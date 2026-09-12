@@ -912,6 +912,19 @@
   transform-origin: 57.5469px 16.3984px;
 }
 
+/* Prevent browser-default anchor decoration from appearing in the exported
+   landing CTA buttons without changing their Framer-exported geometry. */
+.div-22 .primary,
+.div-22 .primary:visited,
+.div-22 .primary:hover,
+.div-22 .primary:focus,
+.div-22 .primary-3,
+.div-22 .primary-3:visited,
+.div-22 .primary-3:hover,
+.div-22 .primary-3:focus {
+  text-decoration: none;
+}
+
 .get-started-3 {
   background-color: rgba(0, 0, 0, 0);
   background-position: 0% 0%;
@@ -14738,4 +14751,323 @@
 
 .loop-1 {
   animation: loop-1-frames 94.80s linear infinite;
+}
+
+/* The Framer export uses a fixed 1440px canvas. Keep that composition on wide
+   screens, but constrain it to the viewport below the source canvas width. */
+@media (max-width: 1439px) {
+  .div-22,
+  .div-22 .div-23,
+  .div-22 .div-24,
+  .div-22 .desktop {
+    width: 100%;
+  }
+
+  .div-22 {
+    min-height: 0;
+    overflow-x: clip;
+  }
+}
+
+@media (max-width: 1120px) {
+  .div-22 .container {
+    box-sizing: border-box;
+    padding-left: 24px;
+    padding-right: 24px;
+    width: 100%;
+  }
+
+  .div-22 .hero,
+  .div-22 .overview-3,
+  .div-22 .features-2,
+  .div-22 .integrations-2,
+  .div-22 .benefits-2,
+  .div-22 .about-2,
+  .div-22 .pricing-2,
+  .div-22 .faq,
+  .div-22 .cta-2 {
+    box-sizing: border-box;
+    max-width: none;
+    width: calc(100% - 48px);
+  }
+
+  .div-22 .hero,
+  .div-22 .overview-3,
+  .div-22 .features-2,
+  .div-22 .integrations-2,
+  .div-22 .benefits-2,
+  .div-22 .about-2,
+  .div-22 .pricing-2,
+  .div-22 .faq {
+    height: auto;
+    min-height: 0;
+  }
+
+  .div-22 .hero > *,
+  .div-22 .overview-3 > *,
+  .div-22 .features-2 > *,
+  .div-22 .integrations-2 > *,
+  .div-22 .benefits-2 > *,
+  .div-22 .about-2 > *,
+  .div-22 .pricing-2 > *,
+  .div-22 .faq > *,
+  .div-22 .cta-2 > * {
+    max-width: 100%;
+  }
+
+  .div-22 .header,
+  .div-22 .heading-10,
+  .div-22 .container-6,
+  .div-22 .heading-11,
+  .div-22 .container-7,
+  .div-22 .heading-12,
+  .div-22 .heading-13,
+  .div-22 .heading-14,
+  .div-22 .text-9,
+  .div-22 .text-12,
+  .div-22 .text-18,
+  .div-22 .content-cards,
+  .div-22 .icon-cards,
+  .div-22 .section-2,
+  .div-22 .div-47,
+  .div-22 .div-48,
+  .div-22 .description-19,
+  .div-22 .container-8,
+  .div-22 .content-6 {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .image-2,
+  .div-22 .div-31,
+  .div-22 .img-6,
+  .div-22 .action-cards,
+  .div-22 .div-36,
+  .div-22 .div-47,
+  .div-22 .div-48,
+  .div-22 .image-3,
+  .div-22 .div-43,
+  .div-22 .img-8,
+  .div-22 .image-4,
+  .div-22 .div-50,
+  .div-22 .img-10 {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .image-2,
+  .div-22 .action-cards,
+  .div-22 .div-36,
+  .div-22 .div-47,
+  .div-22 .div-48,
+  .div-22 .section-2 {
+    height: auto;
+  }
+
+  .div-22 .div-36 > *,
+  .div-22 .div-47 > *,
+  .div-22 .div-48 > * {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .div-36 > *,
+  .div-22 .section-2,
+  .div-22 .div-48 > * {
+    flex-wrap: wrap;
+  }
+
+  .div-22 .div-36 > *,
+  .div-22 .section-2 {
+    flex-direction: column;
+  }
+
+  .div-22 .div-36 > * {
+    flex-wrap: nowrap;
+    height: auto;
+  }
+
+  .div-22 .div-36 > * > *,
+  .div-22 .div-48 > * > * {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .action-cards,
+  .div-22 .content-cards,
+  .div-22 .icon-cards,
+  .div-22 .pricing-cards {
+    flex-wrap: wrap;
+  }
+
+  .div-22 .div-32,
+  .div-22 .div-33,
+  .div-22 .div-34,
+  .div-22 .div-35,
+  .div-22 .div-38,
+  .div-22 .div-39,
+  .div-22 .div-41,
+  .div-22 .div-42 {
+    max-width: calc(50% - 12px);
+    width: calc(50% - 12px);
+  }
+
+  .div-22 .div-32 > *,
+  .div-22 .div-33 > *,
+  .div-22 .div-34 > *,
+  .div-22 .div-35 > *,
+  .div-22 .div-38 > *,
+  .div-22 .div-39 > *,
+  .div-22 .div-41 > *,
+  .div-22 .div-42 > * {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .div-22 .container {
+    gap: 16px;
+    justify-content: space-between;
+  }
+
+  .div-22 .navbar {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .div-22 .menu {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .div-22 .container {
+    box-sizing: border-box;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+  }
+
+  .div-22 .hero,
+  .div-22 .overview-3,
+  .div-22 .features-2,
+  .div-22 .integrations-2,
+  .div-22 .benefits-2,
+  .div-22 .about-2,
+  .div-22 .pricing-2,
+  .div-22 .faq,
+  .div-22 .cta-2 {
+    width: calc(100% - 40px);
+  }
+
+  .div-22 .hero {
+    gap: 32px;
+    padding-bottom: 40px;
+    padding-top: 32px;
+  }
+
+  .div-22 .header,
+  .div-22 .heading-10,
+  .div-22 .container-6,
+  .div-22 .text-7,
+  .div-22 .title-8,
+  .div-22 .description-11,
+  .div-22 .actions {
+    height: auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .h1 {
+    font-size: 38px;
+    height: auto;
+    line-height: 1.1;
+    width: 100%;
+  }
+
+  .div-22 .h1 span,
+  .div-22 .p-41,
+  .div-22 .p-41 span {
+    height: auto;
+    max-width: 100%;
+    width: auto;
+  }
+
+  .div-22 .p-41 {
+    line-height: 24px;
+  }
+
+  .div-22 .actions,
+  .div-22 .action-cards,
+  .div-22 .content-cards,
+  .div-22 .icon-cards,
+  .div-22 .section-2,
+  .div-22 .cta-2 {
+    flex-wrap: wrap;
+  }
+
+  .div-22 .image-2,
+  .div-22 .div-31,
+  .div-22 .img-6,
+  .div-22 .image-3,
+  .div-22 .div-43,
+  .div-22 .img-8,
+  .div-22 .image-4,
+  .div-22 .div-50,
+  .div-22 .img-10 {
+    height: auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .img-6,
+  .div-22 .img-8,
+  .div-22 .img-10 {
+    aspect-ratio: auto;
+  }
+
+  .div-22 .action-cards,
+  .div-22 .content-cards,
+  .div-22 .icon-cards,
+  .div-22 .section-2 {
+    height: auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .div-32,
+  .div-22 .div-33,
+  .div-22 .div-34,
+  .div-22 .div-35,
+  .div-22 .div-38,
+  .div-22 .div-39,
+  .div-22 .div-41,
+  .div-22 .div-42,
+  .div-22 .content-4,
+  .div-22 .content-5 {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .dots,
+  .div-22 .dots-2,
+  .div-22 .dots-3,
+  .div-22 .dots-4 {
+    left: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .div-22 .div-28,
+  .div-22 .div-37,
+  .div-22 .div-49,
+  .div-22 .img-5,
+  .div-22 .img-7,
+  .div-22 .img-9 {
+    max-width: 100%;
+    width: 100%;
+  }
 }
