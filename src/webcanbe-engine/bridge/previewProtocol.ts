@@ -13,5 +13,12 @@ export function isPreviewMessage(value: unknown): value is PreviewMessage {
   if (message.type === "ready") return true
   if (message.type !== "hover" && message.type !== "select") return false
   const element = message.element as Record<string, unknown> | undefined
-  return Boolean(element && typeof element.tagName === "string" && typeof element.identity === "object" && typeof element.rect === "object")
+  const identity = element?.identity as Record<string, unknown> | undefined
+  const rect = element?.rect as Record<string, unknown> | undefined
+  const finite = (number: unknown) => typeof number === "number" && Number.isFinite(number)
+  return Boolean(
+    element && typeof element.tagName === "string"
+    && identity && typeof identity.file === "string" && Number.isInteger(identity.elementStart)
+    && rect && finite(rect.top) && finite(rect.left) && finite(rect.width) && finite(rect.height),
+  )
 }

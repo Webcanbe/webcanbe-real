@@ -17,6 +17,7 @@ export function patchText(store: SourceStore, identity: SourceIdentity, text: st
   const target = analyzeReactSource(identity.file, source, store.read.bind(store)).find((candidate) => candidate.identity.elementStart === identity.elementStart)
   if (!target?.textRange || target.text === undefined) return transaction({ file: identity.file, range: { start: 0, end: 0 }, editType: "text", before: "", after: "", target: identity, success: false, error: "This element does not have a safe static text range." })
   if (!text.trim()) return transaction({ file: identity.file, range: target.textRange, editType: "text", before: target.text, after: text, target: identity, success: false, error: "Text cannot be empty in Phase 1." })
+  if (/[<>{}]/.test(text)) return transaction({ file: identity.file, range: target.textRange, editType: "text", before: target.text, after: text, target: identity, success: false, error: "Text containing JSX syntax is not a safe Phase 1 visual mutation." })
   store.write(identity.file, replaceRange(source, target.textRange.start, target.textRange.end, text))
   return transaction({ file: identity.file, range: target.textRange, editType: "text", before: target.text, after: text, target: identity, success: true })
 }

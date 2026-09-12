@@ -36,6 +36,14 @@ describe("minimal source mutation transactions", () => {
     expect(store.files["src/Hero.tsx"]).toBe(`// preserve this\nexport function Hero() { return <h1>Build a real product.</h1> }`)
   })
 
+  it("refuses JSX syntax in a text-only mutation", () => {
+    const store = memory({ "src/Hero.tsx": `export function Hero() { return <h1>Safe text</h1> }` })
+    const target = analyzeReactSource("src/Hero.tsx", store.read("src/Hero.tsx")!, store.read)[0]
+    const result = patchText(store, target.identity, "</h1><script />")
+    expect(result.success).toBe(false)
+    expect(store.files["src/Hero.tsx"]).toContain("Safe text")
+  })
+
   it("patches an external CSS declaration at its declaration range", () => {
     const store = memory({
       "src/Card.tsx": `import "./Card.css"\nexport function Card() { return <article className="card">Card</article> }`,
@@ -88,6 +96,8 @@ describe("compatibility and preview bridge validation", () => {
   it("accepts only shaped preview messages", () => {
     expect(isPreviewMessage({ channel: PREVIEW_CHANNEL, type: "ready", session: "a" })).toBe(true)
     expect(isPreviewMessage({ channel: PREVIEW_CHANNEL, type: "select", session: "a" })).toBe(false)
+    expect(isPreviewMessage({ channel: PREVIEW_CHANNEL, type: "select", session: "a", element: { tagName: "h1", identity: { file: "src/Hero.tsx", elementStart: 1 }, rect: { top: 0, left: 0, width: 12, height: 14 } } })).toBe(true)
+    expect(isPreviewMessage({ channel: PREVIEW_CHANNEL, type: "select", session: "a", element: { tagName: "h1", identity: { file: "src/Hero.tsx" }, rect: { top: "0", left: 0, width: 12, height: 14 } } })).toBe(false)
     expect(isPreviewMessage({ channel: "other", type: "ready", session: "a" })).toBe(false)
   })
 })

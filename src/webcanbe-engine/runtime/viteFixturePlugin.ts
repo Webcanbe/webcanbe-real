@@ -19,30 +19,57 @@ function json(response: ServerResponse, status: number, value: unknown) {
 function readBody(request: IncomingMessage) {
   return new Promise<string>((resolve, reject) => {
     let body = ""
+    let settled = false
+    const fail = (error: Error) => {
+      if (settled) return
+      settled = true
+      request.destroy()
+      reject(error)
+    }
     request.on("data", (chunk) => {
+      if (settled) return
       body += chunk
-      if (body.length > 65_536) reject(new Error("Request is too large."))
+      if (body.length > 65_536) fail(new Error("Request is too large."))
     })
-    request.on("end", () => resolve(body))
-    request.on("error", reject)
+    request.on("end", () => { if (!settled) { settled = true; resolve(body) } })
+    request.on("error", (error) => fail(error))
   })
+}
+
+function isTrustedEditorRequest(request: IncomingMessage) {
+  const origin = request.headers.origin
+  if (!origin) return false
+  try {
+    const url = new URL(origin)
+    // The preview runs at fixture.localhost. It intentionally cannot invoke
+    // mutation APIs even though it is served by this same local Vite process.
+    return url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname)
+  } catch {
+    return false
+  }
 }
 
 export function webCanBeFixturePlugin(projectRoot: string): Plugin {
   const fixtureRoot = path.resolve(projectRoot, "fixtures/compatible-react-vite")
   const sourceRoot = path.resolve(fixtureRoot, "src")
+  const canonicalSourceRoot = fs.realpathSync(sourceRoot)
   const allowed = (file: string) => file.startsWith("src/") && /\.(tsx|ts|css)$/.test(file) && !file.includes("..")
   const absolute = (file: string) => path.resolve(fixtureRoot, file)
+  const confined = (target: string) => {
+    if (!fs.existsSync(target)) return false
+    const relative = path.relative(canonicalSourceRoot, fs.realpathSync(target))
+    return relative !== "" && !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative)
+  }
   const store: SourceStore = {
     read(file) {
       if (!allowed(file)) return undefined
       const target = absolute(file)
-      return target.startsWith(sourceRoot) && fs.existsSync(target) ? fs.readFileSync(target, "utf8") : undefined
+      return confined(target) ? fs.readFileSync(target, "utf8") : undefined
     },
     write(file, content) {
       if (!allowed(file)) throw new Error("Mutation target is not allowed.")
       const target = absolute(file)
-      if (!target.startsWith(sourceRoot)) throw new Error("Mutation target is outside the fixture source root.")
+      if (!confined(target)) throw new Error("Mutation target is outside the fixture source root.")
       fs.writeFileSync(target, content, "utf8")
     },
   }
@@ -59,6 +86,7 @@ export function webCanBeFixturePlugin(projectRoot: string): Plugin {
         response.end(`<!doctype html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Compatible fixture</title></head><body><div id="root"></div><script type="module" src="/src/webcanbe-engine/runtime/reactPreamble.ts"></script><script type="module" src="/fixtures/compatible-react-vite/src/main.tsx"></script></body></html>`)
       })
       server.middlewares.use(apiRoute, async (request, response) => {
+        if (!isTrustedEditorRequest(request)) return json(response, 403, { error: "Editor origin required." })
         if (request.method !== "POST") return json(response, 405, { error: "Method not allowed" })
         try {
           const requestPath = request.url?.split("?")[0]
