@@ -56,7 +56,7 @@ export default function Navigation({ slots = [] }: { slots?: string[] }) {
           </div>
           <div className={styles["cta"]}>
             <div className={styles["div-2"]}>
-              <a className={styles["primary"]}>
+            <a className={styles["primary"]} href="/signup">
                 <div className={styles["get-started"]}>
                   <p className={styles["p-9"]}>{slots[8] ?? "Get started"}</p>
                 </div>

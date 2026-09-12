@@ -60,7 +60,12 @@ const ATTR: Record<string, string> = {
   "maxlength": "maxLength",
   "tabindex": "tabIndex",
   "srcset": "srcSet",
-  "usemap": "useMap"
+  "usemap": "useMap",
+  "stroke-opacity": "strokeOpacity",
+  "stroke-width": "strokeWidth",
+  "stroke-linecap": "strokeLinecap",
+  "stroke-linejoin": "strokeLinejoin",
+  "stroke-dasharray": "strokeDasharray"
 }
 
 const VOID = new Set(["br","hr","img"])
