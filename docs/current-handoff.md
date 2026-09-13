@@ -12,6 +12,8 @@ The [complete committed Phase 2C report](reports/phase2c-http-preview.md) and it
 - Next: resolve an approved browser egress/admission boundary, finish production editor integration, exercise the full nested-route editing loop and obtain unchanged compatible external-project evidence. Do not simply delete the BrowserRouter rejection.
 - Preserve broader dependencies/config/Tailwind, responsive authoring, semantic gestures, editable Code UI, durable/multi-file history, imported HMR, hosted ownership/resource isolation and the full experience/navigation/seller/footer/Docs plan. No landing/auth/marketplace redesign or main merge occurred.
 
+Implementation/validation checkpoint `4a6520f795e52bff2ccebabd1ea13274dfe85466` was normally pushed and verified at `origin/phase-2-compatible-editor`; main is unchanged. The documentation-only publication receipt is recorded in the report. No further runtime work or speculative WebRTC workaround follows this checkpoint.
+
 ## Historical Phase 2B handoff (retained)
 
 # Current handoff — Phase 2B

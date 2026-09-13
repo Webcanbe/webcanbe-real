@@ -231,7 +231,11 @@ This checkpoint does not redefine overall Phase 2 or reduce the product. All rem
 
 ## Publication
 
-Validation is complete for this safe disabled-HTTP checkpoint. A normal push is authorized only to `phase-2-compatible-editor`; exact checkpoint hash and verified publication will be recorded in the publication receipt. No main merge or force-push is authorized. The failed all-egress policy probe remains a blocker, not a failed functional regression being hidden as a pass. After publication, stop; no speculative WebRTC workaround is part of this task.
+Implementation and validation checkpoint: **`4a6520f795e52bff2ccebabd1ea13274dfe85466`**, directly descended from starting HEAD `b4438a999ccd98e391dd5f2670d4deeb897e0870`. A normal push to `origin/phase-2-compatible-editor` succeeded. `git ls-remote origin refs/heads/phase-2-compatible-editor refs/heads/main` verified that exact checkpoint at the remote branch and unchanged main at `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. The working tree was clean after that push.
+
+This accompanying documentation-only receipt records the verified publication; it changes no tested code. The receipt's final remote tip is checked again on delivery. The staged checkpoint scan covered 51 files, checked all four known private development keys, and found no known-key, private runtime path or credential-pattern matches. Only authored app screenshots and sanitized result data were committed, not operator logs, session credentials, imported project copies or export job directories.
+
+The failed all-egress policy probe remains a blocker, not a functional regression hidden as a pass. No main merge, force-push, public deployment, sandbox relaxation or speculative WebRTC workaround was performed. Work stops after this safe checkpoint and publication receipt.
 
 PHASE 2C HTTP/BROWSERROUTER CHECKPOINT: NOT YET
 OVERALL PHASE 2: NOT YET
