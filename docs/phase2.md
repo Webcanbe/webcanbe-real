@@ -1,8 +1,10 @@
 # Phase 2 recovery checkpoint
 
 This records the original recovered Phase 2 checkpoint. Runtime support has since
-advanced in `phase2b-runtime.md`; the remaining overall Phase 2 requirements below
-remain open. See `current-handoff.md` for current commits and push status.
+advanced in `phase2b-runtime.md` and the appended Phase 2C–2D/E checkpoints.
+Historical limitations below are superseded only where a later checkpoint explicitly
+records verified support; the broader overall Phase 2 requirements remain open.
+See `current-handoff.md` for current commits and push status.
 
 The source remains the product. This extends the reviewed Phase 1 engine at
 `6f3582a`, on `phase-2-compatible-editor`. It does not replace its adapter,
@@ -178,3 +180,16 @@ HTTP/BrowserRouter, strict network isolation, overall Phase 2 and hosted import 
 ## Phase 2C.2 local controlled execution checkpoint
 
 Current local status: **controlled runner PASS; BrowserRouter through the controlled raster viewer PASS**. See the [complete report](reports/phase2c2-controlled-runner.md) for the tested Linux VM/namespace/cgroup boundary, native browser sandbox, immutable artifacts, source-authorized selection/edit flow and reproducible real probes. All 108 prior tests are retained in a 116-test suite; existing HashRouter and Field Notes regressions remain covered. Strict mode is selected server-side with `WCB_PREVIEW_PROVIDER=lima`; no imported JavaScript executes in the ordinary browser in that mode. No raw project HTTP iframe is admitted, and without the provider BrowserRouter remains disabled. Overall Phase 2 and public hosted ownership/resource readiness remain NOT YET/NO; the wider requirements above remain in force.
+
+
+## Phase 2D/E local source revision checkpoint
+
+**PHASE 2D/E CODE↔CANVAS + DURABLE HISTORY CHECKPOINT: PASS. OVERALL PHASE 2: NOT YET. PUBLIC HOSTED IMPORT READY: NO.** See the [complete report](reports/phase2de-code-canvas-history.md) and [current handoff](current-handoff.md). Implementation/verification is `390d1f09a1bd50b062a80483c80bbffb96e7a10a`, descended from the verified Phase 2C.2 tip `66403284303f12cfdc38139c4d81780ef63b131a`.
+
+This supersedes the historical in-memory/single-file history and unimplemented Code statements above for the supported local source scope. The existing `MutationTransaction` now durably records visual/code/system producers, unique parent-linked revisions, idempotency, expected bases/hashes, validation and safe inverse evidence. Canonical project source remains authoritative. Per-project serialization and a SQLite writer lease protect the fsynced JSON ledger/journal protocol outside exported source. Multi-file create/update/rename/delete are staged, compiled and committed or recovered coherently. Undo/revert creates inverse transactions at current HEAD, preserves other-file work and rejects same-file conflicts. Actual process-crash and restart tests cover durable HEAD/history consistency.
+
+CodeMirror provides functional direct editing, file tree, drafts, keyboard save, diagnostics, source diff/markers and safe file operations. Invalid drafts do not alter accepted source or last-good preview. Acceptance refreshes analysis and revision-scoped anchors, invalidates stale selection and rebuilds the controlled preview with route/viewport retained. Mixed Visual → Code → Visual history, restart, undo/redo/checkpoint and final independent source export build/render pass. All original 116 tests remain unchanged in the 145-test suite. TypeScript/build and the existing controlled-runner/browser/security suites pass; original runner/compiler/profile/fixture files are unchanged.
+
+The supported contract is a private local source/history foundation. Unaccepted drafts remain memory-only; semantic uploaded TypeScript checking, automatic import rewriting, a multi-file editor save UI, same-file inverse merging, external Git/source ingestion, ledger compaction/hosted persistence and true imported HMR remain open. The preview still uses the Phase 2C.2 controlled Linux/raster boundary; source authority remains outside untrusted project JavaScript. Legacy non-strict behavior retains its existing qualification. No main merge or public deployment.
+
+Retain every full-product requirement: broader CSS/Tailwind/source analysis, full responsive authoring, semantic drag/gesture breadth, wider runtime/dependency/configuration profiles, hosted ownership/scheduling/storage/cookie/resource isolation and final Phase 2 external-project/security audit. The complete landing/dashboard/Marketplace, experience/navigation/footer/Docs, final visual design, AI editing, seller/payment/admin and final product scope are unchanged. This local checkpoint must not be used to mark overall Phase 2 or public hosted imports complete.

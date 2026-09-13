@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "browser": "151.0.7922.34",
+  "nativeChromiumSandbox": true,
+  "independentViteBuild": true,
+  "noEditorServer": true,
+  "instrumentationAbsent": true,
+  "sourceTextAndStyle": true,
+  "propLiteral": true,
+  "CSSModule": true,
+  "structuralRemoval": true,
+  "nestedRouteHistoryRefresh": true,
+  "assets": true,
+  "desktop": "1280x900",
+  "mobile": "390x844",
+  "runtimeErrors": []
+}
