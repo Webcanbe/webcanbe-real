@@ -203,6 +203,7 @@ export function patchSemanticLayout(store: SourceStore, identity: SourceIdentity
  * or client-provided offset can choose the declaration being written. */
 export function patchProjectStyle(store: SourceStore, files: Map<string, string>, identity: SourceIdentity, property: StyleProperty, value: string, options: { breakpoint?: string; viewport?: ViewportPreset; scope?: string; semantic?: boolean } = {}) {
   if (!safeStyleValue(value) && !/^[a-z0-9:./-]{1,200}$/.test(value)) return failed(identity, "style", "Unsupported style value.", value)
+  if (options.viewport !== undefined && !Object.prototype.hasOwnProperty.call(viewportWidths, options.viewport)) return failed(identity, "responsive", "Unsupported viewport.")
   const width = viewportWidths[options.viewport ?? "desktop"]
   const analysis = analyzeProjectStyles(files, Boolean(store.tailwind), width)
   const target = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
@@ -239,6 +240,7 @@ function tailwindPropertySafe(property: StyleProperty, token: string) {
 }
 
 export function patchSiblingReorder(store: SourceStore, files: Map<string, string>, identity: SourceIdentity, direction: string, viewport: ViewportPreset = "desktop", scope?: string) {
+  if (!Object.prototype.hasOwnProperty.call(viewportWidths, viewport)) return failed(identity, "layout", "Unsupported viewport.")
   const analysis = analyzeProjectStyles(files, Boolean(store.tailwind), viewportWidths[viewport])
   const target = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
   const neighbor = direction === "previous" ? target?.reorder?.previous : direction === "next" ? target?.reorder?.next : undefined

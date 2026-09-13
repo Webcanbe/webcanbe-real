@@ -9,7 +9,7 @@ import { patchProjectStyle, patchSiblingReorder, undoTransaction, type SourceSto
 import { ProjectRegistry } from "./runtime/projectRegistry"
 import { webCanBeFixturePlugin } from "./runtime/viteFixturePlugin"
 import { contentHash } from "./mutations/durableSource"
-import type { StyleProperty } from "./core/types"
+import type { StyleProperty, ViewportPreset } from "./core/types"
 
 function setup(jsx = '<main className="flex flex-row gap-4 md:gap-8 lg:gap-12 items-center custom-brand"><p>One</p>\n<p>Two</p></main>', css = '') {
   const files = new Map([['src/App.tsx', `import './app.css'; export default function App(){return ${jsx}}`], ['src/app.css', css]])
@@ -28,6 +28,12 @@ describe('Phase 2F responsive style origins', () => {
     expect(result.success).toBe(true); expect(result.patches[0].before).toBe('gap-4'); expect(result.patches[0].after).toBe('gap-6')
     expect(files.get('src/App.tsx')).toBe(before.replace('gap-4', 'gap-6'))
     expect(undoTransaction(store, result)).toBe(true); expect(files.get('src/App.tsx')).toBe(before)
+  })
+  it.each(['phone', '__proto__'])('rejects unknown viewport %s instead of selecting a fallback breakpoint', viewport => {
+    const { files, store, target, analysis } = setup(), before = new Map(files)
+    expect(patchProjectStyle(store, files, target.identity, 'gap', '24px', { viewport: viewport as ViewportPreset }).success).toBe(false)
+    expect(patchSiblingReorder(store, files, analysis().targets[1].identity, 'next', viewport as ViewportPreset).success).toBe(false)
+    expect(files).toEqual(before)
   })
   it('changes only the explicit responsive token, with distinct effective viewport values', () => {
     const { files, store, target, analysis } = setup()
