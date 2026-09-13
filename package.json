@@ -13,6 +13,11 @@
     "runner:verify": "node scripts/runner/verify-local.cjs"
   },
   "dependencies": {
+    "@codemirror/lang-css": "6.3.1",
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
+    "@codemirror/view": "6.43.11",
+    "codemirror": "6.0.2",
     "esbuild": "^0.25.12",
     "isomorphic-dompurify": "^2.16.0",
     "jsonc-parser": "3.3.1",

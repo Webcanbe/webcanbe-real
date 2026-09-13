@@ -3,6 +3,8 @@ export type SourceRange = { start: number; end: number }
 export type SourceIdentity = {
   file: string
   elementStart: number
+  revisionId?: string
+  contentHash?: string
 }
 
 export type LayoutContext = "block" | "flex" | "grid" | "positioned" | "unknown"
@@ -69,6 +71,7 @@ export type CompatibilityKind = "full" | "partial" | "code-only"
 
 export type SourceTarget = {
   identity: SourceIdentity
+  effectScope?: string
   elementName: string
   nodeKind: SourceNodeKind
   sourceRange: SourceRange
@@ -105,7 +108,7 @@ export type MutationTransaction = {
   timestamp: string
   file: string
   range: SourceRange
-  editType: "text" | "style" | "layout" | "responsive"
+  editType: "text" | "style" | "layout" | "responsive" | "code" | "revert" | "redo" | "checkpoint"
   before: string
   after: string
   target: SourceIdentity
@@ -115,7 +118,30 @@ export type MutationTransaction = {
   viewport?: ViewportPreset
   success: boolean
   error?: string
+  projectId?: string
+  baseRevisionId?: string
+  newRevisionId?: string
+  idempotencyKey?: string
+  requestHash?: string
+  producer?: "visual" | "code" | "system"
+  actor?: string
+  summary?: string
+  status?: "accepted" | "rejected"
+  operations?: FileOperation[]
+  fileStates?: Array<{ file: string; before: string | null; after: string | null }>
+  validation?: SourceValidation
+  reverts?: string
 }
+
+export type FileOperation =
+  | { kind: "update"; file: string; expectedHash: string; content: string }
+  | { kind: "create"; file: string; expectedHash: null; content: string }
+  | { kind: "delete"; file: string; expectedHash: string }
+  | { kind: "rename"; file: string; to: string; expectedHash: string; content?: string }
+
+export type SourceValidation = { level: "parse" | "compile" | "checkpoint"; passed: boolean; diagnostics: Array<{ file: string; message: string; line?: number; column?: number }> }
+export type SourceRevision = { revisionId: string; projectId: string; parentRevisionId: string | null; createdAt: string; actor: string; producer: "visual" | "code" | "system"; contentHash: string; transactionId?: string }
+export type RevisionLedger = { schema: 1; projectId: string; revisions: SourceRevision[]; transactions: MutationTransaction[]; past: string[]; future: string[] }
 
 export type CompatibilitySummary = {
   total: number

@@ -1,15 +1,17 @@
 import type { RunnerObservation, PreviewInput } from "../runtime/controlledPreview"
-import { useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { isPreviewMessage, PREVIEW_CHANNEL } from "../bridge/previewProtocol"
 import { safePreviewRoute } from "../bridge/previewRoute"
 import { PREVIEW_SECURITY_NOTICE } from "../bridge/previewSecurity"
 import type { CompatibilitySummary, MutationTransaction, PreviewElement, SourceTarget, StyleProperty, ViewportPreset } from "../core/types"
+import type { SourceResponse } from "./CodeWorkspace"
+const CodeWorkspace = lazy(() => import("./CodeWorkspace"))
 import "./compatibleWorkspace.css"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
 type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
-type ApiResponse = { transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
+type ApiResponse = SourceResponse & { transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
@@ -59,9 +61,14 @@ export default function CompatibleWorkspace() {
   const [targets, setTargets] = useState<SourceTarget[]>([])
   const [source, setSource] = useState("")
   const [pending, setPending] = useState(false)
+  const [surface, setSurface] = useState<"canvas" | "code" | "history">("canvas")
+  const [sourceUIOpened, setSourceUIOpened] = useState(false)
+  function openSurface(value: "canvas" | "code" | "history") { if (value !== "canvas") setSourceUIOpened(true); setSurface(value) }
+  const [sourceEpoch, setSourceEpoch] = useState(0)
+  const [codeFile, setCodeFile] = useState<string>()
 
   async function request(path: string, body: Record<string, unknown> = {}) {
-    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: JSON.stringify({ ...body, previewId: session?.previewId, capability: session?.capability, expectedRevision: revision.current }) })
+    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: JSON.stringify({ expectedRevision: revision.current, ...body, previewId: session?.previewId, capability: session?.capability }) })
     return { ok: response.ok, data: await response.json() as ApiResponse }
   }
 
@@ -232,30 +239,38 @@ export default function CompatibleWorkspace() {
 
   useEffect(() => { configurePreview() }, [selectMode, preview])
 
-  async function mutate(edit: { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) {
-    if (!selected || !session || pending) return
-    const epoch = connectionEpoch.current
-    setPending(true)
-    const response = await request("mutate", { identity: selected.identity, edit }).finally(() => setPending(false))
-    if (epoch !== connectionEpoch.current) return
-    if (!response.ok || !response.data.transaction?.success) { setMessage(response.data.transaction?.error ?? response.data.error ?? "The source change was not safe to apply."); return }
-    setDiff(response.data.diff ?? "")
-    setMessage(`Saved ${response.data.transaction.editType} transaction to the real source.`)
-    revision.current = response.data.revision ?? ""
+  async function sourceAccepted(data: SourceResponse) {
+    revision.current = data.revision ?? revision.current
+    setDiff(data.diff ?? "")
+    inspected.current = ""; ++inspectSequence.current
+    setSelected(undefined); setHovered(undefined); setTarget(undefined)
+    setSourceEpoch(value => value + 1)
     await refreshCompatibility()
     await refreshPreview()
   }
 
+  async function mutate(edit: { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) {
+    if (!selected || !session || pending) return
+    const epoch = connectionEpoch.current
+    setPending(true)
+    const response = await request("mutate", { identity: target?.identity ?? selected.identity, expectedRevision: target?.identity.revisionId ?? revision.current, idempotencyKey: crypto.randomUUID(), edit }).finally(() => setPending(false))
+    if (epoch !== connectionEpoch.current) return
+    if (!response.ok || !response.data.transaction?.success) { setMessage(response.data.transaction?.error ?? response.data.error ?? "The source change was not safe to apply."); return }
+    setDiff(response.data.diff ?? "")
+    setMessage(`Saved ${response.data.transaction.editType} transaction to the real source.`)
+    await sourceAccepted(response.data)
+  }
+
   async function history(action: "undo" | "redo") {
     const epoch = connectionEpoch.current
-    const response = await request(action)
+    if (pending) return
+    setPending(true)
+    const response = await request(action, { idempotencyKey: crypto.randomUUID() }).finally(() => setPending(false))
     if (epoch !== connectionEpoch.current) return
     if (!response.ok || !response.data.transaction) { setMessage(response.data.error ?? `Nothing safe to ${action}.`); return }
     setDiff(response.data.diff ?? "")
     setMessage(`${action === "undo" ? "Undid" : "Redid"} the real source transaction.`)
-    revision.current = response.data.revision ?? ""
-    await refreshCompatibility()
-    await refreshPreview()
+    await sourceAccepted(response.data)
   }
 
   async function importProject(file: File) {
@@ -295,7 +310,7 @@ export default function CompatibleWorkspace() {
     <header className="compatible-topbar">
       <a href="/projects" className="compatible-brand">WebCanBe <span>/ Compatible</span></a>
       <div className="compatible-project-status"><i/> {project?.name ?? "Loading project"} <small>{project?.detection.tailwind ? "Tailwind detected" : "Actual source files"}</small></div>
-      <div className="compatible-top-actions"><button type="button" onClick={() => void history("undo")}>Undo</button><button type="button" onClick={() => void history("redo")}>Redo</button><button type="button" onClick={() => void exportProject()} disabled={!session}>Export code</button></div>
+      <div className="compatible-top-actions"><button type="button" aria-pressed={surface === "canvas"} onClick={() => openSurface("canvas")}>Canvas</button><button type="button" aria-pressed={surface === "code"} onClick={() => openSurface("code")}>Code</button><button type="button" aria-pressed={surface === "history"} onClick={() => openSurface("history")}>History</button><button type="button" onClick={() => void history("undo")}>Undo</button><button type="button" onClick={() => void history("redo")}>Redo</button><button type="button" onClick={() => void exportProject()} disabled={!session}>Export code</button></div>
     </header>
     <div className="compatible-layout">
       <aside className="compatible-files">
@@ -308,7 +323,8 @@ export default function CompatibleWorkspace() {
       </aside>
       <section className="compatible-preview-shell">
         <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
-        <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
+        {sourceUIOpened && <Suspense fallback={<p>Loading source editor…</p>}><CodeWorkspace key={projectId} projectId={projectId} request={request} epoch={sourceEpoch} connected={Boolean(session)} visible={surface} openFile={codeFile} onAccepted={sourceAccepted} /></Suspense>}
+        <div hidden={surface !== "canvas"} ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
       </section>
       <aside className="compatible-inspector">
         <div className="inspector-heading"><p>Element inspector</p><span>{target?.compatibility ?? "preview"}</span></div>
@@ -317,7 +333,8 @@ export default function CompatibleWorkspace() {
         {target?.capabilities.text && <label className="inspector-control">Text <textarea value={text} onChange={(event) => setText(event.target.value)} /><button type="button" onClick={() => void mutate({ type: "text", value: text })}>Apply text change</button></label>}
         {styleOrigins.length > 0 && <div className="style-controls"><small>Safe style origins</small>{styleOrigins.map((styleOrigin) => <label className="inspector-control" key={`${styleOrigin.property}-${styleOrigin.kind}-${styleOrigin.range?.start}`}><span>{editableLabels[styleOrigin.property] ?? styleOrigin.property}<em>{styleOrigin.kind}</em></span><div><input data-wcb-property={styleOrigin.property} defaultValue={styleOrigin.value?.replace(/^['"]|['"]$/g, "")} key={styleOrigin.value} /><button type="button" onClick={(event) => { const input = event.currentTarget.previousElementSibling as HTMLInputElement; void mutate({ type: "style", property: styleOrigin.property, value: input.value }) }}>Save</button></div><button type="button" onClick={() => { const input = document.querySelector<HTMLInputElement>(`input[data-wcb-property="${styleOrigin.property}"]`); if (input) void mutate({ type: "responsive", property: styleOrigin.property, value: input.value, viewport }) }}>Save at {viewport}</button></label>)}</div>}
         {target?.capabilities.layout && <div className="semantic-controls"><small>Semantic layout</small><button type="button" onClick={() => void mutate({ type: "layout", property: "gap", value: "24px" })}>Set gap 24px</button><button type="button" onClick={() => void mutate({ type: "layout", property: "justifyContent", value: "space-between" })}>Distribute items</button></div>}
-        {target && !target.capabilities.visualEdit && <div className="limited-editing"><b>Visual editing unavailable</b><br/>{target.unavailableReasons.visualEdit ?? "WebCanBe cannot safely identify a static source mutation."}<br/><button type="button" onClick={() => setDiff(`${target.identity.file}\n${source}`)}>Open code location</button></div>}
+        {target && !target.capabilities.visualEdit && <div className="limited-editing"><b>Visual editing unavailable</b><br/>{target.unavailableReasons.visualEdit ?? "WebCanBe cannot safely identify a static source mutation."}<br/><button type="button" onClick={() => { setCodeFile(target.identity.file); openSurface("code") }}>Open code location</button></div>}
+        {target?.effectScope && <p className="limited-editing">Effect scope: {target.effectScope}</p>}
         {target && <details><summary>{target.identity.file} — source</summary><pre className="source-diff">{source}</pre></details>}
         {target && Object.entries(target.unavailableReasons).map(([key, reason]) => <p key={key} className="limited-editing">{reason}</p>)}
         {diff && <div className="source-diff"><small>Actual source diff</small><pre>{diff}</pre></div>}

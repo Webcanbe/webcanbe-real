@@ -4,13 +4,14 @@ import path from "node:path"
 import yauzl from "yauzl"
 import { htmlEntry } from "./runtimeCompatibility"
 import { crc32 } from "node:zlib"
+import { DurableSource } from "../mutations/durableSource"
 import { MutationHistory, type SourceStore } from "../mutations/sourceMutations"
 
 export const ZIP_LIMITS = Object.freeze({ archiveBytes: 25 * 1024 * 1024, totalBytes: 40 * 1024 * 1024, fileBytes: 2 * 1024 * 1024, entries: 2_000, ratio: 100 })
-const sourceExtension = /\.(tsx|jsx|ts|js|css)$/
-export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo"
+const sourceExtension = /\.(tsx|jsx|ts|js|css|json)$/
+export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint"
 export type SessionAuthority = { previewId: string; capability: string; operation: SessionOperation }
-const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo"]
+const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint"]
 
 export type FrameworkDetection = {
   supported: boolean
@@ -135,6 +136,8 @@ export function detectProject(root: string, dependencyRoot: string): FrameworkDe
 export class ProjectRegistry {
   private readonly projects = new Map<string, ProjectRecord>()
   private readonly sessions = new Map<string, { projectId: string; tokenHash: string; expiresAt: number; root: string; operations: SessionOperation[] }>()
+  private readonly durableStores = new Map<string, DurableSource>()
+  private readonly queues = new Map<string, Promise<void>>()
   readonly importedRoot: string
 
   constructor(private readonly applicationRoot: string, private readonly now = Date.now) {
@@ -148,8 +151,32 @@ export class ProjectRegistry {
       const directory = path.join(this.importedRoot, id)
       if (!fs.lstatSync(directory).isDirectory()) continue
       const root = fs.realpathSync(projectRootFromArchive(directory)), detection = detectProject(root, applicationRoot)
-      if (detection.supported) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", root, sourceRoot: path.join(root, "src"), imported: true, detection, history: new MutationHistory() })
+      if (detection.supported || fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", id, "pending.json"))) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", root, sourceRoot: path.join(root, "src"), imported: true, detection, history: new MutationHistory() })
     }
+    // Recover interrupted source writes before sessions or compilation can start.
+    for (const project of this.projects.values()) {
+      if (fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", project.id, "history.json"))) { this.durable(project.id); project.detection = detectProject(project.root, applicationRoot) }
+    }
+  }
+
+  durable(projectId: string) {
+    const project = this.projects.get(projectId)
+    if (!project) throw new Error("Project is unavailable.")
+    if (!this.durableStores.has(projectId)) this.durableStores.set(projectId, new DurableSource(project, path.join(this.applicationRoot, ".webcanbe", "history")))
+    return this.durableStores.get(projectId)!
+  }
+
+  async lock(projectId: string) {
+    const previous = this.queues.get(projectId) ?? Promise.resolve()
+    let release!: () => void
+    const current = new Promise<void>(resolve => { release = resolve })
+    this.queues.set(projectId, current)
+    await previous
+    const done = () => { release(); if (this.queues.get(projectId) === current) this.queues.delete(projectId) }
+    try {
+      const unlock = this.durable(projectId).lease()
+      return () => { try { unlock() } finally { done() } }
+    } catch (error) { done(); throw error }
   }
 
   get(id: string) { return this.projects.get(id) }
@@ -177,6 +204,7 @@ export class ProjectRegistry {
   createSession(projectId: string, scope = operations): PreviewSession | undefined {
     const project = this.projects.get(projectId)
     if (!project || !isWithin(project.root, fs.realpathSync(project.sourceRoot))) return undefined
+    this.durable(projectId)
     const previewId = randomUUID()
     const capability = randomBytes(32).toString("base64url")
     for (const [id, entry] of this.sessions) if (entry.expiresAt <= this.now()) this.sessions.delete(id)
@@ -246,10 +274,7 @@ export class ProjectRegistry {
   }
 
   revision(projectId: string) {
-    const project = this.projects.get(projectId), store = this.store(projectId)
-    if (!project || !store) return ""
-    const files = fs.readdirSync(project.sourceRoot, { recursive: true }).filter((entry): entry is string => typeof entry === "string" && sourceExtension.test(entry)).sort()
-    return sha(JSON.stringify(files.map(file => [file, store.read(`src/${file}`)])))
+    return this.projects.has(projectId) ? this.durable(projectId).revision() : ""
   }
 
   entryPath(projectId: string) {

@@ -70,6 +70,13 @@ export class MutationHistory {
   latest() { return this.past.at(-1) }
   undo(store: SourceStore) { const entry = this.past.at(-1); if (!entry || !undoTransaction(store, entry)) return undefined; this.past.pop(); this.future.push(entry); return entry }
   redo(store: SourceStore) { const entry = this.future.at(-1); if (!entry || !redoTransaction(store, entry)) return undefined; this.future.pop(); this.past.push(entry); return entry }
+
+  /** The durable ledger hydrates the existing undo/redo projection on reopen. */
+  hydrate(entries: MutationTransaction[], past: string[], future: string[]) {
+    const byId = new Map(entries.map(entry => [entry.id, entry]))
+    this.past = past.map(id => byId.get(id)!).filter(Boolean)
+    this.future = future.map(id => byId.get(id)!).filter(Boolean)
+  }
 }
 
 export function formatTransactionDiff(entry: MutationTransaction, reverse = false) {
