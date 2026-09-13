@@ -1,3 +1,5 @@
+import type { PreviewElement, SourceIdentity } from "../core/types"
+import { analyzeReactSource } from "../adapters/react/reactSourceAdapter"
 import { createHash, randomUUID } from "node:crypto"
 import { buildIsolatedHttpPreview, type HttpPreviewBuild } from "./isolatedPreview"
 import { ProjectRegistry, safeArchivePath, type SessionAuthority } from "./projectRegistry"
@@ -34,29 +36,28 @@ export type ControlledJob = Readonly<{
   network: Readonly<{ external: "deny" }>
   snapshot: PreviewSnapshot
 }>
-export type PreviewInput = Readonly<{ type: "pointer"; x: number; y: number; action: "move" | "click" }> | Readonly<{ type: "navigate"; route: string }>
+export type PreviewInput = Readonly<{ type: "pointer"; x: number; y: number; action: "move" | "click" | "select" }> | Readonly<{ type: "navigate"; route: string }> | Readonly<{ type: "scroll"; dx: number; dy: number }> | Readonly<{ type: "history"; action: "back" | "forward" | "reload" }> | Readonly<{ type: "viewport"; width: number; height: number }>
+export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[] }
+export type RunnerSample = { bytes: Uint8Array; observation: unknown }
 export interface ControlledExecution {
+  sample?(): Promise<RunnerSample>
   /** Trusted browser screenshot encoder; never project-supplied HTML/SVG/URLs. */
   capture(): Promise<Uint8Array>
   input(input: PreviewInput): Promise<void>
   /** Must kill/reap the entire job and delete its private profile, artifacts and IPC. */
   close(): Promise<void>
 }
-/** Trusted server integration seam, NOT a client attestation protocol.
- * No concrete provider is installed in this checkpoint. A future provider must
- * enforce network/process/filesystem isolation before consuming job bytes, retain
- * the native browser sandbox, use private controller pipes (no exposed CDP port),
- * and supervise expiry/abort/crash independently of browser JavaScript and this
- * process's timers. No shell/config/project code runs in the editor process.
- * An aborted open must kill/reap even if it has not returned an execution handle.
- * Tests use an in-memory double: those tests prove broker logic, NOT isolation.
- */
-export interface ProjectRunner {
+/** Server-owned replaceable execution boundary. Must enforce isolation outside browser APIs,
+ * retain the native browser sandbox, supervise expiry/crash and reap aborted startup. */
+export class RunnerCleanupError extends Error {}
+export interface RunnerProvider {
   open(job: ControlledJob, signal: AbortSignal): Promise<ControlledExecution>
 }
+/** Compatibility name for the Phase 2C.1 broker seam. */
+export type ProjectRunner = RunnerProvider
 type Entry = {
   projectId: string; authority: SessionAuthority; job?: ControlledJob
-  generation: string; revision: string; expiresAt: number; abort: AbortController
+  generation: string; revision: string; expiresAt: number; sequence: number; abort: AbortController
   timer: ReturnType<typeof setTimeout>; retired: boolean; pending: boolean; busy: boolean
   execution?: ControlledExecution; closing?: Promise<void>
 }
@@ -66,7 +67,7 @@ function routeAllowed(route: unknown): route is string {
   return Boolean(pathname && !/^\/_wcb(?:\/|$)/i.test(pathname))
 }
 
-/** Dormant raster transport foundation. Not wired to the editor API.
+/** Raster transport. Only server-installed providers can start strict execution.
  * All calls require the existing server capability; a generation is not authority.
  * Strict failure never falls back to Blob or executable HTML in an end-user browser.
  */
@@ -116,7 +117,7 @@ export class ControlledPreviewTransport {
     if (this.closed || this.quarantined || !this.authorized(projectId, authority)) throw new Error("Controlled preview is unavailable.")
     if (this.entries.size >= 4 || [...this.entries.values()].some(entry => entry.pending)) throw new Error("Controlled preview capacity reached.")
     const generation = randomUUID(), expiresAt = Math.min(this.registry.sessionExpiry(projectId, authority.previewId)!, this.now() + 60_000)
-    const entry: Entry = { projectId, authority: { ...authority }, generation, revision, expiresAt, abort: new AbortController(), retired: false, pending: true, busy: false,
+    const entry: Entry = { projectId, authority: { ...authority }, generation, revision, expiresAt, sequence: 0, abort: new AbortController(), retired: false, pending: true, busy: false,
       timer: setTimeout(() => { void this.retire(entry).catch(() => { this.quarantined = true }) }, Math.max(0, expiresAt - this.now())) }
     entry.timer.unref(); this.entries.set(generation, entry)
     try {
@@ -129,7 +130,7 @@ export class ControlledPreviewTransport {
       if (!this.current(entry)) throw new Error("Controlled preview became stale during startup.")
       entry.pending = false
       return { transport: "raster" as const, generation, revision: entry.revision, expiresAt }
-    } catch (error) { entry.pending = false; await this.retire(entry); throw error }
+    } catch (error) { if (error instanceof RunnerCleanupError) this.quarantined = true; entry.pending = false; await this.retire(entry); throw error }
   }
   private async requireEntry(projectId: string, authority: SessionAuthority, generation: string) {
     // Wrong capabilities must not stop someone else's job.
@@ -146,20 +147,30 @@ export class ControlledPreviewTransport {
     entry.busy = true
     try {
       if (!this.current(entry)) throw new Error("Controlled preview expired before capture.")
-      const bytes = Buffer.from(await entry.execution!.capture())
+      const sample = entry.execution!.sample ? await entry.execution!.sample() : { bytes: await entry.execution!.capture(), observation: undefined }
+      const bytes = Buffer.from(sample.bytes)
       if (!this.current(entry)) throw new Error("Controlled preview expired during capture.")
       // Fixed raster type, bounded dimensions and bytes. The provider owns encoding.
       if (bytes.length < 33 || bytes.length > 8 * 1024 * 1024 || bytes.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a" || bytes.toString("ascii", 12, 16) !== "IHDR" || bytes.readUInt32BE(16) < 1 || bytes.readUInt32BE(20) < 1 || bytes.readUInt32BE(16) > 4096 || bytes.readUInt32BE(20) > 4096) throw new Error("Invalid controlled preview raster.")
-      return { transport: "raster" as const, generation, contentType: "image/png" as const, bytes }
+      const observation = sample.observation === undefined ? undefined : sanitizeObservation(sample.observation)
+      if (observation && (observation.viewport.width !== bytes.readUInt32BE(16) || observation.viewport.height !== bytes.readUInt32BE(20))) throw new Error("Raster geometry mismatch.")
+      if (observation?.selection) {
+        const store = this.registry.store(projectId, authority)!
+        const valid = (identity: SourceIdentity) => this.registry.sourceFiles(projectId).includes(identity.file) && analyzeReactSource(identity.file, store.read(identity.file) ?? "", store.read).some(target => target.identity.elementStart === identity.elementStart)
+        if (!valid(observation.selection.identity)) observation.selection = null
+        else if (observation.selection.parentIdentity && !valid(observation.selection.parentIdentity)) { delete observation.selection.parentIdentity; delete observation.selection.parentLayoutContext }
+      }
+      return { transport: "raster" as const, generation, contentType: "image/png" as const, bytes, observation, sequence: ++entry.sequence, revision: entry.revision }
     } catch (error) { await this.retire(entry); throw error } finally { entry.busy = false }
   }
-  async input(projectId: string, authority: SessionAuthority, generation: string, input: PreviewInput) {
-    if (!input || (input.type === "navigate" ? Object.keys(input).some(key => !["type", "route"].includes(key)) || !routeAllowed(input.route) : input.type !== "pointer" || Object.keys(input).some(key => !["type", "x", "y", "action"].includes(key)) || !["move", "click"].includes(input.action) || ![input.x, input.y].every(n => Number.isFinite(n) && n >= 0 && n < 4096))) throw new Error("Invalid controlled preview input.")
+  async input(projectId: string, authority: SessionAuthority, generation: string, input: PreviewInput, sequence?: number) {
+    if (!validPreviewInput(input)) throw new Error("Invalid controlled preview input.")
     const command = Object.freeze({ ...input })
     const entry = await this.requireEntry(projectId, authority, generation)
     entry.busy = true
     try {
       if (!this.current(entry)) throw new Error("Controlled preview expired before input.")
+      if (sequence !== undefined && sequence !== entry.sequence) throw new Error("Preview frame is stale.")
       await entry.execution!.input(command)
       if (!this.current(entry)) throw new Error("Controlled preview expired during input.")
     }
@@ -172,4 +183,39 @@ export class ControlledPreviewTransport {
     if (entry) await this.retire(entry)
   }
   async close() { this.closed = true; clearInterval(this.sweepTimer); await this.sweep() }
+}
+
+export function validPreviewInput(input: unknown): input is PreviewInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return false
+  const v = input as Record<string, unknown>, exact = (keys: string[]) => Object.keys(v).every(key => keys.includes(key))
+  const number = (n: unknown, min: number, max: number) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max
+  if (v.type === "navigate") return exact(["type", "route"]) && routeAllowed(v.route)
+  if (v.type === "pointer") return exact(["type", "action", "x", "y"]) && ["move", "click", "select"].includes(String(v.action)) && number(v.x, 0, 4095) && number(v.y, 0, 4095)
+  if (v.type === "scroll") return exact(["type", "dx", "dy"]) && number(v.dx, -2000, 2000) && number(v.dy, -2000, 2000)
+  if (v.type === "history") return exact(["type", "action"]) && ["back", "forward", "reload"].includes(String(v.action))
+  return v.type === "viewport" && exact(["type", "width", "height"]) && number(v.width, 320, 1920) && number(v.height, 240, 1080) && Number.isInteger(v.width) && Number.isInteger(v.height)
+}
+function sanitizeObservation(value: unknown): RunnerObservation {
+  const v = value as RunnerObservation
+  if (!v || !routeAllowed(v.route) || !validPreviewInput({ type: "viewport", ...v.viewport }) || !Array.isArray(v.logs) || v.logs.length > 20 || v.logs.some(line => typeof line !== "string" || line.length > 310)) throw new Error("Invalid runner observation.")
+  const identity = (value: SourceIdentity) => {
+    if (!value || typeof value.file !== "string" || value.file.length > 512 || safeArchivePath(value.file) !== value.file || !Number.isSafeInteger(value.elementStart) || value.elementStart < 0) throw new Error("Invalid observed source identity.")
+    return { file: value.file, elementStart: value.elementStart }
+  }
+  const layout = (value: string) => { if (!["block", "flex", "grid", "positioned", "unknown"].includes(value)) throw new Error("Invalid observed layout."); return value as PreviewElement["layoutContext"] }
+  let selection: PreviewElement | null = null
+  if (v.selection !== null) {
+    const e = v.selection
+    if (!e || typeof e.tagName !== "string" || !/^[a-z][a-z0-9-]{0,63}$/.test(e.tagName) || !e.rect || !e.computed || typeof e.computed !== "object") throw new Error("Invalid observed element.")
+    const rect = { top: e.rect.top, left: e.rect.left, width: e.rect.width, height: e.rect.height }
+    if (Object.values(rect).some(n => !Number.isFinite(n) || Math.abs(n) > 1e7) || rect.width < 0 || rect.height < 0) throw new Error("Invalid observed geometry.")
+    const computed: Record<string, string> = {}
+    for (const key of ["display","position","backgroundColor","color","fontSize","fontWeight","padding","margin","gap","width","height","border","borderRadius"]) {
+      const item = e.computed[key]
+      if (item !== undefined) { if (typeof item !== "string" || item.length > 512) throw new Error("Invalid observed style."); computed[key] = item }
+    }
+    selection = { identity: identity(e.identity), tagName: e.tagName, rect, computed, layoutContext: layout(e.layoutContext) }
+    if (e.parentIdentity) { selection.parentIdentity = identity(e.parentIdentity); selection.parentLayoutContext = layout(e.parentLayoutContext!) }
+  }
+  return { route: v.route, viewport: { width: v.viewport.width, height: v.viewport.height }, selection, logs: v.logs.slice() }
 }

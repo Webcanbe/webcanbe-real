@@ -1,3 +1,5 @@
+import { ControlledPreviewTransport, type RunnerProvider, type PreviewInput } from "./controlledPreview"
+import { RasterViewerServer } from "./rasterViewer"
 import { randomBytes, timingSafeEqual } from "node:crypto"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Plugin } from "vite"
@@ -32,14 +34,17 @@ export function validEditorOrigin(request: IncomingMessage) {
 function matchesKey(supplied: unknown, expected: string) { return typeof supplied === "string" && Buffer.byteLength(supplied) === Buffer.byteLength(expected) && timingSafeEqual(Buffer.from(supplied), Buffer.from(expected)) }
 
 /** Development-only single-operator authentication. Hosted accounts are intentionally not implied. */
-export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?: string; registry?: ProjectRegistry } = {}): Plugin {
+export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?: string; registry?: ProjectRegistry; runner?: RunnerProvider } = {}): Plugin {
   const registry = options.registry ?? new ProjectRegistry(projectRoot)
   const editorKey = options.editorKey ?? randomBytes(32).toString("base64url")
+  const controlled = options.runner ? new ControlledPreviewTransport(registry, projectRoot, options.runner) : undefined
+  const viewer = new RasterViewerServer()
   let busy = false
   return {
     name: "webcanbe-compatible-preview-runtime",
     apply: "serve",
     configureServer(server) {
+      server.httpServer?.once("close", () => { void controlled?.close(); void viewer.close() })
       if (!options.editorKey) server.config.logger.info(`WebCanBe local editor access key (this server run only): ${editorKey}`)
       // Imported source must never reach Vite transforms or the application origin as executable code.
       server.middlewares.use((request, response, next) => {
@@ -52,8 +57,9 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
         if (!validEditorOrigin(request)) return json(response, 403, { error: "Editor request origin denied." })
         if (request.method !== "POST") return json(response, 405, { error: "Method not allowed." })
         if (!matchesKey(request.headers["x-wcb-editor-key"], editorKey)) return json(response, 403, { error: "Local editor access key required." })
-        if (busy) return json(response, 409, { error: "An engine operation is in progress. Retry when it completes." })
-        busy = true
+        const previewIO = /^\/projects\/[a-z0-9-]{8,80}\/preview(?:\?|$)/i.test(request.url ?? "")
+        if (!previewIO && busy) return json(response, 409, { error: "An engine operation is in progress. Retry when it completes." })
+        if (!previewIO) busy = true
         try {
           const requestPath = request.url?.split("?")[0] ?? ""
           const body = await readBody(request, requestPath === "/projects/import" ? 36 * 1024 * 1024 : 64 * 1024)
@@ -80,7 +86,24 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (action === "export") return json(response, 200, { archive: (await exportProjectZip(project)).toString("base64") })
           if (action === "preview") {
             try {
-              if (body.command === "stop") { registry.revokeSession(project.id, previewId); return json(response, 200, { state: "stopped" }) }
+              if (body.command === "stop") { registry.revokeSession(project.id, previewId); await controlled?.sweep(); return json(response, 200, { state: "stopped" }) }
+              if (controlled) {
+                const authority = { previewId, capability, operation: "preview" as const }
+                if (body.command === "status") return json(response, 200, { state: "available", transport: "raster", revision })
+                if (body.command === "capture") {
+                  const result = await controlled.capture(project.id, authority, String(body.generation ?? ""))
+                  const { bytes, ...metadata } = result
+                  return json(response, 200, { ...metadata, png: bytes.toString("base64") })
+                }
+                if (body.command === "input") {
+                  if (!Number.isSafeInteger(body.sequence) || Number(body.sequence) < 1) throw new Error("A current preview frame is required.")
+                  await controlled.input(project.id, authority, String(body.generation ?? ""), body.input as PreviewInput, Number(body.sequence))
+                  return json(response, 200, { revision })
+                }
+                if (body.command !== undefined && body.command !== "start") throw new Error("Unknown controlled preview command.")
+                const preview = await controlled.start(project.id, authority, { revision, route: typeof body.route === "string" ? body.route : "/" })
+                return json(response, 200, { ...preview, viewerUrl: await viewer.start() })
+              }
               if (body.command === "status") return json(response, 200, { state: "unavailable", transport: "http", reason: HTTP_PREVIEW_BLOCKER, requiredCapability: "Approved browser network-isolation runner" })
               // The HTTP compiler/server prototype is intentionally NOT reachable here.
               // Chromium CSP does not constrain WebRTC. See the Phase 2C report before
@@ -113,7 +136,7 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (mutation.success) project.history.record(mutation)
           return json(response, mutation.success ? 200 : 422, { transaction: mutation, diff: mutation.success ? formatTransactionDiff(mutation) : undefined, revision: registry.revision(project.id) })
         } catch { return json(response, 400, { error: "The project operation was rejected. Check the archive limits and source constraints." }) }
-        finally { busy = false }
+        finally { if (!previewIO) busy = false }
       })
     },
   }

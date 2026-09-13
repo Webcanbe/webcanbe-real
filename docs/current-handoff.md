@@ -1,3 +1,22 @@
+# Current handoff: Phase 2C.2 local controlled runner (2026-09-13)
+
+**Phase 2C.2 PASS locally; Phase 2C HTTP/BrowserRouter PASS through the controlled local viewer; overall Phase 2 NOT YET; public hosted imports NO.**
+
+See the [complete Phase 2C.2 report](reports/phase2c2-controlled-runner.md) and [evidence](reports/phase2c2-evidence/verification-results.json). Earlier handoffs below are historical checkpoints.
+
+- Started clean at `6b43dcee099b270d6b1663467218532574ce6bc2`, matching the live branch. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. Only `phase-2-compatible-editor` is published; no main merge or hosted deployment.
+- Concrete `RunnerProvider` / local Lima provider extends the Phase 2C.1 broker. Every strict project/browser runs inside a no-host-mount Linux VM job with private network/filesystem/PID namespaces, socket-family restriction, native Chromium sandbox, cgroup limits, external deadline and verified stop/revoke behavior.
+- `npm run runner:prepare`, then `npm run runner:verify`, then `WCB_PREVIEW_PROVIDER=lima npm run dev`. Development-only Apple Silicon macOS provider; no cloud account, purchase or global installation. The VM was stopped after checkpoint validation; preparation restarts it.
+- The ordinary browser receives only platform-owned separate-origin raster viewer code, PNG frames and sanitized source/geometry observations. All keys, session capabilities and mutation authority remain in the trusted editor/server. External networking is denied; no project networking capability is inferred from transport.
+- Full local BrowserRouter navigation/assets/selection/edit/diff/undo/redo/export and preserved HashRouter/Field Notes regressions pass. All original 108 tests retained; 116 pass with TypeScript/production build. Real positive/negative network, process/filesystem, memory/frozen-worker, source authorization, cross-project, expiry/revoke and cleanup evidence is committed.
+- Without the server-selected Lima provider, BrowserRouter remains disabled and legacy Blob/HashRouter retains its non-strict warning. No raw project HTTP iframe or `allow-same-origin` path was enabled. Strict failures do not fall back to client execution.
+- Preview sessions last at most 60 seconds; reconnect renews. This is PNG polling and bounded click/select/scroll/route/viewport input, not finished streaming, keyboard/text-input or remote-desktop UX. Supported source mutations are unchanged. On cleanup quarantine, stop the VM before restarting admission.
+- Next bounded work: hosted ownership/scheduling/storage/cookie isolation and stronger viewer ergonomics need separate implementation and tests. Broader Phase 2 profile/configuration, history/HMR, Code UI and product-experience work remains open. Do not mark public hosted imports ready from this local checkpoint.
+
+The report intentionally does not embed its own commit hash. Verify HEAD against the live branch before continuing.
+
+---
+
 # Current handoff: Phase 2C.1 controlled execution foundation (2026-09-13)
 
 **Phase 2C.1 network isolation NOT YET; Phase 2C HTTP/BrowserRouter NOT YET; overall Phase 2 NOT YET; public hosted imports NO.**

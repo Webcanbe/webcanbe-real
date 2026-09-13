@@ -1,3 +1,4 @@
+import type { RunnerObservation, PreviewInput } from "../runtime/controlledPreview"
 import { useEffect, useRef, useState } from "react"
 import { isPreviewMessage, PREVIEW_CHANNEL } from "../bridge/previewProtocol"
 import { safePreviewRoute } from "../bridge/previewRoute"
@@ -8,7 +9,7 @@ import "./compatibleWorkspace.css"
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
 type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
-type ApiResponse = { transport?: "blob" | "http"; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
+type ApiResponse = { transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
@@ -27,7 +28,12 @@ export default function CompatibleWorkspace() {
   const [routeInput, setRouteInput] = useState("/")
   const [previewState, setPreviewState] = useState("stopped")
   const activeGeneration = useRef("")
+  const rasterBusy = useRef(false)
+  const rasterSequence = useRef(0)
+  const rasterQueued = useRef<{ input: PreviewInput; sequence: number; generation: string } | undefined>(undefined)
+  const lastRaster = useRef<ApiResponse | undefined>(undefined)
   const inspected = useRef("")
+  const selectionSource = useRef<"runtime" | "source">("runtime")
   const inspectSequence = useRef(0)
   const connectionEpoch = useRef(0)
   const [projectId, setProjectId] = useState(workspaceProjectId)
@@ -40,12 +46,14 @@ export default function CompatibleWorkspace() {
   const [message, setMessage] = useState("Starting a sandboxed project preview…")
   const [text, setText] = useState("")
   const [viewport, setViewport] = useState<ViewportPreset>("desktop")
+  const rasterWidth = useRef(1280)
+  rasterWidth.current = { mobile: 390, tablet: 768, desktop: 1280 }[viewport]
   const [diff, setDiff] = useState("")
   const [accessKey, setAccessKey] = useState("")
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
-  const [preview, setPreview] = useState<{ url: string; transport: "blob" | "http"; generation: string }>()
+  const [preview, setPreview] = useState<{ url: string; transport: "blob" | "http" | "raster"; generation: string }>()
   const previewUrl = preview?.url ?? ""
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url) }, [preview])
   const [targets, setTargets] = useState<SourceTarget[]>([])
@@ -101,12 +109,17 @@ export default function CompatibleWorkspace() {
 
   async function refreshPreview() {
     const epoch = connectionEpoch.current
+    selectionSource.current = "runtime"
     setPreviewState("starting"); activeGeneration.current = ""; inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
     const response = await request("preview", { route: routePath.current })
     if (epoch !== connectionEpoch.current) return
     revision.current = response.data.revision ?? revision.current
-    if (response.ok && response.data.html && response.data.generation) {
+    if (response.ok && response.data.transport === "raster" && response.data.viewerUrl && response.data.generation) {
+      activeGeneration.current = response.data.generation; rasterSequence.current = 0; lastRaster.current = undefined
+      setPreview({ url: response.data.viewerUrl, transport: "raster", generation: response.data.generation })
+      setPreviewState("ready")
+    } else if (response.ok && response.data.html && response.data.generation) {
       activeGeneration.current = response.data.generation
       setPreview({ url: URL.createObjectURL(new Blob([response.data.html], { type: "text/html" })), transport: response.data.transport ?? "blob", generation: response.data.generation })
     } else { setPreview(undefined); setPreviewState("failed"); setMessage(response.data.error ?? "Preview unavailable. Inspect source below.") }
@@ -146,8 +159,74 @@ export default function CompatibleWorkspace() {
     return () => window.removeEventListener("message", receive)
   }, [session, preview, projectId])
 
+  function deliverRaster(data = lastRaster.current) {
+    if (!data?.png || !data.observation || data.generation !== activeGeneration.current) return
+    frame.current?.contentWindow?.postMessage({ channel: "wcb-raster", type: "frame", generation: data.generation, sequence: data.sequence, png: data.png, ...data.observation.viewport, select: selectMode }, "*")
+  }
+  async function rasterOperation(input?: PreviewInput, sequence = rasterSequence.current) {
+    if (preview?.transport !== "raster" || !activeGeneration.current) return
+    if (rasterBusy.current) { if (input && !rasterQueued.current) rasterQueued.current = { input, sequence, generation: activeGeneration.current }; return }
+    rasterBusy.current = true
+    const generation = activeGeneration.current, epoch = connectionEpoch.current
+    try {
+      if (input) {
+        if (input.type === "pointer") selectionSource.current = "runtime"
+        const result = await request("preview", { command: "input", generation, sequence, input })
+        if (!result.ok) throw new Error(result.data.error ?? "Preview input rejected.")
+      }
+      let result = await request("preview", { command: "capture", generation })
+      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+      if (result.ok && result.data.observation && result.data.observation.viewport.width !== rasterWidth.current) {
+        const resized = await request("preview", { command: "input", generation, sequence: result.data.sequence, input: { type: "viewport", width: rasterWidth.current, height: 900 } })
+        if (!resized.ok) throw new Error(resized.data.error ?? "Viewport rejected.")
+        result = await request("preview", { command: "capture", generation })
+      }
+      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+      if (!result.ok || !result.data.observation) throw new Error(result.data.error ?? "Preview expired. Connect to renew.")
+      const data = result.data, observation = data.observation!
+      rasterSequence.current = data.sequence!; lastRaster.current = data; deliverRaster(data)
+      if (routePath.current !== observation.route) {
+        selectionSource.current = "runtime"
+        routePath.current = observation.route; setRouteInput(observation.route)
+        try { sessionStorage.setItem('wcb-preview-route:' + projectId, observation.route) } catch { /* No credentials. */ }
+        setTarget(undefined); inspected.current = ""; ++inspectSequence.current
+      }
+      if (selectionSource.current === "runtime") setSelected(observation.selection ?? undefined)
+      if (observation.selection && selectionSource.current === "runtime") {
+        const key = generation + ':' + observation.selection.identity.file + ':' + observation.selection.identity.elementStart
+        if (inspected.current !== key) { inspected.current = key; void inspect(observation.selection) }
+      } else if (selectionSource.current === "runtime") { setTarget(undefined); inspected.current = ""; ++inspectSequence.current }
+      setPreviewState("ready")
+    } catch (error) {
+      if (generation === activeGeneration.current && epoch === connectionEpoch.current) { activeGeneration.current = ""; setPreviewState("expired"); setSelected(undefined); setTarget(undefined); setMessage(String(error instanceof Error ? error.message : error)) }
+    } finally {
+      rasterBusy.current = false
+      const queued = rasterQueued.current; rasterQueued.current = undefined
+      if (queued && queued.generation === activeGeneration.current) {
+        if (queued.input.type === "pointer" && queued.sequence !== rasterSequence.current) setMessage("The frame changed before selection. Select the element again.")
+        else void rasterOperation(queued.input, rasterSequence.current)
+      }
+    }
+  }
+  useEffect(() => {
+    if (preview?.transport !== "raster") return
+    void rasterOperation()
+    const timer = setInterval(() => { void rasterOperation() }, 1500)
+    const receive = (event: MessageEvent) => {
+      const data = event.data
+      if (event.source !== frame.current?.contentWindow || event.origin !== "null" || data?.channel !== "wcb-raster" || data.type !== "input" || data.generation !== activeGeneration.current || data.sequence !== rasterSequence.current) return
+      if (data.input?.type === "pointer" || data.input?.type === "scroll") void rasterOperation(data.input, data.sequence)
+    }
+    window.addEventListener("message", receive)
+    return () => { clearInterval(timer); window.removeEventListener("message", receive) }
+  }, [preview, session, selectMode])
+  useEffect(() => {
+    if (preview?.transport === "raster") void rasterOperation()
+  }, [viewport])
+
   function configurePreview() {
     if (!session || !preview) return
+    if (preview.transport === "raster") { deliverRaster(); return }
     frame.current?.contentWindow?.postMessage({ channel: PREVIEW_CHANNEL, type: "configure", session: session.previewId, generation: preview.generation, active: selectMode, hash: routeHash.current }, "*")
   }
 
@@ -210,7 +289,7 @@ export default function CompatibleWorkspace() {
   const styleOrigins = target?.styleOrigins.filter((styleOrigin) => styleOrigin.editable && !styleOrigin.prefix) ?? []
   const viewportWidth = { mobile: 390, tablet: 768, desktop: 1280 }[viewport]
   const scale = Math.max(0.1, Math.min(1, availableWidth / viewportWidth))
-  const frameStyle = { width: viewportWidth, height: `${100 / scale}%`, transform: `scale(${scale})`, marginLeft: Math.max(0, (availableWidth - viewportWidth * scale) / 2) }
+  const frameStyle = { width: viewportWidth, height: preview?.transport === "raster" ? 900 : `${100 / scale}%`, transform: `scale(${scale})`, marginLeft: Math.max(0, (availableWidth - viewportWidth * scale) / 2) }
 
   return <main className="compatible-workspace">
     <header className="compatible-topbar">
@@ -225,10 +304,10 @@ export default function CompatibleWorkspace() {
         <p>Project runtime</p><strong>▾ src</strong><span>⌘ JSX / TSX source</span><span># CSS / Modules</span>
         <div className="compatibility-summary"><small>Visual compatibility</small><b>{summary ? `${summary.score}%` : "…"}</b><p>{summary ? `${summary.full} full · ${summary.partial} partial · ${summary.codeOnly} code only` : "Analysing real source…"}</p></div>
         {runtime && <details><summary>Runtime: {runtime.profile}</summary><p>{runtime.supported ? "Explicit dedicated profile" : "Runtime unavailable"}</p>{runtime.dependencies.map(item => <p key={item.name}>{item.name}: {item.declared} → {item.selected ?? "unavailable"}{item.locked ? ` (lock ${item.locked})` : ""}</p>)}{runtime.issues.map((issue, index) => <p key={index}>{issue.message} Requires: {issue.requiredCapability}</p>)}{runtime.notes.map(note => <p key={note}>{note}</p>)}</details>}
-        <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
+        <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { selectionSource.current = "source"; const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className="compatible-preview-shell">
-        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{preview?.transport === "http" && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } routePath.current = routeInput; void refreshPreview() }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}<button type="button" disabled={!session} onClick={() => { void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
+        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
         <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
       </section>
       <aside className="compatible-inspector">
@@ -243,7 +322,7 @@ export default function CompatibleWorkspace() {
         {target && Object.entries(target.unavailableReasons).map(([key, reason]) => <p key={key} className="limited-editing">{reason}</p>)}
         {diff && <div className="source-diff"><small>Actual source diff</small><pre>{diff}</pre></div>}
         <p className="transaction-status">{message}</p>
-        <p className="limited-editing" data-preview-boundary>{PREVIEW_SECURITY_NOTICE}</p>
+        <p className="limited-editing" data-preview-boundary>{preview?.transport === "raster" ? "Local controlled preview: project JavaScript runs in an isolated Linux browser. This viewer receives pixels and validated selection data. External project networking is disabled. Sessions last up to 60 seconds; reconnect to renew." : PREVIEW_SECURITY_NOTICE}</p>
       </aside>
     </div>
   </main>

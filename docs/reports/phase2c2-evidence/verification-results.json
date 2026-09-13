@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-13",
+  "outcome": "fixed for the tested local provider",
+  "branch": "phase-2-compatible-editor",
+  "startingHead": "6b43dcee099b270d6b1663467218532574ce6bc2",
+  "mainUnchanged": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "baselineTests": 108,
+  "finalTests": 116,
+  "suites": 6,
+  "testDurationSeconds": 4.22,
+  "typeScript": "PASS",
+  "productionBuild": "PASS",
+  "viteBuildSeconds": 1.93,
+  "preservedHashRouterFieldNotes": "PASS",
+  "controlledBrowserRouterAndEditFlow": "PASS",
+  "outerBoundaryProbes": "PASS",
+  "freshGenerationStorageIsolation": "PASS",
+  "startupCleanupFaultInjection": "PASS",
+  "independentReview": {
+    "cycles": 1,
+    "confirmedIssues": [
+      "viewport lost after generation refresh",
+      "formatted grouped console line exceeded observation limit",
+      "startup cleanup failure did not quarantine admission"
+    ],
+    "resolution": "All fixed and tested"
+  },
+  "cleanup": {
+    "activePreviewUnitsAfterQA": 0,
+    "remainingRunnerUserProcesses": 0,
+    "psExitOneMeansNoProcesses": true,
+    "vmStatusAfterValidation": "Stopped",
+    "taskOwnedDevServerStopped": true
+  },
+  "limitations": [
+    "Local Apple Silicon macOS provider only",
+    "No hosted tenant/ownership/storage/cookie-site infrastructure",
+    "PNG polling; no keyboard/text entry, drag or streaming product claim",
+    "60-second job leases",
+    "DTLS/SCTP positive payload exchange not claimed; outer socket confinement and RTC packet attempts tested"
+  ],
+  "checkpoints": {
+    "phase2c2": "PASS (local)",
+    "phase2cHttpBrowserRouter": "PASS (controlled local viewer)",
+    "overallPhase2": "NOT YET",
+    "publicHostedImportReady": "NO"
+  },
+  "validatedFilesSha256": {
+    "src/webcanbe-engine/runtime/controlledPreview.ts": "8e2bb3625eadf583b51fc0a60c0311e590b0d06663d9c4652e38ebc1c5a7e324",
+    "src/webcanbe-engine/runtime/localLimaRunner.ts": "9d055bcf39fd5bc56c2353a13855dc16a74e71e6eec44ce03786910836212b8a",
+    "src/webcanbe-engine/runtime/rasterViewer.ts": "c7dc6585c50a3ec7da6a4c416ba6978f4e8fe2813bc5bba03dd68560e7d67c11",
+    "src/webcanbe-engine/runtime/viteFixturePlugin.ts": "ade57374be5f45bce958e398dfe8b4d8c1b92dc875b6797baab967cd7206270c",
+    "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx": "e4fb3a4b8d206a4855ab5ba6ec23ea172fa6c399a34b78739083be2bbdac8dce",
+    "src/webcanbe-engine/phase2c2.test.ts": "42fd5062bc477fe1f9e3f4f8cbd748e0c7bbb69717e2a376f0ae24bd6fd52e41",
+    "scripts/verify-phase2c2-controlled.cjs": "a956005a9896404258821379899e864424bcca05d984819b11d384e26468a3fb",
+    "scripts/runner/launch.sh": "2fad5bbc09100a770ca14aaa9275b446cf2bc6b32b9ef50a83d0187997d2cc2c",
+    "scripts/runner/prepare.cjs": "6a0f67834e396c7c60a7b65dd1b359d554b939eeb41ed2c5374892c21df3a335",
+    "scripts/runner/probe.cjs": "0c6da4c68617788e83026f8e692fe4d8044e93310babf3c636beeb7c56f67ab1",
+    "scripts/runner/socket-probe.c": "5816096e4022a9817d3cb2992d6919688f867c5158e6c9ab5e2a97331d39950c",
+    "scripts/runner/stop.sh": "2ed3b3e0ed6e561fabdcf1a5d21fb2aa6e1bf5a3b3c8685a0f91b9e6fdc4adc2",
+    "scripts/runner/verify-local.cjs": "804717e2b271ff5c8df6b26de81d958cb7c9b3fc03cd2dcd02543df6def8fd8b",
+    "scripts/runner/verify.cjs": "63618db7b7edb5c9e3f8d6490af617dd538b8de6fd1e6729fd1773925b401dd7",
+    "scripts/runner/vm.yaml": "fd9ad5ddda275f10c4410aab11f57d6521343aca7046828e90c89a5796db53e7",
+    "scripts/runner/worker.cjs": "74cdf5b18f48309b9606413214a64b9dcddad7e9524b7618165338405dcab11f"
+  },
+  "stagedCredentialAndArtifactChecks": "PASS"
+}
