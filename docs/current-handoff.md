@@ -1,3 +1,22 @@
+# Current handoff: Phase 2F responsive and semantic authoring (2026-09-14)
+
+**PHASE 2F RESPONSIVE + SEMANTIC AUTHORING CHECKPOINT: PASS locally. OVERALL PHASE 2: NOT YET. PUBLIC HOSTED IMPORT READY: NO.**
+
+See the [complete Phase 2F report](reports/phase2f-responsive-semantic-authoring.md) and [sanitized verification receipt](reports/phase2f-evidence/verification-results.json). Earlier handoffs below are historical.
+
+- Started clean at expected/live `fac8339e86ca2e0a6395f73b922917fdc1a41de6`, descending from `390d1f09a1bd50b062a80483c80bbffb96e7a10a`. Implementation: **`1a825e9b9107840a0faf00c24b9754f6c5fd3527`**; final invalid-viewport guard: **`247d8ec83af3a83b766228f6325b2dd5983ec5e1`**. Documentation is a separate commit. Only `phase-2-compatible-editor` is published; main stays `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.
+- The existing React adapter plus additive project style reconciliation expose literal/inline/CSS/Module/Tailwind/responsive/inherited origins, active/effective source candidates, exact ranges, known source-use counts and shared scope. Explicit source-scope edits affect all matching uses; instance-only shared requests are refused. Ambiguous cascade, dynamic values and unsafe selectors retain Code access.
+- Preview mobile/tablet/desktop widths remain 390/768/1280. A separate authoring selector edits base/default or an existing project CSS/Tailwind breakpoint. Only the selected token/declaration changes. Static CSS @theme breakpoint literals are understood by analysis, **but the unchanged runtime still rejects @theme/configuration directives**. Do not claim custom theme preview support. Unknown viewports and unsupported variants fail closed.
+- Expanded utility families, static local const/object/array token origins, existing Flex/Grid properties and adjacent native JSX sibling reorder share normal source transactions, revisions, hash checks, durable History, inverse/restart behavior and controlled preview rebuilds. No coordinates, alternate canvas document or second history. Shared const storage is explicit; writes/aliases/deletion/exports/dynamic values are conservative.
+- All original **145 tests remain unchanged; 196/196 pass** with 51 new cases. TypeScript/build, real controlled runner isolation/resource probes, unchanged legacy and controlled browser suites, Code/Canvas/invalid-draft/file-operation/restart regressions, both responsive router paths and independent exports build/render pass. No runtime errors in final new/Code/export acceptance. Original fixtures, compiler, runner/security and durable storage implementation remain unchanged.
+- Final browser jobs were cleaned up; the local VM is stopped after validation. Restart with `npm run runner:prepare`, then `WCB_PREVIEW_PROVIDER=lima npm run dev`. Credentials are newly issued by the local server, not stored here.
+- Limits: existing declarations only; explicit reorder controls rather than pointer drag; partial cascade/value vocabulary, approximate static counts, local const tracing rather than general prop/cross-file analysis, and no independently authored external-project acceptance. The fixture and its HashRouter variant are explicitly authored QA, not third-party evidence.
+- Still open: genuine imported HMR, broader runtime/dependency/config profiles, hosted ownership/scheduling/storage/cookie/resource isolation, production hosted provider, broader independent real-project validation, final external/security audit, remaining compatibility gaps and the entire final product/Phase 4 UI/AI/Marketplace/seller/payment/admin/collaboration/experience scope. No main merge or public deployment.
+
+Verify the final live feature tip, clean tree and unchanged main before continuing. The report intentionally does not embed its own documentation commit hash.
+
+---
+
 # Current handoff: Phase 2D/E Code ↔ Canvas and durable history (2026-09-13)
 
 **PHASE 2D/E CODE↔CANVAS + DURABLE HISTORY CHECKPOINT: PASS locally. OVERALL PHASE 2: NOT YET. PUBLIC HOSTED IMPORT READY: NO.**
