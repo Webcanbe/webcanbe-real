@@ -39,6 +39,13 @@ export type StyleProperty =
   | "gridColumn"
   | "gridRow"
   | "maxWidth"
+  | "minWidth"
+  | "minHeight"
+  | "maxHeight"
+  | "flexDirection"
+  | "display"
+  | "lineHeight"
+  | "letterSpacing"
 
 export type StyleOriginKind = "inline" | "css" | "css-module" | "tailwind" | "inherited" | "default" | "unknown"
 
@@ -52,6 +59,13 @@ export type StyleOrigin = {
   reason?: string
   selector?: string
   prefix?: string
+  media?: string
+  active?: boolean
+  effective?: boolean
+  scope?: string
+  usageCount?: number
+  shared?: boolean
+  valueOrigin?: string
 }
 
 export type ElementCapabilities = {
@@ -71,7 +85,11 @@ export type CompatibilityKind = "full" | "partial" | "code-only"
 
 export type SourceTarget = {
   identity: SourceIdentity
+  classNames?: string[]
+  ownerComponent?: string
+  repeated?: boolean
   effectScope?: string
+  reorder?: { previous?: number; next?: number; parentStart: number }
   elementName: string
   nodeKind: SourceNodeKind
   sourceRange: SourceRange

@@ -1,12 +1,14 @@
+import { analyzeProjectStyles, viewportWidths } from "../adapters/react/projectStyles"
 import { ControlledPreviewTransport, type RunnerProvider, type PreviewInput } from "./controlledPreview"
 import { RasterViewerServer } from "./rasterViewer"
 import { randomBytes, timingSafeEqual } from "node:crypto"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Plugin } from "vite"
-import { analyzeReactSource } from "../adapters/react/reactSourceAdapter"
+import fs from "node:fs"
+import path from "node:path"
 import { summarizeCompatibility } from "../core/compatibility"
 import type { FileOperation, SourceIdentity, StyleProperty, ViewportPreset } from "../core/types"
-import { formatTransactionDiff, patchResponsiveStyle, patchSemanticLayout, patchStyle, patchText } from "../mutations/sourceMutations"
+import { formatTransactionDiff, patchProjectStyle, patchSiblingReorder, patchText } from "../mutations/sourceMutations"
 import { ProjectRegistry, type SessionOperation } from "./projectRegistry"
 import { exportProjectZip } from "./projectExport"
 import { inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
@@ -85,9 +87,13 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (!store) return json(response, 403, { error: "Project source root is unavailable or changed." })
           const durable = registry.durable(project.id)
           const revision = registry.revision(project.id)
-          const targets = () => registry.sourceFiles(project.id).flatMap(file => analyzeReactSource(file, store.read(file) ?? "", store.read, { tailwind: project.detection.tailwind }).map(target => ({ ...target, identity: { ...target.identity, revisionId: revision, contentHash: contentHash(store.read(file) ?? "") }, effectScope: target.component ? `Source definition in ${file}; all rendered instances of this definition may change.` : "Source location; shared styles may affect every matching element." })))
+          const styleFiles = () => { const files = durable.files(); for (const file of ["tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs"]) { if (fs.existsSync(path.join(project.root, file))) files.set(file, "unsupported configuration present (not evaluated)") } return files }
+          const width = viewportWidths[body.viewport as ViewportPreset] ?? 1280
+          let analysis: ReturnType<typeof analyzeProjectStyles> | undefined
+          const styles = () => analysis ??= analyzeProjectStyles(styleFiles(), Boolean(store.tailwind), width)
+          const targets = () => styles().targets.map(target => ({ ...target, identity: { ...target.identity, revisionId: revision, contentHash: contentHash(store.read(target.identity.file) ?? "") } }))
           if (["inspect", "source"].includes(action) && typeof body.expectedRevision === "string" && body.expectedRevision !== revision) return json(response, 409, { error: "Selection belongs to stale source. Rebuild and select again." })
-          if (action === "compatibility") { const analyzed = targets(); return json(response, 200, { summary: summarizeCompatibility(analyzed), targets: analyzed, revision }) }
+          if (action === "compatibility") { const analyzed = targets(); return json(response, 200, { summary: summarizeCompatibility(analyzed), targets: analyzed, breakpoints: styles().breakpoints, styleDiagnostics: styles().diagnostics, revision }) }
           if (action === "files") {
             const files = durable.files()
             if (body.file !== undefined && (typeof body.file !== "string" || !files.has(body.file))) return json(response, 404, { error: "Source file is unavailable." })
@@ -169,20 +175,20 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if ((identity.revisionId && identity.revisionId !== revision) || (identity.contentHash && identity.contentHash !== contentHash(store.read(identity.file) ?? ""))) return json(response, 409, { error: "Stale SourceAnchor. Rebuild and select again." })
           const target = targets().find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
           if (!target) return json(response, 404, { error: "Unknown source identity." })
-          if (action === "inspect" || action === "source") return json(response, 200, { target, source: store.read(identity.file), revision })
+          if (action === "inspect" || action === "source") return json(response, 200, { target, breakpoints: styles().breakpoints, styleDiagnostics: styles().diagnostics, source: store.read(identity.file), revision })
           if (action !== "mutate") return json(response, 404, { error: "Unknown operation." })
           const edit = body.edit as Record<string, unknown> | undefined
           if (typeof edit?.value !== "string" || edit.value.length > 4096) return json(response, 400, { error: "Invalid edit value." })
+          if (edit.type === "text" && (target.repeated || /; (?:[2-9]|[1-9]\d+) statically/.test(target.effectScope ?? "")) && edit.scope !== "source") return json(response, 422, { error: "This source definition has repeated/shared uses. Choose source scope or edit the invocation in Code." })
           const stagedFiles = durable.files(), originalFiles = new Map(stagedFiles)
           const draftStore: SourceStore = { tailwind: store.tailwind, read: file => stagedFiles.get(file), write: (file, content, expected) => { if (stagedFiles.get(file) !== expected) throw new SourceConflict("Draft source changed."); stagedFiles.set(file, content) } }
           const mutation = edit.type === "text" ? patchText(draftStore, identity, edit.value)
-            : edit.type === "style" ? patchStyle(draftStore, identity, edit.property as StyleProperty, edit.value)
-            : edit.type === "responsive" ? patchResponsiveStyle(draftStore, identity, edit.property as StyleProperty, edit.value, edit.viewport as ViewportPreset)
-            : edit.type === "layout" ? patchSemanticLayout(draftStore, identity, edit.property as StyleProperty, edit.value) : undefined
+            : ["style", "responsive", "layout"].includes(String(edit.type)) ? patchProjectStyle(draftStore, styleFiles(), identity, edit.property as StyleProperty, edit.value, { breakpoint: typeof edit.breakpoint === "string" ? edit.breakpoint : undefined, viewport: edit.type === "responsive" ? edit.viewport as ViewportPreset : undefined, scope: typeof edit.scope === "string" ? edit.scope : undefined, semantic: edit.type === "layout" })
+            : edit.type === "reorder" ? patchSiblingReorder(draftStore, stagedFiles, identity, edit.value, body.viewport as ViewportPreset, typeof edit.scope === "string" ? edit.scope : undefined) : undefined
           if (!mutation) return json(response, 400, { error: "Unsupported mutation." })
           if (!mutation.success) return json(response, 422, { transaction: mutation, error: mutation.error, revision })
           const operations: FileOperation[] = [...stagedFiles].filter(([file, source]) => source !== originalFiles.get(file)).map(([file, content]) => ({ kind: "update", file, content, expectedHash: contentHash(originalFiles.get(file)!) }))
-          const validation = await validateSource(new Map(operations.map(op => [op.file, stagedFiles.get(op.file)!])))
+          const validation = edit.type === "reorder" ? await validateStagedProject(project, projectRoot, stagedFiles, "compile") : await validateSource(new Map(operations.map(op => [op.file, stagedFiles.get(op.file)!])))
           const entry = transactionEntry(project.id, revision, "visual", idempotencyKey, requestHash, `Visual ${edit.type}: ${mutation.file}`, validation, mutation)
           authorize(); durable.assertBase(revision)
           if (!validation.passed) { durable.reject(entry); return result(entry) }

@@ -1,0 +1,5 @@
+/* Ordinary project rules; shared deliberately by two source elements. */
+h1 { font-size: 24px; }
+.responsive-card { padding: 20px; }
+@media (max-width: 620px) { .responsive-card { padding: 8px; } }
+@media (min-width: 900px) { .responsive-card { padding: 32px; } }

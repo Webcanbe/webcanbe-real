@@ -1,5 +1,7 @@
+import ts from "typescript"
+import { analyzeProjectStyles, mutationOrigin, viewportWidths } from "../adapters/react/projectStyles"
 import { createHash } from "node:crypto"
-import { analyzeReactSource, cssDeclaration } from "../adapters/react/reactSourceAdapter"
+import { analyzeReactSource, cssDeclaration, tailwindProperty } from "../adapters/react/reactSourceAdapter"
 import type { MutationTransaction, SourceIdentity, SourcePatch, StyleOrigin, StyleProperty, ViewportPreset } from "../core/types"
 
 export type SourceStore = { tailwind?: boolean; read(file: string): string | undefined; write(file: string, content: string, expected?: string): void }
@@ -109,11 +111,17 @@ export function tailwindToken(property: StyleProperty, value: string) {
   if (property === "width") return sizeScale[normalized] ? `w-${sizeScale[normalized]}` : undefined
   if (property === "height") return sizeScale[normalized] ? `h-${sizeScale[normalized]}` : undefined
   if (property === "flexBasis") return normalized === "auto" ? "basis-auto" : sizeScale[normalized] ? `basis-${sizeScale[normalized]}` : undefined
+  if (["minWidth", "minHeight", "maxHeight"].includes(property)) { const prefix = { minWidth: "min-w", minHeight: "min-h", maxHeight: "max-h" }[property as "minWidth"]; return sizeScale[normalized] ? `${prefix}-${sizeScale[normalized]}` : undefined }
+  if (property === "flexDirection") return ({ row: "flex-row", column: "flex-col", "row-reverse": "flex-row-reverse", "column-reverse": "flex-col-reverse" } as Record<string, string>)[normalized]
+  if (property === "display") return ({ none: "hidden", block: "block", inline: "inline", "inline-block": "inline-block", flex: "flex", "inline-flex": "inline-flex", grid: "grid", "inline-grid": "inline-grid", contents: "contents" } as Record<string, string>)[normalized]
+  if (property === "lineHeight") return ({ "1": "leading-none", "1.25": "leading-tight", "1.375": "leading-snug", "1.5": "leading-normal", "1.625": "leading-relaxed", "2": "leading-loose" } as Record<string, string>)[normalized]
+  if (property === "letterSpacing") return ({ "-0.05em": "tracking-tighter", "-0.025em": "tracking-tight", "0em": "tracking-normal", "0.025em": "tracking-wide", "0.05em": "tracking-wider", "0.1em": "tracking-widest" } as Record<string, string>)[normalized]
   if (property === "maxWidth") return sizeScale[normalized] ? `max-w-${sizeScale[normalized]}` : undefined
   if (property === "backgroundColor") return colorScale[normalized] ? `bg-${colorScale[normalized]}` : undefined
   if (property === "color") return colorScale[normalized] ? `text-${colorScale[normalized]}` : undefined
   if (property === "fontSize") return ({ "12px": "text-xs", "14px": "text-sm", "16px": "text-base", "18px": "text-lg", "20px": "text-xl", "24px": "text-2xl" } as Record<string, string>)[normalized]
   if (property === "fontWeight") return ({ "400": "font-normal", "500": "font-medium", "600": "font-semibold", "700": "font-bold" } as Record<string, string>)[normalized]
+  if (property === "border") return ({ "0px": "border-0", "1px": "border", "2px": "border-2", "4px": "border-4", "8px": "border-8" } as Record<string, string>)[normalized]
   if (property === "borderRadius") return ({ "0px": "rounded-none", "4px": "rounded-sm", "6px": "rounded-md", "8px": "rounded-lg", "12px": "rounded-xl", "9999px": "rounded-full" } as Record<string, string>)[normalized]
   if (property === "alignItems") return ({ center: "items-center", start: "items-start", end: "items-end", stretch: "items-stretch" } as Record<string, string>)[normalized]
   if (property === "justifyContent") return ({ center: "justify-center", start: "justify-start", end: "justify-end", "space-between": "justify-between" } as Record<string, string>)[normalized]
@@ -140,7 +148,7 @@ export function patchStyle(store: SourceStore, identity: SourceIdentity, propert
   const source = store.read(identity.file)
   if (!source) return failed(identity, "style", "Source file is unavailable.", value)
   const target = analyzeReactSource(identity.file, source, store.read.bind(store), { tailwind: store.tailwind }).find((candidate) => candidate.identity.elementStart === identity.elementStart)
-  const origin = target?.styleOrigins.find((candidate) => candidate.property === property && candidate.editable && !candidate.prefix)
+  const origin = target?.styleOrigins.find((candidate) => candidate.property === property && candidate.editable && !candidate.prefix && !candidate.media)
   const localOrigin = origin && (origin.kind === "inline" || origin.kind === "tailwind") ? { ...origin, file: identity.file } : origin
   if (!localOrigin?.range || !localOrigin.file) return failed(identity, "style", "The style origin is inherited, dynamic, or unsupported.", value)
   const replacement = patchStyleValue(localOrigin, value)
@@ -189,4 +197,61 @@ export function patchSemanticLayout(store: SourceStore, identity: SourceIdentity
   const result = patchStyle(store, identity, property, value)
   if (result.success) return { ...result, editType: "layout" as const }
   return failed(identity, "layout", "An existing explicit layout declaration is required.", value)
+}
+
+/** The authorized API supplies the complete revision snapshot. No live DOM value
+ * or client-provided offset can choose the declaration being written. */
+export function patchProjectStyle(store: SourceStore, files: Map<string, string>, identity: SourceIdentity, property: StyleProperty, value: string, options: { breakpoint?: string; viewport?: ViewportPreset; scope?: string; semantic?: boolean } = {}) {
+  if (!safeStyleValue(value) && !/^[a-z0-9:./-]{1,200}$/.test(value)) return failed(identity, "style", "Unsupported style value.", value)
+  const width = viewportWidths[options.viewport ?? "desktop"]
+  const analysis = analyzeProjectStyles(files, Boolean(store.tailwind), width)
+  const target = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
+  if (!target || target.nodeKind !== "native" || target.reasonCodes?.includes("jsx-spread-props") || target.reasonCodes?.includes("dynamic-class-expression")) return failed(identity, "style", "Dynamic or unsafe source; use Code.")
+  let breakpoint = options.breakpoint ?? "base"
+  if (!options.breakpoint && options.viewport) {
+    const tw = options.viewport === "mobile" ? "base" : options.viewport === "tablet" ? "tw:md" : "tw:lg"
+    if (target.styleOrigins.some(item => item.property === property && item.kind === "tailwind")) breakpoint = tw
+    else {
+      const effective = target.styleOrigins.find(item => item.property === property && item.effective)
+      breakpoint = effective?.media ? `css:${effective.media}` : "base"
+    }
+  }
+  const origin = mutationOrigin(target, property, breakpoint, analysis.breakpoints)
+  if (!origin?.range || !origin.file) return failed(identity, "responsive", "No unambiguous existing declaration at this breakpoint; use Code.")
+  if (origin.kind !== "tailwind" && !safeStyleValue(value)) return failed(identity, "style", "Invalid CSS or inline value.")
+  if ((origin.shared || target.repeated) && options.scope !== "source") return failed(identity, "style", `Choose source scope before editing: ${origin.scope}.`)
+  if (options.semantic && !["display", "flexDirection", "gap", "padding", "paddingX", "paddingY", "margin", "width", "minWidth", "maxWidth", "height", "alignItems", "justifyContent", "alignSelf", "justifySelf", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow"].includes(property)) return failed(identity, "layout", "Unsupported semantic layout property.")
+  // Accept the existing semantic CSS value or a single recognized utility token.
+  // Literal tokens are useful for config-defined scales and never rebuild className.
+  const requestedToken = value.startsWith(origin.prefix ?? "") ? value.slice((origin.prefix ?? "").length) : value
+  if (origin.kind === "tailwind" && !tailwindPropertySafe(property, requestedToken) && [...files.values()].some(code => /--(?:spacing|text-|font-|radius-|color-)/.test(code))) return failed(identity, "style", "Custom theme scale: supply an explicit supported utility token or use Code.")
+  const replacement = origin.kind === "tailwind" && tailwindPropertySafe(property, requestedToken) ? (origin.prefix ?? "") + requestedToken : patchStyleValue(origin, value)
+  if (!replacement || origin.kind === "tailwind" && !tailwindPropertySafe(property, replacement.slice((origin.prefix ?? "").length))) return failed(identity, "style", "Unsupported value for the identified source origin.")
+  const original = files.get(origin.file)
+  if (original === undefined) return failed(identity, "style", "Source unavailable.")
+  const patch = sourcePatch(origin.file, origin.range, original.slice(origin.range.start, origin.range.end), replacement)
+  try { const versions = applyPatches(store, [patch], "forward"); return transaction({ file: origin.file, range: origin.range, editType: options.semantic ? "layout" : breakpoint === "base" ? "style" : "responsive", before: patch.before, after: patch.after, target: identity, success: true, patches: [patch], versions, viewport: options.viewport }) } catch (error) { return failed(identity, "style", String(error)) }
+}
+
+function tailwindPropertySafe(property: StyleProperty, token: string) {
+  // Numeric/named standard tokens only; unknown/custom/arbitrary/state values stay untouched.
+  return !/[:!\[\]\s]/.test(token) && /^[a-z0-9./-]+$/.test(token) && tailwindProperty(token) === property
+}
+
+export function patchSiblingReorder(store: SourceStore, files: Map<string, string>, identity: SourceIdentity, direction: string, viewport: ViewportPreset = "desktop", scope?: string) {
+  const analysis = analyzeProjectStyles(files, Boolean(store.tailwind), viewportWidths[viewport])
+  const target = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
+  const neighbor = direction === "previous" ? target?.reorder?.previous : direction === "next" ? target?.reorder?.next : undefined
+  if (neighbor === undefined || !target?.reorder) return failed(identity, "layout", "A static adjacent JSX sibling in an explicit Flex/Grid parent is required.")
+  const parent = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === target.reorder!.parentStart)
+  if (parent?.styleOrigins.some(item => item.shared) && scope !== "source") return failed(identity, "layout", "Choose source scope: reordering changes this component definition.")
+  const code = files.get(identity.file)!, source = ts.createSourceFile(identity.file, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const nodes: ts.Node[] = []
+  const visit = (node: ts.Node) => { if ((ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) && [identity.elementStart, neighbor].includes(node.getStart(source))) nodes.push(node); ts.forEachChild(node, visit) }; visit(source)
+  nodes.sort((a, b) => a.getStart(source) - b.getStart(source))
+  if (nodes.length !== 2 || nodes[0].parent !== nodes[1].parent) return failed(identity, "layout", "Sibling source changed.")
+  const [first, second] = nodes, start = first.getStart(source), end = second.getEnd(), between = code.slice(first.getEnd(), second.getStart(source))
+  if (between.trim()) return failed(identity, "layout", "Comments/expressions between siblings require Code to preserve intent.")
+  const before = code.slice(start, end), after = second.getText(source) + between + first.getText(source), patch = sourcePatch(identity.file, { start, end }, before, after)
+  try { const versions = applyPatches(store, [patch], "forward"); return transaction({ file: identity.file, range: patch.range, editType: "layout", before, after, target: identity, success: true, patches: [patch], versions }) } catch (error) { return failed(identity, "layout", String(error)) }
 }
