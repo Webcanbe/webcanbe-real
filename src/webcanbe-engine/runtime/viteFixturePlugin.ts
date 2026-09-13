@@ -7,6 +7,7 @@ import type { SourceIdentity, StyleProperty, ViewportPreset } from "../core/type
 import { formatTransactionDiff, patchResponsiveStyle, patchSemanticLayout, patchStyle, patchText } from "../mutations/sourceMutations"
 import { ProjectRegistry, type SessionOperation } from "./projectRegistry"
 import { exportProjectZip } from "./projectExport"
+import { inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
 import { buildIsolatedPreview } from "./isolatedPreview"
 
 function json(response: ServerResponse, status: number, value: unknown) {
@@ -65,7 +66,7 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           const project = route && registry.get(route[1])
           if (!route || !project) return json(response, 404, { error: "Project is unavailable." })
           const action = route[2] as SessionOperation | "session"
-          if (action === "session") return json(response, 201, { session: registry.createSession(project.id), project: publicProject(project) })
+          if (action === "session") return json(response, 201, { session: registry.createSession(project.id), project: publicProject(project), runtime: inspectRuntime(project, projectRoot) })
           const previewId = typeof body.previewId === "string" ? body.previewId : ""
           const capability = typeof body.capability === "string" ? body.capability : ""
           if (!registry.authorize(project.id, previewId, capability, action)) return json(response, 403, { error: "Capability is invalid, expired, or outside its scope." })
@@ -77,7 +78,7 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (action === "export") return json(response, 200, { archive: (await exportProjectZip(project)).toString("base64") })
           if (action === "preview") {
             try { return json(response, 200, { html: await buildIsolatedPreview(project, projectRoot), revision }) }
-            catch { return json(response, 422, { error: "Preview unavailable: this project requires unsupported dependencies, assets, or build configuration. Source inspection remains available." }) }
+            catch (error) { return json(response, 422, { error: error instanceof RuntimeCompatibilityError ? error.message : "Preview could not resolve the project: " + (error instanceof Error ? error.message.slice(0, 1500) : "Unsupported source"), runtime: inspectRuntime(project, projectRoot), requiredCapability: error instanceof RuntimeCompatibilityError ? error.issues.map(issue => issue.requiredCapability).join("; ") : "A compatible dependency profile or isolated HTTP/configuration runner" }) }
           }
           if (["mutate", "undo", "redo"].includes(action) && (typeof body.expectedRevision !== "string" || body.expectedRevision !== revision)) return json(response, 409, { error: "Source changed. Inspect it again before editing." })
           if (action === "undo" || action === "redo") {

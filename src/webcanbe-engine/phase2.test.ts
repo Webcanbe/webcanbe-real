@@ -36,7 +36,7 @@ const projectFiles = {
   "src/App.tsx": `import './App.css'; import styles from './Note.module.css'; export function App(){return <main className="page"><header><h1>Field notes for a slower week</h1><p>Ideas, places, and things worth keeping.</p></header><section className="cards"><article className={styles.note}><h2>A walk by the water</h2><p>Take the longer way home.</p></article><aside style={{padding: 24, color: "#111827"}}>Sunday reading</aside></section></main>}`,
   "src/App.css": `.page { padding: 24px; max-width: 1100px; }\n.cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }\n@media (max-width: 767px) { .page { padding: 12px; } }`,
   "src/Note.module.css": `.note { padding: 16px; border-radius: 8px; background-color: #fff; }`,
-  "vite.config.ts": `throw new Error('UPLOADED CONFIG MUST NOT EXECUTE');`,
+  "vite.config.ts": `import {defineConfig} from "vite"; export default defineConfig({});`,
 }
 function archive(files = projectFiles) { return zip(Object.entries(files).map(([name, data]) => ({ name, data }))) }
 function registry(now?: () => number) {
@@ -74,7 +74,7 @@ describe("bounded ZIP intake", () => {
     await expect(extractSafeZip(corrupt, path.join(temp(), "out"))).rejects.toThrow()
   })
   it("imports normal source without running config or lifecycle scripts", async () => {
-    const reg = registry(), project = await reg.importZip("field-notes.zip", archive())
+    const reg = registry(), project = await reg.importZip("field-notes.zip", archive({ ...projectFiles, "vite.config.ts": `throw new Error("UPLOADED CONFIG MUST NOT EXECUTE")` }))
     expect(project.detection.supported).toBe(true)
     expect(fs.existsSync(path.join(project.root, "SHOULD_NOT_RUN"))).toBe(false)
     expect(reg.store(project.id)!.read("src/App.tsx")).toContain("Field notes")

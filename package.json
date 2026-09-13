@@ -7,15 +7,19 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "runtime:prepare": "npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6"
   },
   "dependencies": {
+    "esbuild": "^0.25.12",
     "isomorphic-dompurify": "^2.16.0",
+    "jsonc-parser": "3.3.1",
+    "parse5": "8.0.0",
+    "postcss": "^8.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "semver": "7.7.3",
     "yauzl": "^3.4.0",
-    "esbuild": "^0.25.12",
-    "postcss": "^8.5.28",
     "yazl": "^3.3.1"
   },
   "devDependencies": {
@@ -23,6 +27,7 @@
     "@types/node": "^22.20.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/semver": "7.7.1",
     "@types/yauzl": "^3.4.0",
     "@types/yazl": "^3.3.1",
     "@vitejs/plugin-react": "^4.3.0",

@@ -5,7 +5,8 @@ import "./compatibleWorkspace.css"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
-type ApiResponse = { target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
+type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
+type ApiResponse = { runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
@@ -17,6 +18,9 @@ export default function CompatibleWorkspace() {
   const frame = useRef<HTMLIFrameElement>(null)
   const previewContainer = useRef<HTMLDivElement>(null)
   const [availableWidth, setAvailableWidth] = useState(1280)
+  const [runtime, setRuntime] = useState<RuntimeInfo>()
+  const [selectMode, setSelectMode] = useState(true)
+  const routeHash = useRef("#/")
   const [projectId, setProjectId] = useState(workspaceProjectId)
   const [project, setProject] = useState<ProjectInfo>()
   const [session, setSession] = useState<PreviewSession>()
@@ -33,6 +37,13 @@ export default function CompatibleWorkspace() {
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
   const [html, setHtml] = useState("")
+  const [previewUrl, setPreviewUrl] = useState("")
+  useEffect(() => {
+    if (!html) { setPreviewUrl(""); return }
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }))
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [html])
   const [targets, setTargets] = useState<SourceTarget[]>([])
   const [source, setSource] = useState("")
   const [pending, setPending] = useState(false)
@@ -60,12 +71,13 @@ export default function CompatibleWorkspace() {
 
   useEffect(() => {
     if (!accessKey) { setMessage("Enter the local editor access key printed by the development server."); return }
+    routeHash.current = "#/"; setRuntime(undefined)
     setSession(undefined); setHtml(""); setTarget(undefined); setSelected(undefined)
     void (async () => {
       const response = await fetch(`/__webcanbe/api/projects/${projectId}/session`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: "{}" })
       const data = await response.json() as ApiResponse
       if (!response.ok || !data.session || !data.project) { setMessage(data.error ?? "This project could not start a preview."); return }
-      setProject(data.project); setSession(data.session); setMessage("Project source is ready. Previews run offline; remote assets and network calls are disabled.")
+      setRuntime(data.runtime); setProject(data.project); setSession(data.session); setMessage("Project source is ready. Previews run offline; remote assets and network calls are disabled.")
     })().catch(() => setMessage("The local Compatible engine is unavailable."))
   }, [projectId, accessKey, connectionAttempt])
 
@@ -81,6 +93,7 @@ export default function CompatibleWorkspace() {
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.origin !== "null" || event.source !== frame.current?.contentWindow || !isPreviewMessage(event.data) || event.data.session !== session?.previewId) return
+      if (event.data.type === "route") routeHash.current = event.data.hash
       if (event.data.type === "hover") setHovered(event.data.element)
       if (event.data.type === "select") { setSelected(event.data.element); void inspect(event.data.element) }
       if (event.data.type === "drag") {
@@ -94,8 +107,10 @@ export default function CompatibleWorkspace() {
 
   function configurePreview() {
     if (!session) return
-    frame.current?.contentWindow?.postMessage({ channel: PREVIEW_CHANNEL, type: "configure", session: session.previewId, active: true }, "*")
+    frame.current?.contentWindow?.postMessage({ channel: PREVIEW_CHANNEL, type: "configure", session: session.previewId, active: selectMode, hash: routeHash.current }, "*")
   }
+
+  useEffect(() => { configurePreview() }, [selectMode])
 
   async function mutate(edit: { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) {
     if (!selected || !session || pending) return
@@ -164,11 +179,12 @@ export default function CompatibleWorkspace() {
         <label>Import React/Vite ZIP<input type="file" accept=".zip" disabled={!session} onChange={event => { const file = event.target.files?.[0]; if (file) void importProject(file) }} /></label>
         <p>Project runtime</p><strong>▾ src</strong><span>⌘ JSX / TSX source</span><span># CSS / Modules</span>
         <div className="compatibility-summary"><small>Visual compatibility</small><b>{summary ? `${summary.score}%` : "…"}</b><p>{summary ? `${summary.full} full · ${summary.partial} partial · ${summary.codeOnly} code only` : "Analysing real source…"}</p></div>
+        {runtime && <details><summary>Runtime: {runtime.profile}</summary><p>{runtime.supported ? "Explicit dedicated profile" : "Runtime unavailable"}</p>{runtime.dependencies.map(item => <p key={item.name}>{item.name}: {item.declared} → {item.selected ?? "unavailable"}{item.locked ? ` (lock ${item.locked})` : ""}</p>)}{runtime.issues.map((issue, index) => <p key={index}>{issue.message} Requires: {issue.requiredCapability}</p>)}{runtime.notes.map(note => <p key={note}>{note}</p>)}</details>}
         <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className="compatible-preview-shell">
-        <div className="compatible-preview-head"><span><i/> Sandboxed source preview</span><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
-        <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe ref={frame} onLoad={configurePreview} title="Running imported React/Vite project" srcDoc={html || "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
+        <div className="compatible-preview-head"><span><i/> Sandboxed source preview</span><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
+        <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe ref={frame} onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
       </section>
       <aside className="compatible-inspector">
         <div className="inspector-heading"><p>Element inspector</p><span>{target?.compatibility ?? "preview"}</span></div>

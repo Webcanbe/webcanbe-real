@@ -1,0 +1,1 @@
+body { margin: 0; font-family: system-ui, sans-serif; background: #f4f3f0; color: #242424; } header, footer { display: flex; justify-content: space-between; padding: 24px 32px; border-bottom: 1px solid #ddd; } nav { display: flex; gap: 24px; } a { color: inherit; } main { padding: 32px; } h1 { font-size: 36px; } img { display: block; }

@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import fs from "node:fs"
 import path from "node:path"
 import yauzl from "yauzl"
+import { htmlEntry } from "./runtimeCompatibility"
 import { crc32 } from "node:zlib"
 import { MutationHistory, type SourceStore } from "../mutations/sourceMutations"
 
@@ -113,6 +114,7 @@ function projectRootFromArchive(root: string) {
 }
 
 function findEntry(root: string) {
+  try { const entry = htmlEntry(root); if (entry) return entry } catch { /* Intake remains separate from runtime configuration support. */ }
   for (const candidate of ["src/main.tsx", "src/main.jsx", "src/index.tsx", "src/index.jsx"]) if (fs.existsSync(path.join(root, candidate))) return candidate
   return undefined
 }
@@ -121,7 +123,7 @@ export function detectProject(root: string, dependencyRoot: string): FrameworkDe
   const manifest = packageAt(root)
   if (!manifest) return { supported: false, framework: "unknown", tailwind: false, reason: "package.json is required.", dependencies: [] }
   const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) }
-  const dependencies = Object.entries(declared).map(([name, version]) => ({ name, declared: String(version), resolved: ["react", "react-dom"].includes(name) && fs.existsSync(path.join(dependencyRoot, "node_modules", name)) }))
+  const dependencies = Object.entries(declared).map(([name, version]) => ({ name, declared: String(version), resolved: false }))
   const entry = findEntry(root)
   const react = Boolean(declared.react && declared["react-dom"])
   const vite = Boolean(declared.vite || fs.existsSync(path.join(root, "vite.config.ts")) || fs.existsSync(path.join(root, "vite.config.js")))

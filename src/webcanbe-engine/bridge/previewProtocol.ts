@@ -4,13 +4,14 @@ export const PREVIEW_CHANNEL = "webcanbe-compatible-v1"
 
 export type PreviewReadyMessage = { channel: typeof PREVIEW_CHANNEL; type: "ready"; session: string }
 export type PreviewElementMessage = { channel: typeof PREVIEW_CHANNEL; type: "hover" | "select" | "drag"; session: string; element: PreviewElement; delta?: { x: number; y: number } }
-export type PreviewMessage = PreviewReadyMessage | PreviewElementMessage
+export type PreviewMessage = PreviewReadyMessage | PreviewElementMessage | { channel: typeof PREVIEW_CHANNEL; type: "route"; session: string; hash: string }
 
 export function isPreviewMessage(value: unknown): value is PreviewMessage {
   if (!value || typeof value !== "object") return false
   const message = value as Record<string, unknown>
   if (message.channel !== PREVIEW_CHANNEL || typeof message.type !== "string" || typeof message.session !== "string") return false
   if (message.type === "ready") return true
+  if (message.type === "route") return typeof message.hash === "string" && /^#\/[\x20-\x7e]{0,2048}$/.test(message.hash)
   if (message.type !== "hover" && message.type !== "select" && message.type !== "drag") return false
   const element = message.element as Record<string, unknown> | undefined
   const identity = element?.identity as Record<string, unknown> | undefined

@@ -59,11 +59,12 @@ function refreshSelection() {
 
 window.addEventListener("message", (event) => {
   if (event.source !== window.parent || !safeParentOrigin(event.origin) || !event.data || typeof event.data !== "object") return
-  const message = event.data as { channel?: string; type?: string; session?: string; active?: boolean }
+  const message = event.data as { channel?: string; type?: string; session?: string; active?: boolean; hash?: string }
   if (message.channel !== PREVIEW_CHANNEL || message.type !== "configure" || typeof message.session !== "string") return
   session = message.session
   parentOrigin = event.origin
   active = Boolean(message.active)
+  if (typeof message.hash === "string" && /^#\/[\x20-\x7e]{0,2048}$/.test(message.hash) && window.location.hash !== message.hash) window.location.hash = message.hash
   window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "ready", session }, parentOrigin)
 })
 
@@ -102,3 +103,7 @@ document.addEventListener("pointerup", (event) => {
 window.addEventListener("scroll", refreshSelection, true)
 window.addEventListener("resize", refreshSelection)
 new ResizeObserver(refreshSelection).observe(document.documentElement)
+
+window.addEventListener("hashchange", () => {
+  if (session && parentOrigin) window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "route", session, hash: window.location.hash }, parentOrigin)
+})
