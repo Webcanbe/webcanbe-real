@@ -2,7 +2,7 @@ import type { CompatibilityKind, CompatibilitySummary, ElementCapabilities, Sour
 
 export function deriveCompatibility(capabilities: ElementCapabilities): CompatibilityKind {
   if (capabilities.visualEdit && (capabilities.text || capabilities.spacing || capabilities.color || capabilities.typography || capabilities.size)) return "full"
-  if (capabilities.codeEdit) return "partial"
+  if (capabilities.visualEdit) return "partial"
   return "code-only"
 }
 

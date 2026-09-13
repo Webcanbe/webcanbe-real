@@ -23,7 +23,7 @@ describe("React source mapping", () => {
     const source = `export function Hero({ title }: { title: string }) { return <h1>{title}</h1> }`
     const target = analyzeReactSource("src/Hero.tsx", source, () => undefined)[0]
     expect(target.capabilities.text).toBe(false)
-    expect(target.compatibility).toBe("partial")
+    expect(target.compatibility).toBe("code-only")
   })
 })
 

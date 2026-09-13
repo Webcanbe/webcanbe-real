@@ -7,6 +7,9 @@ export type SourceIdentity = {
 
 export type LayoutContext = "block" | "flex" | "grid" | "positioned" | "unknown"
 
+export type SourceNodeKind = "native" | "component" | "fragment" | "dynamic" | "unknown"
+export type ViewportPreset = "mobile" | "tablet" | "desktop"
+
 export type StyleProperty =
   | "backgroundColor"
   | "color"
@@ -23,6 +26,17 @@ export type StyleProperty =
   | "borderRadius"
   | "alignItems"
   | "justifyContent"
+  | "alignSelf"
+  | "justifySelf"
+  | "order"
+  | "flexGrow"
+  | "flexShrink"
+  | "flexBasis"
+  | "gridTemplateColumns"
+  | "gridTemplateRows"
+  | "gridColumn"
+  | "gridRow"
+  | "maxWidth"
 
 export type StyleOriginKind = "inline" | "css" | "css-module" | "tailwind" | "inherited" | "default" | "unknown"
 
@@ -34,6 +48,8 @@ export type StyleOrigin = {
   range?: SourceRange
   value?: string
   reason?: string
+  selector?: string
+  prefix?: string
 }
 
 export type ElementCapabilities = {
@@ -54,12 +70,17 @@ export type CompatibilityKind = "full" | "partial" | "code-only"
 export type SourceTarget = {
   identity: SourceIdentity
   elementName: string
+  nodeKind: SourceNodeKind
   sourceRange: SourceRange
   textRange?: SourceRange
+  textEncoding?: "js-string"
+  reasonCodes?: string[]
   text?: string
   styleOrigins: StyleOrigin[]
   capabilities: ElementCapabilities
   compatibility: CompatibilityKind
+  unavailableReasons: Partial<Record<keyof ElementCapabilities, string>>
+  component?: { name: string; file: string; range: SourceRange }
 }
 
 export type PreviewElement = {
@@ -69,6 +90,14 @@ export type PreviewElement = {
   computed: Record<string, string>
   parentIdentity?: SourceIdentity
   layoutContext: LayoutContext
+  parentLayoutContext?: LayoutContext
+}
+
+export type SourcePatch = {
+  file: string
+  range: SourceRange
+  before: string
+  after: string
 }
 
 export type MutationTransaction = {
@@ -76,10 +105,14 @@ export type MutationTransaction = {
   timestamp: string
   file: string
   range: SourceRange
-  editType: "text" | "style"
+  editType: "text" | "style" | "layout" | "responsive"
   before: string
   after: string
   target: SourceIdentity
+  patches: SourcePatch[]
+  versions?: Record<string, { before: string; after: string }>
+  groupId?: string
+  viewport?: ViewportPreset
   success: boolean
   error?: string
 }

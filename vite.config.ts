@@ -4,7 +4,8 @@ import tailwindcss from "@tailwindcss/vite"
 import { webCanBeFixturePlugin } from "./src/webcanbe-engine/runtime/viteFixturePlugin"
 
 export default defineConfig({
-  // The fixture transform must see raw TSX before React turns it into JS.
+  // Project source uses the controlled preview builder, separate from app transforms.
   plugins: [webCanBeFixturePlugin(process.cwd()), react(), tailwindcss()],
-  server: { allowedHosts: ["fixture.localhost"] },
+  // Project previews run only inside opaque-origin sandboxed frames.
+  server: { watch: { ignored: ["**/.webcanbe/**"] }, host: "127.0.0.1", allowedHosts: ["localhost", "127.0.0.1"] },
 })

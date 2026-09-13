@@ -7,6 +7,7 @@ let parentOrigin = ""
 let active = false
 let lastHover = ""
 let selected: Element | undefined
+let dragStart: { element: Element; x: number; y: number } | undefined
 
 function safeParentOrigin(origin: string) {
   try {
@@ -18,7 +19,7 @@ function safeParentOrigin(origin: string) {
 }
 
 function layoutContext(style: CSSStyleDeclaration): LayoutContext {
-  if (style.position !== "static") return "positioned"
+  if (["absolute", "fixed"].includes(style.position)) return "positioned"
   if (style.display.includes("flex")) return "flex"
   if (style.display.includes("grid")) return "grid"
   if (["block", "inline-block", "inline"].includes(style.display)) return "block"
@@ -33,6 +34,7 @@ function describe(target: Element): PreviewElement | null {
   const rect = element.getBoundingClientRect()
   const style = getComputedStyle(element)
   const parent = element.parentElement?.closest<HTMLElement>("[data-wcb-id]")
+  const parentStyle = parent ? getComputedStyle(parent) : undefined
   return {
     identity,
     tagName: element.tagName.toLowerCase(),
@@ -40,12 +42,13 @@ function describe(target: Element): PreviewElement | null {
     computed: Object.fromEntries(["display", "position", "backgroundColor", "color", "fontSize", "fontWeight", "padding", "margin", "gap", "width", "height", "border", "borderRadius"].map((property) => [property, style.getPropertyValue(property.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`))])),
     parentIdentity: parent ? decodeSourceIdentity(parent.dataset.wcbId ?? "") ?? undefined : undefined,
     layoutContext: layoutContext(style),
+    parentLayoutContext: parentStyle ? layoutContext(parentStyle) : undefined,
   }
 }
 
-function send(type: "hover" | "select", element: PreviewElement) {
+function send(type: "hover" | "select" | "drag", element: PreviewElement, delta?: { x: number; y: number }) {
   if (!session || !parentOrigin) return
-  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type, session, element }, parentOrigin)
+  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type, session, element, delta }, parentOrigin)
 }
 
 function refreshSelection() {
@@ -80,6 +83,20 @@ document.addEventListener("click", (event) => {
   event.stopPropagation()
   selected = event.target as Element
   send("select", element)
+}, true)
+
+document.addEventListener("pointerdown", (event) => {
+  if (!active) return
+  const element = (event.target as Element).closest<HTMLElement>("[data-wcb-id]")
+  if (element) dragStart = { element, x: event.clientX, y: event.clientY }
+}, true)
+
+document.addEventListener("pointerup", (event) => {
+  if (!active || !dragStart) return
+  const current = describe(dragStart.element)
+  const delta = { x: event.clientX - dragStart.x, y: event.clientY - dragStart.y }
+  dragStart = undefined
+  if (current && (Math.abs(delta.x) > 24 || Math.abs(delta.y) > 24)) send("drag", current, delta)
 }, true)
 
 window.addEventListener("scroll", refreshSelection, true)
