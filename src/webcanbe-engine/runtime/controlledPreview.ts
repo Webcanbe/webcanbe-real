@@ -1,5 +1,11 @@
+import { IncrementalPreviewCompiler, classifyPreviewUpdate, type PreviewUpdate } from "./incrementalPreview"
+import type { RunnerAllocation } from "./runnerScheduler"
+import { LOCAL_RESOURCE_BUDGET } from "./runnerScheduler"
+import type { ArtifactStore, ArtifactReference } from "./storageContracts"
+import { redactSecrets } from "./previewSecrets"
 import type { PreviewElement, SourceIdentity } from "../core/types"
 import { analyzeReactSource } from "../adapters/react/reactSourceAdapter"
+import { contentHash } from "../mutations/durableSource"
 import { createHash, randomUUID } from "node:crypto"
 import { buildIsolatedHttpPreview, type HttpPreviewBuild } from "./isolatedPreview"
 import { ProjectRegistry, safeArchivePath, type SessionAuthority } from "./projectRegistry"
@@ -28,6 +34,7 @@ export function snapshotPreview(build: HttpPreviewBuild): PreviewSnapshot {
 }
 
 export type ControlledJob = Readonly<{
+  allocation?: RunnerAllocation
   generation: string
   origin: string
   revision: string
@@ -40,6 +47,7 @@ export type PreviewInput = Readonly<{ type: "pointer"; x: number; y: number; act
 export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[] }
 export type RunnerSample = { bytes: Uint8Array; observation: unknown }
 export interface ControlledExecution {
+  update?(update: PreviewUpdate): Promise<void>
   sample?(): Promise<RunnerSample>
   /** Trusted browser screenshot encoder; never project-supplied HTML/SVG/URLs. */
   capture(): Promise<Uint8Array>
@@ -52,11 +60,13 @@ export interface ControlledExecution {
 export class RunnerCleanupError extends Error {}
 export interface RunnerProvider {
   open(job: ControlledJob, signal: AbortSignal): Promise<ControlledExecution>
+  /** Trusted controller recovery only; must create a revoke tombstone and verify cleanup. */
+  revoke?(generation: string): Promise<void>
 }
 /** Compatibility name for the Phase 2C.1 broker seam. */
 export type ProjectRunner = RunnerProvider
 type Entry = {
-  projectId: string; authority: SessionAuthority; job?: ControlledJob
+  projectId: string; authority: SessionAuthority; job?: ControlledJob; compiler?: IncrementalPreviewCompiler; updating?: boolean; heldForUpdate?: boolean; restartRequired?: boolean; lastRoute?: string; artifactRef?: ArtifactReference; sourceHashes?: Map<string, string>
   generation: string; revision: string; expiresAt: number; sequence: number; abort: AbortController
   timer: ReturnType<typeof setTimeout>; retired: boolean; pending: boolean; busy: boolean
   execution?: ControlledExecution; closing?: Promise<void>
@@ -76,7 +86,7 @@ export class ControlledPreviewTransport {
   private closed = false
   private quarantined = false
   private readonly sweepTimer: ReturnType<typeof setInterval>
-  constructor(private readonly registry: ProjectRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now) {
+  constructor(private readonly registry: ProjectRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now, private readonly artifacts?: ArtifactStore) {
     this.sweepTimer = setInterval(() => { void this.sweep().catch(() => { this.quarantined = true }) }, 250)
     this.sweepTimer.unref()
   }
@@ -89,6 +99,8 @@ export class ControlledPreviewTransport {
   }
   private async retire(entry: Entry) {
     entry.retired = true; clearTimeout(entry.timer); entry.abort.abort()
+    if (entry.artifactRef) { this.artifacts?.retire(entry.artifactRef); entry.artifactRef = undefined }
+    if (entry.compiler && !entry.updating) { await entry.compiler.close(); entry.compiler = undefined }
     if (entry.execution && !entry.closing) {
       entry.closing = Promise.resolve().then(() => entry.execution!.close()).catch(() => {
         this.quarantined = true
@@ -100,7 +112,7 @@ export class ControlledPreviewTransport {
     if (!entry.pending) { entry.job = undefined; this.entries.delete(entry.generation) }
   }
   async sweep() {
-    const results = await Promise.allSettled([...this.entries.values()].filter(entry => !this.current(entry)).map(entry => this.retire(entry)))
+    const results = await Promise.allSettled([...this.entries.values()].filter(entry => this.closed || this.quarantined || entry.retired || !entry.updating && !entry.heldForUpdate && !this.current(entry) || entry.expiresAt <= this.now() || !this.authorized(entry.projectId, entry.authority)).map(entry => this.retire(entry)))
     if (results.some(result => result.status === "rejected")) throw new Error("Controlled runner cleanup failed; transport quarantined.")
   }
 
@@ -108,7 +120,7 @@ export class ControlledPreviewTransport {
     if (!this.authorized(projectId, authority)) throw new Error("Controlled preview is unauthorized.")
     if (!request || Object.keys(request).some(key => !["revision", "route"].includes(key)) || !routeAllowed(request.route)) throw new Error("Invalid controlled preview request. External networking is not an enabled project capability.")
     const { revision, route } = request
-    if (revision !== this.registry.revision(projectId)) throw new Error("Controlled preview source revision is stale.")
+    if (revision !== this.registry.revision(projectId) || this.registry.sessionBinding(projectId, authority.previewId) && revision !== this.registry.durable(projectId).head().revisionId) throw new Error("Controlled preview source revision is stale.")
     if (this.closed || this.quarantined) throw new Error("Controlled preview transport is closed or quarantined.")
     if (!this.runner) throw new Error(STRICT_PREVIEW_BLOCKER)
     await this.sweep()
@@ -121,16 +133,61 @@ export class ControlledPreviewTransport {
       timer: setTimeout(() => { void this.retire(entry).catch(() => { this.quarantined = true }) }, Math.max(0, expiresAt - this.now())) }
     entry.timer.unref(); this.entries.set(generation, entry)
     try {
-      const snapshot = snapshotPreview(await buildIsolatedHttpPreview(this.registry.get(projectId)!, this.applicationRoot))
+      entry.sourceHashes = new Map([...this.registry.durable(projectId).files()].map(([file, text]) => [file, contentHash(text)]))
+      entry.compiler = new IncrementalPreviewCompiler()
+      let snapshot = snapshotPreview(await buildIsolatedHttpPreview(this.registry.get(projectId)!, this.applicationRoot, entry.compiler))
+      snapshot = this.storedSnapshot(entry, snapshot)
       if (!this.current(entry)) throw new Error("Controlled preview became stale during compilation.")
       // Reserved .invalid name is resolved only inside the future runner. It is
       // not an address or bootstrap credential returned to an end-user browser.
-      entry.job = Object.freeze({ generation, revision: entry.revision, expiresAt, route, origin: "http://wcb-" + generation + ".preview.invalid", network: Object.freeze({ external: "deny" as const }), snapshot })
+      entry.job = Object.freeze({ generation, revision: entry.revision, expiresAt, route, origin: "http://wcb-" + generation + ".preview.invalid", network: Object.freeze({ external: "deny" as const }), snapshot, allocation: Object.freeze({ owner: Object.freeze(this.registry.sessionOwner(projectId, authority.previewId)), idempotencyKey: generation, startupDeadline: Math.min(expiresAt, this.now() + 15_000), executionDeadline: expiresAt, idleMs: 60_000, budget: LOCAL_RESOURCE_BUDGET }) })
       entry.execution = await this.runner.open(entry.job, entry.abort.signal)
       if (!this.current(entry)) throw new Error("Controlled preview became stale during startup.")
       entry.pending = false
       return { transport: "raster" as const, generation, revision: entry.revision, expiresAt }
     } catch (error) { if (error instanceof RunnerCleanupError) this.quarantined = true; entry.pending = false; await this.retire(entry); throw error }
+  }
+  private storedSnapshot(entry: Entry, snapshot: PreviewSnapshot) {
+    const grant = this.registry.sessionBinding(entry.projectId, entry.authority.previewId)?.grant
+    if (!this.artifacts || !grant) return snapshot
+    const ref: ArtifactReference = { workspaceId: grant.workspaceId, projectId: entry.projectId, revision: entry.revision, generation: entry.generation, digest: snapshot.digest }
+    this.artifacts.put(grant, ref, snapshot)
+    const stored = this.artifacts.get(grant, ref)
+    if (entry.artifactRef && JSON.stringify(entry.artifactRef) !== JSON.stringify(ref)) this.artifacts.retire(entry.artifactRef)
+    entry.artifactRef = ref
+    return stored
+  }
+  /** Hold only a live same-session generation across a canonical commit. Capture
+   * and input still reject the old revision. The bounded update either advances
+   * its digest/revision atomically or destroys the entire job. */
+  holdForSourceCommit(projectId: string, previewId: string, structural = false) {
+    for (const entry of this.entries.values()) if (entry.projectId === projectId && entry.authority.previewId === previewId && this.current(entry) && entry.execution?.update)  { entry.heldForUpdate = true; entry.restartRequired ||= structural }
+  }
+  async update(projectId: string, authority: SessionAuthority, generation: string, revision: string) {
+    if (!this.authorized(projectId, authority)) throw new Error("Controlled preview is unauthorized.")
+    const entry = this.entries.get(generation)
+    if (!entry || entry.projectId !== projectId || entry.authority.previewId !== authority.previewId || entry.retired || entry.pending || entry.busy || entry.updating || entry.expiresAt <= this.now() || this.closed || this.quarantined || !entry.execution?.update || !entry.compiler || !entry.job) throw new Error("Controlled update is unavailable; restart the generation.")
+    if (revision !== this.registry.revision(projectId) || this.registry.sessionBinding(projectId, authority.previewId) && revision !== this.registry.durable(projectId).head().revisionId) throw new Error("Controlled update revision is stale.")
+    if (entry.restartRequired) return { ...await this.start(projectId, authority, { revision, route: entry.lastRoute ?? entry.job.route }), updateKind: "generation-restart" }
+    entry.updating = true; entry.heldForUpdate = false; entry.busy = true
+    try {
+      const snapshot = snapshotPreview(await buildIsolatedHttpPreview(this.registry.get(projectId)!, this.applicationRoot, entry.compiler))
+      if (!this.authorized(projectId, authority) || revision !== this.registry.revision(projectId) || entry.retired || entry.expiresAt <= this.now()) throw new Error("Update became stale during compilation.")
+      if (entry.compiler.configurationChanged) {
+        entry.updating = false; entry.busy = false
+        return { ...await this.start(projectId, authority, { revision, route: entry.lastRoute ?? entry.job.route }), updateKind: "generation-restart" }
+      }
+      const sourceHashes = new Map([...this.registry.durable(projectId).files()].map(([file, text]) => [file, contentHash(text)]))
+      const affectedFiles = [...new Set([...(entry.sourceHashes?.keys() ?? []), ...sourceHashes.keys()])].filter(file => entry.sourceHashes?.get(file) !== sourceHashes.get(file))
+      const kind = classifyPreviewUpdate(entry.job.snapshot, snapshot)
+      await entry.execution.update({ expectedRevision: entry.revision, expectedDigest: entry.job.snapshot.digest, revision, snapshot, kind })
+      if (!this.authorized(projectId, authority) || revision !== this.registry.revision(projectId) || entry.retired || entry.expiresAt <= this.now()) throw new Error("Update became stale in runner.")
+      entry.revision = revision; entry.sourceHashes = sourceHashes
+      const stored = this.storedSnapshot(entry, snapshot)
+      entry.job = Object.freeze({ ...entry.job, revision, snapshot: stored })
+      return { transport: "raster" as const, generation, revision, expiresAt: entry.expiresAt, updateKind: kind, affectedFiles, compilerBuilds: entry.compiler.builds }
+    } catch (error) { await this.retire(entry); throw error }
+    finally { entry.updating = false; entry.busy = false; if (entry.retired && entry.compiler) { await entry.compiler.close(); entry.compiler = undefined } }
   }
   private async requireEntry(projectId: string, authority: SessionAuthority, generation: string) {
     // Wrong capabilities must not stop someone else's job.
@@ -153,6 +210,8 @@ export class ControlledPreviewTransport {
       // Fixed raster type, bounded dimensions and bytes. The provider owns encoding.
       if (bytes.length < 33 || bytes.length > 8 * 1024 * 1024 || bytes.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a" || bytes.toString("ascii", 12, 16) !== "IHDR" || bytes.readUInt32BE(16) < 1 || bytes.readUInt32BE(20) < 1 || bytes.readUInt32BE(16) > 4096 || bytes.readUInt32BE(20) > 4096) throw new Error("Invalid controlled preview raster.")
       const observation = sample.observation === undefined ? undefined : sanitizeObservation(sample.observation)
+      if (observation) entry.lastRoute = observation.route
+      if (observation) observation.logs = observation.logs.map(line => redactSecrets(line, [authority.capability]))
       if (observation && (observation.viewport.width !== bytes.readUInt32BE(16) || observation.viewport.height !== bytes.readUInt32BE(20))) throw new Error("Raster geometry mismatch.")
       if (observation?.selection) {
         const store = this.registry.store(projectId, authority)!

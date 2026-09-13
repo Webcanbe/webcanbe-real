@@ -1,9 +1,11 @@
+import { validateStylesheetConfiguration } from "./configuration"
+import { IncrementalPreviewCompiler } from "./incrementalPreview"
 import fs from "node:fs"
 import path from "node:path"
 import { createRequire } from "node:module"
 import { context, type BuildOptions, type Loader } from "esbuild"
 import ts from "typescript"
-import { clientPackages, inspectRuntime, PROFILE, RuntimeCompatibilityError } from "./runtimeCompatibility"
+import { clientPackages, inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
 import { instrumentReactSource } from "../adapters/react/reactSourceAdapter"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
@@ -48,22 +50,24 @@ async function boundedBuild(options: BuildOptions) {
 }
 
 /** No uploaded module/config is evaluated by Node. No artifacts are written to disk. */
-async function compilePreview(project: ProjectRecord, applicationRoot: string, transport: "blob" | "http") {
+async function compilePreview(project: ProjectRecord, applicationRoot: string, transport: "blob" | "http", incremental?: IncrementalPreviewCompiler) {
   const runtime = inspectRuntime(project, applicationRoot)
   if (!runtime.supported) throw new RuntimeCompatibilityError(runtime.issues)
-  const profileRoot = path.join(applicationRoot, "runtime-profiles", PROFILE)
+  const profileRoot = path.join(applicationRoot, "runtime-profiles", runtime.profile)
   const require = createRequire(path.join(profileRoot, "package.json"))
   const vendorRoot = fs.realpathSync(path.join(profileRoot, "node_modules"))
   if (!isWithin(vendorRoot, fs.realpathSync(require.resolve("tailwindcss")))) throw new Error("Dedicated Tailwind compiler is unavailable; host fallback is forbidden.")
   const { compile } = require("tailwindcss") as typeof import("tailwindcss")
   const root = fs.realpathSync(project.root)
   const outputRoot = path.join(root, ".webcanbe-virtual-output")
-  let bytes = 0, tailwind: string | undefined
-  const bundle = await boundedBuild({
+  let bytes = 0
+  const tailwindOutputs = new Map<string, string>()
+  const options: BuildOptions = {
     entryPoints: [runtime.entry!], absWorkingDir: root, bundle: true, write: false, outdir: outputRoot,
     entryNames: "_wcb/app", assetNames: "_wcb/assets/[name]-[hash]", publicPath: "/", format: "iife", platform: "browser", jsx: "automatic", minify: true,
-    tsconfigRaw: {}, define: { "process.env.NODE_ENV": '"production"', "import.meta.env": "{}" }, logLevel: "silent",
+    metafile: true, tsconfigRaw: { compilerOptions: runtime.compilerOptions }, define: { "process.env.NODE_ENV": '"production"', ...Object.fromEntries(Object.entries(runtime.environment).map(([key, value]) => ["import.meta.env." + key, JSON.stringify(value)])) }, logLevel: "silent",
     plugins: [{ name: "confined-source", setup(builder) {
+      builder.onStart(() => { bytes = 0; tailwindOutputs.clear() })
       builder.onResolve({ filter: /.*/ }, async args => {
         if (args.pluginData?.profileResolution) return
         const vendorImporter = isWithin(vendorRoot, args.importer)
@@ -72,7 +76,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         if (args.kind === "entry-point") candidate = path.resolve(root, args.path)
         else if (alias && !vendorImporter) candidate = path.resolve(root, runtime.aliases[alias], args.path.slice(alias.length + 1))
         else if (args.path.startsWith("./") || args.path.startsWith("../")) candidate = path.resolve(path.dirname(args.importer), args.path)
-        else if (transport === "http" && args.kind === "url-token" && args.path.startsWith("/") && !args.path.startsWith("//")) {
+        else if (transport === "http" && ["url-token", "import-statement"].includes(args.kind) && args.path.startsWith("/") && !args.path.startsWith("//")) {
           const relative = args.path.slice(1)
           if (!safeArchivePath(relative)) throw new Error("Invalid public asset path.")
           candidate = path.resolve(root, "public", relative)
@@ -98,12 +102,17 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         if (assetTypes[ext]) return { contents: content, loader: transport === "http" ? "file" : "dataurl" }
         if (!["tsx", "jsx", "ts", "js", "css", "json"].includes(ext)) throw new Error("Unsupported preview file type.")
         let code = content.toString("utf8")
+        const cached = incremental?.transforms.get(args.path)
+        if (ext !== "css" && cached?.source === code) return cached.result
+        const originalCode = code
         if (ext === "css") {
-          if (/@(?:plugin|config|source|tailwind|theme|utility|variant|custom-variant|apply|reference|screen)\b/i.test(code)) throw new Error("Tailwind plugins, configuration and filesystem scanning are disabled in previews.")
+          const cssConfig = validateStylesheetConfiguration(code, runtime.profile !== "react19-vite6")
           if (/@import\s+["']tailwindcss["']\s*;/.test(code)) {
             if (!runtime.dependencies.some(item => item.name === "tailwindcss")) throw new Error("Tailwind CSS import is not declared.")
+            const themeKey = cssConfig.theme ? code : "default"
+            let tailwind = tailwindOutputs.get(themeKey)
             if (!tailwind) {
-              const compiler = await compile('@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
+              const compiler = await compile(cssConfig.theme ? code : '@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
               const sources = fs.readdirSync(project.sourceRoot, { recursive: true }).filter((file): file is string => typeof file === "string" && /\.(tsx?|jsx?)$/.test(file))
               const candidates = sources.flatMap(file => {
                 const absolute = fs.realpathSync(path.join(project.sourceRoot, file))
@@ -111,17 +120,26 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
                 return fs.readFileSync(absolute, "utf8").match(/[a-zA-Z0-9_:/.[\]#%()-]+/g) ?? []
               })
               tailwind = compiler.build([...new Set(candidates)])
+              tailwindOutputs.set(themeKey, tailwind)
             }
-            code = code.replace(/@import\s+["']tailwindcss["']\s*;/g, tailwind)
+            code = cssConfig.theme ? tailwind : code.replace(/@import\s+["']tailwindcss["']\s*;/g, tailwind)
           }
         }
         if (!vendor && /^(tsx|jsx|ts|js)$/.test(ext) && transport === "blob" && historyImport(code, args.path)) throw new Error("Browser-history router requires an isolated HTTP preview runner. HashRouter is supported.")
         if (!vendor && /^(tsx|jsx)$/.test(ext)) code = instrumentReactSource(path.relative(root, args.path).split(path.sep).join("/"), code)
-        return { contents: code, loader: args.path.endsWith(".module.css") ? "local-css" : ext as Loader, resolveDir: path.dirname(args.path) }
+        const result = { contents: code, loader: args.path.endsWith(".module.css") ? "local-css" as const : ext as Loader, resolveDir: path.dirname(args.path) }
+        if (ext !== "css" && incremental) {
+          if (incremental.transforms.size >= 2000) incremental.transforms.clear()
+          incremental.transforms.set(args.path, { source: originalCode, result })
+        }
+        return result
       })
     } }],
-  })
-  const bridge = await boundedBuild({ entryPoints: [path.join(applicationRoot, "src/webcanbe-engine/runtime/previewBridge.ts")], bundle: true, write: false, outfile: path.join(outputRoot, "_wcb/bridge.js"), format: "iife", minify: true, logLevel: "silent", define: { __WCB_HTTP_PREVIEW__: String(transport === "http") } })
+  }
+  const fingerprint = JSON.stringify({ root, transport, runtime })
+  const bundle = incremental ? await incremental.build("app", fingerprint, options) : await boundedBuild(options)
+  const bridgeOptions: BuildOptions = { entryPoints: [path.join(applicationRoot, "src/webcanbe-engine/runtime/previewBridge.ts")], bundle: true, write: false, outfile: path.join(outputRoot, "_wcb/bridge.js"), format: "iife", minify: true, logLevel: "silent", define: { __WCB_HTTP_PREVIEW__: String(transport === "http") } }
+  const bridge = incremental ? await incremental.build("bridge", transport, bridgeOptions) : await boundedBuild(bridgeOptions)
   const files = new Map<string, PreviewArtifact>()
   for (const file of [...bridge.outputFiles!, ...bundle.outputFiles!]) {
     const relative = path.relative(outputRoot, file.path).split(path.sep).join("/")
@@ -142,10 +160,11 @@ export async function buildIsolatedPreview(project: ProjectRecord, applicationRo
   return '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; img-src data:; font-src data:; connect-src \'none\'; base-uri \'none\'; form-action \'none\';"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + css.replace(/<\/style/gi, "<\\/style") + '</style></head><body><div id="root"></div><script>' + js.replace(/<\/script/gi, "<\\/script") + '</script></body></html>'
 }
 
-export async function buildIsolatedHttpPreview(project: ProjectRecord, applicationRoot: string): Promise<HttpPreviewBuild> {
-  const { files } = await compilePreview(project, applicationRoot, "http")
+export async function buildIsolatedHttpPreview(project: ProjectRecord, applicationRoot: string, incremental?: IncrementalPreviewCompiler): Promise<HttpPreviewBuild> {
+  const { files } = await compilePreview(project, applicationRoot, "http", incremental)
   const publicRoot = path.join(project.root, "public")
   let bytes = [...files.values()].reduce((size, file) => size + file.body.length, 0)
+  const base = inspectRuntime(project, applicationRoot).base
   if (fs.existsSync(publicRoot)) {
     if (fs.lstatSync(publicRoot).isSymbolicLink()) throw new Error("Public directory links are forbidden.")
     for (const entry of fs.readdirSync(publicRoot, { recursive: true, withFileTypes: true })) {
@@ -162,6 +181,7 @@ export async function buildIsolatedHttpPreview(project: ProjectRecord, applicati
       bytes += body.length
       if (body.length > 2 * 1024 * 1024 || bytes > 32 * 1024 * 1024 || files.size >= 2000) throw new Error("HTTP artifact limit exceeded.")
       files.set("/" + relative, { body, contentType })
+      if (base !== "/" && base !== "./") files.set(base + relative, { body, contentType })
     }
   }
   if (bytes > 32 * 1024 * 1024) throw new Error("HTTP artifact limit exceeded.")

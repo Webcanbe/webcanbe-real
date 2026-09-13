@@ -5,11 +5,15 @@ import yauzl from "yauzl"
 import { htmlEntry } from "./runtimeCompatibility"
 import { crc32 } from "node:zlib"
 import { DurableSource } from "../mutations/durableSource"
+import type { ProjectGrant } from "./hostedAuthority"
+import type { ProjectPersistence, ProjectStoreFactory } from "./storageContracts"
+import type { RunnerOwner } from "./runnerScheduler"
 import { MutationHistory, type SourceStore } from "../mutations/sourceMutations"
 
 export const ZIP_LIMITS = Object.freeze({ archiveBytes: 25 * 1024 * 1024, totalBytes: 40 * 1024 * 1024, fileBytes: 2 * 1024 * 1024, entries: 2_000, ratio: 100 })
 const sourceExtension = /\.(tsx|jsx|ts|js|css|json)$/
 export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint"
+export type SessionBinding = { grant: ProjectGrant; check: (operation: SessionOperation) => boolean }
 export type SessionAuthority = { previewId: string; capability: string; operation: SessionOperation }
 const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint"]
 
@@ -66,7 +70,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
         if (directory) { zip.readEntry(); return }
-        if (!/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
+        if (!/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
         zip.openReadStream(entry, async (streamError, stream) => {
           if (streamError || !stream) return fail(streamError ?? new Error("Invalid ZIP stream."))
           try {
@@ -135,12 +139,12 @@ export function detectProject(root: string, dependencyRoot: string): FrameworkDe
 
 export class ProjectRegistry {
   private readonly projects = new Map<string, ProjectRecord>()
-  private readonly sessions = new Map<string, { projectId: string; tokenHash: string; expiresAt: number; root: string; operations: SessionOperation[] }>()
-  private readonly durableStores = new Map<string, DurableSource>()
+  private readonly sessions = new Map<string, { projectId: string; tokenHash: string; expiresAt: number; root: string; operations: SessionOperation[]; binding?: SessionBinding }>()
+  private readonly durableStores = new Map<string, ProjectPersistence>()
   private readonly queues = new Map<string, Promise<void>>()
   readonly importedRoot: string
 
-  constructor(private readonly applicationRoot: string, private readonly now = Date.now) {
+  constructor(private readonly applicationRoot: string, private readonly now = Date.now, private readonly storeFactory?: ProjectStoreFactory) {
     this.importedRoot = path.join(applicationRoot, ".webcanbe", "projects")
     fs.mkdirSync(this.importedRoot, { recursive: true })
     const fixtureRoot = fs.realpathSync(path.join(applicationRoot, "fixtures", "compatible-react-vite"))
@@ -162,7 +166,7 @@ export class ProjectRegistry {
   durable(projectId: string) {
     const project = this.projects.get(projectId)
     if (!project) throw new Error("Project is unavailable.")
-    if (!this.durableStores.has(projectId)) this.durableStores.set(projectId, new DurableSource(project, path.join(this.applicationRoot, ".webcanbe", "history")))
+    if (!this.durableStores.has(projectId)) this.durableStores.set(projectId, this.storeFactory ? this.storeFactory(project) : new DurableSource(project, path.join(this.applicationRoot, ".webcanbe", "history")))
     return this.durableStores.get(projectId)!
   }
 
@@ -201,31 +205,46 @@ export class ProjectRegistry {
     }
   }
 
-  createSession(projectId: string, scope = operations): PreviewSession | undefined {
+  createSession(projectId: string, scope = operations, binding?: SessionBinding): PreviewSession | undefined {
     const project = this.projects.get(projectId)
-    if (!project || !isWithin(project.root, fs.realpathSync(project.sourceRoot))) return undefined
+    if (!project || binding && !binding.check("inspect") || !isWithin(project.root, fs.realpathSync(project.sourceRoot))) return undefined
     this.durable(projectId)
     const previewId = randomUUID()
     const capability = randomBytes(32).toString("base64url")
     for (const [id, entry] of this.sessions) if (entry.expiresAt <= this.now()) this.sessions.delete(id)
     if (this.sessions.size >= 100) throw new Error("Too many preview sessions.")
-    const expiresAt = this.now() + 10 * 60_000
-    this.sessions.set(previewId, { projectId, tokenHash: sha(capability), expiresAt, root: fs.realpathSync(this.projects.get(projectId)!.sourceRoot), operations: [...scope] })
+    const expiresAt = Math.min(this.now() + 10 * 60_000, binding?.grant.expiresAt ?? Infinity)
+    this.sessions.set(previewId, { projectId, tokenHash: sha(capability), expiresAt, root: fs.realpathSync(this.projects.get(projectId)!.sourceRoot), operations: [...scope], binding })
     return { projectId, previewId, capability, expiresAt: new Date(expiresAt).toISOString() }
   }
 
   authorize(projectId: string, previewId: string, capability: string, operation: SessionOperation = "inspect") {
     const session = this.sessions.get(previewId)
-    if (!session || session.projectId !== projectId || session.expiresAt <= this.now() || !session.operations.includes(operation)) return false
+    if (!session || session.projectId !== projectId || session.expiresAt <= this.now() || !session.operations.includes(operation) || session.binding && !session.binding.check(operation)) return false
     const supplied = Buffer.from(sha(capability))
     const expected = Buffer.from(session.tokenHash)
     return supplied.length === expected.length && timingSafeEqual(supplied, expected)
   }
 
+  sessionBinding(projectId: string, previewId: string) { const session = this.sessions.get(previewId); return session?.projectId === projectId ? session.binding : undefined }
+  sessionOwner(projectId: string, previewId: string): RunnerOwner {
+    const binding = this.sessionBinding(projectId, previewId)
+    return { userId: binding?.grant.userId ?? "local-operator", workspaceId: binding?.grant.workspaceId ?? "local-workspace", projectId, sessionId: previewId }
+  }
+  runnerAuthorized(owner: RunnerOwner) {
+    const current = this.sessionOwner(owner.projectId, owner.sessionId)
+    return this.sessionActive(owner.projectId, owner.sessionId) && current.userId === owner.userId && current.workspaceId === owner.workspaceId
+  }
+  async discardImport(projectId: string) {
+    const project = this.projects.get(projectId)
+    if (!project?.imported) throw new Error("Only a newly imported project can be discarded.")
+    this.projects.delete(projectId)
+    await fs.promises.rm(path.join(this.importedRoot, projectId), { recursive: true, force: true })
+  }
   sessionExpiry(projectId: string, previewId: string) { const session = this.sessions.get(previewId); return session?.projectId === projectId ? session.expiresAt : undefined }
   sessionActive(projectId: string, previewId: string) {
     const session = this.sessions.get(previewId), project = this.projects.get(projectId)
-    try { return Boolean(project && session && session.projectId === projectId && session.expiresAt > this.now() && session.operations.includes("preview") && session.root === fs.realpathSync(project.sourceRoot) && isWithin(project.root, session.root)) } catch { return false }
+    try { return Boolean(project && session && session.projectId === projectId && session.expiresAt > this.now() && session.operations.includes("preview") && (!session.binding || session.binding.check("preview")) && session.root === fs.realpathSync(project.sourceRoot) && isWithin(project.root, session.root)) } catch { return false }
   }
   revokeSession(projectId: string, previewId: string) { if (this.sessions.get(previewId)?.projectId === projectId) this.sessions.delete(previewId) }
 

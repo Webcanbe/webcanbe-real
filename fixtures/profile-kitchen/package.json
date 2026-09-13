@@ -1,0 +1,25 @@
+{
+  "name": "profile-kitchen",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.3",
+    "zustand": "5.0.8",
+    "nanoid": "5.1.16",
+    "clsx": "2.1.1"
+  },
+  "devDependencies": {
+    "vite": "8.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  }
+}

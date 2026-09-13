@@ -1,3 +1,4 @@
+import { validateStylesheetConfiguration } from "./configuration"
 import fs from "node:fs"
 import path from "node:path"
 import ts from "typescript"
@@ -7,10 +8,23 @@ import { parse as parseHtml } from "parse5"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames"])
-export type RuntimeIssue = { code: string; message: string; requiredCapability: string }
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1"] as const
+export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid"])
+export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported"
+export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
+function selectProfile(project: ProjectRecord, applicationRoot: string) {
+  try {
+    const manifest = json(project.root, "package.json"), declared = { ...manifest.devDependencies, ...manifest.dependencies }
+    const lock = fs.existsSync(path.join(project.root, "package-lock.json")) ? json(project.root, "package-lock.json") : undefined
+    return RUNTIME_PROFILES.find(id => {
+      const profile = JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8"))
+      return Object.entries(declared).every(([name, range]) => typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]))
+    }) ?? PROFILE
+  } catch { return PROFILE }
+}
+export type RuntimeIssue = { file?: string; classification?: ConfigurationClass; code: string; message: string; requiredCapability: string }
 export type RuntimeReport = {
-  profile: string; supported: boolean; entry?: string; aliases: Record<string, string>
+  compilerOptions: Record<string, any>; schema: 2; configuration: ConfigurationSupport[]; base: string; environment: Record<string, string | boolean>; profile: string; supported: boolean; entry?: string; aliases: Record<string, string>
   dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>
   issues: RuntimeIssue[]; notes: string[]
 }
@@ -55,10 +69,10 @@ export function htmlEntry(root: string) {
 }
 
 /** Interpret only a fixed AST grammar; never import/eval the Vite module. */
-function staticViteConfig(root: string, declared: Record<string, unknown>): Record<string, string> {
+function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string } {
   const files = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].filter(file => fs.existsSync(path.join(root, file)))
   if (files.length > 1) throw new Error("Multiple Vite configurations are ambiguous.")
-  if (!files.length) return {}
+  if (!files.length) return { aliases: {}, base: "/" }
   const source = ts.createSourceFile(files[0], fs.readFileSync(confinedFile(root, files[0]), "utf8"), ts.ScriptTarget.Latest, true)
   if ((source as ts.SourceFile & { parseDiagnostics: unknown[] }).parseDiagnostics.length) throw new Error("Invalid Vite configuration syntax.")
   const bindings = new Map<string, string>()
@@ -107,7 +121,7 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): Reco
   if (exports.length !== 1 || source.statements.some(statement => !ts.isImportDeclaration(statement) && !ts.isExportAssignment(statement))) throw new Error("Vite configuration has executable statements; an isolated configuration runner is required.")
   const config = value(exports[0].expression)
   if (!object(config) || Object.keys(config).some(key => !["plugins", "resolve", "base"].includes(key))) throw new Error("Unsupported Vite configuration field; an isolated configuration runner is required.")
-  if (config.base !== undefined && !["/", "./"].includes(config.base)) throw new Error("Custom Vite base requires an HTTP preview runner.")
+  if (config.base !== undefined && (typeof config.base !== "string" || !["/", "./"].includes(config.base) && (!/^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\/$/.test(config.base)))) throw new Error("Only bounded local Vite base paths are supported.")
   if (config.plugins !== undefined && (!Array.isArray(config.plugins) || config.plugins.some((plugin: any) => !pluginValues.has(plugin)))) throw new Error("Unsupported Vite build plugin.")
   const aliases: Record<string, string> = Object.create(null)
   if (config.resolve !== undefined) {
@@ -119,14 +133,15 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): Reco
       aliases[key] = path.relative(root, confinedFile(root, path.relative(root, replacement))).split(path.sep).join("/")
     }
   }
-  return aliases
+  return { aliases, base: config.base ?? "/" }
 }
 
 export function inspectRuntime(project: ProjectRecord, applicationRoot: string): RuntimeReport {
-  const report: RuntimeReport = { profile: PROFILE, supported: false, aliases: {}, dependencies: [], issues: [], notes: [] }
+  const selectedProfile = selectProfile(project, applicationRoot)
+  const report: RuntimeReport = { compilerOptions: {}, schema: 2, configuration: [], base: "/", environment: {}, profile: selectedProfile, supported: false, aliases: {}, dependencies: [], issues: [], notes: [] }
   const issue = (code: string, message: string, requiredCapability = "A separately approved dependency/runtime profile or isolated build runner") => report.issues.push({ code, message, requiredCapability })
   const root = project.root
-  const profileRoot = path.join(applicationRoot, "runtime-profiles", PROFILE)
+  const profileRoot = path.join(applicationRoot, "runtime-profiles", selectedProfile)
   try {
     if (fs.realpathSync(root) !== root) throw new Error("Registered project root changed.")
     const manifest = json(root, "package.json"), profile = JSON.parse(fs.readFileSync(path.join(profileRoot, "package.json"), "utf8"))
@@ -174,7 +189,10 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
     report.notes.push(lock ? "Client versions checked against the npm lockfile." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
     if (object(manifest.scripts) && Object.keys(manifest.scripts).length) report.notes.push("Package scripts, including install/build hooks, are inspected only and never run during intake or preview.")
     try { report.entry = htmlEntry(root) ?? project.detection.entry; if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
-    try { report.aliases = staticViteConfig(root, declared) } catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner") }
+    const viteFile = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].find(file => fs.existsSync(path.join(root, file)))
+    try { const config = staticViteConfig(root, declared); report.aliases = config.aliases; report.base = config.base; if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
+    catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner"); report.configuration.push({ file: viteFile ?? "vite.config", classification: "requires-isolated-execution", detail: (error as Error).message }) }
+    report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base }
     const configs = new Set<string>()
     const readTsconfig = (file: string) => {
       if (configs.has(file)) return
@@ -182,22 +200,65 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
       configs.add(file)
       const config = json(root, file, true), options = config.compilerOptions ?? {}
       if (config.extends) throw new Error("Extended TypeScript configurations require explicit isolated resolution.")
-      if (options.jsxImportSource && options.jsxImportSource !== "react" || options.experimentalDecorators || options.useDefineForClassFields === false || options.plugins || options.jsxFactory || options.jsxFragmentFactory || options.jsx && !["react-jsx", "react-jsxdev", "preserve"].includes(options.jsx)) throw new Error("Unsupported TypeScript runtime transformation setting.")
+      if (options.jsxImportSource && options.jsxImportSource !== "react" || options.experimentalDecorators || options.emitDecoratorMetadata || options.useDefineForClassFields === false || options.plugins || options.jsxFactory || options.jsxFragmentFactory || options.jsx && !["react-jsx", "react-jsxdev", "preserve"].includes(options.jsx)) throw new Error("Unsupported TypeScript runtime transformation setting.")
+      const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && /^src(?:[/*]|$)/.test(item))
+      if (appliesToSource) for (const name of ["useDefineForClassFields", "verbatimModuleSyntax", "importsNotUsedAsValues", "preserveValueImports"]) {
+        if (options[name] !== undefined) {
+          if (report.compilerOptions[name] !== undefined && report.compilerOptions[name] !== options[name]) throw new Error("Conflicting TypeScript client transformation options.")
+          report.compilerOptions[name] = options[name]
+        }
+      }
       if (options.paths) {
         if (!object(options.paths) || options.baseUrl && options.baseUrl !== ".") throw new Error("Only project-root TypeScript aliases are supported.")
         for (const [key, replacements] of Object.entries(options.paths)) {
           if (!key.endsWith("/*") || !Array.isArray(replacements) || replacements.length !== 1 || typeof replacements[0] !== "string" || !replacements[0].endsWith("/*")) throw new Error("Only single-target TypeScript path aliases are supported.")
-          const target = replacements[0].slice(0, -2).replace(/^\.\//, ""), alias = key.slice(0, -2)
+          const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), replacements[0].slice(0, -2).replace(/^\.\//, ""))), alias = key.slice(0, -2)
           confinedFile(root, target)
           if (report.aliases[alias] !== target) throw new Error(`TypeScript alias ${alias} must match an explicit static Vite alias.`)
         }
       }
       if (Array.isArray(config.references)) for (const reference of config.references) { if (typeof reference.path !== "string") throw new Error("Invalid tsconfig reference."); readTsconfig(path.posix.normalize(path.posix.join(path.posix.dirname(file), reference.path))) }
     }
-    try { if (fs.existsSync(path.join(root, "tsconfig.json"))) readTsconfig("tsconfig.json") } catch (error) { issue("tsconfig", (error as Error).message) }
-    if (["tailwind.config.ts", "tailwind.config.js", "tailwind.config.cjs", "tailwind.config.mjs", "postcss.config.js", "postcss.config.cjs", "postcss.config.mjs"].some(file => fs.existsSync(path.join(root, file)))) issue("css-config", "Custom Tailwind/PostCSS configuration requires an isolated plugin runner; only Tailwind 4 defaults are supported.")
-    report.notes.push("Supported configuration is interpreted as static data, never executed. HashRouter is supported; browser-history/server routing requires a separate HTTP preview runner.")
+    try { for (const file of ["tsconfig.json", "jsconfig.json"]) if (fs.existsSync(path.join(root, file))) readTsconfig(file)
+      for (const file of configs) report.configuration.push({ file, classification: "statically-supported", detail: "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate." }) } catch (error) { issue("tsconfig", (error as Error).message) }
+    const cssConfigs = fs.readdirSync(root).filter(file => /^(?:tailwind|postcss)\.config\.(?:[cm]?[jt]s|json)$/.test(file) || /^\.postcssrc(?:\.|$)/.test(file))
+    if (manifest.postcss) cssConfigs.push("package.json#postcss")
+    for (const file of cssConfigs) report.issues.push({ file, code: "css-config", classification: "requires-isolated-execution", message: `${file}: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.`, requiredCapability: "An isolated plugin/configuration profile" })
+    for (const entry of fs.readdirSync(project.sourceRoot, { recursive: true })) {
+      if (typeof entry !== "string" || !entry.endsWith(".css")) continue
+      const file = "src/" + entry.split(path.sep).join("/")
+      try {
+        const result = validateStylesheetConfiguration(fs.readFileSync(confinedFile(root, file), "utf8"), selectedProfile !== PROFILE)
+        if (result.theme) report.configuration.push({ file, classification: "safely-translated", detail: "Literal CSS @theme custom properties through the pinned Tailwind compiler." })
+      } catch (error) { report.issues.push({ file, code: "css-directive", classification: "unsupported", message: file + ": " + (error as Error).message, requiredCapability: "A supported static theme or isolated configuration profile" }) }
+    }
+    // Environment references are statically classified; an unknown variable is
+    // never silently replaced with undefined or a platform environment value.
+    for (const entry of fs.readdirSync(project.sourceRoot, { recursive: true })) {
+      if (typeof entry !== "string" || !/\.[jt]sx?$/.test(entry)) continue
+      const file = "src/" + entry.split(path.sep).join("/"), source = ts.createSourceFile(file, fs.readFileSync(confinedFile(root, file), "utf8"), ts.ScriptTarget.Latest, true)
+      const visit = (node: ts.Node) => {
+        if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.MetaProperty && node.name.text === "env") {
+          const parent = node.parent
+          if (!ts.isPropertyAccessExpression(parent) || parent.expression !== node || !Object.prototype.hasOwnProperty.call(report.environment, parent.name.text)) {
+            report.issues.push({ code: "environment-reference", file, classification: "unsupported", message: `${file}: environment references require an explicitly granted static public value; platform env is never exposed.`, requiredCapability: "Explicit project public environment configuration" })
+          }
+        }
+        if (ts.isElementAccessExpression(node) && node.expression.kind === ts.SyntaxKind.MetaProperty) report.issues.push({ code: "dynamic-environment", file, classification: "unsupported", message: `${file}: computed import.meta access is unsupported.`, requiredCapability: "Statically understood environment references" })
+        if (ts.isPropertyAccessExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "process" && node.name.text === "env") {
+          if (!ts.isPropertyAccessExpression(node.parent) || node.parent.name.text !== "NODE_ENV") report.issues.push({ code: "environment-reference", file, classification: "unsupported", message: `${file}: only the fixed production process.env.NODE_ENV compatibility constant is supported.`, requiredCapability: "Explicit project public environment configuration" })
+        }
+        ts.forEachChild(node, visit)
+      }
+      visit(source)
+    }
+    report.notes.push("Versioned controlled browser compilation, not an uploaded Vite server. React module changes use incremental rebuild + document reload, not React Fast Refresh. BrowserRouter requires a controlled provider.")
   } catch (error) { issue("runtime-inspection", (error as Error).message) }
+  for (const item of report.issues) {
+    item.file ??= item.code === "tsconfig" ? "tsconfig.json / jsconfig.json" : item.code === "css-config" ? "Tailwind / PostCSS configuration" : item.code === "executable-config" ? "vite.config" : "package.json / package-lock.json"
+    item.classification ??= ["executable-config", "css-config"].includes(item.code) ? "requires-isolated-execution" : "unsupported"
+    item.message = item.message.split(project.root).join("<project>").split(applicationRoot).join("<platform>")
+  }
   report.supported = report.issues.length === 0
   return report
 }

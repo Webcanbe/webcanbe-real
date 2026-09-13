@@ -12,7 +12,7 @@ import "./compatibleWorkspace.css"
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
 type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
-type ApiResponse = SourceResponse & { breakpoints?: Breakpoint[]; styleDiagnostics?: string[]; transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
+type ApiResponse = SourceResponse & { updateKind?: string; breakpoints?: Breakpoint[]; styleDiagnostics?: string[]; transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
@@ -121,12 +121,14 @@ export default function CompatibleWorkspace() {
     return () => { cancelled = true; ++connectionEpoch.current; window.removeEventListener("pagehide", pagehide); if (connected) stop(connected) }
   }, [projectId, accessKey, connectionAttempt])
 
-  async function refreshPreview() {
+  async function refreshPreview(incremental = false) {
     const epoch = connectionEpoch.current
     selectionSource.current = "runtime"
     setPreviewState("starting"); activeGeneration.current = ""; inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
-    const response = await request("preview", { route: routePath.current })
+    let response = await request("preview", incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current })
+    if (!response.ok && incremental && epoch === connectionEpoch.current) response = await request("preview", { route: routePath.current })
+    if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
     if (epoch !== connectionEpoch.current) return
     revision.current = response.data.revision ?? revision.current
     if (response.ok && response.data.transport === "raster" && response.data.viewerUrl && response.data.generation) {
@@ -248,13 +250,14 @@ export default function CompatibleWorkspace() {
   useEffect(() => { configurePreview() }, [selectMode, preview])
 
   async function sourceAccepted(data: SourceResponse) {
+    activeGeneration.current = ""
     revision.current = data.revision ?? revision.current
     setDiff(data.diff ?? "")
     inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
     setSourceEpoch(value => value + 1)
     await refreshCompatibility()
-    await refreshPreview()
+    await refreshPreview(true)
   }
 
   async function mutate(edit: ({ type: "reorder"; value: string } | { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) & { breakpoint?: string; scope?: string }) {

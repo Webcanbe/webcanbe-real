@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@theme { --color-brand: #e7f5ed; --breakpoint-wide: 70rem; }
+body { margin:0; font-family:system-ui; color:#173e2b; }
+h1 { font-size:36px; } button { background:#174b32; color:white; padding:12px 24px; margin:16px 0; border-radius:8px; }
+nav { display:flex; gap:24px; margin:24px 0; }

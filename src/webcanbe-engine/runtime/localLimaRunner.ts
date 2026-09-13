@@ -7,6 +7,15 @@ import type { ControlledExecution, ControlledJob, RunnerProvider, PreviewInput, 
  * Linux systemd/bubblewrap enforce isolation; Playwright routes are artifact delivery only. */
 export class LocalLimaRunnerProvider implements RunnerProvider {
   constructor(private readonly root: string) {}
+  async revoke(generation: string) {
+    if (!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(generation)) throw new RunnerCleanupError("Invalid cleanup identity.")
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(join(this.root, ".webcanbe/runner/tools/bin/limactl"), ["shell", "--workdir=/", "wcb", "sudo", "-n", "/opt/wcb-runtime/stop.sh", generation], { env: { PATH: process.env.PATH, HOME: process.env.HOME, LIMA_HOME: join(this.root, ".webcanbe/runner/lima") }, stdio: "ignore" })
+      const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new RunnerCleanupError("Runner revoke deadline exceeded.")) }, 8000)
+      child.on("error", () => { clearTimeout(timer); reject(new RunnerCleanupError("Runner revoke failed.")) })
+      child.on("exit", code => { clearTimeout(timer); code === 0 ? resolve() : reject(new RunnerCleanupError("Runner cleanup unverified.")) })
+    })
+  }
   async open(job: ControlledJob, signal: AbortSignal): Promise<ControlledExecution> {
     if (signal.aborted || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(job.generation)) throw new Error("Runner startup rejected.")
     const executable = join(this.root, ".webcanbe/runner/tools/bin/limactl")
@@ -64,7 +73,7 @@ export class LocalLimaRunnerProvider implements RunnerProvider {
         if (typeof result?.png !== "string" || result.png.length > 12 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(result.png)) throw new Error("Invalid runner raster.")
         return { bytes: Buffer.from(result.png, "base64"), observation: result.observation }
       }
-      return { sample, capture: async () => (await sample()).bytes, input: async (input: PreviewInput) => { await rpc("input", input) }, close }
+      return { update: async update => { await rpc("update", update) }, sample, capture: async () => (await sample()).bytes, input: async (input: PreviewInput) => { await rpc("input", input) }, close }
     } catch (error) { try { await close() } catch { throw new RunnerCleanupError("Runner startup cleanup failed; restart only after verifying VM cleanup.") } throw error }
   }
 }

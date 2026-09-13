@@ -100,7 +100,7 @@ async function verify() {
     await fillCode(good + '\nexport const broken = <'); await page.getByText('Syntax/validation error — draft retained; preview remains at the last accepted revision.', { exact: false }).waitFor();
     assert.equal(source('src/App.jsx'), good); assert.equal((await api('history')).revision, goodRevision); assert.equal(latest.generation, goodGeneration);
     const failed = await save(good + '\nexport const broken = <', false, false); assert.equal(failed.transaction.status, 'rejected'); assert.equal(source('src/App.jsx'), good); assert((await page.getByRole('textbox', { name: 'Source code editor' }).innerText()).includes('export const broken'));
-    app = good.replace('Code meets the canvas.', 'Recovered code draft.'); await save(app); await observed((frame, value) => frame.generation !== goodGeneration && value.h === 'Recovered code draft.');
+    app = good.replace('Code meets the canvas.', 'Recovered code draft.'); await save(app); await observed((frame, value) => frame.generation === goodGeneration && frame.revision !== goodRevision && value.h === 'Recovered code draft.');
     results.invalidDraftRecovery = { localDraftRetained: true, lastGoodRevision: true, lastGoodPreview: true, rejectedSaveRecorded: true, repairedSaveRendered: true };
     // Structural source edits invalidate previous offsets, then permit fresh selection.
     const anchors = await api('compatibility'), oldAnchor = anchors.targets.find(item => item.text === 'Recovered code draft.').identity;
