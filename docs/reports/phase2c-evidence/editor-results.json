@@ -1,0 +1,15 @@
+{
+  "freshRegistry": true,
+  "existingImportsUntouched": true,
+  "nativeChromiumSandbox": true,
+  "hashRouterRegressions": true,
+  "fieldNotesEditing": true,
+  "staleHashOverlayCleared": true,
+  "lateInspectionRejected": true,
+  "reselection": true,
+  "duplicateRouteStable": true,
+  "persistentQualifiedSecurityNotice": true,
+  "forgedBridgeDenied": true,
+  "stopRestart": true,
+  "httpEnabled": false
+}

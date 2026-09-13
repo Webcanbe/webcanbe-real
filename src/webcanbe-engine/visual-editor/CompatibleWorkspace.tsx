@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react"
 import { isPreviewMessage, PREVIEW_CHANNEL } from "../bridge/previewProtocol"
+import { safePreviewRoute } from "../bridge/previewRoute"
+import { PREVIEW_SECURITY_NOTICE } from "../bridge/previewSecurity"
 import type { CompatibilitySummary, MutationTransaction, PreviewElement, SourceTarget, StyleProperty, ViewportPreset } from "../core/types"
 import "./compatibleWorkspace.css"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
 type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
-type ApiResponse = { runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
+type ApiResponse = { transport?: "blob" | "http"; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
@@ -21,6 +23,13 @@ export default function CompatibleWorkspace() {
   const [runtime, setRuntime] = useState<RuntimeInfo>()
   const [selectMode, setSelectMode] = useState(true)
   const routeHash = useRef("#/")
+  const routePath = useRef("/")
+  const [routeInput, setRouteInput] = useState("/")
+  const [previewState, setPreviewState] = useState("stopped")
+  const activeGeneration = useRef("")
+  const inspected = useRef("")
+  const inspectSequence = useRef(0)
+  const connectionEpoch = useRef(0)
   const [projectId, setProjectId] = useState(workspaceProjectId)
   const [project, setProject] = useState<ProjectInfo>()
   const [session, setSession] = useState<PreviewSession>()
@@ -36,14 +45,9 @@ export default function CompatibleWorkspace() {
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
-  const [html, setHtml] = useState("")
-  const [previewUrl, setPreviewUrl] = useState("")
-  useEffect(() => {
-    if (!html) { setPreviewUrl(""); return }
-    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }))
-    setPreviewUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [html])
+  const [preview, setPreview] = useState<{ url: string; transport: "blob" | "http"; generation: string }>()
+  const previewUrl = preview?.url ?? ""
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url) }, [preview])
   const [targets, setTargets] = useState<SourceTarget[]>([])
   const [source, setSource] = useState("")
   const [pending, setPending] = useState(false)
@@ -54,14 +58,18 @@ export default function CompatibleWorkspace() {
   }
 
   async function refreshCompatibility() {
+    const epoch = connectionEpoch.current
     const response = await request("compatibility")
+    if (epoch !== connectionEpoch.current) return
     if (response.ok) { setSummary(response.data.summary); setTargets(response.data.targets ?? []) }
   }
 
   async function inspect(element: PreviewElement) {
+    const sequence = ++inspectSequence.current, generation = activeGeneration.current, epoch = connectionEpoch.current
     setMessage("Reading the element’s real source location…")
     const response = await request("inspect", { identity: element.identity })
-    if (!response.ok || !response.data.target) { setTarget(undefined); setMessage(response.data.error ?? "This element is preview-only."); return }
+    if (sequence !== inspectSequence.current || generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+    if (!response.ok || !response.data.target) { setTarget(undefined); setSelected(undefined); inspected.current = ""; setMessage(response.data.error ?? "This element is preview-only."); return }
     revision.current = response.data.revision ?? ""
     setSource(response.data.source ?? "")
     setTarget(response.data.target)
@@ -70,32 +78,65 @@ export default function CompatibleWorkspace() {
   }
 
   useEffect(() => {
+    ++connectionEpoch.current
     if (!accessKey) { setMessage("Enter the local editor access key printed by the development server."); return }
-    routeHash.current = "#/"; setRuntime(undefined)
-    setSession(undefined); setHtml(""); setTarget(undefined); setSelected(undefined)
+    routeHash.current = "#/"; routePath.current = "/"
+    try { const saved = sessionStorage.getItem('wcb-preview-route:' + projectId); if (safePreviewRoute(saved)) routePath.current = saved! } catch { /* Route persistence is optional; credentials never enter storage. */ }
+    setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""
+    setSession(undefined); setPreview(undefined); setTarget(undefined); setSelected(undefined); setHovered(undefined)
+    let cancelled = false, connected: PreviewSession | undefined
+    const stop = (old: PreviewSession) => { void fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'X-WCB-Editor-Key': accessKey }, body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).catch(() => {}) }
     void (async () => {
       const response = await fetch(`/__webcanbe/api/projects/${projectId}/session`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: "{}" })
       const data = await response.json() as ApiResponse
       if (!response.ok || !data.session || !data.project) { setMessage(data.error ?? "This project could not start a preview."); return }
-      setRuntime(data.runtime); setProject(data.project); setSession(data.session); setMessage("Project source is ready. Previews run offline; remote assets and network calls are disabled.")
-    })().catch(() => setMessage("The local Compatible engine is unavailable."))
+      connected = data.session
+      if (cancelled) { stop(connected); return }
+      setRuntime(data.runtime); setProject(data.project); setSession(data.session); setMessage("Project source is ready. See the verified preview boundary below.")
+    })().catch(() => { if (!cancelled) setMessage("The local Compatible engine is unavailable.") })
+    const pagehide = () => { if (connected) stop(connected) }
+    window.addEventListener("pagehide", pagehide)
+    return () => { cancelled = true; ++connectionEpoch.current; window.removeEventListener("pagehide", pagehide); if (connected) stop(connected) }
   }, [projectId, accessKey, connectionAttempt])
 
   async function refreshPreview() {
-    const response = await request("preview")
-    revision.current = response.data.revision ?? revision.current
-    setHtml(response.data.html ?? "")
-    if (!response.ok) setMessage(response.data.error ?? "Preview unavailable. Inspect source below.")
+    const epoch = connectionEpoch.current
+    setPreviewState("starting"); activeGeneration.current = ""; inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
+    const response = await request("preview", { route: routePath.current })
+    if (epoch !== connectionEpoch.current) return
+    revision.current = response.data.revision ?? revision.current
+    if (response.ok && response.data.html && response.data.generation) {
+      activeGeneration.current = response.data.generation
+      setPreview({ url: URL.createObjectURL(new Blob([response.data.html], { type: "text/html" })), transport: response.data.transport ?? "blob", generation: response.data.generation })
+    } else { setPreview(undefined); setPreviewState("failed"); setMessage(response.data.error ?? "Preview unavailable. Inspect source below.") }
   }
   useEffect(() => { if (session) void (async () => { await refreshCompatibility(); await refreshPreview() })() }, [session])
 
   useEffect(() => {
     const receive = (event: MessageEvent) => {
-      if (event.origin !== "null" || event.source !== frame.current?.contentWindow || !isPreviewMessage(event.data) || event.data.session !== session?.previewId) return
-      if (event.data.type === "route") routeHash.current = event.data.hash
+      if (event.origin !== "null" || event.source !== frame.current?.contentWindow || !isPreviewMessage(event.data) || event.data.session !== session?.previewId || !activeGeneration.current || event.data.generation !== activeGeneration.current) return
+      if (event.data.type === "ready") setPreviewState("ready")
+      if (event.data.type === "failed" || event.data.type === "expired") { setPreviewState(event.data.type); setMessage(event.data.type === "expired" ? "Preview session expired. Connect to renew." : "Preview did not become ready. Check its route and supported profile."); setSelected(undefined); setHovered(undefined); setTarget(undefined) }
+      if (event.data.type === "clear") { setSelected(undefined); setHovered(undefined); setTarget(undefined); inspected.current = ""; ++inspectSequence.current }
+      if (event.data.type === "route") {
+        let changed = false
+        if (event.data.hash) { changed = routeHash.current !== event.data.hash; routeHash.current = event.data.hash }
+        if (safePreviewRoute(event.data.route)) {
+          changed = changed || routePath.current !== event.data.route
+          routePath.current = event.data.route; setRouteInput(event.data.route)
+          try { sessionStorage.setItem('wcb-preview-route:' + projectId, event.data.route) } catch { /* No credential storage. */ }
+        }
+        // A route observation invalidates geometry and any in-flight source inspection,
+        // not the source revision or the authority required for a later explicit edit.
+        if (changed) { setSelected(undefined); setHovered(undefined); setTarget(undefined); inspected.current = ""; ++inspectSequence.current }
+      }
       if (event.data.type === "hover") setHovered(event.data.element)
-      if (event.data.type === "select") { setSelected(event.data.element); void inspect(event.data.element) }
+      if (event.data.type === "select") {
+        setSelected(event.data.element)
+        const key = activeGeneration.current + ':' + event.data.element.identity.file + ':' + event.data.element.identity.elementStart
+        if (inspected.current !== key) { inspected.current = key; void inspect(event.data.element) }
+      }
       if (event.data.type === "drag") {
         setSelected(event.data.element)
         setMessage("Drag intent cannot be inferred safely. Select an existing semantic layout property in the inspector.")
@@ -103,19 +144,21 @@ export default function CompatibleWorkspace() {
     }
     window.addEventListener("message", receive)
     return () => window.removeEventListener("message", receive)
-  }, [session, selected])
+  }, [session, preview, projectId])
 
   function configurePreview() {
-    if (!session) return
-    frame.current?.contentWindow?.postMessage({ channel: PREVIEW_CHANNEL, type: "configure", session: session.previewId, active: selectMode, hash: routeHash.current }, "*")
+    if (!session || !preview) return
+    frame.current?.contentWindow?.postMessage({ channel: PREVIEW_CHANNEL, type: "configure", session: session.previewId, generation: preview.generation, active: selectMode, hash: routeHash.current }, "*")
   }
 
-  useEffect(() => { configurePreview() }, [selectMode])
+  useEffect(() => { configurePreview() }, [selectMode, preview])
 
   async function mutate(edit: { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) {
     if (!selected || !session || pending) return
+    const epoch = connectionEpoch.current
     setPending(true)
     const response = await request("mutate", { identity: selected.identity, edit }).finally(() => setPending(false))
+    if (epoch !== connectionEpoch.current) return
     if (!response.ok || !response.data.transaction?.success) { setMessage(response.data.transaction?.error ?? response.data.error ?? "The source change was not safe to apply."); return }
     setDiff(response.data.diff ?? "")
     setMessage(`Saved ${response.data.transaction.editType} transaction to the real source.`)
@@ -125,7 +168,9 @@ export default function CompatibleWorkspace() {
   }
 
   async function history(action: "undo" | "redo") {
+    const epoch = connectionEpoch.current
     const response = await request(action)
+    if (epoch !== connectionEpoch.current) return
     if (!response.ok || !response.data.transaction) { setMessage(response.data.error ?? `Nothing safe to ${action}.`); return }
     setDiff(response.data.diff ?? "")
     setMessage(`${action === "undo" ? "Undid" : "Redid"} the real source transaction.`)
@@ -183,8 +228,8 @@ export default function CompatibleWorkspace() {
         <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className="compatible-preview-shell">
-        <div className="compatible-preview-head"><span><i/> Sandboxed source preview</span><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
-        <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe ref={frame} onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
+        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{preview?.transport === "http" && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } routePath.current = routeInput; void refreshPreview() }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}<button type="button" disabled={!session} onClick={() => { void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
+        <div ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
       </section>
       <aside className="compatible-inspector">
         <div className="inspector-heading"><p>Element inspector</p><span>{target?.compatibility ?? "preview"}</span></div>
@@ -198,6 +243,7 @@ export default function CompatibleWorkspace() {
         {target && Object.entries(target.unavailableReasons).map(([key, reason]) => <p key={key} className="limited-editing">{reason}</p>)}
         {diff && <div className="source-diff"><small>Actual source diff</small><pre>{diff}</pre></div>}
         <p className="transaction-status">{message}</p>
+        <p className="limited-editing" data-preview-boundary>{PREVIEW_SECURITY_NOTICE}</p>
       </aside>
     </div>
   </main>

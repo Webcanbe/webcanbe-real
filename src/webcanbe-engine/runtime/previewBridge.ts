@@ -2,14 +2,19 @@ import { decodeSourceIdentity } from "../core/sourceIdentity"
 import type { LayoutContext, PreviewElement } from "../core/types"
 import { PREVIEW_CHANNEL } from "../bridge/previewProtocol"
 
+declare const __WCB_HTTP_PREVIEW__: boolean
+let generation = ""
 let session = ""
 let parentOrigin = ""
 let active = false
 let lastHover = ""
 let selected: Element | undefined
+let hovered: Element | undefined
+let lastRoute = ""
 let dragStart: { element: Element; x: number; y: number } | undefined
 
 function safeParentOrigin(origin: string) {
+  if (__WCB_HTTP_PREVIEW__) return origin === "null"
   try {
     const url = new URL(origin)
     return url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname)
@@ -48,29 +53,49 @@ function describe(target: Element): PreviewElement | null {
 
 function send(type: "hover" | "select" | "drag", element: PreviewElement, delta?: { x: number; y: number }) {
   if (!session || !parentOrigin) return
-  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type, session, element, delta }, parentOrigin)
+  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type, session, generation, element, delta }, parentOrigin === "null" ? "*" : parentOrigin)
 }
 
-function refreshSelection() {
-  if (!active || !selected) return
-  const element = describe(selected)
-  if (element) send("select", element)
+function reportRoute() {
+  if (!session || !parentOrigin) return
+  const route = window.location.pathname + window.location.search + window.location.hash
+  if (lastRoute === route) return
+  if (lastRoute) {
+    selected = undefined; hovered = undefined; lastHover = ""; dragStart = undefined
+    window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "clear", session, generation }, parentOrigin === "null" ? "*" : parentOrigin)
+  }
+  lastRoute = route
+  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "route", session, generation, ...(__WCB_HTTP_PREVIEW__ ? { route } : { hash: window.location.hash || "#/" }) }, parentOrigin === "null" ? "*" : parentOrigin)
 }
+function refreshSelection() {
+  reportRoute()
+  if (!active) return
+  if (selected && !selected.isConnected) {
+    selected = undefined
+    window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "clear", session, generation }, parentOrigin === "null" ? "*" : parentOrigin)
+  }
+  if (selected) { const element = describe(selected); if (element) send("select", element) }
+  if (hovered?.isConnected) { const element = describe(hovered); if (element) send("hover", element) }
+}
+
 
 window.addEventListener("message", (event) => {
   if (event.source !== window.parent || !safeParentOrigin(event.origin) || !event.data || typeof event.data !== "object") return
-  const message = event.data as { channel?: string; type?: string; session?: string; active?: boolean; hash?: string }
-  if (message.channel !== PREVIEW_CHANNEL || message.type !== "configure" || typeof message.session !== "string") return
+  const message = event.data as { channel?: string; type?: string; session?: string; generation?: string; active?: boolean; hash?: string }
+  if (message.channel !== PREVIEW_CHANNEL || message.type !== "configure" || typeof message.session !== "string" || message.session.length > 128 || typeof message.generation !== "string" || !/^[a-zA-Z0-9-]{1,128}$/.test(message.generation) || typeof message.active !== "boolean") return
+  generation = message.generation
   session = message.session
   parentOrigin = event.origin
   active = Boolean(message.active)
-  if (typeof message.hash === "string" && /^#\/[\x20-\x7e]{0,2048}$/.test(message.hash) && window.location.hash !== message.hash) window.location.hash = message.hash
-  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "ready", session }, parentOrigin)
+  if (!__WCB_HTTP_PREVIEW__ && typeof message.hash === "string" && /^#\/[\x20-\x7e]{0,2048}$/.test(message.hash) && window.location.hash !== message.hash) window.location.hash = message.hash
+  window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "ready", session, generation }, parentOrigin === "null" ? "*" : parentOrigin)
+  reportRoute()
 })
 
 document.addEventListener("pointermove", (event) => {
   if (!active) return
-  const element = describe(event.target as Element)
+  hovered = event.target as Element
+  const element = describe(hovered)
   const key = element ? `${element.identity.file}:${element.identity.elementStart}` : ""
   if (element && key !== lastHover) send("hover", element)
   lastHover = key
@@ -104,6 +129,8 @@ window.addEventListener("scroll", refreshSelection, true)
 window.addEventListener("resize", refreshSelection)
 new ResizeObserver(refreshSelection).observe(document.documentElement)
 
-window.addEventListener("hashchange", () => {
-  if (session && parentOrigin) window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "route", session, hash: window.location.hash }, parentOrigin)
-})
+window.addEventListener("hashchange", reportRoute)
+window.addEventListener("popstate", reportRoute)
+new MutationObserver(refreshSelection).observe(document.documentElement, { childList: true, subtree: true })
+// Observe native push/replace changes without replacing window/history or router behavior.
+setInterval(reportRoute, 100)

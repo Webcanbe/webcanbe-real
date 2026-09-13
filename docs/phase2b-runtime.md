@@ -108,10 +108,12 @@ an in-memory HTML Blob URL inside `sandbox="allow-scripts"`, with NO
 `allow-same-origin`. The document still has an opaque security origin even though
 the Blob URL has a useful location origin. A controlled Chromium probe verified
 `event.origin === "null"`, `self.origin === "null"`, and denied parent-DOM, storage
-and network access before this transport change was approved. The main two-project
-browser workflow rechecks DOM/network denial and absence of the operator key.
+and the tested fetch/resource requests before this transport change was approved.
+The main two-project browser workflow rechecks DOM/API-fetch denial and absence of the operator key.
 
-CSP still blocks network, frames, workers, forms and remote assets. Blob URLs are
+CSP restricts fetch/resource loads, frames, workers and forms, but does not block
+all possible browser egress. The Phase 2C WebRTC/RTC and self-navigation probes
+qualify the historical networking claim; HTTP admission remains disabled. Blob URLs are
 revoked when replaced. They are not authorization credentials or server endpoints.
 Ten-minute project/session/operation/root/revision/capability checks remain unchanged;
 privileged keys and mutation capability never enter the iframe. No public endpoint,
@@ -221,3 +223,10 @@ that runner, then validate independently authored projects against explicit vers
   reproducible browser loop and independent OS-isolated export QA.
 - Package parser dependencies, concise AGENTS/project/handoff documents and preserved
   historical report. No source mutation/history architecture replacement.
+
+
+## Phase 2C follow-up qualification (2026-09-13)
+
+The Phase 2B baseline above remains the controlled Blob bundle, not an uploaded Vite server. Its 69 tests and the HashRouter/Field Notes browser editing flows passed the Phase 2C regression runs. The shared compiler now also produces dormant HTTP artifacts, but history-router admission is deliberately rejected until an approved browser network-isolation runner exists. See the [Phase 2C report](reports/phase2c-http-preview.md).
+
+New native-sandbox browser probes found that an opaque HTTP document can use native pathname History API without allow-same-origin. They also found inherited Blob self-navigation and WebRTC egress gaps beyond resource/fetch CSP. Earlier offline or complete-network-denial wording must not be treated as a security guarantee. No existing iframe permission or source-mutation authorization was weakened to conceal this. A full BrowserRouter editor and hosted/security acceptance pass is not claimed. Imported rebuild/reload is still not HMR.

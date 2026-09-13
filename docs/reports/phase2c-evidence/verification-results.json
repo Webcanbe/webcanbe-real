@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-13",
+  "node": "26.4.0",
+  "typescript": "5.9.3",
+  "esbuild": "0.25.12",
+  "vite": "6.4.3",
+  "browser": "153.0.8010.12",
+  "nativeChromiumSandbox": true,
+  "tests": {
+    "command": "npm test",
+    "exitCode": 0,
+    "suites": 4,
+    "passed": 95,
+    "existingTests": 69,
+    "addedTests": 26,
+    "durationSeconds": 3.13
+  },
+  "typescriptCheck": {
+    "command": "npx tsc -b",
+    "exitCode": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "modules": 59,
+    "cssKB": 306.11,
+    "jsKB": 415.96,
+    "durationSeconds": 2.52
+  },
+  "editorRegressionCommand": "node scripts/verify-phase2c-editor-regressions.cjs \"$QA/editor\"",
+  "editorRegressionExitCode": 0,
+  "prototypeExitCode": 0,
+  "isolatedExportBuildExitCodes": [
+    0,
+    0
+  ],
+  "standaloneRenderExitCode": 0,
+  "policyProbeExitCode": 2,
+  "policyProbeMeaning": "Expected blocked admission, NOT a passed all-egress security check",
+  "webrtcReceivedUdpPackets": 3,
+  "productionHttpEnabled": false,
+  "fullEditorNestedRouteAcceptance": false,
+  "codexSecurityRan": false,
+  "phase2cCheckpoint": "NOT YET",
+  "overallPhase2": "NOT YET",
+  "publicHostedImportReady": "NO"
+}

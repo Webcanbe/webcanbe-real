@@ -1,0 +1,34 @@
+{
+  "browser": "153.0.8010.12",
+  "nativeChromiumSandbox": true,
+  "reports": [
+    {
+      "fixture": "coast-paths",
+      "standalone": true,
+      "root": true,
+      "nestedRouteQueryHash": true,
+      "nativeHistory": true,
+      "hardRefresh": true,
+      "publicAndImportedAssets": true,
+      "editedTextAndStyle": true,
+      "instrumentationAbsent": true,
+      "desktop": "1280x900",
+      "mobile": "390x844",
+      "runtimeErrors": []
+    },
+    {
+      "fixture": "harbor-desk",
+      "standalone": true,
+      "root": true,
+      "nestedRouteQueryHash": true,
+      "nativeHistory": true,
+      "hardRefresh": true,
+      "publicAndImportedAssets": true,
+      "editedTextAndStyle": true,
+      "instrumentationAbsent": true,
+      "desktop": "1280x900",
+      "mobile": "390x844",
+      "runtimeErrors": []
+    }
+  ]
+}

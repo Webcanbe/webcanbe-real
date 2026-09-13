@@ -8,7 +8,8 @@ import { formatTransactionDiff, patchResponsiveStyle, patchSemanticLayout, patch
 import { ProjectRegistry, type SessionOperation } from "./projectRegistry"
 import { exportProjectZip } from "./projectExport"
 import { inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
-import { buildIsolatedPreview } from "./isolatedPreview"
+import { buildIsolatedPreview, requiresHttpPreview } from "./isolatedPreview"
+import { HTTP_PREVIEW_BLOCKER } from "../bridge/previewSecurity"
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" })
@@ -74,11 +75,22 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (!store) return json(response, 403, { error: "Project source root is unavailable or changed." })
           const targets = () => registry.sourceFiles(project.id).flatMap(file => analyzeReactSource(file, store.read(file) ?? "", store.read, { tailwind: project.detection.tailwind }))
           const revision = registry.revision(project.id)
+          if (["inspect", "source"].includes(action) && typeof body.expectedRevision === "string" && body.expectedRevision !== revision) return json(response, 409, { error: "Selection belongs to stale source. Rebuild and select again." })
           if (action === "compatibility") return json(response, 200, { summary: summarizeCompatibility(targets()), targets: targets(), revision })
           if (action === "export") return json(response, 200, { archive: (await exportProjectZip(project)).toString("base64") })
           if (action === "preview") {
-            try { return json(response, 200, { html: await buildIsolatedPreview(project, projectRoot), revision }) }
-            catch (error) { return json(response, 422, { error: error instanceof RuntimeCompatibilityError ? error.message : "Preview could not resolve the project: " + (error instanceof Error ? error.message.slice(0, 1500) : "Unsupported source"), runtime: inspectRuntime(project, projectRoot), requiredCapability: error instanceof RuntimeCompatibilityError ? error.issues.map(issue => issue.requiredCapability).join("; ") : "A compatible dependency profile or isolated HTTP/configuration runner" }) }
+            try {
+              if (body.command === "stop") { registry.revokeSession(project.id, previewId); return json(response, 200, { state: "stopped" }) }
+              if (body.command === "status") return json(response, 200, { state: "unavailable", transport: "http", reason: HTTP_PREVIEW_BLOCKER, requiredCapability: "Approved browser network-isolation runner" })
+              // The HTTP compiler/server prototype is intentionally NOT reachable here.
+              // Chromium CSP does not constrain WebRTC. See the Phase 2C report before
+              // introducing any approved runner; a browser-supplied flag is not attestation.
+              if (requiresHttpPreview(project)) throw new RuntimeCompatibilityError([{ code: "http-network-boundary", message: HTTP_PREVIEW_BLOCKER, requiredCapability: "OS-enforced preview browser network isolation with the native browser sandbox retained" }])
+              const preview = { html: await buildIsolatedPreview(project, projectRoot), transport: "blob", generation: randomBytes(16).toString("hex") }
+              if (revision !== registry.revision(project.id)) return json(response, 409, { error: "Source changed during compilation. Rebuild the preview." })
+              return json(response, 200, { ...preview, revision })
+            }
+            catch (error) { return json(response, 422, { revision, error: error instanceof RuntimeCompatibilityError ? error.message : "Preview could not resolve the project: " + (error instanceof Error ? error.message.slice(0, 1500) : "Unsupported source"), runtime: inspectRuntime(project, projectRoot), requiredCapability: error instanceof RuntimeCompatibilityError ? error.issues.map(issue => issue.requiredCapability).join("; ") : "A compatible dependency profile or isolated HTTP/configuration runner" }) }
           }
           if (["mutate", "undo", "redo"].includes(action) && (typeof body.expectedRevision !== "string" || body.expectedRevision !== revision)) return json(response, 409, { error: "Source changed. Inspect it again before editing." })
           if (action === "undo" || action === "redo") {

@@ -9,7 +9,7 @@ const check=(condition,message)=>{if(!condition)throw Error(message)};
 (async()=>{
  const {ZipFile}=require('yazl');
  for(const name of ['trail-atlas','studio-ledger']){const directory=path.join(root,'fixtures',name),zip=new ZipFile();for(const file of fs.readdirSync(directory,{recursive:true})){const absolute=path.join(directory,file);if(fs.statSync(absolute).isFile()&&!file.split(path.sep).includes('node_modules'))zip.addBuffer(fs.readFileSync(absolute),file.split(path.sep).join('/'))}const output=fs.createWriteStream(path.join(artifacts,name+'.zip'));const done=new Promise((resolve,reject)=>{output.on('close',resolve);output.on('error',reject);zip.outputStream.on('error',reject)});zip.outputStream.pipe(output);zip.end();await done;}
- const browser=await chromium.launch({headless:true});
+ const browser=await chromium.launch({headless:true,chromiumSandbox:true});
  for(const fixture of [{name:'trail-atlas',heading:'A good day begins with a trail.',route:'Field guides',routeHeading:'Pack light. Notice more.',back:'Discover',source:'src/pages/Home.jsx',style:'css-module'}, {name:'studio-ledger',heading:'Make space for focused work.',route:'Archive',routeHeading:'Good work, carefully kept.',back:'This week',source:'src/pages/Dashboard.tsx',style:'tailwind'}]) {
   const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(origin+'/workspace/northstar');
@@ -18,16 +18,22 @@ const check=(condition,message)=>{if(!condition)throw Error(message)};
   await page.getByLabel('Local editor access key').fill(access);await page.getByRole('button',{name:'Connect / renew session'}).click();
   await page.waitForFunction(()=>document.querySelector('iframe')?.src.startsWith('blob:'));
   await page.locator('input[type=file]').setInputFiles(artifacts+'/'+fixture.name+'.zip');await page.waitForURL(/workspace\/[a-f0-9-]{36}$/);
-  const projectRoot=path.join(root,'.webcanbe/projects',page.url().split('/').at(-1));const frame=page.frameLocator('iframe');
+  const projectRoot=path.join(process.env.WCB_QA_REGISTRY_ROOT || root,'.webcanbe/projects',page.url().split('/').at(-1));const frame=page.frameLocator('iframe');
   async function history(action) {const previous=await page.locator('iframe').getAttribute('src');const resultPromise=page.waitForResponse(response=>response.url().endsWith('/'+action.toLowerCase()));await page.getByRole('button',{name:action,exact:true}).click();const result=await resultPromise;check(result.ok(),'History refused: '+await result.text());await page.waitForFunction(previous=>document.querySelector('iframe')?.src.startsWith('blob:')&&document.querySelector('iframe')?.src!==previous,previous);}
 
   try {await frame.getByRole('heading',{name:fixture.heading}).waitFor({timeout:10000})} catch(error){console.log('FAILED_RENDER',fixture.name,await page.locator('.transaction-status').innerText(),errors);throw error}
   check(await frame.locator('body').evaluate(()=>{try{void parent.document.body;return false}catch{return true}}),'Preview lost opaque isolation');
-  check(await frame.locator('body').evaluate(async origin=>{try{await fetch(origin+'/__webcanbe/api/projects',{method:'POST',body:'{}'});return false}catch{return true}},origin),'Preview network boundary failed');
+  check(await frame.locator('body').evaluate(async origin=>{try{await fetch(origin+'/__webcanbe/api/projects',{method:'POST',body:'{}'});return false}catch{return true}},origin),'Preview API fetch restriction failed');
   check(!(await frame.locator('html').evaluate(node=>node.outerHTML)).includes(access),'Operator key leaked into preview');
   check(await frame.locator('img').first().evaluate(img=>img.complete&&img.naturalWidth>0),'Local asset failed');
   check(await page.locator('vite-error-overlay').count()===0,'Framework error overlay');
+  await frame.getByRole('heading',{name:fixture.heading}).click();await page.locator('.inspector-control textarea').waitFor();
+  check((await page.locator('[data-preview-boundary]').innerText()).includes('CSP does not block all browser egress'),'Preview security qualification missing');
   await page.getByRole('button',{name:'Interact with preview'}).click();await frame.getByRole('link',{name:fixture.route,exact:true}).click();await frame.getByRole('heading',{name:fixture.routeHeading}).waitFor();
+  await page.locator('.source-location').waitFor({state:'detached'});
+  check(await page.locator('.inspector-control textarea').count()===0,'HashRouter kept an old source inspector');
+  await frame.locator('body').evaluate(()=>{dispatchEvent(new Event('scroll'));dispatchEvent(new Event('resize'))});
+  await page.waitForTimeout(180);check(await page.locator('.canvas-outline').count()===0,'HashRouter resurrected stale geometry after scroll/resize');
   await frame.getByRole('link',{name:fixture.back,exact:true}).click();await frame.getByRole('heading',{name:fixture.heading}).waitFor();
   await page.getByRole('button',{name:'Select elements',exact:true}).click();
   const sourceFile=path.join(projectRoot,fixture.source),original=fs.readFileSync(sourceFile,'utf8'),changed='A careful update to '+fixture.name+'.';

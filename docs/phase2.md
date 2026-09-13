@@ -44,8 +44,11 @@ modules. Uploaded package scripts, Vite config, tsconfig, Tailwind plugins/confi
 and environment files are never evaluated or loaded into the server runtime.
 No dependencies are installed for imported projects.
 
-The preview runs in `srcdoc` with `sandbox="allow-scripts"`, an opaque origin,
-and CSP denying network connections, frames, workers, forms and remote assets.
+The current preview uses an in-memory Blob with `sandbox="allow-scripts"` and an opaque origin.
+CSP restricts fetch/resource loads, frames, workers and forms; it does not establish
+all-egress isolation. WebRTC/RTC networking and the recorded self-navigation gaps
+remain outside that verified boundary. HTTP admission stays disabled pending a
+tested defense-in-depth solution.
 It receives a nonsecret session ID for bridge messages, never the operator key
 or capability. Preview messages can request selection/inspection; writes require
 an explicit editor action. Temporary DOM source IDs exist only in bundled copies.
@@ -156,3 +159,10 @@ transaction-backed code editing and durable history. Hosted use additionally
 requires account/project ownership and an isolated runner with resource limits.
 The local engine checkpoint must not be presented as a production multi-user
 security boundary or universal React/Vite project support.
+
+
+## Phase 2C bounded checkpoint (2026-09-13)
+
+Status: **NOT YET**. See the [complete isolated HTTP preview report](reports/phase2c-http-preview.md) and [current handoff](current-handoff.md). Authored unchanged BrowserRouter routing and independent exported rendering work in the HTTP artifact prototype, including an existing basename. The editor still rejects HTTP admission: an approved all-egress browser runner with its native sandbox retained is unavailable, and the real nested-route editor acceptance sequence has not passed. All existing 69 tests remain passing within the expanded 95-test suite; existing HashRouter/Field Notes browser regressions and TypeScript/build pass. This targeted evidence does not make overall Phase 2 pass.
+
+Retain every existing full-product requirement above. Explicitly still open are broader dependency/config/Tailwind compatibility, responsive authoring, semantic gestures, editable Code UI, durable and multi-file history, genuine imported-project HMR, hosted project ownership/resource isolation and the complete product-experience/navigation/seller/footer/Docs plan. Landing, dashboard, auth and marketplace remain in their planned scope, not redesigned during this checkpoint. Hosted public imports remain NO.

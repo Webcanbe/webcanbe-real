@@ -194,6 +194,13 @@ export class ProjectRegistry {
     return supplied.length === expected.length && timingSafeEqual(supplied, expected)
   }
 
+  sessionExpiry(projectId: string, previewId: string) { const session = this.sessions.get(previewId); return session?.projectId === projectId ? session.expiresAt : undefined }
+  sessionActive(projectId: string, previewId: string) {
+    const session = this.sessions.get(previewId), project = this.projects.get(projectId)
+    try { return Boolean(project && session && session.projectId === projectId && session.expiresAt > this.now() && session.operations.includes("preview") && session.root === fs.realpathSync(project.sourceRoot) && isWithin(project.root, session.root)) } catch { return false }
+  }
+  revokeSession(projectId: string, previewId: string) { if (this.sessions.get(previewId)?.projectId === projectId) this.sessions.delete(previewId) }
+
   store(projectId: string, authority?: SessionAuthority): SourceStore | undefined {
     const project = this.projects.get(projectId)
     if (!project) return undefined

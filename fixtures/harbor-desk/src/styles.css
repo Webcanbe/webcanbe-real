@@ -1,0 +1,7 @@
+body { margin: 0; background: #e9eff2; color: #1e394d; font-family: Georgia, serif; }
+header { padding: 24px; display: flex; gap: 32px; border-bottom: 1px solid #8c9da8; }
+.desk { padding: 32px; max-width: 980px; margin: auto; }
+h1 { font-size: 44px; }
+a { color: #265b7c; margin-right: 20px; }
+img { display: block; width: 200px; height: 100px; margin: 24px 0; }
+button { padding: 12px; }

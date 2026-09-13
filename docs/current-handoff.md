@@ -1,3 +1,19 @@
+# Current handoff: Phase 2C safe blocked checkpoint (2026-09-13)
+
+**Current status: Phase 2C NOT YET; overall Phase 2 NOT YET; public hosted imports NO.**
+
+The [complete committed Phase 2C report](reports/phase2c-http-preview.md) and its evidence are authoritative. The older Phase 2B handoff below is retained as historical baseline, not a claim of HTTP support.
+
+- The existing controlled Blob/HashRouter workflow remains active. It is not a general uploaded Vite server.
+- Shared HTTP compiler/artifacts, isolated-origin artifact registry, read-only bootstrap/cookie lifecycle and opaque confinement envelope are implemented as dormant prototypes. No editor endpoint starts the HTTP listener. BrowserRouter requests fail closed with an approved browser network-isolation capability error.
+- Authored BrowserRouter routing/basename fixtures and independent export builds/renders pass; 95 tests and TypeScript/production build pass. Existing Trail Atlas/Studio Ledger and final Field Notes browser editing regressions pass. Prototype source-transaction QA is not full nested-route editor UI acceptance.
+- Blocking browser evidence: native History works in opaque HTTP frames, but Chromium sends WebRTC/STUN UDP despite CSP. A macOS network sandbox experiment did not work with Chromium's native sandbox retained. No unsafe runner/client-flag bypass was admitted.
+- Complete security/privacy/lifecycle and limitation details, including inherited Blob network limitations and the verified route-overlay fix, are in the report. Codex Security did not run.
+- Next: resolve an approved browser egress/admission boundary, finish production editor integration, exercise the full nested-route editing loop and obtain unchanged compatible external-project evidence. Do not simply delete the BrowserRouter rejection.
+- Preserve broader dependencies/config/Tailwind, responsive authoring, semantic gestures, editable Code UI, durable/multi-file history, imported HMR, hosted ownership/resource isolation and the full experience/navigation/seller/footer/Docs plan. No landing/auth/marketplace redesign or main merge occurred.
+
+## Historical Phase 2B handoff (retained)
+
 # Current handoff — Phase 2B
 
 Working copy: `~/Developer/WebCanBe-recovery`.
@@ -48,7 +64,9 @@ The local QA runner is not a hosted or universal configuration execution service
 
 Preview Blob transport retains sandbox="allow-scripts" without same-origin access;
 Chromium verifies opaque document/message origins and denies parent DOM, storage and
-network. No key/capability is sent to preview. Ten-minute authority and source guards
+tested fetch/resource requests, not all browser egress. WebRTC/RTC networking can
+bypass CSP; HTTP stays disabled pending a tested defense-in-depth solution.
+No key/capability is sent to preview. Ten-minute authority and source guards
 remain unchanged. Auto-review initially rejected the Blob proposal; controlled
 security probes established the retained isolation, and the action was then approved.
 
