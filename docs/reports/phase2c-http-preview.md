@@ -1,5 +1,7 @@
 # Phase 2C HTTP preview checkpoint: NOT YET
 
+Follow-up: [Phase 2C.1 network-isolation foundation](phase2c1-network-isolation.md) contains the current threat-model answers, new RTC evidence and controlled-runner architecture. HTTP is still disabled; this report remains the historical Phase 2C checkpoint.
+
 Updated 2026-09-13. This is a bounded runtime checkpoint, not overall Phase 2 completion.
 
 **The HTTP compiler/listener/envelope are tested prototypes, deliberately unreachable from the editor API.** The current supported editor flow remains the Phase 2B controlled Blob bundle and HashRouter flow. BrowserRouter admission fails closed with an actionable network-isolation capability error.

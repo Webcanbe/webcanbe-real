@@ -1,0 +1,167 @@
+{
+  "browser": "152.0.7977.83",
+  "nativeChromiumSandbox": true,
+  "requestInterception": false,
+  "syntheticLoopbackCollectors": true,
+  "results": [
+    {
+      "mode": "control",
+      "origin": "separate-preview-origin",
+      "parentDOMDenied": true,
+      "parentStorageDenied": true,
+      "parentCookieDenied": true,
+      "ownStorageDenied": false,
+      "ownCookieDenied": false,
+      "cameraDenied": true,
+      "microphoneDenied": true,
+      "supportedPolicyFeatures": [
+        "camera",
+        "microphone"
+      ],
+      "fetch": "resolved",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "remoteCandidate": "accepted",
+      "requests": [
+        "fetch",
+        "websocket",
+        "eventsource",
+        "beacon",
+        "child-frame",
+        "image"
+      ],
+      "udpPackets": 34,
+      "udpPacketsByProbe": {
+        "stun": 3,
+        "turn": 6,
+        "remoteCandidate": 25
+      },
+      "warnings": [],
+      "dataChannelPayloadDelivery": "not-tested; receiver records ICE/STUN/TURN packets only"
+    },
+    {
+      "mode": "csp",
+      "origin": "null",
+      "parentDOMDenied": true,
+      "parentStorageDenied": true,
+      "parentCookieDenied": true,
+      "ownStorageDenied": true,
+      "ownCookieDenied": true,
+      "cameraDenied": true,
+      "microphoneDenied": true,
+      "supportedPolicyFeatures": [
+        "camera",
+        "microphone"
+      ],
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "remoteCandidate": "accepted",
+      "requests": [],
+      "udpPackets": 34,
+      "udpPacketsByProbe": {
+        "stun": 3,
+        "turn": 6,
+        "remoteCandidate": 25
+      },
+      "warnings": [],
+      "dataChannelPayloadDelivery": "not-tested; receiver records ICE/STUN/TURN packets only"
+    },
+    {
+      "mode": "permissions",
+      "origin": "null",
+      "parentDOMDenied": true,
+      "parentStorageDenied": true,
+      "parentCookieDenied": true,
+      "ownStorageDenied": true,
+      "ownCookieDenied": true,
+      "cameraDenied": true,
+      "microphoneDenied": true,
+      "supportedPolicyFeatures": [
+        "camera",
+        "microphone"
+      ],
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "remoteCandidate": "accepted",
+      "requests": [],
+      "udpPackets": 34,
+      "udpPacketsByProbe": {
+        "stun": 3,
+        "turn": 6,
+        "remoteCandidate": 25
+      },
+      "warnings": [
+        "Error with Permissions-Policy header: Unrecognized feature: 'webrtc'."
+      ],
+      "dataChannelPayloadDelivery": "not-tested; receiver records ICE/STUN/TURN packets only"
+    },
+    {
+      "mode": "draft-webrtc",
+      "origin": "null",
+      "parentDOMDenied": true,
+      "parentStorageDenied": true,
+      "parentCookieDenied": true,
+      "ownStorageDenied": true,
+      "ownCookieDenied": true,
+      "cameraDenied": true,
+      "microphoneDenied": true,
+      "supportedPolicyFeatures": [
+        "camera",
+        "microphone"
+      ],
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "remoteCandidate": "accepted",
+      "requests": [],
+      "udpPackets": 34,
+      "udpPacketsByProbe": {
+        "stun": 3,
+        "turn": 6,
+        "remoteCandidate": 25
+      },
+      "warnings": [
+        "Error with Permissions-Policy header: Unrecognized feature: 'webrtc'.",
+        "Unrecognized Content-Security-Policy directive 'webrtc'."
+      ],
+      "dataChannelPayloadDelivery": "not-tested; receiver records ICE/STUN/TURN packets only"
+    },
+    {
+      "mode": "envelope",
+      "origin": "null",
+      "parentDOMDenied": true,
+      "parentStorageDenied": true,
+      "parentCookieDenied": true,
+      "ownStorageDenied": true,
+      "ownCookieDenied": true,
+      "cameraDenied": true,
+      "microphoneDenied": true,
+      "supportedPolicyFeatures": [
+        "camera",
+        "microphone"
+      ],
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "remoteCandidate": "accepted",
+      "requests": [],
+      "udpPackets": 34,
+      "udpPacketsByProbe": {
+        "stun": 3,
+        "turn": 6,
+        "remoteCandidate": 25
+      },
+      "warnings": [
+        "Error with Permissions-Policy header: Unrecognized feature: 'webrtc'."
+      ],
+      "dataChannelPayloadDelivery": "not-tested; receiver records ICE/STUN/TURN packets only"
+    }
+  ],
+  "networkIsolationProven": false,
+  "httpEnabled": false,
+  "previewReceivedParentCookie": false,
+  "webrtcEgressReproduced": true,
+  "harness": "completed"
+}

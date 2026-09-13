@@ -1,3 +1,22 @@
+# Current handoff: Phase 2C.1 controlled execution foundation (2026-09-13)
+
+**Phase 2C.1 network isolation NOT YET; Phase 2C HTTP/BrowserRouter NOT YET; overall Phase 2 NOT YET; public hosted imports NO.**
+
+The [Phase 2C.1 report](reports/phase2c1-network-isolation.md) and sanitized evidence are the current record. The earlier handoff below is retained as history.
+
+- Audited clean starting HEAD and live remote at `fbd95b46e9ac0ac02ae7e422501f0a7395d45ce4`, descended from `4a6520f795e52bff2ccebabd1ea13274dfe85466`; main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.
+- Native-sandbox browser probes reproduce RTC/STUN/TURN/remote-ICE egress despite CSP, media Permissions Policy, separate origin and opaque confinement. The current CSP draft has a WebRTC directive, but the tested browsers do not implement it. Collector-positive HTTP/resource denials are not all-egress proof.
+- Added dormant `ControlledPreviewTransport` / `ProjectRunner` foundation: immutable artifact digest, server-authorized leases, credential-free job, raster/input boundary, lifecycle invalidation and fail-closed unavailable provider. No concrete OS-isolated browser provider or separate-origin raster viewer is installed. Mock runner tests prove broker behavior only.
+- HTTP remains unreachable from the editor. No same-origin sandbox grant, client isolation flag, credential injection or unsafe native-sandbox bypass was added. Legacy local Blob/HashRouter keeps its qualified warning and existing source authorization.
+- All original 95 tests are retained; **108 tests pass** with 13 new foundation cases, and TypeScript/production build pass. Exact results are in the report receipt. Existing Trail Atlas/Studio Ledger/Field Notes source-edit/diff/undo/redo/export and bridge/cleanup browser regressions pass.
+- Next: implement and negatively test an actual controlled browser/network provider and authenticated separate-origin raster presentation. All strict imported JS must stay inside that boundary, including HashRouter apps. Do not expose artifact/bootstrap URLs to an uncontrolled browser. Then integrate validated observations and run the full BrowserRouter editor workflow before considering admission.
+- External project networking is a distinct server-owned capability and is denied by this foundation. Preview transport must not grant it. Existing mutation authorization remains the only source-write path.
+- The full broader Phase 2 and product experience plan remains open. No main merge, force push, public deployment, purchase or infrastructure installation.
+
+This checkpoint is published only on `phase-2-compatible-editor`; verify its delivered commit against the live branch. The report intentionally does not embed its own commit hash.
+
+---
+
 # Current handoff: Phase 2C safe blocked checkpoint (2026-09-13)
 
 **Current status: Phase 2C NOT YET; overall Phase 2 NOT YET; public hosted imports NO.**

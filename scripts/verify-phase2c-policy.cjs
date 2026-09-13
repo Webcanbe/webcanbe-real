@@ -42,8 +42,9 @@ const servers=[];async function listen(handler){const server=http.createServer(h
   const rtcFrame=page.frames().find(f=>f.url().startsWith(preview))||await page.waitForEvent('framenavigated',{predicate:f=>f.url().startsWith(preview)});await rtcFrame.waitForFunction(()=>window.probeReady===true);
   const rtc=await rtcFrame.evaluate(async port=>{try{const pc=new RTCPeerConnection({iceServers:[{urls:'stun:127.0.0.1:'+port}]});window.probePC=pc;pc.createDataChannel('synthetic');await pc.setLocalDescription(await pc.createOffer());return{origin:self.origin,created:true}}catch(error){return{created:false,error:error.name}}},udp.address().port);
   await page.waitForTimeout(1500);await rtcFrame.evaluate(()=>window.probePC?.close());
-  const report={browser:browser.version(),nativeChromiumSandbox:true,syntheticLoopbackOnly:true,results,webrtc:{...rtc,receivedUdpPackets:packets.length,warnings},httpAdmissionSafe:packets.length===0};
+  const report={browser:browser.version(),nativeChromiumSandbox:true,syntheticLoopbackOnly:true,results,webrtc:{...rtc,receivedUdpPackets:packets.length,warnings},httpAdmissionSafe:false,rtcEgressObserved:packets.length>0};
   fs.writeFileSync(path.join(output,'policy-results.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
-  if(packets.length)process.exitCode=2;
+  // A quiet STUN collector cannot certify all browser egress or admit HTTP.
+  process.exitCode=2;
  }finally{if(browser)await browser.close();udp.close();for(const server of servers){server.closeAllConnections();server.close()}}
 })().catch(error=>{console.error(error);process.exitCode=1});
