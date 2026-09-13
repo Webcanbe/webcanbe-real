@@ -1,5 +1,9 @@
 # Phase 2 recovery checkpoint
 
+This records the original recovered Phase 2 checkpoint. Runtime support has since
+advanced in `phase2b-runtime.md`; the remaining overall Phase 2 requirements below
+remain open. See `current-handoff.md` for current commits and push status.
+
 The source remains the product. This extends the reviewed Phase 1 engine at
 `6f3582a`, on `phase-2-compatible-editor`. It does not replace its adapter,
 bridge, runtime, or mutation boundaries, and does not change the landing page.
