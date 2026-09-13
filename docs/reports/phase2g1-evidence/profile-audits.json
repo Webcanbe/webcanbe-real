@@ -1,0 +1,60 @@
+[
+  {
+    "profile": "react18-vite5-v1",
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 1,
+      "critical": 0,
+      "total": 2
+    },
+    "advisories": [
+      {
+        "package": "esbuild",
+        "severity": "moderate",
+        "via": [
+          {
+            "title": "esbuild enables any website to send any requests to the development server and read the response",
+            "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+            "range": "<=0.24.2"
+          }
+        ]
+      },
+      {
+        "package": "vite",
+        "severity": "high",
+        "via": [
+          {
+            "title": "Vite Vulnerable to Path Traversal in Optimized Deps `.map` Handling",
+            "url": "https://github.com/advisories/GHSA-4w7w-66w2-5vf9",
+            "range": "<=6.4.1"
+          },
+          {
+            "title": "launch-editor: NTLMv2 hash disclosure via UNC path handling on Windows",
+            "url": "https://github.com/advisories/GHSA-v6wh-96g9-6wx3",
+            "range": "<=6.4.2"
+          },
+          {
+            "title": "vite: `server.fs.deny` bypass on Windows alternate paths",
+            "url": "https://github.com/advisories/GHSA-fx2h-pf6j-xcff",
+            "range": "<=6.4.2"
+          },
+          "esbuild"
+        ]
+      }
+    ]
+  },
+  {
+    "profile": "react19-vite8-v1",
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "advisories": []
+  }
+]

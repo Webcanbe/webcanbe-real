@@ -1,3 +1,5 @@
+> Current extension (2026-09-14): [Phase 2G.1](reports/phase2g1-hosted-foundation-hmr-profiles.md) adds named React 18/Vite 5 and React 19/Vite 8 profiles, bounded static configuration/theme/env support, unchanged official starter evidence and controlled CSS hot updates/module incremental rebuild-reloads. The original Phase 2B profile is unchanged. The material below records the historical Phase 2B boundary; its old no-incremental-update statements are superseded only as specified in the current report. React Fast Refresh, broader configuration and genuine hosted readiness remain open.
+
 # Phase 2B runtime compatibility
 
 ## Audit of d1683f6
