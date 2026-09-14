@@ -1,0 +1,15 @@
+{
+  "hostId": "worker-a",
+  "listenAddress": "127.0.0.1",
+  "port": 9443,
+  "key": "/etc/webcanbe/gateway-key.pem",
+  "cert": "/etc/webcanbe/gateway-cert.pem",
+  "ca": "/etc/webcanbe/controller-ca.pem",
+  "postgres": {
+    "host": "REPLACE_WITH_PRIVATE_POSTGRES_HOST",
+    "database": "webcanbe",
+    "user": "webcanbe_control",
+    "password": "LOAD_FROM_PRIVATE_OPERATOR_CONFIG",
+    "ssl": { "rejectUnauthorized": true, "ca": "LOAD_PRIVATE_DATABASE_CA_PEM" }
+  }
+}

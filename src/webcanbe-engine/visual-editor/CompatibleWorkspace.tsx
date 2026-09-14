@@ -128,7 +128,7 @@ export default function CompatibleWorkspace() {
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
     let response = await request("preview", incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current })
     if (!response.ok && incremental && epoch === connectionEpoch.current) response = await request("preview", { route: routePath.current })
-    if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
+    if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "react-fast-refresh" ? "React component refreshed inside the controlled runner; compatible component state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
     if (epoch !== connectionEpoch.current) return
     revision.current = response.data.revision ?? revision.current
     if (response.ok && response.data.transport === "raster" && response.data.viewerUrl && response.data.generation) {

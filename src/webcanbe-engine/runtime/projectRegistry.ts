@@ -70,7 +70,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
         if (directory) { zip.readEntry(); return }
-        if (!/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
+        if (!/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
         zip.openReadStream(entry, async (streamError, stream) => {
           if (streamError || !stream) return fail(streamError ?? new Error("Invalid ZIP stream."))
           try {

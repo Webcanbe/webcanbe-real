@@ -1,16 +1,14 @@
 import { spawn } from "node:child_process"
-import { join } from "node:path"
 import { RunnerCleanupError } from "./runnerContracts"
 import type { ControlledExecution, ControlledJob, RunnerProvider, PreviewInput, RunnerSample } from "./controlledPreview"
 
-/** Local operator-only provider. Fixed guest executable, private stdio, no shell interpolation.
+/** Dedicated Linux host supervisor; instantiated only by the authenticated gateway. Fixed guest executable, private stdio, no shell interpolation.
  * Linux systemd/bubblewrap enforce isolation; Playwright routes are artifact delivery only. */
-export class LocalLimaRunnerProvider implements RunnerProvider {
-  constructor(private readonly root: string) {}
+export class LinuxHostRunnerProvider implements RunnerProvider {
   async revoke(generation: string) {
     if (!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(generation)) throw new RunnerCleanupError("Invalid cleanup identity.")
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(join(this.root, ".webcanbe/runner/tools/bin/limactl"), ["shell", "--workdir=/", "wcb", "sudo", "-n", "/opt/wcb-runtime/stop.sh", generation], { env: { PATH: process.env.PATH, HOME: process.env.HOME, LIMA_HOME: join(this.root, ".webcanbe/runner/lima") }, stdio: "ignore" })
+      const child = spawn("/usr/bin/sudo", ["-n", "/opt/wcb-runtime/stop.sh", generation], { env: { PATH: "/usr/bin", HOME: "/nonexistent" }, stdio: "ignore" })
       const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new RunnerCleanupError("Runner revoke deadline exceeded.")) }, 8000)
       child.on("error", () => { clearTimeout(timer); reject(new RunnerCleanupError("Runner revoke failed.")) })
       child.on("exit", code => { clearTimeout(timer); code === 0 ? resolve() : reject(new RunnerCleanupError("Runner cleanup unverified.")) })
@@ -18,9 +16,9 @@ export class LocalLimaRunnerProvider implements RunnerProvider {
   }
   async open(job: ControlledJob, signal: AbortSignal): Promise<ControlledExecution> {
     if (signal.aborted || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(job.generation)) throw new Error("Runner startup rejected.")
-    const executable = join(this.root, ".webcanbe/runner/tools/bin/limactl")
-    const env = { PATH: process.env.PATH, HOME: process.env.HOME, LIMA_HOME: join(this.root, ".webcanbe/runner/lima") }
-    const prefix = ["shell", "--workdir=/", "wcb", "sudo", "-n"]
+    const executable = "/usr/bin/sudo"
+    const env = { PATH: "/usr/bin", HOME: "/nonexistent" }
+    const prefix = ["-n"]
     const child = spawn(executable, [...prefix, "/opt/wcb-runtime/launch.sh", job.generation], { env, stdio: ["pipe", "pipe", "pipe"] })
     let closed = false, closePromise: Promise<void> | undefined, buffer = "", stderr = "", nextId = 0
     const pending = new Map<number, { resolve(value: unknown): void; reject(error: Error): void; timer: ReturnType<typeof setTimeout> }>()
@@ -48,7 +46,7 @@ export class LocalLimaRunnerProvider implements RunnerProvider {
       }
     })
     child.stderr.on("data", chunk => { stderr = (stderr + String(chunk)).slice(-4096) })
-    child.on("error", () => rejectAll(new Error("Local runner is not prepared. Run npm run runner:prepare.")))
+    child.on("error", () => rejectAll(new Error("Hosted Linux runtime is not provisioned.")))
     child.on("exit", () => rejectAll(new Error("Runner exited: " + stderr.slice(-1000))))
     child.stdin.on("error", () => rejectAll(new Error("Runner pipe closed.")))
     const close = () => closePromise ??= (async () => {
@@ -74,6 +72,6 @@ export class LocalLimaRunnerProvider implements RunnerProvider {
         return { bytes: Buffer.from(result.png, "base64"), observation: result.observation }
       }
       return { update: async update => { await rpc("update", update) }, sample, capture: async () => (await sample()).bytes, input: async (input: PreviewInput) => { await rpc("input", input) }, close }
-    } catch (error) { try { await close() } catch { throw new RunnerCleanupError("Runner startup cleanup failed; restart only after verifying VM cleanup.") } throw error }
+    } catch (error) { try { await close() } catch { throw new RunnerCleanupError("Runner startup cleanup failed; restart only after verifying host cleanup.") } throw error }
   }
 }

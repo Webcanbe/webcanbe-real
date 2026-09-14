@@ -37,3 +37,10 @@ export class RasterViewerServer {
   }
   async close() { await new Promise<void>(resolve => { if (!this.server) resolve(); else this.server.close(() => resolve()) }) }
 }
+
+/** Serve these headers on the separate viewer HTTPS origin. In particular the
+ * response sandbox also protects direct navigation, outside an editor iframe. */
+export function hostedRasterViewerHeaders(editorOrigin: string) {
+  hostedRasterViewerDocument(editorOrigin) // validates the exact origin
+  return { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "Content-Security-Policy": `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors ${editorOrigin}; sandbox allow-scripts`, "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" }
+}

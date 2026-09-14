@@ -1,3 +1,4 @@
+import type { HostedLoginBoundary } from "./hostedIdentity"
 import { AuthorityDenied, roleOperations, type HostedSessionBoundary, type ServerSession } from "./hostedAuthority"
 import { ScheduledRunnerProvider, type SessionLeaseStore } from "./runnerScheduler"
 import type { ArtifactStore } from "./storageContracts"
@@ -44,12 +45,13 @@ function matchesKey(supplied: unknown, expected: string) { return typeof supplie
 
 /** Local development adapter with an explicitly injected hosted session boundary.
  * The default remains single-operator; injection is not a deployed login service. */
-export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?: string; registry?: ProjectRegistry; runner?: RunnerProvider; hosted?: HostedSessionBoundary; leases?: SessionLeaseStore; artifacts?: ArtifactStore } = {}): Plugin {
+export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?: string; registry?: ProjectRegistry; runner?: RunnerProvider; hosted?: HostedSessionBoundary; leases?: SessionLeaseStore; artifacts?: ArtifactStore; fastRefresh?: boolean; login?: HostedLoginBoundary } = {}): Plugin {
+  if (options.login && !options.hosted) throw new Error("Login requires the hosted cookie/session boundary.")
   const registry = options.registry ?? new ProjectRegistry(projectRoot)
   const editorKey = options.editorKey ?? randomBytes(32).toString("base64url")
   if (options.hosted && (!options.runner || !options.leases || !options.artifacts)) throw new Error("Hosted foundation requires a controlled provider, durable leases and authorized artifacts.")
   const scheduled = options.hosted ? new ScheduledRunnerProvider(options.runner!, options.leases!, owner => registry.runnerAuthorized(owner)) : undefined
-  const controlled = options.runner ? new ControlledPreviewTransport(registry, projectRoot, scheduled ?? options.runner, Date.now, options.artifacts) : undefined
+  const controlled = options.runner ? new ControlledPreviewTransport(registry, projectRoot, scheduled ?? options.runner, Date.now, options.artifacts, { fastRefresh: options.fastRefresh }) : undefined
   const viewer = new RasterViewerServer()
   let importBusy = false
   return {
@@ -70,6 +72,9 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
         try { url = decodeURIComponent((request.url ?? "").split("?")[0]).replace(/\\/g, "/") } catch { return json(response, 400, { error: "Invalid path." }) }
         if (!(options.hosted ? request.headers.host === new URL(options.hosted.origins.editorOrigin).host : /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(request.headers.host ?? "")) || /(?:\.webcanbe|\/fixtures\/|\/__webcanbe\/(?:preview|fixture)\/)/i.test(url)) return json(response, 403, { error: "Project content is available only through the authorized sandbox preview." })
         next()
+      })
+      if (options.login) server.middlewares.use((request, response, next) => {
+        void options.login!.handle(request, response).then(handled => { if (!handled) next() }).catch(() => { if (response.headersSent) response.destroy(); else json(response, 403, { error: "Identity is unavailable." }) })
       })
       server.middlewares.use("/__webcanbe/api", async (request, response) => {
         if (!options.hosted && !validEditorOrigin(request)) return json(response, 403, { error: "Editor request origin denied." })

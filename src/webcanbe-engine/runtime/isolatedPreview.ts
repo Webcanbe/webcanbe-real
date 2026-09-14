@@ -1,3 +1,4 @@
+import { developmentVendor, fastRefreshArtifacts } from "./fastRefreshCompiler"
 import { validateStylesheetConfiguration } from "./configuration"
 import { IncrementalPreviewCompiler } from "./incrementalPreview"
 import fs from "node:fs"
@@ -105,6 +106,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const cached = incremental?.transforms.get(args.path)
         if (ext !== "css" && cached?.source === code) return cached.result
         const originalCode = code
+        if (vendor && incremental?.fastRefresh && /^(tsx|jsx|ts|js)$/.test(ext)) code = developmentVendor(code)
         if (ext === "css") {
           const cssConfig = validateStylesheetConfiguration(code, runtime.profile !== "react19-vite6")
           if (/@import\s+["']tailwindcss["']\s*;/.test(code)) {
@@ -149,6 +151,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
     if (!contentType) throw new Error("Unsupported preview artifact type.")
     files.set("/" + relative, { body: Buffer.from(file.contents), contentType })
   }
+  if (transport === "http" && incremental?.fastRefresh) incremental.refreshFallback = await fastRefreshArtifacts(bundle, incremental.transforms, root, applicationRoot, runtime.entry!, files, runtime.environment)
   return { files }
 }
 

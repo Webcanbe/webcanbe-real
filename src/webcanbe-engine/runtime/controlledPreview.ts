@@ -9,8 +9,8 @@ import { contentHash } from "../mutations/durableSource"
 import { createHash, randomUUID } from "node:crypto"
 import { buildIsolatedHttpPreview, type HttpPreviewBuild } from "./isolatedPreview"
 import { ProjectRegistry, safeArchivePath, type SessionAuthority } from "./projectRegistry"
-import { safePreviewRoute } from "../bridge/previewRoute"
-import { previewResourcePath } from "./httpPreviewServer"
+import { routeAllowed, validPreviewInput } from "./previewInputs"
+export { validPreviewInput } from "./previewInputs"
 
 export const STRICT_PREVIEW_BLOCKER = "Strict preview is unavailable: no controlled browser/network runner has been verified and installed. Client iframe policy or runner claims cannot authorize strict execution."
 
@@ -57,7 +57,8 @@ export interface ControlledExecution {
 }
 /** Server-owned replaceable execution boundary. Must enforce isolation outside browser APIs,
  * retain the native browser sandbox, supervise expiry/crash and reap aborted startup. */
-export class RunnerCleanupError extends Error {}
+export { RunnerCleanupError } from "./runnerContracts"
+import { RunnerCleanupError } from "./runnerContracts"
 export interface RunnerProvider {
   open(job: ControlledJob, signal: AbortSignal): Promise<ControlledExecution>
   /** Trusted controller recovery only; must create a revoke tombstone and verify cleanup. */
@@ -71,11 +72,7 @@ type Entry = {
   timer: ReturnType<typeof setTimeout>; retired: boolean; pending: boolean; busy: boolean
   execution?: ControlledExecution; closing?: Promise<void>
 }
-function routeAllowed(route: unknown): route is string {
-  if (!safePreviewRoute(route)) return false
-  const pathname = previewResourcePath(route.split("#")[0])
-  return Boolean(pathname && !/^\/_wcb(?:\/|$)/i.test(pathname))
-}
+
 
 /** Raster transport. Only server-installed providers can start strict execution.
  * All calls require the existing server capability; a generation is not authority.
@@ -86,7 +83,7 @@ export class ControlledPreviewTransport {
   private closed = false
   private quarantined = false
   private readonly sweepTimer: ReturnType<typeof setInterval>
-  constructor(private readonly registry: ProjectRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now, private readonly artifacts?: ArtifactStore) {
+  constructor(private readonly registry: ProjectRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now, private readonly artifacts?: ArtifactStore, private readonly options: { fastRefresh?: boolean } = {}) {
     this.sweepTimer = setInterval(() => { void this.sweep().catch(() => { this.quarantined = true }) }, 250)
     this.sweepTimer.unref()
   }
@@ -134,7 +131,7 @@ export class ControlledPreviewTransport {
     entry.timer.unref(); this.entries.set(generation, entry)
     try {
       entry.sourceHashes = new Map([...this.registry.durable(projectId).files()].map(([file, text]) => [file, contentHash(text)]))
-      entry.compiler = new IncrementalPreviewCompiler()
+      entry.compiler = new IncrementalPreviewCompiler(Boolean(this.options.fastRefresh))
       let snapshot = snapshotPreview(await buildIsolatedHttpPreview(this.registry.get(projectId)!, this.applicationRoot, entry.compiler))
       snapshot = this.storedSnapshot(entry, snapshot)
       if (!this.current(entry)) throw new Error("Controlled preview became stale during compilation.")
@@ -244,16 +241,7 @@ export class ControlledPreviewTransport {
   async close() { this.closed = true; clearInterval(this.sweepTimer); await this.sweep() }
 }
 
-export function validPreviewInput(input: unknown): input is PreviewInput {
-  if (!input || typeof input !== "object" || Array.isArray(input)) return false
-  const v = input as Record<string, unknown>, exact = (keys: string[]) => Object.keys(v).every(key => keys.includes(key))
-  const number = (n: unknown, min: number, max: number) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max
-  if (v.type === "navigate") return exact(["type", "route"]) && routeAllowed(v.route)
-  if (v.type === "pointer") return exact(["type", "action", "x", "y"]) && ["move", "click", "select"].includes(String(v.action)) && number(v.x, 0, 4095) && number(v.y, 0, 4095)
-  if (v.type === "scroll") return exact(["type", "dx", "dy"]) && number(v.dx, -2000, 2000) && number(v.dy, -2000, 2000)
-  if (v.type === "history") return exact(["type", "action"]) && ["back", "forward", "reload"].includes(String(v.action))
-  return v.type === "viewport" && exact(["type", "width", "height"]) && number(v.width, 320, 1920) && number(v.height, 240, 1080) && Number.isInteger(v.width) && Number.isInteger(v.height)
-}
+
 function sanitizeObservation(value: unknown): RunnerObservation {
   const v = value as RunnerObservation
   if (!v || !routeAllowed(v.route) || !validPreviewInput({ type: "viewport", ...v.viewport }) || !Array.isArray(v.logs) || v.logs.length > 20 || v.logs.some(line => typeof line !== "string" || line.length > 310)) throw new Error("Invalid runner observation.")

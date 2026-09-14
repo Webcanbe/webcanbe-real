@@ -1,0 +1,24 @@
+[Unit]
+Description=WebCanBe private fenced runner gateway
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+User=wcb-controller
+Group=wcb-controller
+ExecStart=/usr/bin/node /opt/wcb-control/gateway.cjs /etc/webcanbe/gateway.json
+Restart=on-failure
+UMask=0077
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LimitCORE=0
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+TimeoutStopSec=10
+# Fixed root-owned launch/stop entrypoints need the narrow sudoers grant below.
+# Project jobs retain their own NoNewPrivileges/capability/namespace/cgroup policy.
+[Install]
+WantedBy=multi-user.target

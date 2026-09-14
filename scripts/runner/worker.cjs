@@ -1,5 +1,6 @@
 // Trusted Linux guest worker. Only fixed commands; imported JS runs in Chromium.
 const fs = require('node:fs');
+const {refreshChanges,refreshManifest}=require('/opt/wcb-runtime/refresh-policy.cjs');
 const { createHash } = require('node:crypto');
 const { chromium } = require('/opt/wcb-runtime/node_modules/playwright-core');
 let browser, page, cdp, job, artifacts, selectedRoute = '', closed = false;
@@ -61,11 +62,13 @@ async function open(value) {
   return { browser: browser.version(), sandbox, networkNamespace: fs.readlinkSync('/proc/self/ns/net'), processNamespace: fs.readlinkSync('/proc/self/ns/pid') };
 }
 async function update(value) {
-  if (!job || closed || Date.now() >= job.expiresAt || value?.expectedRevision !== job.revision || value.expectedDigest !== job.snapshot.digest || !['css-hot-update', 'incremental-rebuild-reload'].includes(value.kind)) throw Error('Stale update authority');
+  if (!job || closed || Date.now() >= job.expiresAt || value?.expectedRevision !== job.revision || value.expectedDigest !== job.snapshot.digest || !['css-hot-update', 'react-fast-refresh', 'incremental-rebuild-reload'].includes(value.kind)) throw Error('Stale update authority');
   const snapshot = value.snapshot;
   if (!snapshot || JSON.stringify(snapshot).length > 48 * 1024 * 1024 || snapshot.files.length > 2000 || createHash('sha256').update(JSON.stringify({ html: snapshot.html, files: snapshot.files })).digest('hex') !== snapshot.digest) throw Error('Update artifact digest mismatch');
   const next = new Map(snapshot.files.map(file => [file.path, file]));
   if (value.kind === 'css-hot-update' && (job.snapshot.html !== snapshot.html || artifacts.size !== next.size || snapshot.files.some(file => { const previous = artifacts.get(file.path); return !previous || previous.contentType !== file.contentType || (!file.path.endsWith('.css') && previous.base64 !== file.base64) }))) throw Error('CSS update changes executable artifacts');
+  const changed = value.kind === 'react-fast-refresh' ? refreshChanges(job.snapshot, snapshot) : undefined;
+  if (value.kind === 'react-fast-refresh' && !changed) throw Error('Refresh crosses an unsupported module boundary');
   const current = new URL(page.url());
   if (current.origin !== job.origin) throw Error('Update origin mismatch');
   // Swap the full immutable map in the trusted supervisor. CSS is modified from
@@ -82,6 +85,11 @@ async function update(value) {
       }
       globalThis.__wcbSelected = null;
     }, css);
+  } else if (value.kind === 'react-fast-refresh') {
+    // This executes only inside the isolated project browser. No imported JS is
+    // sent to the ordinary editor/viewer browser, and no new network is enabled.
+    await page.evaluate(({manifest,changed}) => { if (window.__wcbApplyRefresh(manifest,changed) !== true) throw Error('Refresh failed'); }, {manifest:refreshManifest(snapshot),changed});
+    await dom(() => { globalThis.__wcbSelected = null; });
   } else {
     const scroll = await dom(() => ({ x: scrollX, y: scrollY }));
     job = { ...job, snapshot };

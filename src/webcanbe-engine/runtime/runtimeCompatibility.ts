@@ -18,7 +18,7 @@ function selectProfile(project: ProjectRecord, applicationRoot: string) {
     const lock = fs.existsSync(path.join(project.root, "package-lock.json")) ? json(project.root, "package-lock.json") : undefined
     return RUNTIME_PROFILES.find(id => {
       const profile = JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8"))
-      return Object.entries(declared).every(([name, range]) => typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]))
+      return ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]) })
     }) ?? PROFILE
   } catch { return PROFILE }
 }
@@ -252,7 +252,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
       }
       visit(source)
     }
-    report.notes.push("Versioned controlled browser compilation, not an uploaded Vite server. React module changes use incremental rebuild + document reload, not React Fast Refresh. BrowserRouter requires a controlled provider.")
+    report.notes.push("Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider.")
   } catch (error) { issue("runtime-inspection", (error as Error).message) }
   for (const item of report.issues) {
     item.file ??= item.code === "tsconfig" ? "tsconfig.json / jsconfig.json" : item.code === "css-config" ? "Tailwind / PostCSS configuration" : item.code === "executable-config" ? "vite.config" : "package.json / package-lock.json"

@@ -1,10 +1,11 @@
 import { DatabaseSync } from "node:sqlite"
 import { createHash } from "node:crypto"
-import { RunnerCleanupError, type ControlledExecution, type ControlledJob, type RunnerProvider } from "./controlledPreview"
+import { type ControlledExecution, type ControlledJob, type RunnerProvider } from "./controlledPreview"
 
 export type RunnerOwner = Readonly<{ userId: string; workspaceId: string; projectId: string; sessionId: string }>
 export type ResourceBudget = Readonly<{ memoryMiB: number; cpuPercent: number; tasks: number; artifactBytes: number }>
-export const LOCAL_RESOURCE_BUDGET: ResourceBudget = Object.freeze({ memoryMiB: 1536, cpuPercent: 150, tasks: 192, artifactBytes: 32 * 1024 * 1024 })
+export { LOCAL_RESOURCE_BUDGET } from "./runnerContracts"
+import { LOCAL_RESOURCE_BUDGET, RunnerCleanupError } from "./runnerContracts"
 export type RunnerAllocation = Readonly<{ owner: RunnerOwner; idempotencyKey: string; startupDeadline: number; executionDeadline: number; idleMs: number; budget: ResourceBudget }>
 export type RunnerLease = { generation: string; requestHash: string; allocation: RunnerAllocation; state: "allocating" | "running" | "stopping" | "stopped" | "quarantined" }
 export interface SessionLeaseStore {

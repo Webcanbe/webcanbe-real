@@ -12,6 +12,18 @@ export const treeHash = (files: Map<string, string>) => contentHash(JSON.stringi
 type Change = { file: string; before: string | null; after: string | null }
 type Journal = { schema: 1; projectId: string; transactionId: string; changes: Change[]; next: RevisionLedger }
 export class SourceConflict extends Error {}
+export const HISTORY_LIMITS = Object.freeze({ bytes: 64 * 1024 * 1024, transactions: 1000, revisions: 1001, journalBytes: 160 * 1024 * 1024 })
+const historyFull = () => new SourceConflict("Project history capacity reached. Source is unchanged; export and operator-managed history archival are required before more edits.")
+function readHistoryFile(file: string, limit = HISTORY_LIMITS.bytes) {
+  if (fs.statSync(file).size > limit) throw historyFull()
+  return JSON.parse(fs.readFileSync(file, "utf8"))
+}
+export function boundedHistory(ledger: RevisionLedger) {
+  if (ledger.transactions.length > HISTORY_LIMITS.transactions || ledger.revisions.length > HISTORY_LIMITS.revisions) throw historyFull()
+  const text = JSON.stringify(ledger)
+  if (Buffer.byteLength(text) > HISTORY_LIMITS.bytes) throw historyFull()
+  return text
+}
 
 function syncDirectory(directory: string) { const fd = fs.openSync(directory, "r"); try { fs.fsyncSync(fd) } finally { fs.closeSync(fd) } }
 function ensureDirectory(directory: string) {
@@ -48,12 +60,12 @@ export class DurableSource {
     this.journalPath = path.join(this.directory, "pending.json")
     const release = this.lease()
     try {
-      this.ledger = fs.existsSync(this.statePath) ? JSON.parse(fs.readFileSync(this.statePath, "utf8")) : { schema: 1, projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
+      this.ledger = fs.existsSync(this.statePath) ? readHistoryFile(this.statePath) : { schema: 1, projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
       if (this.ledger.schema !== 1 || this.ledger.projectId !== project.id || !Array.isArray(this.ledger.revisions) || !Array.isArray(this.ledger.transactions)) throw new Error("Invalid project history. Recovery requires operator review.")
       this.recover()
       if (!this.ledger.revisions.length) {
         this.ledger.revisions.push({ revisionId: `rev_${randomUUID()}`, projectId: project.id, parentRevisionId: null, createdAt: new Date().toISOString(), actor: "local-operator", producer: "system", contentHash: treeHash(this.files()) })
-        atomicFile(this.statePath, JSON.stringify(this.ledger))
+        atomicFile(this.statePath, boundedHistory(this.ledger))
       }
       this.hydrate()
     } finally { release() }
@@ -80,7 +92,7 @@ export class DurableSource {
     try { return operation() } finally { release() }
   }
   private reload() {
-    if (fs.existsSync(this.statePath)) this.ledger = JSON.parse(fs.readFileSync(this.statePath, "utf8"))
+    if (fs.existsSync(this.statePath)) this.ledger = readHistoryFile(this.statePath)
     this.hydrate()
   }
 
@@ -209,7 +221,7 @@ export class DurableSource {
   }
   private recover() {
     if (!fs.existsSync(this.journalPath)) return
-    const journal: Journal = JSON.parse(fs.readFileSync(this.journalPath, "utf8"))
+    const journal: Journal = readHistoryFile(this.journalPath, HISTORY_LIMITS.journalBytes)
     if (journal.schema !== 1 || journal.projectId !== this.project.id || journal.next.projectId !== this.project.id) throw new Error("Invalid source recovery journal.")
     const committed = this.ledger.transactions.some(item => item.id === journal.transactionId && item.status === "accepted")
     this.writeChanges(journal.changes, committed ? "after" : "before")
@@ -222,13 +234,17 @@ export class DurableSource {
   reject(entry: MutationTransaction) {
     return this.withLease(() => {
       this.assertReady(); this.reload()
+      boundedHistory(this.ledger)
+      if (this.ledger.transactions.length >= HISTORY_LIMITS.transactions) throw historyFull()
       const next = structuredClone(this.ledger); next.transactions.push(entry)
-      atomicFile(this.statePath, JSON.stringify(next)); this.ledger = next
+      atomicFile(this.statePath, boundedHistory(next)); this.ledger = next
     })
   }
   commit(input: { expectedRevision: string; operations: FileOperation[]; entry: MutationTransaction; authorize: () => void; reverts?: string; redo?: boolean; checkpoint?: boolean; fault?: (phase: string, index?: number) => void }) {
     return this.withLease(() => {
       this.assertBase(input.expectedRevision); input.authorize()
+      boundedHistory(this.ledger)
+      if (this.ledger.transactions.length >= HISTORY_LIMITS.transactions || this.ledger.revisions.length >= HISTORY_LIMITS.revisions) throw historyFull()
       const prepared = input.checkpoint ? { before: this.files(), after: this.files(), changes: [] } : this.prepare(input.operations)
       const { changes, after } = prepared, entry = structuredClone(input.entry)
       const next = structuredClone(this.ledger), parent = this.head()
@@ -247,16 +263,19 @@ export class DurableSource {
         if (input.redo) { next.future = next.future.filter(id => id !== input.reverts); next.past.push(input.reverts) }
         else { next.past = next.past.filter(id => id !== input.reverts); next.future.push(input.reverts) }
       } else if (!input.checkpoint) { next.past.push(entry.id); next.future = [] }
+      boundedHistory(next) // quota before journaling or changing canonical source
       const journal: Journal = { schema: 1, projectId: this.project.id, transactionId: entry.id, changes, next }
       // Recheck authority, revision, and file identities after all validation.
       input.authorize(); this.assertBase(input.expectedRevision)
-      atomicFile(this.journalPath, JSON.stringify(journal))
+      const journalText = JSON.stringify(journal)
+      if (Buffer.byteLength(journalText) > HISTORY_LIMITS.journalBytes) throw historyFull()
+      atomicFile(this.journalPath, journalText)
       try {
         input.fault?.("journal")
         this.writeChanges(changes, "after", index => input.fault?.("write", index))
         input.authorize()
         if (treeHash(this.files()) !== treeHash(after)) throw new SourceConflict("Source changed during commit.")
-        atomicFile(this.statePath, JSON.stringify(next))
+        atomicFile(this.statePath, boundedHistory(next))
         this.ledger = next; this.hydrate()
         input.fault?.("committed")
         fs.unlinkSync(this.journalPath); syncDirectory(this.directory)
@@ -265,7 +284,7 @@ export class DurableSource {
         // The disk ledger decides whether a commit succeeded, including failures
         // after rename/fsync. A retry with the same key returns that result.
         try {
-          this.ledger = JSON.parse(fs.readFileSync(this.statePath, "utf8"))
+          this.ledger = readHistoryFile(this.statePath)
           this.recover(); this.hydrate()
           const accepted = this.ledger.transactions.find(item => item.id === entry.id)
           if (accepted) return accepted

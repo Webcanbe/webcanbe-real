@@ -13,10 +13,8 @@ export type PreviewGenerationId = string & { readonly __identity: "preview-gener
 export type RevisionId = string & { readonly __identity: "revision" }
 export type ProjectRole = "owner" | "editor" | "viewer"
 export const opaqueId = () => randomUUID()
-export function requireOpaqueId(value: unknown): asserts value is string {
-  if (typeof value !== "string" || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(value)) throw new AuthorityDenied()
-}
-export class AuthorityDenied extends Error { constructor() { super("Project or session is unavailable.") } }
+export { requireOpaqueId, AuthorityDenied } from "./authorityIdentity"
+import { requireOpaqueId, AuthorityDenied } from "./authorityIdentity"
 const hash = (value: string) => createHash("sha256").update(value).digest("hex")
 export const readOperations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "files", "validate", "history"]
 export const writeOperations: SessionOperation[] = ["mutate", "undo", "redo", "code", "revert", "checkpoint"]
@@ -45,6 +43,7 @@ export class SqliteAuthorityStore implements AuthenticatedSessionStore, Membersh
   constructor(file: string, private readonly now = Date.now) {
     this.db = new DatabaseSync(file)
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=1000;
+      CREATE TABLE IF NOT EXISTS disabled_users (user_id TEXT PRIMARY KEY);
       CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT UNIQUE NOT NULL, csrf_hash TEXT NOT NULL, expires INTEGER NOT NULL, revoked INTEGER NOT NULL DEFAULT 0);
       CREATE TABLE IF NOT EXISTS workspaces (workspace_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL, version INTEGER NOT NULL, active INTEGER NOT NULL, PRIMARY KEY(workspace_id,user_id));
       CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL);
@@ -64,6 +63,7 @@ export class SqliteAuthorityStore implements AuthenticatedSessionStore, Membersh
   private validRole(role: ProjectRole | null) { if (role !== null && !["owner", "editor", "viewer"].includes(role)) throw new AuthorityDenied() }
   issueVerifiedSession(userId: string, lifetimeMs = 600_000) {
     requireOpaqueId(userId)
+    if (this.db.prepare("SELECT user_id FROM disabled_users WHERE user_id=?").get(userId)) throw new AuthorityDenied()
     if (!Number.isSafeInteger(lifetimeMs) || lifetimeMs < 1 || lifetimeMs > 600_000) throw new AuthorityDenied()
     const token = randomBytes(32).toString("base64url"), csrf = randomBytes(32).toString("base64url")
     const session = { sessionId: opaqueId(), userId, expiresAt: this.now() + lifetimeMs }
@@ -74,11 +74,26 @@ export class SqliteAuthorityStore implements AuthenticatedSessionStore, Membersh
   }
   resolve(token: string): ServerSession | undefined {
     if (!/^[\w-]{43}$/.test(token)) return undefined
-    const row = this.db.prepare("SELECT id,user_id,expires FROM sessions WHERE token_hash=? AND expires>? AND revoked=0").get(hash(token), this.now())
+    const row = this.db.prepare("SELECT id,user_id,expires FROM sessions WHERE token_hash=? AND expires>? AND revoked=0 AND user_id NOT IN (SELECT user_id FROM disabled_users)").get(hash(token), this.now())
     return row ? Object.freeze({ sessionId: String(row.id), userId: String(row.user_id), expiresAt: Number(row.expires) }) : undefined
   }
-  active(session: ServerSession) { return Boolean(this.db.prepare("SELECT id FROM sessions WHERE id=? AND user_id=? AND expires=? AND expires>? AND revoked=0").get(session.sessionId, session.userId, session.expiresAt, this.now())) }
+  active(session: ServerSession) { return Boolean(this.db.prepare("SELECT id FROM sessions WHERE id=? AND user_id=? AND expires=? AND expires>? AND revoked=0 AND user_id NOT IN (SELECT user_id FROM disabled_users)").get(session.sessionId, session.userId, session.expiresAt, this.now())) }
   csrf(session: ServerSession, token: string) { return this.active(session) && /^[\w-]{43}$/.test(token) && Boolean(this.db.prepare("SELECT id FROM sessions WHERE id=? AND csrf_hash=?").get(session.sessionId, hash(token))) }
+  rotateCsrf(session: ServerSession) {
+    if (!this.active(session)) throw new AuthorityDenied()
+    const token = randomBytes(32).toString("base64url")
+    this.db.prepare("UPDATE sessions SET csrf_hash=? WHERE id=?").run(hash(token), session.sessionId)
+    return token
+  }
+  revokeUser(userId: string) {
+    requireOpaqueId(userId)
+    this.db.exec("BEGIN IMMEDIATE")
+    try {
+      this.db.prepare("INSERT OR IGNORE INTO disabled_users VALUES(?)").run(userId)
+      this.db.prepare("UPDATE sessions SET revoked=1 WHERE user_id=?").run(userId)
+      this.db.exec("COMMIT")
+    } catch (error) { this.db.exec("ROLLBACK"); throw error }
+  }
   revokeSession(sessionId: string) { this.db.prepare("UPDATE sessions SET revoked=1 WHERE id=?").run(sessionId) }
   requireWorkspace(session: ServerSession, workspaceId: string) {
     requireOpaqueId(workspaceId)

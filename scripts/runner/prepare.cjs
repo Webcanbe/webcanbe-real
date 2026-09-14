@@ -15,6 +15,9 @@ if (!fs.existsSync(executable)) {
 const env = {...process.env,LIMA_HOME:path.join(state,'lima')};
 const lima = args => run(executable,args,{env});
 lima(fs.existsSync(path.join(state,'lima/wcb/lima.yaml')) ? ['start','wcb','--timeout=10m'] : ['start','-y','--name=wcb',path.join(__dirname,'vm.yaml'),'--timeout=10m']);
+require('esbuild').buildSync({entryPoints:[path.join(root,'src/webcanbe-engine/runtime/refreshPolicy.ts')],outfile:path.join(state,'refresh-policy.cjs'),bundle:true,platform:'node',format:'cjs',target:'node20'});
+lima(['copy',path.join(state,'refresh-policy.cjs'),'wcb:/tmp/wcb-refresh-policy.cjs']);
+lima(['shell','--workdir=/','wcb','sudo','-n','install','-m','644','/tmp/wcb-refresh-policy.cjs','/opt/wcb-runtime/refresh-policy.cjs']);
 for (const name of ['worker.cjs','launch.sh','stop.sh','probe.cjs','verify.cjs','socket-probe.c']) {
  lima(['copy',path.join(__dirname,name),'wcb:/tmp/wcb-'+name]);
  lima(['shell','--workdir=/','wcb','sudo','-n','install','-m',name.endsWith('.sh')?'755':'644','/tmp/wcb-'+name,'/opt/wcb-runtime/'+name]);
