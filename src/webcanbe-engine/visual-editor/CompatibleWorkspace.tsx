@@ -8,6 +8,7 @@ import type { CompatibilitySummary, MutationTransaction, PreviewElement, SourceT
 import type { SourceResponse } from "./CodeWorkspace"
 const CodeWorkspace = lazy(() => import("./CodeWorkspace"))
 import "./compatibleWorkspace.css"
+import { samePointerFrame } from "./rasterFrame"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -28,6 +29,8 @@ export default function CompatibleWorkspace() {
   const [availableWidth, setAvailableWidth] = useState(1280)
   const [runtime, setRuntime] = useState<RuntimeInfo>()
   const [selectMode, setSelectMode] = useState(true)
+  const selectModeRef = useRef(selectMode)
+  selectModeRef.current = selectMode
   const routeHash = useRef("#/")
   const routePath = useRef("/")
   const [routeInput, setRouteInput] = useState("/")
@@ -35,7 +38,7 @@ export default function CompatibleWorkspace() {
   const activeGeneration = useRef("")
   const rasterBusy = useRef(false)
   const rasterSequence = useRef(0)
-  const rasterQueued = useRef<Array<{ input: PreviewInput; sequence: number; generation: string; revision: string; epoch: number }>>([])
+  const rasterQueued = useRef<Array<{ input: PreviewInput; sequence: number; generation: string; revision: string; epoch: number; frame?: ApiResponse }>>([])
   const currentRasterOperation = useRef<(input?: PreviewInput, sequence?: number) => Promise<void>>(async () => {})
   const refreshAttempt = useRef(0)
   const lastRaster = useRef<ApiResponse | undefined>(undefined)
@@ -208,7 +211,7 @@ export default function CompatibleWorkspace() {
 
   function deliverRaster(data = lastRaster.current) {
     if (!data?.png || !data.observation || data.generation !== activeGeneration.current) return
-    frame.current?.contentWindow?.postMessage({ channel: "wcb-raster", type: "frame", generation: data.generation, sequence: data.sequence, png: data.png, ...data.observation.viewport, select: selectMode }, "*")
+    frame.current?.contentWindow?.postMessage({ channel: "wcb-raster", type: "frame", generation: data.generation, sequence: data.sequence, png: data.png, ...data.observation.viewport, select: selectModeRef.current }, "*")
   }
   async function rasterOperation(input?: PreviewInput, sequence = rasterSequence.current) {
     if (preview?.transport !== "raster" || !activeGeneration.current) return
@@ -216,7 +219,7 @@ export default function CompatibleWorkspace() {
       if (input) {
         const queue = rasterQueued.current, last = queue.at(-1)
         if (input.type === "text" && last?.input.type === "text" && last.generation === activeGeneration.current && last.revision === revision.current && last.epoch === connectionEpoch.current && last.input.text.length + input.text.length <= 4096) last.input = { type: "text", text: last.input.text + input.text }
-        else if (queue.length < 64) queue.push({ input, sequence, generation: activeGeneration.current, revision: revision.current, epoch: connectionEpoch.current })
+        else if (queue.length < 64) queue.push({ input, sequence, generation: activeGeneration.current, revision: revision.current, epoch: connectionEpoch.current, frame: input.type === "pointer" ? lastRaster.current : undefined })
         else setMessage("Preview input queue is full. Wait for the frame before continuing.")
       }
       return
@@ -260,7 +263,7 @@ export default function CompatibleWorkspace() {
       rasterBusy.current = false
       const queued = rasterQueued.current.shift()
       if (queued && queued.generation === activeGeneration.current && queued.revision === revision.current && queued.epoch === connectionEpoch.current) {
-        if (queued.input.type === "pointer" && queued.sequence !== rasterSequence.current) setMessage("The frame changed before selection. Select the element again.")
+        if (queued.input.type === "pointer" && queued.sequence !== rasterSequence.current && !samePointerFrame(queued.frame, lastRaster.current)) setMessage("The frame changed before selection. Select the element again.")
         else void currentRasterOperation.current(queued.input, rasterSequence.current)
       }
     }
@@ -268,16 +271,17 @@ export default function CompatibleWorkspace() {
   useEffect(() => { currentRasterOperation.current = rasterOperation })
   useEffect(() => {
     if (preview?.transport !== "raster") return
-    void rasterOperation()
-    const timer = setInterval(() => { void rasterOperation() }, 1500)
+    void currentRasterOperation.current()
+    const timer = setInterval(() => { void currentRasterOperation.current() }, 1500)
     const receive = (event: MessageEvent) => {
       const data = event.data
       if (event.source !== frame.current?.contentWindow || event.origin !== "null" || data?.channel !== "wcb-raster" || data.type !== "input" || data.generation !== activeGeneration.current || data.sequence !== rasterSequence.current) return
-      if (["pointer", "scroll", "key", "text"].includes(data.input?.type)) void rasterOperation(data.input, data.sequence)
+      if (["pointer", "scroll", "key", "text"].includes(data.input?.type)) void currentRasterOperation.current(data.input, data.sequence)
     }
     window.addEventListener("message", receive)
     return () => { clearInterval(timer); window.removeEventListener("message", receive) }
-  }, [preview, session, selectMode])
+  // Mode changes configure the viewer without invalidating its displayed frame.
+  }, [preview, session])
   useEffect(() => {
     if (preview?.transport === "raster") void rasterOperation()
     if (selected && session) void inspect(selected)

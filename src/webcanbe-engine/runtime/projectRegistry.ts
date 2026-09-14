@@ -1,3 +1,4 @@
+import { isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
@@ -45,7 +46,7 @@ export function safeArchivePath(entryName: string) {
   if (!entryName || entryName.length > 512 || /[\x00-\x1f\x7f\\:]/.test(entryName) || entryName.startsWith("/") || entryName !== entryName.normalize("NFC")) return undefined
   const parts = entryName.replace(/\/$/, "").split("/")
   if (parts.length > 20 || parts.some(part => part.length > 128 || !part || part === "." || part === ".." || /[. ]$/.test(part) || /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i.test(part))) return undefined
-  if (parts.some(part => ["node_modules", ".git", ".webcanbe"].includes(part.toLowerCase()) || /^\.env(?:$|\.)/i.test(part) && part !== ".env.example")) return undefined
+  if (parts.some(part => ["node_modules", ".git", ".webcanbe"].includes(part.toLowerCase()) || /^\.env(?:$|\.)/i.test(part) && !isExampleEnvironment(part))) return undefined
   return parts.join("/")
 }
 
@@ -70,7 +71,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
         if (directory) { zip.readEntry(); return }
-        if (!/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
+        if (!isInertMetadata(path.posix.basename(name)) && !/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
         zip.openReadStream(entry, async (streamError, stream) => {
           if (streamError || !stream) return fail(streamError ?? new Error("Invalid ZIP stream."))
           try {
@@ -84,6 +85,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
             const content = Buffer.concat(chunks)
             if (crc32(content) !== entry.crc32) throw new Error("ZIP member checksum mismatch.")
             if (!/\.(png|jpe?g|gif|webp|ico|woff2?)$/i.test(name)) { if (content.includes(0)) throw new Error("Binary data in a text file."); new TextDecoder("utf-8", { fatal: true }).decode(content) }
+            validateIntakeMetadata(path.posix.basename(name), content)
             files.set(name, content)
             if (!stopped) zip.readEntry()
           } catch (err) { stream.destroy(); fail(err instanceof Error ? err : new Error("Invalid ZIP content.")) }

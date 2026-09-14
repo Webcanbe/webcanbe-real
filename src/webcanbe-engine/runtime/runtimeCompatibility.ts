@@ -8,24 +8,23 @@ import { parse as parseHtml } from "parse5"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1"] as const
-export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs"])
-export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported"
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1"] as const
+export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer"])
+export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported" | "preserved-not-applied"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
 function selectProfile(project: ProjectRecord, applicationRoot: string) {
   try {
     const manifest = json(project.root, "package.json"), declared = { ...manifest.devDependencies, ...manifest.dependencies }
     const lock = fs.existsSync(path.join(project.root, "package-lock.json")) ? json(project.root, "package-lock.json") : undefined
-    return RUNTIME_PROFILES.find(id => {
-      const profile = JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8"))
-      return ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]) })
-    }) ?? PROFILE
+    const candidates = RUNTIME_PROFILES.map(id => ({ id, profile: JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8")) })).filter(({ profile }) =>
+      ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]) }))
+    return candidates.find(({ profile }) => Object.entries(declared).every(([name, range]) => typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name])))?.id ?? candidates[0]?.id ?? PROFILE
   } catch { return PROFILE }
 }
 export type RuntimeIssue = { file?: string; classification?: ConfigurationClass; code: string; message: string; requiredCapability: string }
 export type RuntimeReport = {
   compilerOptions: Record<string, any>; schema: 2; configuration: ConfigurationSupport[]; base: string; environment: Record<string, string | boolean>; profile: string; supported: boolean; entry?: string; aliases: Record<string, string>
-  dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>
+  clientDependencies: string[]; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>
   issues: RuntimeIssue[]; notes: string[]
 }
 export class RuntimeCompatibilityError extends Error {
@@ -69,7 +68,7 @@ export function htmlEntry(root: string) {
 }
 
 /** Interpret only a fixed AST grammar; never import/eval the Vite module. */
-function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string } {
+function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string; preserved?: string[] } {
   const files = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].filter(file => fs.existsSync(path.join(root, file)))
   if (files.length > 1) throw new Error("Multiple Vite configurations are ambiguous.")
   if (!files.length) return { aliases: {}, base: "/" }
@@ -80,13 +79,20 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
   for (const statement of source.statements.filter(ts.isImportDeclaration)) {
     if (!ts.isStringLiteral(statement.moduleSpecifier)) throw new Error("Unknown configuration import.")
     const module = statement.moduleSpecifier.text, clause = statement.importClause
-    if (!["node:url", "url"].includes(module) && !declared[module]) throw new Error(`Undeclared Vite configuration dependency: ${module}.`)
+    if (!["node:url", "url", "node:path", "path"].includes(module) && !declared[module]) throw new Error(`Undeclared Vite configuration dependency: ${module}.`)
     if (clause?.isTypeOnly) throw new Error("Type-only configuration imports cannot be runtime bindings.")
+    if (clause?.namedBindings && ts.isNamespaceImport(clause.namedBindings)) bindings.set(clause.namedBindings.name.text, module + ":namespace")
     if (clause?.name) bindings.set(clause.name.text, module + ":default")
     if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) for (const item of clause.namedBindings.elements) bindings.set(item.name.text, module + ":" + (item.propertyName?.text ?? item.name.text))
-    if (!["vite", "@vitejs/plugin-react", "@vitejs/plugin-react-swc", "@tailwindcss/vite", "node:url", "url"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
+    if (!["vite", "@vitejs/plugin-react", "@vitejs/plugin-react-swc", "@tailwindcss/vite", "node:url", "url", "node:path", "path"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
   }
   const value = (node: ts.Expression): any => {
+    if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isSatisfiesExpression(node)) return value(node.expression)
+    if (ts.isArrowFunction(node) && !node.parameters.length && !node.modifiers?.length) {
+      if (ts.isBlock(node.body)) { if (node.body.statements.length === 1 && ts.isReturnStatement(node.body.statements[0]) && node.body.statements[0].expression) return value(node.body.statements[0].expression) }
+      else return value(node.body)
+      throw new Error("Only a zero-argument literal configuration factory is supported.")
+    }
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text
     if (ts.isNumericLiteral(node)) return Number(node.text)
     if (node.kind === ts.SyntaxKind.TrueKeyword) return true
@@ -102,6 +108,16 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
       return result
     }
     if (ts.isArrayLiteralExpression(node)) return node.elements.map(item => value(item as ts.Expression))
+    if (ts.isCallExpression(node)) {
+      const expression = node.expression
+      const binding = ts.isIdentifier(expression) ? bindings.get(expression.text) : ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression) && ["path:default", "node:path:default", "path:namespace", "node:path:namespace"].includes(bindings.get(expression.expression.text) ?? "") ? "path:" + expression.name.text : undefined
+      if (["path:resolve", "node:path:resolve"].includes(binding ?? "")) {
+        const args = [...node.arguments]
+        if (args.length === 2 && ts.isIdentifier(args[0]) && args[0].text === "__dirname" && !bindings.has("__dirname")) args.shift()
+        if (args.length !== 1 || !ts.isStringLiteral(args[0]) || !/^\.?\//.test(args[0].text) || args[0].text.startsWith("/")) throw new Error("Only project-relative literal path.resolve aliases are supported.")
+        return confinedFile(root, args[0].text.replace(/^\.\//, ""))
+      }
+    }
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const binding = bindings.get(node.expression.text)
       if (binding === "vite:defineConfig" && node.arguments.length === 1) return value(node.arguments[0])
@@ -120,25 +136,36 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
   const exports = source.statements.filter(ts.isExportAssignment)
   if (exports.length !== 1 || source.statements.some(statement => !ts.isImportDeclaration(statement) && !ts.isExportAssignment(statement))) throw new Error("Vite configuration has executable statements; an isolated configuration runner is required.")
   const config = value(exports[0].expression)
-  if (!object(config) || Object.keys(config).some(key => !["plugins", "resolve", "base"].includes(key))) throw new Error("Unsupported Vite configuration field; an isolated configuration runner is required.")
+  if (!object(config) || Object.keys(config).some(key => !["plugins", "resolve", "base", "server", "preview"].includes(key))) throw new Error("Unsupported Vite configuration field; an isolated configuration runner is required.")
   if (config.base !== undefined && (typeof config.base !== "string" || !["/", "./"].includes(config.base) && (!/^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\/$/.test(config.base)))) throw new Error("Only bounded local Vite base paths are supported.")
   if (config.plugins !== undefined && (!Array.isArray(config.plugins) || config.plugins.some((plugin: any) => !pluginValues.has(plugin)))) throw new Error("Unsupported Vite build plugin.")
+  const preserved: string[] = []
+  for (const field of ["server", "preview"]) if (config[field] !== undefined) {
+    const settings = config[field]
+    if (!object(settings) || Object.entries(settings).some(([key, item]) => key === "port" ? !Number.isInteger(item) || item < 1 || item > 65535 : key === "open" ? typeof item !== "boolean" : true)) throw new Error("Only inert local dev-server open/port preferences can be preserved.")
+    preserved.push(field + ": local open/port preferences preserved but not applied; the controlled snapshot does not run an uploaded dev server.")
+  }
   const aliases: Record<string, string> = Object.create(null)
   if (config.resolve !== undefined) {
-    if (!object(config.resolve) || Object.keys(config.resolve).some(key => key !== "alias") || !object(config.resolve.alias)) throw new Error("Only static project-local resolve.alias objects are supported.")
-    for (const [key, replacement] of Object.entries(config.resolve.alias)) {
+    if (!object(config.resolve) || Object.keys(config.resolve).some(key => key !== "alias") || !object(config.resolve.alias) && !Array.isArray(config.resolve.alias)) throw new Error("Only static project-local resolve.alias objects are supported.")
+    const entries: Array<[string, unknown]> = Array.isArray(config.resolve.alias) ? config.resolve.alias.map((entry: any) => {
+      if (!object(entry) || Object.keys(entry).length !== 2 || !Object.prototype.hasOwnProperty.call(entry, "find") || !Object.prototype.hasOwnProperty.call(entry, "replacement")) throw new Error("Only literal find/replacement alias entries are supported.")
+      return [entry.find, entry.replacement]
+    }) : Object.entries(config.resolve.alias)
+    for (const [key, replacement] of entries) {
+      if (typeof key !== "string" || Object.prototype.hasOwnProperty.call(aliases, key)) throw new Error("Invalid or duplicate alias.")
       if (!/^[@~][\w/-]*$/.test(key) || typeof replacement !== "string") throw new Error("Only explicit @/~ project-local aliases are supported.")
       // Vite string aliases must be absolute; relative replacements have different resolution semantics.
       if (!path.isAbsolute(replacement) || !isWithin(root, replacement)) throw new Error("Alias escapes the project or requires executable path resolution.")
       aliases[key] = path.relative(root, confinedFile(root, path.relative(root, replacement))).split(path.sep).join("/")
     }
   }
-  return { aliases, base: config.base ?? "/" }
+  return { aliases, base: config.base ?? "/", preserved }
 }
 
 export function inspectRuntime(project: ProjectRecord, applicationRoot: string): RuntimeReport {
   const selectedProfile = selectProfile(project, applicationRoot)
-  const report: RuntimeReport = { compilerOptions: {}, schema: 2, configuration: [], base: "/", environment: {}, profile: selectedProfile, supported: false, aliases: {}, dependencies: [], issues: [], notes: [] }
+  const report: RuntimeReport = { compilerOptions: {}, schema: 2, configuration: [], base: "/", environment: {}, profile: selectedProfile, supported: false, aliases: {}, clientDependencies: [], dependencies: [], issues: [], notes: [] }
   const issue = (code: string, message: string, requiredCapability = "A separately approved dependency/runtime profile or isolated build runner") => report.issues.push({ code, message, requiredCapability })
   const root = project.root
   const profileRoot = path.join(applicationRoot, "runtime-profiles", selectedProfile)
@@ -168,6 +195,38 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
         if (!fs.existsSync(installed) || !isWithin(fs.realpathSync(path.join(profileRoot, "node_modules")), fs.realpathSync(installed)) || JSON.parse(fs.readFileSync(installed, "utf8")).version !== selected) issue("profile-unavailable", `The dedicated profile package ${name}@${selected} is missing or changed.`, "Operator installation of the repository-owned locked runtime profile with scripts disabled")
       }
     }
+    // Only the dependency closure of explicitly admitted browser packages is
+    // available to application imports. Tooling and the editor graph are excluded.
+    const pendingClients = Object.keys(declared).filter(name => clientPackages.has(name)).map(name => "node_modules/" + name), clients = new Set<string>(), visited = new Set<string>()
+    const nestedDependency = (location: string, name: string) => {
+      let parent = location
+      while (parent) {
+        const candidate = parent + "/node_modules/" + name
+        if (profileLock.packages[candidate]) return candidate
+        const at = parent.lastIndexOf("/node_modules/")
+        parent = at < 0 ? "" : parent.slice(0, at)
+      }
+      return "node_modules/" + name
+    }
+    while (pendingClients.length) {
+      const location = pendingClients.pop()!
+      if (visited.has(location)) continue
+      visited.add(location)
+      const record = profileLock.packages[location]
+      if (!record || record.link) { issue("profile-unavailable", "Missing pinned browser dependency: " + location); continue }
+      const name = location.slice(location.lastIndexOf("node_modules/") + 13)
+      if (location === "node_modules/" + name) clients.add(name)
+      if (lock) {
+        const upstream = lock.packages[location]
+        if (!upstream || upstream.link || upstream.version !== record.version || upstream.integrity !== record.integrity) issue("lock-conflict", "Browser dependency graph differs from the uploaded lock: " + location)
+      }
+      for (const dependency of Object.keys(record.dependencies ?? {})) {
+        const next = nestedDependency(location, dependency)
+        if (record.optionalDependencies?.[dependency] && !profileLock.packages[next]) continue
+        pendingClients.push(next)
+      }
+    }
+    report.clientDependencies = [...clients].sort()
     // The executed transitive client graph must also match an uploaded lock; no hidden version substitution.
     if (lock) for (const [location, record] of Object.entries(lock.packages) as Array<[string, any]>) {
       const name = location.split("node_modules/").at(-1)!
@@ -186,11 +245,11 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
         for (const dependency of Object.keys(selected?.dependencies ?? {})) pending.push(dependency)
       }
     }
-    report.notes.push(lock ? "Client versions checked against the npm lockfile." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
+    report.notes.push(lock ? "Client versions checked against the npm lockfile." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
     if (object(manifest.scripts) && Object.keys(manifest.scripts).length) report.notes.push("Package scripts, including install/build hooks, are inspected only and never run during intake or preview.")
     try { report.entry = htmlEntry(root) ?? project.detection.entry; if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
     const viteFile = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].find(file => fs.existsSync(path.join(root, file)))
-    try { const config = staticViteConfig(root, declared); report.aliases = config.aliases; report.base = config.base; if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
+    try { const config = staticViteConfig(root, declared); report.aliases = config.aliases; report.base = config.base; for (const detail of config.preserved ?? []) report.configuration.push({ file: viteFile!, classification: "preserved-not-applied", detail }); if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
     catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner"); report.configuration.push({ file: viteFile ?? "vite.config", classification: "requires-isolated-execution", detail: (error as Error).message }) }
     report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base }
     const configs = new Set<string>()
@@ -228,7 +287,9 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
       if (typeof entry !== "string" || !entry.endsWith(".css")) continue
       const file = "src/" + entry.split(path.sep).join("/")
       try {
-        const result = validateStylesheetConfiguration(fs.readFileSync(confinedFile(root, file), "utf8"), selectedProfile !== PROFILE)
+        const stylesheet = fs.readFileSync(confinedFile(root, file), "utf8")
+        if (/@import\s+(?:url\()?\s*[\"\']?https?:|url\(\s*[\"\']?https?:/i.test(stylesheet)) report.notes.push(`${file}: external CSS resource URLs are preserved; controlled preview network access remains denied.`)
+        const result = validateStylesheetConfiguration(stylesheet, selectedProfile !== PROFILE)
         if (result.theme) report.configuration.push({ file, classification: "safely-translated", detail: "Literal CSS @theme custom properties through the pinned Tailwind compiler." })
       } catch (error) { report.issues.push({ file, code: "css-directive", classification: "unsupported", message: file + ": " + (error as Error).message, requiredCapability: "A supported static theme or isolated configuration profile" }) }
     }

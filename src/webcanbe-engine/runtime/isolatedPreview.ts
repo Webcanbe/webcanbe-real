@@ -6,7 +6,7 @@ import path from "node:path"
 import { createRequire } from "node:module"
 import { context, type BuildOptions, type Loader } from "esbuild"
 import ts from "typescript"
-import { clientPackages, inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
+import { inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
 import { instrumentReactSource } from "../adapters/react/reactSourceAdapter"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
@@ -71,6 +71,16 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
       builder.onStart(() => { bytes = 0; tailwindOutputs.clear() })
       builder.onResolve({ filter: /.*/ }, async args => {
         if (args.pluginData?.profileResolution) return
+        // Preserve CSS resource URLs as browser data; never fetch them in the
+        // compiler. The controlled HTTP runner still denies all external egress.
+        if (transport === "http" && args.importer.endsWith(".css") && ["url-token", "import-rule"].includes(args.kind)) {
+          if (/^https?:\/\//i.test(args.path)) {
+            const url = new URL(args.path)
+            if (url.username || url.password) throw new Error("CSS resource credentials are forbidden.")
+            return { path: args.path, external: true }
+          }
+          if (args.kind === "url-token" && /^data:(?:image\/(?:png|jpeg|gif|webp|avif|svg\+xml)|font\/(?:woff2?|ttf|otf))(?:;[^,]*)?,/i.test(args.path)) return { path: args.path, external: true }
+        }
         const vendorImporter = isWithin(vendorRoot, args.importer)
         const alias = Object.keys(runtime.aliases).sort((a, b) => b.length - a.length).find(key => args.path === key || args.path.startsWith(key + "/"))
         let candidate: string
@@ -83,7 +93,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
           candidate = path.resolve(root, "public", relative)
         } else {
           const name = args.path.startsWith("@") ? args.path.split("/").slice(0, 2).join("/") : args.path.split("/")[0]
-          if (!vendorImporter && (!clientPackages.has(name) || !runtime.dependencies.some(dependency => dependency.name === name))) throw new Error('Unknown or undeclared preview import: ' + args.path)
+          if (!vendorImporter && !runtime.clientDependencies.includes(name)) throw new Error('Unknown or undeclared preview import: ' + args.path)
           const resolved = await builder.resolve(args.path, { kind: args.kind, resolveDir: vendorImporter ? path.dirname(args.importer) : profileRoot, pluginData: { profileResolution: true } })
           if (resolved.errors.length || !resolved.path || !isWithin(vendorRoot, fs.realpathSync(resolved.path))) throw new Error('Dependency is unavailable in the dedicated profile: ' + args.path)
           return { path: resolved.path, namespace: "confined" }
