@@ -1,0 +1,133 @@
+{
+  "qualification": "Single local engineering observations, warm installed profiles/VM; no latency or cloud scalability promises. Separate scopes and included work are stated in the report.",
+  "hostedProtocol": {
+    "boundary": "local Linux VM + TEST mTLS + PostgreSQL",
+    "startupMs": 2012,
+    "cssMs": 94,
+    "cleanupMs": 77,
+    "nativeSandboxRequiredByWorker": true
+  },
+  "react18": {
+    "boundary": "AUTHORED React18 fixture, local native-sandbox Lima",
+    "startupMs": 1481,
+    "refreshMs": 320,
+    "cssMs": 307,
+    "stateSequence": [
+      1,
+      1,
+      2,
+      3
+    ]
+  },
+  "react19": {
+    "boundary": "AUTHORED React19 fixture, local native-sandbox Lima",
+    "startupMs": 824,
+    "refreshMs": 266,
+    "cssMs": 331,
+    "stateSequence": [
+      1,
+      1,
+      2,
+      3
+    ]
+  },
+  "retainedAuthoredFlow": {
+    "coldImportStartMs": 1146,
+    "cssEditMs": 401,
+    "reactModuleEditMs": 460,
+    "generationRestartMs": 1192,
+    "viewerFrameMs": 53
+  },
+  "exports": [
+    {
+      "name": "react18",
+      "profile": "react18-vite5-v1",
+      "buildMs": 2796,
+      "buildTool": "279ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    },
+    {
+      "name": "react19",
+      "profile": "react19-vite8-v1",
+      "buildMs": 1610,
+      "buildTool": "286ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    },
+    {
+      "name": "authored",
+      "profile": "react19-vite8-v1",
+      "buildMs": 1827,
+      "buildTool": "350ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    },
+    {
+      "name": "code",
+      "profile": "react19-vite6",
+      "buildMs": 2855,
+      "buildTool": "489ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    },
+    {
+      "name": "responsive-browser",
+      "profile": "react19-vite6",
+      "buildMs": 2454,
+      "buildTool": "513ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    },
+    {
+      "name": "responsive-hash",
+      "profile": "react19-vite6",
+      "buildMs": 2265,
+      "buildTool": "509ms",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false,
+      "status": "PASS",
+      "independentRender": true
+    }
+  ]
+}

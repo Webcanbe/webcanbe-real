@@ -1,0 +1,237 @@
+{
+  "scripts": [
+    {
+      "script": "verify-phase2c-editor-regressions.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 22930
+    },
+    {
+      "script": "verify-phase2c2-controlled.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 35231
+    },
+    {
+      "script": "verify-phase2de.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 58181
+    },
+    {
+      "script": "verify-phase2f.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 79833
+    },
+    {
+      "script": "verify-phase2g.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 9972
+    }
+  ],
+  "controlled": {
+    "result": "PASS",
+    "missingAssetAndPlatformApi404": true,
+    "viewerIsolation": {
+      "parentDOM": true,
+      "parentStorage": true,
+      "parentCookie": true,
+      "ownStorage": true,
+      "ownCookie": true,
+      "onlyImage": true,
+      "projectDOMAbsent": true
+    },
+    "editLoop": {
+      "coordinateSelection": true,
+      "sourceMapping": true,
+      "text": true,
+      "style": true,
+      "renderChanged": true,
+      "diff": true,
+      "undo": true,
+      "redo": true,
+      "export": true,
+      "viewportSurvivesRebuild": true,
+      "incrementalRevisionAndGeneration": true
+    },
+    "freshGenerationStorageIsolation": true,
+    "browserRouter": {
+      "nested": true,
+      "parameter": true,
+      "searchHash": true,
+      "hardRefresh": true,
+      "backForward": true,
+      "application404": true,
+      "assets": true,
+      "clickNavigation": true,
+      "scroll": true,
+      "editorReloadDeepLink": true,
+      "basename": true,
+      "directDeepLink": true
+    },
+    "authority": {
+      "crossProjectDenied": true,
+      "forgedCapabilityDenied": true,
+      "staleSourceDenied": true,
+      "revokedDenied": true,
+      "realGuestExpiry": true
+    }
+  },
+  "sourceHistory": {
+    "result": "PASS",
+    "visualCodeServerRestart": {
+      "source": true,
+      "history": true,
+      "exactHead": true,
+      "separateServerProcess": true,
+      "freshControlledGeneration": true
+    },
+    "codeTextClassCSSModuleProp": {
+      "keyboardSave": true,
+      "text": true,
+      "className": true,
+      "css": true,
+      "cssModule": true,
+      "literalProp": true,
+      "routeAndViewportPreserved": true
+    },
+    "invalidDraftRecovery": {
+      "localDraftRetained": true,
+      "lastGoodRevision": true,
+      "lastGoodPreview": true,
+      "rejectedSaveRecorded": true,
+      "repairedSaveRendered": true
+    },
+    "structureAndVisualRoundTrip": {
+      "add": true,
+      "reorder": true,
+      "remove": true,
+      "reanalysis": true,
+      "staleAnchorRejected": true,
+      "freshSelection": true,
+      "visualCodeVisual": true
+    },
+    "historyCheckpointUndoRedoExport": {
+      "realDiff": true,
+      "checkpoint": true,
+      "undo": true,
+      "redo": true,
+      "sourceExport": true,
+      "mixedHistoryRestart": true
+    },
+    "browser": {
+      "version": "151.0.7922.34",
+      "nativeSandbox": true,
+      "editorViewport": "1600x1100",
+      "previewWidths": [
+        1280,
+        768
+      ],
+      "pageIdentity": true,
+      "meaningfulContent": true,
+      "noFrameworkOverlay": true,
+      "runtimeErrors": [],
+      "boundary": "real Linux controlled raster provider"
+    },
+    "safeFileOperationUI": {
+      "create": true,
+      "rename": true,
+      "delete": true,
+      "compiledBeforeAcceptance": true
+    },
+    "strictHashRouterCode": {
+      "realControlledProvider": true,
+      "tailwindRecompiled": true,
+      "componentPropLiteral": true,
+      "otherInstancePreserved": true
+    }
+  },
+  "responsive": {
+    "result": "PASS",
+    "BrowserRouter": {
+      "strictRunner": true,
+      "visualBaseExactCodeUndo": true,
+      "responsiveOnlySelectedToken": true,
+      "viewportWidths": [
+        390,
+        768,
+        1280
+      ],
+      "CSSMediaScopeRefusalAndEdit": true,
+      "module": true,
+      "inline": true,
+      "siblingReorderPreviewUndo": true,
+      "flexDirectionGap": true,
+      "gridTracks": true,
+      "codeResponsiveCanvas": true,
+      "realServerRestartHeadHistoryUndo": true,
+      "cleanExport": true
+    },
+    "HashRouter": {
+      "strictRunner": true,
+      "visualBaseExactCodeUndo": true,
+      "responsiveOnlySelectedToken": true,
+      "viewportWidths": [
+        390,
+        768,
+        1280
+      ],
+      "CSSMediaScopeRefusalAndEdit": true,
+      "module": true,
+      "inline": true,
+      "siblingReorderPreviewUndo": true,
+      "flexDirectionGap": true,
+      "gridTracks": true,
+      "codeResponsiveCanvas": true,
+      "realServerRestartHeadHistoryUndo": true,
+      "cleanExport": true
+    },
+    "browser": "151.0.7922.34",
+    "errors": []
+  },
+  "hostedFoundation": {
+    "environment": "LOCAL HOSTED-STYLE QA; NOT PRODUCTION",
+    "publicHostedImportReady": false,
+    "performance": {
+      "coldImportStartMs": 1146,
+      "cssEditMs": 401,
+      "reactModuleEditMs": 460,
+      "generationRestartMs": 1192,
+      "viewerFrameMs": 53
+    },
+    "independent": [
+      {
+        "name": "vite-react18-ts",
+        "profile": "react18-vite5-v1",
+        "unchanged": true,
+        "controlledRender": true,
+        "exportMs": 86,
+        "sourceCommit": "73cd3c1de63d6f511b7a6003d0cb8079dd491176"
+      },
+      {
+        "name": "vite-react19-ts",
+        "profile": "react19-vite8-v1",
+        "unchanged": true,
+        "controlledRender": true,
+        "exportMs": 92,
+        "sourceCommit": "99bd9d1d46153fa939f4a304cc0177db42e28776"
+      }
+    ],
+    "crossUserAndWorkspaceIsolation": true,
+    "viewerCannotWriteOrReuseGeneration": true,
+    "staleRevisionAndFrameDenied": true,
+    "cssStatePreserved": true,
+    "reactUpdateIsReloadNotHmr": true,
+    "activeMembershipRevocation": true,
+    "status": "PASS"
+  },
+  "visualInspection": [
+    "authored controlled reload: title/counter/route and meaningful raster",
+    "390px responsive BrowserRouter in functional QA editor",
+    "390px unchanged React19 starter export: loaded image and counter state",
+    "1280px authored independent export: edited styles and counter"
+  ],
+  "scope": "Local browser/native-sandbox execution; no full-app corpus pass inferred."
+}

@@ -235,3 +235,8 @@ New native-sandbox browser probes found that an opaque HTTP document can use nat
 
 
 Phase 2C.1 follow-up: the [controlled-execution foundation and new network evidence](reports/phase2c1-network-isolation.md) preserve this compatible local workflow and its tests, while moving the intended strict execution boundary into a controlled browser/network job. No strict client-iframe guarantee, installed provider, BrowserRouter admission or hosted readiness is claimed.
+
+
+## Phase 2G.2 follow-up qualification (2026-09-14)
+
+The [final closure matrix](reports/phase2g2-final-closure.md) preserves the original deterministic runtime requirements and all earlier evidence. Actual strict BrowserRouter/HashRouter, native OS isolation, Code/history, responsive editing and independent export passes remain intact. Opt-in React 18/19 component-only Fast Refresh now preserves state inside the controlled runner; default module rebuild/reload remains accurately labeled. Four unchanged full applications expose retained lockfile/dependency/config/intake gaps, with no full-project render PASS. New PostgreSQL/OIDC/mTLS provider adapters have real local tests but still require async hosted editor composition and actual hosted identity/storage/hosts/DNS/cookie evidence. Phase 2G.2 and overall Phase 2 remain NOT YET; public hosted imports NO. No earlier requirement is silently dropped.

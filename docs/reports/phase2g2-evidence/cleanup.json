@@ -1,0 +1,13 @@
+{
+  "scope": "Local validation infrastructure only; no cloud resources were created.",
+  "gatewayLeaseCountsBeforeShutdown": {
+    "stopped": 6
+  },
+  "unsettledGatewayLeases": 0,
+  "runningPreviewUnits": 0,
+  "qaGatewayStopped": true,
+  "qaTunnelProcessesStopped": true,
+  "generatedHostAndGuestQaCredentialsRemoved": true,
+  "limaStatus": "Stopped",
+  "retainedLocalState": "Ignored QA receipts, installed test database software and disposable VM disk; not published."
+}
