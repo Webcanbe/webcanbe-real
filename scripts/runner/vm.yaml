@@ -25,6 +25,6 @@ provision:
     set -eu
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends nodejs npm chromium bubblewrap ca-certificates gcc libc6-dev
+    apt-get install -y --no-install-recommends nodejs npm chromium bubblewrap ca-certificates gcc libc6-dev fonts-noto-color-emoji=2.051-0+deb13u1 fonts-noto-cjk=1:20240730+repack1-1
     id wcb-runner >/dev/null 2>&1 || useradd --create-home --shell /usr/sbin/nologin wcb-runner
     mkdir -p /opt/wcb-runtime

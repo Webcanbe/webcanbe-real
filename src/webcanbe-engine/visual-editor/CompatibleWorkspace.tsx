@@ -9,6 +9,7 @@ import type { SourceResponse } from "./CodeWorkspace"
 const CodeWorkspace = lazy(() => import("./CodeWorkspace"))
 import "./compatibleWorkspace.css"
 import { samePointerFrame } from "./rasterFrame"
+import SourceGestures from "./SourceGestures"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -25,6 +26,8 @@ function workspaceProjectId() { const id = window.location.pathname.split("/").f
 
 export default function CompatibleWorkspace() {
   const frame = useRef<HTMLIFrameElement>(null)
+  const previewModeButton = useRef<HTMLButtonElement>(null)
+  const [copiedText, setCopiedText] = useState<string>()
   const previewContainer = useRef<HTMLDivElement>(null)
   const [availableWidth, setAvailableWidth] = useState(1280)
   const [runtime, setRuntime] = useState<RuntimeInfo>()
@@ -68,19 +71,27 @@ export default function CompatibleWorkspace() {
   const [diff, setDiff] = useState("")
   const [accessKey, setAccessKey] = useState("")
   const [csrf, setCsrf] = useState("")
+  const csrfToken = useRef("")
+  const connecting = useRef(false)
+  const cleanupPending = useRef<Promise<void>>(Promise.resolve())
   const [workspaces, setWorkspaces] = useState<string[]>([])
   const [workspaceId, setWorkspaceId] = useState("")
   const [hostedProjects, setHostedProjects] = useState<ProjectInfo[]>([])
-  const headers = () => ({ "Content-Type": "application/json", ...(hostedMode ? { "X-WCB-CSRF": csrf } : { "X-WCB-Editor-Key": accessKey }) })
+  const headers = () => ({ "Content-Type": "application/json", ...(hostedMode ? { "X-WCB-CSRF": csrfToken.current } : { "X-WCB-Editor-Key": accessKey }) })
   async function connectHosted() {
+    if(connecting.current)return
+    connecting.current=true
+    ++connectionEpoch.current; activeGeneration.current=""; rasterQueued.current=[]
+    try {
     const response = await fetch("/__webcanbe/auth/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
-    if (!response.ok) { setCsrf(""); setMessage("Sign in to open your projects."); return }
-    const data = await response.json(); setCsrf(data.csrf)
+    if (!response.ok) { csrfToken.current=""; setCsrf(""); setMessage("Sign in to open your projects."); return }
+    const data = await response.json(); csrfToken.current=data.csrf
     const authorizedHeaders = { "Content-Type": "application/json", "X-WCB-CSRF": data.csrf }
     const [workspaceResponse, projectResponse] = await Promise.all([fetch("/__webcanbe/api/workspaces", { method: "POST", headers: authorizedHeaders, body: "{}" }), fetch("/__webcanbe/api/projects", { method: "POST", headers: authorizedHeaders, body: "{}" })])
     if (workspaceResponse.ok) { const result = await workspaceResponse.json(); setWorkspaces(result.workspaces); setWorkspaceId(current => current || result.workspaces[0] || "") }
     if (projectResponse.ok) { const result = await projectResponse.json(); setHostedProjects(result.projects); if (workspaceProjectId() === "phase1-fixture" && result.projects.length) setProjectId(result.projects[0].id) }
-    setConnectionAttempt(value => value + 1)
+    setCsrf(data.csrf); setConnectionAttempt(value => value + 1)
+    } finally { connecting.current=false }
   }
   async function signIn() {
     const response = await fetch("/__webcanbe/auth/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
@@ -138,8 +149,10 @@ export default function CompatibleWorkspace() {
     setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""; revision.current = ""; rasterQueued.current = []
     setSession(undefined); setPreview(undefined); setTarget(undefined); setSelected(undefined); setHovered(undefined)
     let cancelled = false, connected: PreviewSession | undefined
-    const stop = (old: PreviewSession) => { void fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: headers(), body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).catch(() => {}) }
+    const stop = (old: PreviewSession) => { cleanupPending.current = fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: headers(), body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).then(() => {}, () => {}) }
     void (async () => {
+      await cleanupPending.current
+      if(cancelled)return
       const response = await fetch(`/__webcanbe/api/projects/${projectId}/session`, { method: "POST", headers: headers(), body: "{}" })
       const data = await response.json() as ApiResponse
       if (!response.ok || !data.session || !data.project) { setMessage(data.error ?? "This project could not start a preview."); return }
@@ -211,7 +224,7 @@ export default function CompatibleWorkspace() {
 
   function deliverRaster(data = lastRaster.current) {
     if (!data?.png || !data.observation || data.generation !== activeGeneration.current) return
-    frame.current?.contentWindow?.postMessage({ channel: "wcb-raster", type: "frame", generation: data.generation, sequence: data.sequence, png: data.png, ...data.observation.viewport, select: selectModeRef.current }, "*")
+    frame.current?.contentWindow?.postMessage({ channel: "wcb-raster", type: "frame", generation: data.generation, sequence: data.sequence, png: data.png, revision: data.revision, focused: data.observation.focused, ...data.observation.viewport, select: selectModeRef.current }, "*")
   }
   async function rasterOperation(input?: PreviewInput, sequence = rasterSequence.current) {
     if (preview?.transport !== "raster" || !activeGeneration.current) return
@@ -244,6 +257,12 @@ export default function CompatibleWorkspace() {
       if (generation !== activeGeneration.current || epoch !== connectionEpoch.current || requestRevision !== revision.current) return
       if (!result.ok || !result.data.observation) throw new Error(result.data.error ?? "Preview expired. Connect to renew.")
       const data = result.data, observation = data.observation!
+      if (input?.type === "key" && input.key === "CopySelection" && observation.clipboard !== undefined) {
+        const value = observation.clipboard
+        const stillCurrent = () => generation === activeGeneration.current && epoch === connectionEpoch.current && requestRevision === revision.current
+        if (!value) setMessage("No preview text is selected.")
+        else void navigator.clipboard.writeText(value).then(() => { if (stillCurrent()) { setCopiedText(undefined); setMessage("Preview selection copied.") } }).catch(() => { if (stillCurrent()) { setCopiedText(value); setMessage("Copy the selected preview text below.") } })
+      }
       rasterSequence.current = data.sequence!; lastRaster.current = data; deliverRaster(data)
       if (routePath.current !== observation.route) {
         selectionSource.current = "runtime"
@@ -275,8 +294,9 @@ export default function CompatibleWorkspace() {
     const timer = setInterval(() => { void currentRasterOperation.current() }, 1500)
     const receive = (event: MessageEvent) => {
       const data = event.data
-      if (event.source !== frame.current?.contentWindow || event.origin !== "null" || data?.channel !== "wcb-raster" || data.type !== "input" || data.generation !== activeGeneration.current || data.sequence !== rasterSequence.current) return
-      if (["pointer", "scroll", "key", "text"].includes(data.input?.type)) void currentRasterOperation.current(data.input, data.sequence)
+      if (event.source !== frame.current?.contentWindow || event.origin !== "null" || data?.channel !== "wcb-raster" || data.generation !== activeGeneration.current || data.sequence !== rasterSequence.current) return
+      if (data.type === "focus-exit") { previewModeButton.current?.focus(); return }
+      if (data.type === "input" && ["pointer", "scroll", "key", "text"].includes(data.input?.type)) void currentRasterOperation.current(data.input, data.sequence)
     }
     window.addEventListener("message", receive)
     return () => { clearInterval(timer); window.removeEventListener("message", receive) }
@@ -386,26 +406,28 @@ export default function CompatibleWorkspace() {
         <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { selectionSource.current = "source"; const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className="compatible-preview-shell">
-        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select aria-label="Viewport" value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
+        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button ref={previewModeButton} type="button" onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select aria-label="Viewport" value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
         {sourceUIOpened && <Suspense fallback={<p>Loading source editor…</p>}><CodeWorkspace key={projectId} projectId={projectId} request={request} epoch={sourceEpoch} connected={Boolean(session)} visible={surface} openFile={codeFile} onAccepted={sourceAccepted} /></Suspense>}
-        <div hidden={surface !== "canvas"} ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}</div>}</div></div>
+        <div hidden={surface !== "canvas"} ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}{selected && target && selectionSource.current === "runtime" && target.identity.elementStart === selected.identity.elementStart && target.identity.file === selected.identity.file && <SourceGestures key={JSON.stringify([projectId, preview?.generation, revision.current, selected.identity, selected.rect, viewport, authoringBreakpoint, effectScope, scale, routeInput, previewState])} target={target} origins={effectScope === "source" ? styleOrigins : target.repeated ? [] : styleOrigins.filter(origin => !origin.shared)} scale={scale} breakpoint={authoringBreakpoint} disabled={pending || !session || !selectMode || previewState !== "ready"} onEdit={edit => void mutate(edit)} />}</div>}</div></div>
       </section>
       <aside className="compatible-inspector">
         <div className="inspector-heading"><p>Element inspector</p><span>{target?.compatibility ?? "preview"}</span></div>
         {selected && <div className="source-location"><small>Source location</small><b>{selected.identity.file}</b><span>{target?.nodeKind ?? "native"} · JSX offset {selected.identity.elementStart} · {selected.layoutContext} inside {selected.parentLayoutContext ?? "unknown"}</span></div>}
         {!selected && <div className="empty-inspector"><b>Visual editing changes the same files.</b><p>Hover and select an element in the actual running project to inspect its real source.</p></div>}
-        {target?.capabilities.text && <label className="inspector-control">Text <textarea value={text} onChange={(event) => setText(event.target.value)} /><button type="button" onClick={() => void mutate({ type: "text", value: text })}>Apply text change</button></label>}
+        {target?.capabilities.text && <label className="inspector-control">Text {target.textShared && <small>Shared literal · {target.textFile ?? target.identity.file}</small>}<textarea value={text} onChange={(event) => setText(event.target.value)} /><button type="button" onClick={() => void mutate({ type: "text", value: text })}>Apply text change</button></label>}
         {target && <div className="style-analysis"><p>{target.effectScope}</p><label>Authoring breakpoint <select aria-label="Authoring breakpoint" value={authoringBreakpoint} onChange={event => setAuthoringBreakpoint(event.target.value)}>{breakpoints.map(item => <option key={item.id} value={item.id}>{item.label}{item.min !== undefined ? ` ≥ ${item.min}px` : ""}{item.max !== undefined ? ` ≤ ${item.max}px` : ""}</option>)}</select></label><label>Effect scope <select aria-label="Effect scope" value={effectScope} onChange={event => setEffectScope(event.target.value)}><option value="source">Edit identified source (all matching uses)</option><option value="instance">Selected runtime instance only (shared sources refused)</option></select></label><small>Mobile / tablet / desktop are preview widths. Choose an existing source breakpoint to edit its override; base values may also affect wider viewports.</small><details><summary>Effective values and source origins</summary>{target.styleOrigins.map((origin, index) => <p key={index}>{origin.property}: {origin.effective ? selected?.computed[origin.property] || origin.value : origin.value} · {origin.effective ? "effective at viewport" : origin.active ? "active candidate" : "inactive/conditional"}<br/>{origin.kind} · {origin.file} {origin.selector || origin.prefix || "base"} {origin.media}<br/>{origin.scope}<br/>{origin.reason}</p>)}{styleDiagnostics.map((item, index) => <p key={index}>{item}</p>)}<p>Inherited or unresolved computed values are read-only; use Code.</p></details>{!styleOrigins.length && <p>No safe existing declaration at this breakpoint. Code remains available.</p>}</div>}
         {styleOrigins.length > 0 && <div className="style-controls"><small>Safe style origins</small>{styleOrigins.map((styleOrigin) => <label className="inspector-control" key={`${styleOrigin.property}-${styleOrigin.kind}-${styleOrigin.range?.start}`}><span>{editableLabels[styleOrigin.property] ?? styleOrigin.property}<em>{styleOrigin.kind}</em></span><small>{styleOrigin.file} {styleOrigin.selector || styleOrigin.prefix || "base"} · {styleOrigin.scope}</small><div><input data-wcb-property={styleOrigin.property} defaultValue={styleOrigin.value?.replace(/^['"]|['"]$/g, "")} key={styleOrigin.value} /><button type="button" onClick={(event) => { const input = event.currentTarget.previousElementSibling as HTMLInputElement; void mutate({ type: "style", property: styleOrigin.property, value: input.value, breakpoint: authoringBreakpoint }) }}>Save</button></div><button type="button" onClick={() => { const input = document.querySelector<HTMLInputElement>(`input[data-wcb-property="${styleOrigin.property}"]`); if (input) void mutate({ type: "responsive", property: styleOrigin.property, value: input.value, viewport }) }}>Save at {viewport}</button></label>)}</div>}
         {target && <details className="responsive-construction"><summary>Create responsive override</summary><p>Uses the selected element’s existing base class or utility. The change affects every matching source use.</p><label>New override breakpoint<select aria-label="New override breakpoint" value={newBreakpoint} onChange={event=>setNewBreakpoint(event.target.value)}><option value="new:mobile">CSS mobile ≤ 767px</option><option value="new:tablet">CSS tablet 768–1023px</option><option value="new:desktop">CSS desktop ≥ 1024px</option>{breakpoints.filter(b=>b.id!=="base").map(b=><option key={b.id} value={b.id}>{b.label}</option>)}</select></label><label>Override property<select aria-label="Override property" value={newProperty} onChange={event=>setNewProperty(event.target.value as StyleProperty)}>{Object.entries(editableLabels).map(([property,label])=><option key={property} value={property}>{label}</option>)}</select></label><label>Override value<input aria-label="Override value" value={newValue} onChange={event=>setNewValue(event.target.value)}/></label><button disabled={pending} onClick={()=>void mutate({type:"responsive-create",property:newProperty,value:newValue,breakpoint:newBreakpoint})}>Create source override</button></details>}
         {target?.reorder && <div className="semantic-reorder"><small>Reorder adjacent JSX siblings in the source Flex/Grid parent</small><button type="button" disabled={target.reorder.previous === undefined || pending} onClick={() => void mutate({ type: "reorder", value: "previous" })}>Move before previous sibling</button><button type="button" disabled={target.reorder.next === undefined || pending} onClick={() => void mutate({ type: "reorder", value: "next" })}>Move after next sibling</button></div>}
         {target?.capabilities.layout && <div className="semantic-controls"><small>Semantic layout</small><button type="button" onClick={() => void mutate({ type: "layout", property: "gap", value: "24px" })}>Set gap 24px</button><button type="button" onClick={() => void mutate({ type: "layout", property: "justifyContent", value: "space-between" })}>Distribute items</button></div>}
         {target && !target.capabilities.visualEdit && <div className="limited-editing"><b>Visual editing unavailable</b><br/>{target.unavailableReasons.visualEdit ?? "WebCanBe cannot safely identify a static source mutation."}<br/><button type="button" onClick={() => { setCodeFile(target.identity.file); openSurface("code") }}>Open code location</button></div>}
+        {target?.component?.resolved && <p className="limited-editing">Component definition: {target.component.file} · {target.component.definitionName}</p>}
+        {target?.propOrigin && <div className="limited-editing">Prop {target.propOrigin.name} → {target.propOrigin.localName}. Invocation values remain Code-only.{target.invocationOrigins?.map(origin=><button key={`${origin.file}:${origin.range.start}`} onClick={()=>{setCodeFile(origin.file);openSurface("code")}}>Open caller {origin.file} · {origin.range.start}</button>)}</div>}
         {target?.effectScope && <p className="limited-editing">Effect scope: {target.effectScope}</p>}
         {target && <details><summary>{target.identity.file} — source</summary><pre className="source-diff">{source}</pre></details>}
         {target && Object.entries(target.unavailableReasons).map(([key, reason]) => <p key={key} className="limited-editing">{reason}</p>)}
         {diff && <div className="source-diff"><small>Actual source diff</small><pre>{diff}</pre></div>}
-        <p className="transaction-status">{message}</p>
+        <p className="transaction-status" role="status">{message}</p>{copiedText !== undefined && <label>Selected preview text<textarea aria-label="Selected preview text" readOnly value={copiedText} onFocus={event => event.target.select()} /></label>}
         <p className="limited-editing" data-preview-boundary>{preview?.transport === "raster" ? "Controlled preview: project JavaScript runs in an isolated Linux browser. This viewer receives pixels and validated selection data. External project networking is disabled. Sessions last up to 60 seconds; reconnect to renew." : PREVIEW_SECURITY_NOTICE}</p>
       </aside>
     </div>

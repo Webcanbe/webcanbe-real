@@ -92,9 +92,11 @@ export function patchText(store: SourceStore, identity: SourceIdentity, text: st
   if (!target?.capabilities.text || !target?.textRange || target.text === undefined) return failed(identity, "text", "This element does not have a safe static text range.")
   if (!text.trim()) return transaction({ file: identity.file, range: target.textRange, editType: "text", before: target.text, after: text, target: identity, success: false, error: "Text cannot be empty." })
   if (!target.textEncoding && /[<>{}]/.test(text)) return transaction({ file: identity.file, range: target.textRange, editType: "text", before: target.text, after: text, target: identity, success: false, error: "Text containing JSX syntax is not a safe visual mutation." })
-  const before = source.slice(target.textRange.start, target.textRange.end), after = target.textEncoding === "js-string" ? JSON.stringify(text) : text.replace(/&/g, "&amp;")
-  const patch = sourcePatch(identity.file, target.textRange, before, after)
-  try { const versions = applyPatches(store, [patch], "forward"); return transaction({ file: identity.file, range: target.textRange, editType: "text", before, after, target: identity, success: true, patches: [patch], versions }) } catch (error) { return failed(identity, "text", error instanceof Error ? error.message : "Unable to save text.", text) }
+  const originFile = target.textFile ?? identity.file, originSource = store.read(originFile)
+  if (originSource === undefined) return failed(identity, "text", "Text origin is unavailable.")
+  const before = originSource.slice(target.textRange.start, target.textRange.end), after = target.textEncoding === "js-string" ? JSON.stringify(text) : text.replace(/&/g, "&amp;")
+  const patch = sourcePatch(originFile, target.textRange, before, after)
+  try { const versions = applyPatches(store, [patch], "forward"); return transaction({ file: originFile, range: target.textRange, editType: "text", before, after, target: identity, success: true, patches: [patch], versions }) } catch (error) { return failed(identity, "text", error instanceof Error ? error.message : "Unable to save text.", text) }
 }
 
 const spacingScale: Record<string, string> = { "0px": "0", "2px": "0.5", "4px": "1", "8px": "2", "12px": "3", "16px": "4", "20px": "5", "24px": "6", "32px": "8", "40px": "10", "48px": "12", "64px": "16" }

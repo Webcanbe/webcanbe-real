@@ -93,6 +93,8 @@ export type SourceTarget = {
   elementName: string
   nodeKind: SourceNodeKind
   sourceRange: SourceRange
+  textFile?: string
+  textShared?: boolean
   textRange?: SourceRange
   textEncoding?: "js-string"
   reasonCodes?: string[]
@@ -101,7 +103,9 @@ export type SourceTarget = {
   capabilities: ElementCapabilities
   compatibility: CompatibilityKind
   unavailableReasons: Partial<Record<keyof ElementCapabilities, string>>
-  component?: { name: string; file: string; range: SourceRange }
+  component?: { name: string; file: string; range: SourceRange; definitionName?: string; resolved?: boolean }
+  propOrigin?: {name:string;localName:string;file:string;range:SourceRange}
+  invocationOrigins?: Array<{file:string;range:SourceRange}>
 }
 
 export type PreviewElement = {
@@ -148,6 +152,7 @@ export type MutationTransaction = {
   operations?: FileOperation[]
   fileStates?: Array<{ file: string; before: string | null; after: string | null }>
   validation?: SourceValidation
+  restoresRevisionId?: string
   reverts?: string
 }
 
@@ -157,9 +162,11 @@ export type FileOperation =
   | { kind: "delete"; file: string; expectedHash: string }
   | { kind: "rename"; file: string; to: string; expectedHash: string; content?: string }
 
-export type SourceValidation = { level: "parse" | "compile" | "checkpoint"; passed: boolean; diagnostics: Array<{ file: string; message: string; line?: number; column?: number }> }
+export type SourceValidation = { level: "parse" | "compile" | "checkpoint" | "semantic"; passed: boolean; diagnostics: Array<{ file: string; message: string; line?: number; column?: number }> }
 export type SourceRevision = { revisionId: string; projectId: string; parentRevisionId: string | null; createdAt: string; actor: string; producer: "visual" | "code" | "system"; contentHash: string; transactionId?: string }
-export type RevisionLedger = { schema: 1; projectId: string; revisions: SourceRevision[]; transactions: MutationTransaction[]; past: string[]; future: string[] }
+export type SourceImportOrigin = Readonly<{ provider: "github"; repository: string; commit: string; archiveSha256: string }>
+export type HistoryArchive = Readonly<{ schema: 1; digest: string; rawBytes: number; revisions: number; transactions: number; data: string }>
+export type RevisionLedger = { schema: 1; archives?: HistoryArchive[]; importOrigin?: SourceImportOrigin; sourceScope?: 2; projectId: string; revisions: SourceRevision[]; transactions: MutationTransaction[]; past: string[]; future: string[] }
 
 export type CompatibilitySummary = {
   total: number

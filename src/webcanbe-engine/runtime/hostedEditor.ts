@@ -1,3 +1,5 @@
+import { ManagedSecretRunnerProvider, type ManagedPreviewSecrets } from "./managedPreviewSecrets"
+import { sourceReference, type ExternalSourceProvider } from "./externalSource"
 import { PostgresDraftStore } from "./draftStore"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Pool } from "pg"
@@ -45,7 +47,7 @@ export class HostedEditor {
   readonly login: HostedLoginBoundary
   private recoveryTimer: ReturnType<typeof setInterval>
   private recovery?: Promise<void>
-  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; onError?: (error: unknown) => void }) {
+  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
     this.identity = new PostgresIdentityStore(options.pool)
     this.access = new PostgresAccess(options.pool)
     this.source = new PostgresProjectStore(this.access)
@@ -54,7 +56,7 @@ export class HostedEditor {
     this.registry = new HostedProjectRegistry(this.access, this.source, applicationRoot)
     this.leases = new PostgresLeaseStore(options.pool)
     this.provider = new HostedLinuxRunnerProvider(this.leases, options.hosts, owner => this.registry.runnerAuthorized(owner))
-    this.controlled = new ControlledPreviewTransport(this.registry, applicationRoot, this.provider, Date.now, this.artifacts, { fastRefresh: options.fastRefresh })
+    this.controlled = new ControlledPreviewTransport(this.registry, applicationRoot, options.managedSecrets ? new ManagedSecretRunnerProvider(this.provider, options.managedSecrets) : this.provider, Date.now, this.artifacts, { fastRefresh: options.fastRefresh })
     this.boundary = new PostgresSessionBoundary(this.identity, options.origins)
     this.login = new HostedLoginBoundary(options.origins.editorOrigin, options.identityProvider, this.identity, this.identity)
     // Recover idle orphans even if no new editor request arrives. Failed cleanup
@@ -82,6 +84,24 @@ export class HostedEditor {
       if (["accountId", "userId", "root", "sourceRoot", "role", "projectId", "runnerId", "revisionId", "generationId", "artifactId"].some(key => key in body)) throw new AuthorityDenied()
       let assertAccess = async () => { const current = await this.boundary.authenticate(request); if (current.sessionId !== account.sessionId) throw new AuthorityDenied() }
       const send = async (status: number, value: Record<string, unknown>) => { await assertAccess(); json(response, { status, value }); return true }
+      if (actionPath === "/projects/import-source") {
+        if (typeof body.workspaceId !== "string" || !this.options.externalSourceProvider) throw new AuthorityDenied()
+        const workspaceId = body.workspaceId, reference = sourceReference(body.source)
+        if (body.archive !== undefined || Object.keys(body).some(key => !["workspaceId", "name", "source"].includes(key))) throw new AuthorityDenied()
+        assertAccess = async () => { await this.boundary.authenticate(request); await this.access.requireWorkspace(account, workspaceId) }
+        await assertAccess()
+        const controller = new AbortController(), abort = () => controller.abort()
+        response.once("close", abort)
+        try {
+          const project = await this.registry.importSource(account, workspaceId, typeof body.name === "string" ? body.name.slice(0,200) : reference.repository, async () => {
+            await assertAccess()
+            const source = await this.options.externalSourceProvider!.fetch(reference, controller.signal)
+            await assertAccess(); if (controller.signal.aborted) throw new AuthorityDenied()
+            return source
+          })
+          return send(201, { project })
+        } finally { response.removeListener("close", abort); controller.abort() }
+      }
       if (actionPath === "/projects/import") {
         if (typeof body.workspaceId !== "string") throw new AuthorityDenied()
         const workspaceId = body.workspaceId
@@ -142,6 +162,7 @@ export class HostedEditor {
       const perform = () => withHostedSource(this.source, grant, this.applicationRoot, async (project, staging) => {
         const files = staging.files()
         return executeSourceOperation({ project, projectRoot: this.applicationRoot, durable: staging, store: { tailwind: project.detection.tailwind, read: file => files.get(file), write: () => { throw new Error("Use source transactions.") } }, action: operation, body, actor: account.userId,
+          semanticCheck: (files,revision) => this.controlled.typecheck(projectId,{previewId,capability,operation:"preview"},revision,files),
           assertAccess, authorize: () => {}, // provisional checkout only; PostgreSQL authorizes the actual commit
           beforeCommit: async structural => { await assertAccess(); await this.controlled.holdForSourceCommit(projectId, previewId, structural) } })
       }, writeOperations.includes(operation))

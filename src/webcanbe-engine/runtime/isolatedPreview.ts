@@ -98,7 +98,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
           if (resolved.errors.length || !resolved.path || !isWithin(vendorRoot, fs.realpathSync(resolved.path))) throw new Error('Dependency is unavailable in the dedicated profile: ' + args.path)
           return { path: resolved.path, namespace: "confined" }
         }
-        const resolved = [candidate, ...[".tsx", ".jsx", ".ts", ".js", ".css", ".json", "/index.tsx", "/index.jsx", "/index.ts", "/index.js"].map(ext => candidate + ext)].find(file => fs.existsSync(file) && fs.statSync(file).isFile())
+        const resolved = [candidate, ...[".tsx", ".jsx", ".ts", ".js", ".mts", ".cts", ".mjs", ".cjs", ".css", ".json", "/index.tsx", "/index.jsx", "/index.ts", "/index.js"].map(ext => candidate + ext)].find(file => fs.existsSync(file) && fs.statSync(file).isFile())
         if (!resolved) throw new Error('Preview dependency is unresolved: ' + args.path)
         const actual = fs.realpathSync(resolved)
         if (vendorImporter ? !isWithin(vendorRoot, actual) : !isWithin(root, actual) || !safeArchivePath(path.relative(root, actual))) throw new Error("Preview import escaped its permitted root.")
@@ -108,7 +108,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const content = fs.readFileSync(args.path)
         bytes += content.length
         if (bytes > 40 * 1024 * 1024 || content.length > 2 * 1024 * 1024) throw new Error("Preview source limit exceeded.")
-        const ext = path.extname(args.path).slice(1).replace(/^[mc]js$/, "js")
+        const ext = path.extname(args.path).slice(1).replace(/^[mc]([jt])s$/, "$1s")
         const vendor = isWithin(vendorRoot, args.path)
         if (assetTypes[ext]) return { contents: content, loader: transport === "http" ? "file" : "dataurl" }
         if (!["tsx", "jsx", "ts", "js", "css", "json"].includes(ext)) throw new Error("Unsupported preview file type.")

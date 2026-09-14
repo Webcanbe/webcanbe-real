@@ -7,7 +7,7 @@ import { PostgresLeaseStore, type Fence } from "./postgresFencing"
 
 /** Trusted management service on a dedicated Linux host. Mutual TLS credentials
  * remain here, outside every project job. PostgreSQL fences every command/result.
- * No source mounts, arbitrary shell, URLs, HTTP proxy, evaluate or secret injection. */
+ * No source mounts, arbitrary shell, URLs, HTTP proxy or evaluate. Optional preview values arrive only in a fenced server-owned job. */
 export function hostedRunnerGateway(tls: ServerOptions, hostId: string, leases: PostgresLeaseStore, provider: RunnerProvider) {
   if (!tls.key || !tls.cert || !tls.ca || !provider.revoke) throw new Error("Gateway requires private PKI and explicit provider revocation.")
   const handles = new Map<string, { hash: string; opening: Promise<ControlledExecution> }>()
@@ -40,6 +40,7 @@ export function hostedRunnerGateway(tls: ServerOptions, hostId: string, leases: 
         const entry = handles.get(fence.generation)
         if (!entry) throw new Error("Worker handle unavailable; revoke and start a fresh generation.")
         const execution = await entry.opening
+        if (body.command === "check" && execution.check) return execution.check()
         if (body.command === "sample") {
           const sample = execution.sample ? await execution.sample() : { bytes: await execution.capture(), observation: undefined }
           return { png: Buffer.from(sample.bytes).toString("base64"), observation: sample.observation }

@@ -17,7 +17,7 @@ export async function validateSource(files: Map<string, string>, level: SourceVa
       if (!editableSource.test(file) || typeof source !== "string" || Buffer.byteLength(source) > 2 * 1024 * 1024 || source.includes("\0")) throw new Error("Unsupported source path or size.")
       if (file.endsWith(".json")) JSON.parse(source)
       else if (file.endsWith(".css")) postcss.parse(source, { from: file })
-      else await transform(source, { loader: file.endsWith(".tsx") ? "tsx" : file.endsWith(".ts") ? "ts" : "jsx", sourcefile: file, logLevel: "silent" })
+      else await transform(source, { loader: file.endsWith(".tsx") ? "tsx" : /\.[cm]?ts$/.test(file) ? "ts" : "jsx", sourcefile: file, logLevel: "silent" })
     } catch (error) {
       const detail = error as { errors?: Array<{ text: string; location?: { line: number; column: number } }>; reason?: string; message?: string; line?: number; column?: number }
       if (detail.errors?.length) diagnostics.push(...detail.errors.map(item => ({ file, message: item.text, line: item.location?.line, column: item.location?.column })))

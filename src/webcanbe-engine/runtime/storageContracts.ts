@@ -10,7 +10,7 @@ import type { PreviewSnapshot } from "./controlledPreview"
  * domain. A hosted adapter must supply the same CAS/recovery semantics, not split
  * a source write and a history write across independently committed services. */
 export type ProjectSourceStore = Pick<DurableSource, "files" | "revision" | "head" | "assertBase" | "prepare" | "lease" | "commit">
-export type RevisionHistoryStore = Pick<DurableSource, "history" | "retry" | "revertOperations" | "reject">
+export type RevisionHistoryStore = Pick<DurableSource, "history" | "retry" | "revertOperations" | "restoreOperations" | "reject">
 export type ProjectPersistence = ProjectSourceStore & RevisionHistoryStore
 export type ProjectStoreFactory = (project: ProjectRecord) => ProjectPersistence
 export type ArtifactReference = Readonly<{ workspaceId: string; projectId: string; revision: string; generation: string; digest: string }>

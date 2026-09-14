@@ -1,4 +1,5 @@
 import ts from "typescript"
+import { importedLiteral, importedDeclaration } from "./importedLiteral"
 import postcss from "postcss"
 import { deriveCompatibility } from "../../core/compatibility"
 import { encodeSourceIdentity } from "../../core/sourceIdentity"
@@ -13,7 +14,7 @@ const cssCache = new Map<string, ReturnType<typeof postcss.parse>>()
 export function parsedSource(file: string, code: string) {
   const key = file + "\0" + code
   let value = astCache.get(key)
-  if (!value) { value = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX); if (astCache.size >= 64) astCache.delete(astCache.keys().next().value!); astCache.set(key, value) }
+  if (!value) { value = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true); if (astCache.size >= 64) astCache.delete(astCache.keys().next().value!); astCache.set(key, value) }
   return value
 }
 export function parsedCSS(code: string) {
@@ -54,7 +55,7 @@ function hasShadowedBinding(source: ts.SourceFile, name: string) {
   return shadowed
 }
 
-function staticValue(expression: ts.Expression, seen = new Set<string>()): ts.Expression | undefined {
+function staticValue(expression: ts.Expression, seen = new Set<string>(), readSource?: ReadSource): ts.Expression | undefined {
   const source = expression.getSourceFile()
   if (ts.isIdentifier(expression)) {
     if (seen.has(expression.text)) return undefined
@@ -75,35 +76,37 @@ function staticValue(expression: ts.Expression, seen = new Set<string>()): ts.Ex
       ts.forEachChild(node, visit)
     }
     visit(source)
+    if (!unsafe && !declarations.length && readSource && !hasShadowedBinding(source, expression.text)) return importedLiteral(expression, readSource, parsedSource)
     const declaration = declarations[0]
     if (unsafe || declarations.length !== 1 || !declaration.initializer || !ts.isVariableDeclarationList(declaration.parent) || !(declaration.parent.flags & ts.NodeFlags.Const) || !ts.isVariableStatement(declaration.parent.parent) || declaration.parent.parent.parent !== source) return undefined
     if (declaration.parent.parent.modifiers?.some(item => item.kind === ts.SyntaxKind.ExportKeyword) && (ts.isObjectLiteralExpression(declaration.initializer) || ts.isArrayLiteralExpression(declaration.initializer))) return undefined
-    return staticValue(declaration.initializer, new Set([...seen, expression.text]))
+    return staticValue(declaration.initializer, new Set([...seen, expression.text]), readSource)
   }
   if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) {
-    const object = staticValue(expression.expression, seen)
+    if (readSource && ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression) && !hasShadowedBinding(source, expression.expression.text)) { const imported = importedLiteral(expression, readSource, parsedSource); if (imported) return imported }
+    const object = staticValue(expression.expression, seen, readSource)
     const key = ts.isPropertyAccessExpression(expression) ? expression.name.text : expression.argumentExpression && (ts.isStringLiteral(expression.argumentExpression) || ts.isNumericLiteral(expression.argumentExpression)) ? expression.argumentExpression.text : undefined
     if (!object || key === undefined) return undefined
     if (ts.isObjectLiteralExpression(object)) {
       if (object.properties.some(item => !ts.isPropertyAssignment(item) || ts.isComputedPropertyName(item.name))) return undefined
       const matches = object.properties.filter(ts.isPropertyAssignment).filter(item => item.name.getText(source).replace(/^['"]|['"]$/g, "") === key)
-      return matches.length === 1 ? staticValue(matches[0].initializer, seen) : undefined
+      return matches.length === 1 ? staticValue(matches[0].initializer, seen, readSource) : undefined
     }
     if (ts.isArrayLiteralExpression(object) && /^\d+$/.test(key) && object.elements.every(item => !ts.isSpreadElement(item))) {
-      const value = object.elements[Number(key)]; return value && ts.isExpression(value) ? staticValue(value, seen) : undefined
+      const value = object.elements[Number(key)]; return value && ts.isExpression(value) ? staticValue(value, seen, readSource) : undefined
     }
     return undefined
   }
   return expression
 }
 
-function staticStrings(expression: ts.Expression): string[] | undefined {
-  const resolved = staticValue(expression)
+function staticStrings(expression: ts.Expression, readSource?: ReadSource): string[] | undefined {
+  const resolved = staticValue(expression, new Set(), readSource)
   if (!resolved) return undefined
-  if (resolved !== expression) return staticStrings(resolved)
+  if (resolved !== expression) return staticStrings(resolved, readSource)
   if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return [expression.text]
   if (ts.isArrayLiteralExpression(expression)) {
-    const values = expression.elements.map((item) => ts.isExpression(item) ? staticStrings(item) : undefined)
+    const values = expression.elements.map((item) => ts.isExpression(item) ? staticStrings(item, readSource) : undefined)
     return values.every(Boolean) ? values.flat() as string[] : undefined
   }
   if (ts.isCallExpression(expression) && ts.isIdentifier(expression.expression) && ["clsx", "cn", "classnames"].includes(expression.expression.text)) {
@@ -111,13 +114,13 @@ function staticStrings(expression: ts.Expression): string[] | undefined {
     const helper = expression.expression.text
     const binding = source.statements.filter(ts.isImportDeclaration).some(item => ts.isStringLiteral(item.moduleSpecifier) && ["clsx", "classnames"].includes(item.moduleSpecifier.text) && (item.importClause?.name?.text === helper || item.importClause?.namedBindings && ts.isNamedImports(item.importClause.namedBindings) && item.importClause.namedBindings.elements.some(element => element.name.text === helper && ["clsx", "default"].includes(element.propertyName?.text ?? element.name.text))))
     if (!binding || hasShadowedBinding(source, helper)) return undefined
-    const values = expression.arguments.map(staticStrings)
+    const values = expression.arguments.map(argument => staticStrings(argument, readSource))
     return values.every(Boolean) ? values.flat() as string[] : undefined
   }
   return undefined
 }
 
-function staticClassInfo(node: ts.JsxOpeningLikeElement): ClassInfo {
+function staticClassInfo(node: ts.JsxOpeningLikeElement, readSource?: ReadSource): ClassInfo {
   const attribute = getAttribute(node, "className")
   if (!attribute?.initializer) return { classNames: [], tailwind: [], static: false }
   if (ts.isStringLiteral(attribute.initializer)) {
@@ -127,7 +130,7 @@ function staticClassInfo(node: ts.JsxOpeningLikeElement): ClassInfo {
   if (ts.isJsxExpression(attribute.initializer) && attribute.initializer.expression) {
     const expression = attribute.initializer.expression
     if (ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression) && !hasShadowedBinding(expression.getSourceFile(), expression.expression.text) && expression.getSourceFile().statements.filter(ts.isImportDeclaration).some(item => item.importClause?.name?.text === expression.expression.getText() && ts.isStringLiteral(item.moduleSpecifier) && item.moduleSpecifier.text.endsWith(".module.css"))) return { classNames: [], tailwind: [], static: true, cssModule: { namespace: expression.expression.text, name: expression.name.text } }
-    const strings = staticStrings(expression)
+    const strings = staticStrings(expression, readSource)
     if (strings) {
       const tokens = strings.flatMap((value) => value.split(/\s+/)).filter(Boolean)
       return { classNames: tokens, tailwind: tokens, static: true }
@@ -224,13 +227,13 @@ export function tailwindProperty(token: string): StyleProperty | undefined {
   return undefined
 }
 
-function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile) {
+function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile, readSource?: ReadSource) {
   const element = node.parent
   if (!ts.isJsxElement(element)) return undefined
   const meaningful = element.children.filter(child => !ts.isJsxText(child) || child.getText(source).trim())
-  if (meaningful.length === 1 && ts.isJsxExpression(meaningful[0]) && meaningful[0].expression && ts.isStringLiteral(meaningful[0].expression)) {
-    const literal = meaningful[0].expression
-    return { text: literal.text, range: { start: literal.getStart(source), end: literal.getEnd() }, encoding: "js-string" as const }
+  if (meaningful.length === 1 && ts.isJsxExpression(meaningful[0]) && meaningful[0].expression) {
+    const literal = staticValue(meaningful[0].expression, new Set(), readSource)
+    if (literal && (ts.isStringLiteral(literal) || ts.isNoSubstitutionTemplateLiteral(literal))) return { text: literal.text, file: literal.getSourceFile().fileName, shared: literal !== meaningful[0].expression, range: { start: literal.getStart(), end: literal.getEnd() }, encoding: "js-string" as const }
   }
   const texts = element.children.filter(ts.isJsxText).filter((child) => child.getText(source).trim())
   if (texts.length !== 1 || element.children.some((child) => ts.isJsxExpression(child) && child.expression)) return undefined
@@ -275,20 +278,20 @@ function stylesheetOrigins(file: string, source: string, classInfo: ClassInfo, r
   return origins
 }
 
-function tailwindOrigins(node: ts.JsxOpeningLikeElement, source: ts.SourceFile, classInfo: ClassInfo): StyleOrigin[] {
+function tailwindOrigins(node: ts.JsxOpeningLikeElement, source: ts.SourceFile, classInfo: ClassInfo, readSource?: ReadSource): StyleOrigin[] {
   const attribute = getAttribute(node, "className")
   if (!attribute?.initializer || !classInfo.tailwind.length || !classInfo.static) return []
   const literals: Array<ts.StringLiteral | ts.NoSubstitutionTemplateLiteral> = []
   const visited = new Set<ts.Node>()
-  const visit = (node: ts.Node) => { if (visited.has(node)) return; visited.add(node); if (ts.isExpression(node)) { const resolved = staticValue(node); if (!resolved) return; if (resolved !== node) { visit(resolved); return } } if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) literals.push(node); else ts.forEachChild(node, visit) }
+  const visit = (node: ts.Node) => { if (visited.has(node)) return; visited.add(node); if (ts.isExpression(node)) { const resolved = staticValue(node, new Set(), readSource); if (!resolved) return; if (resolved !== node) { visit(resolved); return } } if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) literals.push(node); else ts.forEachChild(node, visit) }
   visit(attribute.initializer)
   return literals.flatMap(literal => {
-    if (literal.getText(source).slice(1, -1) !== literal.text) return []
+    if (literal.getText().slice(1, -1) !== literal.text) return []
     return [...literal.text.matchAll(/\S+/g)].flatMap(match => {
       const token = match[0], property = tailwindProperty(token)
       if (!property) return []
-      const start = literal.getStart(source) + 1 + match.index!
-      return [{ property, kind: "tailwind" as const, editable: !token.includes(":") || /^(sm|md|lg|xl|2xl):[^:]+$/.test(token), range: { start, end: start + token.length }, value: token, prefix: token.includes(":") ? token.slice(0, token.lastIndexOf(":") + 1) : "", valueOrigin: literal.getStart(source) < attribute.initializer!.getStart(source) || literal.getEnd() > attribute.initializer!.getEnd() ? "local const/object/array literal" : "literal/static composition" }]
+      const start = literal.getStart() + 1 + match.index!
+      return [{ property, file: literal.getSourceFile().fileName, kind: "tailwind" as const, editable: !token.includes(":") || /^(sm|md|lg|xl|2xl):[^:]+$/.test(token), range: { start, end: start + token.length }, value: token, prefix: token.includes(":") ? token.slice(0, token.lastIndexOf(":") + 1) : "", valueOrigin: literal.getSourceFile().fileName !== source.fileName ? "imported immutable literal (shared)" : literal.getStart(source) < attribute.initializer!.getStart(source) || literal.getEnd() > attribute.initializer!.getEnd() ? "local const/object/array literal" : "literal/static composition" }]
     })
   })
 }
@@ -310,9 +313,31 @@ function capabilitySet(origins: StyleOrigin[], text: boolean, nodeKind: SourceTa
   }
 }
 
-function componentFor(node: ts.JsxOpeningLikeElement, file: string, source: ts.SourceFile) {
-  const name = jsxName(node)
-  return isNative(name, node) ? undefined : { name, file, range: { start: node.getStart(source), end: node.getEnd() } }
+function componentFor(node: ts.JsxOpeningLikeElement, file: string, source: ts.SourceFile, read: ReadSource) {
+  const name=jsxName(node)
+  if(isNative(name,node))return undefined
+  const definition=ts.isExpression(node.tagName)?importedDeclaration(node.tagName,read,parsedSource):undefined
+  if(definition&&(ts.isFunctionDeclaration(definition)||ts.isFunctionExpression(definition)||ts.isArrowFunction(definition))) {
+    const definitionName=(ts.isArrowFunction(definition)?undefined:definition.name?.text)??(ts.isVariableDeclaration(definition.parent)&&ts.isIdentifier(definition.parent.name)?definition.parent.name.text:"default")
+    return {name,file:definition.getSourceFile().fileName,range:{start:definition.getStart(),end:definition.getEnd()},definitionName,resolved:true}
+  }
+  return {name,file,range:{start:node.getStart(source),end:node.getEnd()},resolved:false}
+}
+function propOrigin(node:ts.JsxOpeningLikeElement) {
+  let owner:ts.Node|undefined=node.parent
+  while(owner&&!ts.isFunctionLike(owner))owner=owner.parent
+  if(!owner||!ts.isFunctionLike(owner)||!owner.parameters.length)return undefined
+  const parameter=owner.parameters[0]
+  const expressions:ts.Expression[]=[]
+  if(ts.isJsxElement(node.parent))for(const child of node.parent.children)if(ts.isJsxExpression(child)&&child.expression)expressions.push(child.expression)
+  for(const attribute of node.attributes.properties)if(ts.isJsxAttribute(attribute)&&attribute.initializer&&ts.isJsxExpression(attribute.initializer)&&attribute.initializer.expression)expressions.push(attribute.initializer.expression)
+  for(const expression of expressions){
+    let name:string|undefined,localName:string|undefined
+    if(ts.isObjectBindingPattern(parameter.name)&&ts.isIdentifier(expression))for(const binding of parameter.name.elements)if(!binding.dotDotDotToken&&ts.isIdentifier(binding.name)&&binding.name.text===expression.text&&(!binding.propertyName||ts.isIdentifier(binding.propertyName)||ts.isStringLiteral(binding.propertyName))){name=binding.propertyName?.getText().replace(/^["']|["']$/g,"")??binding.name.text;localName=binding.name.text}
+    if(ts.isIdentifier(parameter.name)&&ts.isPropertyAccessExpression(expression)&&ts.isIdentifier(expression.expression)&&expression.expression.text===parameter.name.text){name=expression.name.text;localName=expression.getText()}
+    if(name&&localName)return{name,localName,file:parameter.getSourceFile().fileName,range:{start:parameter.getStart(),end:parameter.getEnd()}}
+  }
+  return undefined
 }
 
 export function analyzeReactSource(file: string, code: string, readSource: ReadSource, options: { tailwind?: boolean } = {}): SourceTarget[] {
@@ -323,9 +348,9 @@ export function analyzeReactSource(file: string, code: string, readSource: ReadS
       const name = jsxName(node)
       const nodeKind = isNative(name, node) ? "native" as const : "component" as const
       const identity: SourceIdentity = { file, elementStart: node.getStart(source) }
-      const classInfo = staticClassInfo(node)
-      const text = ts.isJsxOpeningElement(node) && nodeKind === "native" ? staticTextRange(node, source) : undefined
-      let origins = nodeKind === "native" ? [...inlineStyleOrigins(node, source), ...(options.tailwind === false ? [] : tailwindOrigins(node, source, classInfo)), ...stylesheetOrigins(file, code, classInfo, readSource)] : []
+      const classInfo = staticClassInfo(node, readSource)
+      const text = ts.isJsxOpeningElement(node) && nodeKind === "native" ? staticTextRange(node, source, readSource) : undefined
+      let origins = nodeKind === "native" ? [...inlineStyleOrigins(node, source), ...(options.tailwind === false ? [] : tailwindOrigins(node, source, classInfo, readSource)), ...stylesheetOrigins(file, code, classInfo, readSource)] : []
       const dynamicClass = Boolean(getAttribute(node, "className") && !classInfo.static)
       const attributeNames = node.attributes.properties.filter(ts.isJsxAttribute).map(attribute => attribute.name.getText(source))
       const spread = node.attributes.properties.some(ts.isJsxSpreadAttribute) || new Set(attributeNames).size !== attributeNames.length
@@ -342,8 +367,9 @@ export function analyzeReactSource(file: string, code: string, readSource: ReadS
         if (ts.isCallExpression(parent) && parent.arguments.some(argument => (ts.isArrowFunction(argument) || ts.isFunctionExpression(argument)) && argument.pos <= node.pos && argument.end >= node.end)) repeated = true
         if (ts.isFunctionDeclaration(parent) && parent.name) ownerComponent = parent.name.text
         if (ts.isVariableDeclaration(parent) && ts.isIdentifier(parent.name)) ownerComponent = parent.name.text
+        if (ts.isExportAssignment(parent)) ownerComponent = "default"
       }
-      const target: SourceTarget = { classNames: classInfo.classNames, ownerComponent, repeated, identity, elementName: name, nodeKind, sourceRange: { start: node.getStart(source), end: node.getEnd() }, textRange: text?.range, text: text?.text, textEncoding: text && "encoding" in text ? text.encoding : undefined, styleOrigins: origins, capabilities, compatibility: "partial", unavailableReasons, component: componentFor(node, file, source) }
+      const target: SourceTarget = { classNames: classInfo.classNames, ownerComponent, repeated, identity, elementName: name, nodeKind, sourceRange: { start: node.getStart(source), end: node.getEnd() }, textRange: text?.range, textFile: text && "file" in text ? text.file : undefined, textShared: text && "shared" in text ? text.shared : false, text: text?.text, textEncoding: text && "encoding" in text ? text.encoding : undefined, styleOrigins: origins, capabilities, compatibility: "partial", unavailableReasons, component: componentFor(node, file, source, readSource), propOrigin: propOrigin(node) }
       const dynamicChildren = !text && ts.isJsxOpeningElement(node) && ts.isJsxElement(node.parent) && node.parent.children.some(child => ts.isJsxExpression(child) && child.expression)
       target.reasonCodes = [
         ...(dynamicClass ? ["dynamic-class-expression"] : []),
@@ -354,7 +380,9 @@ export function analyzeReactSource(file: string, code: string, readSource: ReadS
         ...(origins.some(origin => !origin.editable) ? ["ambiguous-style-source"] : []),
       ]
       if (spread) unavailableReasons.visualEdit = "JSX spread props can override source properties."
-      if (dynamicChildren) unavailableReasons.text = "Runtime-generated children cannot be edited as static JSX text."
+      if (dynamicChildren) unavailableReasons.text = target.propOrigin ? `Prop ${target.propOrigin.name} (local ${target.propOrigin.localName}) comes from a component invocation. Inspect its callers in Code; no per-instance override is synthesized.` : "Runtime-generated children cannot be edited as static JSX text."
+      if(target.propOrigin)target.reasonCodes.push("prop-derived-value")
+      if(target.component&&!target.component.resolved)target.reasonCodes.push("component-origin-unresolved")
       target.compatibility = deriveCompatibility(target.capabilities)
       if (target.capabilities.visualEdit && (target.reasonCodes.length > 0)) target.compatibility = "partial"
       targets.push(target)

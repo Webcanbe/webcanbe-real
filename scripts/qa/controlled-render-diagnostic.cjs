@@ -2,8 +2,11 @@
 // Never exposed through the gateway; cannot change ordinary capture acceptance.
 const fs=require('node:fs'),path=require('node:path'),{spawn,execFileSync}=require('node:child_process'),{randomUUID,createHash}=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),state=path.join(root,'.webcanbe/runner/qa-common-applications'),name=process.argv[2];
-if(!['zustand','kanban-refresh','kanban-board','GroqRecipeBook','kanban-export','zustand-export','recipe-export','legacy-de','legacy-f-browser','legacy-f-hash','legacy-g-authored','legacy-g-react18','legacy-g-react19','legacy-hosted-react18','legacy-hosted-react19'].includes(name))throw Error('Unknown fixed diagnostic subject');
+if(!['habit-export','zustand','kanban-refresh','kanban-board','GroqRecipeBook','kanban-export','zustand-export','recipe-export','legacy-de','legacy-f-browser','legacy-f-hash','legacy-g-authored','legacy-g-react18','legacy-g-react19','legacy-hosted-react18','legacy-hosted-react19'].includes(name))throw Error('Unknown fixed diagnostic subject');
 const input=JSON.parse(fs.readFileSync(path.join(state,'hosted',name+'-artifact.json'))),generation=randomUUID(),snapshot={...input,digest:createHash('sha256').update(JSON.stringify(input)).digest('hex')};
+// Classify only explicit local document icons as optional browser chrome.
+// Required script/style/image requests are never exempted, even at that path.
+const documentIcons=[];const document=require('parse5').parse(input.html);const walkIcons=node=>{if(node.tagName==='link'){const a=Object.fromEntries((node.attrs||[]).map(a=>[a.name,a.value]));if(a.rel?.split(/\s+/).includes('icon')&&a.href)try{const u=new URL(a.href,'https://fixed.invalid/');if(u.origin==='https://fixed.invalid')documentIcons.push(u.pathname)}catch{}}for(const child of node.childNodes||[])walkIcons(child)};walkIcons(document);
 const env={...process.env,LIMA_HOME:path.join(root,'.webcanbe/runner/lima')},lima=path.join(root,'.webcanbe/runner/tools/bin/limactl');
 const run=args=>execFileSync(lima,args,{env,stdio:'pipe',timeout:15000});
 const worker=path.join(__dirname,'render-diagnostic-worker.cjs'),launcher=path.join(state,'diagnostic-launch.sh');
@@ -13,11 +16,11 @@ for(const[from,to,mode]of [[path.join(__dirname,'legacy-export-assertions.cjs'),
 const child=spawn(lima,['shell','--workdir=/','wcb','sudo','-n','/opt/wcb-runtime/common-render-diagnostic.sh',generation],{env,stdio:['pipe','pipe','pipe']});let output='',errors='',samples=[];
 child.stdout.on('data',d=>{output+=d;if(output.length>16*1024*1024)child.kill('SIGKILL')});child.stderr.on('data',d=>errors=(errors+d).slice(-1500));
 const timer=setTimeout(()=>child.kill('SIGKILL'),55000),sampler=setInterval(()=>{try{samples.push(run(['shell','--workdir=/','wcb','systemctl','show','wcb-preview-'+generation,'-p','MemoryCurrent','-p','MemoryPeak','-p','CPUUsageNSec','-p','TasksCurrent','-p','Result','-p','CPUQuotaPerSecUSec']).toString().trim())}catch{}},500);
-child.stdin.end(JSON.stringify({generation,origin:'http://wcb-'+generation+'.preview.invalid',snapshot,scenario:name})+'\n');
+child.stdin.end(JSON.stringify({generation,origin:'http://wcb-'+generation+'.preview.invalid',snapshot,scenario:name,documentIcons})+'\n');
 child.on('exit',code=>{clearTimeout(timer);clearInterval(sampler);let result;try{result=JSON.parse(output.trim())}catch{result={error:'Diagnostic process failed',exitCode:code,stderr:errors}}
  for(const key of ['ordinaryPng','rawPng','extendedPng'])if(result[key]){fs.writeFileSync(path.join(state,name+'-'+key+'.png'),Buffer.from(result[key],'base64'));result[key]={sha256:createHash('sha256').update(Buffer.from(result[key],'base64')).digest('hex')}}
  for(const entry of result.exportViewports||[])if(entry.png){const b=Buffer.from(entry.png,'base64');fs.writeFileSync(path.join(state,name+'-'+entry.width+'.png'),b);entry.png={sha256:createHash('sha256').update(b).digest('hex')}}
  result.resources=samples;result.boundary='Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial';
  try{run(['shell','--workdir=/','wcb','sudo','-n','/opt/wcb-runtime/stop.sh',generation]);result.cleanupVerified=true}catch{result.cleanupVerified=false}
- fs.writeFileSync(path.join(state,name+'-diagnostic.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+ fs.writeFileSync(path.join(state,name+'-diagnostic-'+Date.now()+'.json'),JSON.stringify(result,null,2)+'\n');fs.writeFileSync(path.join(state,name+'-diagnostic.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
 });

@@ -13,7 +13,7 @@ The editor dependency graph and local QA also import node:sqlite and were valida
 Retain the repository lockfile for rebuilding.
 
 On an already authorized dedicated Debian 13 Linux VM, provision signed distribution
-packages `nodejs chromium bubblewrap systemd gcc sudo fonts-dejavu-core` and pinned
+packages `nodejs chromium bubblewrap systemd gcc sudo fonts-dejavu-core` and `fonts-noto-color-emoji=2.051-0+deb13u1` (Debian 13) and pinned
 `playwright-core@1.63.0` in `/opt/wcb-runtime/node_modules`, with lifecycle scripts
 disabled. Install the retained launch/stop policy and packaged worker/probe/refresh-policy tools root-owned in
 `/opt/wcb-runtime`; launch/stop mode 0755, others 0644. Compile socket-probe.c there.

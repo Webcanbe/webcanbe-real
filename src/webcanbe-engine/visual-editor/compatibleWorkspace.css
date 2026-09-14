@@ -24,3 +24,5 @@
 .source-history article button { margin-right: 8px; }
 .code-status { flex-basis: 100%; font-size: 12px; }
 @media (max-width: 1000px) { .source-file-tree { width: 100%; max-height: 140px; overflow: auto; } }
+
+.source-gesture{position:absolute;pointer-events:auto;touch-action:none;z-index:3;border:2px solid #16200e;background:#c9ed70;min-width:18px;min-height:18px;padding:0;color:#16200e;border-radius:3px;font:12px Arial,sans-serif}.source-gesture:focus-visible{outline:3px solid #fff;box-shadow:0 0 0 5px #16200e}.source-gesture:disabled{opacity:.4}.source-gesture-width{right:-9px;top:calc(50% - 9px);cursor:ew-resize}.source-gesture-height{bottom:-9px;left:calc(50% - 9px);cursor:ns-resize}.source-gesture-gap{left:3px;bottom:3px;padding:2px 5px;cursor:ew-resize}.source-gesture-reorder{left:3px;top:3px;padding:2px 5px;cursor:grab}.source-gesture-hint:not(:empty){position:absolute;top:100%;left:0;width:260px;padding:6px;background:#16200e;color:#eef8df;font:12px/1.4 Arial,sans-serif;z-index:4}

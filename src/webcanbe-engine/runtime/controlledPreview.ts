@@ -1,3 +1,4 @@
+import { semanticSnapshot, semanticResult } from "./semanticTypecheck"
 import type { ProjectGrant } from "./hostedAuthority"
 import type { RunnerOwner } from "./runnerScheduler"
 import { IncrementalPreviewCompiler, classifyPreviewUpdate, type PreviewUpdate } from "./incrementalPreview"
@@ -36,6 +37,8 @@ export function snapshotPreview(build: HttpPreviewBuild): PreviewSnapshot {
 }
 
 export type ControlledJob = Readonly<{
+  secretDelivery?: import("./managedPreviewSecrets").RuntimeSecretDelivery
+  purpose?: "semantic-typescript-v1"
   allocation?: RunnerAllocation
   generation: string
   origin: string
@@ -45,11 +48,12 @@ export type ControlledJob = Readonly<{
   network: Readonly<{ external: "deny" }>
   snapshot: PreviewSnapshot
 }>
-export type PreviewKey = "Tab" | "Enter" | "Escape" | "Backspace" | "Delete" | "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End" | "PageUp" | "PageDown" | "SelectAll"
+export type PreviewKey = "Tab" | "Enter" | "Escape" | "Backspace" | "Delete" | "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End" | "PageUp" | "PageDown" | "SelectAll" | "CopySelection"
 export type PreviewInput = Readonly<{ type: "text"; text: string }> | Readonly<{ type: "key"; key: PreviewKey; shift: boolean }> | Readonly<{ type: "pointer"; x: number; y: number; action: "move" | "click" | "select" }> | Readonly<{ type: "navigate"; route: string }> | Readonly<{ type: "scroll"; dx: number; dy: number }> | Readonly<{ type: "history"; action: "back" | "forward" | "reload" }> | Readonly<{ type: "viewport"; width: number; height: number }>
-export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[] }
+export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[]; clipboard?: string; focused?: { role: string; name: string } }
 export type RunnerSample = { bytes: Uint8Array; observation: unknown }
 export interface ControlledExecution {
+  check?(): Promise<unknown>
   update?(update: PreviewUpdate): Promise<void>
   sample?(): Promise<RunnerSample>
   /** Trusted browser screenshot encoder; never project-supplied HTML/SVG/URLs. */
@@ -187,6 +191,26 @@ export class ControlledPreviewTransport {
       return { transport: "raster" as const, generation, revision: entry.revision, expiresAt }
     } catch (error) { if (error instanceof RunnerCleanupError) this.quarantined = true; entry.pending = false; await this.retire(entry); throw error }
   }
+  async typecheck(projectId: string, authority: SessionAuthority, revision: string, files: Map<string,string>) {
+    authority={...authority}; files=new Map(files)
+    if(!this.runner||this.closed||this.quarantined||!await this.authorized(projectId,authority)||await this.registry.revision(projectId,authority.previewId)!==revision)throw new Error("Semantic checker authority unavailable.")
+    const expiresAt=Math.min((await this.registry.sessionExpiry(projectId,authority.previewId))!,this.now()+60_000)
+    if(!Number.isFinite(expiresAt)||expiresAt<=this.now()||this.closed||this.quarantined||this.entries.size>=4||[...this.entries.values()].some(e=>e.pending||e.job?.purpose==="semantic-typescript-v1"))throw new Error("Semantic checker capacity unavailable.")
+    const generation=randomUUID(),entry:Entry={projectId,authority,generation,revision,expiresAt,sequence:0,abort:new AbortController(),retired:false,pending:true,busy:true,timer:setTimeout(()=>{void this.retire(entry).catch(()=>{this.quarantined=true})},Math.max(0,expiresAt-this.now()))}
+    entry.timer.unref();this.entries.set(generation,entry)
+    try{
+      const snapshot=await this.registry.withPreviewSource(projectId,authority,async project=>semanticSnapshot(project,this.applicationRoot,files))
+      const stored=await this.storedSnapshot(entry,snapshot)
+      if(!await this.current(entry))throw new Error("Semantic source became stale.")
+      entry.job=Object.freeze({purpose:"semantic-typescript-v1",generation,revision,expiresAt,route:"/",origin:"http://wcb-"+generation+".preview.invalid",network:{external:"deny" as const},snapshot:stored,allocation:{owner:await this.registry.sessionOwner(projectId,authority.previewId),idempotencyKey:generation,startupDeadline:Math.min(expiresAt,this.now()+15_000),executionDeadline:expiresAt,idleMs:60_000,budget:LOCAL_RESOURCE_BUDGET}})
+      entry.execution=await this.runner.open(entry.job,entry.abort.signal);entry.pending=false
+      if(!entry.execution.check||!await this.current(entry))throw new Error("Semantic checker unavailable or stale.")
+      const result=semanticResult(await entry.execution.check())
+      if(!await this.current(entry))throw new Error("Semantic result became stale or unauthorized.")
+      return result
+    }catch(error){if(error instanceof RunnerCleanupError)this.quarantined=true;throw error}
+    finally{entry.pending=false;await this.retire(entry)}
+  }
   private async storedSnapshot(entry: Entry, snapshot: PreviewSnapshot, revision = entry.revision) {
     const grant = (await this.registry.sessionBinding(entry.projectId, entry.authority.previewId))?.grant
     if (!this.artifacts || !grant) return snapshot
@@ -321,5 +345,7 @@ function sanitizeObservation(value: unknown): RunnerObservation {
     selection = { identity: identity(e.identity), tagName: e.tagName, rect, computed, layoutContext: layout(e.layoutContext) }
     if (e.parentIdentity) { selection.parentIdentity = identity(e.parentIdentity); selection.parentLayoutContext = layout(e.parentLayoutContext!) }
   }
-  return { route: v.route, viewport: { width: v.viewport.width, height: v.viewport.height }, selection, logs: v.logs.slice() }
+  if (v.clipboard !== undefined && (typeof v.clipboard !== "string" || v.clipboard !== "" && !validPreviewInput({ type: "text", text: v.clipboard }))) throw new Error("Invalid clipboard text.")
+  if (v.focused !== undefined && (!v.focused || !["button","textbox","link","checkbox","radio","combobox","slider","unknown"].includes(v.focused.role) || typeof v.focused.name !== "string" || v.focused.name.length > 200)) throw new Error("Invalid focus description.")
+  return { route: v.route, viewport: { width: v.viewport.width, height: v.viewport.height }, selection, logs: v.logs.slice(), ...(v.clipboard !== undefined ? { clipboard: v.clipboard } : {}), ...(v.focused ? { focused: { role: v.focused.role, name: v.focused.name } } : {}) }
 }

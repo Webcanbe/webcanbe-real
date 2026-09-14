@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),https=require('node:https'
 const {randomUUID,createHash}=require('node:crypto'),{spawn,execFileSync}=require('node:child_process');
 const {Pool}=require('pg'),{build}=require('esbuild');
 const root=path.resolve(__dirname,'../..'),sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-exports.setup=async()=>{
+exports.setup=async(options={})=>{
  const dir=path.join(root,'.webcanbe/runner/qa-common-applications/hosted');fs.mkdirSync(dir,{recursive:true,mode:0o700});
  const bundle=path.join(dir,'trusted-api.cjs');await build({stdin:{contents:['postgresStores','postgresIdentity','runtimeCompatibility','projectRegistry','isolatedPreview','controlledPreview','localLimaRunner'].map(n=>`export * from './src/webcanbe-engine/runtime/${n}';`).join('\n')+'\nexport {MutationHistory} from "./src/webcanbe-engine/mutations/sourceMutations";',resolveDir:root},bundle:true,platform:'node',format:'cjs',packages:'external',outfile:bundle,logLevel:'silent'});
  const engine=require(bundle),{generateKeyPair,exportJWK,SignJWT}=await import('jose');
@@ -24,7 +24,7 @@ exports.setup=async()=>{
  await new Promise(r=>idp.listen(0,'127.0.0.1',r));issuer=`https://localhost:${idp.address().port}`;
  const portProbe=https.createServer();await new Promise(r=>portProbe.listen(0,'127.0.0.1',r));const port=portProbe.address().port;await new Promise(r=>portProbe.close(r));origin=`https://app.wcb-app.test:${port}`;
  const host={...config.host};for(const name of ['ca','cert','key']){const file=path.join(dir,'gateway-'+name+'.pem');fs.writeFileSync(file,host[name],{mode:0o600});host[name]=file}
- const settings={applicationRoot:root,localTest:true,listenAddress:'127.0.0.1',port,key:path.join(dir,'key.pem'),cert:path.join(dir,'cert.pem'),postgres:config.postgres,origins:{editorOrigin:origin,viewerOrigin:`https://viewer.wcb-preview.test:${port}`,editorSite:'wcb-app.test',viewerSite:'wcb-preview.test'},oidc:{issuer,authorizationEndpoint:issuer+'/authorize',tokenEndpoint:issuer+'/token',jwksUri:issuer+'/jwks',clientId:'common-test-client',redirectUri:origin+'/__webcanbe/auth/callback',ca},hosts:[host],fastRefresh:true};
+ const settings={applicationRoot:root,localTest:true,listenAddress:'127.0.0.1',port,key:path.join(dir,'key.pem'),cert:path.join(dir,'cert.pem'),postgres:config.postgres,origins:{editorOrigin:origin,viewerOrigin:`https://viewer.wcb-preview.test:${port}`,editorSite:'wcb-app.test',viewerSite:'wcb-preview.test'},oidc:{issuer,authorizationEndpoint:issuer+'/authorize',tokenEndpoint:issuer+'/token',jwksUri:issuer+'/jwks',clientId:'common-test-client',redirectUri:origin+'/__webcanbe/auth/callback',ca},hosts:[host],fastRefresh:true,publicGitHubSourceIntake:options.publicGitHubSourceIntake===true};
  fs.writeFileSync(path.join(dir,'editor-config.json'),JSON.stringify(settings),{mode:0o600});
  async function launch(){child=spawn(process.execPath,[path.join(root,'.webcanbe/hosted-package/editor.cjs'),path.join(dir,'editor-config.json')],{cwd:root,stdio:['ignore','pipe','pipe']});await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Packaged editor startup timeout')),15000);child.stdout.on('data',d=>{if(String(d).includes('Hosted editor TLS listener started.')){clearTimeout(timer);resolve()}});child.once('exit',()=>{clearTimeout(timer);reject(Error('Packaged editor exited'))});child.stderr.on('data',()=>{});});}
  async function shutdown(signal='SIGTERM'){if(child&&child.exitCode===null&&child.signalCode===null){const done=new Promise(r=>child.once('exit',r));child.kill(signal);await done}}
@@ -34,6 +34,7 @@ exports.setup=async()=>{
  const session=async(user,id)=>{const r=await call(user,`/__webcanbe/api/projects/${id}/session`);if(r.status!==201)throw Error('Session failed');return{id,...r.body.session}};
  const projects=[];
  async function close(){for(const p of projects)try{await api(p.user,p,'preview',{command:'stop'})}catch{}await shutdown();idp.closeAllConnections();await new Promise(r=>idp.close(r));await pool.end();for(const file of ['editor-config.json','key.pem','cert.pem','gateway-ca.pem','gateway-cert.pem','gateway-key.pem'])fs.rmSync(path.join(dir,file),{force:true});}
- execFileSync(process.execPath,[path.join(root,'scripts/hosted/package.cjs')],{stdio:'pipe'});await launch();
+ execFileSync(process.execPath,[path.join(root,'scripts/hosted/package.cjs')],{stdio:'pipe'});
+ await launch();
  return{root,dir,engine,pool,access,identities,origin,ca,call,api,session,login,launch,shutdown,close,projects,sha};
 };

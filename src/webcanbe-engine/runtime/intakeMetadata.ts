@@ -1,14 +1,21 @@
 /** Additional metadata is preserved as source bytes, never loaded as editor configuration.
  * The grammar is deliberately finite. It does not grant package-manager execution. */
 export function isExampleEnvironment(name: string) { return /^\.env\.example(?:-[a-z][a-z0-9-]{0,31})?$/.test(name) }
-export function isInertMetadata(name: string) { return [".editorconfig", ".npmrc", ".prettierignore", ".prettierrc"].includes(name) || isExampleEnvironment(name) }
+export function isInertMetadata(name: string) { return [".gitattributes", ".editorconfig", ".npmrc", ".prettierignore", ".prettierrc"].includes(name) || isExampleEnvironment(name) }
 export const METADATA_BYTES = 16 * 1024
 export function validateIntakeMetadata(name: string, bytes: Buffer) {
   if (!isInertMetadata(name)) return
   if (bytes.length > METADATA_BYTES) throw new Error("Project metadata exceeds the 16 KiB limit.")
   const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes)
   if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(text) || /-----BEGIN .*PRIVATE KEY-----|(?:gh[pousr]_|github_pat_|sk_live_|AKIA)[A-Za-z0-9_]+|(?:password|token|secret|credential|api[_-]?key|access[_-]?key)\s*[:=]\s*[^\s]+/i.test(text)) throw new Error("Secret or control data in project metadata.")
-  if (name === ".npmrc") {
+  if (name === ".gitattributes") {
+    // Only inert text/eol declarations, never filters, diff drivers, includes,
+    // macros, export-ignore or export-subst. Export retains every original byte.
+    for(const line of text.split(/\r?\n/)) {
+      if(!line.trim()||/^\s*#/.test(line))continue
+      if(!/^[a-zA-Z0-9_.*?/[\]{}-]{1,256}(?:[ \t]+(?:text(?:=auto)?|-text|eol=(?:lf|crlf)))+[ \t]*$/.test(line))throw new Error("Unsupported Git attributes metadata.")
+    }
+  } else if (name === ".npmrc") {
     // These values affect package-manager operation only. They are not used by
     // compilation, and never authorize registry/auth/shell/script configuration.
     const seen = new Set<string>()

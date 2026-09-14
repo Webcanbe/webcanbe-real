@@ -15,12 +15,22 @@ if (!fs.existsSync(executable)) {
 const env = {...process.env,LIMA_HOME:path.join(state,'lima')};
 const lima = args => run(executable,args,{env});
 lima(fs.existsSync(path.join(state,'lima/wcb/lima.yaml')) ? ['start','wcb','--timeout=10m'] : ['start','-y','--name=wcb',path.join(__dirname,'vm.yaml'),'--timeout=10m']);
+lima(['shell','--workdir=/','wcb','sudo','-n','apt-get','install','-y','--no-install-recommends','fonts-noto-color-emoji=2.051-0+deb13u1','fonts-noto-cjk=1:20240730+repack1-1']);
 require('esbuild').buildSync({entryPoints:[path.join(root,'src/webcanbe-engine/runtime/refreshPolicy.ts')],outfile:path.join(state,'refresh-policy.cjs'),bundle:true,platform:'node',format:'cjs',target:'node20'});
 lima(['copy',path.join(state,'refresh-policy.cjs'),'wcb:/tmp/wcb-refresh-policy.cjs']);
 lima(['shell','--workdir=/','wcb','sudo','-n','install','-m','644','/tmp/wcb-refresh-policy.cjs','/opt/wcb-runtime/refresh-policy.cjs']);
-for (const name of ['worker.cjs','launch.sh','stop.sh','probe.cjs','verify.cjs','socket-probe.c']) {
+for (const name of ['worker.cjs','raster-capture.cjs','typecheck.cjs','typecheck-worker.cjs','launch.sh','stop.sh','probe.cjs','verify.cjs','socket-probe.c']) {
  lima(['copy',path.join(__dirname,name),'wcb:/tmp/wcb-'+name]);
  lima(['shell','--workdir=/','wcb','sudo','-n','install','-m',name.endsWith('.sh')?'755':'644','/tmp/wcb-'+name,'/opt/wcb-runtime/'+name]);
 }
 lima(['shell','--workdir=/','wcb','sudo','-n','sh','-c','cd /opt/wcb-runtime && npm install --ignore-scripts --no-audit --no-fund playwright-core@1.63.0 && cc -O2 socket-probe.c -o socket-probe']);
+
+if(require('typescript/package.json').version!=='5.9.3')throw Error('Expected pinned TypeScript 5.9.3');
+const compilerSource=require.resolve('typescript');
+lima(['copy',compilerSource,'wcb:/tmp/wcb-typescript.cjs']);
+lima(['shell','--workdir=/','wcb','sudo','-n','install','-m','644','/tmp/wcb-typescript.cjs','/opt/wcb-runtime/typescript.cjs']);
+const typeLib=path.join(state,'typecheck-lib');fs.mkdirSync(typeLib,{recursive:true});
+for(const name of fs.readdirSync(path.dirname(compilerSource)))if(/^lib\.[a-z0-9.]+\.d\.ts$/.test(name))fs.copyFileSync(path.join(path.dirname(compilerSource),name),path.join(typeLib,name));
+lima(['copy','-r',typeLib,'wcb:/tmp/wcb-typecheck-lib']);
+lima(['shell','--workdir=/','wcb','sudo','-n','sh','-c','mkdir -p /opt/wcb-runtime/typecheck-lib && cp /tmp/wcb-typecheck-lib/lib.*.d.ts /opt/wcb-runtime/typecheck-lib/ && chmod 644 /opt/wcb-runtime/typecheck-lib/*']);
 console.log('Local runner prepared. Start with WCB_PREVIEW_PROVIDER=lima npm run dev. Run npm run runner:verify before relying on this installation.');

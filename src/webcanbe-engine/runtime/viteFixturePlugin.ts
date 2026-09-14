@@ -180,6 +180,7 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
             if (!registry.authorize(project.id, previewId, capability, action) || !registry.store(project.id, { previewId, capability, operation: action })) throw new Error("Source commit authority expired or changed.")
           }
           const result = await executeSourceOperation({ project, projectRoot, durable, store, action, body, actor: account?.userId ?? "local-operator", assertAccess, authorize,
+            semanticCheck: controlled ? (files,revision) => controlled.typecheck(project.id,{previewId,capability,operation:"preview"},revision,files) : undefined,
             beforeCommit: structural => controlled?.holdForSourceCommit(project.id, previewId, structural) })
           return send(result.status, result.value)
         } catch (error) { return json(response, error instanceof AuthorityDenied ? 403 : error instanceof SourceConflict ? 409 : 400, { error: error instanceof Error ? redactSecrets(error.message, [editorKey, projectRoot, registry.importedRoot, String(request.headers.cookie ?? ""), String(request.headers["x-wcb-csrf"] ?? "")]).slice(0, 1500) : "The project operation was rejected." }) }

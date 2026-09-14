@@ -29,6 +29,20 @@ function componentBoundary(file: string, code: string) {
   }
   return safe && exports > 0
 }
+/** Only declarations whose evaluation does not execute uploaded code.
+ * Functions are recreated but their bodies are not invoked by module loading. */
+export function pureRefreshModule(file:string,code:string):boolean {
+  const ast=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true)
+  if((ast as ts.SourceFile&{parseDiagnostics:readonly unknown[]}).parseDiagnostics.length)return false
+  const value=(node:ts.Expression):boolean=>ts.isStringLiteralLike(node)||ts.isNumericLiteral(node)||[ts.SyntaxKind.TrueKeyword,ts.SyntaxKind.FalseKeyword,ts.SyntaxKind.NullKeyword].includes(node.kind)||ts.isArrowFunction(node)||ts.isFunctionExpression(node)||ts.isArrayLiteralExpression(node)&&node.elements.every(e=>!ts.isSpreadElement(e)&&ts.isExpression(e)&&value(e))||ts.isObjectLiteralExpression(node)&&node.properties.every(p=>ts.isPropertyAssignment(p)&&(ts.isIdentifier(p.name)||ts.isStringLiteral(p.name)||ts.isNumericLiteral(p.name))&&value(p.initializer))
+  return ast.statements.length>0&&ast.statements.every(s=>
+    ts.isImportDeclaration(s)?Boolean(s.importClause):
+    ts.isExportDeclaration(s)?!s.moduleSpecifier||ts.isStringLiteral(s.moduleSpecifier):
+    ts.isFunctionDeclaration(s)?Boolean(s.name):
+    ts.isVariableStatement(s)?Boolean(s.declarationList.flags&ts.NodeFlags.Const)&&s.declarationList.declarations.every(d=>ts.isIdentifier(d.name)&&Boolean(d.initializer&&value(d.initializer))):
+    ts.isExportAssignment(s)?!s.isExportEquals&&value(s.expression):
+    ts.isInterfaceDeclaration(s)||ts.isTypeAliasDeclaration(s)||ts.isEmptyStatement(s))
+}
 /** The already confined esbuild graph is reused as data. Babel configuration is
  * explicitly disabled. No uploaded module/config is evaluated on this host. */
 export async function fastRefreshArtifacts(bundle: BuildResult, sources: Map<string, { source: string; result: OnLoadResult }>, root: string, applicationRoot: string, entry: string, files: Map<string, PreviewArtifact>, environment: Record<string, string | boolean>): Promise<string | undefined> {
@@ -51,7 +65,7 @@ export async function fastRefreshArtifacts(bundle: BuildResult, sources: Map<str
       if (!dependency.original || !metadata.inputs[dependency.path]) return "An unresolved module edge requires rebuild/reload."
       imports[dependency.original] = id(dependency.path)
     }
-    let code: string, boundary = false
+    let code: string, boundary = false, propagate = false
     if (key.endsWith(".css")) code = "module.exports = {}"
     else if (!source) {
       const artifact = Object.entries(metadata.outputs).find(([name,output]) => output.inputs[key] && !output.entryPoint && !/\.(?:js|css)$/.test(name))
@@ -60,8 +74,9 @@ export async function fastRefreshArtifacts(bundle: BuildResult, sources: Map<str
       if (!name || !files.has(name) || /\.(?:js|css)$/.test(name)) return "An unsupported asset module requires rebuild/reload."
       code = "module.exports = " + JSON.stringify(name)
     } else {
-      const original = String(source.result.contents), extension = path.extname(full).slice(1).replace(/^[mc]js$/, "js")
+      const original = String(source.result.contents), extension = path.extname(full).slice(1).replace(/^[mc]([jt])s$/, "$1s")
       boundary = !vendor && componentBoundary(full, source.source)
+      propagate = !vendor && !boundary && pureRefreshModule(full,source.source)
       let transformed = original
       if (!vendor) {
         const stripped = await transform(original, { loader: extension as Loader, jsx: "preserve", target: "es2020", logLevel: "silent" })
@@ -75,14 +90,14 @@ export async function fastRefreshArtifacts(bundle: BuildResult, sources: Map<str
       if (!runtime) return "JSX runtime graph is unavailable."
       imports["react/jsx-runtime"] = id(runtime)
     }
-    manifest.modules[current] = { code, imports, boundary }
+    manifest.modules[current] = { code, imports, boundary, ...(propagate?{propagate:true}:{}) }
   }
   if (!manifest.entry) return "Refresh entry is unavailable."
   const runtime = await build({ stdin: { contents: 'module.exports = require("react-refresh/runtime")', resolveDir: applicationRoot }, bundle: true, platform: "browser", format: "iife", globalName: "__wcbRefreshLibrary", write: false, define: { "process.env.NODE_ENV": '"development"' }, logLevel: "silent" })
   const bootstrap = runtime.outputFiles![0].text + `\n(()=>{const refresh=__wcbRefreshLibrary;refresh.injectIntoGlobalHook(window);let manifest=${JSON.stringify(manifest)};const cache=Object.create(null);
 function load(id){if(cache[id])return cache[id].exports;const spec=manifest.modules[id];if(!spec)throw Error('Unknown confined module');const module=cache[id]={exports:{}};const localRequire=name=>{if(!Object.prototype.hasOwnProperty.call(spec.imports,name))throw Error('Unmapped confined import');return load(spec.imports[name])};const register=(type,name)=>refresh.register(type,id+' '+name);new Function('module','exports','require','$RefreshReg$','$RefreshSig$',spec.code)(module,module.exports,localRequire,register,refresh.createSignatureFunctionForTransform);return module.exports}
 function boundary(exports){const keys=Object.keys(exports).filter(k=>k!=='__esModule');return keys.length>0&&keys.every(k=>refresh.isLikelyComponentType(exports[k]))}
-window.__wcbApplyRefresh=(next,changed)=>{for(const id of changed)if(!cache[id]||!boundary(cache[id].exports))throw Error('Refresh boundary changed');manifest=next;for(const id of changed){delete cache[id];if(!boundary(load(id)))throw Error('Refresh export changed')}refresh.performReactRefresh();return true};load(manifest.entry)})();`
+window.__wcbApplyRefresh=(next,changed)=>{for(const id of changed){const old=manifest.modules[id],value=next.modules[id];if(!cache[id]||!old||!value||!(old.boundary&&value.boundary?boundary(cache[id].exports):old.propagate&&value.propagate))throw Error('Refresh boundary changed')}manifest=next;for(const id of changed)delete cache[id];for(const id of changed){const exports=load(id);if(manifest.modules[id].boundary&&!boundary(exports))throw Error('Refresh export changed')}refresh.performReactRefresh();return true};load(manifest.entry)})();`
   files.set("/_wcb/app.js", { contentType: "text/javascript; charset=utf-8", body: Buffer.from(bootstrap) })
   files.set("/_wcb/refresh.json", { contentType: "application/json", body: Buffer.from(JSON.stringify(manifest)) })
   return undefined

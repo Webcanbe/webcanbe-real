@@ -71,7 +71,7 @@ export class LinuxHostRunnerProvider implements RunnerProvider {
         if (typeof result?.png !== "string" || result.png.length > 12 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(result.png)) throw new Error("Invalid runner raster.")
         return { bytes: Buffer.from(result.png, "base64"), observation: result.observation }
       }
-      return { update: async update => { await rpc("update", update) }, sample, capture: async () => (await sample()).bytes, input: async (input: PreviewInput) => { await rpc("input", input) }, close }
+      return { check: () => rpc("check"), update: async update => { await rpc("update", update) }, sample, capture: async () => (await sample()).bytes, input: async (input: PreviewInput) => { await rpc("input", input) }, close }
     } catch (error) { try { await close() } catch { throw new RunnerCleanupError("Runner startup cleanup failed; restart only after verifying host cleanup.") } throw error }
   }
 }

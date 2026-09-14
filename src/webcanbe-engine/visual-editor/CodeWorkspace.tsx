@@ -7,7 +7,7 @@ import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
 import type { FileOperation, MutationTransaction, RevisionLedger, SourceValidation } from "../core/types"
 
-export type SourceResponse = { draftState?: DraftState; files?: Array<{ file: string; hash: string }>; source?: string; revision?: string; history?: RevisionLedger; validation?: SourceValidation; transaction?: MutationTransaction; diff?: string; error?: string }
+export type SourceResponse = { archivedHistory?: {transactions: MutationTransaction[];revisions: RevisionLedger["revisions"]}; restorePreview?: {baseRevision:string;revisionId:string;files:Array<{file:string;kind:string;expectedHash:string|null;afterHash:string|null}>;diff:string;truncatedPerFile:number}; draftState?: DraftState; files?: Array<{ file: string; hash: string }>; source?: string; revision?: string; history?: RevisionLedger; validation?: SourceValidation; transaction?: MutationTransaction; diff?: string; error?: string }
 type Request = (action: string, body?: Record<string, unknown>) => Promise<{ ok: boolean; data: SourceResponse }>
 type Draft = { file: string; text: string; baseline: string; hash: string; baseRevision: string }
 
@@ -16,7 +16,7 @@ function CodeEditor({ file, value, onChange, onSave }: { file: string; value: st
   const callbacks = useRef({ onChange, onSave }); callbacks.current = { onChange, onSave }
   useEffect(() => {
     const editor = new EditorView({ parent: host.current!, doc: value, extensions: [
-      basicSetup, file.endsWith(".css") ? css() : file.endsWith(".json") ? json() : javascript({ jsx: true, typescript: /\.tsx?$/.test(file) }),
+      basicSetup, file.endsWith(".css") ? css() : file.endsWith(".json") ? json() : javascript({ jsx: true, typescript: /\.(?:tsx?|mts|cts)$/.test(file) }),
       EditorView.contentAttributes.of({ "aria-label": "Source code editor" }),
       keymap.of([{ key: "Mod-s", run: () => { callbacks.current.onSave(); return true } }]),
       EditorView.updateListener.of(update => { if (update.docChanged) callbacks.current.onChange(update.state.doc.toString()) }),
@@ -47,6 +47,8 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const [fileAction, setFileAction] = useState<"create" | "rename" | "delete">("create")
   const [newPath, setNewPath] = useState("src/New.tsx")
   const serial = useRef(0), mounted = useRef(true), saving = useRef(false)
+  const validationVersion = useRef(0), validationState = useRef({head,drafts})
+  validationState.current = {head,drafts}
   const pendingSave = useRef<{ signature: string; key: string } | undefined>(undefined)
   const requests = useRef(request); requests.current = request
   const draft = drafts[active], dirty = Boolean(draft && draft.text !== draft.baseline)
@@ -120,10 +122,12 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     return () => { cancelled = true }
   }, [active, epoch, connected])
   useEffect(() => {
-    if (!draft || !connected || !dirty) { setValidation(undefined); return }
+    const version=++validationVersion.current
+    setValidation(undefined)
+    if (!draft || !connected || !dirty) return
     let cancelled = false
     const timer = setTimeout(() => {
-      void requests.current("validate", { file: draft.file, content: draft.text }).then(response => { if (!cancelled && response.ok) setValidation(response.data.validation) }).catch(() => {})
+      void requests.current("validate", { file: draft.file, content: draft.text }).then(response => { if (!cancelled && version===validationVersion.current && response.ok) setValidation(response.data.validation) }).catch(() => {})
     }, 500)
     return () => { cancelled = true; clearTimeout(timer) }
   }, [draft?.text, draft?.file, connected, dirty])
@@ -185,7 +189,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
       : { kind: "delete", file: active, expectedHash: file!.hash }
     saving.current = true; setBusy(true)
     try {
-      const response = await requests.current("code", { expectedRevision: head, idempotencyKey: crypto.randomUUID(), operations: [operation] })
+      const response = await requests.current("code", { expectedRevision: head, idempotencyKey: crypto.randomUUID(), operations: [operation], rewriteImports: fileAction === "rename" })
       if (!response.ok) { setStatus(response.data.error ?? "File operation rejected. Source is unchanged."); setValidation(response.data.validation); return }
       setDrafts(all => { const next = { ...all }; delete next[active]; return next })
       setActive(fileAction === "delete" ? files.find(item => item.file !== active)?.file ?? "" : newPath)
@@ -194,11 +198,34 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     } catch { setStatus("File operation response unavailable. Reopen History to check acceptance before retrying.") }
     finally { saving.current = false; setBusy(false) }
   }
-  async function historyAction(action: "revert" | "checkpoint", id?: string) {
+  async function checkTypes() {
+    if(saving.current||!connected)return
+    const expected=head,sequence=serial.current,checkedDrafts=drafts,version=++validationVersion.current
+    saving.current=true;setBusy(true);setStatus("Checking TypeScript in the isolated runner…")
+    try{
+      const response=await requests.current("validate",{mode:"semantic",expectedRevision:expected,operations:dirtyDrafts.map(d=>({kind:"update",file:d.file,expectedHash:d.hash,content:d.text}))})
+      if(!mounted.current||serial.current!==sequence)return
+      if(version!==validationVersion.current||validationState.current.head!==expected||validationState.current.drafts!==checkedDrafts){setStatus("Source or draft changed during type checking. Run Check types again.");return}
+      if(!response.ok){setStatus(response.data.error??"Semantic checking unavailable.");return}
+      setValidation(response.data.validation);setStatus("Semantic check complete. Source has not been saved.")
+    }catch{if(mounted.current&&serial.current===sequence)setStatus("Semantic checking unavailable. Source is unchanged.")}
+    finally{saving.current=false;if(mounted.current)setBusy(false)}
+  }
+  const [archivedEntries,setArchivedEntries]=useState<MutationTransaction[]>([])
+  const [restorePreview,setRestorePreview]=useState<SourceResponse["restorePreview"]>()
+  useEffect(()=>{setArchivedEntries([]);setRestorePreview(undefined)},[head])
+  async function inspectHistory(body:Record<string,unknown>){
+    const response=await requests.current("history",body)
+    if(!response.ok){setStatus(response.data.error??"History inspection unavailable.");return}
+    if(response.data.revision!==head){setStatus("History changed. Reload before restoring.");return}
+    if(response.data.archivedHistory)setArchivedEntries(response.data.archivedHistory.transactions)
+    if(response.data.restorePreview)setRestorePreview(response.data.restorePreview)
+  }
+  async function historyAction(action: "revert" | "checkpoint", id?: string, migrateSourceScope?: true, extra: {compactHistory?:true;restoreRevisionId?:string} = {}) {
     if (saving.current) return
     saving.current = true; setBusy(true)
     try {
-      const response = await requests.current(action, { expectedRevision: head, idempotencyKey: crypto.randomUUID(), transactionId: id })
+      const response = await requests.current(action, { expectedRevision: head, idempotencyKey: crypto.randomUUID(), transactionId: id, migrateSourceScope, ...extra })
       if (!response.ok) { setStatus(response.data.error ?? "History action rejected."); return }
       setStatus(action === "checkpoint" ? "Validated checkpoint recorded." : "Revert committed against the current revision.")
       await onAccepted(response.data)
@@ -210,17 +237,17 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     {visible === "code" && <>
       <div className="source-file-tree" aria-label="Source file tree">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => { setActive(item.file); setValidation(undefined) }}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div>
       <div className="source-editor-panel">
-        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
-        <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Referenced files cannot be removed or renamed if that breaks the preview build. Multi-file import updates can be submitted together through the source transaction API.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
+        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
+        <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Renames update statically resolved source, CSS and asset references in the same transaction. Ambiguous references require a Code edit. The preview build must still pass.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
         {conflict && <p role="alert">HEAD changed while this draft was open. Save will reject this stale base. <button onClick={() => void reloadBase()}>Rebase unchanged file</button></p>}
         {draft && <CodeEditor file={active} value={draft.text} onChange={value => setDrafts(all => ({ ...all, [active]: { ...all[active], text: value } }))} onSave={() => void save()} />}
-        {validation && <div className="source-diagnostics" role="status">{validation.passed ? "Parse checks passed. Save validates the controlled preview bundle." : "Syntax/validation error — draft retained; preview remains at the last accepted revision."}{validation.diagnostics.map((item, index) => <p key={index}>{item.file}{item.line ? `:${item.line}:${item.column ?? 0}` : ""}: {item.message}</p>)}</div>}
+        {validation && <div className="source-diagnostics" role="status">{validation.level === "semantic" ? (validation.passed ? "Semantic TypeScript checks passed. Build and runtime validation are separate." : "Semantic TypeScript errors — source remains unchanged.") : validation.passed ? "Parse checks passed. Save validates the controlled preview bundle." : "Syntax/validation error — draft retained; preview remains at the last accepted revision."}{validation.diagnostics.map((item, index) => <p key={index}>{item.file}{item.line ? `:${item.line}:${item.column ?? 0}` : ""}: {item.message}</p>)}</div>}
         {showDiff && draft && <pre className="draft-diff">{`${active}\n--- Accepted source\n${draft.baseline.split("\n").map(line => "-" + line).join("\n")}\n+++ Draft\n${draft.text.split("\n").map(line => "+" + line).join("\n")}`}</pre>}
         <small>⌘S / Ctrl+S saves this file. Save all drafts validates and accepts them together.</small><p className="draft-backup-status" role="status">{backupStatus}</p>
       </div>
     </>}
-    {visible === "history" && <div className="source-history"><h2>Source history</h2><p>HEAD <code>{head}</code></p><button onClick={() => void historyAction("checkpoint")} disabled={busy || !connected}>Create checkpoint</button><p>Revert checks every affected file. A later change in an affected file requires manual reconciliation.</p>
-      {[...(ledger?.transactions ?? [])].reverse().map(entry => <article key={entry.id} data-transaction-id={entry.id}><b>{entry.summary}</b><span>{entry.status} · {entry.producer} · {new Date(entry.timestamp).toLocaleString()}{entry.newRevisionId === head ? " · HEAD" : ""}</span><code>{entry.id}<br/>{entry.baseRevisionId} → {entry.newRevisionId ?? "no revision"}</code><p>{entry.fileStates?.map(item => item.file).join(", ") || entry.file || "Source checkpoint"}</p><button onClick={() => setSelectedEntry(entry)}>View diff</button><button disabled={busy || !ledger?.past.includes(entry.id)} onClick={() => void historyAction("revert", entry.id)}>Revert transaction</button>{entry.validation && <small>{entry.validation.level}: {entry.validation.passed ? "passed" : "failed"}</small>}{entry.error && <p role="alert">{entry.error}</p>}</article>)}
+    {visible === "history" && <div className="source-history"><h2>Source history</h2>{ledger && ledger.sourceScope!==2 && <button disabled={busy || !connected} onClick={() => void historyAction("checkpoint",undefined,true)}>Enable module file editing</button>}<p>HEAD <code>{head}</code></p><button onClick={() => void historyAction("checkpoint")} disabled={busy || !connected}>Create checkpoint</button><button disabled={busy || !connected || !ledger?.transactions.length || (ledger?.archives?.length ?? 0)>=4} onClick={()=>void historyAction("checkpoint",undefined,undefined,{compactHistory:true})}>Compact active history</button><p>Up to four lossless archives; the combined uncompressed retention limit remains 64 MiB. Archived transactions retain their audit and revert evidence.</p>{ledger?.archives?.map((archive,index)=><button key={archive.digest} disabled={busy} onClick={()=>void inspectHistory({archiveId:archive.digest})}>Browse archive {index+1} · {archive.transactions} transactions</button>)}{restorePreview&&<section><h3>Restore {restorePreview.files.length} source files</h3><p>Target {restorePreview.revisionId}. Each file preview is limited to {restorePreview.truncatedPerFile} characters. Acceptance checks the current head and validates all complete files.</p><pre className="source-diff">{restorePreview.diff}</pre><button disabled={busy || !connected || restorePreview.baseRevision!==head} onClick={()=>void historyAction("checkpoint",undefined,undefined,{restoreRevisionId:restorePreview.revisionId})}>Restore these source files</button></section>}<p>Revert checks every affected file. A later change in an affected file requires manual reconciliation.</p>
+      {[...archivedEntries,...(ledger?.transactions ?? [])].reverse().map(entry => <article key={entry.id} data-transaction-id={entry.id}><b>{entry.summary}</b><span>{entry.status} · {entry.producer} · {new Date(entry.timestamp).toLocaleString()}{entry.newRevisionId === head ? " · HEAD" : ""}</span><code>{entry.id}<br/>{entry.baseRevisionId} → {entry.newRevisionId ?? "no revision"}</code><p>{entry.fileStates?.map(item => item.file).join(", ") || entry.file || "Source checkpoint"}</p><button onClick={() => setSelectedEntry(entry)}>View diff</button>{entry.newRevisionId && <button disabled={busy || !connected || entry.newRevisionId===head} onClick={()=>void inspectHistory({restoreRevisionId:entry.newRevisionId})}>Preview restore to this revision</button>}<button disabled={busy || !ledger?.past.includes(entry.id)} onClick={() => void historyAction("revert", entry.id)}>Revert transaction</button>{entry.validation && <small>{entry.validation.level}: {entry.validation.passed ? "passed" : "failed"}</small>}{entry.error && <p role="alert">{entry.error}</p>}</article>)}
       {!ledger?.transactions.length && <p>No accepted changes yet. The initial source revision is retained.</p>}
       {selectedEntry && <pre className="history-diff">{`Transaction ${selectedEntry.id}\n` + selectedEntry.patches.map(patch => `${patch.file}\n@@ offset ${patch.range.start} @@\n${patch.before.split("\n").map(line => "-" + line).join("\n")}\n${patch.after.split("\n").map(line => "+" + line).join("\n")}`).join("\n\n")}</pre>}
     </div>}

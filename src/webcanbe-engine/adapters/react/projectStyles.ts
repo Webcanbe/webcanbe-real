@@ -1,3 +1,4 @@
+import { isDefaultTailwindConfig } from "./defaultTailwindConfig"
 import ts from "typescript"
 import { analyzeReactSource, cssDeclaration, parsedCSS, parsedSource, supportedProperties } from "./reactSourceAdapter"
 import type { SourceTarget, StyleOrigin, StyleProperty, ViewportPreset } from "../../core/types"
@@ -22,7 +23,7 @@ export function breakpointRegistry(files: Map<string, string>, tailwind: boolean
   const defaults: Record<string, number> = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 }
   let unsafeTheme = false
   for (const [file, code] of files) {
-    if (/tailwind\.config\./.test(file)) { unsafeTheme = true; diagnostics.push(`${file}: config evaluation is unsupported; responsive Tailwind editing is read-only.`) }
+    if (/tailwind\.config\./.test(file) && !isDefaultTailwindConfig(code)) { unsafeTheme = true; diagnostics.push(`${file}: config evaluation is unsupported; responsive Tailwind editing is read-only.`) }
     if (!file.endsWith(".css")) continue
     try {
       const root = parsedCSS(code)
@@ -61,11 +62,21 @@ function analyzedFile(file: string, code: string, files: Map<string, string>, ta
   return structuredClone(targets)
 }
 function overlap(a: StyleProperty, b: StyleProperty) { return a === b || [a, b].every(item => ["padding", "paddingX", "paddingY"].includes(item)) && (a === "padding" || b === "padding") }
+// Rule-out only a finite selector grammar. Unknown selectors may match at runtime.
+function selectorMayMatch(selector: string, tag: string, classes: string[]) {
+  return selector.split(",").some(part => {
+    if (!/^[\w.#*\s>+~-]+$/.test(part)) return true
+    const compound=part.trim().split(/[\s>+~]+/).at(-1) ?? ""
+    const tokens=compound.match(/(?:[.#][A-Za-z_][\w-]*|[A-Za-z][\w-]*|\*)/g)
+    if(!tokens || tokens.join("")!==compound)return true
+    return tokens.every(token=>token.startsWith(".")?classes.includes(token.slice(1)):token.startsWith("#")||token==="*"||token===tag)
+  })
+}
 export function analyzeProjectStyles(files: Map<string, string>, tailwind: boolean, width = 1280): StyleAnalysis {
   const registry = breakpointRegistry(files, tailwind)
   const targets = [...files].filter(([file]) => /\.[jt]sx?$/.test(file)).flatMap(([file, code]) => analyzedFile(file, code, files, tailwind))
   const componentCounts = new Map<string, number>()
-  for (const target of targets) if (target.nodeKind === "component") componentCounts.set(target.elementName, (componentCounts.get(target.elementName) ?? 0) + 1)
+  for (const target of targets) if (target.nodeKind === "component" && target.component?.resolved) { const key=`${target.component.file}:${target.component.definitionName}`;componentCounts.set(key,(componentCounts.get(key)??0)+1) }
   const importedCSS = new Set<string>()
   for (const [file, code] of files) if (/\.[jt]sx?$/.test(file)) {
     for (const statement of parsedSource(file, code).statements) if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier) && statement.moduleSpecifier.text.endsWith(".css")) {
@@ -79,7 +90,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
   // Global simple class rules are source matches, never computed-value guesses.
   // All normal project CSS is conservatively considered, including entry imports.
   for (const target of targets) {
-    if (targets.some(item => item.nodeKind === "component" && item.elementName === target.ownerComponent && item.repeated)) target.repeated = true
+    if (targets.some(item => item.nodeKind === "component" && item.component?.resolved && item.component.file === target.identity.file && item.component.definitionName === target.ownerComponent && item.repeated)) target.repeated = true
     if (target.nodeKind !== "native") continue
     for (const [file, code] of files) {
       if (!file.endsWith(".css") || file.endsWith(".module.css") || !importedCSS.has(file)) continue
@@ -113,7 +124,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
       for (const [file, code] of files) if (file.endsWith(".css") && (!file.endsWith(".module.css") || file === origin.file)) {
         try { parsedCSS(code).walkRules(rule => {
           const exact = target.classNames?.some(name => rule.selector === `.${name}`) || rule.selector === origin.selector && file === origin.file
-          const related = exact || (target.classNames ?? []).some(name => new RegExp(`\\.${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w-])`).test(rule.selector)) || /^(\*|html|body)$/.test(rule.selector) || rule.selector === target.elementName
+          const related = exact || selectorMayMatch(rule.selector, target.elementName, target.classNames ?? [])
           if (!related) return
           rule.walkDecls(decl => {
             const prop = origin.property.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)
@@ -134,17 +145,18 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
       if (inline.length === 1) effective = inline[0]
       else if (candidates.every(item => item.kind === "tailwind")) effective = candidates.sort((a, b) => (registry.breakpoints.find(item => item.prefix === a.prefix)?.min ?? 0) - (registry.breakpoints.find(item => item.prefix === b.prefix)?.min ?? 0)).at(-1)
       else if (new Set(candidates.map(item => `${item.file}:${item.selector}`)).size === 1) effective = candidates.sort((a, b) => (a.range?.start ?? 0) - (b.range?.start ?? 0)).at(-1)
-      if (effective) effective.effective = true
+      if (effective && effective.editable) effective.effective = true
       else for (const item of candidates) { item.editable = false; item.reason = "Effective cascade origin cannot be proven." }
     }
   }
   for (const target of targets) {
-    const instances = Math.max(1, componentCounts.get(target.ownerComponent ?? "") ?? 0)
-    target.effectScope = `Source definition ${target.ownerComponent ?? target.identity.file}; ${target.repeated ? "runtime repetition (count unknown)" : `${instances} statically known component use(s)`}. Definition edits affect all its rendered instances.`
+    target.invocationOrigins=targets.filter(item=>item.nodeKind==="component"&&item.component?.resolved&&item.component.file===target.identity.file&&item.component.definitionName===target.ownerComponent).map(item=>({file:item.identity.file,range:item.sourceRange}))
+    const instances = Math.max(1, componentCounts.get(`${target.identity.file}:${target.ownerComponent}`) ?? 0)
+    target.effectScope = `Source definition ${target.ownerComponent ?? target.identity.file}; ${target.repeated ? "runtime repetition (count unknown)" : `${instances} statically known component use(s)`}. Definition edits affect all its rendered instances.${target.textShared ? ` Text comes from a shared literal in ${target.textFile ?? target.identity.file}.` : ""}`
     for (const origin of target.styleOrigins) {
       const matches = targets.filter(other => other.styleOrigins.some(item => item.file === origin.file && item.range?.start === origin.range?.start && item.property === origin.property))
-      origin.usageCount = matches.reduce((count, other) => count + Math.max(1, componentCounts.get(other.ownerComponent ?? "") ?? 0), 0)
-      origin.shared = origin.valueOrigin?.startsWith("local const") || origin.kind === "css" || origin.usageCount > 1 || matches.some(other => other.repeated)
+      origin.usageCount = matches.reduce((count, other) => count + Math.max(1, componentCounts.get(`${other.identity.file}:${other.ownerComponent}`) ?? 0), 0)
+      origin.shared = (origin.valueOrigin?.startsWith("local const") || origin.valueOrigin?.startsWith("imported immutable")) || origin.kind === "css" || origin.usageCount > 1 || matches.some(other => other.repeated)
       origin.scope = origin.kind === "css" ? `Global class rule; ${origin.usageCount} known source use(s), additional runtime matches possible` : `${origin.usageCount} known source use(s)${matches.some(other => other.repeated) ? "; runtime repetition unknown" : ""}; all rendered instances of these source locations`
     }
     if (target.styleOrigins.some(item => !item.editable)) { target.compatibility = "partial"; target.reasonCodes = [...new Set([...(target.reasonCodes ?? []), "style-analysis-partial"])] }

@@ -1,3 +1,4 @@
+import { isDefaultTailwindConfig } from "../adapters/react/defaultTailwindConfig"
 import { validateStylesheetConfiguration } from "./configuration"
 import fs from "node:fs"
 import path from "node:path"
@@ -8,7 +9,7 @@ import { parse as parseHtml } from "parse5"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1"] as const
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1"] as const
 export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer"])
 export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported" | "preserved-not-applied"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
@@ -283,7 +284,12 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
       for (const file of configs) report.configuration.push({ file, classification: "statically-supported", detail: "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate." }) } catch (error) { issue("tsconfig", (error as Error).message) }
     const cssConfigs = fs.readdirSync(root).filter(file => /^(?:tailwind|postcss)\.config\.(?:[cm]?[jt]s|json)$/.test(file) || /^\.postcssrc(?:\.|$)/.test(file))
     if (manifest.postcss) cssConfigs.push("package.json#postcss")
-    for (const file of cssConfigs) report.issues.push({ file, code: "css-config", classification: "requires-isolated-execution", message: `${file}: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.`, requiredCapability: "An isolated plugin/configuration profile" })
+    for (const file of cssConfigs) {
+      if(/^tailwind\.config\.[jt]s$/.test(file)&&isDefaultTailwindConfig(fs.readFileSync(confinedFile(root,file),'utf8'))) {
+        report.configuration.push({file,classification:'preserved-not-applied',detail:'Finite default legacy Tailwind config; CSS-first compiler defaults are equivalent, bytes preserved and no config executed.'});continue
+      }
+      report.issues.push({ file, code: "css-config", classification: "requires-isolated-execution", message: `${file}: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.`, requiredCapability: "An isolated plugin/configuration profile" })
+    }
     for (const entry of fs.readdirSync(project.sourceRoot, { recursive: true })) {
       if (typeof entry !== "string" || !entry.endsWith(".css")) continue
       const file = "src/" + entry.split(path.sep).join("/")

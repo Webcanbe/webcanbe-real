@@ -78,7 +78,7 @@ export class HostedLinuxRunnerProvider implements RunnerProvider {
         if (typeof result.png !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(result.png) || result.png.length > 12 * 1024 * 1024) throw new Error("Invalid hosted raster output.")
         return { bytes: Buffer.from(result.png, "base64"), observation: result.observation }
       }
-      return { sample, capture: async () => (await sample()).bytes, input: async input => { await perform("input", { input }) }, update: async update => { await perform("update", { update }) }, close }
+      return { check: () => perform("check"), sample, capture: async () => (await sample()).bytes, input: async input => { await perform("input", { input }) }, update: async update => { await perform("update", { update }) }, close }
     } catch (error) { await close(); throw error }
   }
   async revoke(generation: string) {

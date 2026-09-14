@@ -1,3 +1,4 @@
+import { compactHistory, historyParts, historyTransactions, historyRevisions } from "./historyArchive"
 import fs from "node:fs"
 import path from "node:path"
 import { DatabaseSync } from "node:sqlite"
@@ -6,7 +7,8 @@ import type { FileOperation, MutationTransaction, RevisionLedger, SourcePatch, S
 import type { ProjectRecord } from "../runtime/projectRegistry"
 import { safeArchivePath } from "../runtime/projectRegistry"
 
-export const editableSource = /^src\/.+\.(?:tsx?|jsx?|css|json)$/
+export const editableSource = /^src\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/
+export const legacyEditableSource = /^src\/.+\.(?:tsx?|jsx?|css|json)$/
 export const contentHash = (value: string) => createHash("sha256").update(value).digest("hex")
 export const treeHash = (files: Map<string, string>) => contentHash(JSON.stringify([...files].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))))
 type Change = { file: string; before: string | null; after: string | null }
@@ -19,9 +21,13 @@ function readHistoryFile(file: string, limit = HISTORY_LIMITS.bytes) {
   return JSON.parse(fs.readFileSync(file, "utf8"))
 }
 export function boundedHistory(ledger: RevisionLedger) {
+  const origin = ledger.importOrigin
+  if (origin !== undefined && (!origin || typeof origin !== "object" || Object.keys(origin).length !== 4 || origin.provider !== "github" || typeof origin.repository !== "string" || !/^[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(origin.repository) || !/^[a-f0-9]{40}$/.test(origin.commit) || !/^[a-f0-9]{64}$/.test(origin.archiveSha256))) throw new Error("Invalid immutable import provenance.")
+  if(ledger.sourceScope!==undefined&&ledger.sourceScope!==2)throw new Error("Unsupported source scope version.")
   if (ledger.transactions.length > HISTORY_LIMITS.transactions || ledger.revisions.length > HISTORY_LIMITS.revisions) throw historyFull()
   const text = JSON.stringify(ledger)
   if (Buffer.byteLength(text) > HISTORY_LIMITS.bytes) throw historyFull()
+  historyParts(ledger)
   return text
 }
 
@@ -60,8 +66,9 @@ export class DurableSource {
     this.journalPath = path.join(this.directory, "pending.json")
     const release = this.lease()
     try {
-      this.ledger = fs.existsSync(this.statePath) ? readHistoryFile(this.statePath) : { schema: 1, projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
+      this.ledger = fs.existsSync(this.statePath) ? readHistoryFile(this.statePath) : { schema: 1, sourceScope: 2, projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
       if (this.ledger.schema !== 1 || this.ledger.projectId !== project.id || !Array.isArray(this.ledger.revisions) || !Array.isArray(this.ledger.transactions)) throw new Error("Invalid project history. Recovery requires operator review.")
+      boundedHistory(this.ledger)
       this.recover()
       if (!this.ledger.revisions.length) {
         this.ledger.revisions.push({ revisionId: `rev_${randomUUID()}`, projectId: project.id, parentRevisionId: null, createdAt: new Date().toISOString(), actor: this.options.actor ?? "local-operator", producer: "system", contentHash: treeHash(this.files()) })
@@ -103,15 +110,15 @@ export class DurableSource {
     this.hydrate()
   }
 
-  private hydrate() { this.project.history.hydrate(this.ledger.transactions, this.ledger.past, this.ledger.future) }
+  private hydrate() { this.project.history.hydrate(historyTransactions(this.ledger), this.ledger.past, this.ledger.future) }
   private assertReady() { if (this.poisoned) throw new Error("Source recovery is required. Restart before reopening this project.") }
   head() { this.assertReady(); this.reload(); return this.ledger.revisions.at(-1)! }
   history() { this.assertReady(); this.reload(); return structuredClone(this.ledger) }
 
   /** Every segment is checked, including the root. No symlink traversal, hard
    * links, normalization aliases or caller-selected root is accepted. */
-  private target(file: string, allowAbsent = false) {
-    if (!editableSource.test(file) || safeArchivePath(file) !== file) throw new Error("File operation is outside the editable source scope.")
+  private target(file: string, allowAbsent = false, scope=this.ledger?.sourceScope) {
+    if (!(scope===2?editableSource:legacyEditableSource).test(file) || safeArchivePath(file) !== file) throw new Error("File operation is outside the editable source scope.")
     if (fs.realpathSync(this.project.root) !== this.project.root || fs.lstatSync(this.project.sourceRoot).isSymbolicLink() || fs.realpathSync(this.project.sourceRoot) !== path.join(this.project.root, "src")) throw new Error("Source root identity changed.")
     let current = this.project.root
     const parts = file.split("/")
@@ -128,13 +135,13 @@ export class DurableSource {
     }
     return current
   }
-  files() {
+  files(scope=this.ledger?.sourceScope) {
     this.assertReady()
     const files = new Map<string, string>()
     for (const entry of fs.readdirSync(this.project.sourceRoot, { recursive: true })) {
       if (typeof entry !== "string") continue
       const file = `src/${entry.split(path.sep).join("/")}`
-      if (editableSource.test(file)) files.set(file, fs.readFileSync(this.target(file), "utf8"))
+      if ((scope===2?editableSource:legacyEditableSource).test(file)) files.set(file, fs.readFileSync(this.target(file,false,scope), "utf8"))
     }
     return files
   }
@@ -148,7 +155,7 @@ export class DurableSource {
   }
   retry(key: string, requestHash: string) {
     this.reload()
-    const entry = this.ledger.transactions.find(item => item.idempotencyKey === key)
+    const entry = historyTransactions(this.ledger).find(item => item.idempotencyKey === key)
     if (entry && entry.requestHash !== requestHash) throw new SourceConflict("Idempotency key was already used for a different request.")
     return entry && structuredClone(entry)
   }
@@ -193,13 +200,37 @@ export class DurableSource {
     if (!changes.length) throw new Error("There are no source changes to save.")
     return { before, after, changes }
   }
+  restoreOperations(revisionId: string) {
+    this.reload()
+    const revisions = historyRevisions(this.ledger), index = revisions.findIndex(item => item.revisionId === revisionId)
+    if (index < 0) throw new SourceConflict("Restore checkpoint is unavailable.")
+    const transactions = new Map(historyTransactions(this.ledger).map(entry => [entry.id, entry])), current = this.files(), desired = new Map(current)
+    for (const revision of revisions.slice(index + 1).reverse()) {
+      const entry = transactions.get(revision.transactionId ?? "")
+      if (!entry || !entry.fileStates || entry.status !== "accepted") throw new SourceConflict("Restore requires complete accepted file evidence.")
+      for (const file of entry.fileStates) {
+        if ((desired.get(file.file) ?? null) !== file.after) throw new SourceConflict("Restore conflicts with source evidence.")
+        if (file.before === null) desired.delete(file.file); else desired.set(file.file, file.before)
+      }
+    }
+    if (treeHash(desired) !== revisions[index].contentHash) throw new SourceConflict("Restore digest or source-scope epoch differs; reconcile in Code.")
+    const operations: FileOperation[] = []
+    for (const file of new Set([...current.keys(), ...desired.keys()])) {
+      const before = current.get(file), after = desired.get(file)
+      if (before === after) continue
+      operations.push(after === undefined ? {kind:"delete",file,expectedHash:contentHash(before!)} : before === undefined ? {kind:"create",file,expectedHash:null,content:after} : {kind:"update",file,expectedHash:contentHash(before),content:after})
+    }
+    if (!operations.length) throw new SourceConflict("Checkpoint already has the current source bytes.")
+    this.prepare(operations) // preserve the ordinary 100-file mutation and byte bounds
+    return operations
+  }
   /** Conservative selective revert: unaffected files survive; a later change in
    * any affected file conflicts. Never restore a project-wide old snapshot. */
   revertOperations(id?: string, redo = false) {
     this.reload()
     const transactionId = id ?? (redo ? this.ledger.future.at(-1) : this.ledger.past.at(-1))
     if (!transactionId || !(redo ? this.ledger.future : this.ledger.past).includes(transactionId)) throw new SourceConflict(`Nothing safe to ${redo ? "redo" : "revert"}.`)
-    const entry = this.ledger.transactions.find(item => item.id === transactionId)!
+    const entry = historyTransactions(this.ledger).find(item => item.id === transactionId)!
     const current = this.files(), operations: FileOperation[] = []
     for (const patch of entry.fileStates ?? []) {
       const version = entry.versions?.[patch.file]
@@ -247,14 +278,17 @@ export class DurableSource {
       atomicFile(this.statePath, boundedHistory(next)); this.ledger = next
     })
   }
-  commit(input: { expectedRevision: string; operations: FileOperation[]; entry: MutationTransaction; authorize: () => void; reverts?: string; redo?: boolean; checkpoint?: boolean; fault?: (phase: string, index?: number) => void }) {
+  commit(input: { expectedRevision: string; operations: FileOperation[]; entry: MutationTransaction; authorize: () => void; reverts?: string; redo?: boolean; checkpoint?: boolean; migrateSourceScope?: boolean; compactHistory?: boolean; fault?: (phase: string, index?: number) => void }) {
     return this.withLease(() => {
       this.assertBase(input.expectedRevision); input.authorize()
       boundedHistory(this.ledger)
-      if (this.ledger.transactions.length >= HISTORY_LIMITS.transactions || this.ledger.revisions.length >= HISTORY_LIMITS.revisions) throw historyFull()
-      const prepared = input.checkpoint ? { before: this.files(), after: this.files(), changes: [] } : this.prepare(input.operations)
+      if (!input.compactHistory && (this.ledger.transactions.length >= HISTORY_LIMITS.transactions || this.ledger.revisions.length >= HISTORY_LIMITS.revisions)) throw historyFull()
+      if(input.migrateSourceScope&&(!input.checkpoint||this.ledger.sourceScope===2||input.operations.length))throw new SourceConflict("Source scope migration requires a legacy checkpoint.")
+      if (input.compactHistory && (!input.checkpoint || input.migrateSourceScope || input.operations.length)) throw new SourceConflict("Compaction requires a separate unchanged-source checkpoint.")
+      const prepared = input.checkpoint ? { before: this.files(), after: this.files(input.migrateSourceScope?2:this.ledger.sourceScope), changes: [] } : this.prepare(input.operations)
       const { changes, after } = prepared, entry = structuredClone(input.entry)
-      const next = structuredClone(this.ledger), parent = this.head()
+      const next = input.compactHistory ? compactHistory(this.ledger) : structuredClone(this.ledger), parent = this.head()
+      if(input.migrateSourceScope)next.sourceScope=2
       entry.baseRevisionId = parent.revisionId; entry.newRevisionId = `rev_${randomUUID()}`; entry.status = "accepted"; entry.success = true
       entry.operations = input.operations
       entry.versions = Object.fromEntries(changes.map(change => [change.file, { before: change.before === null ? "absent" : contentHash(change.before), after: change.after === null ? "absent" : contentHash(change.after) }]))
@@ -281,7 +315,7 @@ export class DurableSource {
         input.fault?.("journal")
         this.writeChanges(changes, "after", index => input.fault?.("write", index))
         input.authorize()
-        if (treeHash(this.files()) !== treeHash(after)) throw new SourceConflict("Source changed during commit.")
+        if (treeHash(this.files(next.sourceScope)) !== treeHash(after)) throw new SourceConflict("Source changed during commit.")
         atomicFile(this.statePath, boundedHistory(next))
         this.ledger = next; this.hydrate()
         input.fault?.("committed")
@@ -293,7 +327,7 @@ export class DurableSource {
         try {
           this.ledger = readHistoryFile(this.statePath)
           this.recover(); this.hydrate()
-          const accepted = this.ledger.transactions.find(item => item.id === entry.id)
+          const accepted = historyTransactions(this.ledger).find(item => item.id === entry.id)
           if (accepted) return accepted
         } catch { this.poisoned = true; throw new Error("Source recovery failed; project quarantined until restart/operator recovery.") }
         throw error

@@ -1,3 +1,4 @@
+import type { PoolClient } from "pg"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
@@ -8,6 +9,8 @@ import { pgTransaction } from "./postgresTransaction"
 import { withHostedSource } from "./postgresSourceCheckout"
 import { detectProject, extractSafeZip, type ProjectRecord, type SessionAuthority, type SessionOperation } from "./projectRegistry"
 import { DurableSource } from "../mutations/durableSource"
+import type { SourceImportOrigin } from "../core/types"
+import { SourceConflict } from "../mutations/durableSource"
 import { MutationHistory } from "../mutations/sourceMutations"
 import type { IncrementalPreviewCompiler } from "./incrementalPreview"
 import type { RunnerOwner } from "./runnerScheduler"
@@ -17,7 +20,24 @@ const hash = (text: string) => createHash("sha256").update(text).digest("hex")
  * No local operator, SQLite registry or persistent source mirror is constructed. */
 export class HostedProjectRegistry {
   constructor(readonly access: PostgresAccess, readonly source: PostgresProjectStore, readonly applicationRoot: string) {}
+  /** Non-queued distributed intake reservation, shared by ZIP and external
+   * sources. It holds no identity row locks while remote bytes are in flight. */
+  async importSource(account: ServerSession, workspaceId: string, name: string, load: () => Promise<{ archive: Buffer; origin?: SourceImportOrigin }>) {
+    await this.access.requireWorkspace(account, workspaceId)
+    return pgTransaction(this.access.pool, async client => {
+      if (!(await client.query("SELECT pg_try_advisory_xact_lock(hashtextextended($1,73)) AS acquired", [workspaceId])).rows[0].acquired) throw new SourceConflict("Workspace intake is busy.")
+      let reserved = false
+      for (const slot of [1,2]) if ((await client.query("SELECT pg_try_advisory_xact_lock(7401,$1) AS acquired", [slot])).rows[0].acquired) { reserved = true; break }
+      if (!reserved) throw new SourceConflict("Source intake is at capacity.")
+      const source = await load()
+      await this.access.requireWorkspace(account, workspaceId)
+      return this.acceptImport(account, workspaceId, name, source.archive, source.origin, client)
+    })
+  }
   async importZip(account: ServerSession, workspaceId: string, name: string, archive: Buffer) {
+    return this.importSource(account, workspaceId, name, async () => ({ archive }))
+  }
+  private async acceptImport(account: ServerSession, workspaceId: string, name: string, archive: Buffer, origin?: SourceImportOrigin, admissionClient?: PoolClient) {
     await this.access.requireWorkspace(account, workspaceId)
     const temporary = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wcb-hosted-import-")))
     try {
@@ -36,8 +56,9 @@ export class HostedProjectRegistry {
         const full = path.join(e.parentPath, e.name)
         return [path.relative(root, full).split(path.sep).join("/"), fs.readFileSync(full)]
       }))
-      await this.source.create(account, workspaceId, id, name, files, staging.history())
-      return { id, name: project.name, imported: true, detection }
+      const history = staging.history(); if (origin) history.importOrigin = structuredClone(origin)
+      await this.source.create(account, workspaceId, id, name, files, history, admissionClient)
+      return { id, name: project.name, imported: true, detection, ...(origin ? { importOrigin: origin } : {}) }
     } finally { fs.rmSync(temporary, { recursive: true, force: true }) }
   }
   async list(account: ServerSession) {

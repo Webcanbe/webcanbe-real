@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from "node:util"
+import { preservesHistory, historyRevisions, appendsCompaction } from "../mutations/historyArchive"
 import { SourceConflict } from "../mutations/durableSource"
 import { boundedHistory } from "../mutations/durableSource"
 import { createHash } from "node:crypto"
@@ -98,7 +100,7 @@ const filePayload = (files: Map<string, Buffer>) => {
 function verifyHistory(project: string, files: Map<string, Buffer>, history: RevisionLedger) {
   boundedHistory(history)
   if (history.schema !== 1 || history.projectId !== project || !history.revisions.length || JSON.stringify(history).length > 64 * 1024 * 1024) throw new Error("Invalid or over-quota hosted history.")
-  const editable = [...files].filter(([file]) => /^src\/.+\.(?:tsx?|jsx?|css|json)$/.test(file)).map(([file, bytes]) => [file, bytes.toString("utf8")]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+  const editable = [...files].filter(([file]) => (history.sourceScope===2 ? /^src\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/ : /^src\/.+\.(?:tsx?|jsx?|css|json)$/).test(file)).map(([file, bytes]) => [file, bytes.toString("utf8")]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
   const hash = createHash("sha256").update(JSON.stringify(editable)).digest("hex")
   if (history.revisions.at(-1)!.contentHash !== hash) throw new Error("Source and history digest disagree.")
   return history.revisions.at(-1)!.revisionId
@@ -108,10 +110,10 @@ function verifyHistory(project: string, files: Map<string, Buffer>, history: Rev
  * No canvas schema. Private materialization is a cache, never a commit point. */
 export class PostgresProjectStore {
   constructor(private access: PostgresAccess) {}
-  async create(session: ServerSession, workspaceId: string, projectId: string, name: string, files: Map<string, Buffer>, history: RevisionLedger) {
+  async create(session: ServerSession, workspaceId: string, projectId: string, name: string, files: Map<string, Buffer>, history: RevisionLedger, admissionClient?: PoolClient) {
     requireOpaqueId(projectId)
     const payload = filePayload(files), ledger = structuredClone(history), revision = verifyHistory(projectId, files, ledger)
-    await pgTransaction(this.access.pool, async client => {
+    const commit = async (client: PoolClient) => {
       await this.access.requireWorkspaceIn(client, session, workspaceId)
       // Serialize per-workspace admission without depending on an editor process.
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [workspaceId])
@@ -119,7 +121,8 @@ export class PostgresProjectStore {
       await client.query("INSERT INTO wcb_projects(project_id,workspace_id,name,revision,files,history,source_epoch) VALUES($1,$2,$3,$4,$5,$6,1)", [projectId, workspaceId, name.slice(0,200), revision, JSON.stringify(payload), JSON.stringify(ledger)])
       await client.query("INSERT INTO wcb_project_members VALUES($1,$2,'owner',1,true)", [projectId, session.userId])
       await this.access.requireWorkspaceIn(client, session, workspaceId)
-    })
+    }
+    if (admissionClient) await commit(admissionClient); else await pgTransaction(this.access.pool, commit)
   }
   async read(grant: ProjectGrant): Promise<HostedSourceState> {
     return pgTransaction(this.access.pool, async client => {
@@ -141,6 +144,11 @@ export class PostgresProjectStore {
       await this.access.authorize(client, grant, "code")
       const old = (await client.query("SELECT revision,source_epoch,history FROM wcb_projects WHERE project_id=$1 AND workspace_id=$2 AND NOT deleted FOR UPDATE", [grant.projectId, grant.workspaceId])).rows[0]
       if (!old) throw new AuthorityDenied()
+      if (old.history && JSON.stringify(old.history.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"]) !== JSON.stringify(ledger.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"])) throw new Error("Import provenance cannot change.")
+      if(old.history && old.history.sourceScope!==ledger.sourceScope){
+        const last=ledger.transactions.at(-1),same=(await client.query("SELECT files=$2::jsonb AS same FROM wcb_projects WHERE project_id=$1",[grant.projectId,JSON.stringify(payload)])).rows[0]
+        if(old.history.sourceScope!==undefined||ledger.sourceScope!==2||last?.editType!=="checkpoint"||last.producer!=="system"||last.status!=="accepted"||last.operations?.length||last.fileStates?.length||!same.same)throw new Error("Unsupported source scope migration.")
+      }
       // Exact retry after an uncertain COMMIT is idempotent; changed payload is not.
       if (old.revision === revision) {
         const row = (await client.query("SELECT files=$2::jsonb AND history=$3::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(payload), JSON.stringify(ledger)])).rows[0]
@@ -148,17 +156,25 @@ export class PostgresProjectStore {
         // A rejected draft appends a receipt without changing a source revision.
         // Only that append is allowed; old source/revisions/inverses stay exact.
         const last = ledger.transactions.at(-1)
-        const prefix = (await client.query("SELECT files=$2::jsonb AND history->'revisions'=$3::jsonb AND history->'transactions'=$4::jsonb AND history->'past'=$5::jsonb AND history->'future'=$6::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(payload), JSON.stringify(ledger.revisions), JSON.stringify(ledger.transactions.slice(0,-1)), JSON.stringify(ledger.past), JSON.stringify(ledger.future)])).rows[0]
+        const prefix = (await client.query("SELECT files=$2::jsonb AND history->'revisions'=$3::jsonb AND history->'transactions'=$4::jsonb AND history->'past'=$5::jsonb AND history->'future'=$6::jsonb AND COALESCE(history->'archives','null'::jsonb)=$7::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(payload), JSON.stringify(ledger.revisions), JSON.stringify(ledger.transactions.slice(0,-1)), JSON.stringify(ledger.past), JSON.stringify(ledger.future), JSON.stringify(ledger.archives ?? null)])).rows[0]
         if (expected.revision !== revision || expected.epoch !== String(old.source_epoch) || !prefix.same || last?.status !== "rejected" || last.success !== false || ledger.transactions.length !== old.history.transactions.length + 1) throw new Error("Immutable revision conflict.")
         await client.query("UPDATE wcb_projects SET history=$2,source_epoch=source_epoch+1 WHERE project_id=$1", [grant.projectId, JSON.stringify(ledger)])
         await this.access.authorize(client, grant, "code")
         return { revision, epoch: String(BigInt(old.source_epoch)+1n), replayed: false }
       }
       if (old.revision !== expected.revision || String(old.source_epoch) !== expected.epoch) throw new SourceConflict("Stale source revision or fencing token.")
-      if (expected.revision !== null && (ledger.revisions.at(-1)!.parentRevisionId !== expected.revision || ledger.revisions.length !== old.history.revisions.length + 1)) throw new Error("History ancestry conflict.")
+      if (expected.revision !== null && (ledger.revisions.at(-1)!.parentRevisionId !== expected.revision || historyRevisions(ledger).length !== historyRevisions(old.history).length + 1)) throw new Error("History ancestry conflict.")
       if (expected.revision !== null) {
-        const same = (await client.query("SELECT history->'revisions'=$2::jsonb AND history->'transactions'=$3::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(ledger.revisions.slice(0, -1)), JSON.stringify(ledger.transactions.slice(0, -1))])).rows[0]
-        if (!same.same) throw new Error("History ancestry conflict.")
+        if (ledger.archives?.length || old.history.archives?.length) {
+          if (!preservesHistory(old.history, ledger)) throw new Error("History ancestry conflict.")
+          if (!isDeepStrictEqual(ledger.archives ?? [], old.history.archives ?? [])) {
+            const entry=ledger.transactions.at(-1), unchanged=(await client.query("SELECT files=$2::jsonb AS same FROM wcb_projects WHERE project_id=$1",[grant.projectId,JSON.stringify(payload)])).rows[0].same
+            if (!appendsCompaction(old.history,ledger) || entry?.editType!=="checkpoint" || entry.producer!=="system" || entry.operations?.length || entry.fileStates?.length || !unchanged) throw new Error("Invalid history compaction checkpoint.")
+          }
+        } else {
+          const same = (await client.query("SELECT history->'revisions'=$2::jsonb AND history->'transactions'=$3::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(ledger.revisions.slice(0, -1)), JSON.stringify(ledger.transactions.slice(0, -1))])).rows[0]
+          if (!same.same) throw new Error("History ancestry conflict.")
+        }
       }
       await client.query("UPDATE wcb_projects SET revision=$3,files=$4,history=$5,source_epoch=source_epoch+1 WHERE project_id=$1 AND workspace_id=$2", [grant.projectId, grant.workspaceId, revision, JSON.stringify(payload), JSON.stringify(ledger)])
       await fault?.()
