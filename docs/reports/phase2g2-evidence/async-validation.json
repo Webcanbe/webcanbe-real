@@ -1,0 +1,73 @@
+{
+  "startingCommit": "65005b3822418594dd95ca826e8ff90b912c8df3",
+  "originalTests": 305,
+  "newTests": 20,
+  "distinctPassingTests": 325,
+  "originalTestFilesUnchanged": 16,
+  "default": {
+    "passed": 290,
+    "optInSkipped": 35,
+    "elapsedSeconds": 9.81
+  },
+  "retainedPostgresMtlsRefresh": {
+    "passed": 24,
+    "includesOneDefaultTest": true,
+    "elapsedSeconds": 9.95
+  },
+  "packagedHostedHttp": {
+    "passed": 12,
+    "elapsedSeconds": 43.88,
+    "exactPackagedCli": true
+  },
+  "typeScript": "PASS",
+  "productionBuild": "PASS",
+  "buildSeconds": 2.36,
+  "lazyCodeChunkKb": 544.81,
+  "package": "PASS",
+  "retainedBrowserRuns": 6,
+  "independentExportBuildRenderPasses": 8,
+  "isolation": "PASS including finite task exhaustion",
+  "boundaries": [
+    "Local signed TEST OIDC, verified local TLS, real PG and mTLS native Linux runner; no production proof",
+    "Actual HTTP child SIGKILL while PG transaction sleeps, then explicit orphan-backend cancellation verifies rollback",
+    "No original tests weakened/replaced; corpus failures retained"
+  ],
+  "logsSha256": {
+    "async-full-suite-final.log": "a0597d967dd9f81fdd47358bfd4c9438bdc5f1204d432958ed1f550982e5bd23",
+    "async-retained-hosted.log": "49aeed5fb5d2871f3dde3c8ea266974545eebf206cead0ab98a9eb9a7a5c68d1",
+    "async-packaged-hosted.log": "ab3bd3b2df92993ee0f526344f4070f79a9d719dffeff6d78dc6428d0b3e95e6",
+    "async-build-final.log": "5c9dfea2957db0a445324a549704bf5e52099373ef0e93bb593c29f6024c33c1",
+    "async-isolation-final.log": "023d271c14e0c114b3086655e3c84e61b97bccafe3a87c9045f7a6a710c4a757"
+  },
+  "delayedPreviewRegression": "Real old-revision capture request held until accepted Code/refresh, then server409: final ready state and input retained; current callback/connection epoch and latest refresh attempt guards independently reviewed.",
+  "commands": {
+    "default": "npm test",
+    "typeScript": "npx tsc --noEmit",
+    "build": "npm run build",
+    "isolation": [
+      "npm run runner:prepare",
+      "npm run runner:verify"
+    ],
+    "localTestSetup": [
+      "node scripts/hosted/local-postgres.cjs (keep running)",
+      "node scripts/hosted/package.cjs",
+      "node scripts/hosted/local-gateway.cjs (keep running)"
+    ],
+    "retainedGated": "WCB_PG_TEST=1 WCB_HOSTED_RUNNER_TEST=1 WCB_REFRESH_TEST=1 npx vitest run src/webcanbe-engine/phase2g2-postgres.test.ts src/webcanbe-engine/phase2g2-hosted-runner.test.ts src/webcanbe-engine/phase2g2-refresh.test.ts",
+    "hosted": "WCB_HOSTED_EDITOR_TEST=1 npx vitest run src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+    "browserPrerequisite": "WCB_PLAYWRIGHT_MODULE resolves a trusted installed Playwright module; all browser scripts retained in scripts/",
+    "browsers": [
+      "node scripts/verify-phase2c-editor-regressions.cjs",
+      "node scripts/verify-phase2c2-controlled.cjs",
+      "node scripts/verify-phase2de.cjs",
+      "node scripts/verify-phase2f.cjs",
+      "node scripts/verify-phase2g.cjs",
+      "node scripts/qa/phase2g2-tls-browser.cjs"
+    ],
+    "hostedExport": [
+      "python3 scripts/verify-phase2g-export-sandbox.py <authored-hosted-export.zip> <system-temporary-job-path> --profile <matching-pinned-profile>",
+      "node scripts/verify-phase2g2-hosted-export.cjs <system-temporary-job-path> <ignored-output-path>"
+    ],
+    "corpus": "node scripts/qa/phase2g2-corpus.cjs <ignored-output-path> (exact four commits retained in script/receipt)"
+  }
+}

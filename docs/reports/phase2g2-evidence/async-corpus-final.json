@@ -1,0 +1,3545 @@
+{
+  "schema": 1,
+  "classification": "INDEPENDENT PROJECT",
+  "boundary": "Local real API/static compiler; never hosted evidence",
+  "selectedBeforeAttempts": true,
+  "thirdPartySourcesCommitted": false,
+  "upstreamCodeExecutedOnHost": false,
+  "sourceChangesToForceCompatibility": false,
+  "createdAt": "2026-09-14T08:20:09.985Z",
+  "platformBaseCommit": "65005b3822418594dd95ca826e8ff90b912c8df3",
+  "controller": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v26.4.0"
+  },
+  "startingAdapterOverrides": null,
+  "platformModuleHashes": {
+    "src/webcanbe-engine/runtime/projectRegistry.ts": "ec5a8daa4e59d913697d62e5455791c1873370bac26ff31ccc86a11e8bee692c",
+    "src/webcanbe-engine/runtime/runtimeCompatibility.ts": "bd4bd1dae10f3ade66cf5ec2895a0d20f854923fd6dc2ae99c218c3af6eeed40",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts": "7e84a519f2c476f583d4313e27a2c94eb34d0e4a05601d19fe1798b7181f51d6",
+    "src/webcanbe-engine/runtime/viteFixturePlugin.ts": "3ddb1da7d5a34dbcc6c66ffd5e4bdcc7f8d13e6fb5886d372e4dcd0948bf7e3a",
+    "src/webcanbe-engine/mutations/sourceValidation.ts": "1d263f0f252e905113904694fc7f54a965404eefb3bc2689e98f17bd9119d728",
+    "src/webcanbe-engine/mutations/durableSource.ts": "8c83ceeb598b65f22de1cd477acbb1f155de313919fc69149c05bdda18656056"
+  },
+  "subjects": [
+    {
+      "id": "redux-essentials",
+      "repository": "https://github.com/reduxjs/redux-essentials-example-app.git",
+      "commit": "b4414e1504c914ece3253dd8a21adfb2278464d9",
+      "subpath": "",
+      "license": "UNDETERMINED: no repository LICENSE at this commit; read-only public inspection; no source redistributed",
+      "routeModel": "BrowserRouter, React Router 6; Redux tutorial application with MSW service worker",
+      "classification": "INDEPENDENT PROJECT",
+      "upstreamTree": "b4414e1504c914ece3253dd8a21adfb2278464d9",
+      "archiveMtime": "2024-07-30T14:19:40-04:00",
+      "archiveSha256": "a09cb0880f7b791dd2ea746c1182978fc2d60962e27d1a9b40b92a50dc90ed7a",
+      "archiveBytes": 1054174,
+      "unchangedFiles": {
+        ".gitignore": {
+          "bytes": 448,
+          "sha256": "b28022a4a9b82960f9619f4639be94e76cd776799b3de0cf62fa433f10b5a8d8"
+        },
+        ".prettierrc.json": {
+          "bytes": 91,
+          "sha256": "5535a8a6aa5e305bf39cdd4bf42c10e935a5f8bc5c18e27365f59210f8051fee"
+        },
+        ".yarn/releases/yarn-4.2.2.cjs": {
+          "bytes": 2742928,
+          "sha256": "1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef"
+        },
+        ".yarnrc.yml": {
+          "bytes": 91,
+          "sha256": "a07777bbfad43a6acba9cdfd6cbeeffe5bf620e67d0c79f8cbd561aaf88adb6d"
+        },
+        "README.md": {
+          "bytes": 1794,
+          "sha256": "3fc3d2493576c92687e4ef8198d463f09ec5c432c93cd184406c28b43aac49f2"
+        },
+        "index.html": {
+          "bytes": 483,
+          "sha256": "2bfd363f14f2056fe45ee0246eaefb2a86aacd73706ba02fb8f1b6e99bb96e64"
+        },
+        "package.json": {
+          "bytes": 896,
+          "sha256": "a3bd46f1fb94bdc5cf64855251c423ec90e80b304194026dbee8eaaa655cd9c8"
+        },
+        "public/favicon.ico": {
+          "bytes": 3585,
+          "sha256": "3c524384b3a9b9b59bdbddc6cb5d8eaf79ffd07fb51080071386e0f832e80563"
+        },
+        "public/logo192.png": {
+          "bytes": 4153,
+          "sha256": "79ce13bf8f584fc7efd9a96c4380b7330e1369062de81d42759009c5e079ca37"
+        },
+        "public/logo512.png": {
+          "bytes": 12066,
+          "sha256": "d14a225fac5414703857891b04552be24ba49f0a51479dc5268589d3c30f0da9"
+        },
+        "public/mockServiceWorker.js": {
+          "bytes": 7514,
+          "sha256": "eaa3bd914f501d08a0894172dc0a1f7f085145b44c4d5539bab87ea98a2eef61"
+        },
+        "public/robots.txt": {
+          "bytes": 57,
+          "sha256": "3ff0048f3edebfe57ead4ccbb645660094be33f7df63b6f4ee65f631f91c5d35"
+        },
+        "src/App.tsx": {
+          "bytes": 508,
+          "sha256": "74c31fa2a896b4b3c3b15698a060ef4009fedb05b3399e7f80f0fb5933c0fa36"
+        },
+        "src/api/client.ts": {
+          "bytes": 1406,
+          "sha256": "6c21098655d952c98ce78329f47794e97b2af08318119c2efa238fd4be736fc6"
+        },
+        "src/api/server.ts": {
+          "bytes": 9424,
+          "sha256": "13ae71f7244471754075375778ac3d8aa11ac29233584821b4aefb9f789c53a4"
+        },
+        "src/components/Navbar.tsx": {
+          "bytes": 266,
+          "sha256": "826a1e730ac39579efb93d5bec32d899d00625d55d44b1b88c1bd56f160096c7"
+        },
+        "src/components/Spinner.tsx": {
+          "bytes": 276,
+          "sha256": "6882a6601eb7c74f6d690fbabc8898163775af6c6ad02e76c73bc9b6d740d439"
+        },
+        "src/components/UserIcon.tsx": {
+          "bytes": 768,
+          "sha256": "b0c250f92dfbed49051ee05c69e2ea7e4c74a43f0c98f1942cdeca386b39ded8"
+        },
+        "src/index.css": {
+          "bytes": 4714,
+          "sha256": "950899d2700c2d8f19183003dfb978c832d1ad3d7a22c24599c1e84bd67005ed"
+        },
+        "src/main.tsx": {
+          "bytes": 519,
+          "sha256": "41ef42ac30a78ceeab7fc49ddd6f25afebf712161417a73c15023ac5681ddc9e"
+        },
+        "src/primitiveui.css": {
+          "bytes": 17576,
+          "sha256": "4c8487d103260c66cd4fb0e96827e13ca00353140b724f4a828c5de50335dddd"
+        },
+        "tsconfig.json": {
+          "bytes": 474,
+          "sha256": "5fba7c17a47e4eb900267a7f2ba6f303863b6dc4dfa5379f05dd412b0f8afb52"
+        },
+        "vite.config.mts": {
+          "bytes": 302,
+          "sha256": "134968b5cb92d34e5788fcc24308fb636435dc180149e080feef2583ae7a8ae2"
+        },
+        "yarn.lock": {
+          "bytes": 96291,
+          "sha256": "1d757201762d9525bed90f1ce55fed9f38ee99af895876674020d3cf87823abd"
+        }
+      },
+      "licenseEvidence": {
+        "path": null,
+        "note": "No license file; source is not redistributed."
+      },
+      "framework": {
+        "react": "^18",
+        "reactDom": "^18",
+        "vite": "^5.0.11"
+      },
+      "dependencies": {
+        "@faker-js/faker": "^8",
+        "@mswjs/data": "^0.16",
+        "@reduxjs/toolkit": "^2.2",
+        "classnames": "^2.2.6",
+        "date-fns": "^3",
+        "mock-socket": "^9.0.3",
+        "msw": "^2",
+        "react": "^18",
+        "react-dom": "^18",
+        "react-redux": "^9",
+        "react-router-dom": "^6",
+        "react-tiny-toast": "^2.0.1"
+      },
+      "devDependencies": {
+        "@types/node": "^20.11.6",
+        "@types/react": "^18.2.47",
+        "@types/react-dom": "^18.2.18",
+        "@vitejs/plugin-react": "^4.2.1",
+        "prettier": "^3.2.1",
+        "typescript": "^5.4",
+        "vite": "^5.0.11"
+      },
+      "configuration": {
+        "packageManager": "yarn@4.2.2",
+        "lockfiles": [
+          "yarn.lock"
+        ],
+        "files": [
+          ".yarnrc.yml",
+          "tsconfig.json",
+          "vite.config.mts"
+        ],
+        "scriptsInspectedOnly": {
+          "dev": "vite",
+          "start": "vite",
+          "build": "tsc && vite build",
+          "format": "prettier --write ./src/**/*.{ts,tsx,css}"
+        }
+      },
+      "intakeDiagnostics": [
+        {
+          "file": ".yarn/releases/yarn-4.2.2.cjs",
+          "reason": "archive size/entry/ratio boundary"
+        }
+      ],
+      "performance": {
+        "coldImportMs": 21.8,
+        "staticRuntimeInspectionMs": 26,
+        "compilerDiagnosticMs": 7.4
+      },
+      "performanceNotMeasured": {
+        "coldRunnerStartup": "Runtime admission failed",
+        "warmCssEdit": "No admitted runtime",
+        "warmReactEdit": "No admitted runtime",
+        "fastRefresh": "No admitted runtime",
+        "documentReload": "No admitted runtime",
+        "fullGenerationRestart": "No admitted runtime",
+        "exportBuild": "No admitted export build"
+      },
+      "stages": {
+        "import": {
+          "status": "FAIL",
+          "httpStatus": 400,
+          "reason": "Unsafe ZIP path, type, or archive limit."
+        },
+        "compilerDiagnostic": {
+          "status": "FAIL",
+          "boundary": "Compiler refused unchanged source before project execution",
+          "reason": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @types/node@^20.11.6 cannot use this profile (package not provided). prettier@^3.2.1 cannot use this profile (package not provided). @faker-js/faker@^8 cannot use this profile (package not provided). @mswjs/data@^0.16 cannot use this profile (package not provided). @reduxjs/toolkit@^2.2 cannot use this profile (package not provided). date-fns@^3 cannot use this profile (package not provided). mock-socket@^9.0.3 cannot use this profile (package not provided). msw@^2 cannot use this profile (package not provided). react-redux@^9 cannot use this profile (package not provided). react-router-dom@^6 cannot use this profile (7.18.3). react-tiny-toast@^2.0.1 cannot use this profile (package not provided). Undeclared Vite configuration dependency: path. TypeScript alias @ must match an explicit static Vite alias."
+        },
+        "runtime": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "visualCompatibility": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "codeEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "responsiveEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "historyRestart": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportExactness": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportBuild": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportRender": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        }
+      },
+      "runtimeInspection": {
+        "compilerOptions": {
+          "useDefineForClassFields": true
+        },
+        "schema": 2,
+        "configuration": [
+          {
+            "file": "vite.config.mts",
+            "classification": "requires-isolated-execution",
+            "detail": "Undeclared Vite configuration dependency: path."
+          }
+        ],
+        "base": "/",
+        "environment": {
+          "MODE": "production",
+          "PROD": true,
+          "DEV": false,
+          "SSR": false,
+          "BASE_URL": "/"
+        },
+        "profile": "react18-vite5-v1",
+        "supported": false,
+        "aliases": {},
+        "dependencies": [
+          {
+            "name": "@types/node",
+            "declared": "^20.11.6"
+          },
+          {
+            "name": "@types/react",
+            "declared": "^18.2.47",
+            "selected": "18.3.31"
+          },
+          {
+            "name": "@types/react-dom",
+            "declared": "^18.2.18",
+            "selected": "18.3.7"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "declared": "^4.2.1",
+            "selected": "4.7.0"
+          },
+          {
+            "name": "prettier",
+            "declared": "^3.2.1"
+          },
+          {
+            "name": "typescript",
+            "declared": "^5.4",
+            "selected": "5.9.3"
+          },
+          {
+            "name": "vite",
+            "declared": "^5.0.11",
+            "selected": "5.4.21"
+          },
+          {
+            "name": "@faker-js/faker",
+            "declared": "^8"
+          },
+          {
+            "name": "@mswjs/data",
+            "declared": "^0.16"
+          },
+          {
+            "name": "@reduxjs/toolkit",
+            "declared": "^2.2"
+          },
+          {
+            "name": "classnames",
+            "declared": "^2.2.6",
+            "selected": "2.5.1"
+          },
+          {
+            "name": "date-fns",
+            "declared": "^3"
+          },
+          {
+            "name": "mock-socket",
+            "declared": "^9.0.3"
+          },
+          {
+            "name": "msw",
+            "declared": "^2"
+          },
+          {
+            "name": "react",
+            "declared": "^18",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "react-dom",
+            "declared": "^18",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "react-redux",
+            "declared": "^9"
+          },
+          {
+            "name": "react-router-dom",
+            "declared": "^6",
+            "selected": "7.18.3"
+          },
+          {
+            "name": "react-tiny-toast",
+            "declared": "^2.0.1"
+          }
+        ],
+        "issues": [
+          {
+            "code": "unsupported-lockfile",
+            "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/node@^20.11.6 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "prettier@^3.2.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@faker-js/faker@^8 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@mswjs/data@^0.16 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@reduxjs/toolkit@^2.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "date-fns@^3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "mock-socket@^9.0.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "msw@^2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-redux@^9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-router-dom@^6 cannot use this profile (7.18.3).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-tiny-toast@^2.0.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "executable-config",
+            "message": "Undeclared Vite configuration dependency: path.",
+            "requiredCapability": "An isolated Vite configuration/plugin runner",
+            "file": "vite.config",
+            "classification": "requires-isolated-execution"
+          },
+          {
+            "code": "tsconfig",
+            "message": "TypeScript alias @ must match an explicit static Vite alias.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "tsconfig.json / jsconfig.json",
+            "classification": "unsupported"
+          }
+        ],
+        "notes": [
+          "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+          "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+          "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+        ],
+        "entry": "src/main.tsx"
+      },
+      "failureLayers": [
+        "INTAKE",
+        "DEPENDENCY"
+      ],
+      "sourceAnalysis": {
+        "boundary": "Static AST inspection only, not rendered compatibility or Code workflow",
+        "files": 7,
+        "targets": 28,
+        "visualCandidates": 2,
+        "textCandidates": 2,
+        "responsiveCandidates": 0,
+        "exceptions": []
+      },
+      "unchangedAfterInspection": true
+    },
+    {
+      "id": "bulletproof-react",
+      "repository": "https://github.com/alan2207/bulletproof-react.git",
+      "commit": "9506629ed003a561c6627735480cce4994244bb4",
+      "subpath": "apps/react-vite",
+      "license": "MIT (repository-root LICENSE applies to app)",
+      "routeModel": "BrowserRouter data router, React Router 7; authenticated discussion application",
+      "classification": "INDEPENDENT PROJECT",
+      "upstreamTree": "7ccf9452907247b7b6ceefa765ed6a3015d03342",
+      "archiveMtime": "2026-05-14T15:53:03+02:00",
+      "archiveSha256": "e27e51cb59db08ad1cf498f84e7289efb113e71096873d9fddb9b53c008177c0",
+      "archiveBytes": 329601,
+      "unchangedFiles": {
+        ".env.example": {
+          "bytes": 80,
+          "sha256": "6942ac3fb1f8ace30812eea1a9d84c2507cc63932fe1ffd22cd337f97d4a6bf0"
+        },
+        ".env.example-e2e": {
+          "bytes": 139,
+          "sha256": "20f89d6c4f537decd5f1786e0748779ed6f0f04d226cb4b2a4aea6f7cb18b1df"
+        },
+        ".eslintrc.cjs": {
+          "bytes": 4508,
+          "sha256": "fc79b3753e8f5821f00f529b17166ef318f6f03f474f5ae6de7dfa0360156236"
+        },
+        ".gitignore": {
+          "bytes": 490,
+          "sha256": "189ce352505538cc46340c73f053b469ff6ceca1751daee640fb576f7dfd0ba5"
+        },
+        ".prettierignore": {
+          "bytes": 5,
+          "sha256": "fb043091b4d180d96a53feb9f97050962477aa63f0fe7ff0e2060cdfbeb366bb"
+        },
+        ".prettierrc": {
+          "bytes": 109,
+          "sha256": "16b37a36e2dd13b1f4f976b62dc46cb9ce714d79feca7498572f9741cd288b5a"
+        },
+        ".storybook/main.ts": {
+          "bytes": 515,
+          "sha256": "411a00a7647e67d1fcb70585af6fccbeb3a8d64679dffcdc2eb5752176cff39a"
+        },
+        ".storybook/preview.tsx": {
+          "bytes": 281,
+          "sha256": "7231536e2a1038c89013a9da16eda252738c970b59756530f5cf93aad8875295"
+        },
+        ".vscode/extensions.json": {
+          "bytes": 200,
+          "sha256": "992dfc429df71b924c24883a021478d147d6949b4a161005b1041bb46747388a"
+        },
+        ".vscode/settings.json": {
+          "bytes": 110,
+          "sha256": "301ae8e171e21a37303ebea72efea469040bc4b74c28646f5327960f24feec10"
+        },
+        "README.md": {
+          "bytes": 685,
+          "sha256": "dd84c4ed660a1fe60a6a53dd6a17850c718a5fc81efe9948cb7ba6903ca24cdd"
+        },
+        "__mocks__/vitest-env.d.ts": {
+          "bytes": 79,
+          "sha256": "ba72ebecf2f77591b0b3e5145585ca0d1edf8ed81d1dd0392eb24e661fd3f4c6"
+        },
+        "__mocks__/zustand.ts": {
+          "bytes": 1754,
+          "sha256": "226d10488590c2ef04d8b6ab4ced3e4089a1e8867435a11188e5d2283cdb374f"
+        },
+        "e2e/.eslintrc.cjs": {
+          "bytes": 119,
+          "sha256": "953e5c20c4eeb010f2f77d5194d42bf6913e93ee1eb37e60dc95a19059ace9f8"
+        },
+        "e2e/tests/auth.setup.ts": {
+          "bytes": 1665,
+          "sha256": "d86fbd524461f980bf660335eb3ca44ae9ff5f042cb2486448d3d111bfd20ed3"
+        },
+        "e2e/tests/profile.spec.ts": {
+          "bytes": 658,
+          "sha256": "1d1975192de4d7692b04a9ffc5107786b8a773d89908b963b49f1c9bed9c53fb"
+        },
+        "e2e/tests/smoke.spec.ts": {
+          "bytes": 3340,
+          "sha256": "fe639ea82ec193ff3679d40413f6d133f8ef8c9d1cef83400611a73708dcaece"
+        },
+        "generators/component/component.stories.tsx.hbs": {
+          "bytes": 330,
+          "sha256": "9a80ba10c5b80605da3fd007984ca0a9195a13483210998027602332ea6dfd55"
+        },
+        "generators/component/component.tsx.hbs": {
+          "bytes": 219,
+          "sha256": "d12c3ac435a4423dcd2e1a3869376cfcf66ffa6c7ee8e7f03448c698055a904a"
+        },
+        "generators/component/index.cjs": {
+          "bytes": 1532,
+          "sha256": "3c1f58fc5b28758729f58c7ba5f4e5f884aadb4582ea2b661c962db99c28b8cd"
+        },
+        "generators/component/index.ts.hbs": {
+          "bytes": 40,
+          "sha256": "42131bfce130809a568859bd31fff040628b7ed24aa540c33e3dc1ae5ec6a682"
+        },
+        "index.html": {
+          "bytes": 610,
+          "sha256": "be3935cbb4b63d9dba76c90b1f2813572fe481c171fbfbea9085915d648d18b2"
+        },
+        "mock-server.ts": {
+          "bytes": 708,
+          "sha256": "c0151a22eca6d36ac5070081c8af2b0230e7faec739de75cc04daf4fd15fd9b7"
+        },
+        "package.json": {
+          "bytes": 3918,
+          "sha256": "770724c0d08c5f7a84e0f38a2eeeb269bc959672458c4f60d4ef396abde8bae5"
+        },
+        "playwright.config.ts": {
+          "bytes": 1613,
+          "sha256": "c6c036175532b6fecfd7d8f15e142e6de542462c13772067b0e016ee8c8ec50e"
+        },
+        "plopfile.cjs": {
+          "bytes": 216,
+          "sha256": "1a5c60518a1462106be08678bd2908af0ec87d28f391f68d8860c4215c426313"
+        },
+        "postcss.config.cjs": {
+          "bytes": 83,
+          "sha256": "fa650b380adfabb151a0b352f7135e107e6352345f899060f1c5c231228f94bf"
+        },
+        "public/_redirects": {
+          "bytes": 18,
+          "sha256": "bd00766d6edbe8742fc1546343749db9adf898e447b0a109350182e41b9c4534"
+        },
+        "public/favicon.ico": {
+          "bytes": 3870,
+          "sha256": "3d10f7da6c603178340081668c4ac5b3ae9743ca9a262ab0fcd312fbb9f48bdd"
+        },
+        "public/logo192.png": {
+          "bytes": 5347,
+          "sha256": "c386396ec70db3608075b5fbfaac4ab1ccaa86ba05a68ab393ec551eb66c3e00"
+        },
+        "public/logo512.png": {
+          "bytes": 9664,
+          "sha256": "9ea4f4da7050c0cc408926f6a39c253624e9babb1d43c7977cd821445a60b461"
+        },
+        "public/mockServiceWorker.js": {
+          "bytes": 7515,
+          "sha256": "37813784daf849ec5e70e9f5324cdd24236bb05deaa994c89b281f1d3a317621"
+        },
+        "public/robots.txt": {
+          "bytes": 67,
+          "sha256": "90d24bc3bf698ac1e173739502298ccca72adf1f564fab05f484b8c48d1cadd2"
+        },
+        "src/app/index.tsx": {
+          "bytes": 184,
+          "sha256": "2a2279b0a85f895804452feb7934b0f42ce6c37461a7e7119c486c0f3c8ae7fb"
+        },
+        "src/app/provider.tsx": {
+          "bytes": 1618,
+          "sha256": "898dcaaebb30e0c324b1d9e1c2bdbab7951652e1dc7e3125ffd33ec65086ac7d"
+        },
+        "src/app/router.tsx": {
+          "bytes": 2479,
+          "sha256": "bf63cee669390954c05d9c933a63310bf6d9a4ec27c7d7b3493d7d21f8745dfb"
+        },
+        "src/app/routes/app/dashboard.tsx": {
+          "bytes": 1095,
+          "sha256": "1a4f672684fee4cadd9ffc00f8dab795cdbac9d2b075bf74a5da5ba03d5f4c9b"
+        },
+        "src/app/routes/app/discussions/__tests__/discussion.test.tsx": {
+          "bytes": 3607,
+          "sha256": "316fcc4e4d5390480e3e0c30cfface6cbbbc29d1f4c0bfb7fb798ad02cabbf87"
+        },
+        "src/app/routes/app/discussions/__tests__/discussions.test.tsx": {
+          "bytes": 2298,
+          "sha256": "c6717b3b02b5a1bdc0fe2fa7dda051576de63bfb194eee9b7b147b2e09ec7215"
+        },
+        "src/app/routes/app/discussions/discussion.tsx": {
+          "bytes": 2237,
+          "sha256": "679a07cafc632a1c5d9313f06bc58de89986fb08806fbf3862debb3185e17126"
+        },
+        "src/app/routes/app/discussions/discussions.tsx": {
+          "bytes": 1516,
+          "sha256": "af88780b1f3b3709c513817bc653fd1d4e8be866867d388fd851de3400dcd7ad"
+        },
+        "src/app/routes/app/profile.tsx": {
+          "bytes": 1672,
+          "sha256": "73024c0fa4f524b74150fb2699ffc8ed38a5c098422ede2677d5bd788fccc6dc"
+        },
+        "src/app/routes/app/root.tsx": {
+          "bytes": 311,
+          "sha256": "48f7899aa27c3c08464a6d8b20902f99ccf98c8ca312cbfaa3a4ba102a7c7c3b"
+        },
+        "src/app/routes/app/users.tsx": {
+          "bytes": 836,
+          "sha256": "4465bb71412497a8e7993cacf4447cba6500bf7c91270a960a1f146b0adc75c5"
+        },
+        "src/app/routes/auth/login.tsx": {
+          "bytes": 739,
+          "sha256": "6130d88757e0001c29ec5554c1c41241ffd2a0e9d4e5c554bef55b3a6a381b55"
+        },
+        "src/app/routes/auth/register.tsx": {
+          "bytes": 1120,
+          "sha256": "fef90618c82281e63b8d1ed47cca62702413a7beb2e9591e6cc8dc2b8b8a102d"
+        },
+        "src/app/routes/landing.tsx": {
+          "bytes": 3555,
+          "sha256": "8c5d10e3d0fd77a2dcf87b3c564d39e85dbd1f2f47c5966a18b90b40633adc63"
+        },
+        "src/app/routes/not-found.tsx": {
+          "bytes": 422,
+          "sha256": "424ea2fefdfca898a460f054fa89086c787023f9d7840399549784bafd629195"
+        },
+        "src/assets/logo.svg": {
+          "bytes": 2632,
+          "sha256": "6000b0e9b0b05b3f112de04f0d039768a1db63588ff9b6ef7099dbd71632f383"
+        },
+        "src/components/errors/main.tsx": {
+          "bytes": 467,
+          "sha256": "d21f13892a699e63390535f51c7cd40096e39ad8b545ed139bccc99d3f2361c3"
+        },
+        "src/components/layouts/auth-layout.tsx": {
+          "bytes": 1673,
+          "sha256": "9b13111c3c5b02d901e5910de7390640dea3de13d53d3ec7d23d0ccf79a0bb3d"
+        },
+        "src/components/layouts/content-layout.tsx": {
+          "bytes": 586,
+          "sha256": "7d02cc5cc7de44165d196812af3dd5c77dddee768330191f12c839ac3372cbfc"
+        },
+        "src/components/layouts/dashboard-layout.tsx": {
+          "bytes": 6859,
+          "sha256": "0f58eb5dc4e3834134eead251678c03de9dbbb8bb5a1a7ad39cf939dd95262f8"
+        },
+        "src/components/layouts/index.ts": {
+          "bytes": 70,
+          "sha256": "9b5fd62afdd50171499ffa37129294f63a9133dbda3d820fbc87249467de476f"
+        },
+        "src/components/seo/__tests__/head.test.tsx": {
+          "bytes": 580,
+          "sha256": "0158a8fdfbb64790fb3a8aa4fd539ef7823a17117b43de544886d636500dd5b1"
+        },
+        "src/components/seo/head.tsx": {
+          "bytes": 480,
+          "sha256": "37679fff8e13bf14e31c0f863e6eca78c0edfd8d56bdcbfd97b8e84175e06778"
+        },
+        "src/components/seo/index.ts": {
+          "bytes": 24,
+          "sha256": "9d44f9b2620b289068bd972becdead970e6faab44a3f7b2c82a6c9bda139d426"
+        },
+        "src/components/ui/button/button.stories.tsx": {
+          "bytes": 307,
+          "sha256": "8773ea4ab7ed1cc7539843bb5addefc4afc86bb6a4687465283bb381b4bf2a0e"
+        },
+        "src/components/ui/button/button.tsx": {
+          "bytes": 2225,
+          "sha256": "ce24901c7a7110e3b448eb32b9974c55ec8e8400727fb80ab68144974505fbf5"
+        },
+        "src/components/ui/button/index.ts": {
+          "bytes": 26,
+          "sha256": "fc5ea235d834b81a17d49bed93c442274766fcc21bed6de8aee53e4ab002bd85"
+        },
+        "src/components/ui/dialog/__tests__/dialog.test.tsx": {
+          "bytes": 1753,
+          "sha256": "945259d1c0a6ede99b7269573d3663665bd537a60b177a2b6b786107571f89ee"
+        },
+        "src/components/ui/dialog/confirmation-dialog/__tests__/confirmation-dialog.test.tsx": {
+          "bytes": 1176,
+          "sha256": "f1faa5fa2de389d5848a112516af7395bdfba555f95c53fdd47d27a315ff0fa3"
+        },
+        "src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx": {
+          "bytes": 757,
+          "sha256": "0032427d2658f66e7de45834e0540739e128be4175555c2d7f3bab1a65def5e6"
+        },
+        "src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx": {
+          "bytes": 2132,
+          "sha256": "9f7f59228a8a9158c5dd599d8c83b33f1bc9a95d7a6d6fc6727d0a0a0a29035a"
+        },
+        "src/components/ui/dialog/confirmation-dialog/index.ts": {
+          "bytes": 39,
+          "sha256": "1281f7ae7405716c7bdfc028af367a2532eb20c16e46d75c3d79d26065a1e66b"
+        },
+        "src/components/ui/dialog/dialog.stories.tsx": {
+          "bytes": 1444,
+          "sha256": "a9846c26c88f211e5ce294e4968386f5dae48d71d8fb069d5dd791cb593e2b4e"
+        },
+        "src/components/ui/dialog/dialog.tsx": {
+          "bytes": 3886,
+          "sha256": "af1d3fe61d306cfe5f393a814a8abe990fc1609e457370c8645e352cdae8de1f"
+        },
+        "src/components/ui/dialog/index.ts": {
+          "bytes": 65,
+          "sha256": "f3e72728a6f1303591885c9cf7716d0545118ee714789ac813373a72d316d721"
+        },
+        "src/components/ui/drawer/__tests__/drawer.test.tsx": {
+          "bytes": 1655,
+          "sha256": "14accb1772c51542c29e20aee211018d92882ff80a46f5759b5c26096e3feafa"
+        },
+        "src/components/ui/drawer/drawer.stories.tsx": {
+          "bytes": 1536,
+          "sha256": "6361563d47709061337c85f5d285afee7d2c6077059eef8aaf3c5f3fe8842cd6"
+        },
+        "src/components/ui/drawer/drawer.tsx": {
+          "bytes": 4366,
+          "sha256": "1b9de70bf5adcc4327b441f69a86b0e2ac5ecb91f4988a87c0e1473473391a73"
+        },
+        "src/components/ui/drawer/index.ts": {
+          "bytes": 26,
+          "sha256": "8415abfcdd4a445406926bfccea6649cea77e3f600fee397bdc9609436505711"
+        },
+        "src/components/ui/dropdown/dropdown.stories.tsx": {
+          "bytes": 3024,
+          "sha256": "f38837fe9a38dee8edad9499543b0b3c4f565be37e0c319c2dae85c0ef3890a8"
+        },
+        "src/components/ui/dropdown/dropdown.tsx": {
+          "bytes": 7382,
+          "sha256": "7d3eb786ba2ab18fec82ac1d8f04eb26252fc9b863f3ff788d78cfede4bab24f"
+        },
+        "src/components/ui/dropdown/index.ts": {
+          "bytes": 28,
+          "sha256": "4e8d09bff6c366e48695a9d15461d2261737e554ab1b561cdcb850ffcf180366"
+        },
+        "src/components/ui/form/__tests__/form.test.tsx": {
+          "bytes": 1954,
+          "sha256": "4cc5efe28c0d44e57cb32f0b4c894faad76c1a8c90c36f0a09a255a48847dc74"
+        },
+        "src/components/ui/form/error.tsx": {
+          "bytes": 325,
+          "sha256": "7da0fa3b5c3696b1c40775fa0609090c42a006b5f812ac6773454e4971ed3a93"
+        },
+        "src/components/ui/form/field-wrapper.tsx": {
+          "bytes": 668,
+          "sha256": "c04dafd3f7af2c40e60e1562fc8b4eaeded2f9b9664a809bd04333b258bd1c98"
+        },
+        "src/components/ui/form/form-drawer.tsx": {
+          "bytes": 1477,
+          "sha256": "2d7c02d89c04a611649cfec20c4bedfc292a0fa6ed416f27733d82d55d539fd0"
+        },
+        "src/components/ui/form/form.stories.tsx": {
+          "bytes": 2046,
+          "sha256": "2f01efb11e09b14ace579cbee218484792a522602440076bab7d7e9e056430b2"
+        },
+        "src/components/ui/form/form.tsx": {
+          "bytes": 5055,
+          "sha256": "e97da75d8870253a26e3b445cfd4ccf734ed1f90dd7e9a7bb46b60e673847d5c"
+        },
+        "src/components/ui/form/index.ts": {
+          "bytes": 185,
+          "sha256": "f2204fe8dbed6d2d4c21c5bce0c08938c1a3e9bdee515b9129e73dae6378b8ac"
+        },
+        "src/components/ui/form/input.tsx": {
+          "bytes": 1194,
+          "sha256": "7c750b8a5a4a85510c163188ca9b642a2d615e645d31d6684f2385413b4bc0aa"
+        },
+        "src/components/ui/form/label.tsx": {
+          "bytes": 718,
+          "sha256": "8cc3e38ac95b1dff8a95cadaa5043741d230ec27a53d2e4fb4a440dd9cab9660"
+        },
+        "src/components/ui/form/select.tsx": {
+          "bytes": 1153,
+          "sha256": "255bfb4569462e73cd5c69cf95f802fe7ca839a820a2e2564e4d6b63fc69336d"
+        },
+        "src/components/ui/form/switch.tsx": {
+          "bytes": 1155,
+          "sha256": "df1807bd82373f1d10c9f21cbd1cfccb4b0dfca0252e08b89dbc7421eaf810d6"
+        },
+        "src/components/ui/form/textarea.tsx": {
+          "bytes": 1118,
+          "sha256": "7a4442137e657ce02bba479d39b6a87fde24dac32f717212795c4e81f4f77958"
+        },
+        "src/components/ui/link/index.ts": {
+          "bytes": 24,
+          "sha256": "a3f31df36cad262964aadb12d036ce31754c4566b913a87b3f453e1bfc347114"
+        },
+        "src/components/ui/link/link.stories.tsx": {
+          "bytes": 285,
+          "sha256": "4da3612887afac0886809c5c6075b313f2965feadb90691261b64d877001db9e"
+        },
+        "src/components/ui/link/link.tsx": {
+          "bytes": 333,
+          "sha256": "639452b5c1b55574c5cfd8d6c67f66be88178ca931e5d9c12e05958c212805ff"
+        },
+        "src/components/ui/md-preview/index.ts": {
+          "bytes": 30,
+          "sha256": "777c9ab0d011e56609758796aec040d341c93d8035b9627a6ee1b074af29e92c"
+        },
+        "src/components/ui/md-preview/md-preview.stories.tsx": {
+          "bytes": 306,
+          "sha256": "bf8d72389f7895771778794389bacccfb9d558121934ce8d40218e843e9bdc2c"
+        },
+        "src/components/ui/md-preview/md-preview.tsx": {
+          "bytes": 417,
+          "sha256": "91738fa26c10d39307736277cfdd7196b8072437bc2f48cd46422773966f85a0"
+        },
+        "src/components/ui/notifications/__tests__/notifications.test.ts": {
+          "bytes": 740,
+          "sha256": "3e949779de925cb0a1c2bc92b69f1b8bef30de1999ccd4c790318a107df9c9e9"
+        },
+        "src/components/ui/notifications/index.ts": {
+          "bytes": 72,
+          "sha256": "d704da492b7bc3e337414d4eb2109800c82af504a432156398ed9406d5b8774c"
+        },
+        "src/components/ui/notifications/notification.stories.tsx": {
+          "bytes": 1371,
+          "sha256": "88c06bcd03b0318b19a61ec2dc4b657e87716a0644723fad8dba5766e737273d"
+        },
+        "src/components/ui/notifications/notification.tsx": {
+          "bytes": 1874,
+          "sha256": "28e9a3012afa3d41067d6e279a0154b6daf9b92a41e18c361dabfb35bb1de430"
+        },
+        "src/components/ui/notifications/notifications-store.ts": {
+          "bytes": 823,
+          "sha256": "cf4c146ca897800db76ea32818b77b5ce4707085ce4138fe6fbbdd9907864b25"
+        },
+        "src/components/ui/notifications/notifications.tsx": {
+          "bytes": 609,
+          "sha256": "df4d0dfa27def37b645bf92c6c78d4b75f498bf08665cfcefd1d13f9981df502"
+        },
+        "src/components/ui/spinner/index.ts": {
+          "bytes": 27,
+          "sha256": "2f60c2aa879630f1cd5926f675e616d51fb3f8d35adedece39fb654fbb4ee22f"
+        },
+        "src/components/ui/spinner/spinner.stories.tsx": {
+          "bytes": 281,
+          "sha256": "206572100f3d72f0282215d4c26678e961652591ac14b2da93c71ed2a7318917"
+        },
+        "src/components/ui/spinner/spinner.tsx": {
+          "bytes": 964,
+          "sha256": "ab3493ff94a495f532a807617996187a0fe117a8aaf7a22741ec5b1da1f45ca4"
+        },
+        "src/components/ui/table/index.ts": {
+          "bytes": 25,
+          "sha256": "de735c3ec29600fbadb668401ab49a7de45560093d4338d0ffe19e29f0ff2ee4"
+        },
+        "src/components/ui/table/pagination.tsx": {
+          "bytes": 4584,
+          "sha256": "f36c296945d50bdbc71c917f7042653e6a2b40ae74e0356a66ffc09aeb465075"
+        },
+        "src/components/ui/table/table.stories.tsx": {
+          "bytes": 1041,
+          "sha256": "e844cf6505bc9e3982d25aabd32b75c81b3b7423c61f3883771aa53aaa46b585"
+        },
+        "src/components/ui/table/table.tsx": {
+          "bytes": 4433,
+          "sha256": "e20989301fe58cd12f5757af8709912ab640e46b05fefd6030866c3fb63ce606"
+        },
+        "src/config/env.ts": {
+          "bytes": 1015,
+          "sha256": "8c5254c67939bd52fa978ae96e863cd6715e646809fb7b3716f52f2579ff491b"
+        },
+        "src/config/paths.ts": {
+          "bytes": 1035,
+          "sha256": "05b5af111a99043ab8f377e95a8a1c194552d98af43ffc73b2cc27de20a399df"
+        },
+        "src/features/auth/components/__tests__/login-form.test.tsx": {
+          "bytes": 722,
+          "sha256": "0cc94e6cc126a8d5798312ab06bf744bc48f1ae5203ef230f58dd9b619b356e5"
+        },
+        "src/features/auth/components/__tests__/register-form.test.tsx": {
+          "bytes": 1079,
+          "sha256": "101979aa5b034d4297b6c71f2d7acb543fb90507220de688ac6e08337aeb6b96"
+        },
+        "src/features/auth/components/login-form.tsx": {
+          "bytes": 1710,
+          "sha256": "fcba878f5720d0d3dae2a7e9d5f1e2dc5b8d8703291c738346e36203b7b35a5e"
+        },
+        "src/features/auth/components/register-form.tsx": {
+          "bytes": 3547,
+          "sha256": "2e2904429abb8ce0f0d6ad89cdc9ac824ec2ea9364cedb8da73a630d07e73f1f"
+        },
+        "src/features/comments/api/create-comment.ts": {
+          "bytes": 1245,
+          "sha256": "5c3e33f6b02902ec596f1155200f6cc97a62ec80a878fb05b7e55aed492d1435"
+        },
+        "src/features/comments/api/delete-comment.ts": {
+          "bytes": 946,
+          "sha256": "d9be7b10138401ec24cf1af3b63be584d2924bd3138920691b4fff2cb914be2d"
+        },
+        "src/features/comments/api/get-comments.ts": {
+          "bytes": 1253,
+          "sha256": "c5b2e72211e833de56f07b6ec176bc2b91cbb36da4838aed574b227c9dbe6de2"
+        },
+        "src/features/comments/components/comments-list.tsx": {
+          "bytes": 2803,
+          "sha256": "8bd0c1f5c3d2e8260dcd2ab934bd88b23962468d4dba0b9b4f5f4981facb9993"
+        },
+        "src/features/comments/components/comments.tsx": {
+          "bytes": 491,
+          "sha256": "a503744a8ddeebec1180d9e613fa5ce040384773ecb60fa744c61581b6798028"
+        },
+        "src/features/comments/components/create-comment.tsx": {
+          "bytes": 1831,
+          "sha256": "e34e373b7bb4b1fe003eab7045be4e5298353fb2e626fa48e506cc653e71384e"
+        },
+        "src/features/comments/components/delete-comment.tsx": {
+          "bytes": 1397,
+          "sha256": "9c106ec7c68b33b46d55a0941eb9c29190eb0421efc324f13667e06b329545bc"
+        },
+        "src/features/discussions/api/create-discussion.ts": {
+          "bytes": 1223,
+          "sha256": "fb2108cc2975dfd1fc9ab0ff81d12c7465fd79e31be65a1f7bde1d4b1cf901a2"
+        },
+        "src/features/discussions/api/delete-discussion.ts": {
+          "bytes": 928,
+          "sha256": "d3e2ce56af9b6d1f015600d04eb2e6afdeca31e19a19a3e8dbca1577179028f5"
+        },
+        "src/features/discussions/api/get-discussion.ts": {
+          "bytes": 878,
+          "sha256": "581321951f0e3f3fae051ab61508f5073b5a683c8fbdbc81dfef86721708e7ec"
+        },
+        "src/features/discussions/api/get-discussions.ts": {
+          "bytes": 905,
+          "sha256": "1a42de81ec341ace39969ed75d8cba7830764b59df7aa5a3529b3b32bb391521"
+        },
+        "src/features/discussions/api/update-discussion.ts": {
+          "bytes": 1293,
+          "sha256": "a926b792424a6a248b9fe7adeb820b9ca8fb664a8cf082e1386f9d352a7294f0"
+        },
+        "src/features/discussions/components/create-discussion.tsx": {
+          "bytes": 1974,
+          "sha256": "375a31626199c3642b9e9a8ab2f361ca4e2d97a0302b62284f5db92f12374c7f"
+        },
+        "src/features/discussions/components/delete-discussion.tsx": {
+          "bytes": 1487,
+          "sha256": "429e7ac9e45fb4581e39adde5fcb2bd735358e9113e1ef3a0ec67ef97a348ebe"
+        },
+        "src/features/discussions/components/discussion-view.tsx": {
+          "bytes": 1512,
+          "sha256": "9bbff6346b05b0689c0af429db51c0f6611696bbe46824e6a4a0bfed2bf738c2"
+        },
+        "src/features/discussions/components/discussions-list.tsx": {
+          "bytes": 2392,
+          "sha256": "e4a73a590e5a166096fb9e8309227235fd57a753ce3c4c68fce3303b52048039"
+        },
+        "src/features/discussions/components/update-discussion.tsx": {
+          "bytes": 2456,
+          "sha256": "feea44a0e6041b167c231eb903ecce9a1eb461f26b413bfa74ef882397746ffd"
+        },
+        "src/features/teams/api/get-teams.ts": {
+          "bytes": 657,
+          "sha256": "780430a15c5c806ad67ce1915320c29468102deebddb74dadf69cc2f42128216"
+        },
+        "src/features/users/api/delete-user.ts": {
+          "bytes": 891,
+          "sha256": "51d3f4e711a0eacadf9079df7c8efb3244e5abeeb87eb6329fdf01046faf0bda"
+        },
+        "src/features/users/api/get-users.ts": {
+          "bytes": 644,
+          "sha256": "4cfae7875e878122c4572678edff89d359bc4a8bf8ec6e28f257d16e2096d7ce"
+        },
+        "src/features/users/api/update-profile.ts": {
+          "bytes": 1096,
+          "sha256": "a84fabc2fcbc3a59ae51eed7fe1e3969f18b970a8eba63c0b24007f556f949fa"
+        },
+        "src/features/users/components/delete-user.tsx": {
+          "bytes": 1190,
+          "sha256": "4e81b81ebbd247a6ebdc6c061292315da86f6729160e7fe684c7b75a58629463"
+        },
+        "src/features/users/components/update-profile.tsx": {
+          "bytes": 2398,
+          "sha256": "cc848bb76408cfbb7ddfa1bff5f25f672a65126fd58861a848b802d57b4c78e7"
+        },
+        "src/features/users/components/users-list.tsx": {
+          "bytes": 1277,
+          "sha256": "b733f0fee94b35004e1845264b7dbbb32e4e16584a422538600f6c9f75c24846"
+        },
+        "src/hooks/__tests__/use-disclosure.test.ts": {
+          "bytes": 1177,
+          "sha256": "8fae2d880385b974853dfa47c680914015ca05e0910f8c5ccf051a98fa3888c5"
+        },
+        "src/hooks/use-disclosure.ts": {
+          "bytes": 387,
+          "sha256": "011158bcac450f9e0eec361400828e7c8db0d5075f9edc3acef125f079cf989c"
+        },
+        "src/index.css": {
+          "bytes": 1936,
+          "sha256": "ad8235be87cebe42b07ecf6c544826a9464310a26855077a71b7394e66c8964a"
+        },
+        "src/lib/__tests__/authorization.test.tsx": {
+          "bytes": 2258,
+          "sha256": "e7ad54712d740aba0ee628677634d6b9d0bdc7ec1ac49e8cddef968e81a39490"
+        },
+        "src/lib/api-client.ts": {
+          "bytes": 1101,
+          "sha256": "fec769ffc7c85ab5355046d9a582e214163f1f0906e48ee8e0e067b6e6bc67f9"
+        },
+        "src/lib/auth.tsx": {
+          "bytes": 2372,
+          "sha256": "6419dcc92bc91e0959df4dc3ae673edcab2546a1b3169a06b11be35f2309f06f"
+        },
+        "src/lib/authorization.tsx": {
+          "bytes": 1598,
+          "sha256": "6f2760d590ba0894e662dd95ca7aa944524f0058bbb85da225093d9f69cb037b"
+        },
+        "src/lib/react-query.ts": {
+          "bytes": 667,
+          "sha256": "9e556d467606796ce907cad18a4a63f1748924db48bf540b2670ae352a201c5d"
+        },
+        "src/main.tsx": {
+          "bytes": 408,
+          "sha256": "9e7500082e6577e974d1b794657eb116a7162c0ce0e856db017fa952e28af433"
+        },
+        "src/testing/data-generators.ts": {
+          "bytes": 1627,
+          "sha256": "b772c08b036690fb94233eb1fede773be3a0621742db34b5faa7ef91a5f98e6e"
+        },
+        "src/testing/mocks/browser.ts": {
+          "bytes": 132,
+          "sha256": "5f4183942dd23565908ab3cf26209673cff1aff71f4d8c789e5c8abc4d3e5206"
+        },
+        "src/testing/mocks/db.ts": {
+          "bytes": 2482,
+          "sha256": "4f52b8e872c7e05727125ee254e9c4d1287b76882b40e9a732da7179c11c0356"
+        },
+        "src/testing/mocks/handlers/auth.ts": {
+          "bytes": 3952,
+          "sha256": "ffadef4f796abe29d128d3ee5a5a50cabbd88f840e43e3cc166ca212036f2ce5"
+        },
+        "src/testing/mocks/handlers/comments.ts": {
+          "bytes": 3343,
+          "sha256": "4c8567ebe26c5b1b0341611745a2416ccaf843bca5e4429904684a6bdd688435"
+        },
+        "src/testing/mocks/handlers/discussions.ts": {
+          "bytes": 5509,
+          "sha256": "246c157b7c79cae71d824f6b368d967ff554273c03ac65ff428f96bbe2a11f34"
+        },
+        "src/testing/mocks/handlers/index.ts": {
+          "bytes": 612,
+          "sha256": "1085e768ae0e0336ab791a440099975f62fdd8e398edb679cbdd93c4101d92b7"
+        },
+        "src/testing/mocks/handlers/teams.ts": {
+          "bytes": 519,
+          "sha256": "29fe1e9bee000ce47d55aff1616f7ed10bde53ada74153299603cdbc0ffc94a3"
+        },
+        "src/testing/mocks/handlers/users.ts": {
+          "bytes": 2469,
+          "sha256": "1e2a8bec7793697e662cfbae35fdcc51440f18852f56d91c141032f1f4387df4"
+        },
+        "src/testing/mocks/index.ts": {
+          "bytes": 273,
+          "sha256": "8fbc0ea6102901839203a0878d591a79d50b160387025e81e992849c7216d3d9"
+        },
+        "src/testing/mocks/server.ts": {
+          "bytes": 129,
+          "sha256": "1c2b19a25e03a0008d8d0a9cc4fe5722d7d800f55d0c0bc60a85969cc9c9309f"
+        },
+        "src/testing/mocks/utils.ts": {
+          "bytes": 2450,
+          "sha256": "e7c4ee032b143c221eaebdac5e6a14227a8bf9a61e8b57f800f7d76393bd11a7"
+        },
+        "src/testing/setup-tests.ts": {
+          "bytes": 714,
+          "sha256": "28db0af83fc8b54de7df18edf062d9ca9b4d43c12cada149ee1753876f808ccf"
+        },
+        "src/testing/test-utils.tsx": {
+          "bytes": 2408,
+          "sha256": "039bf98b5d80473ceeef456c5c2406f34c3d5e26c9c27dedf2882c35c292264c"
+        },
+        "src/types/api.ts": {
+          "bytes": 873,
+          "sha256": "db3798d52e02da1fa0a091ec6baceb4f32aa38a464163dd678977d3def07700a"
+        },
+        "src/utils/cn.ts": {
+          "bytes": 169,
+          "sha256": "74e8fe9d0d680c442ed6adb13e7d119d6c210c19ae6c114313b2a72552be0883"
+        },
+        "src/utils/format.ts": {
+          "bytes": 132,
+          "sha256": "d895181055302c5f03221dde050dba2675cc2850e4e4e6f13ba63e07b1e2bea6"
+        },
+        "src/vite-env.d.ts": {
+          "bytes": 38,
+          "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+        },
+        "tailwind.config.cjs": {
+          "bytes": 2219,
+          "sha256": "cb963ac8061eea3639bdaf56f2887506898f05909249d91667042662681f1d2e"
+        },
+        "tsconfig.json": {
+          "bytes": 655,
+          "sha256": "ac71167744af07a035a2cbece3915756b16b2f54feba2c0ee6f6c43374ab4d52"
+        },
+        "vite-env.d.ts": {
+          "bytes": 38,
+          "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+        },
+        "vite.config.ts": {
+          "bytes": 756,
+          "sha256": "c60623df77f0649394b665544d02e4dc867c3d613d4eea0c22b6ddb52bc4fa76"
+        },
+        "yarn.lock": {
+          "bytes": 501391,
+          "sha256": "21937464da5e54de5bce88e8314ed0747b82e0236b78079bf8aaa31c849b6cb8"
+        }
+      },
+      "licenseEvidence": {
+        "path": "LICENSE",
+        "sha256": "5e8e5036383ac3d764a03e785cc7127ee8c10718edf61a6ff0ca28854d66f370",
+        "length": 1071
+      },
+      "framework": {
+        "react": "^18.3.1",
+        "reactDom": "^18.3.1",
+        "vite": "^5.2.10"
+      },
+      "dependencies": {
+        "@hookform/resolvers": "^3.3.4",
+        "@ngneat/falso": "^7.2.0",
+        "@radix-ui/react-dialog": "^1.0.5",
+        "@radix-ui/react-dropdown-menu": "^2.0.6",
+        "@radix-ui/react-icons": "^1.3.0",
+        "@radix-ui/react-label": "^2.0.2",
+        "@radix-ui/react-slot": "^1.0.2",
+        "@radix-ui/react-switch": "^1.0.3",
+        "@tanstack/react-query": "^5.32.0",
+        "@tanstack/react-query-devtools": "^5.32.0",
+        "axios": "^1.6.8",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "dayjs": "^1.11.11",
+        "dompurify": "^3.1.1",
+        "eslint-plugin-check-file": "^2.8.0",
+        "lucide-react": "^0.378.0",
+        "marked": "^12.0.2",
+        "nanoid": "^5.0.7",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-error-boundary": "^4.0.13",
+        "react-helmet-async": "^2.0.4",
+        "react-hook-form": "^7.51.3",
+        "react-query-auth": "^2.4.3",
+        "react-router": "^7.0.2",
+        "tailwind-merge": "^2.3.0",
+        "tailwindcss-animate": "^1.0.7",
+        "zod": "^3.23.4",
+        "zustand": "^4.5.2"
+      },
+      "devDependencies": {
+        "@eslint/eslintrc": "^3.0.2",
+        "@mswjs/data": "^0.16.1",
+        "@mswjs/http-middleware": "^0.10.1",
+        "@playwright/test": "^1.49.1",
+        "@storybook/addon-a11y": "^8.0.10",
+        "@storybook/addon-actions": "^8.0.9",
+        "@storybook/addon-essentials": "^8.0.9",
+        "@storybook/addon-links": "^8.0.9",
+        "@storybook/node-logger": "^8.0.9",
+        "@storybook/react": "^8.0.9",
+        "@storybook/react-vite": "^8.0.9",
+        "@tailwindcss/typography": "^0.5.13",
+        "@testing-library/jest-dom": "^6.4.2",
+        "@testing-library/react": "^15.0.5",
+        "@testing-library/user-event": "^14.5.2",
+        "@types/cors": "^2.8.17",
+        "@types/dompurify": "^3.0.5",
+        "@types/js-cookie": "^3.0.6",
+        "@types/marked": "^6.0.0",
+        "@types/node": "^20.12.7",
+        "@types/react": "^18.3.1",
+        "@types/react-dom": "^18.3.0",
+        "@typescript-eslint/eslint-plugin": "^7.8.0",
+        "@typescript-eslint/parser": "^7.8.0",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.19",
+        "cors": "^2.8.5",
+        "eslint": "8",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-import-resolver-typescript": "^3.6.1",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-jest-dom": "^5.4.0",
+        "eslint-plugin-jsx-a11y": "^6.8.0",
+        "eslint-plugin-playwright": "^1.6.0",
+        "eslint-plugin-prettier": "^5.1.3",
+        "eslint-plugin-react": "^7.34.1",
+        "eslint-plugin-react-hooks": "^4.6.2",
+        "eslint-plugin-tailwindcss": "^3.15.1",
+        "eslint-plugin-testing-library": "^6.2.2",
+        "eslint-plugin-vitest": "^0.5.4",
+        "express": "^4.19.2",
+        "husky": "^9.0.11",
+        "jest-environment-jsdom": "^29.7.0",
+        "js-cookie": "^3.0.5",
+        "jsdom": "^24.0.0",
+        "lint-staged": "^15.2.2",
+        "msw": "^2.2.14",
+        "pino-http": "^10.1.0",
+        "pino-pretty": "^11.1.0",
+        "plop": "^4.0.1",
+        "pm2": "^5.4.0",
+        "postcss": "^8.4.38",
+        "prettier": "^3.2.5",
+        "storybook": "^8.0.9",
+        "tailwindcss": "^3.4.3",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.10",
+        "vite-node": "^1.6.0",
+        "vite-tsconfig-paths": "^4.3.2",
+        "vitest": "^2.1.4"
+      },
+      "configuration": {
+        "packageManager": null,
+        "lockfiles": [
+          "yarn.lock"
+        ],
+        "files": [
+          ".env.example",
+          ".env.example-e2e",
+          "playwright.config.ts",
+          "postcss.config.cjs",
+          "tailwind.config.cjs",
+          "tsconfig.json",
+          "vite.config.ts"
+        ],
+        "scriptsInspectedOnly": {
+          "dev": "vite",
+          "build": "tsc && vite build --base=/",
+          "preview": "vite preview",
+          "test": "vitest",
+          "test-e2e": "pm2 start \"yarn run-mock-server\" --name server && yarn playwright test",
+          "prepare": "husky",
+          "lint": "eslint src --ignore-path .gitignore",
+          "check-types": "tsc --project tsconfig.json --pretty --noEmit",
+          "generate": "plop",
+          "storybook": "storybook dev -p 6006",
+          "build-storybook": "storybook build",
+          "run-mock-server": "vite-node mock-server.ts | pino-pretty -c"
+        }
+      },
+      "intakeDiagnostics": [
+        {
+          "file": ".env.example-e2e",
+          "reason": "path/secret exclusion"
+        },
+        {
+          "file": ".env.example-e2e",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": ".prettierignore",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": ".prettierrc",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": "generators/component/component.stories.tsx.hbs",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": "generators/component/component.tsx.hbs",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": "generators/component/index.ts.hbs",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": "public/_redirects",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        }
+      ],
+      "performance": {
+        "coldImportMs": 5.4,
+        "staticRuntimeInspectionMs": 39.7,
+        "compilerDiagnosticMs": 28
+      },
+      "performanceNotMeasured": {
+        "coldRunnerStartup": "Runtime admission failed",
+        "warmCssEdit": "No admitted runtime",
+        "warmReactEdit": "No admitted runtime",
+        "fastRefresh": "No admitted runtime",
+        "documentReload": "No admitted runtime",
+        "fullGenerationRestart": "No admitted runtime",
+        "exportBuild": "No admitted export build"
+      },
+      "stages": {
+        "import": {
+          "status": "FAIL",
+          "httpStatus": 400,
+          "reason": "Unsafe ZIP path, type, or archive limit."
+        },
+        "compilerDiagnostic": {
+          "status": "FAIL",
+          "boundary": "Compiler refused unchanged source before project execution",
+          "reason": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @eslint/eslintrc@^3.0.2 cannot use this profile (package not provided). @mswjs/data@^0.16.1 cannot use this profile (package not provided). @mswjs/http-middleware@^0.10.1 cannot use this profile (package not provided). @playwright/test@^1.49.1 cannot use this profile (package not provided). @storybook/addon-a11y@^8.0.10 cannot use this profile (package not provided). @storybook/addon-actions@^8.0.9 cannot use this profile (package not provided). @storybook/addon-essentials@^8.0.9 cannot use this profile (package not provided). @storybook/addon-links@^8.0.9 cannot use this profile (package not provided). @storybook/node-logger@^8.0.9 cannot use this profile (package not provided). @storybook/react@^8.0.9 cannot use this profile (package not provided). @storybook/react-vite@^8.0.9 cannot use this profile (package not provided). @tailwindcss/typography@^0.5.13 cannot use this profile (package not provided). @testing-library/jest-dom@^6.4.2 cannot use this profile (package not provided). @testing-library/react@^15.0.5 cannot use this profile (package not provided). @testing-library/user-event@^14.5.2 cannot use this profile (package not provided). @types/cors@^2.8.17 cannot use this profile (package not provided). @types/dompurify@^3.0.5 cannot use this profile (package not provided). @types/js-cookie@^3.0.6 cannot use this profile (package not provided). @types/marked@^6.0.0 cannot use this profile (package not provided). @types/node@^20.12.7 cannot use this profile (package not provided). @typescript-eslint/eslint-plugin@^7.8.0 cannot use this profile (package not provided). @typescript-eslint/parser@^7.8.0 cannot use this profile (package not provided). autoprefixer@^10.4.19 cannot use this profile (package not provided). cors@^2.8.5 cannot use this profile (package not provided). eslint@8 cannot use this profile (9.39.5). eslint-config-prettier@^9.1.0 cannot use this profile (package not provided). eslint-import-resolver-typescript@^3.6.1 cannot use this profile (package not provided). eslint-plugin-import@^2.29.1 cannot use this profile (package not provided). eslint-plugin-jest-dom@^5.4.0 cannot use this profile (package not provided). eslint-plugin-jsx-a11y@^6.8.0 cannot use this profile (package not provided). eslint-plugin-playwright@^1.6.0 cannot use this profile (package not provided). eslint-plugin-prettier@^5.1.3 cannot use this profile (package not provided). eslint-plugin-react@^7.34.1 cannot use this profile (package not provided). eslint-plugin-react-hooks@^4.6.2 cannot use this profile (5.2.0). eslint-plugin-tailwindcss@^3.15.1 cannot use this profile (package not provided). eslint-plugin-testing-library@^6.2.2 cannot use this profile (package not provided). eslint-plugin-vitest@^0.5.4 cannot use this profile (package not provided). express@^4.19.2 cannot use this profile (package not provided). husky@^9.0.11 cannot use this profile (package not provided). jest-environment-jsdom@^29.7.0 cannot use this profile (package not provided). js-cookie@^3.0.5 cannot use this profile (package not provided). jsdom@^24.0.0 cannot use this profile (package not provided). lint-staged@^15.2.2 cannot use this profile (package not provided). msw@^2.2.14 cannot use this profile (package not provided). pino-http@^10.1.0 cannot use this profile (package not provided). pino-pretty@^11.1.0 cannot use this profile (package not provided). plop@^4.0.1 cannot use this profile (package not provided). pm2@^5.4.0 cannot use this profile (package not provided). postcss@^8.4.38 cannot use this profile (package not provided). prettier@^3.2.5 cannot use this profile (package not provided). storybook@^8.0.9 cannot use this profile (package not provided). tailwindcss@^3.4.3 cannot use this profile (4.3.3). vite-node@^1.6.0 cannot use this profile (package not provided). vite-tsconfig-paths@^4.3.2 cannot use this profile (package not provided). vitest@^2.1.4 cannot use this profile (package not provided). @hookform/resolvers@^3.3.4 cannot use this profile (package not provided). @ngneat/falso@^7.2.0 cannot use this profile (package not provided). @radix-ui/react-dialog@^1.0.5 cannot use this profile (package not provided). @radix-ui/react-dropdown-menu@^2.0.6 cannot use this profile (package not provided). @radix-ui/react-icons@^1.3.0 cannot use this profile (package not provided). @radix-ui/react-label@^2.0.2 cannot use this profile (package not provided). @radix-ui/react-slot@^1.0.2 cannot use this profile (package not provided). @radix-ui/react-switch@^1.0.3 cannot use this profile (package not provided). @tanstack/react-query@^5.32.0 cannot use this profile (package not provided). @tanstack/react-query-devtools@^5.32.0 cannot use this profile (package not provided). axios@^1.6.8 cannot use this profile (package not provided). class-variance-authority@^0.7.0 cannot use this profile (package not provided). dayjs@^1.11.11 cannot use this profile (package not provided). dompurify@^3.1.1 cannot use this profile (package not provided). eslint-plugin-check-file@^2.8.0 cannot use this profile (package not provided). lucide-react@^0.378.0 cannot use this profile (package not provided). marked@^12.0.2 cannot use this profile (package not provided). react-error-boundary@^4.0.13 cannot use this profile (package not provided). react-helmet-async@^2.0.4 cannot use this profile (package not provided). react-hook-form@^7.51.3 cannot use this profile (package not provided). react-query-auth@^2.4.3 cannot use this profile (package not provided). react-router@^7.0.2 cannot use this profile (package not provided). tailwind-merge@^2.3.0 cannot use this profile (package not provided). tailwindcss-animate@^1.0.7 cannot use this profile (package not provided). zod@^3.23.4 cannot use this profile (package not provided). zustand@^4.5.2 cannot use this profile (5.0.8). index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner. Unsupported Vite configuration import: vite-tsconfig-paths. TypeScript alias @ must match an explicit static Vite alias. postcss.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported. tailwind.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported. src/index.css: Tailwind executable/scanning directives require isolated configuration support. src/config/env.ts: environment references require an explicitly granted static public value; platform env is never exposed. src/testing/mocks/utils.ts: environment references require an explicitly granted static public value; platform env is never exposed."
+        },
+        "runtime": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "visualCompatibility": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "codeEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "responsiveEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "historyRestart": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportExactness": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportBuild": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportRender": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        }
+      },
+      "runtimeInspection": {
+        "compilerOptions": {},
+        "schema": 2,
+        "configuration": [
+          {
+            "file": "vite.config.ts",
+            "classification": "requires-isolated-execution",
+            "detail": "Unsupported Vite configuration import: vite-tsconfig-paths."
+          }
+        ],
+        "base": "/",
+        "environment": {
+          "MODE": "production",
+          "PROD": true,
+          "DEV": false,
+          "SSR": false,
+          "BASE_URL": "/"
+        },
+        "profile": "react18-vite5-v1",
+        "supported": false,
+        "aliases": {},
+        "dependencies": [
+          {
+            "name": "@eslint/eslintrc",
+            "declared": "^3.0.2"
+          },
+          {
+            "name": "@mswjs/data",
+            "declared": "^0.16.1"
+          },
+          {
+            "name": "@mswjs/http-middleware",
+            "declared": "^0.10.1"
+          },
+          {
+            "name": "@playwright/test",
+            "declared": "^1.49.1"
+          },
+          {
+            "name": "@storybook/addon-a11y",
+            "declared": "^8.0.10"
+          },
+          {
+            "name": "@storybook/addon-actions",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@storybook/addon-essentials",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@storybook/addon-links",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@storybook/node-logger",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@storybook/react",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@storybook/react-vite",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "@tailwindcss/typography",
+            "declared": "^0.5.13"
+          },
+          {
+            "name": "@testing-library/jest-dom",
+            "declared": "^6.4.2"
+          },
+          {
+            "name": "@testing-library/react",
+            "declared": "^15.0.5"
+          },
+          {
+            "name": "@testing-library/user-event",
+            "declared": "^14.5.2"
+          },
+          {
+            "name": "@types/cors",
+            "declared": "^2.8.17"
+          },
+          {
+            "name": "@types/dompurify",
+            "declared": "^3.0.5"
+          },
+          {
+            "name": "@types/js-cookie",
+            "declared": "^3.0.6"
+          },
+          {
+            "name": "@types/marked",
+            "declared": "^6.0.0"
+          },
+          {
+            "name": "@types/node",
+            "declared": "^20.12.7"
+          },
+          {
+            "name": "@types/react",
+            "declared": "^18.3.1",
+            "selected": "18.3.31"
+          },
+          {
+            "name": "@types/react-dom",
+            "declared": "^18.3.0",
+            "selected": "18.3.7"
+          },
+          {
+            "name": "@typescript-eslint/eslint-plugin",
+            "declared": "^7.8.0"
+          },
+          {
+            "name": "@typescript-eslint/parser",
+            "declared": "^7.8.0"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "declared": "^4.2.1",
+            "selected": "4.7.0"
+          },
+          {
+            "name": "autoprefixer",
+            "declared": "^10.4.19"
+          },
+          {
+            "name": "cors",
+            "declared": "^2.8.5"
+          },
+          {
+            "name": "eslint",
+            "declared": "8",
+            "selected": "9.39.5"
+          },
+          {
+            "name": "eslint-config-prettier",
+            "declared": "^9.1.0"
+          },
+          {
+            "name": "eslint-import-resolver-typescript",
+            "declared": "^3.6.1"
+          },
+          {
+            "name": "eslint-plugin-import",
+            "declared": "^2.29.1"
+          },
+          {
+            "name": "eslint-plugin-jest-dom",
+            "declared": "^5.4.0"
+          },
+          {
+            "name": "eslint-plugin-jsx-a11y",
+            "declared": "^6.8.0"
+          },
+          {
+            "name": "eslint-plugin-playwright",
+            "declared": "^1.6.0"
+          },
+          {
+            "name": "eslint-plugin-prettier",
+            "declared": "^5.1.3"
+          },
+          {
+            "name": "eslint-plugin-react",
+            "declared": "^7.34.1"
+          },
+          {
+            "name": "eslint-plugin-react-hooks",
+            "declared": "^4.6.2",
+            "selected": "5.2.0"
+          },
+          {
+            "name": "eslint-plugin-tailwindcss",
+            "declared": "^3.15.1"
+          },
+          {
+            "name": "eslint-plugin-testing-library",
+            "declared": "^6.2.2"
+          },
+          {
+            "name": "eslint-plugin-vitest",
+            "declared": "^0.5.4"
+          },
+          {
+            "name": "express",
+            "declared": "^4.19.2"
+          },
+          {
+            "name": "husky",
+            "declared": "^9.0.11"
+          },
+          {
+            "name": "jest-environment-jsdom",
+            "declared": "^29.7.0"
+          },
+          {
+            "name": "js-cookie",
+            "declared": "^3.0.5"
+          },
+          {
+            "name": "jsdom",
+            "declared": "^24.0.0"
+          },
+          {
+            "name": "lint-staged",
+            "declared": "^15.2.2"
+          },
+          {
+            "name": "msw",
+            "declared": "^2.2.14"
+          },
+          {
+            "name": "pino-http",
+            "declared": "^10.1.0"
+          },
+          {
+            "name": "pino-pretty",
+            "declared": "^11.1.0"
+          },
+          {
+            "name": "plop",
+            "declared": "^4.0.1"
+          },
+          {
+            "name": "pm2",
+            "declared": "^5.4.0"
+          },
+          {
+            "name": "postcss",
+            "declared": "^8.4.38"
+          },
+          {
+            "name": "prettier",
+            "declared": "^3.2.5"
+          },
+          {
+            "name": "storybook",
+            "declared": "^8.0.9"
+          },
+          {
+            "name": "tailwindcss",
+            "declared": "^3.4.3",
+            "selected": "4.3.3"
+          },
+          {
+            "name": "typescript",
+            "declared": "^5.4.5",
+            "selected": "5.9.3"
+          },
+          {
+            "name": "vite",
+            "declared": "^5.2.10",
+            "selected": "5.4.21"
+          },
+          {
+            "name": "vite-node",
+            "declared": "^1.6.0"
+          },
+          {
+            "name": "vite-tsconfig-paths",
+            "declared": "^4.3.2"
+          },
+          {
+            "name": "vitest",
+            "declared": "^2.1.4"
+          },
+          {
+            "name": "@hookform/resolvers",
+            "declared": "^3.3.4"
+          },
+          {
+            "name": "@ngneat/falso",
+            "declared": "^7.2.0"
+          },
+          {
+            "name": "@radix-ui/react-dialog",
+            "declared": "^1.0.5"
+          },
+          {
+            "name": "@radix-ui/react-dropdown-menu",
+            "declared": "^2.0.6"
+          },
+          {
+            "name": "@radix-ui/react-icons",
+            "declared": "^1.3.0"
+          },
+          {
+            "name": "@radix-ui/react-label",
+            "declared": "^2.0.2"
+          },
+          {
+            "name": "@radix-ui/react-slot",
+            "declared": "^1.0.2"
+          },
+          {
+            "name": "@radix-ui/react-switch",
+            "declared": "^1.0.3"
+          },
+          {
+            "name": "@tanstack/react-query",
+            "declared": "^5.32.0"
+          },
+          {
+            "name": "@tanstack/react-query-devtools",
+            "declared": "^5.32.0"
+          },
+          {
+            "name": "axios",
+            "declared": "^1.6.8"
+          },
+          {
+            "name": "class-variance-authority",
+            "declared": "^0.7.0"
+          },
+          {
+            "name": "clsx",
+            "declared": "^2.1.1",
+            "selected": "2.1.1"
+          },
+          {
+            "name": "dayjs",
+            "declared": "^1.11.11"
+          },
+          {
+            "name": "dompurify",
+            "declared": "^3.1.1"
+          },
+          {
+            "name": "eslint-plugin-check-file",
+            "declared": "^2.8.0"
+          },
+          {
+            "name": "lucide-react",
+            "declared": "^0.378.0"
+          },
+          {
+            "name": "marked",
+            "declared": "^12.0.2"
+          },
+          {
+            "name": "nanoid",
+            "declared": "^5.0.7",
+            "selected": "5.1.16"
+          },
+          {
+            "name": "react",
+            "declared": "^18.3.1",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "react-dom",
+            "declared": "^18.3.1",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "react-error-boundary",
+            "declared": "^4.0.13"
+          },
+          {
+            "name": "react-helmet-async",
+            "declared": "^2.0.4"
+          },
+          {
+            "name": "react-hook-form",
+            "declared": "^7.51.3"
+          },
+          {
+            "name": "react-query-auth",
+            "declared": "^2.4.3"
+          },
+          {
+            "name": "react-router",
+            "declared": "^7.0.2"
+          },
+          {
+            "name": "tailwind-merge",
+            "declared": "^2.3.0"
+          },
+          {
+            "name": "tailwindcss-animate",
+            "declared": "^1.0.7"
+          },
+          {
+            "name": "zod",
+            "declared": "^3.23.4"
+          },
+          {
+            "name": "zustand",
+            "declared": "^4.5.2",
+            "selected": "5.0.8"
+          }
+        ],
+        "issues": [
+          {
+            "code": "unsupported-lockfile",
+            "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@eslint/eslintrc@^3.0.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@mswjs/data@^0.16.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@mswjs/http-middleware@^0.10.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@playwright/test@^1.49.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/addon-a11y@^8.0.10 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/addon-actions@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/addon-essentials@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/addon-links@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/node-logger@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/react@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@storybook/react-vite@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@tailwindcss/typography@^0.5.13 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@testing-library/jest-dom@^6.4.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@testing-library/react@^15.0.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@testing-library/user-event@^14.5.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/cors@^2.8.17 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/dompurify@^3.0.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/js-cookie@^3.0.6 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/marked@^6.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/node@^20.12.7 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@typescript-eslint/eslint-plugin@^7.8.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@typescript-eslint/parser@^7.8.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "autoprefixer@^10.4.19 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "cors@^2.8.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint@8 cannot use this profile (9.39.5).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-config-prettier@^9.1.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-import-resolver-typescript@^3.6.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-import@^2.29.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-jest-dom@^5.4.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-jsx-a11y@^6.8.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-playwright@^1.6.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-prettier@^5.1.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-react@^7.34.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-react-hooks@^4.6.2 cannot use this profile (5.2.0).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-tailwindcss@^3.15.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-testing-library@^6.2.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-vitest@^0.5.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "express@^4.19.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "husky@^9.0.11 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "jest-environment-jsdom@^29.7.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "js-cookie@^3.0.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "jsdom@^24.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "lint-staged@^15.2.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "msw@^2.2.14 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "pino-http@^10.1.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "pino-pretty@^11.1.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "plop@^4.0.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "pm2@^5.4.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "postcss@^8.4.38 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "prettier@^3.2.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "storybook@^8.0.9 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "tailwindcss@^3.4.3 cannot use this profile (4.3.3).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "vite-node@^1.6.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "vite-tsconfig-paths@^4.3.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "vitest@^2.1.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@hookform/resolvers@^3.3.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@ngneat/falso@^7.2.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-dialog@^1.0.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-dropdown-menu@^2.0.6 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-icons@^1.3.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-label@^2.0.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-slot@^1.0.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@radix-ui/react-switch@^1.0.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@tanstack/react-query@^5.32.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@tanstack/react-query-devtools@^5.32.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "axios@^1.6.8 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "class-variance-authority@^0.7.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "dayjs@^1.11.11 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "dompurify@^3.1.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-check-file@^2.8.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "lucide-react@^0.378.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "marked@^12.0.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-error-boundary@^4.0.13 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-helmet-async@^2.0.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-hook-form@^7.51.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-query-auth@^2.4.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-router@^7.0.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "tailwind-merge@^2.3.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "tailwindcss-animate@^1.0.7 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "zod@^3.23.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "zustand@^4.5.2 cannot use this profile (5.0.8).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "html-entry",
+            "message": "index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "executable-config",
+            "message": "Unsupported Vite configuration import: vite-tsconfig-paths.",
+            "requiredCapability": "An isolated Vite configuration/plugin runner",
+            "file": "vite.config",
+            "classification": "requires-isolated-execution"
+          },
+          {
+            "code": "tsconfig",
+            "message": "TypeScript alias @ must match an explicit static Vite alias.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "tsconfig.json / jsconfig.json",
+            "classification": "unsupported"
+          },
+          {
+            "file": "postcss.config.cjs",
+            "code": "css-config",
+            "classification": "requires-isolated-execution",
+            "message": "postcss.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.",
+            "requiredCapability": "An isolated plugin/configuration profile"
+          },
+          {
+            "file": "tailwind.config.cjs",
+            "code": "css-config",
+            "classification": "requires-isolated-execution",
+            "message": "tailwind.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.",
+            "requiredCapability": "An isolated plugin/configuration profile"
+          },
+          {
+            "file": "src/index.css",
+            "code": "css-directive",
+            "classification": "unsupported",
+            "message": "src/index.css: Tailwind executable/scanning directives require isolated configuration support.",
+            "requiredCapability": "A supported static theme or isolated configuration profile"
+          },
+          {
+            "code": "environment-reference",
+            "file": "src/config/env.ts",
+            "classification": "unsupported",
+            "message": "src/config/env.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+            "requiredCapability": "Explicit project public environment configuration"
+          },
+          {
+            "code": "environment-reference",
+            "file": "src/testing/mocks/utils.ts",
+            "classification": "unsupported",
+            "message": "src/testing/mocks/utils.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+            "requiredCapability": "Explicit project public environment configuration"
+          }
+        ],
+        "notes": [
+          "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+          "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+          "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+        ]
+      },
+      "failureLayers": [
+        "INTAKE",
+        "DEPENDENCY",
+        "CONFIG"
+      ],
+      "sourceAnalysis": {
+        "boundary": "Static AST inspection only, not rendered compatibility or Code workflow",
+        "files": 128,
+        "targets": 546,
+        "visualCandidates": 120,
+        "textCandidates": 35,
+        "responsiveCandidates": 41,
+        "exceptions": []
+      },
+      "unchangedAfterInspection": true
+    },
+    {
+      "id": "todo-list-react",
+      "repository": "https://github.com/tuanductran/todo-list-react.git",
+      "commit": "f48aef130c31452341450adfb6c3fc2234b79389",
+      "subpath": "",
+      "license": "MIT (repository-root LICENSE)",
+      "routeModel": "Single-page task application; no declared React Router dependency",
+      "classification": "INDEPENDENT PROJECT",
+      "upstreamTree": "f48aef130c31452341450adfb6c3fc2234b79389",
+      "archiveMtime": "2025-03-09T05:44:29+07:00",
+      "archiveSha256": "5c8232d7265f61bae4fce6d04f67d5a2b04d12129b8c65f1e96afc07a72478be",
+      "archiveBytes": 112479,
+      "unchangedFiles": {
+        ".editorconfig": {
+          "bytes": 40,
+          "sha256": "560e96208a3af8dda846fb277dd59f5a063f5aea5bfb1913613aa017fd477a5a"
+        },
+        ".env.example": {
+          "bytes": 13,
+          "sha256": "f1938cc1659589feadd3c111995025c714411a25d5f3a4733fa821e0eb98ee05"
+        },
+        ".github/FUNDING.yml": {
+          "bytes": 80,
+          "sha256": "5c8438bff7f24eb6d5832234e380f7286bef2fb701296a922b65586ff7f49e7e"
+        },
+        ".github/ISSUE_TEMPLATE/bug_report.md": {
+          "bytes": 829,
+          "sha256": "fd9d95aa9307234a2348cbe4414d9ca5f418f0f2b332ec8595caffd4aa10d57e"
+        },
+        ".github/ISSUE_TEMPLATE/feature_request.md": {
+          "bytes": 594,
+          "sha256": "97f2fb2fce0b88887ee947a67967a7d7a2f3405da21071c4c29761bea61fbd91"
+        },
+        ".github/dependabot.yml": {
+          "bytes": 496,
+          "sha256": "bfb1f71e34bccabd4d79434eb8003a6d8a7de03c7e64361ad565384c6bd8f401"
+        },
+        ".github/workflows/auto-response.yml": {
+          "bytes": 1181,
+          "sha256": "5ac9f3c0b3b627b0e5245c7ad30dba31f0be98f2cf43f06e6f0eac3568a4b1a5"
+        },
+        ".github/workflows/autofix.yml": {
+          "bytes": 659,
+          "sha256": "7e1b93f9f54a9e276bb215b2c3a9b5a7a9acaba975269df2c67a4d15bae5e691"
+        },
+        ".github/workflows/dependency-review.yml": {
+          "bytes": 879,
+          "sha256": "88d82e44f44be95c3a3d7e3b0ac7c98ef7aca65b22cba89f7174fef7e7c931c3"
+        },
+        ".github/workflows/lint.yml": {
+          "bytes": 681,
+          "sha256": "3ea2f75e52ffde8595891d365e317c338ddae73f7e058f685559a22d994b8123"
+        },
+        ".github/workflows/stale.yml": {
+          "bytes": 725,
+          "sha256": "1e092575726a4cadaf4d26300190819bfb9d81ef776cccc3eb128ce20936751a"
+        },
+        ".gitignore": {
+          "bytes": 291,
+          "sha256": "be59defe45e80f6b98fce0e38238ed4ccd2b0a6c8aa9e3db2d06df35cddd7a13"
+        },
+        ".node-version": {
+          "bytes": 2,
+          "sha256": "785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09"
+        },
+        ".npmrc": {
+          "bytes": 50,
+          "sha256": "e8db3ef9636e2686d4fe95c2ed4c1de1393724eb1ad1fd35d537694a5c39bb83"
+        },
+        ".whitesource": {
+          "bytes": 283,
+          "sha256": "87762c4d7c64db7232b7c642c387987b83c3bff7251b44b292b69c58acef6e3e"
+        },
+        "LICENSE": {
+          "bytes": 1079,
+          "sha256": "a5e21760bd8ce66599f975079ae651349927e1480f816fde05ce6dc65a1a0625"
+        },
+        "README.md": {
+          "bytes": 2023,
+          "sha256": "fc5a48dae1f090ebe527fbcd92db4908d5fd2dac9e21b82a047bdb9a4316965e"
+        },
+        "SECURITY.md": {
+          "bytes": 1072,
+          "sha256": "54724cc41fcd92af7f4eee21df12acbb3effe22b8ceb2c4176df444edeb0f914"
+        },
+        "bun.lockb": {
+          "bytes": 262443,
+          "sha256": "4a6802815bb395350e14d4bd5d2162157bc2a21de755ca72c82a09dc8808c143"
+        },
+        "eslint.config.mjs": {
+          "bytes": 2224,
+          "sha256": "acb58bebd087c3262640eceb14f3f30cf7acbb228141d71fe489918b419326a4"
+        },
+        "index.html": {
+          "bytes": 983,
+          "sha256": "73e90cadd3a62c9facf20b3a4b45dea84644e03b1a1d32b6ec4b3894098848d6"
+        },
+        "package.json": {
+          "bytes": 1715,
+          "sha256": "4cb69e6d932ecba0b8c41ca03a6cd80e62a9dae862e04da286ae8c59d34e1b12"
+        },
+        "public/IMG_0765.png": {
+          "bytes": 16690,
+          "sha256": "f125d3bed267c258b33abbc3ee212583d71702a04c0799898eb5ccb691a68ccb"
+        },
+        "public/vite.svg": {
+          "bytes": 1497,
+          "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+        },
+        "renovate.json": {
+          "bytes": 106,
+          "sha256": "7748ea026d07812cba2cb72643e0f135ccbe933bb95169741a551e58b5dfc5cb"
+        },
+        "src/App.tsx": {
+          "bytes": 208,
+          "sha256": "cb5c27385ae288fb491253e2ae1a8b444ccf4982abbabcd1dc68cf24a5dbc4b9"
+        },
+        "src/components/TodoForm.tsx": {
+          "bytes": 2080,
+          "sha256": "672f56323aebe76dc6554c651bf087a7e7a4914d5cf3494ea9dfe69d88c4432a"
+        },
+        "src/components/TodoItem.tsx": {
+          "bytes": 1329,
+          "sha256": "02f3b1cb249d94faebc7f9fe105bdb6aa6066498868aeaabb31e067cdacb5416"
+        },
+        "src/components/TodoList.tsx": {
+          "bytes": 944,
+          "sha256": "5805b315349a5194746343d6ff6f03b7f03b5994370bdd758dc764cf343c5c82"
+        },
+        "src/components/index.tsx": {
+          "bytes": 964,
+          "sha256": "3176612ae867c0f63de7f3c5a933fcb20691f883ddcf086c5b71f1bacbd45873"
+        },
+        "src/fetch.ts": {
+          "bytes": 229,
+          "sha256": "b3cc8156a030e4eedac90d87cfbfe0f9b6edf3316041d3825dc181656f8c8855"
+        },
+        "src/hooks/useTodoActions.ts": {
+          "bytes": 3233,
+          "sha256": "c5ccfbb66ceaf0bc835febf93d23353936c358fc0e73825731ae09361abb38ed"
+        },
+        "src/main.tsx": {
+          "bytes": 264,
+          "sha256": "aea7eaddef67bc8b8a6a6d819fb39d0663b4225c2b782eaf28684fdb44ffe928"
+        },
+        "src/schema.ts": {
+          "bytes": 1789,
+          "sha256": "4f23a4ad67eca011e481dbc051e248cbb488fa9b2d0c997683e336d4a80728f1"
+        },
+        "tsconfig.json": {
+          "bytes": 639,
+          "sha256": "158c6083fe4cdd2f10a1310c7f481bfa24c48b827b17f4f329a6845cfbb2efa7"
+        },
+        "uno.config.ts": {
+          "bytes": 410,
+          "sha256": "6d20a42950c4a05b9e26dfad776689d13c18eb28e6ebc0d0616f8c44b7a59f6a"
+        },
+        "vite-env.d.ts": {
+          "bytes": 155,
+          "sha256": "fd94fd489f6e6dd33677a36d895bdb828daa35c80cbcc9c1cd099c9e16636284"
+        },
+        "vite.config.ts": {
+          "bytes": 233,
+          "sha256": "f395ef6e33690a3aba5b968768f3b03a01423fb1e8e7321de0a770082f575ad2"
+        }
+      },
+      "licenseEvidence": {
+        "path": "LICENSE",
+        "sha256": "a5e21760bd8ce66599f975079ae651349927e1480f816fde05ce6dc65a1a0625",
+        "length": 1079
+      },
+      "framework": {
+        "react": "^19.0.0",
+        "reactDom": "^19.0.0",
+        "vite": "^6.1.0"
+      },
+      "dependencies": {
+        "@hookform/resolvers": "^4.0.0",
+        "clsx": "^2.1.1",
+        "dompurify": "^3.2.4",
+        "dotenv": "^16.4.7",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-hook-form": "^7.54.2",
+        "sonner": "^2.0.0",
+        "swr": "^2.3.2",
+        "uuid": "^11.0.5",
+        "zod": "^3.24.1"
+      },
+      "devDependencies": {
+        "@antfu/eslint-config": "^4.1.1",
+        "@eslint-react/eslint-plugin": "^1.26.2",
+        "@julr/unocss-preset-forms": "^1.0.0",
+        "@types/node": "^22.13.1",
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
+        "@unocss/eslint-plugin": "^66.0.0",
+        "@unocss/reset": "^66.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "eslint": "9.22.0",
+        "eslint-plugin-command": "^3.0.0",
+        "eslint-plugin-format": "^1.0.1",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "eslint-plugin-react-refresh": "^0.4.19",
+        "typescript": "^5.7.3",
+        "unocss": "^66.0.0",
+        "vite": "^6.1.0"
+      },
+      "configuration": {
+        "packageManager": "bun@1.1.42",
+        "lockfiles": [
+          "bun.lockb"
+        ],
+        "files": [
+          ".editorconfig",
+          ".env.example",
+          ".npmrc",
+          "eslint.config.mjs",
+          "tsconfig.json",
+          "uno.config.ts",
+          "vite.config.ts"
+        ],
+        "scriptsInspectedOnly": {
+          "build": "vite build",
+          "dev": "vite",
+          "lint": "eslint .",
+          "lint:fix": "eslint . --fix",
+          "preinstall": "npx only-allow bun",
+          "preview": "vite preview",
+          "type:check": "tsc --noEmit"
+        }
+      },
+      "intakeDiagnostics": [
+        {
+          "file": ".editorconfig",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": ".node-version",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": ".npmrc",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": ".whitesource",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        },
+        {
+          "file": "bun.lockb",
+          "reason": "file extension not in the inspected intake grammar; actual full-project API result is authoritative"
+        }
+      ],
+      "performance": {
+        "coldImportMs": 3,
+        "staticRuntimeInspectionMs": 4.6,
+        "compilerDiagnosticMs": 2.9
+      },
+      "performanceNotMeasured": {
+        "coldRunnerStartup": "Runtime admission failed",
+        "warmCssEdit": "No admitted runtime",
+        "warmReactEdit": "No admitted runtime",
+        "fastRefresh": "No admitted runtime",
+        "documentReload": "No admitted runtime",
+        "fullGenerationRestart": "No admitted runtime",
+        "exportBuild": "No admitted export build"
+      },
+      "stages": {
+        "import": {
+          "status": "FAIL",
+          "httpStatus": 400,
+          "reason": "Unsupported archive file type."
+        },
+        "compilerDiagnostic": {
+          "status": "FAIL",
+          "boundary": "Compiler refused unchanged source before project execution",
+          "reason": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @antfu/eslint-config@^4.1.1 cannot use this profile (package not provided). @eslint-react/eslint-plugin@^1.26.2 cannot use this profile (package not provided). @julr/unocss-preset-forms@^1.0.0 cannot use this profile (package not provided). @types/node@^22.13.1 cannot use this profile (package not provided). @types/react@^19.0.8 cannot use this profile (package not provided). @types/react-dom@^19.0.3 cannot use this profile (package not provided). @unocss/eslint-plugin@^66.0.0 cannot use this profile (package not provided). @unocss/reset@^66.0.0 cannot use this profile (package not provided). eslint@9.22.0 cannot use this profile (package not provided). eslint-plugin-command@^3.0.0 cannot use this profile (package not provided). eslint-plugin-format@^1.0.1 cannot use this profile (package not provided). eslint-plugin-react-hooks@^5.1.0 cannot use this profile (package not provided). eslint-plugin-react-refresh@^0.4.19 cannot use this profile (package not provided). unocss@^66.0.0 cannot use this profile (package not provided). @hookform/resolvers@^4.0.0 cannot use this profile (package not provided). dompurify@^3.2.4 cannot use this profile (package not provided). dotenv@^16.4.7 cannot use this profile (package not provided). react-hook-form@^7.54.2 cannot use this profile (package not provided). sonner@^2.0.0 cannot use this profile (package not provided). swr@^2.3.2 cannot use this profile (package not provided). uuid@^11.0.5 cannot use this profile (package not provided). zod@^3.24.1 cannot use this profile (package not provided). index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner. Undeclared Vite configuration dependency: unocss/vite. TypeScript alias @ must match an explicit static Vite alias. src/hooks/useTodoActions.ts: environment references require an explicitly granted static public value; platform env is never exposed."
+        },
+        "runtime": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "visualCompatibility": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "codeEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "responsiveEditing": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "historyRestart": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportExactness": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportBuild": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        },
+        "exportRender": {
+          "status": "BLOCKED",
+          "reason": "Import failed; no admitted project exists. Static diagnostics do not authorize execution or establish UI behavior."
+        }
+      },
+      "runtimeInspection": {
+        "compilerOptions": {
+          "useDefineForClassFields": true
+        },
+        "schema": 2,
+        "configuration": [
+          {
+            "file": "vite.config.ts",
+            "classification": "requires-isolated-execution",
+            "detail": "Undeclared Vite configuration dependency: unocss/vite."
+          }
+        ],
+        "base": "/",
+        "environment": {
+          "MODE": "production",
+          "PROD": true,
+          "DEV": false,
+          "SSR": false,
+          "BASE_URL": "/"
+        },
+        "profile": "react19-vite6",
+        "supported": false,
+        "aliases": {},
+        "dependencies": [
+          {
+            "name": "@antfu/eslint-config",
+            "declared": "^4.1.1"
+          },
+          {
+            "name": "@eslint-react/eslint-plugin",
+            "declared": "^1.26.2"
+          },
+          {
+            "name": "@julr/unocss-preset-forms",
+            "declared": "^1.0.0"
+          },
+          {
+            "name": "@types/node",
+            "declared": "^22.13.1"
+          },
+          {
+            "name": "@types/react",
+            "declared": "^19.0.8"
+          },
+          {
+            "name": "@types/react-dom",
+            "declared": "^19.0.3"
+          },
+          {
+            "name": "@unocss/eslint-plugin",
+            "declared": "^66.0.0"
+          },
+          {
+            "name": "@unocss/reset",
+            "declared": "^66.0.0"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "declared": "^4.3.4",
+            "selected": "4.3.4"
+          },
+          {
+            "name": "eslint",
+            "declared": "9.22.0"
+          },
+          {
+            "name": "eslint-plugin-command",
+            "declared": "^3.0.0"
+          },
+          {
+            "name": "eslint-plugin-format",
+            "declared": "^1.0.1"
+          },
+          {
+            "name": "eslint-plugin-react-hooks",
+            "declared": "^5.1.0"
+          },
+          {
+            "name": "eslint-plugin-react-refresh",
+            "declared": "^0.4.19"
+          },
+          {
+            "name": "typescript",
+            "declared": "^5.7.3",
+            "selected": "5.9.3"
+          },
+          {
+            "name": "unocss",
+            "declared": "^66.0.0"
+          },
+          {
+            "name": "vite",
+            "declared": "^6.1.0",
+            "selected": "6.4.3"
+          },
+          {
+            "name": "@hookform/resolvers",
+            "declared": "^4.0.0"
+          },
+          {
+            "name": "clsx",
+            "declared": "^2.1.1",
+            "selected": "2.1.1"
+          },
+          {
+            "name": "dompurify",
+            "declared": "^3.2.4"
+          },
+          {
+            "name": "dotenv",
+            "declared": "^16.4.7"
+          },
+          {
+            "name": "react",
+            "declared": "^19.0.0",
+            "selected": "19.3.0"
+          },
+          {
+            "name": "react-dom",
+            "declared": "^19.0.0",
+            "selected": "19.3.0"
+          },
+          {
+            "name": "react-hook-form",
+            "declared": "^7.54.2"
+          },
+          {
+            "name": "sonner",
+            "declared": "^2.0.0"
+          },
+          {
+            "name": "swr",
+            "declared": "^2.3.2"
+          },
+          {
+            "name": "uuid",
+            "declared": "^11.0.5"
+          },
+          {
+            "name": "zod",
+            "declared": "^3.24.1"
+          }
+        ],
+        "issues": [
+          {
+            "code": "unsupported-lockfile",
+            "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@antfu/eslint-config@^4.1.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@eslint-react/eslint-plugin@^1.26.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@julr/unocss-preset-forms@^1.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/node@^22.13.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/react@^19.0.8 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@types/react-dom@^19.0.3 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@unocss/eslint-plugin@^66.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@unocss/reset@^66.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint@9.22.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-command@^3.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-format@^1.0.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-react-hooks@^5.1.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "eslint-plugin-react-refresh@^0.4.19 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "unocss@^66.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "@hookform/resolvers@^4.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "dompurify@^3.2.4 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "dotenv@^16.4.7 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "react-hook-form@^7.54.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "sonner@^2.0.0 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "swr@^2.3.2 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "uuid@^11.0.5 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "unsupported-version",
+            "message": "zod@^3.24.1 cannot use this profile (package not provided).",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "html-entry",
+            "message": "index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "package.json / package-lock.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "executable-config",
+            "message": "Undeclared Vite configuration dependency: unocss/vite.",
+            "requiredCapability": "An isolated Vite configuration/plugin runner",
+            "file": "vite.config",
+            "classification": "requires-isolated-execution"
+          },
+          {
+            "code": "tsconfig",
+            "message": "TypeScript alias @ must match an explicit static Vite alias.",
+            "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+            "file": "tsconfig.json / jsconfig.json",
+            "classification": "unsupported"
+          },
+          {
+            "code": "environment-reference",
+            "file": "src/hooks/useTodoActions.ts",
+            "classification": "unsupported",
+            "message": "src/hooks/useTodoActions.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+            "requiredCapability": "Explicit project public environment configuration"
+          }
+        ],
+        "notes": [
+          "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+          "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+          "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+        ]
+      },
+      "failureLayers": [
+        "INTAKE",
+        "DEPENDENCY",
+        "CONFIG"
+      ],
+      "sourceAnalysis": {
+        "boundary": "Static AST inspection only, not rendered compatibility or Code workflow",
+        "files": 9,
+        "targets": 26,
+        "visualCandidates": 6,
+        "textCandidates": 6,
+        "responsiveCandidates": 0,
+        "exceptions": []
+      },
+      "unchangedAfterInspection": true
+    },
+    {
+      "id": "zustand",
+      "repository": "https://github.com/pmndrs/zustand.git",
+      "commit": "b57db4f86ef179285da216eeb291266da82c361c",
+      "subpath": "examples/demo",
+      "license": "MIT (repository-root LICENSE applies to demo)",
+      "routeModel": "Single-page interactive Three.js/Zustand demonstration; no declared router",
+      "classification": "INDEPENDENT PROJECT",
+      "upstreamTree": "c66c04233a454e2eaf61d90d897f2ad141f5f09a",
+      "archiveMtime": "2026-08-25T08:48:49+09:00",
+      "archiveSha256": "bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a",
+      "archiveBytes": 784707,
+      "unchangedFiles": {
+        ".gitignore": {
+          "bytes": 253,
+          "sha256": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8"
+        },
+        "eslint.config.js": {
+          "bytes": 996,
+          "sha256": "107b37d1d6a1fbc273925bad917f4450daef2d2081634f1112ebbe5730f249f9"
+        },
+        "index.html": {
+          "bytes": 726,
+          "sha256": "9d5aea3b4dbc921b8da24d09d8e578946f78e3dffce703b70eb9245b09786c2c"
+        },
+        "package.json": {
+          "bytes": 1033,
+          "sha256": "b2ef840b62cb57b020a13e5ab80e6c92fea80a0ac51a470e2a18b3fc17adbf81"
+        },
+        "public/favicon.ico": {
+          "bytes": 19198,
+          "sha256": "8999d711bd13e16f4b4c383676ce91a4e6f5421c3a659db721c401efe2b4a93f"
+        },
+        "public/logo192.png": {
+          "bytes": 40291,
+          "sha256": "c30256ba8f5886d7795603b0cb883d8458cad7424c970172c7e0feff0f6eea56"
+        },
+        "public/logo512.png": {
+          "bytes": 224260,
+          "sha256": "b7c215c6fc9444fa58e9c3067eb3a0005c756878e372e0cb20a0a0ae7484036a"
+        },
+        "public/manifest.json": {
+          "bytes": 518,
+          "sha256": "d197b135294d95fd3127b7f461e0b1b5335b4661d4648269786a8cf517eb3fbb"
+        },
+        "public/ogimage.jpg": {
+          "bytes": 97927,
+          "sha256": "2652ff78a7261d27765932ba5fa63f82a42ea6e5f6904f4368faa2815478a6d6"
+        },
+        "public/robots.txt": {
+          "bytes": 67,
+          "sha256": "90d24bc3bf698ac1e173739502298ccca72adf1f564fab05f484b8c48d1cadd2"
+        },
+        "public/vite.svg": {
+          "bytes": 1497,
+          "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+        },
+        "src/App.jsx": {
+          "bytes": 766,
+          "sha256": "da99267a4d92fffbc004721eb68085c4cf50a0a5442b03b8258611e28d6a9548"
+        },
+        "src/components/CodePreview.jsx": {
+          "bytes": 1419,
+          "sha256": "9858a38c2c399963044e11b5aca52c8a72f74647512573ca308cd68460a616b2"
+        },
+        "src/components/CopyButton.jsx": {
+          "bytes": 1329,
+          "sha256": "602a508366e7de70ac35139d4c4879d8eb5b0b0e681f9d0503d8fd047cbdc58a"
+        },
+        "src/components/Details.jsx": {
+          "bytes": 781,
+          "sha256": "743355e5c05232c61a6dbfbad52a469cb4340dc50081d4d2a6736817235e33d0"
+        },
+        "src/components/Fireflies.jsx": {
+          "bytes": 1695,
+          "sha256": "1690fd20a061458ba088f14d1ae919b73fffb614cdc66da057ba4e85aeee41d5"
+        },
+        "src/components/Scene.jsx": {
+          "bytes": 5997,
+          "sha256": "d62d3401d6f2b563e326630b1cb22fc86b1185baceaa0e87137cde0d8366b64c"
+        },
+        "src/components/SnippetLang.jsx": {
+          "bytes": 317,
+          "sha256": "f08fae1e82d5d4e1c948e152778bd7e9c4534274c8952c0e62bc355bceeca72e"
+        },
+        "src/main.jsx": {
+          "bytes": 175,
+          "sha256": "903dbdf495fdcace8a30b7976f5f907a94e1f22fb8594afb601c37984dbee9b8"
+        },
+        "src/materials/layerMaterial.js": {
+          "bytes": 1456,
+          "sha256": "771007f647878a81b266609716fbba4221cd6a64ffb353a0f68905bf1d67fda8"
+        },
+        "src/pmndrs.css": {
+          "bytes": 2297,
+          "sha256": "dff3aa449d324fe0d83f36eba73412fd221abd804294c60faf70028c1a56203a"
+        },
+        "src/resources/bear.png": {
+          "bytes": 77571,
+          "sha256": "8ff11f9d0f944c61c30fd4ace62088c1bd4cab683d096c4a3e907c4d4d0d05cb"
+        },
+        "src/resources/bg.jpg": {
+          "bytes": 26496,
+          "sha256": "0d62d151f5bab521cb09a2b17f018e6a3a12cee9857a8035c3da1a0647773df4"
+        },
+        "src/resources/ground.png": {
+          "bytes": 93572,
+          "sha256": "c720b93304ff2e693b2d359970fa05d09060ab050555572cf81462b00f5f041a"
+        },
+        "src/resources/javascript-code.js": {
+          "bytes": 329,
+          "sha256": "abf78ea969ee045a5652a6c95e032d5380316027ad346928e60ee39f8d777a9e"
+        },
+        "src/resources/leaves1.png": {
+          "bytes": 77685,
+          "sha256": "79336cd20b200b3d44246e07f7d07d9e1f70aa427219816355113d4eaf4c98fe"
+        },
+        "src/resources/leaves2.png": {
+          "bytes": 78051,
+          "sha256": "66610b6ecc5ed7f2a52f95626f8763f718ea0a8a831b0066fa3e88c49954b5a9"
+        },
+        "src/resources/stars.png": {
+          "bytes": 40034,
+          "sha256": "3a2357a528a3a3dc16d5b7fbb508874d16b58f0ffa3fd6ac9df38a7f5ba0aa53"
+        },
+        "src/resources/typescript-code.js": {
+          "bytes": 390,
+          "sha256": "e596d627958a77253c420fa1a32c5a6294d4169b32c2ee1af8c39c965e13f4d9"
+        },
+        "src/styles.css": {
+          "bytes": 3620,
+          "sha256": "b47d756bc7ffd6752fac61c0b9e4ed35ce827a65df6a43eacad802a5133c5a28"
+        },
+        "src/utils/copy-to-clipboard.js": {
+          "bytes": 88,
+          "sha256": "c72faf73fd307934fa1b7b81e15fa1b90d41d0da1e7dcee168c1c0f61b888a02"
+        },
+        "vite.config.js": {
+          "bytes": 167,
+          "sha256": "d34c73094bd2dd120c329e4584baa643fe7b989c7431e68be7b599fe2bea9935"
+        }
+      },
+      "licenseEvidence": {
+        "path": "LICENSE",
+        "sha256": "c1e6e266563517467b1bf874817d23e426f3149252bd7d42758cd697514b8417",
+        "length": 1070
+      },
+      "framework": {
+        "react": "^18.2.0",
+        "reactDom": "^18.2.0",
+        "vite": "^4.4.0"
+      },
+      "dependencies": {
+        "@react-three/drei": "^9.78.2",
+        "@react-three/fiber": "^8.13.7",
+        "@react-three/postprocessing": "^2.14.13",
+        "@types/three": "^0.155.0",
+        "meshline": "^3.1.6",
+        "postprocessing": "^6.35.4",
+        "prism-react-renderer": "^2.0.6",
+        "prismjs": "^1.29.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "three": "^0.154.0",
+        "zustand": "^4.3.9"
+      },
+      "devDependencies": {
+        "@eslint/js": "^9.17.0",
+        "@types/react": "^18.2.14",
+        "@types/react-dom": "^18.2.6",
+        "@vitejs/plugin-react-swc": "^3.3.2",
+        "eslint": "^9.17.0",
+        "eslint-plugin-react": "^7.37.2",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "eslint-plugin-react-refresh": "^0.4.16",
+        "globals": "^15.14.0",
+        "vite": "^4.4.0"
+      },
+      "configuration": {
+        "packageManager": null,
+        "lockfiles": [],
+        "files": [
+          "eslint.config.js",
+          "vite.config.js"
+        ],
+        "scriptsInspectedOnly": {
+          "dev": "vite",
+          "build": "vite build",
+          "lint": "eslint .",
+          "preview": "vite preview"
+        }
+      },
+      "intakeDiagnostics": [],
+      "performance": {
+        "coldImportMs": 17.2,
+        "staticRuntimeInspectionMs": 12.9,
+        "compilerDiagnosticMs": 651.9,
+        "coldRunnerAttemptMs": 2008.8
+      },
+      "performanceNotMeasured": {
+        "coldRunnerStartup": "Runtime admission failed",
+        "warmCssEdit": "No admitted runtime",
+        "warmReactEdit": "No admitted runtime",
+        "fastRefresh": "No admitted runtime",
+        "documentReload": "No admitted runtime",
+        "fullGenerationRestart": "No admitted runtime",
+        "exportBuild": "No admitted export build"
+      },
+      "stages": {
+        "import": {
+          "status": "PASS",
+          "httpStatus": 201,
+          "reason": null
+        },
+        "compilerDiagnostic": {
+          "status": "PASS",
+          "boundary": "Byte-identical read-only inspection, independent of intake admission"
+        },
+        "runtime": {
+          "status": "FAIL",
+          "startupHttpStatus": 200,
+          "frameHttpStatus": 422,
+          "reason": "Preview could not resolve the project: page.screenshot: Timeout 4000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n"
+        },
+        "visualCompatibility": {
+          "status": "PARTIAL",
+          "httpStatus": 200,
+          "sourceAccepted": true,
+          "file": "src/App.jsx",
+          "reason": null,
+          "renderedAfterEdit": false
+        },
+        "codeEditing": {
+          "status": "PASS",
+          "sourceReadHttpStatus": 200,
+          "saveHttpStatus": 200,
+          "reason": null,
+          "draftAccepted": true,
+          "renderedAfterEdit": false
+        },
+        "responsiveEditing": {
+          "status": "BLOCKED",
+          "reason": "No responsive construction exercised for this unchanged project; static candidates are not proof."
+        },
+        "historyRestart": {
+          "status": "PASS",
+          "sourceAndHistoryExact": true,
+          "acceptedTransactions": 2
+        },
+        "exportExactness": {
+          "status": "PASS",
+          "files": 32,
+          "method": "All pinned upstream bytes plus only normal authorized Code/Visual edits"
+        },
+        "exportBuild": {
+          "status": "PASS",
+          "profile": "react18-vite4-three-v1",
+          "packageScriptsExecuted": false,
+          "offlineSandbox": true,
+          "elapsedMs": 9693.6
+        },
+        "exportRender": {
+          "status": "FAIL",
+          "reason": "page.screenshot: Timeout 4000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n"
+        }
+      },
+      "runtimeInspection": {
+        "compilerOptions": {},
+        "schema": 2,
+        "configuration": [
+          {
+            "file": "vite.config.js",
+            "classification": "safely-translated",
+            "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+          }
+        ],
+        "base": "/",
+        "environment": {
+          "MODE": "production",
+          "PROD": true,
+          "DEV": false,
+          "SSR": false,
+          "BASE_URL": "/"
+        },
+        "profile": "react18-vite4-three-v1",
+        "supported": true,
+        "aliases": {},
+        "dependencies": [
+          {
+            "name": "@eslint/js",
+            "declared": "^9.17.0",
+            "selected": "9.17.0"
+          },
+          {
+            "name": "@types/react",
+            "declared": "^18.2.14",
+            "selected": "18.2.14"
+          },
+          {
+            "name": "@types/react-dom",
+            "declared": "^18.2.6",
+            "selected": "18.2.6"
+          },
+          {
+            "name": "@vitejs/plugin-react-swc",
+            "declared": "^3.3.2",
+            "selected": "3.11.0"
+          },
+          {
+            "name": "eslint",
+            "declared": "^9.17.0",
+            "selected": "9.39.5"
+          },
+          {
+            "name": "eslint-plugin-react",
+            "declared": "^7.37.2",
+            "selected": "7.37.2"
+          },
+          {
+            "name": "eslint-plugin-react-hooks",
+            "declared": "^5.1.0",
+            "selected": "5.1.0"
+          },
+          {
+            "name": "eslint-plugin-react-refresh",
+            "declared": "^0.4.16",
+            "selected": "0.4.16"
+          },
+          {
+            "name": "globals",
+            "declared": "^15.14.0",
+            "selected": "15.14.0"
+          },
+          {
+            "name": "vite",
+            "declared": "^4.4.0",
+            "selected": "4.5.14"
+          },
+          {
+            "name": "@react-three/drei",
+            "declared": "^9.78.2",
+            "selected": "9.122.0"
+          },
+          {
+            "name": "@react-three/fiber",
+            "declared": "^8.13.7",
+            "selected": "8.13.7"
+          },
+          {
+            "name": "@react-three/postprocessing",
+            "declared": "^2.14.13",
+            "selected": "2.14.13"
+          },
+          {
+            "name": "@types/three",
+            "declared": "^0.155.0",
+            "selected": "0.155.0"
+          },
+          {
+            "name": "meshline",
+            "declared": "^3.1.6",
+            "selected": "3.1.6"
+          },
+          {
+            "name": "postprocessing",
+            "declared": "^6.35.4",
+            "selected": "6.35.4"
+          },
+          {
+            "name": "prism-react-renderer",
+            "declared": "^2.0.6",
+            "selected": "2.0.6"
+          },
+          {
+            "name": "prismjs",
+            "declared": "^1.29.0",
+            "selected": "1.30.0"
+          },
+          {
+            "name": "react",
+            "declared": "^18.2.0",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "react-dom",
+            "declared": "^18.2.0",
+            "selected": "18.3.1"
+          },
+          {
+            "name": "three",
+            "declared": "^0.154.0",
+            "selected": "0.154.0"
+          },
+          {
+            "name": "zustand",
+            "declared": "^4.3.9",
+            "selected": "4.3.9"
+          }
+        ],
+        "issues": [],
+        "notes": [
+          "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+          "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+          "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+        ],
+        "entry": "src/main.jsx"
+      },
+      "failureLayers": [
+        "RUNTIME PROFILE",
+        "VISUAL EDIT",
+        "EXPORT"
+      ],
+      "sourceAnalysis": {
+        "boundary": "Static AST inspection only, not rendered compatibility or Code workflow",
+        "files": 12,
+        "targets": 53,
+        "visualCandidates": 12,
+        "textCandidates": 9,
+        "responsiveCandidates": 0,
+        "exceptions": []
+      },
+      "initialAdmissionByteExact": true,
+      "unchangedAfterInspection": true
+    }
+  ],
+  "summary": {
+    "selected": 4,
+    "retained": 4,
+    "intakePassed": 1,
+    "runtimePassed": 0,
+    "fullCompatibilityPassed": 0,
+    "allFailingCandidatesRetained": true,
+    "fullProjectCompatibilityGate": "NOT YET",
+    "performance": "Attempt timings only; no warm-edit, rendering or export-build latency claims for rejected profiles."
+  }
+}

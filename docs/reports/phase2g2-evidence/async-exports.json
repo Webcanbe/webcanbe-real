@@ -1,0 +1,315 @@
+{
+  "boundary": "Eight independently built authored/starter exports, offline sandbox configuration builds, local standalone browser renders",
+  "runs": [
+    {
+      "subject": "de",
+      "profile": "react19-vite6",
+      "buildExit": 0,
+      "buildElapsedMs": 3611,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2de/phase2de-edited.zip",
+        "profile": "react19-vite6",
+        "lockPresent": true,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "result": "PASS",
+        "browser": "151.0.7922.34",
+        "nativeChromiumSandbox": true,
+        "independentViteBuild": true,
+        "noEditorServer": true,
+        "instrumentationAbsent": true,
+        "sourceTextAndStyle": true,
+        "propLiteral": true,
+        "CSSModule": true,
+        "structuralRemoval": true,
+        "nestedRouteHistoryRefresh": true,
+        "assets": true,
+        "desktop": "1280x900",
+        "mobile": "390x844",
+        "runtimeErrors": []
+      }
+    },
+    {
+      "subject": "f-browser",
+      "profile": "react19-vite6",
+      "buildExit": 0,
+      "buildElapsedMs": 3374,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2f/BrowserRouter-edited.zip",
+        "profile": "react19-vite6",
+        "lockPresent": true,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "result": "PASS",
+        "browser": "151.0.7922.34",
+        "nativeChromiumSandbox": true,
+        "independentViteBuild": true,
+        "noEditorServer": true,
+        "instrumentationAbsent": true,
+        "responsiveTailwind": true,
+        "CSSMedia": true,
+        "CSSModule": true,
+        "inline": true,
+        "flexDirectionGap": true,
+        "gridTracks": true,
+        "sourceOrder": true,
+        "nestedRouteHistoryRefresh": true,
+        "widths": [
+          1280,
+          768,
+          390
+        ],
+        "runtimeErrors": []
+      }
+    },
+    {
+      "subject": "f-hash",
+      "profile": "react19-vite6",
+      "buildExit": 0,
+      "buildElapsedMs": 3634,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2f/HashRouter-edited.zip",
+        "profile": "react19-vite6",
+        "lockPresent": true,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "result": "PASS",
+        "browser": "151.0.7922.34",
+        "nativeChromiumSandbox": true,
+        "independentViteBuild": true,
+        "noEditorServer": true,
+        "instrumentationAbsent": true,
+        "responsiveTailwind": true,
+        "CSSMedia": true,
+        "CSSModule": true,
+        "inline": true,
+        "flexDirectionGap": true,
+        "gridTracks": true,
+        "sourceOrder": true,
+        "nestedRouteHistoryRefresh": true,
+        "widths": [
+          1280,
+          768,
+          390
+        ],
+        "runtimeErrors": []
+      }
+    },
+    {
+      "subject": "g-react18",
+      "profile": "react18-vite5-v1",
+      "buildExit": 0,
+      "buildElapsedMs": 4073,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2g/vite-react18-ts.zip",
+        "profile": "react18-vite5-v1",
+        "lockPresent": false,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "status": "PASS",
+        "kind": "react18",
+        "browser": "151.0.7922.34",
+        "pageIdentity": true,
+        "meaningfulRender": true,
+        "frameworkOverlayAbsent": true,
+        "imagesLoaded": true,
+        "counterInteraction": true,
+        "widths": [
+          1280,
+          390
+        ],
+        "runtimeErrors": [],
+        "instrumentationAbsent": true,
+        "independentBuildRender": true
+      }
+    },
+    {
+      "subject": "g-react19",
+      "profile": "react19-vite8-v1",
+      "buildExit": 0,
+      "buildElapsedMs": 1859,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2g/vite-react19-ts.zip",
+        "profile": "react19-vite8-v1",
+        "lockPresent": false,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "status": "PASS",
+        "kind": "react19",
+        "browser": "151.0.7922.34",
+        "pageIdentity": true,
+        "meaningfulRender": true,
+        "frameworkOverlayAbsent": true,
+        "imagesLoaded": true,
+        "counterInteraction": true,
+        "widths": [
+          1280,
+          390
+        ],
+        "runtimeErrors": [],
+        "instrumentationAbsent": true,
+        "independentBuildRender": true
+      }
+    },
+    {
+      "subject": "g-authored",
+      "profile": "react19-vite8-v1",
+      "buildExit": 0,
+      "buildElapsedMs": 1802,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/async-browsers/verify-phase2g/authored-edited.zip",
+        "profile": "react19-vite8-v1",
+        "lockPresent": true,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "status": "PASS",
+        "kind": "authored",
+        "browser": "151.0.7922.34",
+        "pageIdentity": true,
+        "meaningfulRender": true,
+        "frameworkOverlayAbsent": true,
+        "imagesLoaded": true,
+        "counterInteraction": true,
+        "widths": [
+          1280,
+          390
+        ],
+        "runtimeErrors": [],
+        "instrumentationAbsent": true,
+        "independentBuildRender": true
+      }
+    },
+    {
+      "subject": "hosted-react18",
+      "profile": "react18-vite5-v1",
+      "buildExit": 0,
+      "buildElapsedMs": 4534,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/hosted-editor/react18-export.zip",
+        "profile": "react18-vite5-v1",
+        "lockPresent": false,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "status": "PASS",
+        "independentBuildRender": true,
+        "noEditorServer": true,
+        "codeVisualCssAccepted": true,
+        "counterInteraction": true,
+        "textInput": true,
+        "instrumentationAbsent": true,
+        "runtimeErrors": [],
+        "widths": [
+          1280,
+          390
+        ],
+        "browser": "151.0.7922.34"
+      }
+    },
+    {
+      "subject": "hosted-react19",
+      "profile": "react19-vite8-v1",
+      "buildExit": 0,
+      "buildElapsedMs": 1682,
+      "isolationAndBuild": {
+        "status": "PASS",
+        "archive": "<repository>/.webcanbe/runner/qa-phase2g2/hosted-editor/react19-export.zip",
+        "profile": "react19-vite8-v1",
+        "lockPresent": false,
+        "isolation": {
+          "read": true,
+          "write": true,
+          "exec": true,
+          "network": true
+        },
+        "dist": "<private-temporary-path>",
+        "packageScriptsExecuted": false
+      },
+      "renderExit": 0,
+      "render": {
+        "status": "PASS",
+        "independentBuildRender": true,
+        "noEditorServer": true,
+        "codeVisualCssAccepted": true,
+        "counterInteraction": true,
+        "textInput": true,
+        "instrumentationAbsent": true,
+        "runtimeErrors": [],
+        "widths": [
+          1280,
+          390
+        ],
+        "browser": "151.0.7922.34"
+      }
+    }
+  ]
+}
