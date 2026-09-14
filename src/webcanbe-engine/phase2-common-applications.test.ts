@@ -89,3 +89,27 @@ it("rebinds queued pointers only across pixel-identical captures of the same aut
   for(const changed of [{...frame,png:'changed-pixels'},{...frame,generation:'generation-b'},{...frame,revision:'revision-b'},{...frame,observation:{...frame.observation,route:'/changed'}},{...frame,observation:{...frame.observation,viewport:{width:390,height:900}}},{...frame,observation:{...frame.observation,viewport:{width:1280,height:844}}}])expect(samePointerFrame(frame,changed)).toBe(false)
   expect(samePointerFrame(undefined,frame)).toBe(false);expect(samePointerFrame({...frame,png:''},frame)).toBe(false)
 })
+
+
+function lockedClientProject(profileName: string, client: string) {
+  const p = project(), profile = JSON.parse(fs.readFileSync(`runtime-profiles/${profileName}/package.json`, 'utf8'))
+  const dependencies = Object.fromEntries(['react', 'react-dom', 'vite', '@vitejs/plugin-react', client].map(name => [name, profile.dependencies[name]]))
+  const lock = JSON.parse(fs.readFileSync(`runtime-profiles/${profileName}/package-lock.json`, 'utf8'))
+  lock.packages[''].dependencies = dependencies; delete lock.packages[''].devDependencies
+  fs.writeFileSync(path.join(p.root, 'package.json'), JSON.stringify({ type: 'module', dependencies }))
+  const save = () => fs.writeFileSync(path.join(p.root, 'package-lock.json'), JSON.stringify(lock))
+  save(); return { p, lock, save }
+}
+it("verifies required peer locks even when the peer is not directly declared", () => {
+  const { p, lock, save } = lockedClientProject('react19-vite7-common-v1', 'use-immer')
+  expect(inspectRuntime(p, process.cwd()).issues).toEqual([])
+  lock.packages['node_modules/immer'].integrity = 'sha512-tampered-peer'; save()
+  expect(inspectRuntime(p, process.cwd()).issues.some(i => i.code === 'lock-conflict' && i.message.includes('node_modules/immer'))).toBe(true)
+})
+it("skips absent optional peers but verifies present optional peer locks", () => {
+  const { p, lock, save } = lockedClientProject('react18-vite6-common-v1', 'zustand')
+  expect(lock.packages['node_modules/immer']).toBeUndefined(); expect(lock.packages['node_modules/use-sync-external-store']).toBeUndefined()
+  expect(inspectRuntime(p, process.cwd()).issues).toEqual([])
+  lock.packages['node_modules/@types/react'].integrity = 'sha512-tampered-optional-peer'; save()
+  expect(inspectRuntime(p, process.cwd()).issues.some(i => i.code === 'lock-conflict' && i.message.includes('node_modules/@types/react'))).toBe(true)
+})

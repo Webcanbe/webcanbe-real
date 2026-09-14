@@ -220,9 +220,10 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
         const upstream = lock.packages[location]
         if (!upstream || upstream.link || upstream.version !== record.version || upstream.integrity !== record.integrity) issue("lock-conflict", "Browser dependency graph differs from the uploaded lock: " + location)
       }
-      for (const dependency of Object.keys(record.dependencies ?? {})) {
+      for (const dependency of new Set([...Object.keys(record.dependencies ?? {}), ...Object.keys(record.optionalDependencies ?? {}), ...Object.keys(record.peerDependencies ?? {})])) {
         const next = nestedDependency(location, dependency)
-        if (record.optionalDependencies?.[dependency] && !profileLock.packages[next]) continue
+        const optional = record.optionalDependencies?.[dependency] || (!record.dependencies?.[dependency] && record.peerDependenciesMeta?.[dependency]?.optional)
+        if (optional && !profileLock.packages[next]) continue
         pendingClients.push(next)
       }
     }

@@ -14,7 +14,8 @@ named and exactly pinned. This does not change the application's canonical manif
 or lock. A matching profile must cover the full declared dependency set. Admitted
 client roots can import their verified browser dependency closure; tooling dependencies
 are not automatically client imports. Uploaded npm lock entries must match profile
-versions and integrity, including nested dependencies. Missing packages fail closed.
+versions and integrity, including nested dependencies and present peer dependencies.
+Absent optional peers are skipped; required peers must be pinned. Missing packages fail closed.
 
 Supported lock formats remain one npm package-lock v2/v3, or no lock with an explicit
 profile resolution notice. Yarn classic/Berry and Bun text/binary locks remain unsupported.
@@ -40,5 +41,7 @@ Additional text metadata has a separate 16 KiB, strict UTF-8 grammar: finite
 EditorConfig fields, boolean strict-peer-dependencies/shell-emulator npmrc hints,
 finite formatter settings/globs and narrowly validated example env placeholders or
 loopback/reserved-domain URLs. These files are preserved, never applied. Credentials,
-unknown npm controls, non-example env files, arbitrary dotfiles and binary locks remain
-refused. All archive/path/link/ratio/member/total limits remain unchanged.
+unknown npm controls, non-example env files and binary locks remain refused. Other
+paths still use the existing extension/path allowlist; this does not promise rejection
+of every dot-prefixed JavaScript/JSON file or detection of every source-embedded secret.
+All archive/path/link/ratio/member/total limits remain unchanged.
