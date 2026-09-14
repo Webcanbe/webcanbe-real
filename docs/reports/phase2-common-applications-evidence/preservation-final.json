@@ -1,0 +1,107 @@
+{
+  "startingCheckpoint": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+  "byteIdenticalObjects": [
+    {
+      "path": "docs/reports/phase2g2-evidence/async-corpus-final.json",
+      "sha256": "84110f8d74c61e0f73b62be2ed7914f333f1b1953c94fca29f553ec645986e1e"
+    },
+    {
+      "path": "docs/reports/phase2g2-evidence/async-publication.json",
+      "sha256": "c4cdc3a8be0fd7a2d9179c695389090f1564b66e2666992c3a0bba0ff50e94db"
+    },
+    {
+      "path": "docs/reports/phase2g2-final-closure.md",
+      "sha256": "d8b26fe0394d212fa4b8c764bbaede024e6a041722604abc3f618f1f3ce3fc40"
+    },
+    {
+      "path": "runtime-profiles/react18-vite4-three-v1/package-lock.json",
+      "sha256": "ecee101a660b6536c05cdc2782fd4a8b403c82ec7ec092cafaa84b40651cb642"
+    },
+    {
+      "path": "runtime-profiles/react18-vite5-v1/package-lock.json",
+      "sha256": "176c93168f751be31c3e861800114bca891bade74c5366428c2a43f87f71c313"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6/package-lock.json",
+      "sha256": "166d9ffda1e4f67ced3967e467b0148cc7bb5a525970df5762e8e5bc78fa059a"
+    },
+    {
+      "path": "runtime-profiles/react19-vite8-v1/package-lock.json",
+      "sha256": "0db8e7133796550f2a95c216d20024ba0b9ef2f89d0a7a4ed3ce2799f233ab70"
+    },
+    {
+      "path": "src/webcanbe-engine/engine.test.ts",
+      "sha256": "9ab37907c58e9289e66bcdb0cb39695350dc11f8ae3b76292e48268170941d85"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2.test.ts",
+      "sha256": "7e791731e63ab1be0df8de8e77ad3175f5450abf523b186fd0f2725b9f77ec70"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2b.test.ts",
+      "sha256": "0fab8f7f4ae7023287b0694ab15bae794c1d1fb0046d7283d477ee326937d2e4"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2c.test.ts",
+      "sha256": "3e9b8af9137a649b866f856e733163f36f1ada621485ca3bb402c9722db0cda3"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2c1.test.ts",
+      "sha256": "5bf78bb7a6e90932effbafbf2631033347b87fc6c271a1d2faea2b0cd753b9d6"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2c2.test.ts",
+      "sha256": "42fd5062bc477fe1f9e3f4f8cbd748e0c7bbb69717e2a376f0ae24bd6fd52e41"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2de.test.ts",
+      "sha256": "a6654971b691cd406ff3bbf94d0a490afad5b04c4add6b9989f1dfa7dcdeaa55"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2f.test.ts",
+      "sha256": "2ae9b66c533099a02849ed79e0ae1290f491fa295697f305726616976c593177"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g-authority.test.ts",
+      "sha256": "2c99eb9d285da72f4cf4b6300983d5dcb4590c1df10c24aceb2606730e56f569"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g-failure.test.ts",
+      "sha256": "acc78491861336d30e3beb0a418489b936d2c32f5e08c28fab79c55dee4fa572"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "sha256": "33baed1ec9912e4b01514e23f4faed25ad912f2ee27c8f8e99b3406d3eab2508"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-authoring.test.ts",
+      "sha256": "4d1aa485778ef0366b2949b4ca9cd7e93885ab10fd688954c0736dc0df79c869"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-history.test.ts",
+      "sha256": "115d20b9370b1fc24d46597265f2e65e63a203b2a41969b03b409b8da5ff0e37"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "sha256": "164db98f4c26aa22fbd82685c87953c0f6bdc5f677a8bc3f783fee9c02ba6a11"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "sha256": "6ae703fa0039147d9e0c849aa71f98241fd0356202503f9c336bc7b546dd9cde"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-identity.test.ts",
+      "sha256": "8dc21643ea77d83d5ac638d1843f29c7f7aa964f7a55f6637c05c395c3c4db72"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "sha256": "b2f314951b77c8a387d13258e3840fe0a7acd0dc9b7af01694945e67b8784230"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "sha256": "0f9daa8442fbbf9b5e891754c9e8572ee8baee390a4e70c2210b9597e38d9224"
+    }
+  ],
+  "originalTests": 325,
+  "currentMatrixRows": 64
+}

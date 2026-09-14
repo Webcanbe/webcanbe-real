@@ -1,0 +1,390 @@
+{
+  "events": [
+    {
+      "ms": 411,
+      "type": "external-request",
+      "text": "https://fonts.googleapis.com/css2"
+    },
+    {
+      "ms": 417,
+      "type": "requestfailed",
+      "text": "https://fonts.googleapis.com/css2 net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 417,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 484,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/v1769793314/Chef_Groq_gykqtk.png"
+    },
+    {
+      "ms": 525,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679361/photo-1599021419847-d8a7a6aba5b4_wzbnyr.avif"
+    },
+    {
+      "ms": 539,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679882/pexels-photo-18354016_mgbsh1.jpg"
+    },
+    {
+      "ms": 539,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770680271/pexels-photo-3740237_ms8pat.jpg"
+    },
+    {
+      "ms": 539,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679402/photo-1676300185165-3f543c1fcb72_y5xyax.avif"
+    },
+    {
+      "ms": 539,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679408/pexels-photo-12667658_yefqns.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679411/pexels-photo-31450815_k8jz0i.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679415/pexels-photo-35532838_gslwxj.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679419/pexels-photo-6399993_rbyjml.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679435/pexels-photo-12918198_ug7vtm.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679437/photo-1698688334089-c68105801d02_qaykmv.avif"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679442/pexels-photo-8697543_l2nwu7.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770775069/steak_shq3ho.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770741033/pexels-photo-12973148_agfu5e.jpg"
+    },
+    {
+      "ms": 540,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770741166/pexels-photo-10359939_fpglm4.jpg"
+    },
+    {
+      "ms": 541,
+      "type": "external-request",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770741257/pexels-photo-34690158_fhtyyk.jpg"
+    },
+    {
+      "ms": 559,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/v1769793314/Chef_Groq_gykqtk.png net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 559,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679361/photo-1599021419847-d8a7a6aba5b4_wzbnyr.avif net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679882/pexels-photo-18354016_mgbsh1.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770680271/pexels-photo-3740237_ms8pat.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679402/photo-1676300185165-3f543c1fcb72_y5xyax.avif net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 563,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679408/pexels-photo-12667658_yefqns.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679411/pexels-photo-31450815_k8jz0i.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679415/pexels-photo-35532838_gslwxj.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679419/pexels-photo-6399993_rbyjml.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679435/pexels-photo-12918198_ug7vtm.jpg net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "console-error",
+      "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "ms": 572,
+      "type": "requestfailed",
+      "text": "https://res.cloudinary.com/dxlofja7z/image/upload/w_574,h_574,c_fill,f_auto,q_auto/v1770679437/photo-1698688334089-c68105801d02_qaykmv.avif net::ERR_INTERNET_DISCONNECTED"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 91.30133599999999,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Groq Recipe Book\nAll Recipes\nFavorites\nCategories\nChef Groq\nWeeknight Recipe Collection\n\nPlan and save recipes for the week. Powered by AI to help you cook with what you have.\n\nGenerate with AI\n15\nTotal Recipes\n0\nFavorites\n23 min\nAvg Prep Time\n0\nSaved Recipes\nBrowse by Category\n15 recipes\nAll\nSalads\nMexican\nDesserts\nSeafood\nPasta\nMeat\nKorean\nJapanese\nSALADS\nGreek Salad\n\nFresh Mediterranean salad with tangy feta and olives. Light and refreshing!\n\n8 min\nCook Now\nMEXICAN\nBeef Tacos\n\nFlavorful beef tacos loaded with fresh toppings. Family favorite!\n\n18 min\nCook Now\nDESSERTS\nChocolate Cake\n\nRich and moist chocolate cake. Perfect for celebrations!\n\n45 min\nCook Now\nSEAFOOD\nGrilled Salmon\n\nPerfectly grilled salmon with herbs and lemon. Healthy and delicious!\n\n20 min\nCook Now\nPASTA\nPenne Arrabbiata\n\nSpicy Italian pasta with a fiery tomato sauce. Quick and flavorful!\n\n20 min\nCook Now\nMEAT\nBeef Burger\n\nClassic homemade burger with all the toppings. Better than takeout!\n\n20 min\nCook Now\nSALADS\nCaesar Salad\n\nClassic Caesar salad with crispy croutons and fresh parmesan.\n\n10 min\nCook Now\nMEXICAN\nChicken Quesadilla\n\nCrispy quesadilla stuffed with chicken and melted cheese. Quick and satisfying!\n\n1",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 37.592712000000006,
+  "ordinaryPng": {
+    "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 48.19298500000002,
+  "rawPng": {
+    "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d"
+  },
+  "rawCaptureMs": 28.394536000000016,
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Groq Recipe Book\nAll Recipes\nFavorites\nCategories\nChef Groq\nWeeknight Recipe Collection\n\nPlan and save recipes for the week. Powered by AI to help you cook with what you have.\n\nGenerate with AI\n15\nTotal Recipes\n0\nFavorites\n23 min\nAvg Prep Time\n0\nSaved Recipes\nBrowse by Category\n15 recipes\nAll\nSalads\nMexican\nDesserts\nSeafood\nPasta\nMeat\nKorean\nJapanese\nSALADS\nGreek Salad\n\nFresh Mediterranean salad with tangy feta and olives. Light and refreshing!\n\n8 min\nCook Now\nMEXICAN\nBeef Tacos\n\nFlavorful beef tacos loaded with fresh toppings. Family favorite!\n\n18 min\nCook Now\nDESSERTS\nChocolate Cake\n\nRich and moist chocolate cake. Perfect for celebrations!\n\n45 min\nCook Now\nSEAFOOD\nGrilled Salmon\n\nPerfectly grilled salmon with herbs and lemon. Healthy and delicious!\n\n20 min\nCook Now\nPASTA\nPenne Arrabbiata\n\nSpicy Italian pasta with a fiery tomato sauce. Quick and flavorful!\n\n20 min\nCook Now\nMEAT\nBeef Burger\n\nClassic homemade burger with all the toppings. Better than takeout!\n\n20 min\nCook Now\nSALADS\nCaesar Salad\n\nClassic Caesar salad with crispy croutons and fresh parmesan.\n\n10 min\nCook Now\nMEXICAN\nChicken Quesadilla\n\nCrispy quesadilla stuffed with chicken and melted cheese. Quick and satisfying!\n\n1",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 5121.622779
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 40
+    },
+    {
+      "name": "Frames",
+      "value": 22
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 5721
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 746
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 1212
+    },
+    {
+      "name": "Resources",
+      "value": 37
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 45
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 40
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 3
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 8
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.042261
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.010993
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.013928
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.042392
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.163875
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.054301
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.064224
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 4347400
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 7602176
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 5121.366916
+    },
+    {
+      "name": "NavigationStart",
+      "value": 5121.283869
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=264138752\nMemoryPeak=264138752\nCPUUsageNSec=629205000\nTasksCurrent=113\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=177905664\nMemoryPeak=396222464\nCPUUsageNSec=1364688000\nTasksCurrent=52\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

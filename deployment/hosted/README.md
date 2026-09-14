@@ -99,4 +99,5 @@ gateway cannot satisfy deployed-hosted gates. A professional penetration test re
 separate external service; an agent review does not claim that credential.
 
 Current integration limits and evidence are authoritative in
-`docs/reports/phase2g2-final-closure.md`. No public launch or default hosted mode is enabled.
+`docs/reports/phase2-common-applications.md` (the prior async composition closure is
+retained as historical evidence). No public launch or default hosted mode is enabled.

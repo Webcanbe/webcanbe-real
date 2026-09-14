@@ -1,0 +1,1743 @@
+{
+  "workflowAttempts": [
+    {
+      "receipt": "kanban-workflow-1789383399299.json",
+      "sha256": "5f3d53e5c9318aec38f840b7efe2d0159e85752d94877ba95b9df28f9d3feb51",
+      "failure": "Timed out: idle capture before pointer",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS"
+      },
+      "performance": {
+        "importMs": 40.747749999999996,
+        "coldStartRenderMs": 4332.117125
+      }
+    },
+    {
+      "receipt": "kanban-workflow-1789383433706.json",
+      "sha256": "1852de3a9315579693ab8e88a87e727b52350c2293030f1a5e3d4338c0349f0f",
+      "failure": "The expression evaluated to a falsy value:\n\n  assert(before.includes('Delivery Board'))\n",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS"
+      },
+      "performance": {
+        "importMs": 61.653084000000035,
+        "coldStartRenderMs": 4677.382833,
+        "visualReactUpdateMs": 3097.949375
+      }
+    },
+    {
+      "receipt": "kanban-workflow-1789383599747.json",
+      "sha256": "7d7f951f91a6a0d1fd221a2725ec10c048f38c178fbc957177fcc665fe7ddf07",
+      "failure": "{\"transaction\":{\"file\":\"src/App.tsx\",\"range\":{\"start\":0,\"end\":0},\"editType\":\"responsive\",\"before\":\"\",\"after\":\"\",\"target\":{\"file\":\"src/App.tsx\",\"elementStart\":3295,\"revisionId\":\"rev_f3314593-d449-46c2-af0e-45ae970421ca\",\"contentHash\":\"9e58a0ee726667b953f25f5802e7b9a9252ea3783ed3e6d374f6c56747168e8d\"},\"success\":false,\"error\":\"Unsupported responsive utility value.\",\"patches\":[],\"id\":\"wcb_43b0ccde-6942-4fb3-b5ff-403b84dbf86a\",\"timestamp\":\"2026-09-14T10:59:59.663Z\"},\"error\":\"Unsupported responsive utility value.\",\"revision\":\"rev_f3314593-d449-46c2-af0e-45ae970421ca\"}\n\n422 !== 200\n",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS"
+      },
+      "performance": {
+        "importMs": 40.80554100000006,
+        "coldStartRenderMs": 4816.16175,
+        "visualReactUpdateMs": 2622.020957999999,
+        "codeReactUpdateMs": 3016.430291999999,
+        "warmCssUpdateMs": 2654.7129160000004
+      }
+    },
+    {
+      "receipt": "kanban-workflow-1789383687662.json",
+      "sha256": "115f5fe747e8cc6e6caba53cf63a9320c256c8e7c48e4e7f38becb576ce96a5c",
+      "failure": null,
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS",
+        "responsive": "PASS",
+        "history": "PASS",
+        "undoRedo": "PASS",
+        "restart": "PASS",
+        "export": "PASS",
+        "exportBuild": "PENDING",
+        "exportRender": "PENDING"
+      },
+      "performance": {
+        "importMs": 43.81495800000005,
+        "coldStartRenderMs": 4796.883459,
+        "visualReactUpdateMs": 2620.1698749999996,
+        "codeReactUpdateMs": 3690.875415999999,
+        "warmCssUpdateMs": 2515.8047910000023,
+        "responsiveUpdateMs": 3017.5544160000027,
+        "restartRenderMs": 4082.938833,
+        "exportMs": 413.6367909999972
+      }
+    },
+    {
+      "receipt": "kanban-workflow-1789384553440.json",
+      "sha256": "d50e5bde30c6c82592eb3081f722d068a9796157dc240cece2c301621313509c",
+      "failure": null,
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS",
+        "responsive": "PASS",
+        "history": "PASS",
+        "undoRedo": "PASS",
+        "restart": "PASS",
+        "export": "PASS",
+        "exportBuild": "PENDING",
+        "exportRender": "PENDING"
+      },
+      "performance": {
+        "importMs": 43.667417,
+        "coldStartRenderMs": 4212.247875,
+        "visualReactUpdateMs": 2563.4634590000005,
+        "codeReactUpdateMs": 3208.5221249999995,
+        "warmCssUpdateMs": 2818.8070000000007,
+        "responsiveUpdateMs": 2831.103084000002,
+        "restartRenderMs": 4516.680291000001,
+        "exportMs": 433.98162500000035
+      }
+    },
+    {
+      "receipt": "kanban-workflow-1789386336817.json",
+      "sha256": "e897f24b5e56c7c12e43cff621db76040fb0715aa4e689c9d7be88a12c59efc4",
+      "failure": null,
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS",
+        "responsive": "PASS",
+        "history": "PASS",
+        "undoRedo": "PASS",
+        "restart": "PASS",
+        "export": "PASS",
+        "exportBuild": "PENDING",
+        "exportRender": "PENDING"
+      },
+      "performance": {
+        "importMs": 45.48000000000002,
+        "coldStartRenderMs": 4268.489167,
+        "visualReactUpdateMs": 3140.7589590000007,
+        "codeReactUpdateMs": 2960.972791,
+        "warmCssUpdateMs": 2741.54925,
+        "responsiveUpdateMs": 3541.412708,
+        "restartRenderMs": 4997.950124999996,
+        "exportMs": 461.2320829999953
+      }
+    },
+    {
+      "receipt": "recipe-workflow-1789384105574.json",
+      "sha256": "28553abf62d9461c0e3eed0b0f035355ca46b304246fc9da30aba8ad2f29b5b2",
+      "failure": "spawnSync git ENOBUFS",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {},
+      "performance": {}
+    },
+    {
+      "receipt": "recipe-workflow-1789384173952.json",
+      "sha256": "076f34fdcad7bf0888556c0b121e0bb278390cb83e3d93d1786ffa67cb251747",
+      "failure": "Timed out: acknowledged raster input",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED"
+      },
+      "performance": {
+        "importMs": 189.37183300000004,
+        "coldStartRenderMs": 4052.9147500000004
+      }
+    },
+    {
+      "receipt": "recipe-workflow-1789384650472.json",
+      "sha256": "511bf9467f0369cef3503c61cc5faf8365e618a148c9b4e6e5184535fbe7161f",
+      "failure": null,
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS",
+        "responsive": "PASS",
+        "history": "PASS",
+        "undoRedo": "PASS",
+        "restart": "PASS",
+        "export": "PASS",
+        "exportBuild": "PENDING",
+        "exportRender": "PENDING",
+        "assets": "FAIL"
+      },
+      "performance": {
+        "importMs": 164.73254199999997,
+        "coldStartRenderMs": 3815.0315,
+        "visualReactUpdateMs": 3951.8615420000006,
+        "codeReactUpdateMs": 3545.5252089999994,
+        "warmCssUpdateMs": 2788.0770410000005,
+        "responsiveUpdateMs": 4680.258291999999,
+        "restartRenderMs": 4433.278541,
+        "exportMs": 534.4357080000045
+      }
+    },
+    {
+      "receipt": "recipe-workflow-1789386042038.json",
+      "sha256": "1b4372deb346648915a0d76fe2d9e902a90a2930e08ca3cc84fbd24dfd404801",
+      "failure": "{\"error\":\"Source or preview changed; reload and retry.\"}\n\n409 !== 200\n",
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS"
+      },
+      "performance": {
+        "importMs": 202.23124999999982,
+        "coldStartRenderMs": 4325.95625,
+        "visualReactUpdateMs": 2751.9579589999994,
+        "codeReactUpdateMs": 3931.416083
+      }
+    },
+    {
+      "receipt": "recipe-workflow-1789386381516.json",
+      "sha256": "90535bddfb7fc0841c4a2ae203412b310519f1b502264693b9320d4e3b0c72b8",
+      "failure": null,
+      "fullWorkflowAtCapture": "NOT YET",
+      "stageStatus": {
+        "unchangedImport": "PASS",
+        "render": "PASS",
+        "interaction": "REVIEW_REQUIRED",
+        "viewerSelection": "PASS",
+        "visualEdit": "PASS",
+        "codeEdit": "PASS",
+        "responsive": "PASS",
+        "history": "PASS",
+        "undoRedo": "PASS",
+        "restart": "PASS",
+        "export": "PASS",
+        "exportBuild": "PENDING",
+        "exportRender": "PENDING",
+        "assets": "FAIL"
+      },
+      "performance": {
+        "importMs": 172.32133299999998,
+        "coldStartRenderMs": 3902.607667,
+        "visualReactUpdateMs": 3744.3103330000004,
+        "codeReactUpdateMs": 4070.722667000002,
+        "warmCssUpdateMs": 2479.1690830000007,
+        "responsiveUpdateMs": 3553.3369170000005,
+        "restartRenderMs": 4225.949416999996,
+        "exportMs": 698.7358749999985
+      }
+    }
+  ],
+  "priorCorpusReceipt": "../phase2g2-evidence/async-corpus-final.json",
+  "initialHostedAttempt": {
+    "boundary": "Actual packaged hosted HTTPS / PostgreSQL / mTLS native Linux; local TEST only",
+    "applications": [
+      {
+        "id": "redux-essentials",
+        "commit": "b4414e1504c914ece3253dd8a21adfb2278464d9",
+        "scope": "root",
+        "archiveSha256": "a09cb0880f7b791dd2ea746c1182978fc2d60962e27d1a9b40b92a50dc90ed7a",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "resolution": {
+            "status": "FAIL",
+            "issues": [
+              {
+                "code": "unsupported-lockfile",
+                "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/node@^20.11.6 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "prettier@^3.2.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@faker-js/faker@^8 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@mswjs/data@^0.16 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@reduxjs/toolkit@^2.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "date-fns@^3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "mock-socket@^9.0.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "msw@^2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-redux@^9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-router-dom@^6 cannot use this profile (7.18.3).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-tiny-toast@^2.0.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              }
+            ],
+            "configuration": [
+              {
+                "file": "vite.config.mts",
+                "classification": "preserved-not-applied",
+                "detail": "server: local open/port preferences preserved but not applied; the controlled snapshot does not run an uploaded dev server."
+              },
+              {
+                "file": "vite.config.mts",
+                "classification": "safely-translated",
+                "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+              },
+              {
+                "file": "tsconfig.json",
+                "classification": "statically-supported",
+                "detail": "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate."
+              }
+            ],
+            "notes": [
+              "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "FAIL",
+            "error": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @types/node@^20.11.6 cannot use this profile (package not provided). prettier@^3.2.1 cannot use this profile (package not provided). @faker-js/faker@^8 cannot use this profile (package not provided). @mswjs/data@^0.16 cannot use this profile (package not provided). @reduxjs/toolkit@^2.2 cannot use this profile (package not provided). date-fns@^3 cannot use this profile (package not provided). mock-socket@^9.0.3 cannot use this profile (package not provided). msw@^2 cannot use this profile (package not provided). react-redux@^9 cannot use this profile (package not provided). react-router-dom@^6 cannot use this profile (7.18.3). react-tiny-toast@^2.0.1 cannot use this profile (package not provided)."
+          },
+          "startup": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "render": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 22.41441599999996,
+          "staticCompileMs": 8.104249999999979
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react18-vite5-v1"
+      },
+      {
+        "id": "bulletproof-react",
+        "commit": "9506629ed003a561c6627735480cce4994244bb4",
+        "scope": "apps/react-vite",
+        "archiveSha256": "e27e51cb59db08ad1cf498f84e7289efb113e71096873d9fddb9b53c008177c0",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "resolution": {
+            "status": "FAIL",
+            "issues": [
+              {
+                "code": "unsupported-lockfile",
+                "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@eslint/eslintrc@^3.0.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@mswjs/data@^0.16.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@mswjs/http-middleware@^0.10.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@playwright/test@^1.49.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/addon-a11y@^8.0.10 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/addon-actions@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/addon-essentials@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/addon-links@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/node-logger@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/react@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@storybook/react-vite@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@tailwindcss/typography@^0.5.13 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@testing-library/jest-dom@^6.4.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@testing-library/react@^15.0.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@testing-library/user-event@^14.5.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/cors@^2.8.17 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/dompurify@^3.0.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/js-cookie@^3.0.6 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/marked@^6.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/node@^20.12.7 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@typescript-eslint/eslint-plugin@^7.8.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@typescript-eslint/parser@^7.8.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "autoprefixer@^10.4.19 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "cors@^2.8.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint@8 cannot use this profile (9.39.5).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-config-prettier@^9.1.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-import-resolver-typescript@^3.6.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-import@^2.29.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-jest-dom@^5.4.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-jsx-a11y@^6.8.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-playwright@^1.6.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-prettier@^5.1.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-react@^7.34.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-react-hooks@^4.6.2 cannot use this profile (5.2.0).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-tailwindcss@^3.15.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-testing-library@^6.2.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-vitest@^0.5.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "express@^4.19.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "husky@^9.0.11 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "jest-environment-jsdom@^29.7.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "js-cookie@^3.0.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "jsdom@^24.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "lint-staged@^15.2.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "msw@^2.2.14 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "pino-http@^10.1.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "pino-pretty@^11.1.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "plop@^4.0.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "pm2@^5.4.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "postcss@^8.4.38 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "prettier@^3.2.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "storybook@^8.0.9 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "tailwindcss@^3.4.3 cannot use this profile (4.3.3).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "vite-node@^1.6.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "vite-tsconfig-paths@^4.3.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "vitest@^2.1.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@hookform/resolvers@^3.3.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@ngneat/falso@^7.2.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-dialog@^1.0.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-dropdown-menu@^2.0.6 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-icons@^1.3.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-label@^2.0.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-slot@^1.0.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@radix-ui/react-switch@^1.0.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@tanstack/react-query@^5.32.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@tanstack/react-query-devtools@^5.32.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "axios@^1.6.8 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "class-variance-authority@^0.7.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "dayjs@^1.11.11 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "dompurify@^3.1.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-check-file@^2.8.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "lucide-react@^0.378.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "marked@^12.0.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-error-boundary@^4.0.13 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-helmet-async@^2.0.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-hook-form@^7.51.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-query-auth@^2.4.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-router@^7.0.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "tailwind-merge@^2.3.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "tailwindcss-animate@^1.0.7 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "zod@^3.23.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "zustand@^4.5.2 cannot use this profile (5.0.8).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "html-entry",
+                "message": "index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "executable-config",
+                "message": "Unsupported Vite configuration import: vite-tsconfig-paths.",
+                "requiredCapability": "An isolated Vite configuration/plugin runner",
+                "file": "vite.config",
+                "classification": "requires-isolated-execution"
+              },
+              {
+                "code": "tsconfig",
+                "message": "TypeScript alias @ must match an explicit static Vite alias.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "tsconfig.json / jsconfig.json",
+                "classification": "unsupported"
+              },
+              {
+                "file": "postcss.config.cjs",
+                "code": "css-config",
+                "classification": "requires-isolated-execution",
+                "message": "postcss.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.",
+                "requiredCapability": "An isolated plugin/configuration profile"
+              },
+              {
+                "file": "tailwind.config.cjs",
+                "code": "css-config",
+                "classification": "requires-isolated-execution",
+                "message": "tailwind.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.",
+                "requiredCapability": "An isolated plugin/configuration profile"
+              },
+              {
+                "file": "src/index.css",
+                "code": "css-directive",
+                "classification": "unsupported",
+                "message": "src/index.css: Tailwind executable/scanning directives require isolated configuration support.",
+                "requiredCapability": "A supported static theme or isolated configuration profile"
+              },
+              {
+                "code": "environment-reference",
+                "file": "src/config/env.ts",
+                "classification": "unsupported",
+                "message": "src/config/env.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+                "requiredCapability": "Explicit project public environment configuration"
+              },
+              {
+                "code": "environment-reference",
+                "file": "src/testing/mocks/utils.ts",
+                "classification": "unsupported",
+                "message": "src/testing/mocks/utils.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+                "requiredCapability": "Explicit project public environment configuration"
+              }
+            ],
+            "configuration": [
+              {
+                "file": "vite.config.ts",
+                "classification": "requires-isolated-execution",
+                "detail": "Unsupported Vite configuration import: vite-tsconfig-paths."
+              }
+            ],
+            "notes": [
+              "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "FAIL",
+            "error": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @eslint/eslintrc@^3.0.2 cannot use this profile (package not provided). @mswjs/data@^0.16.1 cannot use this profile (package not provided). @mswjs/http-middleware@^0.10.1 cannot use this profile (package not provided). @playwright/test@^1.49.1 cannot use this profile (package not provided). @storybook/addon-a11y@^8.0.10 cannot use this profile (package not provided). @storybook/addon-actions@^8.0.9 cannot use this profile (package not provided). @storybook/addon-essentials@^8.0.9 cannot use this profile (package not provided). @storybook/addon-links@^8.0.9 cannot use this profile (package not provided). @storybook/node-logger@^8.0.9 cannot use this profile (package not provided). @storybook/react@^8.0.9 cannot use this profile (package not provided). @storybook/react-vite@^8.0.9 cannot use this profile (package not provided). @tailwindcss/typography@^0.5.13 cannot use this profile (package not provided). @testing-library/jest-dom@^6.4.2 cannot use this profile (package not provided). @testing-library/react@^15.0.5 cannot use this profile (package not provided). @testing-library/user-event@^14.5.2 cannot use this profile (package not provided). @types/cors@^2.8.17 cannot use this profile (package not provided). @types/dompurify@^3.0.5 cannot use this profile (package not provided). @types/js-cookie@^3.0.6 cannot use this profile (package not provided). @types/marked@^6.0.0 cannot use this profile (package not provided). @types/node@^20.12.7 cannot use this profile (package not provided). @typescript-eslint/eslint-plugin@^7.8.0 cannot use this profile (package not provided). @typescript-eslint/parser@^7.8.0 cannot use this profile (package not provided). autoprefixer@^10.4.19 cannot use this profile (package not provided). cors@^2.8.5 cannot use this profile (package not provided). eslint@8 cannot use this profile (9.39.5). eslint-config-prettier@^9.1.0 cannot use this profile (package not provided). eslint-import-resolver-typescript@^3.6.1 cannot use this profile (package not provided). eslint-plugin-import@^2.29.1 cannot use this profile (package not provided). eslint-plugin-jest-dom@^5.4.0 cannot use this profile (package not provided). eslint-plugin-jsx-a11y@^6.8.0 cannot use this profile (package not provided). eslint-plugin-playwright@^1.6.0 cannot use this profile (package not provided). eslint-plugin-prettier@^5.1.3 cannot use this profile (package not provided). eslint-plugin-react@^7.34.1 cannot use this profile (package not provided). eslint-plugin-react-hooks@^4.6.2 cannot use this profile (5.2.0). eslint-plugin-tailwindcss@^3.15.1 cannot use this profile (package not provided). eslint-plugin-testing-library@^6.2.2 cannot use this profile (package not provided). eslint-plugin-vitest@^0.5.4 cannot use this profile (package not provided). express@^4.19.2 cannot use this profile (package not provided). husky@^9.0.11 cannot use this profile (package not provided). jest-environment-jsdom@^29.7.0 cannot use this profile (package not provided). js-cookie@^3.0.5 cannot use this profile (package not provided). jsdom@^24.0.0 cannot use this profile (package not provided). lint-staged@^15.2.2 cannot use this profile (package not provided). msw@^2.2.14 cannot use this profile (package not provided). pino-http@^10.1.0 cannot use this profile (package not provided). pino-pretty@^11.1.0 cannot use this profile (package not provided). plop@^4.0.1 cannot use this profile (package not provided). pm2@^5.4.0 cannot use this profile (package not provided). postcss@^8.4.38 cannot use this profile (package not provided). prettier@^3.2.5 cannot use this profile (package not provided). storybook@^8.0.9 cannot use this profile (package not provided). tailwindcss@^3.4.3 cannot use this profile (4.3.3). vite-node@^1.6.0 cannot use this profile (package not provided). vite-tsconfig-paths@^4.3.2 cannot use this profile (package not provided). vitest@^2.1.4 cannot use this profile (package not provided). @hookform/resolvers@^3.3.4 cannot use this profile (package not provided). @ngneat/falso@^7.2.0 cannot use this profile (package not provided). @radix-ui/react-dialog@^1.0.5 cannot use this profile (package not provided). @radix-ui/react-dropdown-menu@^2.0.6 cannot use this profile (package not provided). @radix-ui/react-icons@^1.3.0 cannot use this profile (package not provided). @radix-ui/react-label@^2.0.2 cannot use this profile (package not provided). @radix-ui/react-slot@^1.0.2 cannot use this profile (package not provided). @radix-ui/react-switch@^1.0.3 cannot use this profile (package not provided). @tanstack/react-query@^5.32.0 cannot use this profile (package not provided). @tanstack/react-query-devtools@^5.32.0 cannot use this profile (package not provided). axios@^1.6.8 cannot use this profile (package not provided). class-variance-authority@^0.7.0 cannot use this profile (package not provided). dayjs@^1.11.11 cannot use this profile (package not provided). dompurify@^3.1.1 cannot use this profile (package not provided). eslint-plugin-check-file@^2.8.0 cannot use this profile (package not provided). lucide-react@^0.378.0 cannot use this profile (package not provided). marked@^12.0.2 cannot use this profile (package not provided). react-error-boundary@^4.0.13 cannot use this profile (package not provided). react-helmet-async@^2.0.4 cannot use this profile (package not provided). react-hook-form@^7.51.3 cannot use this profile (package not provided). react-query-auth@^2.4.3 cannot use this profile (package not provided). react-router@^7.0.2 cannot use this profile (package not provided). tailwind-merge@^2.3.0 cannot use this profile (package not provided). tailwindcss-animate@^1.0.7 cannot use this profile (package not provided). zod@^3.23.4 cannot use this profile (package not provided). zustand@^4.5.2 cannot use this profile (5.0.8). index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner. Unsupported Vite configuration import: vite-tsconfig-paths. TypeScript alias @ must match an explicit static Vite alias. postcss.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported. tailwind.config.cjs: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported. src/index.css: Tailwind executable/scanning directives require isolated configuration support. src/config/env.ts: environment references require an explicitly granted static public value; platform env is never exposed. src/testing/mocks/utils.ts: environment references require an explicitly granted static public value; platform env is never exposed."
+          },
+          "startup": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "render": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 11.63191699999993,
+          "staticCompileMs": 28.820999999999913
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react18-vite5-v1"
+      },
+      {
+        "id": "todo-list-react",
+        "commit": "f48aef130c31452341450adfb6c3fc2234b79389",
+        "scope": "root",
+        "archiveSha256": "5c8232d7265f61bae4fce6d04f67d5a2b04d12129b8c65f1e96afc07a72478be",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "resolution": {
+            "status": "FAIL",
+            "issues": [
+              {
+                "code": "unsupported-lockfile",
+                "message": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@antfu/eslint-config@^4.1.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@eslint-react/eslint-plugin@^1.26.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@julr/unocss-preset-forms@^1.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/node@^22.13.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/react@^19.0.8 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@types/react-dom@^19.0.3 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@unocss/eslint-plugin@^66.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@unocss/reset@^66.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint@9.22.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-command@^3.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-format@^1.0.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-react-hooks@^5.1.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "eslint-plugin-react-refresh@^0.4.19 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "unocss@^66.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "@hookform/resolvers@^4.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "dompurify@^3.2.4 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "dotenv@^16.4.7 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "react-hook-form@^7.54.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "sonner@^2.0.0 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "swr@^2.3.2 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "uuid@^11.0.5 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "unsupported-version",
+                "message": "zod@^3.24.1 cannot use this profile (package not provided).",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "html-entry",
+                "message": "index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "package.json / package-lock.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "executable-config",
+                "message": "Undeclared Vite configuration dependency: unocss/vite.",
+                "requiredCapability": "An isolated Vite configuration/plugin runner",
+                "file": "vite.config",
+                "classification": "requires-isolated-execution"
+              },
+              {
+                "code": "tsconfig",
+                "message": "TypeScript alias @ must match an explicit static Vite alias.",
+                "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+                "file": "tsconfig.json / jsconfig.json",
+                "classification": "unsupported"
+              },
+              {
+                "code": "environment-reference",
+                "file": "src/hooks/useTodoActions.ts",
+                "classification": "unsupported",
+                "message": "src/hooks/useTodoActions.ts: environment references require an explicitly granted static public value; platform env is never exposed.",
+                "requiredCapability": "Explicit project public environment configuration"
+              }
+            ],
+            "configuration": [
+              {
+                "file": "vite.config.ts",
+                "classification": "requires-isolated-execution",
+                "detail": "Undeclared Vite configuration dependency: unocss/vite."
+              }
+            ],
+            "notes": [
+              "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "FAIL",
+            "error": "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored. @antfu/eslint-config@^4.1.1 cannot use this profile (package not provided). @eslint-react/eslint-plugin@^1.26.2 cannot use this profile (package not provided). @julr/unocss-preset-forms@^1.0.0 cannot use this profile (package not provided). @types/node@^22.13.1 cannot use this profile (package not provided). @types/react@^19.0.8 cannot use this profile (package not provided). @types/react-dom@^19.0.3 cannot use this profile (package not provided). @unocss/eslint-plugin@^66.0.0 cannot use this profile (package not provided). @unocss/reset@^66.0.0 cannot use this profile (package not provided). eslint@9.22.0 cannot use this profile (package not provided). eslint-plugin-command@^3.0.0 cannot use this profile (package not provided). eslint-plugin-format@^1.0.1 cannot use this profile (package not provided). eslint-plugin-react-hooks@^5.1.0 cannot use this profile (package not provided). eslint-plugin-react-refresh@^0.4.19 cannot use this profile (package not provided). unocss@^66.0.0 cannot use this profile (package not provided). @hookform/resolvers@^4.0.0 cannot use this profile (package not provided). dompurify@^3.2.4 cannot use this profile (package not provided). dotenv@^16.4.7 cannot use this profile (package not provided). react-hook-form@^7.54.2 cannot use this profile (package not provided). sonner@^2.0.0 cannot use this profile (package not provided). swr@^2.3.2 cannot use this profile (package not provided). uuid@^11.0.5 cannot use this profile (package not provided). zod@^3.24.1 cannot use this profile (package not provided). index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner. Undeclared Vite configuration dependency: unocss/vite. TypeScript alias @ must match an explicit static Vite alias. src/hooks/useTodoActions.ts: environment references require an explicitly granted static public value; platform env is never exposed."
+          },
+          "startup": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "render": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 9.038874999999962,
+          "staticCompileMs": 3.086416999999983
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react19-vite6"
+      },
+      {
+        "id": "zustand",
+        "commit": "b57db4f86ef179285da216eeb291266da82c361c",
+        "scope": "examples/demo",
+        "archiveSha256": "bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "PASS",
+            "httpStatus": 201
+          },
+          "resolution": {
+            "status": "PASS",
+            "issues": [],
+            "configuration": [
+              {
+                "file": "vite.config.js",
+                "classification": "safely-translated",
+                "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+              }
+            ],
+            "notes": [
+              "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "PASS",
+            "artifactFiles": 14
+          },
+          "startup": {
+            "status": "PASS",
+            "httpStatus": 200
+          },
+          "render": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 94.00658299999986,
+          "staticCompileMs": 3899.726542,
+          "startMs": 7197.5668749999995,
+          "captureMs": 6904.130041000002
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react18-vite4-three-v1",
+        "canonicalInitialBytesExact": true
+      },
+      {
+        "id": "kanban-board",
+        "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+        "scope": "root",
+        "archiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "PASS",
+            "httpStatus": 201
+          },
+          "resolution": {
+            "status": "PASS",
+            "issues": [],
+            "configuration": [
+              {
+                "file": "vite.config.ts",
+                "classification": "safely-translated",
+                "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+              },
+              {
+                "file": "tsconfig.json",
+                "classification": "statically-supported",
+                "detail": "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate."
+              }
+            ],
+            "notes": [
+              "No lockfile: disclosed pinned profile versions must satisfy every declared range.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "PASS",
+            "artifactFiles": 3
+          },
+          "startup": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "render": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 32.37691700000141,
+          "staticCompileMs": 653.8856670000023,
+          "startMs": 16.516332999999577
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react18-vite6-common-v1",
+        "canonicalInitialBytesExact": true
+      },
+      {
+        "id": "GroqRecipeBook",
+        "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+        "scope": "root",
+        "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+        "exactInitialFileHashes": true,
+        "stages": {
+          "intake": {
+            "status": "PASS",
+            "httpStatus": 201
+          },
+          "resolution": {
+            "status": "FAIL",
+            "issues": [
+              {
+                "file": "src/App.css",
+                "code": "css-directive",
+                "classification": "unsupported",
+                "message": "src/App.css: Tailwind theme requires literal custom properties; dynamic/functions/nested theme forms are unsupported.",
+                "requiredCapability": "A supported static theme or isolated configuration profile"
+              }
+            ],
+            "configuration": [
+              {
+                "file": "vite.config.js",
+                "classification": "safely-translated",
+                "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+              }
+            ],
+            "notes": [
+              "Client versions checked against the npm lockfile.",
+              "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+              "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+            ]
+          },
+          "compilation": {
+            "status": "FAIL",
+            "error": "src/App.css: Tailwind theme requires literal custom properties; dynamic/functions/nested theme forms are unsupported."
+          },
+          "startup": {
+            "status": "FAIL",
+            "httpStatus": 422,
+            "error": "The hosted operation failed. Accepted source and history remain authoritative."
+          },
+          "render": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "interaction": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "viewerSelection": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "visualEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "codeEdit": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "responsive": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "history": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "restart": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "export": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportBuild": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          },
+          "exportRender": {
+            "status": "BLOCKED",
+            "reason": "Prior application stage has not passed"
+          }
+        },
+        "performance": {
+          "importMs": 145.06950000000143,
+          "staticCompileMs": 7.888208000000304,
+          "startMs": 51.60491700000057
+        },
+        "fullWorkflow": "NOT YET",
+        "profile": "react19-vite7-common-v1",
+        "canonicalInitialBytesExact": true
+      }
+    ]
+  },
+  "notes": [
+    "Initial failed Zustand capture quarantined its controller; subsequent independent cases now use fresh packaged controllers after verified stop.",
+    "Early root-only dependency closure rejected nested Three dependencies; fixed to path-aware traversal. Final original Zustand has0issues.",
+    "Early pointer capture effect restarted on mode change; fixed callback refs/exact-pixel rebinding.",
+    "CodeMirror virtualized text is not the full document; QA fills the full accepted source through actual Code UI.",
+    "Attempted arbitrary40px responsive value was refused; the final authorized edit uses supported text-4xl.",
+    "Recipe has retained409 stale revision/preview attempt; rejection was preserved and final new workflow passed after fresh session. No automatic acceptance bypass.",
+    "Recipe desktop probe initially sampled adjacent container16px; corrected to exact mapped heading identity and24/36/30px assertions.",
+    "One recipe invocation omitted installed Playwright module environment; failed before app work.",
+    "Supplemental recipe check/ assert naming defect caught independently and corrected before final passing run.",
+    "First standalone build symlinked read-only node_modules entirely; Vite temporary config output failed; per-package read-only links now permit private .vite-temp without source changes.",
+    "An operator profile preparation timeout left guest npm briefly active; bounded systemd installation job added, orphan absence verified.",
+    "First diagnostic JSON stdout flush truncated; fixed completion callback; failed receipt retained locally.",
+    "First legacy D/E port used too-broad QA-marker rejection; exact original export assertions restored.",
+    "First legacy G authored run used wrong historical profile; unresolved zustand build failed. Correct frozen historical profile restored; static profile precheck now rejects mismatch before isolated execution."
+  ]
+}

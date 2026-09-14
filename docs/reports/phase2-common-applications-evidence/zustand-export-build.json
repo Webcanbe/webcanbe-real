@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 5181.319854,
+  "output": "vite v4.5.14 building for production...\ntransforming...\n\u2713 655 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                       0.82 kB \u2502 gzip:   0.44 kB\ndist/assets/bg-0d62d151.jpg          26.50 kB\ndist/assets/stars-3a2357a5.png       40.03 kB\ndist/assets/bear-8ff11f9d.png        77.57 kB\ndist/assets/leaves1-79336cd2.png     77.69 kB\ndist/assets/leaves2-66610b6e.png     78.05 kB\ndist/assets/ground-c720b933.png      93.57 kB\ndist/assets/index-2058a19f.css        4.50 kB \u2502 gzip:   1.48 kB\ndist/assets/index-6b78ac55.js     1,161.61 kB \u2502 gzip: 358.31 kB\n\u2713 built in 4.96s\n\n../../opt/wcb-export-profiles/react18-vite4-three-v1/node_modules/three-mesh-bvh/src/utils/ExtensionUtilities.js (6:26) \"BatchedMesh\" is not exported by \"../../opt/wcb-export-profiles/react18-vite4-three-v1/node_modules/three/build/three.module.js\", imported by \"../../opt/wcb-export-profiles/react18-vite4-three-v1/node_modules/three-mesh-bvh/src/utils/ExtensionUtilities.js\".\n\n(!) Some chunks are larger than 500 kBs after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 5382.464792,
+  "archiveSha256": "3917db86f376f99d36dc640790637dcb9a4f9683003233db0333e9ccff36b833",
+  "profile": "react18-vite4-three-v1",
+  "artifactFiles": [
+    {
+      "path": "/favicon.ico",
+      "sha256": "8999d711bd13e16f4b4c383676ce91a4e6f5421c3a659db721c401efe2b4a93f"
+    },
+    {
+      "path": "/index.html",
+      "sha256": "55b5c2178fa5e54ba1dabdd6e154c46a4923c9cbf8542dda90498e5cf056d13a"
+    },
+    {
+      "path": "/logo192.png",
+      "sha256": "c30256ba8f5886d7795603b0cb883d8458cad7424c970172c7e0feff0f6eea56"
+    },
+    {
+      "path": "/logo512.png",
+      "sha256": "b7c215c6fc9444fa58e9c3067eb3a0005c756878e372e0cb20a0a0ae7484036a"
+    },
+    {
+      "path": "/manifest.json",
+      "sha256": "d197b135294d95fd3127b7f461e0b1b5335b4661d4648269786a8cf517eb3fbb"
+    },
+    {
+      "path": "/ogimage.jpg",
+      "sha256": "2652ff78a7261d27765932ba5fa63f82a42ea6e5f6904f4368faa2815478a6d6"
+    },
+    {
+      "path": "/robots.txt",
+      "sha256": "90d24bc3bf698ac1e173739502298ccca72adf1f564fab05f484b8c48d1cadd2"
+    },
+    {
+      "path": "/vite.svg",
+      "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+    },
+    {
+      "path": "/assets/bear-8ff11f9d.png",
+      "sha256": "8ff11f9d0f944c61c30fd4ace62088c1bd4cab683d096c4a3e907c4d4d0d05cb"
+    },
+    {
+      "path": "/assets/bg-0d62d151.jpg",
+      "sha256": "0d62d151f5bab521cb09a2b17f018e6a3a12cee9857a8035c3da1a0647773df4"
+    },
+    {
+      "path": "/assets/ground-c720b933.png",
+      "sha256": "c720b93304ff2e693b2d359970fa05d09060ab050555572cf81462b00f5f041a"
+    },
+    {
+      "path": "/assets/index-2058a19f.css",
+      "sha256": "2058a19fa3524eea83ed91b0aa6bbed541a60086a3dbfc207a74a027adfa7563"
+    },
+    {
+      "path": "/assets/index-6b78ac55.js",
+      "sha256": "8658fecfc2ac174a24594933ec8d9c6cf170b4e1b96e7dbe53b7115780dc462e"
+    },
+    {
+      "path": "/assets/leaves1-79336cd2.png",
+      "sha256": "79336cd20b200b3d44246e07f7d07d9e1f70aa427219816355113d4eaf4c98fe"
+    },
+    {
+      "path": "/assets/leaves2-66610b6e.png",
+      "sha256": "66610b6ecc5ed7f2a52f95626f8763f718ea0a8a831b0066fa3e88c49954b5a9"
+    },
+    {
+      "path": "/assets/stars-3a2357a5.png",
+      "sha256": "3a2357a528a3a3dc16d5b7fbb508874d16b58f0ffa3fd6ac9df38a7f5ba0aa53"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 235.289678,
+  "output": "vite v8.3.0 building client environment for production...\ntransforming...\n\u2713 16 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.46 kB \u2502 gzip:  0.30 kB\ndist/assets/index-Cjzf4QAq.css    0.03 kB \u2502 gzip:  0.05 kB\ndist/assets/index-CqmEplnD.js   220.43 kB \u2502 gzip: 69.00 kB\n\n\u2713 built in 70ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 365.698875,
+  "archiveSha256": "44cc954479e00b3487c29899995597802a03e637b87972c3fe8281ebd6dd67ed",
+  "profile": "react19-vite8-v1",
+  "artifactFiles": [
+    {
+      "path": "/favicon.svg",
+      "sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66"
+    },
+    {
+      "path": "/icons.svg",
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a"
+    },
+    {
+      "path": "/index.html",
+      "sha256": "c0921933c80b0b1e9c780c750deef33eed87939d4ddd739680dc34bfb0e9b057"
+    },
+    {
+      "path": "/assets/index-Cjzf4QAq.css",
+      "sha256": "6af2ddc4b11759e8ac181e9fa533f1a95aea18c8b1444cbd6dcae9cec9c56d99"
+    },
+    {
+      "path": "/assets/index-CqmEplnD.js",
+      "sha256": "92266ea3b22f6ec39be3cba6a51044e377e105247f195eebf923335c5d4f94b2"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

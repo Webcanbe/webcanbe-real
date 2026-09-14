@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 500.707277,
+  "output": "vite v8.3.0 building client environment for production...\ntransforming...\n\u2713 31 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.27 kB \u2502 gzip:  0.21 kB\ndist/assets/index-2jehgNIX.css    4.52 kB \u2502 gzip:  1.54 kB\ndist/assets/index-ASIZfQ6v.js   260.70 kB \u2502 gzip: 83.07 kB\n\n\u2713 built in 175ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 774.4247499999999,
+  "archiveSha256": "f1fb79d9f3672c9b5976f13ed9c6f33f903b85073600520bf94340011089a9b6",
+  "profile": "react19-vite8-v1",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "f447e5f57b4fa084bbd954809ced5550f46b7fc8e70ea6ed504c06ac7f9d1689"
+    },
+    {
+      "path": "/plate.svg",
+      "sha256": "105d72621666b168bfc18ab9cb96e52f689d2969427b9324c02cb937c85e115c"
+    },
+    {
+      "path": "/assets/index-2jehgNIX.css",
+      "sha256": "5cb2c3f007d180819a89f098d175773655010224a93624cd3b6fbef7a3e17dd6"
+    },
+    {
+      "path": "/assets/index-ASIZfQ6v.js",
+      "sha256": "42bac4c64b7f7f003d4b2052a14e20e6032074c0ddab3b28127d0b112596b284"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

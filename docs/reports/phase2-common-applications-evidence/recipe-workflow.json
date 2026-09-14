@@ -1,0 +1,581 @@
+{
+  "boundary": "Packaged TLS editor / TEST OIDC / PostgreSQL / mTLS native Linux, platform browser receives raster only",
+  "browserPath": "Browser plugin not available; retained Playwright approach",
+  "stages": {
+    "unchangedImport": {
+      "status": "PASS",
+      "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+      "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+      "fileHashes": {
+        ".gitignore": {
+          "bytes": 262,
+          "sha256": "0a7095d4744304f685dd0478f927c5153ba1b54cfc806f616e63d1671b845794"
+        },
+        ".vite/deps/_metadata.json": {
+          "bytes": 146,
+          "sha256": "264bd98e8e07acbba0c8a0eaf282f898f31b5f2a7f4832b9749fe41d0d9eeec6"
+        },
+        ".vite/deps/package.json": {
+          "bytes": 23,
+          "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+        },
+        "LICENSE": {
+          "bytes": 1074,
+          "sha256": "e9ac49e25f353448de7f4a3dd37114a8df5f39bd69d3c905e3090d03f4fa2c2e"
+        },
+        "README.md": {
+          "bytes": 13682,
+          "sha256": "18e1188bdf622b708bd503c6d6d8a858940fadecfdab7d1a21cf3ec4f8d90739"
+        },
+        "eslint.config.js": {
+          "bytes": 758,
+          "sha256": "da0cbf3213f2994741024e2aa5165d017e0345f389dcd2f8a0db97fee7289d1b"
+        },
+        "index.html": {
+          "bytes": 3063,
+          "sha256": "d56f5ab506f9363deea149c418c65e2531b39413048d69e652ab4c8c0ae8ef70"
+        },
+        "package-lock.json": {
+          "bytes": 119828,
+          "sha256": "41ea068599c08a4b7931ccb288cc7dfc4cfcdd1fdd65d5436797afa23ea6de61"
+        },
+        "package.json": {
+          "bytes": 767,
+          "sha256": "c729d875161f894a41753cbfc30371b065c3fce9c4f66660895217ad8f977388"
+        },
+        "public/coffee-love.svg": {
+          "bytes": 4476,
+          "sha256": "d1b2563fba5fefe472195f250bad2274f6aa7fbb8e16ec65cb8b8b17b061595a"
+        },
+        "public/googlea8e27d32355734fd.html": {
+          "bytes": 53,
+          "sha256": "96d05f99e881faac0454cb189faa91d316156b1145ec7207fee7c72052e73cdb"
+        },
+        "public/home.png": {
+          "bytes": 1190061,
+          "sha256": "f7ec3f5b73de86d1f059e8cb93ac3e7296dfbb878f0857151f0310f4ce4604ac"
+        },
+        "public/logo.svg": {
+          "bytes": 45437,
+          "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+        },
+        "public/mobile.png": {
+          "bytes": 491411,
+          "sha256": "9493d72ef1b9cd0dec0010454e4c77c97144e51e4704422b9af6605305e2a8d5"
+        },
+        "public/recipe.png": {
+          "bytes": 435993,
+          "sha256": "f062d8328bff31fd6e0ec54100c0f2833dd9bf5ae275bd3da7a8c62dd5534e44"
+        },
+        "public/robots.txt": {
+          "bytes": 22,
+          "sha256": "44f3f8eafdf064cf69acb05f23ee4dfc9ab5b3d67d81c64246bc29f7e438789a"
+        },
+        "src/App.css": {
+          "bytes": 5145,
+          "sha256": "5eb1d45217eeee3af5858db7a097f4b63c51137d8a77fc54ef95b7596debb4d3"
+        },
+        "src/App.jsx": {
+          "bytes": 771,
+          "sha256": "d6093ade984d7b7531e95c7b3417ad72d553839260e76563a75560bebc899b22"
+        },
+        "src/assets/ad-icon.svg": {
+          "bytes": 861,
+          "sha256": "d540a6733c034c3b693b5be2d7699aadfb8f12f9b70faca2f18174d7034892a8"
+        },
+        "src/assets/ayman.svg": {
+          "bytes": 9412,
+          "sha256": "78f0dc730148faa315d7d426eea59214a5baf049b4fdcc4ac13ed4cac034a2ea"
+        },
+        "src/assets/burger.svg": {
+          "bytes": 5263,
+          "sha256": "1375a75a24dc238eb7161d67d0dbf402b846326a983e4a2e833cfd44e6d7e94b"
+        },
+        "src/assets/chef-groq-app.png": {
+          "bytes": 87933,
+          "sha256": "ef409a6ff7c7252290730765c50158cadbde5621390488be070356622eeea799"
+        },
+        "src/assets/chef.svg": {
+          "bytes": 9481,
+          "sha256": "51741af47d85d69e24960c27d2625d089e86cf845b082ca89be07753459373e0"
+        },
+        "src/assets/close.svg": {
+          "bytes": 7603,
+          "sha256": "a98a7fb86ffdfb73d987cd82416b1c3b3572e0f5603b1714492e17cab1926a58"
+        },
+        "src/assets/cook-time.svg": {
+          "bytes": 475,
+          "sha256": "68a4d9ba660ff9af6da775584de7b49d36a43f991fc32d5adb7252357262c2ff"
+        },
+        "src/assets/empty-star.svg": {
+          "bytes": 726,
+          "sha256": "fccd486a9defdfc64dc19b8308ddd4d90bee9a8a36703804573d7faa2e4fac71"
+        },
+        "src/assets/favorite.svg": {
+          "bytes": 526,
+          "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+        },
+        "src/assets/flame.svg": {
+          "bytes": 545,
+          "sha256": "af076512d6605664dd87013b8dae6b86fffd81c5fb3f6d6d5a5fa25182b814c6"
+        },
+        "src/assets/github.svg": {
+          "bytes": 12455,
+          "sha256": "dfdd7d0d5a641f7c0d1ea16c66f37626970c74c8b99a43ff3c55710e759bae4b"
+        },
+        "src/assets/lamp.svg": {
+          "bytes": 633,
+          "sha256": "c09ff49a41b62f2107b85d8764b7ca091d5ceaf7f211ec3c956a9e8c998e4903"
+        },
+        "src/assets/like-accent.svg": {
+          "bytes": 1099,
+          "sha256": "4d51151c014ef5409bfd77e0358af80e0b7492080170731330c79b69649152aa"
+        },
+        "src/assets/like.svg": {
+          "bytes": 526,
+          "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+        },
+        "src/assets/liked-fff.svg": {
+          "bytes": 511,
+          "sha256": "d962a602fa29aa999cd4bad6dcef4d9026bd2b40af0c1ce96b4b9fe10ea28b7f"
+        },
+        "src/assets/liked.svg": {
+          "bytes": 492,
+          "sha256": "c0b1daec8fbc00ae3b002285fdff9dd3064380db7df43f15082412ca5a796b65"
+        },
+        "src/assets/link.svg": {
+          "bytes": 571,
+          "sha256": "49a4e53b5cee9d23dbe7897972cde467a2e83ab3a8d4703e15a71ba602618992"
+        },
+        "src/assets/linkedin.svg": {
+          "bytes": 18403,
+          "sha256": "e77b29ce50d00ec05710ca17c7905edbf0c7d0e80652b06f8dadf6136881cbb2"
+        },
+        "src/assets/logo.svg": {
+          "bytes": 45437,
+          "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+        },
+        "src/assets/preparation-time.svg": {
+          "bytes": 450,
+          "sha256": "ee78fe0d03cb393299fa6306067a0cf578a58a3cd5d05aca8cb04390c8227f21"
+        },
+        "src/assets/rate.svg": {
+          "bytes": 581,
+          "sha256": "ab9d2f65c43ff713bb4178e78165a26bb77a294738fc8c9b1f0e4b6079207a8f"
+        },
+        "src/assets/recipe.svg": {
+          "bytes": 6119,
+          "sha256": "16e1c0e82d16d0d95255d9cdae882391b594e14c5b1d10dedcab921aea8074fb"
+        },
+        "src/assets/save-000.svg": {
+          "bytes": 430,
+          "sha256": "fffd1a96cfbf2c9ad915fa8918dc35691cf454fdd685d0dbe9ac80dd83af49bb"
+        },
+        "src/assets/save-fff.svg": {
+          "bytes": 418,
+          "sha256": "e56adad73d8e46567e9762845eedd06c826682b786dc24e7249a5e91c887c120"
+        },
+        "src/assets/save.svg": {
+          "bytes": 405,
+          "sha256": "8d21d745c6178d2044a9953d63edda76a0b1aef7dcf7387bf016af0d27c6fc44"
+        },
+        "src/assets/saved.svg": {
+          "bytes": 383,
+          "sha256": "10b02ad225b8a6d0a24637f4a9cbce6f8762bfbfc521fc13e1fd310f03530b71"
+        },
+        "src/assets/search.svg": {
+          "bytes": 498,
+          "sha256": "2f021219785bfd634447f0377918e0587cf4ed86e29b7cde897bff3ffe67855f"
+        },
+        "src/assets/servings.svg": {
+          "bytes": 687,
+          "sha256": "35184fac7beea65688681ea8354a6332419b978928f6ad640b24bbf350808467"
+        },
+        "src/assets/star.svg": {
+          "bytes": 741,
+          "sha256": "867a65301bef15d18f5b1c304e4a903bc8dd720b644aedae0b872aa7a60ec276"
+        },
+        "src/assets/time.svg": {
+          "bytes": 476,
+          "sha256": "54a5ead2dde6524101e716e1a26f508e435be496b092e6a72698ae1b083987b1"
+        },
+        "src/assets/twitter.svg": {
+          "bytes": 4340,
+          "sha256": "5b4853cec749561b2eb852d8394709d7092dc1f62110d2f6af5af322cc035697"
+        },
+        "src/components/AIChefAssistant.jsx": {
+          "bytes": 1205,
+          "sha256": "9f76b14fd090e258e7e749e09dd963a56901a092f1c7ba310258b79b915961d6"
+        },
+        "src/components/Advertisement.jsx": {
+          "bytes": 3079,
+          "sha256": "31a23932f94a81efd62b8eb640b2392a3d65837a275cf75d6e582b9332045571"
+        },
+        "src/components/CategoryBrowser.jsx": {
+          "bytes": 2140,
+          "sha256": "791e043e1b01ee70a9e08a69ac502e169ac0a07c8ef353d533ccd7d97929f194"
+        },
+        "src/components/Footer.jsx": {
+          "bytes": 2245,
+          "sha256": "8314080cb48c7a688689e58ab4a47337c2760fd5b32eac91b7d426c2ae14252a"
+        },
+        "src/components/Header.jsx": {
+          "bytes": 1508,
+          "sha256": "c1afe1b89d5abf234ab53d414f58a52d577410c824a289ac0603fb7632aa48b7"
+        },
+        "src/components/Logo.jsx": {
+          "bytes": 366,
+          "sha256": "14f5ea8aac6fe1203fe2610a7c358e03e6504d2eb5d4860092e449ffd4ff061c"
+        },
+        "src/components/MainContent.jsx": {
+          "bytes": 804,
+          "sha256": "3494173a1dfd8c57a0bd4f3a6d46bd522c10804852de6e9f9b12fc867f4aaa39"
+        },
+        "src/components/NavigationBar.jsx": {
+          "bytes": 1003,
+          "sha256": "6b5186a0ffc0693001c2b6b3fd58410fe1c25af2bda004e5b72c2ffac095321d"
+        },
+        "src/components/RecipeCard.jsx": {
+          "bytes": 4786,
+          "sha256": "9fa563430244874ed83c070b27f13fc943501c599c15f217300bc398aaffe204"
+        },
+        "src/components/RecipePage.jsx": {
+          "bytes": 14126,
+          "sha256": "8a64aca64dc8d188ee98b3c68388202a5a30a00af7e68f485a61f04f0904d91d"
+        },
+        "src/components/RecipesGrid.jsx": {
+          "bytes": 1006,
+          "sha256": "24628add527b6b952d392ebc1a5a2d0b65aa2c8a7e74a33936162c02af401fdc"
+        },
+        "src/components/SearchBar.jsx": {
+          "bytes": 980,
+          "sha256": "d16f7b2f40766767dbd193759d383ca800bfc4f2f77ef14fb95ab0b691620d7f"
+        },
+        "src/components/Stat.jsx": {
+          "bytes": 541,
+          "sha256": "d80e1ac32dac429c644e175f2159cfbde84f3934d09205d5d58d3e78bbeac645"
+        },
+        "src/components/Stats.jsx": {
+          "bytes": 1169,
+          "sha256": "569a46bec9c73d8bc546ab2ab5fb8f09e6e1a8d6c567a848df2d85377dac3e25"
+        },
+        "src/context/RecipesProvider.jsx": {
+          "bytes": 3146,
+          "sha256": "551537ee0c95ee2b58c614d4e7964df59a9d2b73b4701d410d5859f201029904"
+        },
+        "src/data/state.js": {
+          "bytes": 36110,
+          "sha256": "34a1dbf4509772fd943121f3876d8caa9b2c23b2d083e44c221db49c137343a1"
+        },
+        "src/main.jsx": {
+          "bytes": 317,
+          "sha256": "d6f1a901d452a964ac25be8887d180542f5ebefd60036e9897db46f23c52b518"
+        },
+        "vite.config.js": {
+          "bytes": 220,
+          "sha256": "0c03207436c9eb3f2f35ec9ff13d17c6ae7e4c8d46ad394a556578cf12c80d74"
+        }
+      }
+    },
+    "render": {
+      "status": "PARTIAL",
+      "profile": "react19-vite7-common-v1",
+      "runtimeErrors": [
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+        "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "error: Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+      ]
+    },
+    "interaction": {
+      "status": "PASS",
+      "action": "Filter Mexican recipes and favorite a recipe through raster input",
+      "evidence": [
+        "recipe-category-filter.png",
+        "recipe-favorite.png"
+      ],
+      "review": "Visible Mexican filter reduces15to2; favorite count0to1."
+    },
+    "viewerSelection": {
+      "status": "PASS",
+      "identity": {
+        "file": "src/components/AIChefAssistant.jsx",
+        "elementStart": 419
+      },
+      "computed": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(0, 0, 0)",
+        "fontSize": "30px",
+        "fontWeight": "700",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "width": "534px",
+        "height": "72px",
+        "border": "0px solid rgb(0, 0, 0)",
+        "borderRadius": "0px"
+      }
+    },
+    "visualEdit": {
+      "status": "PASS",
+      "revision": "rev_c6e3e530-0993-4f72-ae1a-3d72a720eeec",
+      "diff": "Transaction wcb_41233035-1db3-4ef8-933c-27a177b488d1\nsrc/components/AIChefAssistant.jsx\n@@ offset 458 @@\n-Your Personal Recipe Collection\n+Weeknight Recipe Collection"
+    },
+    "codeEdit": {
+      "status": "PASS",
+      "revision": "rev_a7ed2573-0af1-4869-a5a1-9a8c96148bfc",
+      "diff": {
+        "omittedSourceDiffSha256": "9329830990e5ad2bc7884825301ca41ae65c0f24857da3fc502e53b596615d9d",
+        "bytes": 2532,
+        "reason": "Full-file Code proposal omitted from public evidence; exact source/export hashes and visible changed text retained."
+      }
+    },
+    "viewports": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "upstreamLayout": "Upstream responsive navigation and recipe cards retained; remote images/fonts blocked"
+      },
+      {
+        "width": 768,
+        "status": "PASS",
+        "upstreamLayout": "Upstream responsive navigation and recipe cards retained; remote images/fonts blocked"
+      },
+      {
+        "width": 1280,
+        "status": "PASS",
+        "upstreamLayout": "Upstream responsive navigation and recipe cards retained; remote images/fonts blocked"
+      },
+      {
+        "width": 390,
+        "after": true,
+        "fontSize": "24px",
+        "identity": {
+          "file": "src/components/AIChefAssistant.jsx",
+          "elementStart": 419
+        }
+      },
+      {
+        "width": 768,
+        "after": true,
+        "fontSize": "36px",
+        "identity": {
+          "file": "src/components/AIChefAssistant.jsx",
+          "elementStart": 419
+        }
+      },
+      {
+        "width": 1280,
+        "after": true,
+        "fontSize": "30px",
+        "identity": {
+          "file": "src/components/AIChefAssistant.jsx",
+          "elementStart": 419
+        }
+      }
+    ],
+    "responsive": {
+      "status": "PASS",
+      "diff": "Transaction wcb_fc0b430a-ddb4-4b97-bf79-a53e52600d57\nsrc/components/AIChefAssistant.jsx\n@@ offset 435 @@\n-text-2xl\n+text-2xl md:text-4xl",
+      "revision": "rev_ddedacab-82a9-4f58-bbd5-e0e5d27bb418"
+    },
+    "history": {
+      "status": "PASS",
+      "transactions": 4,
+      "revision": "rev_ddedacab-82a9-4f58-bbd5-e0e5d27bb418"
+    },
+    "undoRedo": {
+      "status": "PASS",
+      "undo": "rev_2c0f9aa5-3691-43f4-98e3-6d8dd96f4774",
+      "redo": "rev_9583a2c3-d60b-40a7-85d1-35687e0f518c"
+    },
+    "restart": {
+      "status": "PASS",
+      "sourceAndHistoryByteExact": true,
+      "process": "SIGKILL then exact packaged CLI reconnect"
+    },
+    "export": {
+      "status": "PASS",
+      "files": 67,
+      "archiveSha256": "4f491e9f8e228d122e5d29e820c137e8f65ee12a2ab857b608504e9ac8fc3279",
+      "exactAcceptedBytes": true
+    },
+    "exportBuild": {
+      "status": "PASS",
+      "receipt": "recipe-export-build.json"
+    },
+    "exportRender": {
+      "status": "PARTIAL",
+      "receipt": "recipe-export-diagnostic.json",
+      "reason": "Edited UI renders, required external assets do not."
+    },
+    "assets": {
+      "status": "FAIL",
+      "reason": "Required Cloudinary recipe images and Google fonts are unavailable under default egress denial; no replacement assets or source rewrite."
+    }
+  },
+  "performance": {
+    "importMs": 172.32133299999998,
+    "coldStartRenderMs": 3902.607667,
+    "visualReactUpdateMs": 3744.3103330000004,
+    "codeReactUpdateMs": 4070.722667000002,
+    "warmCssUpdateMs": 2479.1690830000007,
+    "responsiveUpdateMs": 3553.3369170000005,
+    "restartRenderMs": 4225.949416999996,
+    "exportMs": 698.7358749999985
+  },
+  "updates": [
+    {
+      "kind": "css-hot-update",
+      "generation": "10ecc88d-b53b-4b1d-8ea1-d044266a6afe",
+      "ms": 19420.924208
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "10ecc88d-b53b-4b1d-8ea1-d044266a6afe",
+      "ms": 26375.049083
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "bc8f759f-cf6b-42a2-b50e-c9bdcbb6f103",
+      "ms": 38658.553541
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "initial",
+      "sha256": "5e2f69e4aa05d47c47983faa37471f8b03b3aa7a3e962489e1278bfaa21f0dd8",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "category-filter",
+      "sha256": "57ceddab9971d68cf2f872e218468c70a20400532d926b9d7c659df9e1ef8b91",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "favorite",
+      "sha256": "ef028aaf5e056b2431e6ce91c9cca430b6f50b3ce568939dffbd57554639bb7c",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "visual",
+      "sha256": "bb93db68d1f427442af5e964828181004d1d8bcc3d417af952763db828c372ff",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "code",
+      "sha256": "4216acb28229de4a9d71ba58139e76bfc1fb3efae5b7c4139102f42eeb5a6adf",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "css",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-before",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-before",
+      "sha256": "f47932574c052f631b6e205c13df1a618418d647d6adef304d785b32e84c9ea1",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-before",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-after",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-after",
+      "sha256": "e52500fb9f01c1240b3c82d6db85746a8decb99d4a2c6d22478afd34a1bfe5fc",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-after",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "restart",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    }
+  ],
+  "fullWorkflow": "NOT YET",
+  "platformBrowser": "153.0.8010.12",
+  "platformErrors": [],
+  "review": {
+    "rawWorkflowSha256": "90535bddfb7fc0841c4a2ae203412b310519f1b502264693b9320d4e3b0c72b8",
+    "method": "Human-visible raster review plus byte-identical screenshot comparison with earlier reviewed receipts. Independent isolated export linked by exact archive SHA-256.",
+    "sourceRevision": "a0899cab6f4a4387116d58ae547230109be52774",
+    "finalAcceptance": "NOT YET",
+    "limitations": [
+      "Required Cloudinary recipe photos and Google fonts unavailable under default egress denial.",
+      "React19/Tippy ref warnings retained.",
+      "Desktop retains upstream lg:text-3xl; corrected actual-heading measurement is 24/36/30px."
+    ]
+  }
+}

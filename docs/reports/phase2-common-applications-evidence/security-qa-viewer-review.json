@@ -1,0 +1,288 @@
+{
+  "scanId": "2ad633c1-b2c8-4292-9903-9c384ed43225",
+  "reviewer": "security_preflight delegated independent QA/viewer review",
+  "reviewedAt": "2026-09-14T11:42:44.665344+00:00",
+  "result": "NO_EVIDENCE_BACKED_SECURITY_CANDIDATES_IN_ASSIGNED_SCOPE",
+  "candidateFindings": [],
+  "immutableScope": {
+    "base": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+    "head": "223a604500912fed5c00ed2050cb535d57d5dd00",
+    "changedFileCount": 11,
+    "files": [
+      {
+        "path": "scripts/qa/common-applications.cjs",
+        "sha256": "3ca1a9adf17562f804e3821daf5dbff5382f5b6b07b21b95630702d9c37e8d6f",
+        "bytes": 5788,
+        "lineCount": 37,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/common-export.cjs",
+        "sha256": "406af9873c129c918a1962a3f1914a90cde1debdda18aaee280c5912601de377",
+        "bytes": 3966,
+        "lineCount": 14,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/common-hosted.cjs",
+        "sha256": "fc45b8aa5ad3b5a61a1f559f17fe3da74c629a7b5a2325a5c9800d2119312cfd",
+        "bytes": 7260,
+        "lineCount": 39,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/common-kanban-workflow.cjs",
+        "sha256": "49b7b54d24e4d25c031298d58189f9054f5316c503275c2445618f70318a7b96",
+        "bytes": 14315,
+        "lineCount": 46,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/common-recipe-workflow.cjs",
+        "sha256": "bc6aa8e2f625012d218cadfa723f064301796c92e476c65690bb82a99ccd9c2a",
+        "bytes": 14259,
+        "lineCount": 45,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/controlled-render-diagnostic.cjs",
+        "sha256": "2990dda8b1f1264661929001c2aef428f228e7bdeca0618b07a660cbdfacdc86",
+        "bytes": 3700,
+        "lineCount": 23,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/export-build-worker.cjs",
+        "sha256": "07892d62f942eaacb008db9a9f49cedbabc97aec0202482d50751114cf04c948",
+        "bytes": 3160,
+        "lineCount": 12,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/prepare-export-profiles.cjs",
+        "sha256": "a866605267ebe9fd390f0a80c371aad7bf9a79b821139180667bf126dbb5f730",
+        "bytes": 2259,
+        "lineCount": 6,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "scripts/qa/render-diagnostic-worker.cjs",
+        "sha256": "75635b179d954dbcdcecef0ff2c77c1341995d14470a534df6892fd5020667f3",
+        "bytes": 6065,
+        "lineCount": 26,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx",
+        "sha256": "8d556e4b33254f31c7a381893b163411c7d2ef39d585807a263e2cf9beea6101",
+        "bytes": 43278,
+        "lineCount": 413,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      },
+      {
+        "path": "src/webcanbe-engine/visual-editor/rasterFrame.ts",
+        "sha256": "5299a32675900d3b78e25aca45a994ec426f25a1d86f1cbadfd7506fa8b29002",
+        "bytes": 977,
+        "lineCount": 8,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "223a604500912fed5c00ed2050cb535d57d5dd00"
+      }
+    ],
+    "boundaryChecks": [
+      {
+        "boundary": "Operator export input to isolated uploaded Vite execution",
+        "disposition": "no_candidate",
+        "evidence": [
+          "scripts/qa/common-export.cjs:4-11",
+          "scripts/qa/export-build-worker.cjs:6-10",
+          "scripts/runner/launch.sh:8-24",
+          "src/webcanbe-engine/runtime/hostedRunnerGateway.ts:17-49",
+          "src/webcanbe-engine/runtime/linuxHostRunner.ts:17-22"
+        ],
+        "reason": "Mac reads ZIP/data and invokes only repository-owned bundles and fixed Lima argv. Archive extraction precedes materialization and is followed by per-file path/hash/size checks inside Linux. Uploaded Vite/config is executed only under the retained wcb-runner systemd/bwrap boundary, cleared environment, read-only runtime/profile mounts and private tmp/proc/network namespaces. No public gateway command reaches these operator-installed TEST workers. No attacker-controlled shell string or Mac code/config execution sink identified."
+      },
+      {
+        "boundary": "Trusted export profile preparation",
+        "disposition": "no_candidate",
+        "evidence": [
+          "scripts/qa/prepare-export-profiles.cjs:4-6"
+        ],
+        "reason": "Profile names are fixed allowlisted values, input package/lock paths derive from the repository, and npm ci uses --ignore-scripts. Privileged, network-enabled preparation is separate operator authority and receives no uploaded package/config. Destination replacement is refused. No new remote attacker path to this administrative operation was found."
+      },
+      {
+        "boundary": "Diagnostic artifacts and browser execution",
+        "disposition": "no_candidate",
+        "evidence": [
+          "scripts/qa/controlled-render-diagnostic.cjs:4-21",
+          "scripts/qa/render-diagnostic-worker.cjs:7-25",
+          "scripts/runner/launch.sh:8-24"
+        ],
+        "reason": "Fixed subject names select operator-generated local artifacts; a separate fixed worker is installed without editing normal worker/launch.sh. Chromium native namespace/seccomp sandbox is required. Browser egress continues into the isolated network namespace, not an editor-side fetch. Diagnostic timeouts and pipe/resource limits are bounded; regular product screenshot acceptance remains unchanged."
+      },
+      {
+        "boundary": "TEST TLS, identity and gateway credentials",
+        "disposition": "no_candidate",
+        "evidence": [
+          "scripts/qa/common-hosted.cjs:8-15",
+          "scripts/qa/common-hosted.cjs:24-36",
+          "scripts/qa/common-kanban-workflow.cjs:10-13",
+          "scripts/qa/common-recipe-workflow.cjs:10-13"
+        ],
+        "reason": "Helper binds TEST listeners to loopback, creates short-lived certs in an owner-only working directory, writes private config/mTLS key files at 0600, and uses verified/pinned TLS. Platform-browser cookies are restricted to the platform host. Normal close removes enumerated private files. No credential literal, project mount of credentials or export inclusion is introduced."
+      },
+      {
+        "boundary": "Original corpus and full application QA on the Mac",
+        "disposition": "no_candidate",
+        "evidence": [
+          "scripts/qa/common-applications.cjs:11-25",
+          "scripts/qa/common-kanban-workflow.cjs:7-42",
+          "scripts/qa/common-recipe-workflow.cjs:7-41"
+        ],
+        "reason": "Git object/archive commands are fixed argv; provenance hashes and canonical database source bytes are compared. Mac browser visits the packaged platform UI and trusted raster iframe; upstream JavaScript is never browser-loaded on the Mac by these scripts. Static inspect/compile uses the platform engine; that engine internals are assigned to the parent/core reviewer."
+      },
+      {
+        "boundary": "Queued raster input to current source and runner authority",
+        "disposition": "no_candidate",
+        "evidence": [
+          "src/webcanbe-engine/visual-editor/rasterFrame.ts:1-7",
+          "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx:212-300",
+          "src/webcanbe-engine/runtime/rasterViewer.ts:3-27",
+          "src/webcanbe-engine/runtime/controlledPreview.ts:244-288",
+          "src/webcanbe-engine/runtime/hostedEditor.ts:113-138"
+        ],
+        "reason": "A mode toggle no longer starts an unnecessary capture. Stale queued pointers rebind only for exact nonempty PNG equality and equal generation/revision/route/viewport, with queue epoch/revision/generation checks. The trusted iframe message must match source window, null origin, channel, current generation and current sequence; HTTP input still requires a positive sequence, current source, capability/session binding and fresh authorization. PNG equality does not claim hidden DOM-state equality and supplies no new source-authoring authority."
+      }
+    ]
+  },
+  "supplementalScope": {
+    "sealedScanScope": false,
+    "base": "223a604500912fed5c00ed2050cb535d57d5dd00",
+    "description": "Separately reviewed later working-tree QA changes; not attributed to the immutable scan revision.",
+    "files": [
+      {
+        "path": "scripts/qa/common-export.cjs",
+        "sha256": "042831ded1da217b61cc8dad8eba3c3cc75f52b56e9cab6f29d4de471f8eb7f7",
+        "bytes": 4567,
+        "lineCount": 14,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "supplemental working tree snapshot"
+      },
+      {
+        "path": "scripts/qa/controlled-render-diagnostic.cjs",
+        "sha256": "de58628abcbc5513fecb4a4d7ced78e0dbc69cc5d429ec5079420493519ec3af",
+        "bytes": 3944,
+        "lineCount": 23,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "supplemental working tree snapshot"
+      },
+      {
+        "path": "scripts/qa/render-diagnostic-worker.cjs",
+        "sha256": "2d2d62b99f5e31aacbf46c48f8bd4b4f7f069a384ee5bb933005cfd56d45f3d8",
+        "bytes": 6574,
+        "lineCount": 27,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "supplemental working tree snapshot"
+      },
+      {
+        "path": "scripts/qa/legacy-export-assertions.cjs",
+        "sha256": "8e21d4c4c0e6f5d25086e4aaabdd14e91fc3187ece3f40f72994e91735098530",
+        "bytes": 5151,
+        "lineCount": 23,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "supplemental working tree snapshot"
+      },
+      {
+        "path": "scripts/qa/common-recipe-workflow.cjs",
+        "sha256": "7274fd9f6b9ba68ddafa31d65c12f3cce091aa16d38fd90f9e413e2d5e8e22e1",
+        "bytes": 14682,
+        "lineCount": 45,
+        "coverage": "Complete added file or all changed hunks plus enclosing function and directly supporting controls",
+        "source": "supplemental working tree snapshot"
+      }
+    ],
+    "candidateFindings": [],
+    "reviewedChanges": [
+      "common-export adds static detectProject/inspectRuntime and exact selected-profile admission before Linux export execution; no uploaded code evaluation on the Mac is added.",
+      "controlled-render-diagnostic adds eight fixed legacy subjects and copies only the fixed repository legacy assertions helper into the read-only Linux runtime.",
+      "render-diagnostic-worker adds same-origin extensionless navigation fallback and calls the fixed legacy assertions module for fixed legacy scenario names; external origins still go to the isolated OS network boundary.",
+      "legacy-export-assertions only performs fixed Playwright DOM/style/route/content assertions within the Linux browser; no shell, uploaded evaluate expression or dynamic module path is added.",
+      "common-recipe-workflow changes responsive click coordinates and checks mapped source identity/font sizes; no product authority or execution boundary change."
+    ],
+    "nonSecurityObservations": [
+      {
+        "file": "scripts/qa/common-recipe-workflow.cjs",
+        "line": 36,
+        "description": "The responsive supplemental edit references check(...) without defining/importing check; only assert is available. Parent was notified; this prevents a successful QA rerun until corrected.",
+        "status": "CORRECTED_ON_REREAD"
+      }
+    ]
+  },
+  "supportingFiles": [
+    {
+      "path": "scripts/runner/launch.sh",
+      "scope": "Full file read"
+    },
+    {
+      "path": "scripts/runner/stop.sh",
+      "scope": "Full file read"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/controlledPreview.ts",
+      "scope": "Relevant control ranges only; no claim of full-file audit"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/hostedRunnerGateway.ts",
+      "scope": "Full file read"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/hostedEditor.ts",
+      "scope": "Relevant control ranges only; no claim of full-file audit"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/linuxHostRunner.ts",
+      "scope": "Relevant control ranges only; no claim of full-file audit"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/rasterViewer.ts",
+      "scope": "Full file read"
+    }
+  ],
+  "policyResolution": {
+    "referencesRead": [
+      "skills/finding-discovery/SKILL.md",
+      "references/security-guidance.md"
+    ],
+    "architectureContext": "artifacts/01_context/architecture-review.json",
+    "resolver": "resolve_security_md.py",
+    "scopes": [
+      "scripts/qa",
+      "src/webcanbe-engine/visual-editor",
+      "src/webcanbe-engine/runtime",
+      "scripts/runner"
+    ],
+    "result": "All resolver calls returned empty policy with exit 0. No SECURITY.md exclusions were invented."
+  },
+  "limitations": [
+    "Read-only source review only: no runtime execution, tests, PoCs, upstream configuration execution, external requests, registry/advisory lookup or credential-file content reads were performed.",
+    "No whole-repository, production deployment or operating-system enforcement attestation is implied. Engine intake/config/dependency admission internals and locks are separately assigned to the parent/core reviewer.",
+    "QA lifecycle cleanup is not total for setup failure before helper return or malformed receipt processing before stop; private owner-only TEST state may need operator cleanup. No remote read/exfiltration path or persistent cross-tenant impact was established, so this is recorded as an operational limitation rather than a security candidate.",
+    "Independent export worker and uploaded config share a disposable Linux execution job. Returned QA fields are useful evidence for fixed selected applications, not a cryptographic integrity guarantee against deliberately hostile configuration attempting to falsify that same job; no authority is granted to a remote caller based on these receipts.",
+    "Exact raster PNG equality permits visually identical frames and does not prove equal hidden DOM/app state. Source mutation still requires a later authorized action and source identity validation.",
+    "Operator profile preparation deliberately has administrative network authority, unlike the subsequent uploaded-source job. The review did not inspect package registry advisory status or privileged environment contents.",
+    "Supplemental file digests identify the exact read versions; later changes require a further bounded reread."
+  ],
+  "measuredUsage": {
+    "available": false,
+    "note": "This worker has no per-scan token or tool-budget measurement interface; no usage value is invented."
+  }
+}

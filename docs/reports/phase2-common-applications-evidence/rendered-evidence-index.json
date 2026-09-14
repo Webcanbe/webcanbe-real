@@ -1,0 +1,181 @@
+{
+  "screenshots": [
+    {
+      "file": "kanban-initial.png",
+      "sha256": "fc641b08158745c72d122c1239474316d9843c1420b5bb36b63f873356bd31d9",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-card-form.png",
+      "sha256": "70580daa86378b9a45e39efdd20262509b200dd3522ed86066e182c8e874dcba",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-card-created.png",
+      "sha256": "5f71cf94d1bcaae9bd062adf884e9126b3727cfdf19cdafe8143c1a1f188902a",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-visual.png",
+      "sha256": "4bcf38deebb819ef7df611cfcc41e8fb32a4511c2d50cb7871b5844bfea00bca",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-code.png",
+      "sha256": "f3520558e23e267557916008b52e72f1a1898bc6e899693fcb113aa1149d46bf",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-css.png",
+      "sha256": "b4bd0eb17197f7bed03dc829293c886aaa5e53b1bb870d4ab2dc1e937284666c",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-mobile-before.png",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-tablet-before.png",
+      "sha256": "1ea300e4f496f96730a790f4b216978487cb242b9f25bb3ed3714af0e5721ce9",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-desktop-before.png",
+      "sha256": "ba7e4f299c98c0047cf056a13768b19ad2276ee7a9cd4bfb4cb7a8f6ffef439a",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-mobile-after.png",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-tablet-after.png",
+      "sha256": "82551f733adfbcae53137f0826277b4b2037020d13dc69908cf224c23d429afe",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-desktop-after.png",
+      "sha256": "e8e1e8731529208c42014d55079d695e72a1f3571330ec46cb0ba562bec963da",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-restart.png",
+      "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-platform-history.png",
+      "sha256": "24ca5b36dd12e9f70b4ff9cd5d99121bda5d6eb2abd5a36fe26531aaf71fbd21",
+      "reviewed": "Platform history/final artifact; machine source/history assertions in workflow receipt."
+    },
+    {
+      "file": "kanban-platform-final.png",
+      "sha256": "a248d1c2b5e0f429a55c7d54591496a6ed1f1f6421719807f2e900ef85855105",
+      "reviewed": "Platform history/final artifact; machine source/history assertions in workflow receipt."
+    },
+    {
+      "file": "recipe-initial.png",
+      "sha256": "5e2f69e4aa05d47c47983faa37471f8b03b3aa7a3e962489e1278bfaa21f0dd8",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-category-filter.png",
+      "sha256": "57ceddab9971d68cf2f872e218468c70a20400532d926b9d7c659df9e1ef8b91",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-favorite.png",
+      "sha256": "ef028aaf5e056b2431e6ce91c9cca430b6f50b3ce568939dffbd57554639bb7c",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-visual.png",
+      "sha256": "bb93db68d1f427442af5e964828181004d1d8bcc3d417af952763db828c372ff",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-code.png",
+      "sha256": "4216acb28229de4a9d71ba58139e76bfc1fb3efae5b7c4139102f42eeb5a6adf",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-css.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-mobile-before.png",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-tablet-before.png",
+      "sha256": "f47932574c052f631b6e205c13df1a618418d647d6adef304d785b32e84c9ea1",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-desktop-before.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-mobile-after.png",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-tablet-after.png",
+      "sha256": "e52500fb9f01c1240b3c82d6db85746a8decb99d4a2c6d22478afd34a1bfe5fc",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-desktop-after.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-restart.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-platform-history.png",
+      "sha256": "3a02395d0caf73c5da6977c38d8f3908b7d7d4fe8a992d7d14321b6fecb9341b",
+      "reviewed": "Platform history/final artifact; machine source/history assertions in workflow receipt."
+    },
+    {
+      "file": "recipe-platform-final.png",
+      "sha256": "efc020da270a5fbebcd6f8fa10bfedb919995ae4f44910563f9f915800c85551",
+      "reviewed": "Platform history/final artifact; machine source/history assertions in workflow receipt."
+    },
+    {
+      "file": "kanban-export-ordinaryPng.png",
+      "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-export-390.png",
+      "sha256": "ac45b8fd2e94e4e732b8cbde42e78802b3f7108a3c97462ee169430efc3faec5",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-export-768.png",
+      "sha256": "62693147427b34a9db28145ed8c019d880d1433d3d55a3508b4be41ef5bab062",
+      "reviewed": true
+    },
+    {
+      "file": "kanban-export-1280.png",
+      "sha256": "6b282d40765edbbb8a3082809352ff3e49da7fa8467249f960b6d7a39d545f3e",
+      "reviewed": true
+    },
+    {
+      "file": "recipe-export-ordinaryPng.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "reviewed": true
+    }
+  ],
+  "zustandImages": "Local-only diagnostic PNGs retained; no artwork redistributed.",
+  "licenses": "See third-party-notices.txt; source ZIPs and full third-party source are not committed."
+}

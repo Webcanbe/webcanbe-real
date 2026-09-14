@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 950.485373,
+  "output": "vite v5.4.21 building for production...\ntransforming...\n\u2713 34 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.46 kB \u2502 gzip:  0.30 kB\ndist/assets/react-CHdo91hT.svg    4.13 kB \u2502 gzip:  2.14 kB\ndist/assets/index-Ca74PG3G.css    1.39 kB \u2502 gzip:  0.72 kB\ndist/assets/index-c9bXaRvi.js   143.20 kB \u2502 gzip: 46.04 kB\n\u2713 built in 727ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1110.35275,
+  "archiveSha256": "f5fdcbf14f4c24ccc9dc4b92e1a16857857f9f519e4e7d94599d6823fcb984cb",
+  "profile": "react18-vite5-v1",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "8b128b9b59740e2567183b66febb6507c66a984a211c203c94a4cf4cef9dbf4c"
+    },
+    {
+      "path": "/vite.svg",
+      "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+    },
+    {
+      "path": "/assets/index-Ca74PG3G.css",
+      "sha256": "a36d8b68c68d2fb3aca1579ccae13b6c838209dbc18e4bf138283614924c9b9c"
+    },
+    {
+      "path": "/assets/index-c9bXaRvi.js",
+      "sha256": "b9e0754878436052a6c000ac22ee9afec5aa17f1f4cade44ff61e30c370a0597"
+    },
+    {
+      "path": "/assets/react-CHdo91hT.svg",
+      "sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

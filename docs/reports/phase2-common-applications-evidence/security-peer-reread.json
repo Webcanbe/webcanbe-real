@@ -1,0 +1,109 @@
+{
+  "kind": "Independent supplemental compatibility remediation reread",
+  "recordedAtUtc": "2026-09-14T11:45:08.137387+00:00",
+  "immutableScanUnchanged": {
+    "base": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+    "head": "223a604500912fed5c00ed2050cb535d57d5dd00",
+    "coreCandidates": 0,
+    "coreArtifact": "artifacts/02_discovery/core-review.json"
+  },
+  "reviewedSnapshot": {
+    "type": "Current working-tree supplemental patch against immutable head",
+    "fileDigests": [
+      {
+        "path": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+        "sha256": "72a93d5dded392beabb4eb04db54c9fea8d9c02f49ba8b789cd6171d92f32d77",
+        "bytes": 31717
+      },
+      {
+        "path": "src/webcanbe-engine/phase2-common-applications.test.ts",
+        "sha256": "ae86746c8fdeb393e2efc91e348800f93ec0990e63af0f6fb23af57213e2ecfd",
+        "bytes": 12798
+      },
+      {
+        "path": "runtime-profiles/README.md",
+        "sha256": "d8aa1094ee6c35e419383e43da543a451a24da3b5a0a9cebac48bdb558688764",
+        "bytes": 3271
+      }
+    ],
+    "selectedDiffSha256": "c492df98468be8652af760319dfa98059eb4fd4cc665ce729c0c59184de17e09",
+    "selectedDiffBytes": 5938
+  },
+  "result": "PASS for the stated peer-lock correction and documentation correction, by independent source/test-case reread plus inspection of parent-produced test logs. No independently executed tests and no new security finding.",
+  "sourceReview": [
+    {
+      "path": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+      "lines": "223-227",
+      "observation": "Traversal now unions dependencies, optionalDependencies and peerDependencies, resolves through nestedDependency, skips absent marked optional edges, and enqueues required peers or present optional peers. Existing visited set, missing-record/link rejection and uploaded version/integrity check apply to those nodes. Required direct dependency is not made optional solely by peerDependenciesMeta."
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "lines": "94-115",
+      "observation": "Fixture deliberately omits peer from direct manifest dependencies. The required use-immer -> immer test passes matching lock and rejects changed peer integrity. The zustand optional-peer test proves absent trusted immer/use-sync-external-store are skipped while changed present @types/react integrity is rejected."
+    },
+    {
+      "path": "runtime-profiles/README.md",
+      "lines": "14-18",
+      "observation": "Documentation explicitly describes present peer validation and absent optional-peer policy."
+    },
+    {
+      "path": "runtime-profiles/README.md",
+      "lines": "40-47",
+      "observation": "Documentation now qualifies dotfile/secret guarantees to the actual extension/path allowlist and finite metadata validation."
+    }
+  ],
+  "regressionEvidence": {
+    "producer": "Parent agent; evidence files independently inspected by this reviewer",
+    "focused": {
+      "passed": 16,
+      "failed": 0,
+      "source": "peer-regressions.log"
+    },
+    "defaultSuite": {
+      "success": true,
+      "numTotalTests": 341,
+      "numPassedTests": 306,
+      "numFailedTests": 0,
+      "numPendingTests": 35
+    },
+    "newPeerCases": [
+      {
+        "title": "verifies required peer locks even when the peer is not directly declared",
+        "status": "passed"
+      },
+      {
+        "title": "skips absent optional peers but verifies present optional peer locks",
+        "status": "passed"
+      }
+    ],
+    "build": "Inspected log starts tsc -b && vite build and reports successful build in 2.51s.",
+    "evidenceDigests": [
+      {
+        "path": ".webcanbe/runner/qa-common-applications/peer-regressions.log",
+        "sha256": "981efd66de25ea13481a241e770f5cef4a170934067768581e410af83da59534",
+        "bytes": 2470
+      },
+      {
+        "path": ".webcanbe/runner/qa-common-applications/default-tests-peer-final.json",
+        "sha256": "bb9d587e5e5e6ff2d6175eda60d7bd581c62875d2e815ae65ce0025f75efaf2c",
+        "bytes": 130020
+      },
+      {
+        "path": ".webcanbe/runner/qa-common-applications/default-tests-peer-final.log",
+        "sha256": "cd0889e3bffb90b9218320deef851fed20b45688deae4d5c64f3f812de0592a1",
+        "bytes": 141
+      },
+      {
+        "path": ".webcanbe/runner/qa-common-applications/build-peer-final.log",
+        "sha256": "52c3019a5a964b882bb392c1dc1a38570cf61a0bca99629a65c0d04d66494ea3",
+        "bytes": 798
+      }
+    ]
+  },
+  "limits": [
+    "This receipt is separate from the immutable six-file scan classification; the peer gap was retained as exact-lock compatibility correction without arbitrary-package execution impact.",
+    "The 35 gated tests and additional integration/workflow/export jobs were reported by parent as still in progress; no pass is claimed here for those runs.",
+    "Logs were inspected as evidence; this reviewer did not rerun tests, execute imported code, modify source, or contact external services.",
+    "File/diff digests bind this reread to observed working-tree bytes; subsequent edits require a new check."
+  ]
+}
