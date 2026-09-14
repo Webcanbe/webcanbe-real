@@ -1,0 +1,367 @@
+{
+  "boundary": "Actual packaged HTTPS / PostgreSQL / mTLS / one isolated local TEST Linux host",
+  "checks": [
+    {
+      "name": "two full independent applications admitted concurrently with exact frozen source",
+      "status": "PASS"
+    },
+    {
+      "name": "third project denied under the unchanged two-job host/workspace bound",
+      "status": "PASS"
+    },
+    {
+      "name": "sixteen ordinary concurrent raster captures obey fixed memory/task/CPU controls",
+      "status": "PASS"
+    },
+    {
+      "name": "same-generation capture burst is bounded to one operation and refuses overload",
+      "status": "PASS"
+    }
+  ],
+  "projects": [
+    {
+      "subject": "kanban-board",
+      "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+      "archiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+      "importMs": 95.72245799999996,
+      "startMs": 4099.769791,
+      "warmCodeMs": 2696.8547500000004,
+      "updateKind": "css-hot-update"
+    },
+    {
+      "subject": "habit-tracker",
+      "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+      "archiveSha256": "9eb8083138152efe3796c90cba95b944f0265188f8ec21cf501633cb052941ec",
+      "importMs": 84.50679100000002,
+      "startMs": 1379.6720840000007
+    },
+    {
+      "subject": "habit-tracker",
+      "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+      "archiveSha256": "9eb8083138152efe3796c90cba95b944f0265188f8ec21cf501633cb052941ec",
+      "importMs": 73.75829099999999
+    }
+  ],
+  "samples": [
+    {
+      "cycle": 0,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "574701568",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2457908000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 0,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "470454272",
+      "MemoryPeak": "474071040",
+      "CPUUsageNSec": "1643846000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 1,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "575590400",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2505479000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 1,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "470552576",
+      "MemoryPeak": "489693184",
+      "CPUUsageNSec": "1740954000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 2,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "575508480",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2527928000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 2,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "473698304",
+      "MemoryPeak": "489693184",
+      "CPUUsageNSec": "1802024000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 3,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "575594496",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2552409000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 3,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "476372992",
+      "MemoryPeak": "489693184",
+      "CPUUsageNSec": "1849081000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 4,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "575574016",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2576463000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 4,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "478920704",
+      "MemoryPeak": "489693184",
+      "CPUUsageNSec": "1911102000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 5,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "572620800",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2593364000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 5,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "481652736",
+      "MemoryPeak": "489693184",
+      "CPUUsageNSec": "1971060000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 6,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "572604416",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2609588000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 6,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "484442112",
+      "MemoryPeak": "491171840",
+      "CPUUsageNSec": "2020395000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 7,
+      "subject": "kanban-board",
+      "Result": "success",
+      "MemoryCurrent": "572624896",
+      "MemoryPeak": "591474688",
+      "CPUUsageNSec": "2625790000",
+      "TasksCurrent": "114",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    },
+    {
+      "cycle": 7,
+      "subject": "habit-tracker",
+      "Result": "success",
+      "MemoryCurrent": "485052416",
+      "MemoryPeak": "491524096",
+      "CPUUsageNSec": "2058610000",
+      "TasksCurrent": "112",
+      "CPUQuotaPerSecUSec": "1.500000s",
+      "MemoryMax": "1610612736",
+      "TasksMax": "192",
+      "ActiveState": "active"
+    }
+  ],
+  "captures": [
+    {
+      "subject": "kanban-board",
+      "ms": 121.33691699999963,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 133.80016700000033,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 118.11599999999999,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 169.21270900000036,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 100.38125000000036,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 129.45683400000053,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 112.60945899999933,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 139.46554099999958,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 97.21591700000135,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 123.86191700000018,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 91.86050000000068,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 117.10575000000063,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 92.29041599999982,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 113.58250000000044,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 75.38037500000064,
+      "status": 200
+    },
+    {
+      "subject": "habit-tracker",
+      "ms": 107.3520840000001,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 60.808499999999185,
+      "status": 200
+    },
+    {
+      "subject": "kanban-board",
+      "ms": 75.01270899999872,
+      "status": 200
+    }
+  ],
+  "admissionDenial": {
+    "status": 422,
+    "error": "The hosted operation failed. Accepted source and history remain authoritative."
+  },
+  "burstStatuses": [
+    422,
+    422,
+    422,
+    422,
+    422,
+    422,
+    422,
+    422,
+    422,
+    200,
+    422,
+    422
+  ],
+  "status": "FAIL",
+  "failure": "{\"error\":\"The hosted operation failed. Accepted source and history remain authoritative.\"}\n\n422 !== 200\n"
+}

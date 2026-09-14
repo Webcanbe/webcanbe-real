@@ -1,0 +1,147 @@
+{
+  "selectedAtUtc": "2026-09-14T12:47:46.784Z",
+  "implementationBase": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
+  "priorGeneralChanges": [
+    "bounded CDP capture",
+    "semantic TypeScript checker",
+    "AST source moves"
+  ],
+  "antiGaming": "Selection and freeze precede package/config/source compatibility inspection. Only upstream README and LICENSE read for qualification; all root files hashed without filtering.",
+  "id": "habit-tracker",
+  "repository": "https://github.com/TheUnknown550/Habit-Tracker-Web-App.git",
+  "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+  "scope": "entire repository root",
+  "license": "MIT",
+  "licenseEvidence": {
+    "mode": "100644",
+    "bytes": 1069,
+    "sha256": "8da439868f8124a6cf2c1c6eeb3c5cfdceaa379c61de24cb74e96249f27d5115"
+  },
+  "archiveMtime": "2025-11-24T13:19:20+07:00",
+  "archiveSha256": "9eb8083138152efe3796c90cba95b944f0265188f8ec21cf501633cb052941ec",
+  "archiveBytes": 50071,
+  "files": {
+    ".gitattributes": {
+      "mode": "100644",
+      "bytes": 66,
+      "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b"
+    },
+    ".github/workflows/deploy.yml": {
+      "mode": "100644",
+      "bytes": 1002,
+      "sha256": "7026d59ceb73534e0d83891d337daebe382c813cabdf6f1be35f7311417727b8"
+    },
+    ".gitignore": {
+      "mode": "100644",
+      "bytes": 253,
+      "sha256": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8"
+    },
+    "INSTALLATION.md": {
+      "mode": "100644",
+      "bytes": 4357,
+      "sha256": "471b2ae9a08d388f9918e7641f66e21a9dfdfcc0aef5ef1e3d6717eebc1a4a31"
+    },
+    "LICENSE": {
+      "mode": "100644",
+      "bytes": 1069,
+      "sha256": "8da439868f8124a6cf2c1c6eeb3c5cfdceaa379c61de24cb74e96249f27d5115"
+    },
+    "README.md": {
+      "mode": "100644",
+      "bytes": 8744,
+      "sha256": "11908c9badca43144e1a128d35e562fce2c01bcd8e170cd579344e7d14cf9c84"
+    },
+    "eslint.config.js": {
+      "mode": "100644",
+      "bytes": 763,
+      "sha256": "38c6066c62e803f0b512c2e18297c36cdeaccd6a1190c1cc19cc59c96c74bbc1"
+    },
+    "index.html": {
+      "mode": "100644",
+      "bytes": 370,
+      "sha256": "e81707402a69f086db9ff5d6d28e37e06aba6aef0fd1ba2cd1da70f0690f2c51"
+    },
+    "package-lock.json": {
+      "mode": "100644",
+      "bytes": 116422,
+      "sha256": "62fe7766df69d4c0ce0876fa3dedf3e0341dfacbbab208c25c93ad1ec3c1cdb6"
+    },
+    "package.json": {
+      "mode": "100644",
+      "bytes": 684,
+      "sha256": "f7cb762bedb8186d8af4560c58db15a702c1a492c19f447d44ff19b2b94c2375"
+    },
+    "src/App.jsx": {
+      "mode": "100644",
+      "bytes": 5762,
+      "sha256": "1df251bc6ad6f755dfe49c68e0903bfa337ef8e03868f191c7361266838da0a3"
+    },
+    "src/components/AddHabitForm.jsx": {
+      "mode": "100644",
+      "bytes": 2268,
+      "sha256": "d489544e46bbf9b4d2583b69278fb7dbd2a5347e88cb8e80727adca94421280c"
+    },
+    "src/components/CalendarView.jsx": {
+      "mode": "100644",
+      "bytes": 5128,
+      "sha256": "4e4d9e05f380ea5eb4e508cdc794073d5f94fc9a2437e96bba606be16f14b2d7"
+    },
+    "src/components/DataExport.jsx": {
+      "mode": "100644",
+      "bytes": 4562,
+      "sha256": "3a669ea0f58e3455ca39c4614e6d900e90ac722e712c054edc7efdff23bcc09c"
+    },
+    "src/components/HabitItem.jsx": {
+      "mode": "100644",
+      "bytes": 4320,
+      "sha256": "292878cb9c503d3b132ee89d7d8f90120b11664c82ea754ade7e6dad58225e2d"
+    },
+    "src/components/HabitList.jsx": {
+      "mode": "100644",
+      "bytes": 2217,
+      "sha256": "5a8b1ab809650dc0091d6f9cc7f733aeb1a50e9c40ec4084ee809890ebdc10ad"
+    },
+    "src/components/ProgressBar.jsx": {
+      "mode": "100644",
+      "bytes": 2030,
+      "sha256": "4167296dd3730a7f2ad6b450c67f255bac7402539b85598c6da3944ecaf34a40"
+    },
+    "src/components/StatisticsDashboard.jsx": {
+      "mode": "100644",
+      "bytes": 6194,
+      "sha256": "afe04c870194ce4eb83d614bff01c422b4743c4bb0b5d428283eb0f8313ca9a3"
+    },
+    "src/hooks/useLocalStorage.js": {
+      "mode": "100644",
+      "bytes": 804,
+      "sha256": "df21247c7c97e00cc9ea9d611071e32908f39c6213f1a89d7ddd32071346e599"
+    },
+    "src/index.css": {
+      "mode": "100644",
+      "bytes": 962,
+      "sha256": "88e4dbfec49547ee24e71a0d6b8a5aad8767da7398d694de6823f567f15d7f3f"
+    },
+    "src/main.jsx": {
+      "mode": "100644",
+      "bytes": 229,
+      "sha256": "4b4b864dbe45253425d0c925337180ec07e204295179f80f59551216f466f618"
+    },
+    "tailwind.config.js": {
+      "mode": "100644",
+      "bytes": 181,
+      "sha256": "3dd3712212acbc67849a13a9f1401527495e09a1a12e1c417fac6b4ecf1fe6d4"
+    },
+    "vite.config.js": {
+      "mode": "100644",
+      "bytes": 255,
+      "sha256": "5772d5464b73547c7d4c43d221e4b9b389120195f9327e430a6ce86eb545716a"
+    }
+  },
+  "expectedWorkflow": "Create two habits, complete one, observe progress and streak, visit calendar and statistics, edit a habit and verify persisted application data within the live generation.",
+  "representativeness": "Independently authored multi-view habit management app with CRUD, calendar, analytics, persistent state and animations, beyond a todo-only or counter demo.",
+  "preservedFailures": "Recipe required remote resources, Zustand bounded capture, and original Redux/Bulletproof/Todo admission failures remain recorded.",
+  "qualificationNotes": [
+    "StudyFlow AI was not selected: no LICENSE or license grant found in qualification README.",
+    "Finpulse was not selected: README states MIT but root has no full license file."
+  ]
+}

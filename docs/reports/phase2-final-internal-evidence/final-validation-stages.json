@@ -1,0 +1,254 @@
+[
+  {
+    "name": "native-tests",
+    "command": [
+      "npx",
+      "vitest",
+      "run",
+      "--no-file-parallelism",
+      "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "src/webcanbe-engine/phase2-final-history.test.ts",
+      "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "--reporter=json",
+      "--outputFile=.webcanbe/final-freeze/native-tests.json"
+    ],
+    "environmentNames": [
+      "WCB_PG_TEST",
+      "WCB_HOSTED_RUNNER_TEST",
+      "WCB_REFRESH_TEST",
+      "WCB_CAPTURE_TEST",
+      "WCB_SEMANTIC_TEST"
+    ],
+    "exit": 0,
+    "elapsedMs": 35141
+  },
+  {
+    "name": "hosted-tests",
+    "command": [
+      "npx",
+      "vitest",
+      "run",
+      "--no-file-parallelism",
+      "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "--reporter=json",
+      "--outputFile=.webcanbe/final-freeze/hosted-tests.json"
+    ],
+    "environmentNames": [
+      "WCB_HOSTED_EDITOR_TEST"
+    ],
+    "exit": 0,
+    "elapsedMs": 46224
+  },
+  {
+    "name": "editor",
+    "command": [
+      "node",
+      "scripts/verify-phase2c-editor-regressions.cjs",
+      ".webcanbe/final-freeze/editor"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 16477
+  },
+  {
+    "name": "controlled",
+    "command": [
+      "node",
+      "scripts/verify-phase2c2-controlled.cjs",
+      ".webcanbe/final-freeze/controlled"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 34083
+  },
+  {
+    "name": "source",
+    "command": [
+      "node",
+      "scripts/verify-phase2de.cjs",
+      ".webcanbe/final-freeze/source"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 59827
+  },
+  {
+    "name": "responsive",
+    "command": [
+      "node",
+      "scripts/verify-phase2f.cjs",
+      ".webcanbe/final-freeze/responsive"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 81253
+  },
+  {
+    "name": "runtime",
+    "command": [
+      "node",
+      "scripts/verify-phase2g.cjs",
+      ".webcanbe/final-freeze/runtime"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 9480
+  },
+  {
+    "name": "tls",
+    "command": [
+      "node",
+      "scripts/qa/phase2g2-tls-browser.cjs"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 539
+  },
+  {
+    "name": "native-os",
+    "command": [
+      "node",
+      "scripts/runner/verify-local.cjs"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 74418
+  },
+  {
+    "name": "kanban-final",
+    "command": [
+      "node",
+      "scripts/qa/common-kanban-workflow.cjs"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 37265
+  },
+  {
+    "name": "habit-final",
+    "command": [
+      "node",
+      "scripts/qa/final-habit-workflow.cjs"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 39101
+  },
+  {
+    "name": "legacy-de-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-de"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1811
+  },
+  {
+    "name": "legacy-f-browser-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-f-browser"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1632
+  },
+  {
+    "name": "legacy-f-hash-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-f-hash"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1658
+  },
+  {
+    "name": "legacy-g-authored-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-g-authored"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1586
+  },
+  {
+    "name": "legacy-g-react18-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-g-react18"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1698
+  },
+  {
+    "name": "legacy-g-react19-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-g-react19"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1515
+  },
+  {
+    "name": "legacy-hosted-react18-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-hosted-react18"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1487
+  },
+  {
+    "name": "legacy-hosted-react19-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "legacy-hosted-react19"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1513
+  },
+  {
+    "name": "kanban-export-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "kanban-export"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 1605
+  },
+  {
+    "name": "habit-export-render",
+    "command": [
+      "node",
+      "scripts/qa/controlled-render-diagnostic.cjs",
+      "habit-export"
+    ],
+    "environmentNames": [],
+    "exit": 0,
+    "elapsedMs": 2742
+  }
+]

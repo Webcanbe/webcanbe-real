@@ -1,0 +1,29 @@
+{
+  "boundary": "Actual packaged hosted editor / PG / mTLS native Linux raster",
+  "browserPath": "Browser plugin not available; retained Playwright",
+  "checks": [
+    {
+      "name": "scaled pointer resize changes only identified authored width",
+      "status": "PASS"
+    },
+    {
+      "name": "keyboard size alternative changes same source declaration",
+      "status": "PASS"
+    },
+    {
+      "name": "pointer drag swaps adjacent Flex source siblings",
+      "status": "PASS"
+    },
+    {
+      "name": "responsive keyboard resize changes only explicit mobile override",
+      "status": "PASS"
+    },
+    {
+      "name": "breakpoint switch cancels in-flight pointer gesture without transaction",
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "acceptedRevision": "rev_dfae4a2f-df6a-4099-8208-997706ee423f",
+  "status": "PASS"
+}

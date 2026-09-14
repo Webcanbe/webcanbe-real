@@ -1,0 +1,11 @@
+{
+  "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+  "checkedTextFiles": 136,
+  "privateKeyCredentialCookieValueAndPersonalPathPatterns": "No matches in outgoing evidence/report and all changed implementation files.",
+  "manualScopeReview": "Only public MIT application QA diffs/screenshots and notices, generated TEST metadata, source-relative paths, hashes and diagnostics. No source archive or generated PKI/config/credential file included.",
+  "historicalErrorPathRedaction": "authoring-1789390973247.json retains EEXIST failure, replacing the personal temporary export path only.",
+  "securityCoverageExactPathMatch": true,
+  "postSealExecutableChanges": false,
+  "allOriginalTestHashesMatch": true,
+  "oldProfilesUnchanged": true
+}

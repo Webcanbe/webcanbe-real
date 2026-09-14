@@ -1,3 +1,21 @@
+# Current handoff: Phase 2 final internal closure attempt (2026-09-15)
+
+**INTERNAL CLOSURE: NOT YET. COMMON-APPLICATION CHECKPOINT: PASS. TWO COMPLETE UNCHANGED APPLICATIONS. MATRIX: 45 PASS / 6 PARTIAL / 1 FAIL / 12 EXTERNAL-EVIDENCE. OVERALL PHASE 2: NOT YET. PUBLIC HOSTED IMPORT: NO. PHASE 3 MAY BEGIN: NO.**
+
+Implementation `2d0087ac8a009af36dd43023e988f7dfdcbd6e69` continues `13871b0311c09ae07d9a8bb3e8598f46a9d38f6c` on the existing `phase-2-compatible-editor` branch. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. The [final report and full unchanged-requirement P01–P64 matrix](reports/phase2-final-internal-closure.md), [final ledger](reports/phase2-final-internal-evidence/final-ledger.json), [evidence index](reports/phase2-final-internal-evidence/index.json) and [publication receipt](reports/phase2-final-internal-evidence/publication.json) are now authoritative. Earlier sections below are historical, not the current status.
+
+- Closed P10/P12/P17/P18/P23/P25/P31/P57/P59 and internal software portions of P29/P51/P55 through general source-origin/cascade/gesture/move, isolated semantic checking, immutable intake, history archive/restore/migration, refresh, resource and managed-value seams.
+- Two exact independently authored MIT apps pass full packaged HTTPS/PG/mTLS workflow and exact isolated export build/render/interaction: 9bzero/kanban-board (`83413e1f5fab4690bb46b23201a3438a427ef265`) and preselected TheUnknown550/Habit-Tracker-Web-App (`0a874ff471873cc662be5479f0cfe94f7c2d653e`). Original Redux/Bulletproof/Todo/Recipe/Zustand failures retained.
+- All original 341 tests/assertions preserved. 429 distinct passes; default45 skips all exercised in native/hosted groups, none outstanding. Five retained browser groups, TLS/native OS, eight retained exports and both new final exports pass.
+- Security scan `61a31df3-9d69-4431-80d8-05ea621329d2` sealed over base..implementation, all74 changed paths, zero confirmed unresolved vulnerabilities. Later changes are documentation/evidence only; not a professional penetration test.
+- Exact internal rows: P05 Yarn/Bun/pinned graph and oversized Redux member; P06 custom mount/plugin/alias semantics; P07 public-env/file breadth and required remote-asset fetch/cache boundary; P08 Tailwind3/PostCSS/UnoCSS; P39 native OS IME/full accessibility/sustained session proof; P61 normal hosted Zustand4s and unexplained second-app warm-update422 plus sustained load. These are not production-credential blockers. Do not relabel them external or waive the DoD.
+- External rows: P29/P41/P43/P45/P46/P48/P49/P50/P51/P52/P55/P56; exact finite production checklist is in the report. P64 remains FAIL/deferred Phase3/4/5 and is prohibited scope for this run.
+- Owned TEST services/tunnels/credentials/schema/export helpers cleaned, all68 leases stopped, VM stopped. No code changes after security freeze. Do not repeatedly regenerate valid evidence or restart repository analysis; use the final ledger as the index.
+
+---
+
+## Historical handoffs
+
 # Current handoff: Phase 2 unchanged common React/Vite applications (2026-09-14)
 
 **COMMON-APPLICATION CHECKPOINT: NOT YET. COMPLETE UNCHANGED FULL-APPLICATION WORKFLOWS: 1 (9bzero/kanban-board). OVERALL PHASE2: NOT YET. PUBLIC HOSTED IMPORT READY: NO. PHASE3 MAY BEGIN: NO.**

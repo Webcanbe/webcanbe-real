@@ -1,0 +1,64 @@
+{
+  "reviewedAt": "2026-09-14T13:18:25.948Z",
+  "status": "PASS",
+  "application": "TheUnknown550/Habit-Tracker-Web-App",
+  "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+  "boundary": "Local TEST: packaged HTTPS/OIDC/PostgreSQL/mTLS/native isolated browser; no production readiness claim",
+  "unchangedInitialFiles": 23,
+  "meaningfulInteraction": "Two habits created; one completed and edited; screenshot shows 50%, one-day streak and statistics with both records.",
+  "responsive": {
+    "widths": [
+      390,
+      768,
+      1280
+    ],
+    "beforeAfterVerified": true,
+    "editedHeadingPx": [
+      36,
+      48,
+      48
+    ]
+  },
+  "sourceWorkflow": [
+    "mapped native heading",
+    "Visual text change",
+    "Code text change",
+    "CSS edit",
+    "responsive source override",
+    "durable history",
+    "byte-exact undo/redo",
+    "SIGKILL/reconnect",
+    "exact 23-file accepted export"
+  ],
+  "independentExport": {
+    "build": "PASS",
+    "ordinaryRasterMs": 146.03615600000012,
+    "interaction": "PASS",
+    "sourceUnchanged": true,
+    "platformMarkersAbsent": true,
+    "archiveSha256": "4dac6380bcfdf3c911d8e2e9c00fdce59be51e94050563bc1d646125e25d7ee3",
+    "mountBase": "/Habit-Tracker-Web-App/"
+  },
+  "retainedUpstreamDefects": [
+    "index.html references absent /vite.svg only as a document favicon; no source or required application asset was removed or substituted.",
+    "Original narrow navigation/progress spacing and native animations retained."
+  ],
+  "retainedOtherFailures": [
+    "Recipe required remote images/fonts under denied egress",
+    "Zustand ordinary hosted bounded capture",
+    "Redux bundled oversized Yarn file and lock/profile breadth",
+    "Bulletproof package/config/env/template breadth",
+    "Todo Bun/config/package breadth"
+  ],
+  "evidence": {
+    "workflow": "habit-workflow.json",
+    "build": "habit-export-build.json",
+    "render": "habit-export-render.json"
+  },
+  "screenshotsReviewed": [
+    "habit-habit-edited.png",
+    "habit-statistics.png",
+    "habit-export-390.png",
+    "habit-export-1280.png"
+  ]
+}

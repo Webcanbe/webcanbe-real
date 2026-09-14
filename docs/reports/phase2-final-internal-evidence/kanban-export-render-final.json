@@ -1,0 +1,213 @@
+{
+  "events": [],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 69.87370299999998,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Delivery Board\n\nTrack delivery work across the board\n\nBacklog\n2\n\nDesign system setup\n\nCreate color tokens and typography scale\n\nMedium\n\nWrite unit tests\n\nCover core business logic\n\nLow\nTo Do\n1\n\nAPI integration\n\nConnect frontend to REST endpoints\n\nHigh\nIn Progress\n1\n\nAuthentication\n\nJWT login and refresh token flow\n\nHigh\nDone\n1\n\nProject setup\n\nInit repo, CI/CD pipeline\n\nLow",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 19.731656000000044,
+  "ordinaryPng": {
+    "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 64.86906900000008,
+  "rawPng": {
+    "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56"
+  },
+  "rawCaptureMs": 26.057470999999964,
+  "exportInteraction": "PASS",
+  "exportViewports": [
+    {
+      "width": 390,
+      "fontSize": "30px",
+      "png": {
+        "sha256": "9c504e1f1609685cdf04b9db5b1c7c087be82c26b68a609d64608b6ef880d06f"
+      }
+    },
+    {
+      "width": 768,
+      "fontSize": "36px",
+      "png": {
+        "sha256": "62693147427b34a9db28145ed8c019d880d1433d3d55a3508b4be41ef5bab062"
+      }
+    },
+    {
+      "width": 1280,
+      "fontSize": "36px",
+      "png": {
+        "sha256": "d376587899041e8f6869e80dd0024ee31c613e935b93942dcf81ed9bce4862b5"
+      }
+    }
+  ],
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Delivery Board\n\nTrack delivery work across the board\n\nBacklog\n3\n\nDesign system setup\n\nCreate color tokens and typography scale\n\nMedium\n\nWrite unit tests\n\nCover core business logic\n\nLow\n\nIndependent export card\n\nStandalone application interaction\n\nMedium\nTo Do\n1\n\nAPI integration\n\nConnect frontend to REST endpoints\n\nHigh\nIn Progress\n1\n\nAuthentication\n\nJWT login and refresh token flow\n\nHigh\nDone\n1\n\nProject setup\n\nInit repo, CI/CD pipeline\n\nLow",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 9563.603879
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 4
+    },
+    {
+      "name": "Frames",
+      "value": 4
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 176
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 211
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 267
+    },
+    {
+      "name": "Resources",
+      "value": 3
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 12
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 4
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 12
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 48
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.011006
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.009573
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.055305
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.049447
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.175229
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.049898
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.076465
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 4562316
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 6676480
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 9563.127841
+    },
+    {
+      "name": "NavigationStart",
+      "value": 9563.063673
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=255242240\nMemoryPeak=255492096\nCPUUsageNSec=644677000\nTasksCurrent=116\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=386961408\nMemoryPeak=387330048\nCPUUsageNSec=1392390000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

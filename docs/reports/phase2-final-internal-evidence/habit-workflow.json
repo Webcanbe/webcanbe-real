@@ -1,0 +1,435 @@
+{
+  "boundary": "Packaged TLS editor / TEST OIDC / PostgreSQL / mTLS native Linux, platform browser receives raster only",
+  "browserPath": "Browser plugin not available; retained Playwright approach",
+  "stages": {
+    "unchangedImport": {
+      "status": "PASS",
+      "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+      "archiveSha256": "9eb8083138152efe3796c90cba95b944f0265188f8ec21cf501633cb052941ec",
+      "fileHashes": {
+        ".gitattributes": {
+          "mode": "100644",
+          "bytes": 66,
+          "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b"
+        },
+        ".github/workflows/deploy.yml": {
+          "mode": "100644",
+          "bytes": 1002,
+          "sha256": "7026d59ceb73534e0d83891d337daebe382c813cabdf6f1be35f7311417727b8"
+        },
+        ".gitignore": {
+          "mode": "100644",
+          "bytes": 253,
+          "sha256": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8"
+        },
+        "INSTALLATION.md": {
+          "mode": "100644",
+          "bytes": 4357,
+          "sha256": "471b2ae9a08d388f9918e7641f66e21a9dfdfcc0aef5ef1e3d6717eebc1a4a31"
+        },
+        "LICENSE": {
+          "mode": "100644",
+          "bytes": 1069,
+          "sha256": "8da439868f8124a6cf2c1c6eeb3c5cfdceaa379c61de24cb74e96249f27d5115"
+        },
+        "README.md": {
+          "mode": "100644",
+          "bytes": 8744,
+          "sha256": "11908c9badca43144e1a128d35e562fce2c01bcd8e170cd579344e7d14cf9c84"
+        },
+        "eslint.config.js": {
+          "mode": "100644",
+          "bytes": 763,
+          "sha256": "38c6066c62e803f0b512c2e18297c36cdeaccd6a1190c1cc19cc59c96c74bbc1"
+        },
+        "index.html": {
+          "mode": "100644",
+          "bytes": 370,
+          "sha256": "e81707402a69f086db9ff5d6d28e37e06aba6aef0fd1ba2cd1da70f0690f2c51"
+        },
+        "package-lock.json": {
+          "mode": "100644",
+          "bytes": 116422,
+          "sha256": "62fe7766df69d4c0ce0876fa3dedf3e0341dfacbbab208c25c93ad1ec3c1cdb6"
+        },
+        "package.json": {
+          "mode": "100644",
+          "bytes": 684,
+          "sha256": "f7cb762bedb8186d8af4560c58db15a702c1a492c19f447d44ff19b2b94c2375"
+        },
+        "src/App.jsx": {
+          "mode": "100644",
+          "bytes": 5762,
+          "sha256": "1df251bc6ad6f755dfe49c68e0903bfa337ef8e03868f191c7361266838da0a3"
+        },
+        "src/components/AddHabitForm.jsx": {
+          "mode": "100644",
+          "bytes": 2268,
+          "sha256": "d489544e46bbf9b4d2583b69278fb7dbd2a5347e88cb8e80727adca94421280c"
+        },
+        "src/components/CalendarView.jsx": {
+          "mode": "100644",
+          "bytes": 5128,
+          "sha256": "4e4d9e05f380ea5eb4e508cdc794073d5f94fc9a2437e96bba606be16f14b2d7"
+        },
+        "src/components/DataExport.jsx": {
+          "mode": "100644",
+          "bytes": 4562,
+          "sha256": "3a669ea0f58e3455ca39c4614e6d900e90ac722e712c054edc7efdff23bcc09c"
+        },
+        "src/components/HabitItem.jsx": {
+          "mode": "100644",
+          "bytes": 4320,
+          "sha256": "292878cb9c503d3b132ee89d7d8f90120b11664c82ea754ade7e6dad58225e2d"
+        },
+        "src/components/HabitList.jsx": {
+          "mode": "100644",
+          "bytes": 2217,
+          "sha256": "5a8b1ab809650dc0091d6f9cc7f733aeb1a50e9c40ec4084ee809890ebdc10ad"
+        },
+        "src/components/ProgressBar.jsx": {
+          "mode": "100644",
+          "bytes": 2030,
+          "sha256": "4167296dd3730a7f2ad6b450c67f255bac7402539b85598c6da3944ecaf34a40"
+        },
+        "src/components/StatisticsDashboard.jsx": {
+          "mode": "100644",
+          "bytes": 6194,
+          "sha256": "afe04c870194ce4eb83d614bff01c422b4743c4bb0b5d428283eb0f8313ca9a3"
+        },
+        "src/hooks/useLocalStorage.js": {
+          "mode": "100644",
+          "bytes": 804,
+          "sha256": "df21247c7c97e00cc9ea9d611071e32908f39c6213f1a89d7ddd32071346e599"
+        },
+        "src/index.css": {
+          "mode": "100644",
+          "bytes": 962,
+          "sha256": "88e4dbfec49547ee24e71a0d6b8a5aad8767da7398d694de6823f567f15d7f3f"
+        },
+        "src/main.jsx": {
+          "mode": "100644",
+          "bytes": 229,
+          "sha256": "4b4b864dbe45253425d0c925337180ec07e204295179f80f59551216f466f618"
+        },
+        "tailwind.config.js": {
+          "mode": "100644",
+          "bytes": 181,
+          "sha256": "3dd3712212acbc67849a13a9f1401527495e09a1a12e1c417fac6b4ecf1fe6d4"
+        },
+        "vite.config.js": {
+          "mode": "100644",
+          "bytes": 255,
+          "sha256": "5772d5464b73547c7d4c43d221e4b9b389120195f9327e430a6ce86eb545716a"
+        }
+      }
+    },
+    "render": {
+      "status": "PASS",
+      "profile": "react19-vite7.1-v1",
+      "runtimeErrors": []
+    },
+    "interaction": {
+      "status": "REVIEW_REQUIRED",
+      "actions": [
+        "Create Read daily and Practice piano",
+        "Complete first habit",
+        "Edit first habit to Read each day",
+        "Calendar and statistics views"
+      ],
+      "evidence": [
+        "habit-two-habits.png",
+        "habit-one-complete.png",
+        "habit-calendar.png",
+        "habit-statistics.png"
+      ]
+    },
+    "viewerSelection": {
+      "status": "PASS",
+      "identity": {
+        "file": "src/App.jsx",
+        "elementStart": 2775
+      },
+      "computed": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgba(0, 0, 0, 0)",
+        "fontSize": "36px",
+        "fontWeight": "700",
+        "padding": "0px",
+        "margin": "0px 0px 8px",
+        "gap": "normal",
+        "width": "864px",
+        "height": "40px",
+        "border": "0px solid rgba(0, 0, 0, 0)",
+        "borderRadius": "0px"
+      }
+    },
+    "visualEdit": {
+      "status": "PASS",
+      "revision": "rev_568e51cb-7df3-4613-99ef-6eeb9ebf06e7",
+      "diff": "Transaction wcb_3a1b9e93-ed09-4caf-9636-dbb55546c288\nsrc/App.jsx\n@@ offset 2903 @@\n-🌟 Habit Tracker\n+🌟 Daily Habits"
+    },
+    "codeEdit": {
+      "status": "PASS",
+      "revision": "rev_5f357d1a-56b6-4db8-b765-2fd7c3685d7e",
+      "diff": "Transaction wcb_01bf7cbf-abeb-469d-a557-465f7caba6ee\nsrc/App.jsx\n@@ offset 0 @@\n-import { useState } from 'react';\n-import useLocalStorage from './hooks/useLocalStorage';\n-import AddHabitForm from './components/AddHabitForm';\n-import HabitList from './components/HabitList';\n-import ProgressBar from './components/ProgressBar';\n-import CalendarView from './components/CalendarView';\n-import StatisticsDashboard from './components/StatisticsDashboard';\n-import DataExport from './components/DataExport';\n-\n-function App() {\n-  const [habits, setHabits] = useLocalStorage('habits', []);\n-  const [completions, setCompletions] = useLocalStorage('completions', {});\n-  const [activeTab, setActiveTab] = useState('habits');\n-\n-  const today = new Date().toISOString().split('T')[0];\n-\n-  const addHabit = (newHabit) => {\n-    const habit = {\n-      id: Date.now().toString(),\n-      ...newHabit,\n-      createdAt: new Date().toISOString(),\n-      color: getRandomColor(),\n-      icon: getRandomIcon(),\n-    };\n-    setHabits([...habits, habit]);\n-  };\n-\n-  const editHabit = (id, updatedHabit) => {\n-    setHabits(habits.map(h => h.id === id ? { ...h, ...updatedHabit } : h));\n-  };\n-\n-  const deleteHabit = (id) => {\n-    setHabits(habits.filter(h => h.id !== id));\n-    const newCompletions = { ...completions };\n-    delete newCompletions[id];\n-    setCompletions(newCompletions);\n-  };\n-\n-  const toggleComplete = (id) => {\n-    const habitCompletions = completions[id] || [];\n-    const isCompleted = habitCompletions.includes(today);\n-    if (isCompleted) {\n-      setCompletions({\n-        ...completions,\n-        [id]: habitCompletions.filter(date => date !== today),\n-      });\n-    } else {\n-      setCompletions({\n-        ...completions,\n-        [id]: [...habitCompletions, today],\n-      });\n-    }\n-  };\n-\n-  const completedToday = habits.filter(habit => (completions[habit.id] || []).includes(today)).length;\n-\n-  const getMotivationalMessage = () => {\n-    const percentage = habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0;\n-    if (percentage === 100 && habits.length > 0) return \"🎉 Amazing! All habits completed today!\";\n-    if (percentage >= 75) return \"🚀 Great progress! Keep it up!\";\n-    if (percentage >= 50) return \"💪 You're doing well! Stay consistent!\";\n-    if (percentage >= 25) return \"🌟 Good start! Every step counts!\";\n-    return \"🌱 Every journey begins with a single step!\";\n-  };\n-\n-  const tabs = [\n-    { id: 'habits', label: 'Habits', icon: '🎯' },\n-    { id: 'calendar', label: 'Calendar', icon: '📅' },\n-    { id: 'statistics', label: 'Statistics', icon: '📊' },\n-    { id: 'data', label: 'Data', icon: '💾' },\n-  ];\n-\n-  return (\n-    <div className=\"min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8\">\n-      <div className=\"container mx-auto px-4 max-w-4xl\">\n-        <div className=\"text-center mb-8 animate-fade-in-up\">\n-          <h1 className=\"text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2\">\n-            🌟 Daily Habits\n-          </h1>\n-          <p className=\"text-gray-600 text-lg\">{getMotivationalMessage()}</p>\n-        </div>\n-\n-        {/* Navigation Tabs */}\n-        <div className=\"mb-6 bg-white rounded-xl shadow-lg p-2 border border-gray-100\">\n-          <div className=\"flex space-x-1\">\n-            {tabs.map((tab) => (\n-              <button\n-                key={tab.id}\n-                onClick={() => setActiveTab(tab.id)}\n-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${\n-                  activeTab === tab.id\n-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md transform scale-105'\n-                    : 'text-gray-600 hover:bg-gray-100'\n-                }`}\n-              >\n-                <span className=\"mr-2\">{tab.icon}</span>\n-                {tab.label}\n-              </button>\n-            ))}\n-          </div>\n-        </div>\n-\n-        {/* Tab Content */}\n-        <div className=\"animate-fade-in-up\" style={{ animationDelay: '0.1s' }}>\n-          {activeTab === 'habits' && (\n-            <>\n-              <AddHabitForm onAddHabit={addHabit} />\n-              <ProgressBar completed={completedToday} total={habits.length} />\n-              <HabitList\n-                habits={habits}\n-                completions={completions}\n-                onToggleComplete={toggleComplete}\n-                onEditHabit={editHabit}\n-                onDeleteHabit={deleteHabit}\n-              />\n-            </>\n-          )}\n-\n-          {activeTab === 'calendar' && (\n-            <CalendarView completions={completions} habits={habits} />\n-          )}\n-\n-          {activeTab === 'statistics' && (\n-            <StatisticsDashboard habits={habits} completions={completions} />\n-          )}\n-\n-          {activeTab === 'data' && (\n-            <DataExport habits={habits} completions={completions} />\n-          )}\n-        </div>\n-\n-        {habits.length === 0 && activeTab === 'habits' && (\n-          <div className=\"text-center mt-12 animate-fade-in-up\" style={{ animationDelay: '0.4s' }}>\n-            <div className=\"text-6xl mb-4 animate-pulse-gentle\">🎯</div>\n-            <h3 className=\"text-xl font-semibold text-gray-700 mb-2\">Ready to build better habits?</h3>\n-            <p className=\"text-gray-500\">Start by adding your first habit above!</p>\n-          </div>\n-        )}\n-      </div>\n-    </div>\n-  );\n-}\n-\n-function getRandomColor() {\n-  const colors = [\n-    'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500',\n-    'bg-indigo-500', 'bg-red-500', 'bg-yellow-500', 'bg-teal-500'\n-  ];\n-  return colors[Math.floor(Math.random() * colors.length)];\n-}\n-\n-function getRandomIcon() {\n-  const icons = ['💧', '🏃', '📚', '🎵', '🍎', '🧘', '💻', '🎨', '🏋️', '🛏️'];\n-  return icons[Math.floor(Math.random() * icons.length)];\n-}\n-\n-export default App;\n-\n+import { useState } from 'react';\n+import useLocalStorage from './hooks/useLocalStorage';\n+import AddHabitForm from './components/AddHabitForm';\n+import HabitList from './components/HabitList';\n+import ProgressBar from './components/ProgressBar';\n+import CalendarView from './components/CalendarView';\n+import StatisticsDashboard from './components/StatisticsDashboard';\n+import DataExport from './components/DataExport';\n+\n+function App() {\n+  const [habits, setHabits] = useLocalStorage('habits', []);\n+  const [completions, setCompletions] = useLocalStorage('completions', {});\n+  const [activeTab, setActiveTab] = useState('habits');\n+\n+  const today = new Date().toISOString().split('T')[0];\n+\n+  const addHabit = (newHabit) => {\n+    const habit = {\n+      id: Date.now().toString(),\n+      ...newHabit,\n+      createdAt: new Date().toISOString(),\n+      color: getRandomColor(),\n+      icon: getRandomIcon(),\n+    };\n+    setHabits([...habits, habit]);\n+  };\n+\n+  const editHabit = (id, updatedHabit) => {\n+    setHabits(habits.map(h => h.id === id ? { ...h, ...updatedHabit } : h));\n+  };\n+\n+  const deleteHabit = (id) => {\n+    setHabits(habits.filter(h => h.id !== id));\n+    const newCompletions = { ...completions };\n+    delete newCompletions[id];\n+    setCompletions(newCompletions);\n+  };\n+\n+  const toggleComplete = (id) => {\n+    const habitCompletions = completions[id] || [];\n+    const isCompleted = habitCompletions.includes(today);\n+    if (isCompleted) {\n+      setCompletions({\n+        ...completions,\n+        [id]: habitCompletions.filter(date => date !== today),\n+      });\n+    } else {\n+      setCompletions({\n+        ...completions,\n+        [id]: [...habitCompletions, today],\n+      });\n+    }\n+  };\n+\n+  const completedToday = habits.filter(habit => (completions[habit.id] || []).includes(today)).length;\n+\n+  const getMotivationalMessage = () => {\n+    const percentage = habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0;\n+    if (percentage === 100 && habits.length > 0) return \"🎉 Amazing! All habits completed today!\";\n+    if (percentage >= 75) return \"🚀 Great progress! Keep it up!\";\n+    if (percentage >= 50) return \"💪 You're doing well! Stay consistent!\";\n+    if (percentage >= 25) return \"🌟 Good start! Every step counts!\";\n+    return \"🌱 Every journey begins with a single step!\";\n+  };\n+\n+  const tabs = [\n+    { id: 'habits', label: 'Habits', icon: '🎯' },\n+    { id: 'calendar', label: 'Calendar', icon: '📅' },\n+    { id: 'statistics', label: 'Statistics', icon: '📊' },\n+    { id: 'data', label: 'Data', icon: '💾' },\n+  ];\n+\n+  return (\n+    <div className=\"min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8\">\n+      <div className=\"container mx-auto px-4 max-w-4xl\">\n+        <div className=\"text-center mb-8 animate-fade-in-up\">\n+          <h1 className=\"text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2\">\n+            🌟 Daily Habits\n+          </h1>\n+          <p className=\"text-gray-600 text-lg\">{getMotivationalMessage()}</p>\n+        </div>\n+\n+        {/* Navigation Tabs */}\n+        <div className=\"mb-6 bg-white rounded-xl shadow-lg p-2 border border-gray-100\">\n+          <div className=\"flex space-x-1\">\n+            {tabs.map((tab) => (\n+              <button\n+                key={tab.id}\n+                onClick={() => setActiveTab(tab.id)}\n+                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${\n+                  activeTab === tab.id\n+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md transform scale-105'\n+                    : 'text-gray-600 hover:bg-gray-100'\n+                }`}\n+              >\n+                <span className=\"mr-2\">{tab.icon}</span>\n+                {tab.label}\n+              </button>\n+            ))}\n+          </div>\n+        </div>\n+\n+        {/* Tab Content */}\n+        <div className=\"animate-fade-in-up\" style={{ animationDelay: '0.1s' }}>\n+          {activeTab === 'habits' && (\n+            <>\n+              <AddHabitForm onAddHabit={addHabit} />\n+              <ProgressBar completed={completedToday} total={habits.length} />\n+              <HabitList\n+                habits={habits}\n+                completions={completions}\n+                onToggleComplete={toggleComplete}\n+                onEditHabit={editHabit}\n+                onDeleteHabit={deleteHabit}\n+              />\n+            </>\n+          )}\n+\n+          {activeTab === 'calendar' && (\n+            <CalendarView completions={completions} habits={habits} />\n+          )}\n+\n+          {activeTab === 'statistics' && (\n+            <StatisticsDashboard habits={habits} completions={completions} />\n+          )}\n+\n+          {activeTab === 'data' && (\n+            <DataExport habits={habits} completions={completions} />\n+          )}\n+        </div>\n+\n+        {habits.length === 0 && activeTab === 'habits' && (\n+          <div className=\"text-center mt-12 animate-fade-in-up\" style={{ animationDelay: '0.4s' }}>\n+            <div className=\"text-6xl mb-4 animate-pulse-gentle\">🎯</div>\n+            <h3 className=\"text-xl font-semibold text-gray-700 mb-2\">Build habits that last</h3>\n+            <p className=\"text-gray-500\">Start by adding your first habit above!</p>\n+          </div>\n+        )}\n+      </div>\n+    </div>\n+  );\n+}\n+\n+function getRandomColor() {\n+  const colors = [\n+    'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500',\n+    'bg-indigo-500', 'bg-red-500', 'bg-yellow-500', 'bg-teal-500'\n+  ];\n+  return colors[Math.floor(Math.random() * colors.length)];\n+}\n+\n+function getRandomIcon() {\n+  const icons = ['💧', '🏃', '📚', '🎵', '🍎', '🧘', '💻', '🎨', '🏋️', '🛏️'];\n+  return icons[Math.floor(Math.random() * icons.length)];\n+}\n+\n+export default App;\n+"
+    },
+    "viewports": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "upstreamLayout": "Original fluid forms and navigation retained"
+      },
+      {
+        "width": 768,
+        "status": "PASS",
+        "upstreamLayout": "Original fluid forms and navigation retained"
+      },
+      {
+        "width": 1280,
+        "status": "PASS",
+        "upstreamLayout": "Original fluid forms and navigation retained"
+      },
+      {
+        "width": 390,
+        "after": true,
+        "fontSize": "36px"
+      },
+      {
+        "width": 768,
+        "after": true,
+        "fontSize": "48px"
+      },
+      {
+        "width": 1280,
+        "after": true,
+        "fontSize": "48px"
+      }
+    ],
+    "responsive": {
+      "status": "PASS",
+      "diff": "Transaction wcb_7d687c28-bf1b-4571-a09f-ab5567d72eb3\nsrc/App.jsx\n@@ offset 2790 @@\n-text-4xl\n+text-4xl md:text-5xl",
+      "revision": "rev_70b3f73e-7997-4517-b86f-0ecc2954a5b6"
+    },
+    "history": {
+      "status": "PASS",
+      "transactions": 4,
+      "revision": "rev_70b3f73e-7997-4517-b86f-0ecc2954a5b6"
+    },
+    "undoRedo": {
+      "status": "PASS",
+      "undo": "rev_5ebca54b-cd23-4e48-a6dd-4bf7661f285c",
+      "redo": "rev_e23484ed-0d8a-49dc-bea3-f03284388099"
+    },
+    "restart": {
+      "status": "PASS",
+      "sourceAndHistoryByteExact": true,
+      "process": "SIGKILL then exact packaged CLI reconnect"
+    },
+    "export": {
+      "status": "PASS",
+      "files": 23,
+      "archiveSha256": "4dac6380bcfdf3c911d8e2e9c00fdce59be51e94050563bc1d646125e25d7ee3",
+      "exactAcceptedBytes": true
+    },
+    "exportBuild": {
+      "status": "PENDING"
+    },
+    "exportRender": {
+      "status": "PENDING"
+    }
+  },
+  "performance": {
+    "importMs": 49.3683749999999,
+    "coldStartRenderMs": 2255.8698329999997,
+    "visualReactUpdateMs": 1077.499208000001,
+    "codeReactUpdateMs": 1183.1116250000014,
+    "warmCssUpdateMs": 1154.0229999999974,
+    "responsiveUpdateMs": 1462.5429580000018,
+    "restartRenderMs": 2930.275708000001,
+    "exportMs": 181.97999999999593
+  },
+  "updates": [
+    {
+      "kind": "react-fast-refresh",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 21579.314542
+    },
+    {
+      "kind": "react-fast-refresh",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 23795.584458
+    },
+    {
+      "kind": "css-hot-update",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 25220.150208
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 28750.290958
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 34916.177958
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "368f1a53-1d47-4fee-a331-11cae7f42cf1",
+      "ms": 36104.63475
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "initial",
+      "sha256": "4561b99c2d7b37940ff87ae9cff0c5f32b7d07ef20c2e512d89916b4d2cd5301",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "settled",
+      "sha256": "4561b99c2d7b37940ff87ae9cff0c5f32b7d07ef20c2e512d89916b4d2cd5301",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "two-habits",
+      "sha256": "096a7ee1bee84d3942115450191b94fd9398762e88e9d20715e7c0728568a60e",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "habits-scrolled",
+      "sha256": "38b90a6577d15129f19734366b577f54294b1e73707a40064a676aa3c9b84b6a",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "one-complete",
+      "sha256": "d4cc61190beb8ce85fd07488f335122b9ca35b457dee9e17b4c7c47deca204e8",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "habit-edited",
+      "sha256": "56236649796cfe83fd8c95cb78e05cc4ebc405f35dbd6925f872a3cc9c727d45",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "calendar",
+      "sha256": "8d925b713bc48e868285fa2f9f0cb615af84c01f11ac192f291915177f692003",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "statistics",
+      "sha256": "d1b84b3877c75be3911f3019ac8e64b9b8625a99527bc9dce2359802dd6d07de",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "visual",
+      "sha256": "e480df960cb67e8f3e2738a49158599831c7219add7daea050314a4c3c8f88c4",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "code",
+      "sha256": "e480df960cb67e8f3e2738a49158599831c7219add7daea050314a4c3c8f88c4",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "css",
+      "sha256": "e4aae09ac1f2a6f235352379cd388f9d380cacb5865c85f960fcf44f9b070902",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-before",
+      "sha256": "829c97fa9b957aa94f324e9c21ea8751aa06dde9ff3d180fa096d7530eda5bd5",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-before",
+      "sha256": "bc8fde53906935884c576807ff5b5433eeadda2bcb8aadc071bb4150db960a7f",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-before",
+      "sha256": "be7d4cc6dceec1bc4716f35d3ee7608d30cd400593f52b05ec9c30f378184167",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-after",
+      "sha256": "538fcb0684ac6c07a4b18d7b5d20d44e204f330109fe8bebd54ff18dc127ebb0",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-after",
+      "sha256": "e7011ef4e9b008bcca56069b48a347d3a24a131c7f93243ad1e5714b25332ae6",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-after",
+      "sha256": "e3a1fca59a7d92cac01cbc67869ffafdb99b6250d987a12b268875e6b948dab3",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "restart",
+      "sha256": "3b4aa6e3ebe307c01305c0405a6cf5bb9b93687ca3e2eac0e5e4c3d3694391ed",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    }
+  ],
+  "fullWorkflow": "NOT YET",
+  "platformBrowser": "151.0.7922.34",
+  "platformErrors": []
+}

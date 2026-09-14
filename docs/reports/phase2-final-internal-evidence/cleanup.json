@@ -1,0 +1,14 @@
+{
+  "boundary": "Owned local TEST infrastructure only",
+  "stoppedGatewayLeasesBeforeCleanup": 68,
+  "activePreviewOrProfileUnits": 0,
+  "gatewayStopped": true,
+  "tunnelsStopped": true,
+  "hostAndGuestGeneratedPkiConfigRemoved": true,
+  "ownedGuestExportProfilesRemoved": 2,
+  "ownedGuestHelperFilesRemoved": 5,
+  "testSchemaRemoved": true,
+  "testRolePasswordCleared": true,
+  "vmStopped": true,
+  "ignoredNoncredentialReceiptsRetained": true
+}

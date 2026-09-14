@@ -1,0 +1,46 @@
+{
+  "boundary": "Packaged HTTPS editor / PG canonical source/history / mTLS native browser",
+  "checks": [
+    {
+      "name": "rendered imported alias exposes exact shared origin and refuses instance-only edit",
+      "status": "PASS"
+    },
+    {
+      "name": "real Visual edit patches only cross-file .mts literal",
+      "status": "PASS"
+    },
+    {
+      "name": "UI compaction accepts one unchanged-source checkpoint and retains a sealed archive",
+      "status": "PASS"
+    },
+    {
+      "name": "archived audit receipts remain browsable through authorized History",
+      "status": "PASS"
+    },
+    {
+      "name": "previewed restore changes only the reviewed source files as a new accepted head",
+      "status": "PASS"
+    },
+    {
+      "name": "restore remains exactly undoable and redoable",
+      "status": "PASS"
+    },
+    {
+      "name": "SIGKILL restart retains exact restored source, archive receipts and source-only export",
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "status": "PASS",
+  "archive": {
+    "digest": "910dee26a44429d2a5c52db2bc5862ffb729974e670143f3a7065f5cdfbcc8f4",
+    "rawBytes": 3716,
+    "transactions": 2
+  },
+  "revisions": {
+    "visual": "rev_a9dd9e1d-80cc-491e-b01e-78c8d2ea09db",
+    "compaction": "rev_cc6d3909-7f87-4d95-9cef-ce84555ffa7e",
+    "restore": "rev_f6100f62-8796-442e-ac59-af6b7797a1e8",
+    "final": "rev_b89799f4-9496-49c1-b55f-cdb9e88f0a9e"
+  }
+}

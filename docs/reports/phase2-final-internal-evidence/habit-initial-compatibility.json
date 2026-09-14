@@ -1,0 +1,332 @@
+{
+  "compilerOptions": {},
+  "schema": 2,
+  "configuration": [
+    {
+      "file": "vite.config.js",
+      "classification": "safely-translated",
+      "detail": "Static React/Tailwind plugin declarations, project aliases and local base; no config execution."
+    }
+  ],
+  "base": "/Habit-Tracker-Web-App/",
+  "environment": {
+    "MODE": "production",
+    "PROD": true,
+    "DEV": false,
+    "SSR": false,
+    "BASE_URL": "/Habit-Tracker-Web-App/"
+  },
+  "profile": "react19-vite6",
+  "supported": false,
+  "aliases": {},
+  "clientDependencies": [
+    "react",
+    "react-dom",
+    "scheduler"
+  ],
+  "dependencies": [
+    {
+      "name": "@eslint/js",
+      "declared": "^9.36.0",
+      "locked": "9.37.0"
+    },
+    {
+      "name": "@types/react",
+      "declared": "^19.1.16",
+      "locked": "19.2.0"
+    },
+    {
+      "name": "@types/react-dom",
+      "declared": "^19.1.9",
+      "locked": "19.2.0"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "declared": "^5.0.4",
+      "selected": "4.3.4",
+      "locked": "5.0.4"
+    },
+    {
+      "name": "eslint",
+      "declared": "^9.36.0",
+      "locked": "9.37.0"
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
+      "declared": "^5.2.0",
+      "locked": "5.2.0"
+    },
+    {
+      "name": "eslint-plugin-react-refresh",
+      "declared": "^0.4.22",
+      "locked": "0.4.23"
+    },
+    {
+      "name": "globals",
+      "declared": "^16.4.0",
+      "locked": "16.4.0"
+    },
+    {
+      "name": "vite",
+      "declared": "^7.1.7",
+      "selected": "6.4.3",
+      "locked": "7.1.9"
+    },
+    {
+      "name": "@tailwindcss/vite",
+      "declared": "^4.1.14",
+      "selected": "4.3.3",
+      "locked": "4.1.14"
+    },
+    {
+      "name": "react",
+      "declared": "^19.1.1",
+      "selected": "19.3.0",
+      "locked": "19.2.0"
+    },
+    {
+      "name": "react-dom",
+      "declared": "^19.1.1",
+      "selected": "19.3.0",
+      "locked": "19.2.0"
+    },
+    {
+      "name": "tailwindcss",
+      "declared": "^4.1.14",
+      "selected": "4.3.3",
+      "locked": "4.1.14"
+    }
+  ],
+  "issues": [
+    {
+      "code": "unsupported-version",
+      "message": "@eslint/js@^9.36.0 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "@eslint/js lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "@types/react@^19.1.16 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "@types/react lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "@types/react-dom@^19.1.9 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "@types/react-dom lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "@vitejs/plugin-react@^5.0.4 cannot use this profile (4.3.4).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "@vitejs/plugin-react lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "eslint@^9.36.0 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "eslint lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "eslint-plugin-react-hooks@^5.2.0 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "eslint-plugin-react-hooks lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "eslint-plugin-react-refresh@^0.4.22 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "eslint-plugin-react-refresh lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "globals@^16.4.0 cannot use this profile (package not provided).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "globals lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "unsupported-version",
+      "message": "vite@^7.1.7 cannot use this profile (6.4.3).",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "vite lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "@tailwindcss/vite lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "react lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "react-dom lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "tailwindcss lockfile version/declaration does not match the selected profile and manifest.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Browser dependency graph differs from the uploaded lock: node_modules/react-dom",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Browser dependency graph differs from the uploaded lock: node_modules/react",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Browser dependency graph differs from the uploaded lock: node_modules/scheduler",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Locked client package node_modules/react differs from the dedicated runtime profile.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Locked client package node_modules/react-dom differs from the dedicated runtime profile.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Locked client package node_modules/scheduler differs from the dedicated runtime profile.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Required client dependency react-dom is missing or differs in the uploaded lock.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Required client dependency scheduler is missing or differs in the uploaded lock.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "code": "lock-conflict",
+      "message": "Required client dependency react is missing or differs in the uploaded lock.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    },
+    {
+      "file": "tailwind.config.js",
+      "code": "css-config",
+      "classification": "requires-isolated-execution",
+      "message": "tailwind.config.js: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.",
+      "requiredCapability": "An isolated plugin/configuration profile"
+    }
+  ],
+  "notes": [
+    "Client versions checked against the npm lockfile.",
+    "Package scripts, including install/build hooks, are inspected only and never run during intake or preview.",
+    "Versioned controlled browser compilation, not an uploaded Vite server. Default React updates use incremental rebuild + document reload. The operator may enable controlled Fast Refresh for supported component boundaries; other edits still reload or restart. BrowserRouter requires a controlled provider."
+  ],
+  "entry": "src/main.jsx"
+}

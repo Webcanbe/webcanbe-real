@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-09-14T15:15:26.074730+00:00",
+  "branch": "phase-2-compatible-editor",
+  "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
+  "implementation": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+  "publicationCommit": "The feature-branch documentation commit containing this receipt; its immutable SHA is resolved after commit, verified after normal push, and supplied in the final deliverable publication-verification.json.",
+  "remoteBeforePublication": {
+    "HEAD": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+    "refs/heads/main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+    "refs/heads/phase-2-compatible-editor": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c"
+  },
+  "mainExpected": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "postSecurityChanges": "Documentation/evidence only; deployment README clarifies already-tested pinned font/typecheck helper installation.",
+  "normalPushOnly": true,
+  "mainMerge": false,
+  "forcePush": false,
+  "publicDeployment": false,
+  "productionAccountOrDnsMutation": false,
+  "realProductionSecretsCreated": false,
+  "allOriginal341Preserved": true,
+  "originalTestFileHashesVerified": 19,
+  "oldRuntimeProfileFilesUnchanged": true,
+  "securityCoveredChangedPaths": 74,
+  "cleanupReceipt": "cleanup.json",
+  "finalGateLedger": "final-ledger.json",
+  "postCommitVerification": "Require clean worktree, live remote feature==local HEAD and main/remote HEAD==mainExpected. The final task deliverable records the resolved SHA without a self-referential commit hash."
+}

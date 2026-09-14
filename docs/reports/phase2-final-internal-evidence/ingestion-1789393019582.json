@@ -1,0 +1,26 @@
+{
+  "boundary": "Operator-enabled fixed GitHub HTTPS intake / packaged TLS editor / fresh PG authority",
+  "checks": [
+    {
+      "name": "foreign workspace refused",
+      "status": "PASS"
+    },
+    {
+      "name": "user URL injection refused",
+      "status": "PASS"
+    },
+    {
+      "name": "real external immutable commit preserves all 23 frozen source files and durable provenance",
+      "status": "PASS"
+    }
+  ],
+  "importMs": 618.899083,
+  "origin": {
+    "commit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+    "provider": "github",
+    "repository": "TheUnknown550/Habit-Tracker-Web-App",
+    "archiveSha256": "4c916820c49d3b666073c63c37fab9b8ad69bca05996e6372927b5d05d6bf572"
+  },
+  "acceptedRevision": "rev_c51e357c-958d-4421-bade-28debf512c4b",
+  "status": "PASS"
+}

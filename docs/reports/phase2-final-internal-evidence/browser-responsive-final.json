@@ -1,0 +1,43 @@
+{
+  "result": "PASS",
+  "BrowserRouter": {
+    "strictRunner": true,
+    "visualBaseExactCodeUndo": true,
+    "responsiveOnlySelectedToken": true,
+    "viewportWidths": [
+      390,
+      768,
+      1280
+    ],
+    "CSSMediaScopeRefusalAndEdit": true,
+    "module": true,
+    "inline": true,
+    "siblingReorderPreviewUndo": true,
+    "flexDirectionGap": true,
+    "gridTracks": true,
+    "codeResponsiveCanvas": true,
+    "realServerRestartHeadHistoryUndo": true,
+    "cleanExport": true
+  },
+  "HashRouter": {
+    "strictRunner": true,
+    "visualBaseExactCodeUndo": true,
+    "responsiveOnlySelectedToken": true,
+    "viewportWidths": [
+      390,
+      768,
+      1280
+    ],
+    "CSSMediaScopeRefusalAndEdit": true,
+    "module": true,
+    "inline": true,
+    "siblingReorderPreviewUndo": true,
+    "flexDirectionGap": true,
+    "gridTracks": true,
+    "codeResponsiveCanvas": true,
+    "realServerRestartHeadHistoryUndo": true,
+    "cleanExport": true
+  },
+  "browser": "151.0.7922.34",
+  "errors": []
+}

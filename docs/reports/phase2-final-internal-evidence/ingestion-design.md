@@ -1,0 +1,7 @@
+# Immutable external source intake boundary
+
+Operator opt-in only; no Phase 3 GitHub product UI or write integration. Authenticated POST `/projects/import-source` names a public repository and a complete 40-character commit. The fixed provider reads only `codeload.github.com` over verified TLS, with no redirects, credentials, proxies or user URLs. DNS answers must be public IPv4 and are pinned to the connection. Whole transfer deadline 10 seconds, 25MiB archive maximum; all original ZIP expansion/path/type/entry/ratio/secret/config checks remain unchanged.
+
+A PostgreSQL advisory transaction reserves at most two intake operations globally and one per workspace, across editor processes, before retrieval or extraction. No authority rows remain locked during the network transfer. Workspace/session authority is checked before fetch, after fetch and inside accepted source creation. Disconnect cancels the transfer. Rejected input creates no canonical project. Import origin and archive SHA256 are stored in initial accepted history, preserved across edits, and excluded from source export. SHA verification is available for independently pinned archive bytes. This is source-ingestion egress in the trusted service; runner networking remains denied.
+
+Adversarial checks target URL/ref injection, private DNS, cancellation/deadlines, quota release, stale/revoked authority and byte identity. Production egress/firewall operational evidence is still external.

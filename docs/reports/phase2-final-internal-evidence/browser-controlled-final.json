@@ -1,0 +1,48 @@
+{
+  "result": "PASS",
+  "missingAssetAndPlatformApi404": true,
+  "viewerIsolation": {
+    "parentDOM": true,
+    "parentStorage": true,
+    "parentCookie": true,
+    "ownStorage": true,
+    "ownCookie": true,
+    "onlyImage": true,
+    "projectDOMAbsent": true
+  },
+  "editLoop": {
+    "coordinateSelection": true,
+    "sourceMapping": true,
+    "text": true,
+    "style": true,
+    "renderChanged": true,
+    "diff": true,
+    "undo": true,
+    "redo": true,
+    "export": true,
+    "viewportSurvivesRebuild": true,
+    "incrementalRevisionAndGeneration": true
+  },
+  "freshGenerationStorageIsolation": true,
+  "browserRouter": {
+    "nested": true,
+    "parameter": true,
+    "searchHash": true,
+    "hardRefresh": true,
+    "backForward": true,
+    "application404": true,
+    "assets": true,
+    "clickNavigation": true,
+    "scroll": true,
+    "editorReloadDeepLink": true,
+    "basename": true,
+    "directDeepLink": true
+  },
+  "authority": {
+    "crossProjectDenied": true,
+    "forgedCapabilityDenied": true,
+    "staleSourceDenied": true,
+    "revokedDenied": true,
+    "realGuestExpiry": true
+  }
+}

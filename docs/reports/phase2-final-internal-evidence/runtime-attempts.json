@@ -1,0 +1,121 @@
+[
+  {
+    "attempt": "gestures-1789392581363",
+    "status": "FAIL",
+    "checksPassed": 0,
+    "failure": "Timed out idle frame",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "gestures-1789392638479",
+    "status": "PASS",
+    "checksPassed": 5,
+    "failure": null,
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "history-origins-1789395293403",
+    "status": "FAIL",
+    "checksPassed": 0,
+    "failure": "Expected values to be strictly equal:\n\n403 !== 422\n",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "history-origins-1789395351589",
+    "status": "PASS",
+    "checksPassed": 7,
+    "failure": null,
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789393935729",
+    "status": "FAIL",
+    "checksPassed": 1,
+    "failure": "trusted viewer frame",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789394017916",
+    "status": "FAIL",
+    "checksPassed": 1,
+    "failure": "The expression evaluated to a falsy value:\n\n  assert(receipt.events.some(e=>e.type==='compositionend'&&e.trusted))\n",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789394347202",
+    "status": "FAIL",
+    "checksPassed": 3,
+    "failure": "Timed out real clipboard copy",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789394581835",
+    "status": "FAIL",
+    "checksPassed": 6,
+    "failure": "Timed out fresh reconnect",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789394979574",
+    "status": "PASS",
+    "checksPassed": 8,
+    "failure": null,
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789396182351",
+    "status": "FAIL",
+    "checksPassed": 8,
+    "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('Preview input queue is full. Wait for the frame before continuing.', { exact: true }) to be visible\u001b[22m\n",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789396250133",
+    "status": "FAIL",
+    "checksPassed": 8,
+    "failure": "Timed out generation replacement with queued input",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789396398258",
+    "status": "FAIL",
+    "checksPassed": 8,
+    "failure": "Timed out generation replacement with queued input",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789396516131",
+    "status": "FAIL",
+    "checksPassed": 8,
+    "failure": "Timed out generation replacement with queued input",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789396617261",
+    "status": "PASS",
+    "checksPassed": 10,
+    "failure": null,
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "input-1789397274183",
+    "status": "PASS",
+    "checksPassed": 10,
+    "failure": null,
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "resources-1789396020314",
+    "status": "FAIL",
+    "checksPassed": 4,
+    "failure": "{\"error\":\"The hosted operation failed. Accepted source and history remain authoritative.\"}\n\n422 !== 200\n",
+    "diagnosticBuild": false
+  },
+  {
+    "attempt": "resources-1789396118017",
+    "status": "PASS",
+    "checksPassed": 7,
+    "failure": null,
+    "diagnosticBuild": false
+  }
+]

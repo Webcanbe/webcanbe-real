@@ -1,0 +1,35 @@
+{
+  "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+  "policy": "Failures are retained; a later PASS does not erase unexplained product failures.",
+  "openProductFailures": [
+    {
+      "rows": [
+        "P61"
+      ],
+      "evidence": "resources-1789396020314.json",
+      "failure": "After four passing concurrent-resource checks and the Kanban warm update, the second application code/update returned 422. Root cause is not established. Instrumented follow-up resources-1789396118017.json passed; reliability closure is not claimed."
+    },
+    {
+      "rows": [
+        "P61"
+      ],
+      "evidence": "zustand-direct-capture.json",
+      "failure": "Direct ordinary LocalLima CDP capture succeeds at about 3686ms, but packaged hosted Zustand still fails normal acceptance with 422/incomplete output. No timeout increase or full workflow PASS."
+    }
+  ],
+  "resolvedProductFailures": [
+    "Queue pressure exposed stale CSRF cleanup and overlapping reconnect startup. Current-token cleanup, one transition and serialized cleanup are covered by the rebuilt final 10-check input receipt.",
+    "Real Unicode screenshot review exposed missing Korean glyphs; pinned Noto CJK installed and final native raster reviewed.",
+    "Copy-selection command initially failed the gateway fixed validator; corrected gateway and native input coverage pass."
+  ],
+  "invalidHarnessOrSetupAttempts": [
+    "Semantic compiler in-memory directory normalization corrected before passing isolated semantic tests.",
+    "Initial authoring harness omitted required expectedHash:null and reused an extraction destination; corrected explicit transaction and fresh destination.",
+    "Input harness initially selected the wrong frame and required Chromium CDP compositionend to be trusted; actual events disprove native OS IME coverage.",
+    "Hard expiry passed in input-1789394581835; its later reconnect assertion expected the wrong route. Final input receipt reuses the valid expiry proof.",
+    "Text burst coalesces by design and does not saturate 64 events. Final saturation uses 81 native navigation-key events.",
+    "One reconnect probe used a stale built frontend after source changes; one diagnostic logging build was not acceptance evidence. Final rebuilt ordinary input is PASS.",
+    "Static compatibility probe first used an unresolved temporary-directory symlink; static-diagnostic-path-error.json retained, real-path recheck verifies frozen source hashes.",
+    "Final Kanban export first selected the wrong React 19 profile and was refused; correct React 18 export profile was then absent. Repository-pinned profile preparation completed, followed by exact-hash final build and independent render. Earlier renders against an old artifact do not validate the final export."
+  ]
+}

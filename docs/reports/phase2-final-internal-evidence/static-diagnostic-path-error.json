@@ -1,0 +1,108 @@
+{
+  "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+  "boundary": "Read-only static diagnosis of exact frozen files; no archive-admission bypass or execution acceptance claimed",
+  "results": [
+    {
+      "id": "redux-essentials",
+      "commit": "b4414e1504c914ece3253dd8a21adfb2278464d9",
+      "unchangedFilesVerified": 24,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    },
+    {
+      "id": "bulletproof-react",
+      "commit": "9506629ed003a561c6627735480cce4994244bb4",
+      "unchangedFilesVerified": 168,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    },
+    {
+      "id": "todo-list-react",
+      "commit": "f48aef130c31452341450adfb6c3fc2234b79389",
+      "unchangedFilesVerified": 38,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    },
+    {
+      "id": "zustand",
+      "commit": "b57db4f86ef179285da216eeb291266da82c361c",
+      "unchangedFilesVerified": 32,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    },
+    {
+      "id": "kanban-board",
+      "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+      "unchangedFilesVerified": 16,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    },
+    {
+      "id": "GroqRecipeBook",
+      "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+      "unchangedFilesVerified": 67,
+      "profile": "react19-vite6",
+      "supported": false,
+      "issues": [
+        {
+          "code": "runtime-inspection",
+          "message": "Registered project root changed.",
+          "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+          "file": "package.json / package-lock.json",
+          "classification": "unsupported"
+        }
+      ],
+      "configuration": []
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Capture path review before implementation
+
+Scope: replace Playwright screenshot orchestration with a fixed CDP raster command in the existing trusted Linux worker. CDP already exists for isolated-world observations. No new network endpoint, browser origin, uploaded execution permission, source transformation or trusted application interpreter is introduced.
+
+Assets: immutable generation/revision/digest, route/document epoch/viewport, current user grants and controller fence; source/history; raster confidentiality and integrity; bounded CPU/memory/tasks/lifetime.
+
+Threats and controls: a page can navigate or change history while capture is pending, so reject changed main-frame navigation epoch, URL, viewport, job identity or expiry before returning. A hung CDP call must consume at most the existing 4000 ms sample budget; fail and close the browser, with existing provider stop/quarantine/watchdog retaining resource authority. No late raster may be returned after deadline. One worker command is serialized; no project-controlled CDP method or parameter is accepted. Validate bounded PNG encoding, dimensions, chunk framing and CRC. Keep fresh broker source authorization, generation/accepted revision, sequence and connection epoch checks unchanged. Observations remain untrusted hints, never DOM authority or accepted source.
+
+Use fixed Page.captureScreenshot PNG/fromSurface/captureBeyondViewport=false parameters. No font/animation readiness wait and no extended fallback timeout. A valid PNG alone does not establish render completeness: actual unchanged Three scene and ordinary DOM workflows must be visually reviewed and interact through the production path. Timeout, navigation race, malformed raster and stale authority regressions plus existing hosted/browser/isolation tests are required. Export source remains exact; standalone export verification uses the same capture implementation in a separate isolated runtime.
+
+Residuals: animation can change pixels between DOM observation and raster, as before; source IDs are revalidated on the server and never authorize writes. A screenshot does not prove source-level instance identity or secret nondisclosure. Software-rendered WebGL may still exceed the bound or be incomplete; keep those outcomes FAIL. This pre-implementation boundary review is not the final sealed Codex Security review.

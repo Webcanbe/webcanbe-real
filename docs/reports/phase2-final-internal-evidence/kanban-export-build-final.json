@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 1590.9013269999998,
+  "output": "vite v6.4.3 building for production...\ntransforming...\n✓ 1577 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.36 kB │ gzip:  0.27 kB\ndist/assets/index-9xjGSiOQ.css   12.00 kB │ gzip:  3.36 kB\ndist/assets/index-um8aaBi3.js   151.67 kB │ gzip: 48.72 kB\n✓ built in 1.33s\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1714.60075,
+  "archiveSha256": "4950e0586d91683f06048c84654682a67be82f86f85613d1eaa383da4c9bb51f",
+  "profile": "react18-vite6-common-v1",
+  "mountBase": "/",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "e3840d9308586eb3da5663cfcb76adba6b50f54a01d6bbfd32cf2390997b5e5b"
+    },
+    {
+      "path": "/assets/index-9xjGSiOQ.css",
+      "sha256": "b071e959e67f0bc311b216398340ec271179b111a64da1cf19477f72cbd4f331"
+    },
+    {
+      "path": "/assets/index-um8aaBi3.js",
+      "sha256": "360db6dc552487dacbb1d8fb6962f2a0efc530b088ca0794d3acef9e1747ee60"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}
