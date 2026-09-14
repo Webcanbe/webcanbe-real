@@ -39,3 +39,15 @@ CREATE TABLE IF NOT EXISTS wcb_identity_accounts (issuer text NOT NULL, subject 
 CREATE TABLE IF NOT EXISTS wcb_login_attempts (state_hash text PRIMARY KEY, binding_hash text NOT NULL, nonce text NOT NULL, verifier text NOT NULL, expires_at timestamptz NOT NULL);
 CREATE TABLE IF NOT EXISTS wcb_identity_lock (id integer PRIMARY KEY CHECK(id=1));
 INSERT INTO wcb_identity_lock VALUES(1) ON CONFLICT DO NOTHING;
+
+ALTER TABLE wcb_projects ADD COLUMN IF NOT EXISTS name text NOT NULL DEFAULT 'Hosted project';
+CREATE TABLE IF NOT EXISTS wcb_editor_capabilities (
+  preview_id uuid PRIMARY KEY, project_id uuid NOT NULL REFERENCES wcb_projects,
+  token_hash text NOT NULL, grant_json jsonb NOT NULL, expires_at timestamptz NOT NULL,
+  revoked boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS wcb_drafts (
+  project_id uuid NOT NULL REFERENCES wcb_projects, user_id uuid NOT NULL,
+  version bigint NOT NULL, payload jsonb NOT NULL, PRIMARY KEY(project_id,user_id)
+);

@@ -1,3 +1,4 @@
+import type { DraftState } from "../runtime/draftStore"
 import { useEffect, useRef, useState } from "react"
 import { basicSetup, EditorView } from "codemirror"
 import { keymap } from "@codemirror/view"
@@ -6,7 +7,7 @@ import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
 import type { FileOperation, MutationTransaction, RevisionLedger, SourceValidation } from "../core/types"
 
-export type SourceResponse = { files?: Array<{ file: string; hash: string }>; source?: string; revision?: string; history?: RevisionLedger; validation?: SourceValidation; transaction?: MutationTransaction; diff?: string; error?: string }
+export type SourceResponse = { draftState?: DraftState; files?: Array<{ file: string; hash: string }>; source?: string; revision?: string; history?: RevisionLedger; validation?: SourceValidation; transaction?: MutationTransaction; diff?: string; error?: string }
 type Request = (action: string, body?: Record<string, unknown>) => Promise<{ ok: boolean; data: SourceResponse }>
 type Draft = { file: string; text: string; baseline: string; hash: string; baseRevision: string }
 
@@ -32,6 +33,10 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const [files, setFiles] = useState<Array<{ file: string; hash: string }>>([])
   const [drafts, setDrafts] = useState<Record<string, Draft>>({})
   const [active, setActive] = useState("")
+  const [draftsLoaded, setDraftsLoaded] = useState(false)
+  const [backupStatus, setBackupStatus] = useState("")
+  const draftVersion = useRef(0), backupQueue = useRef(Promise.resolve())
+  const dirtyDrafts = Object.values(drafts).filter(item => item.text !== item.baseline)
   const [head, setHead] = useState("")
   const [ledger, setLedger] = useState<RevisionLedger>()
   const [validation, setValidation] = useState<SourceValidation>()
@@ -50,7 +55,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   for (const entry of ledger?.transactions ?? []) if (entry.success) for (const [file, version] of Object.entries(entry.versions ?? {})) if (!initialHashes.has(file)) initialHashes.set(file, version.before)
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; ++serial.current } }, [])
-  useEffect(() => { setDrafts({}); setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); ++serial.current }, [projectId])
+  useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); ++serial.current }, [projectId])
   useEffect(() => {
     if (!connected) return
     const sequence = ++serial.current
@@ -64,6 +69,38 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
       if (sequence === serial.current && history.ok) setLedger(history.data.history)
     })().catch(() => { if (sequence === serial.current) setStatus("Source connection unavailable. Drafts are retained.") })
   }, [epoch, connected, projectId])
+  useEffect(() => {
+    if (!connected || draftsLoaded) return
+    let cancelled = false
+    void requests.current("drafts").then(response => {
+      if (cancelled) return
+      if (response.ok && response.data.draftState) {
+        const state = response.data.draftState; draftVersion.current = state.version
+        setDrafts(current => ({ ...Object.fromEntries(state.drafts.map(draft => [draft.file, draft])), ...Object.fromEntries(Object.entries(current).filter(([,draft]) => draft.text !== draft.baseline)) }))
+        if (state.drafts.length) setBackupStatus("Recovered backed-up drafts. Accepted source is unchanged; review before saving.")
+      }
+      setDraftsLoaded(true)
+    }).catch(() => { if (!cancelled) setBackupStatus("Draft recovery unavailable. Reconnect before editing.") })
+    return () => { cancelled = true }
+  }, [connected, draftsLoaded, projectId])
+  useEffect(() => {
+    if (!connected || !draftsLoaded) return
+    const proposal = Object.values(drafts).filter(draft => draft.text !== draft.baseline).map(draft => ({ ...draft }))
+    let cancelled = false
+    const saveRequest = requests.current
+    const timer = setTimeout(() => {
+      setBackupStatus("Backing up drafts…")
+      backupQueue.current = backupQueue.current.then(async () => {
+        if (cancelled) return
+        const response = await saveRequest("drafts", { command: "save", version: draftVersion.current, drafts: proposal })
+        if (!response.ok || !response.data.draftState) { setBackupStatus(response.data.error ?? "Draft backup failed; keep this editor open."); return }
+        if (!mounted.current) return
+        draftVersion.current = response.data.draftState.version
+        if (!cancelled) setBackupStatus(proposal.length ? "Draft backup saved. Restore it after reconnecting or restarting." : "No unsaved drafts to back up.")
+      }).catch(() => setBackupStatus("Draft backup unavailable; keep this editor open."))
+    }, 250)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [drafts, connected, draftsLoaded, projectId])
   useEffect(() => {
     if (visible !== "history" || !connected) return
     let cancelled = false
@@ -96,26 +133,31 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     return () => window.removeEventListener("beforeunload", preventLoss)
   }, [drafts])
 
-  async function save() {
-    if (!draft || !dirty || saving.current || !connected) return
+  async function save(all = false) {
+    const proposals = all ? dirtyDrafts : draft && dirty ? [draft] : []
+    if (!proposals.length || saving.current || !connected) return
+    if (new Set(proposals.map(draft => draft.baseRevision)).size !== 1) { setStatus("Drafts have different base revisions. Rebase unchanged files before Save all."); return }
     saving.current = true; setBusy(true); setStatus("Validating source before acceptance…")
-    const saved = { ...draft }
-    // Keep the same key after an uncertain transport failure. Changing the draft
-    // creates a new proposal and therefore a new key.
+    const saved = proposals.map(draft => ({ ...draft }))
     const signature = JSON.stringify(saved)
     if (pendingSave.current?.signature !== signature) pendingSave.current = { signature, key: crypto.randomUUID() }
     try {
-      const response = await requests.current("code", { expectedRevision: saved.baseRevision, idempotencyKey: pendingSave.current!.key, operations: [{ kind: "update", file: saved.file, expectedHash: saved.hash, content: saved.text }] })
+      const response = await requests.current("code", { expectedRevision: saved[0].baseRevision, idempotencyKey: pendingSave.current!.key, operations: saved.map(draft => ({ kind: "update", file: draft.file, expectedHash: draft.hash, content: draft.text })) })
       if (!mounted.current) return
       setValidation(response.data.validation)
-      if (!response.ok) { pendingSave.current = undefined; setStatus(response.data.error ?? "Save rejected. Draft retained; preview remains at the last accepted revision."); const latest = await requests.current("history"); if (latest.ok) { setLedger(latest.data.history); setHead(latest.data.revision ?? head) } return }
+      if (!response.ok) { pendingSave.current = undefined; setStatus(response.data.error ?? "Save rejected. Drafts retained; preview remains at the last accepted revision."); const latest = await requests.current("history"); if (latest.ok) { setLedger(latest.data.history); setHead(latest.data.revision ?? head) } return }
       pendingSave.current = undefined
-      const current = await requests.current("files", { file: saved.file })
-      const newSource = current.data.source ?? saved.text, newHash = current.data.files?.find(file => file.file === saved.file)?.hash ?? ""
-      setDrafts(all => ({ ...all, [saved.file]: { ...saved, baseline: newSource, text: all[saved.file]?.text === saved.text ? newSource : all[saved.file]?.text ?? saved.text, hash: newHash, baseRevision: response.data.revision! } }))
-      setStatus("Saved real source. Selection cleared; preview is rebuilding.")
+      setDrafts(drafts => {
+        const next = { ...drafts }
+        for (const item of saved) {
+          const hash = response.data.transaction?.versions?.[item.file]?.after ?? ""
+          next[item.file] = { ...item, baseline: item.text, text: drafts[item.file]?.text ?? item.text, hash, baseRevision: response.data.revision! }
+        }
+        return next
+      })
+      setStatus(all ? `Saved ${saved.length} files in one source transaction. Preview is rebuilding.` : "Saved real source. Selection cleared; preview is rebuilding.")
       await onAccepted(response.data)
-    } catch { setStatus("Save response unavailable. Draft retained; Save retries the same request safely.") }
+    } catch { setStatus("Save response unavailable. Drafts retained; Save retries the same request safely.") }
     finally { saving.current = false; if (mounted.current) setBusy(false) }
   }
   async function reloadBase() {
@@ -168,13 +210,13 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     {visible === "code" && <>
       <div className="source-file-tree" aria-label="Source file tree">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => { setActive(item.file); setValidation(undefined) }}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div>
       <div className="source-editor-panel">
-        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
+        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
         <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Referenced files cannot be removed or renamed if that breaks the preview build. Multi-file import updates can be submitted together through the source transaction API.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
         {conflict && <p role="alert">HEAD changed while this draft was open. Save will reject this stale base. <button onClick={() => void reloadBase()}>Rebase unchanged file</button></p>}
         {draft && <CodeEditor file={active} value={draft.text} onChange={value => setDrafts(all => ({ ...all, [active]: { ...all[active], text: value } }))} onSave={() => void save()} />}
         {validation && <div className="source-diagnostics" role="status">{validation.passed ? "Parse checks passed. Save validates the controlled preview bundle." : "Syntax/validation error — draft retained; preview remains at the last accepted revision."}{validation.diagnostics.map((item, index) => <p key={index}>{item.file}{item.line ? `:${item.line}:${item.column ?? 0}` : ""}: {item.message}</p>)}</div>}
         {showDiff && draft && <pre className="draft-diff">{`${active}\n--- Accepted source\n${draft.baseline.split("\n").map(line => "-" + line).join("\n")}\n+++ Draft\n${draft.text.split("\n").map(line => "+" + line).join("\n")}`}</pre>}
-        <small>⌘S / Ctrl+S saves one transaction. Drafts stay in memory until accepted.</small>
+        <small>⌘S / Ctrl+S saves this file. Save all drafts validates and accepts them together.</small><p className="draft-backup-status" role="status">{backupStatus}</p>
       </div>
     </>}
     {visible === "history" && <div className="source-history"><h2>Source history</h2><p>HEAD <code>{head}</code></p><button onClick={() => void historyAction("checkpoint")} disabled={busy || !connected}>Create checkpoint</button><p>Revert checks every affected file. A later change in an affected file requires manual reconciliation.</p>

@@ -1,0 +1,31 @@
+{
+  "name": "@webcanbe/runtime-react18-vite4-three-v1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Finite React 18 / Vite 4 / Three browser profile. No imported lifecycle or config execution.",
+  "dependencies": {
+    "@react-three/drei": "9.122.0",
+    "@react-three/fiber": "8.13.7",
+    "@react-three/postprocessing": "2.14.13",
+    "@types/three": "0.155.0",
+    "meshline": "3.1.6",
+    "postprocessing": "6.35.4",
+    "prism-react-renderer": "2.0.6",
+    "prismjs": "1.30.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.154.0",
+    "zustand": "4.3.9",
+    "@eslint/js": "9.17.0",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "@vitejs/plugin-react-swc": "3.11.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-react": "7.37.2",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "eslint-plugin-react-refresh": "0.4.16",
+    "globals": "15.14.0",
+    "vite": "4.5.14",
+    "tailwindcss": "4.3.3"
+  }
+}

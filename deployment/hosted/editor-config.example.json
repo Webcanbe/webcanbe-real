@@ -1,0 +1,39 @@
+{
+  "applicationRoot": "/opt/webcanbe-editor",
+  "listenAddress": "127.0.0.1",
+  "port": 9444,
+  "key": "/etc/webcanbe/editor-key.pem",
+  "cert": "/etc/webcanbe/editor-cert.pem",
+  "origins": {
+    "editorOrigin": "https://editor.example.com:9444",
+    "viewerOrigin": "https://viewer.example.net:9444",
+    "editorSite": "example.com",
+    "viewerSite": "example.net"
+  },
+  "postgres": {
+    "host": "REPLACE_WITH_PRIVATE_POSTGRES_HOST",
+    "database": "webcanbe",
+    "user": "webcanbe_control",
+    "password": "LOAD_FROM_PRIVATE_OPERATOR_CONFIG",
+    "ssl": { "rejectUnauthorized": true, "ca": "LOAD_PRIVATE_DATABASE_CA_PEM" }
+  },
+  "oidc": {
+    "issuer": "https://identity.example.org",
+    "authorizationEndpoint": "https://identity.example.org/authorize",
+    "tokenEndpoint": "https://identity.example.org/token",
+    "jwksUri": "https://identity.example.org/jwks",
+    "clientId": "REPLACE_WITH_REGISTERED_CLIENT_ID",
+    "clientSecret": "LOAD_FROM_PRIVATE_OPERATOR_CONFIG",
+    "redirectUri": "https://editor.example.com:9444/__webcanbe/auth/callback"
+  },
+  "hosts": [
+    {
+      "id": "worker-a",
+      "origin": "https://worker-a.internal.example.org:9443",
+      "ca": "/etc/webcanbe/gateway-ca.pem",
+      "cert": "/etc/webcanbe/controller-cert.pem",
+      "key": "/etc/webcanbe/controller-key.pem"
+    }
+  ],
+  "fastRefresh": true
+}

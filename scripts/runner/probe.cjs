@@ -5,6 +5,7 @@ let text='';process.stdin.on('data',v=>text+=v);process.stdin.on('end',()=>run(J
 async function run(config){
  if(config.hold){console.log('FROZEN_WORKER');process.kill(process.pid,'SIGSTOP');return}
  if(config.oom){const buffers=[];for(;;)buffers.push(Buffer.alloc(64*1024*1024,1));}
+ if(config.tasks){const result=cp.spawnSync('/opt/wcb-runtime/socket-probe',['tasks'],{encoding:'utf8',timeout:5000});if(result.error||result.status!==0)throw Error('Task exhaustion boundary failed');console.log(result.stdout.trim());return}
 
  const denied=fn=>{try{fn();return false}catch{return true}};
  const raw={procRootEscapeDenied:denied(()=>fs.readFileSync('/proc/1/root/var/lib/wcb-runner/synthetic-canary')),traversalDenied:denied(()=>fs.readFileSync('/tmp/../../var/lib/wcb-runner/synthetic-canary')),secretAbsent:!process.env.WCB_SYNTHETIC_SECRET, filesystemEscapeDenied:denied(()=>fs.readFileSync('/var/lib/wcb-runner/synthetic-canary')), shellDenied:cp.spawnSync('/bin/sh',['-c','true']).error?.code==='ENOENT', outsideProcessDenied:denied(()=>process.kill(config.outsidePid,0)), systemWriteDenied:denied(()=>fs.writeFileSync('/opt/wcb-runtime/escape','synthetic')), hostHomeAbsent:!fs.existsSync('/Users'), vsock:cp.spawnSync('/opt/wcb-runtime/socket-probe',[],{encoding:'utf8'}).stdout?.trim(), net:fs.readlinkSync('/proc/self/ns/net'), pid:fs.readlinkSync('/proc/self/ns/pid'), interfaces:Object.keys(require('node:os').networkInterfaces()), noNewPrivs:/NoNewPrivs:\s+1/.test(fs.readFileSync('/proc/self/status','utf8'))};

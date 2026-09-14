@@ -8,8 +8,8 @@ import { parse as parseHtml } from "parse5"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1"] as const
-export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid"])
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1"] as const
+export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs"])
 export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
 function selectProfile(project: ProjectRecord, applicationRoot: string) {
@@ -84,7 +84,7 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
     if (clause?.isTypeOnly) throw new Error("Type-only configuration imports cannot be runtime bindings.")
     if (clause?.name) bindings.set(clause.name.text, module + ":default")
     if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) for (const item of clause.namedBindings.elements) bindings.set(item.name.text, module + ":" + (item.propertyName?.text ?? item.name.text))
-    if (!["vite", "@vitejs/plugin-react", "@tailwindcss/vite", "node:url", "url"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
+    if (!["vite", "@vitejs/plugin-react", "@vitejs/plugin-react-swc", "@tailwindcss/vite", "node:url", "url"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
   }
   const value = (node: ts.Expression): any => {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text
@@ -105,7 +105,7 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const binding = bindings.get(node.expression.text)
       if (binding === "vite:defineConfig" && node.arguments.length === 1) return value(node.arguments[0])
-      if (["@vitejs/plugin-react:default", "@tailwindcss/vite:default"].includes(binding ?? "") && !node.arguments.length) { const plugin = { plugin: binding!.split(":")[0] }; pluginValues.add(plugin); return plugin }
+      if (["@vitejs/plugin-react:default", "@vitejs/plugin-react-swc:default", "@tailwindcss/vite:default"].includes(binding ?? "") && !node.arguments.length) { const plugin = { plugin: binding!.split(":")[0] }; pluginValues.add(plugin); return plugin }
       if (["node:url:fileURLToPath", "url:fileURLToPath"].includes(binding ?? "") && node.arguments.length === 1) {
         const url = node.arguments[0]
         if (ts.isNewExpression(url) && ts.isIdentifier(url.expression) && url.expression.text === "URL" && !bindings.has("URL") && url.arguments?.length === 2 && ts.isStringLiteral(url.arguments[0]) && url.arguments[1].getText(source) === "import.meta.url") {

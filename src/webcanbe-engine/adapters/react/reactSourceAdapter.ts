@@ -26,7 +26,17 @@ type ClassInfo = { classNames: string[]; cssModule?: { namespace: string; name: 
 
 function cssName(property: StyleProperty) { return property.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`) }
 function jsxName(node: ts.JsxOpeningLikeElement) { return node.tagName.getText() }
-function isNative(name: string) { return /^[a-z][a-zA-Z0-9-]*$/.test(name) }
+// Lowercase JSX is also used by non-DOM renderers. Adding data-* props to
+// their intrinsic objects can change runtime behavior (e.g. dashed-property
+// traversal). Instrument only known DOM tags; custom intrinsics remain Code.
+const htmlTags = new Set("a abbr address area article aside audio b base bdi bdo blockquote body br button canvas caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em embed fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe img input ins kbd label legend li link main map mark menu meta meter nav noscript object ol optgroup option output p picture pre progress q rp rt ruby s samp script search section select slot small source span strong style sub summary sup table tbody td template textarea tfoot th thead time title tr track u ul var video wbr svg".split(" "))
+const svgTags = new Set("animate animateMotion animateTransform circle clipPath defs desc ellipse feBlend feColorMatrix feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence filter foreignObject g image line linearGradient marker mask metadata mpath path pattern polygon polyline radialGradient rect set stop switch symbol text textPath tspan use view".split(" "))
+function isNative(name: string, node: ts.Node) {
+  if (htmlTags.has(name)) return true
+  if (!svgTags.has(name)) return false
+  for (let parent = node.parent; parent; parent = parent.parent) if (ts.isJsxElement(parent) && jsxName(parent.openingElement) === "svg") return true
+  return false
+}
 
 function getAttribute(node: ts.JsxOpeningLikeElement, name: string) {
   return node.attributes.properties.find((attribute): attribute is ts.JsxAttribute => ts.isJsxAttribute(attribute) && ts.isIdentifier(attribute.name) && attribute.name.text === name)
@@ -302,7 +312,7 @@ function capabilitySet(origins: StyleOrigin[], text: boolean, nodeKind: SourceTa
 
 function componentFor(node: ts.JsxOpeningLikeElement, file: string, source: ts.SourceFile) {
   const name = jsxName(node)
-  return isNative(name) ? undefined : { name, file, range: { start: node.getStart(source), end: node.getEnd() } }
+  return isNative(name, node) ? undefined : { name, file, range: { start: node.getStart(source), end: node.getEnd() } }
 }
 
 export function analyzeReactSource(file: string, code: string, readSource: ReadSource, options: { tailwind?: boolean } = {}): SourceTarget[] {
@@ -311,7 +321,7 @@ export function analyzeReactSource(file: string, code: string, readSource: ReadS
   const visit = (node: ts.Node) => {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const name = jsxName(node)
-      const nodeKind = isNative(name) ? "native" as const : "component" as const
+      const nodeKind = isNative(name, node) ? "native" as const : "component" as const
       const identity: SourceIdentity = { file, elementStart: node.getStart(source) }
       const classInfo = staticClassInfo(node)
       const text = ts.isJsxOpeningElement(node) && nodeKind === "native" ? staticTextRange(node, source) : undefined
@@ -361,7 +371,7 @@ export function instrumentReactSource(file: string, code: string) {
   const source = parsedSource(file, code)
   const insertions: Array<{ position: number; value: string }> = []
   const visit = (node: ts.Node) => {
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && isNative(jsxName(node)) && !getAttribute(node, "data-wcb-id")) {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && isNative(jsxName(node), node) && !getAttribute(node, "data-wcb-id")) {
       insertions.push({ position: node.tagName.end, value: ` data-wcb-id="${encodeSourceIdentity({ file, elementStart: node.getStart(source) })}"` })
     }
     ts.forEachChild(node, visit)

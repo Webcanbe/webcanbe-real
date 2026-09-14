@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { analyzeProjectStyles, mutationOrigin, viewportWidths } from "../adapters/react/projectStyles"
 import { createHash } from "node:crypto"
-import { analyzeReactSource, cssDeclaration, tailwindProperty } from "../adapters/react/reactSourceAdapter"
+import { analyzeReactSource, cssDeclaration, tailwindProperty, supportedProperties } from "../adapters/react/reactSourceAdapter"
 import type { MutationTransaction, SourceIdentity, SourcePatch, StyleOrigin, StyleProperty, ViewportPreset } from "../core/types"
 
 export type SourceStore = { tailwind?: boolean; read(file: string): string | undefined; write(file: string, content: string, expected?: string): void }
@@ -232,6 +232,33 @@ export function patchProjectStyle(store: SourceStore, files: Map<string, string>
   if (original === undefined) return failed(identity, "style", "Source unavailable.")
   const patch = sourcePatch(origin.file, origin.range, original.slice(origin.range.start, origin.range.end), replacement)
   try { const versions = applyPatches(store, [patch], "forward"); return transaction({ file: origin.file, range: origin.range, editType: options.semantic ? "layout" : breakpoint === "base" ? "style" : "responsive", before: patch.before, after: patch.after, target: identity, success: true, patches: [patch], versions, viewport: options.viewport }) } catch (error) { return failed(identity, "style", String(error)) }
+}
+
+/** Construct only an explicit missing override of an existing safe origin.
+ * Appends real CSS or one variant token. No new selector, coordinate model,
+ * arbitrary media text, or inferred per-instance source is introduced. */
+export function patchResponsiveConstruct(store: SourceStore, files: Map<string,string>, identity: SourceIdentity, property: StyleProperty, value: string, breakpointId: string, scope?: string) {
+  const analysis=analyzeProjectStyles(files,Boolean(store.tailwind)),target=analysis.targets.find(t=>t.identity.file===identity.file&&t.identity.elementStart===identity.elementStart)
+  if(!target||target.nodeKind!=="native"||target.reasonCodes?.some(c=>["jsx-spread-props","dynamic-class-expression"].includes(c))||scope!=="source"||!supportedProperties.includes(property))return failed(identity,"responsive","Choose an unambiguous existing source origin and source scope.")
+  const origin=mutationOrigin(target,property,"base",analysis.breakpoints)
+  if(!origin?.editable||!origin.range||!origin.file||!["css","css-module","tailwind"].includes(origin.kind))return failed(identity,"responsive","Responsive construction requires an existing static CSS selector or Tailwind token.")
+  const preset=breakpointId.startsWith("new:")?breakpointId.slice(4) as ViewportPreset:undefined
+  const breakpoint=analysis.breakpoints.find(b=>b.id===breakpointId)
+  const media=preset&&Object.prototype.hasOwnProperty.call(breakpointQuery,preset)?breakpointQuery[preset]:breakpoint?.media
+  const prefix=breakpoint?.prefix
+  let patch:SourcePatch
+  const source=files.get(origin.file)!
+  if(origin.kind==="tailwind"){
+    if(!prefix||!breakpointId.startsWith("tw:")||target.styleOrigins.some(o=>o.property===property&&o.prefix===prefix))return failed(identity,"responsive","Select a supported missing Tailwind variant; existing or ambiguous variants must use their original declaration.")
+    const token=tailwindPropertySafe(property,value)?value:tailwindToken(property,value)
+    if(!token||!tailwindPropertySafe(property,token))return failed(identity,"responsive","Unsupported responsive utility value.")
+    patch=sourcePatch(origin.file,origin.range,source.slice(origin.range.start,origin.range.end),source.slice(origin.range.start,origin.range.end)+" "+prefix+token)
+  }else{
+    if(!media||!origin.selector||!/^\.[a-zA-Z_][a-zA-Z0-9_-]*$/.test(origin.selector)||!safeStyleValue(value)||["paddingX","paddingY"].includes(property)||target.styleOrigins.some(o=>o.property===property&&o.media===media))return failed(identity,"responsive","Select a supported missing media override of a single class selector; ambiguous or existing declarations must use Code or their origin.")
+    const name=property.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())
+    patch=sourcePatch(origin.file,{start:source.length,end:source.length},"",`\n@media ${media} {\n  ${origin.selector} { ${name}: ${value}; }\n}\n`)
+  }
+  try{const versions=applyPatches(store,[patch],"forward");return transaction({file:origin.file,range:patch.range,editType:"responsive",before:patch.before,after:patch.after,target:identity,success:true,patches:[patch],versions})}catch{return failed(identity,"responsive","Source changed before responsive construction.")}
 }
 
 function tailwindPropertySafe(property: StyleProperty, token: string) {

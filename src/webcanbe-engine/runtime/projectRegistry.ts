@@ -12,10 +12,10 @@ import { MutationHistory, type SourceStore } from "../mutations/sourceMutations"
 
 export const ZIP_LIMITS = Object.freeze({ archiveBytes: 25 * 1024 * 1024, totalBytes: 40 * 1024 * 1024, fileBytes: 2 * 1024 * 1024, entries: 2_000, ratio: 100 })
 const sourceExtension = /\.(tsx|jsx|ts|js|css|json)$/
-export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint"
+export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint" | "drafts"
 export type SessionBinding = { grant: ProjectGrant; check: (operation: SessionOperation) => boolean }
 export type SessionAuthority = { previewId: string; capability: string; operation: SessionOperation }
-const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint"]
+const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint", "drafts"]
 
 export type FrameworkDetection = {
   supported: boolean
@@ -284,6 +284,11 @@ export class ProjectRegistry {
         } finally { fs.rmSync(temporary, { force: true }) }
       },
     }
+  }
+
+  async withPreviewSource<T>(projectId: string, authority: SessionAuthority, action: (project: ProjectRecord, files: Map<string, string>) => Promise<T>) {
+    if (!this.authorize(projectId, authority.previewId, authority.capability, "preview")) throw new Error("Preview source is unauthorized.")
+    return action(this.get(projectId)!, this.durable(projectId).files())
   }
 
   sourceFiles(projectId: string) {

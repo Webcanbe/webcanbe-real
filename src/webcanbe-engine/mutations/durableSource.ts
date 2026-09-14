@@ -53,7 +53,7 @@ export class DurableSource {
   private readonly journalPath: string
   private poisoned = false
   private held = false
-  constructor(private project: ProjectRecord, storageRoot: string) {
+  constructor(private project: ProjectRecord, storageRoot: string, private options: { disposableStaging?: boolean; actor?: string } = {}) {
     this.directory = path.join(storageRoot, project.id)
     ensureDirectory(this.directory)
     this.statePath = path.join(this.directory, "history.json")
@@ -64,7 +64,7 @@ export class DurableSource {
       if (this.ledger.schema !== 1 || this.ledger.projectId !== project.id || !Array.isArray(this.ledger.revisions) || !Array.isArray(this.ledger.transactions)) throw new Error("Invalid project history. Recovery requires operator review.")
       this.recover()
       if (!this.ledger.revisions.length) {
-        this.ledger.revisions.push({ revisionId: `rev_${randomUUID()}`, projectId: project.id, parentRevisionId: null, createdAt: new Date().toISOString(), actor: "local-operator", producer: "system", contentHash: treeHash(this.files()) })
+        this.ledger.revisions.push({ revisionId: `rev_${randomUUID()}`, projectId: project.id, parentRevisionId: null, createdAt: new Date().toISOString(), actor: this.options.actor ?? "local-operator", producer: "system", contentHash: treeHash(this.files()) })
         atomicFile(this.statePath, boundedHistory(this.ledger))
       }
       this.hydrate()
@@ -74,6 +74,13 @@ export class DurableSource {
    * This avoids PID files, stale-lock deletion races and two-server writers. */
   lease() {
     if (this.held) throw new SourceConflict("A project operation is already in progress.")
+    // A private hosted checkout is disposable transaction staging, never an
+    // authority or commit point. PostgreSQL supplies all hosted locks and CAS.
+    if (this.options.disposableStaging) {
+      this.held = true
+      if (this.ledger) { this.reload(); this.recover(); this.hydrate() }
+      return () => { this.held = false }
+    }
     const database = new DatabaseSync(path.join(this.directory, "writer.sqlite"))
     try { database.exec("PRAGMA busy_timeout=1000; BEGIN IMMEDIATE") }
     catch { database.close(); throw new SourceConflict("Another server owns this project operation. Retry after it completes.") }

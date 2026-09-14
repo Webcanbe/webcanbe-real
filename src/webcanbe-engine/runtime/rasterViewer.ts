@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http"
 /** Serves only this trusted viewer. No project scripts, artifacts, credentials or APIs. */
-function viewerDocument(parentCheck: string) { return `<!doctype html><meta charset="utf-8"><title>Controlled preview viewer</title><style>html,body{margin:0;overflow:hidden;background:#fff}img{display:block;user-select:none;-webkit-user-drag:none}</style><img alt="Rendered project" draggable="false"><script>
+function viewerDocument(parentCheck: string) { return `<!doctype html><meta charset="utf-8"><title>Controlled preview viewer</title><style>html,body{margin:0;overflow:hidden;background:#fff}img{display:block;user-select:none;-webkit-user-drag:none}</style><img alt="Rendered project" draggable="false" tabindex="0"><script>
 let generation='',sequence=0,select=true;const img=document.querySelector('img');
 addEventListener('message',event=>{
  if(event.source!==parent||${parentCheck})return;
@@ -9,7 +9,15 @@ addEventListener('message',event=>{
  if(d.type==='mode'&&d.generation===generation)select=d.select;
 });
 function send(input){if(generation)parent.postMessage({channel:'wcb-raster',type:'input',generation,sequence,input},'*');}
-img.addEventListener('click',e=>{const r=img.getBoundingClientRect();send({type:'pointer',action:select?'select':'click',x:(e.clientX-r.left)*img.width/r.width,y:(e.clientY-r.top)*img.height/r.height});});
+img.addEventListener('click',e=>{img.focus({preventScroll:true});const r=img.getBoundingClientRect();send({type:'pointer',action:select?'select':'click',x:(e.clientX-r.left)*img.width/r.width,y:(e.clientY-r.top)*img.height/r.height});});
+addEventListener('keydown',e=>{
+ if(select||e.isComposing)return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'){e.preventDefault();send({type:'key',key:'SelectAll',shift:false});return;}
+ if(e.ctrlKey||e.metaKey||e.altKey)return;
+ if(['Tab','Enter','Escape','Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(e.key)){e.preventDefault();send({type:'key',key:e.key,shift:e.shiftKey});}
+ else if([...e.key].length===1){e.preventDefault();send({type:'text',text:e.key});}
+});
+addEventListener('compositionend',e=>{if(!select&&typeof e.data==='string'&&e.data.length&&e.data.length<=4096)send({type:'text',text:e.data});});
 addEventListener('wheel',e=>{e.preventDefault();send({type:'scroll',dx:Math.max(-2000,Math.min(2000,e.deltaX)),dy:Math.max(-2000,Math.min(2000,e.deltaY))});},{passive:false});
 </script>` }
 const html = viewerDocument("!/^http:\\/\\/(localhost|127\\.0\\.0\\.1)(:\\d+)?$/.test(event.origin)")

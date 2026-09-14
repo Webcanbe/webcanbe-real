@@ -11,7 +11,7 @@
     "runtime:prepare": "npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6",
     "runner:prepare": "node scripts/runner/prepare.cjs",
     "runner:verify": "node scripts/runner/verify-local.cjs",
-    "runtime:prepare:expanded": "npm ci --ignore-scripts --prefix runtime-profiles/react18-vite5-v1 && npm ci --ignore-scripts --prefix runtime-profiles/react19-vite8-v1"
+    "runtime:prepare:expanded": "npm ci --ignore-scripts --prefix runtime-profiles/react18-vite5-v1 && npm ci --ignore-scripts --prefix runtime-profiles/react19-vite8-v1 && npm ci --ignore-scripts --prefix runtime-profiles/react18-vite4-three-v1"
   },
   "dependencies": {
     "@babel/core": "7.29.7",

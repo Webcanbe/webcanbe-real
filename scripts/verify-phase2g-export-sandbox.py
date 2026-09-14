@@ -21,7 +21,7 @@ import zipfile
 parser = argparse.ArgumentParser()
 parser.add_argument('archive', type=Path)
 parser.add_argument('output', type=Path, help='New empty local validation directory')
-parser.add_argument('--profile', choices=['react19-vite6', 'react18-vite5-v1', 'react19-vite8-v1'], required=True)
+parser.add_argument('--profile', choices=['react19-vite6', 'react18-vite5-v1', 'react19-vite8-v1', 'react18-vite4-three-v1'], required=True)
 args = parser.parse_args()
 if sys.platform != 'darwin' or not Path('/usr/bin/sandbox-exec').exists():
     raise SystemExit('NOT YET: an approved OS-isolated export runner is unavailable.')

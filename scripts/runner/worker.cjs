@@ -93,9 +93,11 @@ async function update(value) {
   } else {
     const scroll = await dom(() => ({ x: scrollX, y: scrollY }));
     job = { ...job, snapshot };
+    // Retire old-revision logs before navigation; preserve startup diagnostics
+    // emitted by the newly accepted document.
+    logs.length = 0;
     await page.reload({ waitUntil: 'load' });
     await dom(position => { scrollTo(position.x, position.y); globalThis.__wcbSelected = null; }, scroll);
-    logs.length = 0;
   }
   job = { ...job, revision: value.revision, snapshot };
   await page.waitForTimeout(40);
@@ -103,7 +105,13 @@ async function update(value) {
 }
 async function input(value) {
   if (!page) throw Error('Not started');
-  if (value.type === 'pointer') {
+  if (value.type === 'text') {
+    if(typeof value.text!=='string'||!value.text.length||value.text.length>4096||/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value.text))throw Error('Invalid text input');
+    await page.keyboard.insertText(value.text);
+  } else if (value.type === 'key') {
+    if(typeof value.shift!=='boolean'||!['Tab','Enter','Escape','Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown','SelectAll'].includes(value.key))throw Error('Invalid key input');
+    await page.keyboard.press(value.key==='SelectAll'?'Control+A':(value.shift?'Shift+':'')+value.key);
+  } else if (value.type === 'pointer') {
     if (value.action === 'select') await dom(point => { globalThis.__wcbSelected = document.elementFromPoint(point.x, point.y)?.closest('[data-wcb-id]') || null; }, value);
     else { await dom(() => { globalThis.__wcbSelected = null; }); if (value.action === 'click') await page.mouse.click(value.x, value.y); else await page.mouse.move(value.x, value.y); }
   } else if (value.type === 'navigate') await page.goto(job.origin + value.route, { waitUntil: 'load' });

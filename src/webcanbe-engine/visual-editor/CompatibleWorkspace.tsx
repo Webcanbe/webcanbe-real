@@ -14,6 +14,8 @@ type PreviewSession = { projectId: string; previewId: string; capability: string
 type RuntimeInfo = { profile: string; supported: boolean; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>; issues: Array<{ message: string; requiredCapability: string }>; notes: string[] }
 type ApiResponse = SourceResponse & { updateKind?: string; breakpoints?: Breakpoint[]; styleDiagnostics?: string[]; transport?: "blob" | "http" | "raster"; viewerUrl?: string; png?: string; sequence?: number; observation?: RunnerObservation; generation?: string; origin?: string; state?: string; runtime?: RuntimeInfo; target?: SourceTarget; summary?: CompatibilitySummary; transaction?: MutationTransaction; diff?: string; project?: ProjectInfo; session?: PreviewSession; html?: string; source?: string; revision?: string; targets?: SourceTarget[]; archive?: string; error?: string }
 
+const hostedMode = document.querySelector('meta[name="wcb-editor-mode"]')?.getAttribute("content") === "hosted"
+
 const editableLabels: Partial<Record<StyleProperty, string>> = {
   backgroundColor: "Background", color: "Text color", fontSize: "Font size", fontWeight: "Font weight", padding: "Padding", paddingX: "Horizontal padding", paddingY: "Vertical padding", margin: "Margin", gap: "Gap", width: "Width", height: "Height", maxWidth: "Max width", border: "Border", borderRadius: "Radius", alignItems: "Align items", justifyContent: "Justify content", alignSelf: "Align self", justifySelf: "Justify self", order: "Order", flexGrow: "Grow", flexShrink: "Shrink", gridTemplateColumns: "Grid columns", gridTemplateRows: "Grid rows", gridColumn: "Grid column", gridRow: "Grid row",
 }
@@ -33,7 +35,9 @@ export default function CompatibleWorkspace() {
   const activeGeneration = useRef("")
   const rasterBusy = useRef(false)
   const rasterSequence = useRef(0)
-  const rasterQueued = useRef<{ input: PreviewInput; sequence: number; generation: string } | undefined>(undefined)
+  const rasterQueued = useRef<Array<{ input: PreviewInput; sequence: number; generation: string; revision: string; epoch: number }>>([])
+  const currentRasterOperation = useRef<(input?: PreviewInput, sequence?: number) => Promise<void>>(async () => {})
+  const refreshAttempt = useRef(0)
   const lastRaster = useRef<ApiResponse | undefined>(undefined)
   const inspected = useRef("")
   const selectionSource = useRef<"runtime" | "source">("runtime")
@@ -50,6 +54,9 @@ export default function CompatibleWorkspace() {
   const [text, setText] = useState("")
   const [breakpoints, setBreakpoints] = useState<Breakpoint[]>([])
   const [authoringBreakpoint, setAuthoringBreakpoint] = useState("base")
+  const [newBreakpoint,setNewBreakpoint]=useState("new:mobile")
+  const [newProperty,setNewProperty]=useState<StyleProperty>("padding")
+  const [newValue,setNewValue]=useState("24px")
   const [styleDiagnostics, setStyleDiagnostics] = useState<string[]>([])
   const [effectScope, setEffectScope] = useState("source")
   const [viewport, setViewport] = useState<ViewportPreset>("desktop")
@@ -57,6 +64,27 @@ export default function CompatibleWorkspace() {
   rasterWidth.current = { mobile: 390, tablet: 768, desktop: 1280 }[viewport]
   const [diff, setDiff] = useState("")
   const [accessKey, setAccessKey] = useState("")
+  const [csrf, setCsrf] = useState("")
+  const [workspaces, setWorkspaces] = useState<string[]>([])
+  const [workspaceId, setWorkspaceId] = useState("")
+  const [hostedProjects, setHostedProjects] = useState<ProjectInfo[]>([])
+  const headers = () => ({ "Content-Type": "application/json", ...(hostedMode ? { "X-WCB-CSRF": csrf } : { "X-WCB-Editor-Key": accessKey }) })
+  async function connectHosted() {
+    const response = await fetch("/__webcanbe/auth/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
+    if (!response.ok) { setCsrf(""); setMessage("Sign in to open your projects."); return }
+    const data = await response.json(); setCsrf(data.csrf)
+    const authorizedHeaders = { "Content-Type": "application/json", "X-WCB-CSRF": data.csrf }
+    const [workspaceResponse, projectResponse] = await Promise.all([fetch("/__webcanbe/api/workspaces", { method: "POST", headers: authorizedHeaders, body: "{}" }), fetch("/__webcanbe/api/projects", { method: "POST", headers: authorizedHeaders, body: "{}" })])
+    if (workspaceResponse.ok) { const result = await workspaceResponse.json(); setWorkspaces(result.workspaces); setWorkspaceId(current => current || result.workspaces[0] || "") }
+    if (projectResponse.ok) { const result = await projectResponse.json(); setHostedProjects(result.projects); if (workspaceProjectId() === "phase1-fixture" && result.projects.length) setProjectId(result.projects[0].id) }
+    setConnectionAttempt(value => value + 1)
+  }
+  async function signIn() {
+    const response = await fetch("/__webcanbe/auth/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
+    if (!response.ok) { setMessage("Sign-in is unavailable."); return }
+    window.location.assign((await response.json()).authorizationUrl)
+  }
+  useEffect(() => { if (hostedMode) void connectHosted().catch(() => setMessage("Sign-in connection is unavailable.")) }, [])
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
@@ -73,14 +101,14 @@ export default function CompatibleWorkspace() {
   const [codeFile, setCodeFile] = useState<string>()
 
   async function request(path: string, body: Record<string, unknown> = {}) {
-    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: JSON.stringify({ expectedRevision: revision.current, viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
+    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: headers(), body: JSON.stringify({ ...(revision.current ? { expectedRevision: revision.current } : {}), viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
     return { ok: response.ok, data: await response.json() as ApiResponse }
   }
 
   async function refreshCompatibility() {
-    const epoch = connectionEpoch.current
+    const epoch = connectionEpoch.current, expectedRevision = revision.current
     const response = await request("compatibility")
-    if (epoch !== connectionEpoch.current) return
+    if (epoch !== connectionEpoch.current || expectedRevision !== revision.current) return
     if (response.ok) { setSummary(response.data.summary); setTargets(response.data.targets ?? []); setBreakpoints(response.data.breakpoints ?? []); setStyleDiagnostics(response.data.styleDiagnostics ?? []) }
   }
 
@@ -101,15 +129,15 @@ export default function CompatibleWorkspace() {
 
   useEffect(() => {
     ++connectionEpoch.current
-    if (!accessKey) { setMessage("Enter the local editor access key printed by the development server."); return }
+    if (hostedMode ? !csrf || projectId === "phase1-fixture" : !accessKey) { setMessage(hostedMode ? "Sign in, then choose or import a project." : "Enter the local editor access key printed by the development server."); return }
     routeHash.current = "#/"; routePath.current = "/"
     try { const saved = sessionStorage.getItem('wcb-preview-route:' + projectId); if (safePreviewRoute(saved)) routePath.current = saved! } catch { /* Route persistence is optional; credentials never enter storage. */ }
-    setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""
+    setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""; revision.current = ""; rasterQueued.current = []
     setSession(undefined); setPreview(undefined); setTarget(undefined); setSelected(undefined); setHovered(undefined)
     let cancelled = false, connected: PreviewSession | undefined
-    const stop = (old: PreviewSession) => { void fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'X-WCB-Editor-Key': accessKey }, body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).catch(() => {}) }
+    const stop = (old: PreviewSession) => { void fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: headers(), body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).catch(() => {}) }
     void (async () => {
-      const response = await fetch(`/__webcanbe/api/projects/${projectId}/session`, { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: "{}" })
+      const response = await fetch(`/__webcanbe/api/projects/${projectId}/session`, { method: "POST", headers: headers(), body: "{}" })
       const data = await response.json() as ApiResponse
       if (!response.ok || !data.session || !data.project) { setMessage(data.error ?? "This project could not start a preview."); return }
       connected = data.session
@@ -119,28 +147,31 @@ export default function CompatibleWorkspace() {
     const pagehide = () => { if (connected) stop(connected) }
     window.addEventListener("pagehide", pagehide)
     return () => { cancelled = true; ++connectionEpoch.current; window.removeEventListener("pagehide", pagehide); if (connected) stop(connected) }
-  }, [projectId, accessKey, connectionAttempt])
+  }, [projectId, accessKey, csrf, connectionAttempt])
 
   async function refreshPreview(incremental = false) {
-    const epoch = connectionEpoch.current
+    const epoch = connectionEpoch.current, expectedRevision = revision.current, attempt = ++refreshAttempt.current
+    const current = () => epoch === connectionEpoch.current && expectedRevision === revision.current && attempt === refreshAttempt.current
     selectionSource.current = "runtime"
     setPreviewState("starting"); activeGeneration.current = ""; inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
-    let response = await request("preview", incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current })
-    if (!response.ok && incremental && epoch === connectionEpoch.current) response = await request("preview", { route: routePath.current })
+    let response = await request("preview", { ...(incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current }), ...(expectedRevision ? { expectedRevision } : {}) })
+    if (!current()) return
+    if (!response.ok && incremental) response = await request("preview", { route: routePath.current, ...(expectedRevision ? { expectedRevision } : {}) })
+    if (!current()) return
     if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "react-fast-refresh" ? "React component refreshed inside the controlled runner; compatible component state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
-    if (epoch !== connectionEpoch.current) return
     revision.current = response.data.revision ?? revision.current
     if (response.ok && response.data.transport === "raster" && response.data.viewerUrl && response.data.generation) {
       activeGeneration.current = response.data.generation; rasterSequence.current = 0; lastRaster.current = undefined
       setPreview({ url: response.data.viewerUrl, transport: "raster", generation: response.data.generation })
       setPreviewState("ready")
+      if (!response.data.updateKind) setMessage("Controlled preview is ready.")
     } else if (response.ok && response.data.html && response.data.generation) {
       activeGeneration.current = response.data.generation
       setPreview({ url: URL.createObjectURL(new Blob([response.data.html], { type: "text/html" })), transport: response.data.transport ?? "blob", generation: response.data.generation })
     } else { setPreview(undefined); setPreviewState("failed"); setMessage(response.data.error ?? "Preview unavailable. Inspect source below.") }
   }
-  useEffect(() => { if (session) void (async () => { await refreshCompatibility(); await refreshPreview() })() }, [session])
+  useEffect(() => { const epoch = connectionEpoch.current; if (session) void (async () => { await refreshCompatibility(); if (epoch === connectionEpoch.current) await refreshPreview() })() }, [session])
 
   useEffect(() => {
     const receive = (event: MessageEvent) => {
@@ -181,23 +212,33 @@ export default function CompatibleWorkspace() {
   }
   async function rasterOperation(input?: PreviewInput, sequence = rasterSequence.current) {
     if (preview?.transport !== "raster" || !activeGeneration.current) return
-    if (rasterBusy.current) { if (input && !rasterQueued.current) rasterQueued.current = { input, sequence, generation: activeGeneration.current }; return }
+    if (rasterBusy.current) {
+      if (input) {
+        const queue = rasterQueued.current, last = queue.at(-1)
+        if (input.type === "text" && last?.input.type === "text" && last.generation === activeGeneration.current && last.revision === revision.current && last.epoch === connectionEpoch.current && last.input.text.length + input.text.length <= 4096) last.input = { type: "text", text: last.input.text + input.text }
+        else if (queue.length < 64) queue.push({ input, sequence, generation: activeGeneration.current, revision: revision.current, epoch: connectionEpoch.current })
+        else setMessage("Preview input queue is full. Wait for the frame before continuing.")
+      }
+      return
+    }
     rasterBusy.current = true
-    const generation = activeGeneration.current, epoch = connectionEpoch.current
+    const generation = activeGeneration.current, epoch = connectionEpoch.current, requestRevision = revision.current
     try {
       if (input) {
         if (input.type === "pointer") selectionSource.current = "runtime"
-        const result = await request("preview", { command: "input", generation, sequence, input })
+        const result = await request("preview", { command: "input", generation, sequence, input, expectedRevision: requestRevision })
+        if (generation !== activeGeneration.current || epoch !== connectionEpoch.current || requestRevision !== revision.current) return
         if (!result.ok) throw new Error(result.data.error ?? "Preview input rejected.")
       }
-      let result = await request("preview", { command: "capture", generation })
-      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+      let result = await request("preview", { command: "capture", generation, expectedRevision: requestRevision })
+      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current || requestRevision !== revision.current) return
       if (result.ok && result.data.observation && result.data.observation.viewport.width !== rasterWidth.current) {
-        const resized = await request("preview", { command: "input", generation, sequence: result.data.sequence, input: { type: "viewport", width: rasterWidth.current, height: 900 } })
+        const resized = await request("preview", { command: "input", generation, expectedRevision: requestRevision, sequence: result.data.sequence, input: { type: "viewport", width: rasterWidth.current, height: 900 } })
+        if (generation !== activeGeneration.current || epoch !== connectionEpoch.current || requestRevision !== revision.current) return
         if (!resized.ok) throw new Error(resized.data.error ?? "Viewport rejected.")
-        result = await request("preview", { command: "capture", generation })
+        result = await request("preview", { command: "capture", generation, expectedRevision: requestRevision })
       }
-      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+      if (generation !== activeGeneration.current || epoch !== connectionEpoch.current || requestRevision !== revision.current) return
       if (!result.ok || !result.data.observation) throw new Error(result.data.error ?? "Preview expired. Connect to renew.")
       const data = result.data, observation = data.observation!
       rasterSequence.current = data.sequence!; lastRaster.current = data; deliverRaster(data)
@@ -214,16 +255,17 @@ export default function CompatibleWorkspace() {
       } else if (selectionSource.current === "runtime") { setTarget(undefined); inspected.current = ""; ++inspectSequence.current }
       setPreviewState("ready")
     } catch (error) {
-      if (generation === activeGeneration.current && epoch === connectionEpoch.current) { activeGeneration.current = ""; setPreviewState("expired"); setSelected(undefined); setTarget(undefined); setMessage(String(error instanceof Error ? error.message : error)) }
+      if (generation === activeGeneration.current && epoch === connectionEpoch.current && requestRevision === revision.current) { activeGeneration.current = ""; setPreviewState("expired"); setSelected(undefined); setTarget(undefined); setMessage(String(error instanceof Error ? error.message : error)) }
     } finally {
       rasterBusy.current = false
-      const queued = rasterQueued.current; rasterQueued.current = undefined
-      if (queued && queued.generation === activeGeneration.current) {
+      const queued = rasterQueued.current.shift()
+      if (queued && queued.generation === activeGeneration.current && queued.revision === revision.current && queued.epoch === connectionEpoch.current) {
         if (queued.input.type === "pointer" && queued.sequence !== rasterSequence.current) setMessage("The frame changed before selection. Select the element again.")
-        else void rasterOperation(queued.input, rasterSequence.current)
+        else void currentRasterOperation.current(queued.input, rasterSequence.current)
       }
     }
   }
+  useEffect(() => { currentRasterOperation.current = rasterOperation })
   useEffect(() => {
     if (preview?.transport !== "raster") return
     void rasterOperation()
@@ -231,7 +273,7 @@ export default function CompatibleWorkspace() {
     const receive = (event: MessageEvent) => {
       const data = event.data
       if (event.source !== frame.current?.contentWindow || event.origin !== "null" || data?.channel !== "wcb-raster" || data.type !== "input" || data.generation !== activeGeneration.current || data.sequence !== rasterSequence.current) return
-      if (data.input?.type === "pointer" || data.input?.type === "scroll") void rasterOperation(data.input, data.sequence)
+      if (["pointer", "scroll", "key", "text"].includes(data.input?.type)) void rasterOperation(data.input, data.sequence)
     }
     window.addEventListener("message", receive)
     return () => { clearInterval(timer); window.removeEventListener("message", receive) }
@@ -250,17 +292,19 @@ export default function CompatibleWorkspace() {
   useEffect(() => { configurePreview() }, [selectMode, preview])
 
   async function sourceAccepted(data: SourceResponse) {
-    activeGeneration.current = ""
+    activeGeneration.current = ""; rasterQueued.current = []
     revision.current = data.revision ?? revision.current
     setDiff(data.diff ?? "")
     inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
     setSourceEpoch(value => value + 1)
+    const epoch = connectionEpoch.current, acceptedRevision = revision.current
     await refreshCompatibility()
+    if (epoch !== connectionEpoch.current || acceptedRevision !== revision.current) return
     await refreshPreview(true)
   }
 
-  async function mutate(edit: ({ type: "reorder"; value: string } | { type: "text"; value: string } | { type: "style" | "layout"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) & { breakpoint?: string; scope?: string }) {
+  async function mutate(edit: ({ type: "reorder"; value: string } | { type: "text"; value: string } | { type: "style" | "layout" | "responsive-create"; property: StyleProperty; value: string } | { type: "responsive"; property: StyleProperty; value: string; viewport: ViewportPreset }) & { breakpoint?: string; scope?: string }) {
     if (!selected || !session || pending) return
     const epoch = connectionEpoch.current
     setPending(true)
@@ -289,7 +333,7 @@ export default function CompatibleWorkspace() {
     const bytes = new Uint8Array(await file.arrayBuffer())
     let binary = ""
     for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192))
-    const response = await fetch("/__webcanbe/api/projects/import", { method: "POST", headers: { "Content-Type": "application/json", "X-WCB-Editor-Key": accessKey }, body: JSON.stringify({ name: file.name, archive: btoa(binary) }) })
+    const response = await fetch("/__webcanbe/api/projects/import", { method: "POST", headers: headers(), body: JSON.stringify({ name: file.name, archive: btoa(binary), ...(hostedMode ? { workspaceId } : {}) }) })
     const data = await response.json() as ApiResponse
     if (!response.ok || !data.project) { setMessage(data.error ?? "Import rejected."); return }
     window.history.replaceState({}, "", `/workspace/${data.project.id}`)
@@ -326,8 +370,12 @@ export default function CompatibleWorkspace() {
     </header>
     <div className="compatible-layout">
       <aside className="compatible-files">
-        <label>Local editor access<input ref={keyInput} type="password" autoComplete="off" aria-label="Local editor access key" /></label><button onClick={() => { setAccessKey(keyInput.current?.value ?? ""); setConnectionAttempt(value => value + 1) }}>Connect / renew session</button>
-        <label>Import React/Vite ZIP<input type="file" accept=".zip" disabled={!session} onChange={event => { const file = event.target.files?.[0]; if (file) void importProject(file) }} /></label>
+        {hostedMode ? <>
+          <button onClick={() => void (csrf ? connectHosted() : signIn())}>{csrf ? "Reconnect session" : "Sign in"}</button>
+          {hostedProjects.length > 0 && <label>Project<select aria-label="Hosted project" value={projectId} onChange={event => { const id = event.target.value; window.history.replaceState({}, "", `/workspace/${id}`); setProjectId(id) }}>{hostedProjects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}
+          {workspaces.length > 0 && <label>Import workspace<select aria-label="Import workspace" value={workspaceId} onChange={event => setWorkspaceId(event.target.value)}>{workspaces.map(id => <option key={id} value={id}>{id}</option>)}</select></label>}
+        </> : <><label>Local editor access<input ref={keyInput} type="password" autoComplete="off" aria-label="Local editor access key" /></label><button onClick={() => { setAccessKey(keyInput.current?.value ?? ""); setConnectionAttempt(value => value + 1) }}>Connect / renew session</button></>}
+        <label>Import React/Vite ZIP<input type="file" accept=".zip" disabled={hostedMode ? !csrf || !workspaceId : !session} onChange={event => { const file = event.target.files?.[0]; if (file) void importProject(file) }} /></label>
         <p>Project runtime</p><strong>▾ src</strong><span>⌘ JSX / TSX source</span><span># CSS / Modules</span>
         <div className="compatibility-summary"><small>Visual compatibility</small><b>{summary ? `${summary.score}%` : "…"}</b><p>{summary ? `${summary.full} full · ${summary.partial} partial · ${summary.codeOnly} code only` : "Analysing real source…"}</p></div>
         {runtime && <details><summary>Runtime: {runtime.profile}</summary><p>{runtime.supported ? "Explicit dedicated profile" : "Runtime unavailable"}</p>{runtime.dependencies.map(item => <p key={item.name}>{item.name}: {item.declared} → {item.selected ?? "unavailable"}{item.locked ? ` (lock ${item.locked})` : ""}</p>)}{runtime.issues.map((issue, index) => <p key={index}>{issue.message} Requires: {issue.requiredCapability}</p>)}{runtime.notes.map(note => <p key={note}>{note}</p>)}</details>}
@@ -345,6 +393,7 @@ export default function CompatibleWorkspace() {
         {target?.capabilities.text && <label className="inspector-control">Text <textarea value={text} onChange={(event) => setText(event.target.value)} /><button type="button" onClick={() => void mutate({ type: "text", value: text })}>Apply text change</button></label>}
         {target && <div className="style-analysis"><p>{target.effectScope}</p><label>Authoring breakpoint <select aria-label="Authoring breakpoint" value={authoringBreakpoint} onChange={event => setAuthoringBreakpoint(event.target.value)}>{breakpoints.map(item => <option key={item.id} value={item.id}>{item.label}{item.min !== undefined ? ` ≥ ${item.min}px` : ""}{item.max !== undefined ? ` ≤ ${item.max}px` : ""}</option>)}</select></label><label>Effect scope <select aria-label="Effect scope" value={effectScope} onChange={event => setEffectScope(event.target.value)}><option value="source">Edit identified source (all matching uses)</option><option value="instance">Selected runtime instance only (shared sources refused)</option></select></label><small>Mobile / tablet / desktop are preview widths. Choose an existing source breakpoint to edit its override; base values may also affect wider viewports.</small><details><summary>Effective values and source origins</summary>{target.styleOrigins.map((origin, index) => <p key={index}>{origin.property}: {origin.effective ? selected?.computed[origin.property] || origin.value : origin.value} · {origin.effective ? "effective at viewport" : origin.active ? "active candidate" : "inactive/conditional"}<br/>{origin.kind} · {origin.file} {origin.selector || origin.prefix || "base"} {origin.media}<br/>{origin.scope}<br/>{origin.reason}</p>)}{styleDiagnostics.map((item, index) => <p key={index}>{item}</p>)}<p>Inherited or unresolved computed values are read-only; use Code.</p></details>{!styleOrigins.length && <p>No safe existing declaration at this breakpoint. Code remains available.</p>}</div>}
         {styleOrigins.length > 0 && <div className="style-controls"><small>Safe style origins</small>{styleOrigins.map((styleOrigin) => <label className="inspector-control" key={`${styleOrigin.property}-${styleOrigin.kind}-${styleOrigin.range?.start}`}><span>{editableLabels[styleOrigin.property] ?? styleOrigin.property}<em>{styleOrigin.kind}</em></span><small>{styleOrigin.file} {styleOrigin.selector || styleOrigin.prefix || "base"} · {styleOrigin.scope}</small><div><input data-wcb-property={styleOrigin.property} defaultValue={styleOrigin.value?.replace(/^['"]|['"]$/g, "")} key={styleOrigin.value} /><button type="button" onClick={(event) => { const input = event.currentTarget.previousElementSibling as HTMLInputElement; void mutate({ type: "style", property: styleOrigin.property, value: input.value, breakpoint: authoringBreakpoint }) }}>Save</button></div><button type="button" onClick={() => { const input = document.querySelector<HTMLInputElement>(`input[data-wcb-property="${styleOrigin.property}"]`); if (input) void mutate({ type: "responsive", property: styleOrigin.property, value: input.value, viewport }) }}>Save at {viewport}</button></label>)}</div>}
+        {target && <details className="responsive-construction"><summary>Create responsive override</summary><p>Uses the selected element’s existing base class or utility. The change affects every matching source use.</p><label>New override breakpoint<select aria-label="New override breakpoint" value={newBreakpoint} onChange={event=>setNewBreakpoint(event.target.value)}><option value="new:mobile">CSS mobile ≤ 767px</option><option value="new:tablet">CSS tablet 768–1023px</option><option value="new:desktop">CSS desktop ≥ 1024px</option>{breakpoints.filter(b=>b.id!=="base").map(b=><option key={b.id} value={b.id}>{b.label}</option>)}</select></label><label>Override property<select aria-label="Override property" value={newProperty} onChange={event=>setNewProperty(event.target.value as StyleProperty)}>{Object.entries(editableLabels).map(([property,label])=><option key={property} value={property}>{label}</option>)}</select></label><label>Override value<input aria-label="Override value" value={newValue} onChange={event=>setNewValue(event.target.value)}/></label><button disabled={pending} onClick={()=>void mutate({type:"responsive-create",property:newProperty,value:newValue,breakpoint:newBreakpoint})}>Create source override</button></details>}
         {target?.reorder && <div className="semantic-reorder"><small>Reorder adjacent JSX siblings in the source Flex/Grid parent</small><button type="button" disabled={target.reorder.previous === undefined || pending} onClick={() => void mutate({ type: "reorder", value: "previous" })}>Move before previous sibling</button><button type="button" disabled={target.reorder.next === undefined || pending} onClick={() => void mutate({ type: "reorder", value: "next" })}>Move after next sibling</button></div>}
         {target?.capabilities.layout && <div className="semantic-controls"><small>Semantic layout</small><button type="button" onClick={() => void mutate({ type: "layout", property: "gap", value: "24px" })}>Set gap 24px</button><button type="button" onClick={() => void mutate({ type: "layout", property: "justifyContent", value: "space-between" })}>Distribute items</button></div>}
         {target && !target.capabilities.visualEdit && <div className="limited-editing"><b>Visual editing unavailable</b><br/>{target.unavailableReasons.visualEdit ?? "WebCanBe cannot safely identify a static source mutation."}<br/><button type="button" onClick={() => { setCodeFile(target.identity.file); openSurface("code") }}>Open code location</button></div>}
@@ -353,7 +402,7 @@ export default function CompatibleWorkspace() {
         {target && Object.entries(target.unavailableReasons).map(([key, reason]) => <p key={key} className="limited-editing">{reason}</p>)}
         {diff && <div className="source-diff"><small>Actual source diff</small><pre>{diff}</pre></div>}
         <p className="transaction-status">{message}</p>
-        <p className="limited-editing" data-preview-boundary>{preview?.transport === "raster" ? "Local controlled preview: project JavaScript runs in an isolated Linux browser. This viewer receives pixels and validated selection data. External project networking is disabled. Sessions last up to 60 seconds; reconnect to renew." : PREVIEW_SECURITY_NOTICE}</p>
+        <p className="limited-editing" data-preview-boundary>{preview?.transport === "raster" ? "Controlled preview: project JavaScript runs in an isolated Linux browser. This viewer receives pixels and validated selection data. External project networking is disabled. Sessions last up to 60 seconds; reconnect to renew." : PREVIEW_SECURITY_NOTICE}</p>
       </aside>
     </div>
   </main>

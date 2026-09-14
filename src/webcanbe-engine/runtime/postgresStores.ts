@@ -1,3 +1,4 @@
+import { SourceConflict } from "../mutations/durableSource"
 import { boundedHistory } from "../mutations/durableSource"
 import { createHash } from "node:crypto"
 import type { Pool, PoolClient } from "pg"
@@ -14,6 +15,30 @@ import { pgTransaction } from "./postgresTransaction"
  * Session records must originate from a verified identity/session issuer. */
 export class PostgresAccess {
   constructor(readonly pool: Pool) {}
+  async check(grant: ProjectGrant, operation: SessionOperation = "inspect") {
+    try { await pgTransaction(this.pool, client => this.authorize(client, grant, operation)); return true } catch { return false }
+  }
+  async requireWorkspaceIn(client: PoolClient, session: ServerSession, workspaceId: string) {
+    requireOpaqueId(workspaceId)
+    const row = await client.query(`SELECT w.workspace_id FROM wcb_workspace_members w JOIN wcb_sessions s ON s.user_id=w.user_id
+      WHERE w.workspace_id=$1 AND w.user_id=$2 AND w.active AND w.role IN ('owner','editor') AND s.session_id=$3 AND s.active
+      AND s.expires_at=to_timestamp($4/1000.0) AND s.expires_at>clock_timestamp()
+      AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=s.user_id) FOR SHARE OF w,s`, [workspaceId, session.userId, session.sessionId, session.expiresAt])
+    if (!row.rowCount) throw new AuthorityDenied()
+  }
+  async requireWorkspace(session: ServerSession, workspaceId: string) { await pgTransaction(this.pool, client => this.requireWorkspaceIn(client, session, workspaceId)) }
+  async workspaces(session: ServerSession) {
+    const rows = (await this.pool.query("SELECT workspace_id FROM wcb_workspace_members WHERE user_id=$1 AND active AND role IN ('owner','editor')", [session.userId])).rows
+    const result: string[] = []
+    for (const row of rows) { await this.requireWorkspace(session, row.workspace_id); result.push(row.workspace_id) }
+    return result
+  }
+  async projects(session: ServerSession) {
+    const rows = (await this.pool.query("SELECT project_id FROM wcb_project_members WHERE user_id=$1 AND active", [session.userId])).rows
+    const grants: ProjectGrant[] = []
+    for (const row of rows) { try { grants.push(await this.grant(session, row.project_id)) } catch (error) { if (!(error instanceof AuthorityDenied)) throw error } }
+    return grants
+  }
   async registerSession(session: ServerSession) {
     requireOpaqueId(session.userId); requireOpaqueId(session.sessionId)
     await pgTransaction(this.pool, async client => {
@@ -83,6 +108,19 @@ function verifyHistory(project: string, files: Map<string, Buffer>, history: Rev
  * No canvas schema. Private materialization is a cache, never a commit point. */
 export class PostgresProjectStore {
   constructor(private access: PostgresAccess) {}
+  async create(session: ServerSession, workspaceId: string, projectId: string, name: string, files: Map<string, Buffer>, history: RevisionLedger) {
+    requireOpaqueId(projectId)
+    const payload = filePayload(files), ledger = structuredClone(history), revision = verifyHistory(projectId, files, ledger)
+    await pgTransaction(this.access.pool, async client => {
+      await this.access.requireWorkspaceIn(client, session, workspaceId)
+      // Serialize per-workspace admission without depending on an editor process.
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [workspaceId])
+      if (Number((await client.query("SELECT count(*) AS n FROM wcb_projects WHERE workspace_id=$1 AND NOT deleted", [workspaceId])).rows[0].n) >= 20) throw new Error("Workspace project capacity reached.")
+      await client.query("INSERT INTO wcb_projects(project_id,workspace_id,name,revision,files,history,source_epoch) VALUES($1,$2,$3,$4,$5,$6,1)", [projectId, workspaceId, name.slice(0,200), revision, JSON.stringify(payload), JSON.stringify(ledger)])
+      await client.query("INSERT INTO wcb_project_members VALUES($1,$2,'owner',1,true)", [projectId, session.userId])
+      await this.access.requireWorkspaceIn(client, session, workspaceId)
+    })
+  }
   async read(grant: ProjectGrant): Promise<HostedSourceState> {
     return pgTransaction(this.access.pool, async client => {
       await this.access.authorize(client, grant, "source")
@@ -116,7 +154,7 @@ export class PostgresProjectStore {
         await this.access.authorize(client, grant, "code")
         return { revision, epoch: String(BigInt(old.source_epoch)+1n), replayed: false }
       }
-      if (old.revision !== expected.revision || String(old.source_epoch) !== expected.epoch) throw new Error("Stale source revision or fencing token.")
+      if (old.revision !== expected.revision || String(old.source_epoch) !== expected.epoch) throw new SourceConflict("Stale source revision or fencing token.")
       if (expected.revision !== null && (ledger.revisions.at(-1)!.parentRevisionId !== expected.revision || ledger.revisions.length !== old.history.revisions.length + 1)) throw new Error("History ancestry conflict.")
       if (expected.revision !== null) {
         const same = (await client.query("SELECT history->'revisions'=$2::jsonb AND history->'transactions'=$3::jsonb AS same FROM wcb_projects WHERE project_id=$1", [grant.projectId, JSON.stringify(ledger.revisions.slice(0, -1)), JSON.stringify(ledger.transactions.slice(0, -1))])).rows[0]

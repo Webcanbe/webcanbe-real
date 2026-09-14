@@ -1,3 +1,6 @@
+import fs from "node:fs"
+import os from "node:os"
+import path from "node:path"
 import { refreshChanges } from "./refreshPolicy"
 import { context, type BuildContext, type BuildOptions, type BuildResult, type OnLoadResult } from "esbuild"
 import { performance } from "node:perf_hooks"
@@ -8,6 +11,12 @@ import type { PreviewSnapshot } from "./controlledPreview"
  * changes replace contexts. Nothing resolves through host node_modules. */
 export class IncrementalPreviewCompiler {
   constructor(readonly fastRefresh = false) {}
+  private checkoutDirectory?: string
+  /** Ephemeral, per-generation compiler input cache; not durable source. */
+  hostedCheckout() {
+    if (this.closed) throw new Error("Preview compiler is closed.")
+    return this.checkoutDirectory ??= fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wcb-compiler-checkout-")))
+  }
   refreshFallback?: string
   private readonly contexts = new Map<string, { fingerprint: string; context: BuildContext }>()
   readonly transforms = new Map<string, { source: string; result: OnLoadResult }>()
@@ -25,7 +34,7 @@ export class IncrementalPreviewCompiler {
     try { const result = await entry.context.rebuild(); this.builds++; return result }
     finally { clearTimeout(timeout); this.lastBuildMs = performance.now() - started }
   }
-  async close() { this.closed = true; await Promise.all([...this.contexts.values()].map(entry => entry.context.dispose())); this.contexts.clear(); this.transforms.clear() }
+  async close() { this.closed = true; await Promise.all([...this.contexts.values()].map(entry => entry.context.dispose())); this.contexts.clear(); this.transforms.clear(); if (this.checkoutDirectory) fs.rmSync(this.checkoutDirectory, { recursive: true, force: true }) }
 }
 export type PreviewUpdateKind = "css-hot-update" | "react-fast-refresh" | "incremental-rebuild-reload" | "generation-restart"
 export type PreviewUpdate = Readonly<{ expectedRevision: string; expectedDigest: string; revision: string; snapshot: PreviewSnapshot; kind: Exclude<PreviewUpdateKind, "generation-restart"> }>
