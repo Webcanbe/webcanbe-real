@@ -290,9 +290,9 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
     const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
     const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):npmDescriptor(name,requested)
     const identity=descriptor.name,versionRange=descriptor.range
-    const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof trusted?.berryChecksum==='string'&&actual.berryChecksum===trusted.berryChecksum&&typeof actual.berryLocator==='string'&&typeof trusted.berryLocator==='string'&&actual.berryLocator===trusted.berryLocator:actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
+    const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof actual?.berryLocator==='string'&&sri(trusted?.integrity):actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
     if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
-    packages[location]={...actual};if(visited.has(location))return;visited.add(location);if(visited.size>12000)throw Error('Dependency graph bound.')
+    packages[location]=berry?{...actual,integrity:trusted.integrity}:{...actual};if(visited.has(location))return;visited.add(location);if(visited.size>12000)throw Error('Dependency graph bound.')
     for(const group of ['dependencies','optionalDependencies']){
       const expected=trusted[group]??{},received=actual[group]??{}
       if(!(berry?equivalentDependencyMap(expected,received,true):JSON.stringify(Object.entries(expected).sort())===JSON.stringify(Object.entries(received).sort())))throw Error('Lock dependency edges differ from pinned metadata: '+location)
