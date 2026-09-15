@@ -21,6 +21,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6
       - run: npx tsc --pretty false
       - run: npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts src/webcanbe-engine/phase2-p05-inert-tooling.test.ts
       - name: Fetch exact frozen Redux Berry inputs
