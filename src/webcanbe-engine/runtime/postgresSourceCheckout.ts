@@ -33,8 +33,8 @@ export async function withHostedSource<T>(backend: PostgresProjectStore, grant: 
     let acceptedEpoch = state.epoch
     if (write && (source.revision() !== state.revision || JSON.stringify(source.history()) !== JSON.stringify(state.history))) {
       const files = new Map(state.files)
-      const scope=source.history().sourceScope
-      for (const file of files.keys()) if (sourceMember(file, source.history().sourceDirectory ?? "src", scope)) files.delete(file)
+      const history = source.history(), scope = history.sourceScope
+      for (const file of files.keys()) if (sourceMember(file, history.sourceDirectory ?? "src", scope)) files.delete(file)
       for (const [file, text] of source.files()) files.set(file, Buffer.from(text))
       acceptedEpoch = (await backend.accept(grant, { revision: state.revision, epoch: state.epoch }, files, source.history())).epoch
     }
