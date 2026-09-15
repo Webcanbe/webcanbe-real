@@ -1,3 +1,29 @@
+# P05 targeted checkpoint — 2026-09-15
+
+**P05 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NO.**
+
+- Selectively reconciled eight P05 production/test files from parallel snapshot
+  `862575adbc617465db1d74d5ec343c8f691edc97`, including inert-tool commit `6f7cff2`.
+  No workflow machinery or unrelated history was merged.
+- Finite Berry v8 parsing and identity/peer checks pass. Cache checksums remain
+  unverified cache metadata; executable integrity comes from operator-owned profiles.
+  Virtual collisions and unpatched-byte substitution refuse.
+- Exact frozen Redux lock/root locators parse. Complete source/export round trip
+  passes, including the 2,742,928-byte Yarn release under a 4 MiB inert bound.
+  Ordinary files remain 2 MiB; archive limits and execution refusal remain enforced.
+- Remaining P05: verified Bun binary decoding/isolated inspection, and exact
+  retained Redux/Bulletproof/Todo trusted package graphs. Redux still fails
+  executable admission for unprovided packages; Bun is not the sole blocker.
+- 76 targeted passes, zero failures; TypeScript passes. All 40 prior test files
+  remain byte-identical. Full 646+ regression deferred to final Phase-2 closure.
+  Changed-path manual review: zero confirmed unresolved vulnerabilities.
+- Main unchanged; feature-only normal publication. No P39/P61 or later-phase work.
+
+See [P05 report](reports/phase2-p05-closure.md) and
+[targeted evidence](reports/phase2-p05-evidence/targeted-tests.json).
+
+---
+
 # P61 bounded checkpoint — 2026-09-15
 
 **P61 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NOT YET.**

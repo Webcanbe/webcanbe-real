@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { ZipFile } from "yazl"
 import { isWithin, safeArchivePath, ZIP_LIMITS, type ProjectRecord } from "./projectRegistry"
+import { archiveMemberLimit } from "./intakeMetadata"
 
 export async function exportProjectZip(project: ProjectRecord): Promise<Buffer> {
   const zip = new ZipFile()
@@ -14,7 +15,7 @@ export async function exportProjectZip(project: ProjectRecord): Promise<Buffer> 
       if (entry.isDirectory()) walk(file)
       else if (entry.isFile()) {
         const bytes = fs.readFileSync(file); total += bytes.length
-        if (++entries > ZIP_LIMITS.entries || total > ZIP_LIMITS.totalBytes || bytes.length > ZIP_LIMITS.fileBytes) throw new Error("Export exceeds project limits.")
+        if (++entries > ZIP_LIMITS.entries || total > ZIP_LIMITS.totalBytes || bytes.length > archiveMemberLimit(relative)) throw new Error("Export exceeds project limits.")
         zip.addBuffer(bytes, relative)
       } else throw new Error("Unsupported export file.")
     }

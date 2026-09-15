@@ -222,7 +222,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     for (const name of Object.keys(manifest.dependencies ?? {})) if (manifest.devDependencies?.[name] && manifest.devDependencies[name] !== manifest.dependencies[name]) issue("dependency-conflict", `Conflicting declarations for ${name}.`)
     const lockNames = ["package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "bun.lockb"].filter(file => fs.existsSync(path.join(root, file)))
     let lock: any, lockDescription="npm lockfile"
-    if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, Yarn classic or Bun text lock is permitted; Berry, binary Bun and other unimplemented formats are preserved and refused.")
+    if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, finite Yarn classic/Berry v8 or Bun text lock is permitted; binary Bun and other unimplemented formats are preserved and refused.")
     if (lockNames.includes("package-lock.json")) {
       lock = json(root, "package-lock.json")
       if (![2, 3].includes(lock.lockfileVersion) || !object(lock.packages) || !object(lock.packages[""])) { issue("unsupported-lockfile", "npm package-lock v2/v3 with package records is required."); lock = undefined }
@@ -298,7 +298,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
         for (const dependency of Object.keys(selected?.dependencies ?? {})) pending.push(dependency)
       }
     }
-    report.notes.push(lock ? "Versions, integrity and required dependency/peer graph checked against the "+lockDescription+"." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
+    report.notes.push(lock && lockDescription === "yarn-berry-v8" ? "Berry descriptors, locators, versions and dependency/peer graph checked against the operator-owned profile. Berry cache checksums remain unverified cache metadata; executable package integrity comes from the operator-owned profile." : lock ? "Versions, integrity and required dependency/peer graph checked against the "+lockDescription+"." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
     if (object(manifest.scripts) && Object.keys(manifest.scripts).length) report.notes.push("Package scripts, including install/build hooks, are inspected only and never run during intake or preview.")
     let tsconfigPaths = false
     const viteFile = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].find(file => fs.existsSync(path.join(root, file)))

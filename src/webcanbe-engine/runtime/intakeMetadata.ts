@@ -3,6 +3,18 @@
 export function isExampleEnvironment(name: string) { return /^\.env\.example(?:-[a-z][a-z0-9-]{0,31})?$/.test(name) }
 export function isInertMetadata(name: string) { return [".gitattributes", ".editorconfig", ".npmrc", ".prettierignore", ".prettierrc", ".node-version", ".nvmrc", ".whitesource", "_redirects"].includes(name) || isExampleEnvironment(name) }
 export const METADATA_BYTES = 16 * 1024
+export const INERT_TOOL_BYTES = 4 * 1024 * 1024
+/** Exact operator-independent role for bundled package-manager tooling. These bytes are
+ * preserved for source ownership/export only and never become executable editor input. */
+export function isInertToolingPath(name: string) {
+  return /^\.yarn\/releases\/yarn-\d{1,3}\.\d{1,3}\.\d{1,3}(?:[-+][0-9A-Za-z.-]{1,64})?\.cjs$/.test(name)
+}
+/** All uploaded Yarn loaders/plugins remain outside the executable graph,
+ * including small files that do not qualify for the larger preservation limit. */
+export function isPackageManagerToolingPath(name: string) {
+  return /(?:^|\/)\.yarn(?:\/|$)/.test(name) || /(?:^|\/)\.pnp(?:\.loader)?\.[cm]?js$/.test(name)
+}
+export function archiveMemberLimit(name: string) { return isInertToolingPath(name) ? INERT_TOOL_BYTES : 2 * 1024 * 1024 }
 export function validateIntakeMetadata(name: string, bytes: Buffer) {
   if (!isInertMetadata(name)) return
   if (bytes.length > METADATA_BYTES) throw new Error("Project metadata exceeds the 16 KiB limit.")

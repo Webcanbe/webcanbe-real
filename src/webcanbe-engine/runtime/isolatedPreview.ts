@@ -13,6 +13,7 @@ import ts from "typescript"
 import { inspectRuntime, RuntimeCompatibilityError, PROFILE } from "./runtimeCompatibility"
 import { instrumentReactSource } from "../adapters/react/reactSourceAdapter"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
+import { isPackageManagerToolingPath } from "./intakeMetadata"
 
 export type PreviewArtifact = { body: Buffer; contentType: string }
 export type HttpPreviewBuild = { html: string; files: Map<string, PreviewArtifact> }
@@ -120,6 +121,8 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const resolved = [candidate, ...[".tsx", ".jsx", ".ts", ".js", ".mts", ".cts", ".mjs", ".cjs", ".css", ".json", "/index.tsx", "/index.jsx", "/index.ts", "/index.js"].map(ext => candidate + ext)].find(file => fs.existsSync(file) && fs.statSync(file).isFile())
         if (!resolved) throw new Error('Preview dependency is unresolved: ' + args.path)
         const actual = fs.realpathSync(resolved)
+        const projectRelative = path.relative(root, actual).split(path.sep).join("/")
+        if (!vendorImporter && isPackageManagerToolingPath(projectRelative)) throw new Error("Inert package-manager tooling cannot be imported or executed.")
         if (!vendorImporter) {
           if (!isWithin(root, resolved)) throw Error("Preview import escaped its permitted root.")
           // Every segment is checked before reading, including in-project links.
@@ -135,6 +138,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
       })
       builder.onLoad({filter: /.*/,namespace:"trusted-uno"},async()=>({contents:await finiteCss!("/* webcanbe uno entry */"),loader:"css"}))
       builder.onLoad({ filter: /.*/, namespace: "confined" }, async args => {
+        if (isWithin(root, args.path) && isPackageManagerToolingPath(path.relative(root, args.path).split(path.sep).join('/'))) throw new Error("Inert package-manager tooling cannot be imported or executed.")
         const content = fs.readFileSync(args.path)
         bytes += content.length
         if (bytes > 40 * 1024 * 1024 || content.length > 2 * 1024 * 1024) throw new Error("Preview source limit exceeded.")

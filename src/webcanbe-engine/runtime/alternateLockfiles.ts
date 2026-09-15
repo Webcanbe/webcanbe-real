@@ -17,10 +17,201 @@ export function npmDescriptor(name:string,value:unknown){
   return {name:identity,range:range(target.slice(at+1))}
 }
 function dependencies(value:any){if(value===undefined)return {};if(!object(value))throw Error('Invalid dependency data.');for(const [name,r]of Object.entries(value)){if(!packageName.test(name))throw Error('Invalid dependency name.');range(r)}return value}
-export type AlternateLock={format:'yarn-classic-v1'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>}
+export type AlternateLock={format:'yarn-classic-v1'|'yarn-berry-v8'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>;cacheKey?:string}
+
+type BerryRequest={name:string;range:string;selector:string;protocol:'npm'|'patch'|'workspace';virtual?:string;raw:string}
+const splitNameRequest=(value:string)=>{const at=value.indexOf('@',value.startsWith('@')?1:0);if(at<1)throw Error('Invalid Yarn descriptor identity.');const name=value.slice(0,at),requested=value.slice(at+1);if(!packageName.test(name)||!requested)throw Error('Invalid Yarn descriptor identity.');return{name,requested}}
+function berryNpmDescriptor(name:string,value:string){
+  if(!value.startsWith('npm:'))throw Error('Invalid Yarn npm descriptor.')
+  const target=value.slice(4),at=target.indexOf('@',target.startsWith('@')?1:0),identity=at<0?name:target.slice(0,at),selector=at<0?target:target.slice(at+1)
+  if(!packageName.test(identity)||!selector||selector.length>256)throw Error('Invalid Yarn npm descriptor.')
+  const valid=semver.validRange(selector)
+  if(valid)return{name:identity,range:selector,selector}
+  if(!/^[a-z][a-z0-9._-]{0,31}$/i.test(selector))throw Error('Unsupported Yarn npm selector.')
+  return{name:identity,range:'*',selector:'tag:'+selector}
+}
+function berryPatch(name:string,value:string):BerryRequest|undefined{
+  if(!value.startsWith('patch:'))return
+  const body=value.slice(6),marker=body.indexOf('@npm%3A',body.startsWith('@')?1:0)
+  if(marker<1)return
+  const identity=body.slice(0,marker),after=body.slice(marker+7),builtin='#optional!builtin<compat/'
+  const hashAt=after.indexOf(builtin)
+  if(hashAt<1||!packageName.test(identity)||identity!==name)return
+  const encodedRange=after.slice(0,hashAt),tail=after.slice(hashAt+builtin.length),close=tail.indexOf('>')
+  if(close<1||tail.slice(0,close)!==identity)return
+  const suffix=tail.slice(close+1)
+  if(suffix&&!/^::version=[0-9A-Za-z.+-]{1,80}&hash=[a-f0-9]{6,64}$/.test(suffix))return
+  let decoded:string
+  try{decoded=decodeURIComponent(encodedRange)}catch{return}
+  const requested=berryNpmDescriptor(name,'npm:'+decoded)
+  if(requested.selector.startsWith('tag:'))return
+  if(suffix){const exact=/^::version=([^&]+)&hash=/.exec(suffix)![1];if(!semver.valid(exact)||!semver.satisfies(exact,requested.range))return}
+  return{name:requested.name,range:requested.range,selector:requested.selector,protocol:'patch',raw:value}
+}
+function berryRequest(name:string,value:unknown,allowWorkspace=false):BerryRequest{
+  if(!packageName.test(name)||typeof value!=='string'||!value||value.length>512)throw Error('Invalid Yarn Berry dependency descriptor.')
+  let raw=value,virtual:string|undefined
+  if(raw.startsWith('virtual:')){
+    const match=/^virtual:([a-f0-9]{6,128})#(.+)$/.exec(raw)
+    if(!match)throw Error('Invalid Yarn virtual descriptor.')
+    virtual=match[1];raw=match[2]
+  }
+  if(raw==='workspace:.'){
+    if(!allowWorkspace||virtual)throw Error('Only the root Yarn workspace is supported; confined workspace graphs require a separate adapter.')
+    return{name,range:'*',selector:raw,protocol:'workspace',raw:value}
+  }
+  const patch=berryPatch(name,raw)
+  if(patch){if(virtual)throw Error('Virtual patched Yarn descriptors are unsupported.');return{...patch,raw:value}}
+  if(!raw.startsWith('npm:'))throw Error('Unsupported Yarn Berry protocol; npm and builtin compatibility patches are the only package records admitted.')
+  const requested=berryNpmDescriptor(name,raw)
+  return{name:requested.name,range:requested.range,selector:requested.selector,protocol:'npm',virtual,raw:value}
+}
+function canonicalBerryRequest(name:string,value:string){
+  if(value.startsWith('npm:')||value.startsWith('virtual:')||value.startsWith('patch:')||value.startsWith('workspace:'))return value
+  // Project/package metadata expresses ordinary npm selectors without the protocol.
+  berryNpmDescriptor(name,'npm:'+value)
+  return'npm:'+value
+}
+function berryComparable(name:string,value:unknown){
+  let raw=String(value)
+  if(raw.startsWith('virtual:'))raw=raw.replace(/^virtual:[a-f0-9]{6,128}#/i,'')
+  if(!/^(?:npm:|patch:|workspace:)/.test(raw))raw='npm:'+raw
+  const parsed=berryRequest(name,raw,true)
+  return parsed.name+'@'+parsed.protocol+':'+parsed.selector
+}
+function equivalentDependencyMap(expected:any,received:any,berry=false){
+  const a=expected??{},b=received??{}
+  if(!object(a)||!object(b)||Object.keys(a).length!==Object.keys(b).length)return false
+  try{return Object.keys(a).sort().every(name=>Object.prototype.hasOwnProperty.call(b,name)&&(berry?berryComparable(name,a[name])===berryComparable(name,b[name]):String(a[name])===String(b[name])))}catch{return false}
+}
+function yamlPair(text:string){
+  let key:string,rest:string
+  if(text.startsWith('"')){
+    let end=1,escaped=false
+    for(;end<text.length;end++){const c=text[end];if(!escaped&&c==='"')break;if(c==='\\'&&!escaped)escaped=true;else escaped=false}
+    if(end>=text.length)throw Error('Invalid quoted Yarn key.')
+    key=JSON.parse(text.slice(0,end+1));rest=text.slice(end+1)
+  }else{const colon=text.indexOf(':');if(colon<1)throw Error('Invalid Yarn field.');key=text.slice(0,colon).trim();rest=text.slice(colon)}
+  if(typeof key!=='string'||!key||key.length>1024||!rest.startsWith(':'))throw Error('Invalid Yarn field.')
+  const raw=rest.slice(1).trim()
+  if(!raw)return{key,value:undefined as any}
+  let value:any=raw
+  if(raw.startsWith('"')){value=JSON.parse(raw);if(typeof value!=='string')throw Error('Invalid Yarn scalar.')}
+  else if(raw==='true'||raw==='false')value=raw==='true'
+  else if(/^\d+$/.test(raw))value=Number(raw)
+  else if(/[\r\n]/.test(raw))throw Error('Invalid Yarn scalar.')
+  if(typeof value==='string'&&value.length>2048)throw Error('Yarn scalar exceeds bound.')
+  return{key,value}
+}
+/** Yarn Berry v8 is treated only as a finite data graph. No Yarn runtime, plugin,
+ * PnP loader, cache archive or uploaded release bundle is ever executed. Berry
+ * cache checksums are a distinct identity and are never substituted for npm SRI. */
+export function parseYarnBerry(source:string):AlternateLock{
+  bounded(source)
+  const descriptors=new Map<string,any>(),patchAliases=new Map<string,any>(),records:any[]=[],metadata:Record<string,any>=Object.create(null)
+  let current:any,group:string|undefined,subgroup:string|undefined,count=0,metadataSeen=false
+  for(const rawLine of source.split(/\r?\n/)){
+    if(!rawLine.trim()||rawLine.startsWith('#'))continue
+    if(/^\s*\t/.test(rawLine))throw Error('Tabs are unsupported in Yarn Berry data.')
+    const indent=/^ */.exec(rawLine)![0].length,line=rawLine.slice(indent)
+    if(indent===0){
+      group=subgroup=undefined
+      if(line==='__metadata:'){if(metadataSeen)throw Error('Duplicate Yarn metadata.');metadataSeen=true;current=metadata;continue}
+      if(!line.endsWith(':')||++count>12000)throw Error('Invalid Yarn Berry record.')
+      const top=yamlPair(line)
+      if(top.value!==undefined)throw Error('Invalid Yarn Berry record key.')
+      const keys=top.key.split(', ')
+      if(!keys.length||keys.length>64)throw Error('Invalid Yarn Berry descriptor set.')
+      current={descriptorTexts:keys,dependencies:Object.create(null),peerDependencies:Object.create(null),dependenciesMeta:Object.create(null),peerDependenciesMeta:Object.create(null),bin:Object.create(null)}
+      records.push(current)
+      continue
+    }
+    if(!current)throw Error('Yarn Berry field without a record.')
+    if(current===metadata){
+      if(indent!==2)throw Error('Invalid Yarn Berry metadata indentation.')
+      const {key,value}=yamlPair(line);if(!['version','cacheKey'].includes(key)||value===undefined||Object.prototype.hasOwnProperty.call(metadata,key))throw Error('Unsupported Yarn Berry metadata.')
+      metadata[key]=value;continue
+    }
+    if(indent===2){
+      const {key,value}=yamlPair(line)
+      if(['dependencies','peerDependencies','dependenciesMeta','peerDependenciesMeta','bin'].includes(key)){
+        if(value!==undefined||current['_'+key])throw Error('Invalid Yarn Berry map field.');current['_'+key]=true;group=key;subgroup=undefined;continue
+      }
+      if(!['version','resolution','checksum','languageName','linkType','conditions'].includes(key)||value===undefined||current[key]!==undefined)throw Error('Unsupported Yarn Berry record field.')
+      current[key]=value;group=subgroup=undefined;continue
+    }
+    if(indent===4&&group){
+      const {key,value}=yamlPair(line)
+      if(group!=='bin'&&!packageName.test(key))throw Error('Invalid Yarn Berry package key.')
+      if(group==='bin'){
+        const binPath=typeof value==='string'?value.replace(/^\.\//,''):''
+        if(key.length>128||typeof value!=='string'||value.length>512||!binPath||binPath.startsWith('/')||binPath.includes('\\')||binPath.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Invalid inert Yarn bin metadata.')
+      }
+      if(['dependenciesMeta','peerDependenciesMeta'].includes(group)){
+        if(value!==undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry dependency metadata.');current[group][key]=Object.create(null);subgroup=key;continue
+      }
+      if(value===undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry map value.')
+      current[group][key]=value;subgroup=undefined;continue
+    }
+    if(indent===6&&group&&subgroup&&['dependenciesMeta','peerDependenciesMeta'].includes(group)){
+      const {key,value}=yamlPair(line)
+      if(!['optional','built'].includes(key)||typeof value!=='boolean'||Object.prototype.hasOwnProperty.call(current[group][subgroup],key))throw Error('Unsupported Yarn Berry dependency metadata.')
+      current[group][subgroup][key]=value;continue
+    }
+    throw Error('Unsupported Yarn Berry indentation or structure.')
+  }
+  if(metadata.version!==8||typeof metadata.cacheKey!=='string'||!/^[a-z0-9]{4,16}$/.test(metadata.cacheKey)||!records.length)throw Error('Only Yarn Berry lockfile version 8 with a bounded cache key is supported.')
+  const checksumPattern=new RegExp('^'+metadata.cacheKey.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/[a-f0-9]{128}$')
+  let root:any
+  const locators=new Map<string,string>()
+  for(const record of records){
+    if(typeof record.version!=='string'||typeof record.resolution!=='string'||typeof record.languageName!=='string'||!['hard','soft'].includes(record.linkType))throw Error('Incomplete Yarn Berry record.')
+    if(record.conditions!==undefined&&(typeof record.conditions!=='string'||!/^(?:(?:os|cpu|libc)=[a-z0-9_-]+)(?: & (?:os|cpu|libc)=[a-z0-9_-]+)*$/i.test(record.conditions)))throw Error('Unsupported Yarn Berry platform condition.')
+    const locatorSplit=splitNameRequest(record.resolution),locator=berryRequest(locatorSplit.name,locatorSplit.requested,true)
+    if(locatorSplit.name!==locator.name)throw Error('Yarn locator must use the real package identity.');
+    record.name=locator.name;record.berryLocator=record.resolution;record.berryChecksum=record.checksum
+    if(locator.protocol==='workspace'){
+      if(record.linkType!=='soft'||record.languageName!=='unknown'||record.checksum!==undefined||root)throw Error('Invalid or duplicate Yarn root workspace record.')
+      root=record
+    }else{
+      if(record.linkType!=='hard'||record.languageName!=='node'||!semver.valid(record.version)||record.checksum!==undefined&&(!checksumPattern.test(record.checksum))||record.checksum===undefined&&record.conditions===undefined)throw Error('Yarn Berry package records require exact versions and matching cache checksums; only conditional unmaterialized records may omit a checksum.')
+      if(!semver.valid(locator.range)||record.version!==locator.range)throw Error('Yarn Berry locator version mismatch.')
+    }
+    for(const [name,value]of Object.entries(record.dependencies)){berryRequest(name,value);if(typeof value!=='string')throw Error('Invalid Yarn Berry dependency.')}
+    for(const [name,value]of Object.entries(record.peerDependencies)){if(!packageName.test(name))throw Error('Invalid Yarn Berry peer.');range(value)}
+    for(const [name,meta]of Object.entries(record.dependenciesMeta)){if(!object(meta)||!Object.prototype.hasOwnProperty.call(record.dependencies,name))throw Error('Dangling Yarn Berry dependency metadata.')}
+    for(const meta of Object.values(record.peerDependenciesMeta))if(!object(meta))throw Error('Invalid Yarn Berry peer metadata.')
+    const allDependencies=record.dependencies,optional:Record<string,any>=Object.create(null),required:Record<string,any>=Object.create(null)
+    for(const [name,value]of Object.entries(allDependencies))(record.dependenciesMeta[name]?.optional===true?optional:required)[name]=value
+    record.dependencies=required;record.optionalDependencies=optional
+    const identityData=JSON.stringify([record.version,record.berryChecksum,record.dependencies,record.optionalDependencies,record.peerDependencies,record.peerDependenciesMeta,record.conditions])
+    if(locators.has(record.resolution)&&locators.get(record.resolution)!==identityData)throw Error('Conflicting Yarn locator checksum or graph.');locators.set(record.resolution,identityData)
+    for(const text of record.descriptorTexts){
+      const split=splitNameRequest(text),descriptor=berryRequest(split.name,split.requested,true)
+      if(descriptor.name!==locator.name||descriptor.protocol!==locator.protocol||descriptor.virtual!==locator.virtual)throw Error('Yarn Berry descriptor/locator identity mismatch.')
+      if(descriptor.protocol!=='workspace'&&!semver.satisfies(record.version,descriptor.range))throw Error('Yarn Berry descriptor does not admit its locator version.')
+      const exact=split.name+'@'+split.requested
+      if(descriptors.has(exact))throw Error('Duplicate Yarn Berry descriptor.');descriptors.set(exact,record)
+      if(descriptor.protocol==='patch'){
+        const underlying=split.name+'@npm:'+descriptor.selector,prior=patchAliases.get(underlying)
+        if(prior&&prior!==record)throw Error('Ambiguous Yarn compatibility patch descriptor.')
+        patchAliases.set(underlying,record)
+      }
+    }
+  }
+  if(!root)throw Error('Yarn Berry requires one root workspace record.')
+  return{format:'yarn-berry-v8',packages:Object.create(null),cacheKey:metadata.cacheKey,root:{dependencies:{...root.dependencies,...root.optionalDependencies}},resolve:(name,requested)=>{
+    if(!packageName.test(name)||typeof requested!=='string')throw Error('Invalid Yarn Berry lookup.')
+    const key=name+'@'+canonicalBerryRequest(name,requested),exact=descriptors.get(key)??patchAliases.get(key)
+    if(exact)return exact
+    throw Error('Exact Yarn Berry descriptor is missing: '+key)
+  }}
+}
+
 export function parseYarnClassic(source:string):AlternateLock {
   bounded(source)
-  if(!/^# yarn lockfile v1\r?$/m.test(source)||/^__metadata:/m.test(source))throw Error('Only Yarn classic v1 with registry SRI is supported; Berry checksums/virtual packages need a separately verified adapter.')
+  if(/^__metadata:/m.test(source))return parseYarnBerry(source)
+  if(!/^# yarn lockfile v1\r?$/m.test(source))throw Error('Only Yarn classic v1 or finite Berry v8 lock data is supported.')
   const descriptors=new Map<string,any>(),byName=new Map<string,any[]>();let current:any,section:string|undefined,records=0,currentNames=new Set<string>()
   const atom=(s:string)=>s.startsWith('"')?JSON.parse(s):s
   for(const line of source.split(/\r?\n/)) {
@@ -89,31 +280,69 @@ export function parseBunText(source:string):AlternateLock {
  * against the operator-owned npm graph. No resolver or package installation runs. */
 export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:any){
   const declared={...manifest.devDependencies,...manifest.dependencies},packages:Record<string,any>={'':{dependencies:manifest.dependencies,devDependencies:manifest.devDependencies}},visited=new Set<string>()
-  if(lock.root){for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')}
+  if(lock.root){
+    if(lock.format==='yarn-berry-v8'){
+      if(!equivalentDependencyMap(declared,lock.root.dependencies,true))throw Error('Yarn root declaration differs from manifest.')
+    }else for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')
+  }
   const located=(parent:string,name:string)=>{let from=parent;while(from){const p=from+'/node_modules/'+name;if(profile.packages[p])return p;const i=from.lastIndexOf('/node_modules/');from=i<0?'':from.slice(0,i)}return 'node_modules/'+name}
   const excludedPlatform=(record:any)=>[ ['os',process.platform],['cpu',process.arch] ].some(([key,current])=>{
     const values=record?.[key];if(!Array.isArray(values))return false
     return values.includes('!'+current)||values.filter((x:any)=>typeof x==='string'&&!x.startsWith('!')).length>0&&!values.includes(current)
   })
+  const berryPeers:Array<{name:string;requested:string;location:string}>=[]
+  let depth=0
   const visit=(name:string,requested:string,location:string,from:string)=>{
     const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
-    const descriptor=npmDescriptor(name,requested)
-    if(!trusted||trusted.link||!actual||actual.name!==descriptor.name||(trusted.name??name)!==descriptor.name||actual.version!==trusted.version||actual.integrity!==trusted.integrity||!sri(trusted.integrity)||!semver.satisfies(trusted.version,descriptor.range))throw Error('Locked graph does not match pinned identity/version/integrity: '+location)
-    packages[location]={...actual};if(visited.has(location))return;visited.add(location);if(visited.size>12000)throw Error('Dependency graph bound.')
+    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):npmDescriptor(name,requested)
+    const identity=descriptor.name,versionRange=descriptor.range
+    const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof actual?.berryLocator==='string'&&sri(trusted?.integrity):actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
+    if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
+    // Uploaded cache hashes are labels, not evidence of npm tarball bytes. An
+    // optional operator-owned Berry attestation binds the exact label/locator.
+    if(berry && (trusted.berryChecksum!==undefined&&trusted.berryChecksum!==actual.berryChecksum || trusted.berryLocator!==undefined&&trusted.berryLocator!==actual.berryLocator))throw Error('Operator Berry checksum/locator mismatch.')
+    // Builtin patches may change package bytes. Parsing one never authorizes
+    // substituting unpatched npm bytes: require explicit operator attestation.
+    if(berry && actual.berryLocator.includes('@patch:') && trusted.berryLocator!==actual.berryLocator)throw Error('Patched package requires operator-owned patched identity and bytes.')
+    if(visited.has(location)){
+      if(berry && (packages[location].berryLocator!==actual.berryLocator || packages[location].berryChecksum!==actual.berryChecksum))throw Error('Conflicting Berry virtual/locator identity at trusted package location.')
+      return
+    }
+    packages[location]=berry?{...actual,integrity:trusted.integrity}:{...actual};visited.add(location);if(visited.size>12000||++depth>256)throw Error('Dependency graph bound.')
     for(const group of ['dependencies','optionalDependencies']){
       const expected=trusted[group]??{},received=actual[group]??{}
-      if(JSON.stringify(Object.entries(expected).sort())!==JSON.stringify(Object.entries(received).sort()))throw Error('Lock dependency edges differ from pinned metadata: '+location)
+      if(!(berry?equivalentDependencyMap(expected,received,true):JSON.stringify(Object.entries(expected).sort())===JSON.stringify(Object.entries(received).sort())))throw Error('Lock dependency edges differ from pinned metadata: '+location)
     }
     // Yarn classic does not encode peer metadata: the SRI-verified operator
-    // package metadata supplies it. Bun's explicit peer data must also agree.
-    if(lock.format==='bun-text-v1'&&JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Bun peer metadata differs from pinned graph.')
-    if(lock.format==='bun-text-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Bun optional-peer metadata differs from pinned graph.')
-    for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
+    // package metadata supplies it. Berry and Bun explicit peer data must agree.
+    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Lock peer metadata differs from pinned graph.')
+    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Lock optional-peer metadata differs from pinned graph.')
+    if(berry){
+      for(const dep of Object.keys({...trusted.dependencies,...trusted.optionalDependencies})){
+        const next=located(location,dep),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)
+        if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
+        visit(dep,String(actual.dependencies?.[dep]??actual.optionalDependencies?.[dep]),next,location)
+      }
+      // A name may be both an optional dependency and a required peer. Keep the
+      // two obligations separate so an omitted optional edge cannot erase a peer.
+      for(const [dep,r]of Object.entries(trusted.peerDependencies??{})){
+        const next=located(location,dep)
+        if(trusted.peerDependenciesMeta?.[dep]?.optional===true&&!profile.packages[next])continue
+        berryPeers.push({name:dep,requested:String(r),location:next})
+      }
+    }else for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
       const next=located(location,dep),isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
       if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
       visit(dep,String(r),next,location)
     }
+    depth--
   }
   for(const [name,r]of Object.entries(declared))visit(name,String(r),'node_modules/'+name,'')
+  // Peer ranges are constraints on the provider selected by the dependency
+  // graph, not additional descriptors that must occur in a Yarn lockfile.
+  for(const peer of berryPeers){
+    const provider=packages[peer.location],wanted=npmDescriptor(peer.name,peer.requested)
+    if(!provider||provider.name!==wanted.name||!semver.satisfies(provider.version,wanted.range))throw Error('Berry peer provider missing or incompatible: '+peer.location)
+  }
   return {lockfileVersion:3,packages}
 }
