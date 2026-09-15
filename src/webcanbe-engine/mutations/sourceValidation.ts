@@ -1,3 +1,4 @@
+import { buildIndependentExport } from "../runtime/independentExport"
 import { assertSourceDirectory, sourceMember } from "../runtime/sourceDirectory"
 import fs from "node:fs"
 import os from "node:os"
@@ -28,9 +29,14 @@ export async function validateSource(files: Map<string, string>, level: SourceVa
   return { level, passed: diagnostics.length === 0, diagnostics }
 }
 
-export async function validateStagedProject(project: ProjectRecord, applicationRoot: string, files: Map<string, string>, level: "compile" | "checkpoint"): Promise<SourceValidation> {
+export async function validateStagedProject(project: ProjectRecord, applicationRoot: string, files: Map<string, string>, level: "compile" | "checkpoint", exportArchive?: Buffer): Promise<SourceValidation> {
   const validation = await validateSource(files, level)
   if (!validation.passed) return validation
+  if (exportArchive) {
+    try { await buildIndependentExport(exportArchive, applicationRoot) }
+    catch { validation.passed = false; validation.diagnostics.push({ file: "project", message: "Unsupported or failed trusted independent export build." }) }
+    return validation
+  }
   const stage = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wcb-source-validation-")))
   try {
     fs.cpSync(project.root, stage, { recursive: true, filter: source => {
