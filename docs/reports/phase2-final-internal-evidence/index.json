@@ -85,9 +85,9 @@
     },
     {
       "path": "final-ledger.json",
-      "bytes": 77753,
-      "sha256": "3d9e4423c553caa218b799801c844e1960f2aa40bcb7e30975c7f3e565b10d17",
-      "purpose": "Final 64-row statuses, exact evidence and internal/external missing proof."
+      "bytes": 85180,
+      "sha256": "24019c608996a83dd14f4e427f94c9deac18130887c2e418a941cf1f2e7f8b1c",
+      "purpose": "Current authoritative ledger, updated only for compatibility breadth rows; prior ledger preserved in the dedicated breadth evidence."
     },
     {
       "path": "final-validation-stages.json",
@@ -455,5 +455,6 @@
       "sha256": "26f40eb7ee2f89f34f1430b36afede58811ddf38bd6e3df011cb25294807a7e6",
       "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
     }
-  ]
+  ],
+  "currentLedgerUpdate": "P05–P08 updated by ../phase2-compatibility-breadth-evidence/index.json; all other historical evidence is unchanged."
 }

@@ -1,0 +1,29 @@
+{
+  "scanId": "28b26b91-59c0-412e-ba34-1ba51d8d55bb",
+  "frozenCandidate": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "finalImplementation": "bc19fac8d91d7360c409285e8613509c3c4e7404",
+  "reviewedFrozenPaths": 32,
+  "originalLowFindings": 1,
+  "confirmedUnresolved": 0,
+  "corrections": [
+    "Linear static URL replacement",
+    "HTML URL ASCII controls",
+    "Finite CSS host preload removed",
+    "Compiler-generated refresh module/static cache consistency"
+  ],
+  "finalPathReviews": [
+    "wcb-breadth-security-admission-final.json",
+    "wcb-breadth-security-css-final.json",
+    "wcb-breadth-security-assets-final.json"
+  ],
+  "limitation": "Attempted bounded stress reproduction was blocked by a cybersecurity safeguard. No retry, stress latency or crash proof is claimed. Static trace and ordinary regressions verify the corrected root cause. The canonical frozen report retains historical pending wording in attack-path change conditions; final remediation and hash-bound rereviews above supersede that wording, without modifying the seal.",
+  "usage": {
+    "coverage": "complete",
+    "totalTokens": 14232343,
+    "inputTokens": 14165537,
+    "cachedInputTokens": 13724672,
+    "outputTokens": 66806,
+    "source": "codex_rollout",
+    "threadCount": 5
+  }
+}

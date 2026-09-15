@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "candidate": "bc19fac8d91d7360c409285e8613509c3c4e7404",
+  "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
-    "PASS": 46,
-    "PARTIAL": 5,
+    "PASS": 45,
+    "PARTIAL": 6,
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
@@ -15,6 +15,7 @@
   "internalRemaining": [
     "P05",
     "P06",
+    "P07",
     "P08",
     "P39",
     "P61"
@@ -105,134 +106,66 @@
       "id": "P05",
       "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
       "status": "PARTIAL",
-      "evidence": "Yarn classic v1 registry/SRI and Bun text JSONC v1 deterministic adapters; full operator version/integrity/dependency/required-peer checks; two new dedicated CSS profiles, no package-manager execution.",
-      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
-      "missingProof": "Berry/checksum/virtual graphs and Yarn npm-alias/protocol/workspace cases remain unimplemented; binary Bun graph resolution remains unsupported. Exact retained corpus root/version gaps are in application-stage-results.json. Redux bundled Yarn is2,742,928bytes and still exceeds the unchanged2MiB member limit.",
+      "evidence": "Added react19-vite7.1-v1 (React 19.2, Vite 7.1.9, Tailwind 4.1.14) without altering the old profiles; Habit’s exact immutable npm graph passes. Static frozen-corpus diagnosis retains all unsupported graphs.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Yarn/Bun lock and pinned dependency/version graphs remain unsupported. The exact Redux archive contains .yarn/releases/yarn-4.2.2.cjs at 2,742,928 bytes, above the retained 2 MiB member limit.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
       "evidenceFiles": [
-        "../phase2-compatibility-breadth-evidence/regressions.json",
-        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
-        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
+        "current-compatibility.json",
+        "habit-initial-compatibility.json",
+        "full-application-acceptance.json"
       ],
-      "disposition": "Unknown or incomplete lock semantics must not fall through to a convenient profile. General tooling-artifact preservation beyond the retained member bound needs a separate role/transport/export design; no dropped bytes or limit exception was introduced. These remain internal engineering requirements, not external evidence.",
-      "priorCheckpoint": {
-        "id": "P05",
-        "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
-        "status": "PARTIAL",
-        "evidence": "Added react19-vite7.1-v1 (React 19.2, Vite 7.1.9, Tailwind 4.1.14) without altering the old profiles; Habit’s exact immutable npm graph passes. Static frozen-corpus diagnosis retains all unsupported graphs.",
-        "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "Yarn/Bun lock and pinned dependency/version graphs remain unsupported. The exact Redux archive contains .yarn/releases/yarn-4.2.2.cjs at 2,742,928 bytes, above the retained 2 MiB member limit.",
-        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
-        "priorStatus": "PARTIAL",
-        "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
-        "evidenceFiles": [
-          "current-compatibility.json",
-          "habit-initial-compatibility.json",
-          "full-application-acceptance.json"
-        ],
-        "disposition": "General lock adapters need complete immutable version/integrity/peer-graph verification and operator-owned package profiles. Supporting the unchanged oversized Redux member would violate this run’s explicit fixed-limit/no-dropped-file constraint. Other graph gaps remain internal engineering, not external credentials."
-      }
+      "disposition": "General lock adapters need complete immutable version/integrity/peer-graph verification and operator-owned package profiles. Supporting the unchanged oversized Redux member would violate this run’s explicit fixed-limit/no-dropped-file constraint. Other graph gaps remain internal engineering, not external credentials."
     },
     {
       "id": "P06",
       "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
       "status": "PARTIAL",
-      "evidence": "Finite custom HTML mount/single module/static resources; literal nested/path/URL aliases, root/publicDir/base, same-directory TS relationships; trusted React/Tailwind4/tsconfig-paths/Uno declarations; unknown effects preserved/refused.",
-      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
-      "missingProof": "Non-root Vite root semantics and arbitrary build/plugin effects remain unsupported. Retained Bulletproof build.rollupOptions external fs/promises and output experimentalMinChunkSize are not applied. Todo tsconfig @ alias has no matching static Vite alias or recognized tsconfig-paths plugin, so resolution remains ambiguous.",
+      "evidence": "Finite default Tailwind no-op configuration and inert .gitattributes grammar added; no uploaded executable config is evaluated. Broader retained plugin/config cases remain unsupported.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Custom HTML mount semantics, vite-tsconfig-paths, unocss/vite and the retained @ alias/config combinations remain unsupported.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
       "evidenceFiles": [
-        "../phase2-compatibility-breadth-evidence/regressions.json",
-        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
-        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
+        "current-compatibility.json",
+        "regressions.json"
       ],
-      "disposition": "A runtime compiler cannot pretend a Rollup build external/chunk setting or undeclared Vite alias has equivalent browser semantics. A separately verified finite adapter is needed; unchanged source is not rewritten and generic plugin execution is not claimed.",
-      "priorCheckpoint": {
-        "id": "P06",
-        "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
-        "status": "PARTIAL",
-        "evidence": "Finite default Tailwind no-op configuration and inert .gitattributes grammar added; no uploaded executable config is evaluated. Broader retained plugin/config cases remain unsupported.",
-        "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "Custom HTML mount semantics, vite-tsconfig-paths, unocss/vite and the retained @ alias/config combinations remain unsupported.",
-        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
-        "priorStatus": "PARTIAL",
-        "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
-        "evidenceFiles": [
-          "current-compatibility.json",
-          "regressions.json"
-        ],
-        "disposition": "Each requires a finite static adapter with exact resolution and adversarial refusal tests. Executing uploaded plugins/config or guessing their behavior would break the retained trust boundary. No DoD waiver is claimed."
-      }
+      "disposition": "Each requires a finite static adapter with exact resolution and adversarial refusal tests. Executing uploaded plugins/config or guessing their behavior would break the retained trust boundary. No DoD waiver is claimed."
     },
     {
       "id": "P07",
       "requirement": "Common dependencies, CSS/Modules, assets/public base, static env (B/G.1)",
-      "status": "PASS",
-      "evidence": "Explicit server-owned public VITE value provider plus project/workspace/session/revision checks; expanded finite metadata/example-env and opaque binary preservation; separate bounded HTTPS DNS-pinned static image/font/CSS cache. Exact67-file Recipe passes packaged PG/mTLS rendering and byte-exact export; exact artifact decodes required images/fonts with no direct runner egress.",
-      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
-      "missingProof": "None for retained finite public-env/file/static-resource requirements. Dynamic/authenticated resources, remote active content, arbitrary file types and general runner egress remain deliberately outside the supported boundary.",
-      "internallyClosable": "Closed for the retained bounded software requirement.",
+      "status": "PARTIAL",
+      "evidence": "All required local Habit/Kanban resources render unchanged, and exports build/render independently. Optional upstream missing favicon is disclosed. Recipe’s required remote assets are still unavailable.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "A broader explicit public-env grant model and example-env/file breadth remain unfinished; Recipe Book’s required remote Cloudinary images/Google fonts remain unavailable.",
+      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Common browser transitive/peer dependencies and preserved CSS resource references work. Required external recipe images/fonts remain unavailable under default egress denial; broader assets/public-env/config support remains.",
       "evidenceFiles": [
-        "../phase2-compatibility-breadth-evidence/regressions.json",
-        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
-        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
+        "current-compatibility.json",
+        "full-application-acceptance.json"
       ],
-      "disposition": "P07 software capability closes with48-resource/2MiB-response/8MiB-total/10second/four-concurrent bounds and current authority before/after asynchronous work. A single generic422 during simultaneous regression load remains documented; no capacity/endurance or guaranteed external-service availability claim. P39/P61 remain unchanged.",
-      "priorCheckpoint": {
-        "id": "P07",
-        "requirement": "Common dependencies, CSS/Modules, assets/public base, static env (B/G.1)",
-        "status": "PARTIAL",
-        "evidence": "All required local Habit/Kanban resources render unchanged, and exports build/render independently. Optional upstream missing favicon is disclosed. Recipe’s required remote assets are still unavailable.",
-        "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "A broader explicit public-env grant model and example-env/file breadth remain unfinished; Recipe Book’s required remote Cloudinary images/Google fonts remain unavailable.",
-        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
-        "priorStatus": "PARTIAL",
-        "priorEvidence": "Common browser transitive/peer dependencies and preserved CSS resource references work. Required external recipe images/fonts remain unavailable under default egress denial; broader assets/public-env/config support remains.",
-        "evidenceFiles": [
-          "current-compatibility.json",
-          "full-application-acceptance.json"
-        ],
-        "disposition": "Credential-pattern example files cannot become preview secrets. A required-asset fetch/cache service would introduce a separate trusted SSRF/cache boundary; it was not added merely for Recipe. Runner egress stays denied. Bulletproof .hbs/_redirects and Todo .node-version/.whitesource/bun.lockb remain exact admission gaps."
-      }
+      "disposition": "Credential-pattern example files cannot become preview secrets. A required-asset fetch/cache service would introduce a separate trusted SSRF/cache boundary; it was not added merely for Recipe. Runner egress stays denied. Bulletproof .hbs/_redirects and Todo .node-version/.whitesource/bun.lockb remain exact admission gaps."
     },
     {
       "id": "P08",
       "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
       "status": "PARTIAL",
-      "evidence": "Pinned Tailwind3.4.17/PostCSS8.5.8/autoprefixer10.4.21 and Uno66.0.0 finite data adapters in confined bounded workers. Literal Tailwind theme/content/screens/extend and trusted typography/animate; Uno static rules/shortcuts/presetUno/presetAttributify.",
-      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
-      "missingProof": "Retained Todo needs @julr/unocss-preset-forms, transformerDirectives, transformerVariantGroup and additional preset options such as presetUno dark:media; these finite adapters and its exact older graph are not implemented. Non-admitted CSS compiler versions and additional plugin semantics remain Code-only.",
+      "evidence": "Pinned Tailwind 4 profile/default no-op config passes; finite adapter does not claim Tailwind 3/PostCSS/UnoCSS support.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Finite Tailwind 3/PostCSS/UnoCSS configuration and utility adapters remain unsupported; the new exact profile and default no-op Tailwind config cover Tailwind 4 only.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Finite literal numeric @theme colors added on pinned Tailwind4. Tailwind3/PostCSS/UnoCSS and broader configuration/vocabulary remain unsupported.",
       "evidenceFiles": [
-        "../phase2-compatibility-breadth-evidence/regressions.json",
-        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
-        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
+        "current-compatibility.json",
+        "regressions.json"
       ],
-      "disposition": "Only trusted pinned transformations with completely parsed finite inputs may run. Existing functions/regex/dynamic config are preserved and refused; those are explicit unsupported semantics, not generic plugin support. Remaining retained finite Uno/config breadth stays internal work.",
-      "priorCheckpoint": {
-        "id": "P08",
-        "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
-        "status": "PARTIAL",
-        "evidence": "Pinned Tailwind 4 profile/default no-op config passes; finite adapter does not claim Tailwind 3/PostCSS/UnoCSS support.",
-        "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "Finite Tailwind 3/PostCSS/UnoCSS configuration and utility adapters remain unsupported; the new exact profile and default no-op Tailwind config cover Tailwind 4 only.",
-        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
-        "priorStatus": "PARTIAL",
-        "priorEvidence": "Finite literal numeric @theme colors added on pinned Tailwind4. Tailwind3/PostCSS/UnoCSS and broader configuration/vocabulary remain unsupported.",
-        "evidenceFiles": [
-          "current-compatibility.json",
-          "regressions.json"
-        ],
-        "disposition": "These need pinned compiler graphs plus safe static semantics. Running uploaded configuration, silently removing it, or treating a no-op Tailwind 4 case as general support is not allowed."
-      }
+      "disposition": "These need pinned compiler graphs plus safe static semantics. Running uploaded configuration, silently removing it, or treating a no-op Tailwind 4 case as general support is not allowed."
     },
     {
       "id": "P09",
@@ -1133,7 +1066,5 @@
       ],
       "disposition": "Retained FAIL/deferred later-phase scope; excluded from the six current internal Phase-2 rows without deleting or waiving the original requirement."
     }
-  ],
-  "compatibilityBreadthBase": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
-  "compatibilityBreadthReport": "docs/reports/phase2-compatibility-breadth-closure.md"
+  ]
 }

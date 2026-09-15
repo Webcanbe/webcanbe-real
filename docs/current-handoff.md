@@ -1,3 +1,21 @@
+# Current handoff: Phase 2 compatibility breadth (2026-09-15)
+
+**P05 PARTIAL / P06 PARTIAL / P07 PASS / P08 PARTIAL. INTERNAL CLOSURE: NOT YET. MATRIX:46 PASS /5 PARTIAL /1 deferred later-phase FAIL /12 EXTERNAL-EVIDENCE. OVERALL PHASE2:NOT YET. PUBLIC HOSTED IMPORT:NO. PHASE3 MAY BEGIN:NO.**
+
+Continue from product implementation `bc19fac8d91d7360c409285e8613509c3c4e7404` on `phase-2-compatible-editor`; base `0f33e11ea60ee4b69ed6a0de5144f73400fe5808`. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. Use [the dedicated breadth report](reports/phase2-compatibility-breadth-closure.md), [current final ledger](reports/phase2-final-internal-evidence/final-ledger.json) and [breadth evidence index](reports/phase2-compatibility-breadth-evidence/index.json); do not rebuild P01–P64 or erase historical reports.
+
+- General Yarn classic/Bun text graph adapters, finite HTML/Vite/TS aliases, Tailwind3/PostCSS/Uno workers, public-value provider and separate static-resource cache added. Exact source/config/export and all trust boundaries retained.
+- P07 closes: Bulletproof/Todo archive intake now passes; unchanged Recipe passes packaged TLS/PG/mTLS import-to-render with38 cached images/fonts/CSS and exact67-file export. Exact native artifact proves no required-resource/page errors and ENETUNREACH direct external egress. Optional upstream favicon and React19 development console diagnostics remain disclosed. No extra complete editing-workflow claim.
+- Remaining internal rows in this run:P05 Berry/alias/binary-Bun/unprovided graphs and oversized Redux tooling; P06 retained Rollup/root/ambiguous alias effects; P08 additional Uno forms/directives/variant-group/options/graphs. Exact finite blockers are in the report. P39/P61 remain byte-for-byte as retained; no deliberate work on them.
+- All prior429 test identities preserved with30 old test files byte-exact;549 distinct passes.504 default plus45 separately covered native/hosted skips. Five browser groups, TypeScript/build and actual cached Recipe/native proof pass. One clock-generated OIDC title has explicit old/new labels; no test weakened.
+- Codex Security scan28b26b91-59c0-412e-ba34-1ba51d8d55bb sealed32 candidate paths. One low algorithmic resource issue fixed; affected final paths independently reread;0 confirmed unresolved vulnerabilities. Stress reproduction was blocked and not retried. No professional pentest claim.
+- Historical failures remain, including one unexplained packaged422 during simultaneous tests. No load/capacity claim. Corpus QA now materializes outside the repository with finally cleanup; product code did not change after its final review.
+- Owned TEST31 leases/jobs/services/tunnels/schema/password/PKI/helpers cleaned; VM stopped. Final normal feature push/clean/main receipt is in task outputs. No main merge/public deployment/force push or later-phase scope work.
+
+---
+
+## Historical handoffs
+
 # Current handoff: Phase 2 final internal closure attempt (2026-09-15)
 
 **INTERNAL CLOSURE: NOT YET. COMMON-APPLICATION CHECKPOINT: PASS. TWO COMPLETE UNCHANGED APPLICATIONS. MATRIX: 45 PASS / 6 PARTIAL / 1 FAIL / 12 EXTERNAL-EVIDENCE. OVERALL PHASE 2: NOT YET. PUBLIC HOSTED IMPORT: NO. PHASE 3 MAY BEGIN: NO.**

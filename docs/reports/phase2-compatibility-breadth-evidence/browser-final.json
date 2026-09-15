@@ -1,0 +1,52 @@
+[
+  {
+    "name": "editor",
+    "command": [
+      "node",
+      "scripts/verify-phase2c-editor-regressions.cjs",
+      ".webcanbe/compatibility-breadth/browser-editor"
+    ],
+    "exit": 0,
+    "elapsedMs": 16011
+  },
+  {
+    "name": "controlled",
+    "command": [
+      "node",
+      "scripts/verify-phase2c2-controlled.cjs",
+      ".webcanbe/compatibility-breadth/browser-controlled"
+    ],
+    "exit": 0,
+    "elapsedMs": 34487
+  },
+  {
+    "name": "source",
+    "command": [
+      "node",
+      "scripts/verify-phase2de.cjs",
+      ".webcanbe/compatibility-breadth/browser-source"
+    ],
+    "exit": 0,
+    "elapsedMs": 58574
+  },
+  {
+    "name": "responsive",
+    "command": [
+      "node",
+      "scripts/verify-phase2f.cjs",
+      ".webcanbe/compatibility-breadth/browser-responsive"
+    ],
+    "exit": 0,
+    "elapsedMs": 78524
+  },
+  {
+    "name": "runtime",
+    "command": [
+      "node",
+      "scripts/verify-phase2g.cjs",
+      ".webcanbe/compatibility-breadth/browser-runtime"
+    ],
+    "exit": 0,
+    "elapsedMs": 9082
+  }
+]

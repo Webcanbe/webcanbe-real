@@ -1,0 +1,36 @@
+{
+  "environment": "LOCAL HOSTED-STYLE QA; NOT PRODUCTION",
+  "publicHostedImportReady": false,
+  "performance": {
+    "coldImportStartMs": 1062,
+    "cssEditMs": 342,
+    "reactModuleEditMs": 416,
+    "generationRestartMs": 1093,
+    "viewerFrameMs": 16
+  },
+  "independent": [
+    {
+      "name": "vite-react18-ts",
+      "profile": "react18-vite5-v1",
+      "unchanged": true,
+      "controlledRender": true,
+      "exportMs": 72,
+      "sourceCommit": "73cd3c1de63d6f511b7a6003d0cb8079dd491176"
+    },
+    {
+      "name": "vite-react19-ts",
+      "profile": "react19-vite8-v1",
+      "unchanged": true,
+      "controlledRender": true,
+      "exportMs": 83,
+      "sourceCommit": "99bd9d1d46153fa939f4a304cc0177db42e28776"
+    }
+  ],
+  "crossUserAndWorkspaceIsolation": true,
+  "viewerCannotWriteOrReuseGeneration": true,
+  "staleRevisionAndFrameDenied": true,
+  "cssStatePreserved": true,
+  "reactUpdateIsReloadNotHmr": true,
+  "activeMembershipRevocation": true,
+  "status": "PASS"
+}

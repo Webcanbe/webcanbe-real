@@ -1,0 +1,162 @@
+{
+  "scanId": "28b26b91-59c0-412e-ba34-1ba51d8d55bb",
+  "phase": "discovery",
+  "base": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+  "head": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "reviewedFiles": [
+    "src/webcanbe-engine/runtime/staticCss.ts",
+    "src/webcanbe-engine/runtime/cssWorkerSource.ts",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts",
+    "src/webcanbe-engine/phase2-breadth-css.test.ts",
+    "runtime-profiles/react18-vite5-css-v1/package.json",
+    "runtime-profiles/react18-vite5-css-v1/package-lock.json",
+    "runtime-profiles/react19-vite6-uno-v1/package.json",
+    "runtime-profiles/react19-vite6-uno-v1/package-lock.json"
+  ],
+  "securityPolicy": "security-guidance.md read; resolver returned no inherited SECURITY.md content for the runtime, test, or either profile scope. Supplied threat model used without regeneration.",
+  "candidates": [],
+  "negativeReasoning": [
+    {
+      "boundary": "Uploaded CSS configuration to executable compiler options",
+      "locations": [
+        "src/webcanbe-engine/runtime/staticCss.ts:16",
+        "src/webcanbe-engine/runtime/staticCss.ts:36",
+        "src/webcanbe-engine/runtime/staticCss.ts:47",
+        "src/webcanbe-engine/runtime/staticCss.ts:54",
+        "src/webcanbe-engine/runtime/staticCss.ts:69",
+        "src/webcanbe-engine/runtime/staticCss.ts:78"
+      ],
+      "evidence": "Configuration is AST-interpreted data with a 256 KiB source limit, 4000 visits, bounded const traversal, rejected executable statements/functions/getters/computed keys, null-prototype objects and forbidden prototype keys. Only recognized import-binding tokens can select two fixed Tailwind plugins or two Uno presets. Unused const initializers are also checked. No uploaded require/import/config function is executed."
+    },
+    {
+      "boundary": "Content paths and stylesheet directives to host filesystem/config loading",
+      "locations": [
+        "src/webcanbe-engine/runtime/staticCss.ts:102",
+        "src/webcanbe-engine/runtime/staticCss.ts:118",
+        "src/webcanbe-engine/runtime/staticCss.ts:125",
+        "src/webcanbe-engine/runtime/staticCss.ts:132",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:13",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:15",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:16",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:19"
+      ],
+      "evidence": "Project realpaths are confined. Tailwind content patterns are matched over explicit raw source strings (40 MiB/2000 candidates), replacing config.content before the compiler. Dangerous config/plugin/scanning directives are refused with the same case-sensitive PostCSS name semantics used by Tailwind findAtConfigPath; process(from:undefined) supplies a second config-path barrier. Tailwind gets a nonempty literal object, which its installed resolveConfigPath returns as null; no config discovery. Autoprefixer receives fixed/finite browser queries and explicit env/stats, so upload/browser-config discovery is unnecessary. Uno createGenerator uses only supplied config and preset instances, no loadConfig adapter."
+    },
+    {
+      "boundary": "Fixed worker toolchain loading and work to operator host resources",
+      "locations": [
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:6",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:8",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:9",
+        "src/webcanbe-engine/runtime/cssWorkerSource.ts:21",
+        "src/webcanbe-engine/runtime/staticCss.ts:150",
+        "src/webcanbe-engine/runtime/staticCss.ts:156",
+        "src/webcanbe-engine/runtime/staticCss.ts:157",
+        "src/webcanbe-engine/runtime/staticCss.ts:158"
+      ],
+      "evidence": "Worker source is a repository constant; uploaded values are structured-cloned data. Synchronous module hooks check every CJS/ESM resolved realpath beneath the dedicated node_modules and deny non-file/non-builtin protocols. Missing hook support refuses compilation. Worker environment contains two fixed variables; no inherited execArgv. Concurrent workers are capped at two, managed heaps at 128/16 MiB, stack at 4 MiB, timeout at 8 seconds, and CSS output at 2 MiB; completion/error/exit terminate the worker and release capacity. No attacker-controlled path to unbounded external-buffer allocation or constructor failure was identified."
+    },
+    {
+      "boundary": "Compiled CSS and HTML to canonical source/artifacts",
+      "locations": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:71",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:98",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:104",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:110",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:113",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:127",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:150",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:160",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:165",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:182",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:199",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:206"
+      ],
+      "evidence": "The integration uses write:false and in-memory transformed contents/artifacts. CSS resources are external browser data, not fetched by this compiler. Source/vendor realpaths remain confined; virtual Uno output has a fixed namespace. Entry stylesheet imports use JSON serialization. Runtime and shell participate in incremental fingerprinting. Blob output retains opaque transport/CSP and closing-tag escaping. Public asset publication preserves realpath/link/path checks and size/type filtering. Fresh project/revision authorization and HTML parsing are parent-owned supporting boundaries, not independently claimed closed here."
+    },
+    {
+      "boundary": "Operator profile metadata to dependency graph",
+      "locations": [
+        "runtime-profiles/react18-vite5-css-v1/package.json:6",
+        "runtime-profiles/react18-vite5-css-v1/package-lock.json:1",
+        "runtime-profiles/react19-vite6-uno-v1/package.json:6",
+        "runtime-profiles/react19-vite6-uno-v1/package-lock.json:1"
+      ],
+      "evidence": "Read all lock records statically: Tailwind profile has 24 direct exact pins/301 package records; Uno profile has 11 exact pins/220 package records. Both lockfileVersion 3; no duplicate JSON keys, links, nonexact package versions, missing integrity, non-npm-registry resolved URL, absent required dependency or absent required peer. All 521 package integrity values are valid-length sha512 SRI. Required peer ranges match pinned versions; omitted peers are explicitly optional. esbuild/fsevents hasInstallScript metadata is present, but profiles contain no script execution path and descriptions require operator preparation with npm ci --ignore-scripts. No dependencies downloaded or lifecycle scripts run."
+    },
+    {
+      "boundary": "Regression evidence",
+      "locations": [
+        "src/webcanbe-engine/phase2-breadth-css.test.ts:13",
+        "src/webcanbe-engine/phase2-breadth-css.test.ts:23",
+        "src/webcanbe-engine/phase2-breadth-css.test.ts:33",
+        "src/webcanbe-engine/phase2-breadth-css.test.ts:38"
+      ],
+      "evidence": "Tests cover finite Tailwind/Uno compilation, unchanged source bytes, executable/unknown/prototype/content-path rejection, and transitive CommonJS module escape refusal. Tests were read but not executed; parent owns the consolidated validation pass."
+    }
+  ],
+  "investigationClosures": [
+    {
+      "id": "css-host-preload",
+      "status": "suppressed-defensive-invariant-gap",
+      "locations": [
+        {
+          "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+          "line": 63,
+          "role": "sink"
+        },
+        {
+          "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+          "line": 66,
+          "role": "new_finite_integration"
+        },
+        {
+          "file": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+          "line": 225,
+          "role": "closest_control"
+        }
+      ],
+      "source": "Uploaded dependency manifest can select the new Tailwind3 profile, but not its operator-owned package bytes or dependency paths.",
+      "control": "Only the Tailwind entry realpath is checked before an unconditional main-process require; worker module hooks and memory/deadline bounds are installed later inside the worker.",
+      "potentialImpact": "If the operator installation had a missing or redirected transitive package, this host preload could resolve an ambient dependency before worker confinement. It also initializes fixed toolchain modules outside worker bounds.",
+      "counterevidence": "The exact require sink predates this diff (BASE isolatedPreview.ts line61). New profile selection expands reachability to Tailwind3, but installed Tailwind3 index/plugin top level only imports fixed libraries; uploaded config, scanning and CSS processing occur only after tw(config), invoked inside the worker. No uploaded value flows into module initialization, operator tree mutation, or transitive resolution. Exploitation currently requires operator installation corruption outside the supplied threat model. Therefore no reportable source/control/sink/impact tuple is established.",
+      "suggestedHardening": "Initialize legacy Tailwind4 only when runtime.cssPlan is absent; this can close the documented invariant without asserting an exploit.",
+      "validationRecommended": false
+    },
+    {
+      "id": "css-constructor-capacity",
+      "status": "suppressed-no-attacker-trigger",
+      "locations": [
+        {
+          "file": "src/webcanbe-engine/runtime/staticCss.ts",
+          "line": 153,
+          "role": "counter_increment"
+        },
+        {
+          "file": "src/webcanbe-engine/runtime/staticCss.ts",
+          "line": 156,
+          "role": "worker_constructor"
+        }
+      ],
+      "counterevidence": "A synchronous Worker constructor failure would bypass decrement, but admitted workerData contains only structured-clone-safe bounded primitive/object data and fixed validated worker options. No attacker-triggerable constructor failure path established; arbitrary process-wide resource starvation is insufficient proof."
+    }
+  ],
+  "supportingEvidence": [
+    "src/webcanbe-engine/runtime/runtimeCompatibility.ts:190-279,326-374",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/index.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/plugin.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/lib/setupTrackingContext.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/lib/findAtConfigPath.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/util/resolveConfigPath.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/tailwindcss/lib/lib/sharedState.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/autoprefixer/lib/browsers.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/browserslist/index.js",
+    "runtime-profiles/react18-vite5-css-v1/node_modules/browserslist/node.js",
+    "runtime-profiles/react19-vite6-uno-v1/node_modules/unocss/dist/index.mjs",
+    "runtime-profiles/react19-vite6-uno-v1/node_modules/@unocss/core/dist/index.mjs"
+  ],
+  "limitations": [
+    "Discovery only; no runtime, app, VM, network or dependency installation execution. Installed package sources are supporting behavior evidence, while changed source/lock review uses immutable git blobs.",
+    "No independent final security claim for parent-owned authority/static-fetch/HTML boundaries."
+  ]
+}

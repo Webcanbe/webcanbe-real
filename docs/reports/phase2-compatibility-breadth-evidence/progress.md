@@ -11,3 +11,6 @@
 - Application failures retained: Redux still exceeds 2 MiB member; Bulletproof and Todo intake now PASS. Initial Recipe shell refusal led to finite inert HTML metadata handling. Sequential and then partially batched fetches hit unchanged 10 s deadline; single image 241 ms, classic font response 5865 ms / about 6.5 MiB TTF. Fixed modern negotiation + four-way resource batches fetched all 38 remote resources; original SVG data-image preservation needed an explicit distinction from forbidden remote SVG. Final application rerun pending.
 - Automatic approval review rejected a proposed lock parse/profile-selection fallback. That proposal was omitted; lock failure still blocks runtime. No bypass implemented.
 - First broad default invocation: all 494 owned cases passed and 45 skipped, but temporary upstream corpus tests were inadvertently collected (14 missing-import collection failures). Not counted as a successful suite. Corrected QA deletes materialized source after each case and subsequent commands target src/webcanbe-engine explicitly. Original tests unchanged; preserve this harness failure.
+
+
+Finalized: product implementation bc19fac8d91d7360c409285e8613509c3c4e7404; P05/P06/P08 PARTIAL, P07 PASS.549 distinct tests preserve429 original identities. Final report/index supersede interim notes above. TEST infrastructure cleaned, VM stopped.

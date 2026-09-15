@@ -1,0 +1,858 @@
+{
+  "events": [
+    {
+      "type": "missing",
+      "path": "/public/logo.svg",
+      "resourceType": "other"
+    }
+  ],
+  "directPublicEgress": "ENETUNREACH",
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "png": {
+    "sha256": "aced124230d19e9f8c45d756a640b0e0ea16bf7069e8a3e73637eb27fc3ebf3d"
+  },
+  "inspection": {
+    "text": "Groq Recipe Book\nAll Recipes\nFavorites\nCategories\nChef Groq\nYour Personal Recipe Collection\n\nBrowse, save, and discover delicious recipes. Powered by AI to help you cook with what you have.\n\nGenerate with AI\n15\nTotal Recipes\n0\nFavorites\n23 min\nAvg Prep Time\n0\nSaved Recipes\nBrowse by Category\n15 recipes\nAll\nSalads\nMexican\nDesserts\nSeafood\nPasta\nMeat\nKorean\nJapanese\nSALADS\nGreek Salad\n\nFresh Mediterranean salad with tangy feta and olives. Light and refreshing!\n\n8 min\nCook Now\nMEXICAN\nBeef Tacos\n\nFlavorful beef tacos loaded with fresh toppings. Family favorite!\n\n18 min\nCook Now\nDESSERTS\nChocolate Cake\n\nRich and moist chocolate cake. Perfect for celebrations!\n\n45 min\nCook Now\nSEAFOOD\nGrilled Salmon\n\nPerfectly grilled salmon with herbs and lemon. Healthy and delicious!\n\n20 min\nCook Now\nPASTA\nPe",
+    "fonts": "loaded",
+    "loadedFonts": [
+      "Caveat",
+      "Playpen Sans"
+    ],
+    "images": [
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/logo-FPJFZCZS.svg",
+        "width": 800,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/search-ETCY4NVQ.svg",
+        "width": 16,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/chef-X245L5A4.svg",
+        "width": 800,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/burger-DIP4V4XR.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/chef-X245L5A4.svg",
+        "width": 800,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/recipe-SEC5H6OK.svg",
+        "width": 800,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/favorite-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/flame-7AD55JK7.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/empty-star-ODGHHIMI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/empty-star-ODGHHIMI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": true
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/empty-star-ODGHHIMI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/empty-star-ODGHHIMI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/empty-star-ODGHHIMI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/like-RPSLNTRS.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/preparation-time-AVPSWXNI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/star-5CVOOZBX.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/save-YG5JWFVP.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/ad-icon-BQMT4GAV.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/chef-X245L5A4.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/link-IOCWBLBI.svg",
+        "width": 24,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/static/b6557dd0432694cb37c48ee4a8447cd4d1e92439127b6edcf8f4d0128f186cfc.png",
+        "width": 1200,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/logo-FPJFZCZS.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/github-UYRWFDTI.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/linkedin-IAHUXSWH.svg",
+        "width": 512,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/twitter-VR4TDH5B.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      },
+      {
+        "src": "http://wcb-93ba8246-2694-459d-a478-daa4bfc990c8.preview.invalid/_wcb/assets/ayman-2IFXSR2E.svg",
+        "width": 800,
+        "complete": true,
+        "visible": false
+      }
+    ],
+    "headingFont": "Caveat, \"Playpen Sans\", Handlee, cursive"
+  },
+  "render": "PASS",
+  "networkNamespace": "net:[4026532289]",
+  "cleanupVerified": true,
+  "boundary": "Same native systemd/bubblewrap limits, no source mount, default denied egress, 4000 ms ordinary navigation/capture"
+}

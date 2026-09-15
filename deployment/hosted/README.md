@@ -101,3 +101,22 @@ separate external service; an agent review does not claim that credential.
 Current integration limits and evidence are authoritative in
 `docs/reports/phase2-common-applications.md` (the prior async composition closure is
 retained as historical evidence). No public launch or default hosted mode is enabled.
+
+
+## Optional public values and static assets
+
+The private editor configuration may enable `publicStaticAssets: true` and supply
+`publicRuntimeValues: [{workspaceId, projectId, values: {VITE_APP_TITLE: "Example"}}]`.
+Identifiers must be the actual server-owned workspace/project IDs. This is operator
+configuration, never uploaded project configuration or a public API. Values are only
+explicit public client data; actual .env files/private process environment and example
+secrets are not injected. Static configuration changes require controlled editor restart.
+
+The static materializer runs outside the isolated job and caches only bounded validated
+public image/font/CSS bytes into its immutable PG snapshot. Runner network policy is
+unchanged. Read [runtime profile boundaries](../../runtime-profiles/README.md) for
+format, MIME, DNS, redirect, byte/deadline/concurrency limits and unsupported cases.
+Finite Tailwind3/UnoCSS workers require Node's synchronous module-resolution hooks;
+the editor was verified on Node26. Install only the committed dedicated profile locks
+with lifecycle execution disabled. These optional capabilities do not confer public
+hosting readiness or replace production evidence.

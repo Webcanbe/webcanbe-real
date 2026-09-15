@@ -1,0 +1,16 @@
+{
+  "scope": "Post-seal QA-only changes; parent final source reread",
+  "files": [
+    {
+      "path": "scripts/qa/breadth-native.cjs",
+      "sha256": "d443d270636560a5df0ef0e56f5780e757b4cef0da444489085d723b8d052dd5",
+      "syntaxChecked": true
+    },
+    {
+      "path": "scripts/qa/compatibility-breadth.cjs",
+      "sha256": "a236730e5f693dac052d7429e737824386dadcefac272bb12b21199e3225de52",
+      "syntaxChecked": true
+    }
+  ],
+  "result": "No new trust-boundary issue. Sources remain data; exact frozen commit/hash checks intact. Corpus extraction moved outside repository with finally cleanup. Optional native input remains a bounded serialized snapshot under unchanged launcher."
+}

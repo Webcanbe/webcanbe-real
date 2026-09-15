@@ -1,3 +1,5 @@
+> Current P05–P08 status is superseded by [the compatibility breadth closure](phase2-compatibility-breadth-closure.md). This historical report remains intact below; the current final-ledger.json carries the updated four rows.
+
 # Phase 2 final internal closure attempt — 2026-09-15
 
 **PHASE 2 INTERNAL SOFTWARE CLOSURE: NOT YET.** The unchanged common-application checkpoint is **PASS**, with two complete workflows. The full retained matrix is **45 PASS / 6 PARTIAL / 1 FAIL / 12 EXTERNAL-EVIDENCE**. The six remaining internal rows are P05, P06, P07, P08, P39 and P61; P64 remains the explicitly deferred original Phase 3/4/5 scope. Overall Phase 2 is **NOT YET**, public hosted import is **NO**, and Phase 3 may **NOT** begin under the original DoD.

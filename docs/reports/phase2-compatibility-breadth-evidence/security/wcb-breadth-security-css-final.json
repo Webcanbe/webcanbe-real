@@ -1,0 +1,66 @@
+{
+  "reviewType": "focused final-path re-review",
+  "base": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "reviewedState": "working-tree file at recorded SHA-256",
+  "reviewedFiles": [
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "sha256": "95e8b1a730b35770726f1899dc7313798e84b0facb158579c03eff91887ee886",
+      "lines": 218
+    }
+  ],
+  "patchSha256": "eef09f8fec24b7dfe63c54f65cd9f1299a9e0158a63d788ca119f69d0e1189a8",
+  "securityPolicy": "Resolver re-run for isolatedPreview.ts; no inherited SECURITY.md content.",
+  "originalConcern": "css-host-preload (suppressed defensive isolation gap in original discovery)",
+  "conclusion": "Addressed. Finite Tailwind3/Uno plans skip the main-process Tailwind resolve/require; the existing finite path loads those toolchains only in its bounded confined worker. No new plausible vulnerability identified in this focused change.",
+  "evidence": [
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 63,
+      "detail": "compile is a type-only optional declaration; typeof import does not load a module at runtime."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 64,
+      "detail": "The !runtime.cssPlan guard now encloses both the Tailwind entry resolve/realpath check (line65) and require (line66). A finite plan cannot execute either host operation."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 70,
+      "detail": "A finite plan obtains cssCompiler, which always returns a compiler closure or rejects. Failure propagates; it does not fall back to the host compiler."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 117,
+      "detail": "Virtual Uno entry still calls the finite compiler directly."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 131,
+      "detail": "Stylesheets use finiteCss first; the else branch for the legacy compiler is reached only when finiteCss is absent."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "line": 139,
+      "detail": "Legacy compile call is unchanged apart from TypeScript non-null assertion. Its Tailwind4 load/check, fixed loadStylesheet adapter and source behavior remain unchanged when no CSS plan exists."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticCss.ts",
+      "line": 146,
+      "sha256": "ea970f9e58fe58aa78c3d313bf3b9fd5fda19f61014148ebde3fa6598db3e3ed",
+      "detail": "Unchanged since prior review: compiler closure routes to runCssWorker; line156 sets resource limits and line158 the deadline."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/cssWorkerSource.ts",
+      "line": 8,
+      "sha256": "a399474de1d36098b4760823a1831559dc123787bb1358d67c67fa2a90f96868",
+      "detail": "Unchanged since prior review: synchronous CJS/ESM realpath hooks are registered before trusted toolchain loads at lines12,15,18."
+    }
+  ],
+  "candidates": [],
+  "validation": {
+    "performed": "Read final file and exact diff; verify supporting CSS files unchanged and content hashes. No tests/apps/VMs/network executed.",
+    "parentReported": "hardening-html-css.json: CSS 12 tests and HTML 17 tests passing.",
+    "testEvidenceLimitation": "Test counts supplied by parent; result artifact not independently located or inspected in this focused review."
+  }
+}

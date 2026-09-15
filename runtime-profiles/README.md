@@ -1,47 +1,117 @@
 # Trusted runtime profiles
 
-Profiles are repository-owned, immutable dependency graphs. Prepare with `npm ci
---ignore-scripts`; never install an uploaded manifest or resolve through the editor's
-node_modules. Existing profile locks are retained unchanged.
+Profiles are operator-owned immutable dependency graphs. Install only their committed
+manifests/locks with `npm ci --ignore-scripts --prefix runtime-profiles/<profile>`.
+Never install uploaded manifests, execute lifecycle hooks/package managers/configs,
+or resolve missing packages from the editor's node_modules. Old profile locks remain
+unchanged. Full graph admission verifies exact versions, registry integrity, required
+and present optional dependency/peer edges; platform-excluded optional branches remain
+explicit. A matching profile must cover every declared root, including tooling.
+Tooling roots do not automatically become client imports.
 
-The common-application additions are `react18-vite6-common-v1` (React 18.3.1,
-Vite 6.4.3, Tailwind 4.3.3, Lucide 0.469.0) and
-`react19-vite7-common-v1` (React 19.2.4, Vite 7.3.1, Tailwind 4.1.18,
-@tippyjs/react 4.2.6, Immer 11.1.3/use-immer 0.11.0). Use
-`npm run runtime:prepare:common`. The latter graph retains every registry package
-record from the frozen application's npm lock; the trusted profile root is separately
-named and exactly pinned. This does not change the application's canonical manifest
-or lock. A matching profile must cover the full declared dependency set. Admitted
-client roots can import their verified browser dependency closure; tooling dependencies
-are not automatically client imports. Uploaded npm lock entries must match profile
-versions and integrity, including nested dependencies and present peer dependencies.
-Absent optional peers are skipped; required peers must be pinned. Missing packages fail closed.
+Existing common profiles retain React18/Vite6/Lucide and React19/Vite7/Tippy/Immer.
+This closure adds `react18-vite5-css-v1` (Tailwind3.4.17, PostCSS8.5.8,
+autoprefixer10.4.21, typography0.5.16, tailwindcss-animate1.0.7) and
+`react19-vite6-uno-v1` (UnoCSS66.0.0); both pin vite-tsconfig-paths5.1.4.
+Their complete committed locks are authoritative. Prepare the new profiles individually:
 
-Supported lock formats remain one npm package-lock v2/v3, or no lock with an explicit
-profile resolution notice. Yarn classic/Berry and Bun text/binary locks remain unsupported.
-A bundled Yarn executable above the existing member bound remains refused. No uploaded
-package-manager executable, plugin, lifecycle hook or Node configuration is run by the
-editor. This is not a general package-manager implementation.
+```sh
+npm ci --ignore-scripts --prefix runtime-profiles/react18-vite5-css-v1
+npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6-uno-v1
+```
 
-The static Vite subset additionally recognizes literal aliases using object or
-find/replacement array forms, literal project-root `path.resolve('./src')` or
-`path.resolve(__dirname, './src')`, and a no-argument arrow returning a literal config.
-Imported `path`/`node:path` bindings are interpreted as data; the module is not executed.
-Static `server`/`preview` open and port hints are preserved but not applied. Proxies,
-computed/environment-dependent configuration and uploaded executable plugins still fail.
+## Deterministic package data
 
-Tailwind 4 defaults and the admitted literal root `@theme` subset use the pinned
-compiler. Literal numeric color functions are included; nested/dynamic directives,
-Tailwind 3 configuration, PostCSS plugins and UnoCSS remain unsupported. CSS HTTP(S)
-resource URLs and data image/font URLs are preserved by the HTTP compiler without a
-compiler fetch. External fonts/images still fail under controlled runner egress denial;
-preservation is not network availability or a complete rendering claim.
+One npm package-lock v2/v3, Yarn classic v1 registry/SRI lock, or Bun text JSONC v1
+lock may be resolved against a complete trusted graph. Yarn aliases/protocols,
+Berry checksums/virtual packages, multiple competing locks, binary Bun resolution and
+unsupported workspace semantics fail closed. No-lock projects receive an explicit
+profile-resolution notice. Bun binary v2 magic is admitted only as bounded opaque
+source/export bytes; it never authorizes dependency resolution or execution.
+A bundled Yarn executable above the retained 2 MiB member limit is still refused.
+No artifact is silently dropped, no security bound is raised, and this is not a
+generic Yarn/Bun implementation.
 
-Additional text metadata has a separate 16 KiB, strict UTF-8 grammar: finite
-EditorConfig fields, boolean strict-peer-dependencies/shell-emulator npmrc hints,
-finite formatter settings/globs and narrowly validated example env placeholders or
-loopback/reserved-domain URLs. These files are preserved, never applied. Credentials,
-unknown npm controls, non-example env files and binary locks remain refused. Other
-paths still use the existing extension/path allowlist; this does not promise rejection
-of every dot-prefixed JavaScript/JSON file or detection of every source-embedded secret.
-All archive/path/link/ratio/member/total limits remain unchanged.
+## Finite configuration and HTML
+
+The static Vite grammar handles literal object/array aliases, finite nested const
+objects, `path.resolve`, `new URL(..., import.meta.url)` aliases, a same-directory
+TS extends relationship, explicit root `.`/publicDir/base, and known no-argument
+React/Tailwind4/vite-tsconfig-paths/UnoCSS plugin declarations. tsconfig paths are
+applied only with the recognized plugin and remain confined. Literal test/optimizer
+metadata and local server/preview port/open hints are preserved but not applied.
+Non-root Vite roots, arbitrary Rollup build effects, proxies, dynamic config and
+unknown uploaded plugins remain unsupported; source configuration is never executed.
+
+A finite index.html shell preserves alternate identified div/main mounts, title,
+metadata/body attributes, one local src module entry, local styles and static resources.
+Extra/inline/remote scripts, event attributes, foreign markup, active embeds, srcset,
+inline styles, URL whitespace/controls and ambiguous HTML refuse safely. Preconnect
+and DNS-prefetch declarations remain canonical source but are omitted from the
+isolated preview. Only the intended application entry executes in the runner.
+
+## CSS adapters
+
+Tailwind4 retains its pinned compiler and existing literal CSS-first theme subset.
+Tailwind3 uses finite content/theme/screens/extend/container/dark/prefix/safelist data;
+trusted typography/animate adapters and defaultTheme sans arrays are supported.
+PostCSS recognizes only pinned Tailwind/autoprefixer transformations and bounded literal
+Browserslist queries. UnoCSS supports presetUno/presetAttributify, finite static rules,
+shortcuts/theme/safelist. Arbitrary functions, regex rules, additional presets/plugins,
+Uno forms/directives/variant-group transformers and executable config are unsupported.
+
+Uploaded JS/TS configuration is parsed as data, never imported. Finite CSS compilation
+runs in a fixed operator worker, with 128 MiB old-generation/16 MiB young-generation
+heap, 8-second deadline, two-worker capacity, empty environment and dedicated module
+resolution hooks. The validated editor runtime is Node26; `node:module.registerHooks`
+is required and unavailable confinement fails closed. Finite toolchains are not
+preloaded in the editor process. No host dependency substitution is allowed.
+
+## Public values and inert files
+
+Only server-owned project/workspace-scoped VITE values are supplied through
+PublicRuntimeValueProvider. The packaged editor optionally reads `publicRuntimeValues`
+from its private operator config. Values are copied/validated, read under fresh
+session/revision authority, and never written into source. Private environment is never
+inherited. Secret-name/token/credential-shaped values are rejected. Accepted values are
+finite public labels, flags/numbers and credential-free public HTTPS URLs without
+query/fragment. Example env is metadata only and is never automatically injected.
+Provider replacement/revocation is checked before and after asynchronous reads; the
+static config provider requires controlled restart to change values.
+
+Narrow grammars preserve .node-version, .nvmrc, .whitesource, _redirects, .hbs and
+recognized bounded opaque Bun binary locks. Existing EditorConfig/npmrc/formatter/
+example-env policies retain 16 KiB strict text limits and secret detection. No blanket
+dotfile or binary acceptance exists. Archive path/type/link/encryption/decompression,
+2 MiB member and total/ratio bounds remain unchanged.
+
+## Separate static asset cache
+
+`publicStaticAssets:true` enables an operator-side materializer for compiled snapshots.
+It exposes no URL-fetch endpoint. Default runner egress remains denied. The service
+accepts public credential-free HTTPS GET, checks and pins all DNS answers, revalidates
+every redirect, blocks private/loopback/link-local/metadata/reserved destinations,
+and forwards no cookies, auth, proxy or caller headers. IPv6/HTTP/custom ports are
+outside the admitted subset. Response compression is refused.
+
+Limits: 2 MiB response, 8 MiB aggregate, 48 resources, 3 redirects, import depth4,
+10-second deadline and four concurrent transfers/materializations. Only validated
+raster image/font signatures and finite CSS are cached; remote SVG/HTML/JavaScript
+are refused. A fixed modern user agent requests browser-compatible WOFF2 where served.
+Cache paths are content-addressed and snapshot-scoped, with source/project/revision
+checks around async work and an immutable hashed audit artifact. No cross-tenant or
+persistent URL cache is implied. Compiler-generated Fast Refresh module code is
+rewritten consistently in initial bootstrap and update manifest; user JSON is not
+interpreted as a refresh manifest. Source/export bytes stay unchanged.
+
+Static CSS/HTML references and finite image/font URL string literals are covered.
+Dynamic URLs, API calls, remote scripts and authenticated resources stay unsupported.
+Cached asset changes may select the existing honest rebuild/reload path. Unknown
+behavior is never silently labeled applied.
+
+Compatibility labels: fully supported means the complete admitted graph/configuration
+passes inspection; partial means only the stated subset is implemented; preserved but
+not applied means inert metadata is exported without changing preview semantics;
+unsupported behavior stays Code-only with a diagnostic. Detailed current P05–P08
+statuses and unchanged real-app evidence are in
+[the breadth closure report](../docs/reports/phase2-compatibility-breadth-closure.md).

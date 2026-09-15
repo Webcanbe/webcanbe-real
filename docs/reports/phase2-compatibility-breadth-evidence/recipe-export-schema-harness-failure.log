@@ -1,0 +1,22 @@
+error: column "created_at" does not exist
+    at /Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async /Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/compatibility-breadth/recipe-export-check.cjs:2:1809 {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '66',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}

@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "scope": "focused-final-path-review",
+  "against": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "status": "reviewed",
+  "reviewedFiles": [
+    {
+      "path": "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+      "changedLines": [
+        28
+      ],
+      "reviewedContext": "1-64",
+      "sha256": "28c7aaf0d03dd894748536bd10edd2825a57e09fb7bc7b4401152bb10950a4dc"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-html.test.ts",
+      "changedLines": [
+        38,
+        39,
+        40,
+        41
+      ],
+      "reviewedContext": "1-47",
+      "sha256": "d54db9e5cd22b4574deb289fdfe2b7b276c883e2f3d6046104ac71f405510f80"
+    }
+  ],
+  "findingClosure": {
+    "observation": "admission-html-url-ascii-whitespace",
+    "status": "closed",
+    "reasoning": "parse5 decodes numeric entities before node attributes are traversed. The new line 28 tests each decoded href/src against [\\x00-\\x20\\x7f] and throws before the HTTPS credential handling at 29, scheme handling at 31, script/style resolution or final serialization at 60. This closes TAB/LF/CR scheme obfuscation and leading-ASCII-space URL ambiguity without executing uploaded HTML.",
+    "tests": "Added cases at test lines 38-41 cover entity-encoded TAB/LF/CR javascript anchors and a leading-space HTTPS src. Each asserts staticHtml throws and inspectRuntime.supported is false."
+  },
+  "validationEvidence": {
+    "path": ".webcanbe/compatibility-breadth/hardening-html-css.json",
+    "sha256": "a7e24179b4f067590784ec02473c106f5a88db57ed49312d7d46cd3cb34abe0a",
+    "success": true,
+    "totalTests": 29,
+    "passedTests": 29,
+    "htmlTests": 17,
+    "htmlPassedTests": 17,
+    "failedTests": 0,
+    "method": "Inspected existing parent-produced test results; did not rerun tests or execute applications."
+  },
+  "candidates": [],
+  "gaps": [],
+  "limitations": [
+    "Focused review only of the two supplied changed files against aedbc024; no new discovery sweep or review of independently changed CSS files.",
+    "The original URL observation remains classified as finite-grammar hardening, not a demonstrated privilege-boundary vulnerability."
+  ]
+}

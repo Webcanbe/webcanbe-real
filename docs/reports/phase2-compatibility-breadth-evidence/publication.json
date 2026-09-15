@@ -1,0 +1,12 @@
+{
+  "branch": "phase-2-compatible-editor",
+  "base": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+  "frozenCandidate": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "finalImplementation": "bc19fac8d91d7360c409285e8613509c3c4e7404",
+  "expectedMain": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "normalFeaturePushOnly": true,
+  "publicDeployment": false,
+  "mainMerge": false,
+  "forcePush": false,
+  "postCommitVerification": "Final documentation commit SHA and live remote/main/clean-worktree verification recorded in the task outputs publication-verification.json after normal push."
+}

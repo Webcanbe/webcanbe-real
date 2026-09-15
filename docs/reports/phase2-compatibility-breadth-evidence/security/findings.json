@@ -1,0 +1,311 @@
+{
+  "documentType": "codex-security.findings",
+  "findings": [
+    {
+      "attackPath": {
+        "change_conditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+        "counterevidence": "Feature disabled by default; authenticated and project-scoped; finite source/artifact/network limits and deadlines. These constrain applicability but do not interrupt synchronous repeated copying. No public deployment or quantitative stress result established.",
+        "dataflow": "1. Project owner includes repeated ordinary public image string literals in a used client value. 2. Compiler output is parsed by TrustedStaticAssets. 3. URL Set deduplicates downloads, leaving all edit spans. 4. Frozen line138 repeatedly copies the whole bundle synchronously, delaying unrelated shared editor tasks.",
+        "decision": "reportable",
+        "facts": {
+          "authScope": "project owner, not operator/admin",
+          "blindspots": [
+            "Stress reproduction blocked by security safeguard; not retried."
+          ],
+          "confidence": "high static root-cause confidence; quantitative delay unmeasured",
+          "exposure": "authenticated hosted endpoint; actual public deployment unverified and prohibited in this task",
+          "inScope": true,
+          "secrets": "none",
+          "targetReach": "single shared editor service",
+          "vector": "remote"
+        },
+        "impact": "medium",
+        "likelihood": "medium",
+        "reachability": "An authenticated project owner imports source and starts its preview through the hosted TLS service. When operator publicStaticAssets is true, ControlledPreview compiles then materializes resource literals in the shared editor process. This is lower-trust source crossing into shared host availability, rather than self-only runner CPU.",
+        "severity": "low",
+        "severity_rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+      },
+      "confidence": {
+        "level": "high",
+        "rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed."
+      },
+      "extensions": {
+        "candidateId": "candidate-325c6d129de43235",
+        "remediationCommit": "bc19fac8d91d7360c409285e8613509c3c4e7404",
+        "remediationStatus": "fixed-and-final-path-reviewed"
+      },
+      "findingId": "csf_97185a485b683d6a243a540f",
+      "fingerprints": {
+        "algorithm": "codex-security/v1",
+        "primary": "codex-security/v1:sha256:d3498e5978e749cd2ce13619d110c0548a07f4287f8211b98e86e3da423e4fdd"
+      },
+      "identity": {
+        "anchor": "candidate-325c6d129de43235"
+      },
+      "locations": [
+        {
+          "endLine": 139,
+          "path": "src/webcanbe-engine/runtime/staticAssets.ts",
+          "role": "root_control",
+          "startLine": 134
+        },
+        {
+          "endLine": 167,
+          "path": "src/webcanbe-engine/runtime/controlledPreview.ts",
+          "role": "entrypoint",
+          "startLine": 158
+        }
+      ],
+      "occurrenceId": "occ_9bfc6fe9b7fcad54e516ea98",
+      "provenance": {
+        "previousFindings": [
+          {
+            "attackPath": {
+              "change_conditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+              "counterevidence": "Feature disabled by default; authenticated and project-scoped; finite source/artifact/network limits and deadlines. These constrain applicability but do not interrupt synchronous repeated copying. No public deployment or quantitative stress result established.",
+              "dataflow": "1. Project owner includes repeated ordinary public image string literals in a used client value. 2. Compiler output is parsed by TrustedStaticAssets. 3. URL Set deduplicates downloads, leaving all edit spans. 4. Frozen line138 repeatedly copies the whole bundle synchronously, delaying unrelated shared editor tasks.",
+              "decision": "reportable",
+              "facts": {
+                "authScope": "project owner, not operator/admin",
+                "blindspots": [
+                  "Stress reproduction blocked by security safeguard; not retried."
+                ],
+                "confidence": "high static root-cause confidence; quantitative delay unmeasured",
+                "exposure": "authenticated hosted endpoint; actual public deployment unverified and prohibited in this task",
+                "inScope": true,
+                "secrets": "none",
+                "targetReach": "single shared editor service",
+                "vector": "remote"
+              },
+              "impact": "medium",
+              "likelihood": "medium",
+              "reachability": "An authenticated project owner imports source and starts its preview through the hosted TLS service. When operator publicStaticAssets is true, ControlledPreview compiles then materializes resource literals in the shared editor process. This is lower-trust source crossing into shared host availability, rather than self-only runner CPU.",
+              "severity": "low",
+              "severity_rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed."
+            },
+            "extensions": {
+              "candidateId": "candidate-325c6d129de43235"
+            },
+            "identity": {
+              "anchor": "candidate-325c6d129de43235"
+            },
+            "locations": [
+              {
+                "endLine": 139,
+                "path": "src/webcanbe-engine/runtime/staticAssets.ts",
+                "role": "root_control",
+                "startLine": 134
+              },
+              {
+                "endLine": 167,
+                "path": "src/webcanbe-engine/runtime/controlledPreview.ts",
+                "role": "entrypoint",
+                "startLine": 158
+              }
+            ],
+            "provenance": {
+              "source": "local_plugin",
+              "worker": "breadth_security_assets"
+            },
+            "remediation": "Build output once from non-overlapping source-order slices and replacements. Keep download and authorization limits unchanged. This correction is implemented after the frozen scan candidate; final-path checks and functional regressions are recorded separately.",
+            "remediationTests": [
+              "Ordinary 128 repeated literals: exactly one fetch, every replacement and surrounding source preserved; original artifact unchanged.",
+              "Stress reproduction blocked by cybersecurity safeguard; no measured latency or crash claim."
+            ],
+            "rootCause": "Every literal edit rebuilds the full immutable string, despite URL fetch deduplication.",
+            "ruleId": "quadratic-static-asset-rewrite",
+            "severity": {
+              "changeConditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+              "level": "low",
+              "rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+            },
+            "summary": "Frozen implementation aedbc024 copies the complete JavaScript artifact for each repeated static-resource literal. The network URL limit counts distinct downloads and does not limit these synchronous copies. An authorized project author can therefore increase shared-editor work disproportionately. The final working tree replaces the loop with one linear chunks/join construction; the original finding is retained here for the immutable reviewed candidate.",
+            "taxonomy": {
+              "category": "Algorithmic resource exhaustion",
+              "cwe": [
+                "CWE-400",
+                "CWE-407"
+              ]
+            },
+            "title": "Repeated resource literals trigger quadratic work in the shared editor",
+            "validation": {
+              "confidence": "high",
+              "confidence_rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed.",
+              "control": "Existing intake/compiler file limits, 48 distinct requests, 2 MiB response and async 10 second deadline. Only fetch URL keys are deduplicated; literal edit count is not limited by the distinct URL bound.",
+              "counterevidence_or_proof_gap": "Feature defaults disabled; authentication and finite artifacts constrain exposure. No measured latency, crash, compiler-literal stress survival or production impact: reproduction was blocked. These limits do not eliminate the statically evident quadratic loop.",
+              "disposition": "reportable",
+              "evidence": [
+                "Source-order AST visit at lines134\u2013136 collects disjoint literal edits including repeated URL values. Set deduplication affects network calls only.",
+                "Frozen line138 iterates every edit and slices the whole evolving string, producing O(number of literals \u00d7 artifact length) copying.",
+                "ControlledPreview.start path executes materialize in shared hosted editor process after compilation. Per-project authority is checked, but accepted source remains untrusted for host resource consumption.",
+                "Final working tree replaces loop with source-order non-overlapping slices followed by one join; ordinary regression asserts one fetch, all replacements, surrounding source exact and original artifact unchanged."
+              ],
+              "method": "Static source/control/sink assessment plus ordinary 128-literal functional regression after remediation. Attempted bounded stress reproduction was blocked by a cybersecurity safeguard and was not retried.",
+              "preconditions": "Authenticated project owner with an admitted profile and an application that uses repeated public image URL string literals; static asset operator option enabled.",
+              "remaining_uncertainty": "Quantitative worst-case delay and real deployment load impact unmeasured.",
+              "rubric": [
+                "Attacker source reaches compiled resource materializer: supported by source trace.",
+                "Repeated literal URL is not constrained by unique-fetch limit: source trace and ordinary functional test.",
+                "Synchronous copying repeats over whole artifact: exact frozen line138.",
+                "Shared-editor boundary and opt-in authenticated precondition: ControlledPreview/CLI trace.",
+                "No timing or crash assertion; blocked stress attempt explicitly retained."
+              ],
+              "sink": "staticAssets.ts frozen candidate line 138 synchronously rebuilds the entire artifact for every literal; async timer cannot preempt synchronous execution.",
+              "source": "Authorized project author supplies client JavaScript; compilePreview bundles/minifies literals, ControlledPreview hands artifact to TrustedStaticAssets when the operator enables publicStaticAssets."
+            }
+          },
+          {
+            "attackPath": {
+              "change_conditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+              "counterevidence": "Feature disabled by default; authenticated and project-scoped; finite source/artifact/network limits and deadlines. These constrain applicability but do not interrupt synchronous repeated copying. No public deployment or quantitative stress result established.",
+              "dataflow": "1. Project owner includes repeated ordinary public image string literals in a used client value. 2. Compiler output is parsed by TrustedStaticAssets. 3. URL Set deduplicates downloads, leaving all edit spans. 4. Frozen line138 repeatedly copies the whole bundle synchronously, delaying unrelated shared editor tasks.",
+              "decision": "reportable",
+              "facts": {
+                "authScope": "project owner, not operator/admin",
+                "blindspots": [
+                  "Stress reproduction blocked by security safeguard; not retried."
+                ],
+                "confidence": "high static root-cause confidence; quantitative delay unmeasured",
+                "exposure": "authenticated hosted endpoint; actual public deployment unverified and prohibited in this task",
+                "inScope": true,
+                "secrets": "none",
+                "targetReach": "single shared editor service",
+                "vector": "remote"
+              },
+              "impact": "medium",
+              "likelihood": "medium",
+              "reachability": "An authenticated project owner imports source and starts its preview through the hosted TLS service. When operator publicStaticAssets is true, ControlledPreview compiles then materializes resource literals in the shared editor process. This is lower-trust source crossing into shared host availability, rather than self-only runner CPU.",
+              "severity": "low",
+              "severity_rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+            },
+            "confidence": {
+              "level": "high",
+              "rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed."
+            },
+            "extensions": {
+              "candidateId": "candidate-325c6d129de43235"
+            },
+            "locations": [
+              {
+                "endLine": 139,
+                "path": "src/webcanbe-engine/runtime/staticAssets.ts",
+                "role": "root_control",
+                "startLine": 134
+              },
+              {
+                "endLine": 167,
+                "path": "src/webcanbe-engine/runtime/controlledPreview.ts",
+                "role": "entrypoint",
+                "startLine": 158
+              }
+            ],
+            "provenance": {
+              "source": "local_plugin",
+              "worker": "breadth_security_assets"
+            },
+            "remediation": "Build output once from non-overlapping source-order slices and replacements. Keep download and authorization limits unchanged. This correction is implemented after the frozen scan candidate; final-path checks and functional regressions are recorded separately.",
+            "remediationTests": [
+              "Ordinary 128 repeated literals: exactly one fetch, every replacement and surrounding source preserved; original artifact unchanged.",
+              "Stress reproduction blocked by cybersecurity safeguard; no measured latency or crash claim."
+            ],
+            "rootCause": "Every literal edit rebuilds the full immutable string, despite URL fetch deduplication.",
+            "ruleId": "quadratic-static-asset-rewrite",
+            "severity": {
+              "changeConditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+              "level": "low",
+              "rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+            },
+            "summary": "Frozen implementation aedbc024 copies the complete JavaScript artifact for each repeated static-resource literal. The network URL limit counts distinct downloads and does not limit these synchronous copies. An authorized project author can therefore increase shared-editor work disproportionately. The final working tree replaces the loop with one linear chunks/join construction; the original finding is retained here for the immutable reviewed candidate.",
+            "taxonomy": {
+              "category": "Algorithmic resource exhaustion",
+              "cwe": [
+                "CWE-400",
+                "CWE-407"
+              ]
+            },
+            "title": "Repeated resource literals trigger quadratic work in the shared editor",
+            "validation": {
+              "confidence": "high",
+              "confidence_rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed.",
+              "control": "Existing intake/compiler file limits, 48 distinct requests, 2 MiB response and async 10 second deadline. Only fetch URL keys are deduplicated; literal edit count is not limited by the distinct URL bound.",
+              "counterevidence_or_proof_gap": "Feature defaults disabled; authentication and finite artifacts constrain exposure. No measured latency, crash, compiler-literal stress survival or production impact: reproduction was blocked. These limits do not eliminate the statically evident quadratic loop.",
+              "disposition": "reportable",
+              "evidence": [
+                "Source-order AST visit at lines134\u2013136 collects disjoint literal edits including repeated URL values. Set deduplication affects network calls only.",
+                "Frozen line138 iterates every edit and slices the whole evolving string, producing O(number of literals \u00d7 artifact length) copying.",
+                "ControlledPreview.start path executes materialize in shared hosted editor process after compilation. Per-project authority is checked, but accepted source remains untrusted for host resource consumption.",
+                "Final working tree replaces loop with source-order non-overlapping slices followed by one join; ordinary regression asserts one fetch, all replacements, surrounding source exact and original artifact unchanged."
+              ],
+              "method": "Static source/control/sink assessment plus ordinary 128-literal functional regression after remediation. Attempted bounded stress reproduction was blocked by a cybersecurity safeguard and was not retried.",
+              "preconditions": "Authenticated project owner with an admitted profile and an application that uses repeated public image URL string literals; static asset operator option enabled.",
+              "remaining_uncertainty": "Quantitative worst-case delay and real deployment load impact unmeasured.",
+              "rubric": [
+                "Attacker source reaches compiled resource materializer: supported by source trace.",
+                "Repeated literal URL is not constrained by unique-fetch limit: source trace and ordinary functional test.",
+                "Synchronous copying repeats over whole artifact: exact frozen line138.",
+                "Shared-editor boundary and opt-in authenticated precondition: ControlledPreview/CLI trace.",
+                "No timing or crash assertion; blocked stress attempt explicitly retained."
+              ],
+              "sink": "staticAssets.ts frozen candidate line 138 synchronously rebuilds the entire artifact for every literal; async timer cannot preempt synchronous execution.",
+              "source": "Authorized project author supplies client JavaScript; compilePreview bundles/minifies literals, ControlledPreview hands artifact to TrustedStaticAssets when the operator enables publicStaticAssets."
+            }
+          }
+        ],
+        "source": "local_plugin",
+        "worker": "breadth_security_assets"
+      },
+      "remediation": "Corrected in final implementation bc19fac8d91d7360c409285e8613509c3c4e7404. Source-order non-overlapping slices and one join remove repeated whole-artifact copies. All download and authority limits remain. Final asset path was independently re-reviewed after the generated Fast Refresh manifest integration, with no new plausible trust-boundary issue. Original immutable aedbc024 finding remains visible.",
+      "remediationTests": [
+        "Ordinary 128 repeated literals: exactly one fetch, every replacement and surrounding source preserved; original artifact unchanged.",
+        "Stress reproduction blocked by cybersecurity safeguard; no measured latency or crash claim."
+      ],
+      "rootCause": "Every literal edit rebuilds the full immutable string, despite URL fetch deduplication.",
+      "ruleId": "quadratic-static-asset-rewrite",
+      "severity": {
+        "changeConditions": "Linear disjoint slicing/join removes this root cause. Final implementation has that fix with functional regression; final path re-review is pending and will be recorded separately without erasing the frozen-candidate finding.",
+        "level": "low",
+        "rationale": "Medium impact is transient shared-service availability, without confidentiality/integrity compromise established. Medium likelihood reflects opt-in functionality and an authenticated source author. The required matrix maps medium/medium to low (P3)."
+      },
+      "summary": "Frozen implementation aedbc024 copies the complete JavaScript artifact for each repeated static-resource literal. The network URL limit counts distinct downloads and does not limit these synchronous copies. An authorized project author can therefore increase shared-editor work disproportionately. The final working tree replaces the loop with one linear chunks/join construction; the original finding is retained here for the immutable reviewed candidate.",
+      "taxonomy": {
+        "category": "Algorithmic resource exhaustion",
+        "cwe": [
+          "CWE-400",
+          "CWE-407"
+        ]
+      },
+      "title": "Repeated resource literals trigger quadratic work in the shared editor",
+      "validation": {
+        "confidence": "high",
+        "confidence_rationale": "Exact new shared-editor input/control/sink chain. Static reasoning establishes repeated whole-string copying; focused functional regression verifies the replacement. No quantitative stress result claimed.",
+        "control": "Existing intake/compiler file limits, 48 distinct requests, 2 MiB response and async 10 second deadline. Only fetch URL keys are deduplicated; literal edit count is not limited by the distinct URL bound.",
+        "counterevidence_or_proof_gap": "Feature defaults disabled; authentication and finite artifacts constrain exposure. No measured latency, crash, compiler-literal stress survival or production impact: reproduction was blocked. These limits do not eliminate the statically evident quadratic loop.",
+        "disposition": "reportable",
+        "evidence": [
+          "Source-order AST visit at lines134\u2013136 collects disjoint literal edits including repeated URL values. Set deduplication affects network calls only.",
+          "Frozen line138 iterates every edit and slices the whole evolving string, producing O(number of literals \u00d7 artifact length) copying.",
+          "ControlledPreview.start path executes materialize in shared hosted editor process after compilation. Per-project authority is checked, but accepted source remains untrusted for host resource consumption.",
+          "Final working tree replaces loop with source-order non-overlapping slices followed by one join; ordinary regression asserts one fetch, all replacements, surrounding source exact and original artifact unchanged."
+        ],
+        "method": "Static source/control/sink assessment plus ordinary 128-literal functional regression after remediation. Attempted bounded stress reproduction was blocked by a cybersecurity safeguard and was not retried.",
+        "preconditions": "Authenticated project owner with an admitted profile and an application that uses repeated public image URL string literals; static asset operator option enabled.",
+        "remaining_uncertainty": "Quantitative worst-case delay and real deployment load impact unmeasured.",
+        "rubric": [
+          "Attacker source reaches compiled resource materializer: supported by source trace.",
+          "Repeated literal URL is not constrained by unique-fetch limit: source trace and ordinary functional test.",
+          "Synchronous copying repeats over whole artifact: exact frozen line138.",
+          "Shared-editor boundary and opt-in authenticated precondition: ControlledPreview/CLI trace.",
+          "No timing or crash assertion; blocked stress attempt explicitly retained."
+        ],
+        "sink": "staticAssets.ts frozen candidate line 138 synchronously rebuilds the entire artifact for every literal; async timer cannot preempt synchronous execution.",
+        "source": "Authorized project author supplies client JavaScript; compilePreview bundles/minifies literals, ControlledPreview hands artifact to TrustedStaticAssets when the operator enables publicStaticAssets."
+      }
+    }
+  ],
+  "scanId": "28b26b91-59c0-412e-ba34-1ba51d8d55bb",
+  "schemaVersion": "1.0"
+}
