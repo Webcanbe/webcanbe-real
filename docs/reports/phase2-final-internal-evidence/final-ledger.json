@@ -1094,9 +1094,9 @@
       "id": "P61",
       "requirement": "Representative cold import/start, warm CSS/React/refresh/reload/restart/export and resource measurements (G.1/2G.2)",
       "status": "PARTIAL",
-      "evidence": "Final actual-app cold/warm/export timings and concurrent fixed-resource samples are recorded. Normal hosted Zustand and the first concurrent second-app warm-update 422 remain unresolved; no sustained-load or production-capacity claim.",
-      "evidenceSource": "docs/reports/phase2-common-applications.md",
-      "missingProof": "Normal packaged hosted Zustand still fails within the unchanged 4000 ms raster bound; the first two-application warm-update run returned an unexplained 422 on the second application; sustained representative load/endurance remains unproved.",
+      "evidence": "P61 bounded attempt: exact Zustand refuses at manifest HTML validation before raster (84.59–97.80 ms startup). Original two-app scenario and 20 A/B/A warm updates pass, historical 422 cause remains unestablished. One actual packaged load passes: 2 users/3 projects/concurrency2/167 operations, 145 success/22 expected refusals, worker tasks/leases return to zero. 19 targeted tests pass; full646 execution deferred.",
+      "evidenceSource": "docs/reports/phase2-p61-closure.md",
+      "missingProof": "Ordinary unchanged Zustand must pass current manifest validation and then the unchanged 4000ms raster bound; historical capture bottleneck remains unmeasured at this checkpoint. Historical second-app warm-update 422 still lacks an established root cause.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Final real-app import/start/update/responsive/restart/export/build/render timings and bounded independent cgroup samples recorded. Broader full-app, concurrent/load/long-session/production capacity evidence remains incomplete.",
@@ -1104,9 +1104,14 @@
         "resources-1789396020314.json",
         "resources-1789396118017.json",
         "zustand-direct-capture.json",
-        "harness-and-failure-notes.json"
+        "harness-and-failure-notes.json",
+        "../phase2-p61-evidence/zustand-attempts.json",
+        "../phase2-p61-evidence/retained-scenario.json",
+        "../phase2-p61-evidence/load.json",
+        "../phase2-p61-evidence/targeted-tests.json",
+        "../phase2-p61-evidence/security-review.json"
       ],
-      "disposition": "Direct LocalLima CDP success and a later passing resource run do not close either failure. Both attempts are retained. Production sizing is additionally external, but these failures remain internal and require diagnosis/repair before closure."
+      "disposition": "PARTIAL. Bounded local TEST load passes, not production sizing. No production implementation or retained acceptance rule changed; later passing runs do not explain the historical 422. Full regression execution deferred by user instruction."
     },
     {
       "id": "P62",

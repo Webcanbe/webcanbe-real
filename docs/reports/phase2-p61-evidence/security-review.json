@@ -1,0 +1,22 @@
+{
+  "scope": [
+    "scripts/qa/p61-load.cjs",
+    "scripts/qa/p61-zustand.cjs"
+  ],
+  "directConsumersReviewed": [
+    "scripts/qa/common-hosted.cjs",
+    "src/webcanbe-engine/runtime/hostedEditor.ts",
+    "src/webcanbe-engine/runtime/controlledPreview.ts",
+    "src/webcanbe-engine/runtime/hostedProjectRegistry.ts",
+    "src/webcanbe-engine/runtime/postgresSourceCheckout.ts",
+    "src/webcanbe-engine/runtime/hostedLinuxRunner.ts",
+    "src/webcanbe-engine/runtime/postgresFencing.ts",
+    "scripts/runner/worker.cjs",
+    "scripts/runner/raster-capture.cjs"
+  ],
+  "productionChanges": [],
+  "review": "QA imports exact retained hashes; trusted TEST credentials remain private; API authority unchanged; artifact queries are read-only diagnostics; unique revisions/generations checked; stale and cross-user/project requests refused; no generic retry; unchanged resource limits; bounded loops and HTTP deadlines; owned API cleanup. No arbitrary uploaded execution, cache/lease reuse policy or raster delivery changes. Temporary raw error/timestamp instrumentation removed.",
+  "confirmedUnresolvedVulnerabilities": 0,
+  "limitations": "No production patch or broad repository scan. Two retained P61 failures remain unresolved; this is not a claim that unreviewed code is vulnerability-free.",
+  "finalHarnessCorrection": "Cleanup failure is recorded and yields failure; baseline CLI failures now exit nonzero. Syntax-checked, no second load run."
+}

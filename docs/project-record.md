@@ -1,3 +1,22 @@
+# P61 bounded checkpoint — 2026-09-15
+
+**P61 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NOT YET.**
+Continue on `phase-2-compatible-editor`; product remains `427c77be667c620a65a290ffa4f77fb97ab7950c`.
+See [P61 report](reports/phase2-p61-closure.md) and [P61 evidence](reports/phase2-p61-evidence/index.json).
+- Unchanged Zustand now refuses earlier at unsupported `rel="manifest"` HTML validation:
+  84.59–97.80 ms startup, no raster reached. Historical 4000 ms failure remains open.
+- Original two-app scenario and A → B → A load updates pass, but the historical
+  second-app 422 has no established root cause; retained as a blocker.
+- One bounded load passes: 2 users/3 projects/concurrency 2, 167 operations,
+  145 success/22 expected refusals/0 unexpected; 58.01 seconds; jobs/leases return to zero.
+- 19 targeted P61 tests pass. 646-test full regression execution deferred to final
+  Phase-2 closure; no prior test identity was removed or intentionally modified.
+- Production implementation unchanged; only bounded QA/evidence/docs added.
+  No P05/P39 work, matrix rebuild, broad scan, later phases, payments or final UI.
+  Normal feature-branch-only publication; main unchanged.
+
+---
+
 # P39 checkpoint — 2026-09-15
 
 P39 remains **PARTIAL** at product `a531b323f8160eeed80e3b67077512f76d165bff`.
