@@ -10,7 +10,7 @@ import path from "node:path"
 import { createRequire } from "node:module"
 import { context, type BuildOptions, type Loader } from "esbuild"
 import ts from "typescript"
-import { inspectRuntime, RuntimeCompatibilityError } from "./runtimeCompatibility"
+import { inspectRuntime, RuntimeCompatibilityError, PROFILE } from "./runtimeCompatibility"
 import { instrumentReactSource } from "../adapters/react/reactSourceAdapter"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
@@ -81,7 +81,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
   const tailwindOutputs = new Map<string, string>()
   const options: BuildOptions = {
     entryPoints: [runtime.entry!], absWorkingDir: root, bundle: true, write: false, outdir: outputRoot,
-    entryNames: productionExport ? "assets/app" : "_wcb/app", chunkNames: "assets/[name]-[hash]", assetNames: productionExport ? "assets/[name]-[hash]" : "_wcb/assets/[name]-[hash]", publicPath: productionExport ? runtime.base : "/", format: productionExport ? "esm" : "iife", splitting: productionExport, platform: "browser", jsx: "automatic", minify: !productionExport,
+    entryNames: productionExport ? "assets/app" : "_wcb/app", chunkNames: "assets/[name]-[hash]", assetNames: productionExport ? "assets/[name]-[hash]" : "_wcb/assets/[name]-[hash]", publicPath: productionExport ? runtime.base : "/", format: productionExport ? "esm" : "iife", splitting: productionExport, platform: "browser", jsx: "automatic", minify: true,
     metafile: true, tsconfigRaw: { compilerOptions: runtime.compilerOptions }, define: { "process.env.NODE_ENV": '"production"', ...Object.fromEntries(Object.entries(runtime.environment).map(([key, value]) => ["import.meta.env." + key, JSON.stringify(value)])) }, logLevel: "silent",
     plugins: [{ name: "confined-source", setup(builder) {
       builder.onStart(() => { bytes = 0; tailwindOutputs.clear() })
@@ -210,7 +210,8 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
     const plan = runtime.exportBuild ?? { external: [], output: {} }
     // esbuild resolves/transpiles the application using only the confined graph;
     // Rollup performs production chunking on these immutable ES modules.
-    const output = await buildFiniteExportGraph(profileRoot, 'assets/app.js', modules, plan)
+    // Rollup is the fixed operator compiler graph, independent of the app's Vite version.
+    const output = await buildFiniteExportGraph(path.join(applicationRoot, 'runtime-profiles', PROFILE), 'assets/app.js', modules, plan)
     for (const file of output) files.set('/assets/' + file.fileName, { body: Buffer.from(file.code), contentType: 'text/javascript' })
     return { files, shell }
   }

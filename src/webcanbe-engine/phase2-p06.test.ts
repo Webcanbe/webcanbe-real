@@ -119,3 +119,7 @@ it.skipIf(process.env.WCB_PG_TEST!=='1')('P06 real PostgreSQL preserves nested s
   await withHostedSource(backend,grant,process.cwd(),async(project,source)=>{expect(source.files().has('apps/web/src/App.tsx')).toBe(true);expect((await buildIndependentExport(await exportProjectZip(project),process.cwd())).sourceUnchanged).toBe(true)})
  }finally{await pool.end();await admin.query(`DROP SCHEMA ${schema} CASCADE`);await admin.end()}
 },20000)
+
+it('P06 exports the retained Vite8 application graph through the fixed pinned Rollup compiler',async()=>{
+ const root=temp();fs.cpSync('fixtures/independent/vite-react19-ts',root,{recursive:true});const detection=detectProject(root,process.cwd()),p={id:randomUUID(),name:'Retained Vite8 export',root,sourceRoot:path.join(root,'src'),imported:true,detection,history:new MutationHistory()};const result=await buildIndependentExport(await exportProjectZip(p),process.cwd());expect(result.profile).toBe('react19-vite8-v1');expect(result.files.has('/assets/app.js')).toBe(true);expect(result.sourceUnchanged).toBe(true)
+},20000)
