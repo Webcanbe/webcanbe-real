@@ -1,0 +1,15 @@
+{
+  "runnerLeaseStates": {
+    "stopped": 17
+  },
+  "activeRunnerLeases": 0,
+  "remainingTemporaryPgSchemas": 0,
+  "gatewayStopped": true,
+  "postgresTunnelStopped": true,
+  "gatewaySchemaRemoved": true,
+  "generatedPasswordDisabled": true,
+  "generatedCredentialsRemoved": true,
+  "ownedScratchRemoved": true,
+  "vmStatus": "Stopped",
+  "publicDeployment": false
+}

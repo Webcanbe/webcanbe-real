@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "archiveSha256": "34a389562c0a44cfbbed9d96ea1bd594e8e5a07a9416da2dc57ce18da1d2c71d",
+  "profile": "react19-vite6",
+  "boundary": "Fresh exact ZIP checkout; confined static compiler; pinned immutable Rollup graph; no uploaded config/plugins/scripts or application code execution",
+  "platformMarkersAbsent": true,
+  "mountBase": "/",
+  "sourceUnchanged": true,
+  "plan": {
+    "external": [
+      "fs/promises"
+    ],
+    "output": {
+      "experimentalMinChunkSize": 3500
+    }
+  },
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "b8f51d1980aa4239bc6d9dae98646662277895ddaf28edd2e47360041456380b"
+    },
+    {
+      "path": "/assets/app.js",
+      "sha256": "7ff21f5ba39e384f273810e46462af1286247b020b70b4b70c5968e6d364a5ee"
+    }
+  ],
+  "packageScriptsExecuted": false,
+  "uploadedConfigurationExecuted": false,
+  "cleanupVerified": true,
+  "totalMs": 462.469417
+}

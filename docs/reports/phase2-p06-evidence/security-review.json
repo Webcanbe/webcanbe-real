@@ -1,0 +1,133 @@
+{
+  "base": "6ad7dc21dd5b580fea84b09d767fe5984c576387",
+  "candidate": "47a97751eee352643ff704886ac1392a812c43a7",
+  "review": "Parent changed-path security review; no broad scan or delegated review claim",
+  "paths": [
+    {
+      "file": "scripts/qa/common-export.cjs",
+      "sha256": "7c2bf28338793ac499e97f9663844ee0300242053086a9a64af6a7a60e96fce6",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "scripts/runner/typecheck-worker.cjs",
+      "sha256": "b2e0f96f37cfee07e9adbd8fc7c63d5d45cc1429c482a6c07038744a83f35e84",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/core/types.ts",
+      "sha256": "1c4e506b78ebdfa92f1be2c254aeae962b53aeae48b8ff973e650f0bbe52b8c5",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/mutations/durableSource.ts",
+      "sha256": "9d9f4f8df05a11d21a4bf6e06d0b45149bf6f773579453d6d92cc2feb4a3b1ac",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/mutations/sourceValidation.ts",
+      "sha256": "44ac255b81e45ed49920e98fa91a9dae673093aa2fe4db9dad4e21c554c609c3",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "sha256": "745c327eed28ed72d46e111a3075be480edf76539a3525b6fbee6f02cf903f36",
+      "coverage": "Adversarial/functional regression coverage reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/finiteBuild.ts",
+      "sha256": "e392368b6907bd630d93dde5614c15348bb53a09ec84310a89bafeb335d9f77c",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/hostedProjectRegistry.ts",
+      "sha256": "b6742510987c596c23dde2019c60f64d95855fa346da939705f6629e18dc8a56",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+      "sha256": "788497e468935153a8f1867b4ffc69c920377cacd147d43582a049fd01fbfb1e",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/independentExport.ts",
+      "sha256": "040d2f57f61dd5062333820a0423118b452c6f6ee90f05448d0d9f652ffd5a11",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "sha256": "002d4c852ee90ebd11cc86141fef061219750ea0e7a5668608af485ff40a68ec",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/postgresSourceCheckout.ts",
+      "sha256": "89d31badc557cf4a099ccbd80a6a2fa499f11a92624567076d49ba3c206af215",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/postgresStores.ts",
+      "sha256": "132065f3f7edb0c618abe7f9f8b6b31207f78cd1a78e7ca8da40fc236d15380a",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/projectRegistry.ts",
+      "sha256": "fedaf80a421457ebb91111f5e2b757f445d6b3685a047ddf0483a9379a197f2a",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+      "sha256": "627a2f78f8dd72ae6a7758e49b01c3ee5f0a6bb580bbfa1a512849351fa3d4c8",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/semanticTypecheck.ts",
+      "sha256": "643dcb5d479b1a37d584fd9c936b3159ce284e01e043cbd954d598c7a724aa36",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/sourceApi.ts",
+      "sha256": "78340dde272308037fa50174eb471aaced6e54d217bb24d5cd352d31c7cd25b4",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/sourceDirectory.ts",
+      "sha256": "7dd0393aee63ba34e79106696b55e3a0150a5d9eef9e6b5bf2dab33814ec7361",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticCss.ts",
+      "sha256": "3fa710b692580c481979e3d6318d689724f4c5a0b3ab8e2a76a6178cebde39a9",
+      "coverage": "Changed source and direct consumers reviewed"
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/viteFixturePlugin.ts",
+      "sha256": "3dd9b46144734bbf1d48eac5deec322e95ec755e2f0d1a9018b13f2175c2ffb5",
+      "coverage": "Changed source and direct consumers reviewed"
+    }
+  ],
+  "confirmedUnresolvedVulnerabilities": 0,
+  "reviewCorrections": [
+    "Fixed Vite8 independent export compiler selection: app dependency graph and fixed operator Rollup graph are separate.",
+    "Captured hosted history scope once per acceptance, avoiding a repeated full-ledger read per file.",
+    "Retained validateStagedProject as the export validation seam; both failure diagnostics and success reauthorize after the independent build. Final 68 focused tests pass without changing old tests.",
+    "Preserved TypeScript include applicability for specific source files/subtrees; 41 affected tests pass, four gated identities retain their native/PG passes from the full and focused runs."
+  ],
+  "directConsumers": [
+    "src/webcanbe-engine/runtime/projectExport.ts",
+    "src/webcanbe-engine/adapters/react/reactSourceAdapter.ts",
+    "src/webcanbe-engine/adapters/react/projectStyles.ts",
+    "src/webcanbe-engine/runtime/draftStore.ts",
+    "src/webcanbe-engine/runtime/hostedEditor.ts",
+    "src/webcanbe-engine/mutations/sourceReferences.ts",
+    "src/webcanbe-engine/mutations/historyArchive.ts"
+  ],
+  "finalReread": [
+    "src/webcanbe-engine/runtime/sourceDirectory.ts",
+    "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+    "src/webcanbe-engine/runtime/semanticTypecheck.ts",
+    "src/webcanbe-engine/runtime/sourceApi.ts",
+    "src/webcanbe-engine/mutations/sourceValidation.ts",
+    "src/webcanbe-engine/runtime/postgresSourceCheckout.ts",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts"
+  ],
+  "directConsumerCoverage": "Relevant path, scope, authority and nonexecution statements only; no broad audit claim."
+}

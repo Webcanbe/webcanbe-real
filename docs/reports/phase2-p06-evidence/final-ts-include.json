@@ -1,0 +1,278 @@
+{
+  "name": "final-ts-include",
+  "passed": 41,
+  "failed": 0,
+  "skipped": 4,
+  "tests": [
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "compiles constant nested aliases, same-directory config inheritance and a confined custom publicDir without altering source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "recognizes only the known declarative tsconfig-paths plugin binding",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: const ignored=globalThis.sideEffect();export default {}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: const x=y;const y=x;export default {base:x}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: let x='/';export default {base:x}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: const x={get base(){return '/'}};export default x",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: import path from 'node:path';import path from 'node:path';export default {}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: export default {publicDir:'../outside'}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: export default {publicDir:'src'}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: export default {root:'./nested'}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: export default {test:{setupFiles:()=>console.log('run')}}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses unimplemented executable or escaping config semantics: export default {build:{rollupOptions:{plugins:[arbitrary()]}}}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "refuses cyclic/escaping inherited TypeScript options and mismatched aliases",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "keeps transpilation distinct from semantics and never runs config or changes source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "does not silently claim support for unknown semantic options or a missing dedicated profile",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "projects and bounds semantic diagnostics, rejects contradictory and forged success",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React18 cross-file types and diagnoses a transpiling type error",
+      "occurrence": 1,
+      "status": "skipped"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React19 cross-file types and diagnoses a transpiling type error",
+      "occurrence": 1,
+      "status": "skipped"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for . / src",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for client / client/src",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for apps/web / apps/web/src",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for frontend / frontend/source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 imports and reopens a nested registry with exact authorized file paths",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses unproven nested roots ../private",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses unproven nested roots apps/../../private",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses unproven nested roots /tmp",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses unproven nested roots missing",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses dynamic nested root/config export default {root:()=> 'client'}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses dynamic nested root/config export default {root:process.env.ROOT}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses dynamic nested root/config export default {root:'client',plugins:[(()=>{throw Error('executed')})()]}",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses missing or ambiguous nested HTML/config roots",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses symlink source root segments client",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses symlink source root segments client/src",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses changed root identity, traversal writes and a hidden second source tree",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 verifies hosted history hashes over actual nested source paths and rejects forged scope",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 actual independent application exports preserve external imports and apply chunk merging",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 real export API returns exact ZIP only after the independent production gate passes",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 Visual, Code, undo and redo share one nested canonical history before exact export",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 uses matching static Vite and referenced TS aliases in a nested source tree",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 builds lazy application exports with base ./ and inert scripts",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 builds lazy application exports with base /nested/ and inert scripts",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 rejects symlink escape imports and independent executable configuration without executing a canary",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 native semantic worker checks the real nested source directory",
+      "occurrence": 1,
+      "status": "skipped"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 real PostgreSQL preserves nested source authority across edits and refuses root rebinding",
+      "occurrence": 1,
+      "status": "skipped"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 exports the retained Vite8 application graph through the fixed pinned Rollup compiler",
+      "occurrence": 1,
+      "status": "passed"
+    }
+  ]
+}

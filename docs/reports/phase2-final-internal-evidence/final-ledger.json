@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "candidate": "775f9b67ed3aa9e0465fed446029ee5502192b2a",
+  "candidate": "47a97751eee352643ff704886ac1392a812c43a7",
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
-    "PASS": 47,
-    "PARTIAL": 4,
+    "PASS": 48,
+    "PARTIAL": 3,
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
@@ -14,7 +14,6 @@
   "completeApplications": 2,
   "internalRemaining": [
     "P05",
-    "P06",
     "P39",
     "P61"
   ],
@@ -139,36 +138,54 @@
     {
       "id": "P06",
       "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
-      "status": "PARTIAL",
-      "evidence": "Literal confined non-root Vite relationships derive HTML/public/entry paths when source remains in canonical src; matching aliases retain their explicit base. Finite Rollup external fs/promises/minChunkSize3500 production-build plan and isolated immutable-graph helper tested. Todo missing runtime alias mechanism correctly refused.",
-      "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
-      "missingProof": "Separate nested source trees outside canonical top-level src; full independent canonical application export-to-resolved-graph composition and finite Rollup helper integration. Direct helper tests do not prove full application export parity.",
-      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+      "status": "PASS",
+      "evidence": "Static Vite/HTML relationships now register actual confined source directories, shared by Visual/Code/local and PG history/semantic checks/export. The actual ZIP is independently rebuilt through trusted esbuild and fixed pinned Rollup; finite external/minimum chunk options reach the production gate. Source/config bytes stay unchanged.",
+      "evidenceSource": "docs/reports/phase2-p06-closure.md",
+      "missingProof": "NONE for the retained finite P06 requirement. Unknown/dynamic executable effects remain unsupported; Todo missing runtime alias is an upstream incompatibility.",
+      "internallyClosable": "Closed at the retained bounded static-configuration requirement.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
       "evidenceFiles": [
-        "../phase2-compatibility-edge-evidence/regressions.json",
-        "../phase2-compatibility-edge-evidence/application-stage-results.json",
-        "../phase2-compatibility-edge-evidence/profile-audit.json",
-        "../phase2-compatibility-edge-evidence/uno-native.json",
-        "../phase2-compatibility-edge-evidence/security/final-reread.json"
+        "../phase2-p06-evidence/regressions.json",
+        "../phase2-p06-evidence/standalone-export.json",
+        "../phase2-p06-evidence/security-review.json",
+        "../phase2-p06-evidence/threat-model.md"
       ],
-      "disposition": "Two internal integration blockers remain. Production chunk settings do not affect preview; reachable Node imports are still refused. Todo undeclared runtime alias is an upstream incompatibility, not an invented mapping. Unknown dynamic config/plugins remain unsupported.",
+      "disposition": "PASS: canonical nested roots and independent complete application export-build integration proven. Preview and production-build semantics remain distinct; no uploaded configuration/plugins/scripts, source rewriting or host fallback.",
       "priorCheckpoint": {
         "id": "P06",
         "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
         "status": "PARTIAL",
-        "evidence": "Finite default Tailwind no-op configuration and inert .gitattributes grammar added; no uploaded executable config is evaluated. Broader retained plugin/config cases remain unsupported.",
-        "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "Custom HTML mount semantics, vite-tsconfig-paths, unocss/vite and the retained @ alias/config combinations remain unsupported.",
+        "evidence": "Literal confined non-root Vite relationships derive HTML/public/entry paths when source remains in canonical src; matching aliases retain their explicit base. Finite Rollup external fs/promises/minChunkSize3500 production-build plan and isolated immutable-graph helper tested. Todo missing runtime alias mechanism correctly refused.",
+        "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
+        "missingProof": "Separate nested source trees outside canonical top-level src; full independent canonical application export-to-resolved-graph composition and finite Rollup helper integration. Direct helper tests do not prove full application export parity.",
         "internallyClosable": "Internal work remains; not reclassified as production evidence.",
         "priorStatus": "PARTIAL",
         "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
         "evidenceFiles": [
-          "current-compatibility.json",
-          "regressions.json"
+          "../phase2-compatibility-edge-evidence/regressions.json",
+          "../phase2-compatibility-edge-evidence/application-stage-results.json",
+          "../phase2-compatibility-edge-evidence/profile-audit.json",
+          "../phase2-compatibility-edge-evidence/uno-native.json",
+          "../phase2-compatibility-edge-evidence/security/final-reread.json"
         ],
-        "disposition": "Each requires a finite static adapter with exact resolution and adversarial refusal tests. Executing uploaded plugins/config or guessing their behavior would break the retained trust boundary. No DoD waiver is claimed."
+        "disposition": "Two internal integration blockers remain. Production chunk settings do not affect preview; reachable Node imports are still refused. Todo undeclared runtime alias is an upstream incompatibility, not an invented mapping. Unknown dynamic config/plugins remain unsupported.",
+        "priorCheckpoint": {
+          "id": "P06",
+          "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
+          "status": "PARTIAL",
+          "evidence": "Finite default Tailwind no-op configuration and inert .gitattributes grammar added; no uploaded executable config is evaluated. Broader retained plugin/config cases remain unsupported.",
+          "evidenceSource": "docs/reports/phase2-common-applications.md",
+          "missingProof": "Custom HTML mount semantics, vite-tsconfig-paths, unocss/vite and the retained @ alias/config combinations remain unsupported.",
+          "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+          "priorStatus": "PARTIAL",
+          "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
+          "evidenceFiles": [
+            "current-compatibility.json",
+            "regressions.json"
+          ],
+          "disposition": "Each requires a finite static adapter with exact resolution and adversarial refusal tests. Executing uploaded plugins/config or guessing their behavior would break the retained trust boundary. No DoD waiver is claimed."
+        }
       }
     },
     {

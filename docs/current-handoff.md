@@ -1,3 +1,33 @@
+# Current handoff: P06 closure (2026-09-15)
+
+**P06 PASS. 48 PASS / 3 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE.
+Phase 2 internal software closure: NOT YET. Internal blockers: P05 / P39 / P61.**
+
+Continue from final product `47a97751eee352643ff704886ac1392a812c43a7` on `phase-2-compatible-editor`.
+The [P06 closure report](reports/phase2-p06-closure.md),
+[current ledger](reports/phase2-final-internal-evidence/final-ledger.json) and
+[P06 evidence](reports/phase2-p06-evidence/regressions.json) are authoritative.
+Documentation/publication commits follow the product. Main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b` (origin/main; no local main branch).
+
+- Static nested roots use their actual canonical source paths through registry, local/PG
+  revision/history, Visual/Code, semantic checking and exact export. No source mirror.
+- Actual exported ZIPs reach the trusted independent production build and finite Rollup
+  helper through both the export API and standalone QA gate. External imports/chunk options
+  are proven. Preview still rejects reachable Node imports; Todo's missing alias is not invented.
+- **621 distinct passing tests; all prior 594 identities and all 38 prior test files preserved.**
+  Full suite ran once; two failures are recorded and bounded 68-test/41-test correction checks passed.
+  No outstanding failures/skips. Final TypeScript/build/package pass.
+- Parent changed-path security review: all 20 paths and direct consumers, final correction
+  rereads, zero confirmed unresolved vulnerabilities. No broad repeated scan/corpus rebuild.
+- P06 blockers: NONE. Every non-P06 ledger row and historical report is preserved.
+  No P05/P39/P61, UI, payments, or Phase 3/4/5 work. TEST cleanup complete and VM stopped.
+  Only a normal feature-branch push; no main merge, force push or public deployment.
+
+---
+
+## Historical handoffs
+
 # Current handoff: Phase 2 narrow compatibility edges (2026-09-15)
 
 **P05 PARTIAL / P06 PARTIAL / P08 PASS / P07 regression PASS. 47 PASS / 4 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE. Internal and overall Phase 2: NOT YET. Phase 3 may begin: NO.**

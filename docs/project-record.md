@@ -1,5 +1,15 @@
 # WebCanBe project record
 
+## 2026-09-15: P06 closed
+
+P06 PASS at `47a97751eee352643ff704886ac1392a812c43a7`: actual canonical nested source directories and
+independent exact-ZIP application builds using the trusted finite Rollup helper.
+621 distinct passing tests preserve all prior 594 identities and 38 unchanged test files.
+Bounded changed-path security review: zero confirmed unresolved vulnerabilities.
+See [closure report](reports/phase2-p06-closure.md) and [current handoff](current-handoff.md).
+Only P06's ledger row changes; internal blockers are P05/P39/P61 and Phase 2 internal
+closure remains NOT YET. Historical evidence preserved; no later-phase/UI/payment work.
+
 The source is the product. Preserve adapter / bridge / runtime / transaction separation.
 
 - Phase 1 reviewed baseline: `6f3582a`.
