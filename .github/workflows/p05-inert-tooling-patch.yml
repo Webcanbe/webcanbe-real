@@ -93,16 +93,17 @@ jobs:
           })
 
           it('round-trips an oversized inert Yarn release while the ordinary 2 MiB member boundary remains',async()=>{
-            const root=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-'));dirs.push(root)
+            const parent=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-'));dirs.push(parent);const root=path.join(parent,'project')
             const inert=randomBytes(2_742_928)
             const archive=await zipOf({'.yarn/releases/yarn-4.2.2.cjs':inert,'package.json':'{}'})
             await extractSafeZip(archive,root)
             expect(fs.readFileSync(path.join(root,'.yarn/releases/yarn-4.2.2.cjs')).equals(inert)).toBe(true)
             const project={id:'p',name:'p',root,sourceRoot:path.join(root,'src'),imported:true,detection:{supported:false,framework:'unknown',tailwind:false,dependencies:[]},history:new MutationHistory()} as ProjectRecord
-            const out=await exportProjectZip(project),copy=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-copy-'));dirs.push(copy)
+            const out=await exportProjectZip(project),copyParent=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-copy-'));dirs.push(copyParent);const copy=path.join(copyParent,'project')
             await extractSafeZip(out,copy)
             expect(fs.readFileSync(path.join(copy,'.yarn/releases/yarn-4.2.2.cjs')).equals(inert)).toBe(true)
-            await expect(extractSafeZip(await zipOf({'src/large.cjs':randomBytes(2*1024*1024+1)}),fs.mkdtempSync(path.join(os.tmpdir(),'wcb-large-')))).rejects.toThrow('Unsafe ZIP')
+            const largeParent=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-large-'));dirs.push(largeParent)
+            await expect(extractSafeZip(await zipOf({'src/large.cjs':randomBytes(2*1024*1024+1)}),path.join(largeParent,'project'))).rejects.toThrow('Unsafe ZIP')
           })
 
           it('preserves inert tooling as source-owned bytes but refuses importing it into the controlled browser graph',async()=>{
