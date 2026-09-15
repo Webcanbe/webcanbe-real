@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   berry:
@@ -31,7 +32,29 @@ jobs:
             'https://raw.githubusercontent.com/reduxjs/redux-essentials-example-app/b4414e1504c914ece3253dd8a21adfb2278464d9/package.json' \
             --output /tmp/redux-package.json
       - name: Parse exact frozen Redux Berry lock
+        id: redux
+        continue-on-error: true
         env:
           WCB_REDUX_BERRY_LOCK: /tmp/redux-yarn.lock
           WCB_REDUX_PACKAGE: /tmp/redux-package.json
-        run: npx vitest run src/webcanbe-engine/phase2-p05-redux-real.test.ts
+        run: npx vitest run src/webcanbe-engine/phase2-p05-redux-real.test.ts --reporter=json --outputFile=/tmp/redux-result.json
+      - name: Publish bounded diagnostic status
+        if: steps.redux.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node - <<'NODE' >/tmp/status.json
+          const fs=require('node:fs')
+          const value=JSON.parse(fs.readFileSync('/tmp/redux-result.json','utf8'))
+          const first=value.testResults?.flatMap(x=>x.assertionResults??[]).find(x=>x.status==='failed')
+          const message=String(first?.failureMessages?.[0]??value.message??'Frozen Redux Berry validation failed').replace(/\s+/g,' ').slice(0,120)
+          process.stdout.write(JSON.stringify({state:'failure',context:'p05/berry-frozen-redux',description:message}))
+          NODE
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            --data-binary @/tmp/status.json >/dev/null
+          exit 1
