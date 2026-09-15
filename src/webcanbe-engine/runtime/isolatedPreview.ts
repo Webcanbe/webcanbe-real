@@ -13,6 +13,7 @@ import ts from "typescript"
 import { inspectRuntime, RuntimeCompatibilityError, PROFILE } from "./runtimeCompatibility"
 import { instrumentReactSource } from "../adapters/react/reactSourceAdapter"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
+import { isInertToolingPath } from "./intakeMetadata"
 
 export type PreviewArtifact = { body: Buffer; contentType: string }
 export type HttpPreviewBuild = { html: string; files: Map<string, PreviewArtifact> }
@@ -120,6 +121,8 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const resolved = [candidate, ...[".tsx", ".jsx", ".ts", ".js", ".mts", ".cts", ".mjs", ".cjs", ".css", ".json", "/index.tsx", "/index.jsx", "/index.ts", "/index.js"].map(ext => candidate + ext)].find(file => fs.existsSync(file) && fs.statSync(file).isFile())
         if (!resolved) throw new Error('Preview dependency is unresolved: ' + args.path)
         const actual = fs.realpathSync(resolved)
+        const projectRelative = path.relative(root, actual).split(path.sep).join("/")
+        if (!vendorImporter && isInertToolingPath(projectRelative)) throw new Error("Inert package-manager tooling cannot be imported or executed.")
         if (!vendorImporter) {
           if (!isWithin(root, resolved)) throw Error("Preview import escaped its permitted root.")
           // Every segment is checked before reading, including in-project links.

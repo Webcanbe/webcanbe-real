@@ -1,4 +1,4 @@
-import { isOpaqueBunLock, isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
+import { archiveMemberLimit, isInertToolingPath, isOpaqueBunLock, isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
@@ -68,7 +68,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         const name = safeArchivePath(entry.fileName)
         const directory = entry.fileName.endsWith("/")
         const mode = (entry.externalFileAttributes >>> 16) & 0o170000
-        if (!name || ++entries > ZIP_LIMITS.entries || ![0, 0o100000, 0o040000].includes(mode) || (mode === 0o040000 && !directory) || (entry.generalPurposeBitFlag & 1) || entry.uncompressedSize > ZIP_LIMITS.fileBytes || total + entry.uncompressedSize > ZIP_LIMITS.totalBytes || entry.uncompressedSize / Math.max(1, entry.compressedSize) > ZIP_LIMITS.ratio) return fail(new Error("Unsafe ZIP path, type, or archive limit."))
+        if (!name || ++entries > ZIP_LIMITS.entries || ![0, 0o100000, 0o040000].includes(mode) || (mode === 0o040000 && !directory) || (entry.generalPurposeBitFlag & 1) || entry.uncompressedSize > archiveMemberLimit(name) || total + entry.uncompressedSize > ZIP_LIMITS.totalBytes || entry.uncompressedSize / Math.max(1, entry.compressedSize) > ZIP_LIMITS.ratio) return fail(new Error("Unsafe ZIP path, type, or archive limit."))
         const key = name.toLowerCase()
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
@@ -80,14 +80,14 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
             const chunks: Buffer[] = []; let size = 0
             for await (const raw of stream) {
               const chunk = Buffer.from(raw); size += chunk.length; total += chunk.length
-              if (size > ZIP_LIMITS.fileBytes || total > ZIP_LIMITS.totalBytes) throw new Error("ZIP inflated beyond its limit.")
+              if (size > archiveMemberLimit(name) || total > ZIP_LIMITS.totalBytes) throw new Error("ZIP inflated beyond its limit.")
               chunks.push(chunk)
             }
             if (size !== entry.uncompressedSize) throw new Error("Invalid ZIP member size.")
             const content = Buffer.concat(chunks)
             if (crc32(content) !== entry.crc32) throw new Error("ZIP member checksum mismatch.")
             if(path.posix.basename(name)==="bun.lockb"&&!isOpaqueBunLock("bun.lockb",content))throw Error("Unsupported opaque Bun lock format.")
-            if (!isOpaqueBunLock(path.posix.basename(name),content) && !/\.(png|jpe?g|gif|webp|ico|woff2?)$/i.test(name)) { if (content.includes(0)) throw new Error("Binary data in a text file."); new TextDecoder("utf-8", { fatal: true }).decode(content) }
+            if (!isOpaqueBunLock(path.posix.basename(name),content) && !isInertToolingPath(name) && !/\.(png|jpe?g|gif|webp|ico|woff2?)$/i.test(name)) { if (content.includes(0)) throw new Error("Binary data in a text file."); new TextDecoder("utf-8", { fatal: true }).decode(content) }
             validateIntakeMetadata(path.posix.basename(name), content)
             files.set(name, content)
             if (!stopped) zip.readEntry()
