@@ -1,3 +1,5 @@
+import { buildIndependentExport } from "./independentExport"
+import { sourceDirectory } from "./sourceDirectory"
 import { decodeHistoryArchive } from "../mutations/historyArchive"
 import { rewriteRenameImports } from "../mutations/sourceReferences"
 import { inspectRuntime } from "./runtimeCompatibility"
@@ -52,7 +54,7 @@ export async function executeSourceOperation(context: {
             const files=body.operations===undefined||Array.isArray(body.operations)&&body.operations.length===0?durable.files():durable.prepare(body.operations as FileOperation[]).after
             const validation=await context.semanticCheck(files,revision)
             await assertAccess();durable.assertBase(revision)
-            return send(200,{validation,revision,scope:"src",toolchain:"typescript@5.9.3",sourceAccepted:false})
+            return send(200,{validation,revision,scope:sourceDirectory(project),toolchain:"typescript@5.9.3",sourceAccepted:false})
           }
           if (action === "validate") {
             if (typeof body.file !== "string" || typeof body.content !== "string" || !durable.files().has(body.file)) return send(400, { error: "Select an authorized source file." })
@@ -60,10 +62,13 @@ export async function executeSourceOperation(context: {
           }
           if (action === "export") {
             durable.assertBase(body.expectedRevision ?? revision)
-            const validation = await validateStagedProject(project, projectRoot, durable.files(), "checkpoint")
+            const validation = await validateSource(durable.files(), "checkpoint")
             if (!validation.passed) return send(422, { error: "Export validation failed.", validation })
-            durable.assertBase(revision)
-            return send(200, { archive: (await exportProjectZip(project)).toString("base64"), revision, validation })
+            const archive = await exportProjectZip(project)
+            try { await buildIndependentExport(archive, projectRoot) }
+            catch { return send(422, { error: "Independent export build failed.", validation: { ...validation, passed: false, diagnostics: [{ file: "project", message: "Unsupported or failed trusted independent export build." }] } }) }
+            await assertAccess(); durable.assertBase(revision)
+            return send(200, { archive: archive.toString("base64"), revision, validation, independentBuild: "PASS" })
           }
           if(body.migrateSourceScope!==undefined&&(action!=="checkpoint"||body.migrateSourceScope!==true))return send(400,{error:"Source scope migration requires an explicit checkpoint."})
           const special=[body.migrateSourceScope,body.compactHistory,body.restoreRevisionId].filter(value=>value!==undefined)

@@ -1,3 +1,4 @@
+import { sourceMember } from "./sourceDirectory"
 import { SourceConflict } from "../mutations/durableSource"
 import fs from "node:fs"
 import os from "node:os"
@@ -25,14 +26,15 @@ export async function withHostedSource<T>(backend: PostgresProjectStore, grant: 
       const file = path.join(root, name)
       fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 }); fs.writeFileSync(file, bytes, { flag: "wx", mode: 0o600 })
     }
-    const project: ProjectRecord = { id: grant.projectId, name: "Hosted project", root, sourceRoot: path.join(root, "src"), imported: true, detection: detectProject(root, applicationRoot), history: new MutationHistory() }
+    const detection = detectProject(root, applicationRoot)
+    const project: ProjectRecord = { id: grant.projectId, name: "Hosted project", root, sourceRoot: path.join(root, state.history.sourceDirectory ?? "src"), imported: true, detection, history: new MutationHistory() }
     fs.mkdirSync(path.join(historyRoot, project.id), { recursive: true, mode: 0o700 }); fs.writeFileSync(path.join(historyRoot, project.id, "history.json"), JSON.stringify(state.history), { mode: 0o600 })
     const source = new DurableSource(project, historyRoot, { disposableStaging: true, actor: grant.userId }), value = await action(project, source)
     let acceptedEpoch = state.epoch
     if (write && (source.revision() !== state.revision || JSON.stringify(source.history()) !== JSON.stringify(state.history))) {
       const files = new Map(state.files)
       const scope=source.history().sourceScope
-      for (const file of files.keys()) if ((scope===2 ? /^src\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/ : /^src\/.+\.(?:tsx?|jsx?|css|json)$/).test(file)) files.delete(file)
+      for (const file of files.keys()) if (sourceMember(file, source.history().sourceDirectory ?? "src", scope)) files.delete(file)
       for (const [file, text] of source.files()) files.set(file, Buffer.from(text))
       acceptedEpoch = (await backend.accept(grant, { revision: state.revision, epoch: state.epoch }, files, source.history())).epoch
     }

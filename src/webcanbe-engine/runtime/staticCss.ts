@@ -134,9 +134,9 @@ export function validateFiniteCss(code:string,plan:CssPlan) {
     if(rule.name==='tailwind'&&!['base','components','utilities'].includes(rule.params.trim()))fail('Unknown Tailwind layer.')
   })
 }
-export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan,prepareSource=(_file:string,code:string)=>code,runtimeRoot=".") {
+export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan,prepareSource=(_file:string,code:string)=>code,runtimeRoot=".",sourceDirectory?:string) {
   const sources:Array<{raw:string;extension:string;file:string}>=[];let bytes=0
-  for(const file of [path.posix.join(runtimeRoot,'index.html'),...fs.readdirSync(root,{recursive:true}).filter((f):f is string=>typeof f==='string'&&/\.(?:[cm]?[jt]sx?|css)$/.test(f)&&!f.split('/').some(p=>['node_modules','.git','.webcanbe'].includes(p)))]) {
+  for(const file of [path.posix.join(runtimeRoot,'index.html'),...fs.readdirSync(root,{recursive:true}).filter((f):f is string=>typeof f==='string'&&(!sourceDirectory||f.startsWith(sourceDirectory+'/'))&&/\.(?:[cm]?[jt]sx?|css)$/.test(f)&&!f.split('/').some(p=>['node_modules','.git','.webcanbe'].includes(p)))]) {
     if(!safeArchivePath(file))fail('Invalid CSS candidate path.')
     const absolute=fs.realpathSync(path.join(root,file));if(!isWithin(root,absolute))fail('CSS candidates escaped project.')
     if(!fs.statSync(absolute).isFile()||fs.statSync(absolute).size>2*1024*1024)fail('CSS candidate member limit exceeded.')

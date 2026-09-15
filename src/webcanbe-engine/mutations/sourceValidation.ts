@@ -1,3 +1,4 @@
+import { assertSourceDirectory, sourceMember } from "../runtime/sourceDirectory"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
@@ -37,14 +38,16 @@ export async function validateStagedProject(project: ProjectRecord, applicationR
       if (stat.isSymbolicLink() || (stat.isFile() && stat.nlink !== 1)) throw new Error("Validation source contains a link.")
       return !["node_modules", ".git", ".webcanbe"].includes(path.basename(source))
     } })
-    for (const entry of fs.readdirSync(path.join(stage, "src"), { recursive: true })) {
-      const file = `src/${String(entry).split(path.sep).join("/")}`
+    const directory = assertSourceDirectory(project)
+    for (const file of files.keys()) if (!sourceMember(file, directory, 2)) throw Error("Staged source is outside canonical directory.")
+    for (const entry of fs.readdirSync(path.join(stage, directory), { recursive: true })) {
+      const file = `${directory}/${String(entry).split(path.sep).join("/")}`
       if (editableSource.test(file) && !files.has(file)) fs.unlinkSync(path.join(stage, file))
     }
     for (const [file, content] of files) { fs.mkdirSync(path.dirname(path.join(stage, file)), { recursive: true }); fs.writeFileSync(path.join(stage, file), content) }
     // The same compiler handles HashRouter and BrowserRouter artifacts. It does
     // not launch project JavaScript; only RunnerProvider can do that in strict mode.
-    await buildIsolatedHttpPreview({ ...project, root: stage, sourceRoot: path.join(stage, "src") }, applicationRoot)
+    await buildIsolatedHttpPreview({ ...project, root: stage, sourceRoot: path.join(stage, directory) }, applicationRoot)
   } catch (error) {
     validation.passed = false
     const errors = (error as { errors?: Array<{ text: string }> }).errors

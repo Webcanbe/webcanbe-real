@@ -1,3 +1,4 @@
+import { assertSourceDirectory, sourceDirectory, sourceMember } from "../runtime/sourceDirectory"
 import { compactHistory, historyParts, historyTransactions, historyRevisions } from "./historyArchive"
 import fs from "node:fs"
 import path from "node:path"
@@ -7,7 +8,7 @@ import type { FileOperation, MutationTransaction, RevisionLedger, SourcePatch, S
 import type { ProjectRecord } from "../runtime/projectRegistry"
 import { safeArchivePath } from "../runtime/projectRegistry"
 
-export const editableSource = /^src\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/
+export const editableSource = /^[^/]+\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/
 export const legacyEditableSource = /^src\/.+\.(?:tsx?|jsx?|css|json)$/
 export const contentHash = (value: string) => createHash("sha256").update(value).digest("hex")
 export const treeHash = (files: Map<string, string>) => contentHash(JSON.stringify([...files].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))))
@@ -23,6 +24,7 @@ function readHistoryFile(file: string, limit = HISTORY_LIMITS.bytes) {
 export function boundedHistory(ledger: RevisionLedger) {
   const origin = ledger.importOrigin
   if (origin !== undefined && (!origin || typeof origin !== "object" || Object.keys(origin).length !== 4 || origin.provider !== "github" || typeof origin.repository !== "string" || !/^[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(origin.repository) || !/^[a-f0-9]{40}$/.test(origin.commit) || !/^[a-f0-9]{64}$/.test(origin.archiveSha256))) throw new Error("Invalid immutable import provenance.")
+  if (ledger.sourceDirectory !== undefined && (typeof ledger.sourceDirectory !== "string" || safeArchivePath(ledger.sourceDirectory) !== ledger.sourceDirectory || ledger.sourceDirectory.split("/").some(p => p.startsWith(".")))) throw Error("Invalid history source directory.")
   if(ledger.sourceScope!==undefined&&ledger.sourceScope!==2)throw new Error("Unsupported source scope version.")
   if (ledger.transactions.length > HISTORY_LIMITS.transactions || ledger.revisions.length > HISTORY_LIMITS.revisions) throw historyFull()
   const text = JSON.stringify(ledger)
@@ -66,7 +68,7 @@ export class DurableSource {
     this.journalPath = path.join(this.directory, "pending.json")
     const release = this.lease()
     try {
-      this.ledger = fs.existsSync(this.statePath) ? readHistoryFile(this.statePath) : { schema: 1, sourceScope: 2, projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
+      this.ledger = fs.existsSync(this.statePath) ? readHistoryFile(this.statePath) : { schema: 1, sourceScope: 2, ...(sourceDirectory(project) === "src" ? {} : { sourceDirectory: sourceDirectory(project) }), projectId: project.id, revisions: [], transactions: [], past: [], future: [] }
       if (this.ledger.schema !== 1 || this.ledger.projectId !== project.id || !Array.isArray(this.ledger.revisions) || !Array.isArray(this.ledger.transactions)) throw new Error("Invalid project history. Recovery requires operator review.")
       boundedHistory(this.ledger)
       this.recover()
@@ -118,8 +120,8 @@ export class DurableSource {
   /** Every segment is checked, including the root. No symlink traversal, hard
    * links, normalization aliases or caller-selected root is accepted. */
   private target(file: string, allowAbsent = false, scope=this.ledger?.sourceScope) {
-    if (!(scope===2?editableSource:legacyEditableSource).test(file) || safeArchivePath(file) !== file) throw new Error("File operation is outside the editable source scope.")
-    if (fs.realpathSync(this.project.root) !== this.project.root || fs.lstatSync(this.project.sourceRoot).isSymbolicLink() || fs.realpathSync(this.project.sourceRoot) !== path.join(this.project.root, "src")) throw new Error("Source root identity changed.")
+    if (!sourceMember(file, this.ledger.sourceDirectory ?? "src", scope)) throw new Error("File operation is outside the editable source scope.")
+    if (assertSourceDirectory(this.project) !== (this.ledger.sourceDirectory ?? "src")) throw new Error("Source root identity changed.")
     let current = this.project.root
     const parts = file.split("/")
     for (let index = 0; index < parts.length; index++) {
@@ -137,11 +139,12 @@ export class DurableSource {
   }
   files(scope=this.ledger?.sourceScope) {
     this.assertReady()
+    if (assertSourceDirectory(this.project) !== (this.ledger.sourceDirectory ?? "src")) throw Error("Source root identity changed.")
     const files = new Map<string, string>()
     for (const entry of fs.readdirSync(this.project.sourceRoot, { recursive: true })) {
       if (typeof entry !== "string") continue
-      const file = `src/${entry.split(path.sep).join("/")}`
-      if ((scope===2?editableSource:legacyEditableSource).test(file)) files.set(file, fs.readFileSync(this.target(file,false,scope), "utf8"))
+      const file = `${sourceDirectory(this.project)}/${entry.split(path.sep).join("/")}`
+      if (sourceMember(file, this.ledger.sourceDirectory ?? "src", scope)) files.set(file, fs.readFileSync(this.target(file,false,scope), "utf8"))
     }
     return files
   }

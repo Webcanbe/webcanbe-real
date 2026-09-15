@@ -1,3 +1,4 @@
+import { sourceMember } from "./sourceDirectory"
 import { isDeepStrictEqual } from "node:util"
 import { preservesHistory, historyRevisions, appendsCompaction } from "../mutations/historyArchive"
 import { SourceConflict } from "../mutations/durableSource"
@@ -97,10 +98,10 @@ const filePayload = (files: Map<string, Buffer>) => {
   }
   return result
 }
-function verifyHistory(project: string, files: Map<string, Buffer>, history: RevisionLedger) {
+export function verifyHistory(project: string, files: Map<string, Buffer>, history: RevisionLedger) {
   boundedHistory(history)
   if (history.schema !== 1 || history.projectId !== project || !history.revisions.length || JSON.stringify(history).length > 64 * 1024 * 1024) throw new Error("Invalid or over-quota hosted history.")
-  const editable = [...files].filter(([file]) => (history.sourceScope===2 ? /^src\/.+\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/ : /^src\/.+\.(?:tsx?|jsx?|css|json)$/).test(file)).map(([file, bytes]) => [file, bytes.toString("utf8")]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+  const editable = [...files].filter(([file]) => sourceMember(file, history.sourceDirectory ?? "src", history.sourceScope)).map(([file, bytes]) => [file, bytes.toString("utf8")]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
   const hash = createHash("sha256").update(JSON.stringify(editable)).digest("hex")
   if (history.revisions.at(-1)!.contentHash !== hash) throw new Error("Source and history digest disagree.")
   return history.revisions.at(-1)!.revisionId
@@ -145,6 +146,7 @@ export class PostgresProjectStore {
       const old = (await client.query("SELECT revision,source_epoch,history FROM wcb_projects WHERE project_id=$1 AND workspace_id=$2 AND NOT deleted FOR UPDATE", [grant.projectId, grant.workspaceId])).rows[0]
       if (!old) throw new AuthorityDenied()
       if (old.history && JSON.stringify(old.history.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"]) !== JSON.stringify(ledger.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"])) throw new Error("Import provenance cannot change.")
+      if (old.history && (old.history.sourceDirectory ?? "src") !== (ledger.sourceDirectory ?? "src")) throw Error("Canonical source directory cannot change.")
       if(old.history && old.history.sourceScope!==ledger.sourceScope){
         const last=ledger.transactions.at(-1),same=(await client.query("SELECT files=$2::jsonb AS same FROM wcb_projects WHERE project_id=$1",[grant.projectId,JSON.stringify(payload)])).rows[0]
         if(old.history.sourceScope!==undefined||ledger.sourceScope!==2||last?.editType!=="checkpoint"||last.producer!=="system"||last.status!=="accepted"||last.operations?.length||last.fileStates?.length||!same.same)throw new Error("Unsupported source scope migration.")

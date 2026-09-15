@@ -1,3 +1,4 @@
+import { sourceDirectory } from "./sourceDirectory"
 import fs from "node:fs"
 import path from "node:path"
 import { parse, type ParseError } from "jsonc-parser"
@@ -16,12 +17,12 @@ export function semanticSnapshot(project: ProjectRecord, applicationRoot: string
     const errors: ParseError[] = [], config = parse(fs.readFileSync(path.join(project.root,item.file),"utf8"),errors)
     if (errors.length || !config || typeof config !== "object" || config.extends) throw new Error("Unsupported semantic configuration.")
     if (config.references && !config.include) continue
-    if (Array.isArray(config.include) && !config.include.some((s:unknown)=>typeof s==="string" && /^src(?:[/*]|$)/.test(s))) { notices.push(item.file+": outside src checking scope"); continue }
+    if (Array.isArray(config.include) && !config.include.some((s:unknown)=>typeof s==="string" && path.posix.join(path.posix.dirname(item.file), s).split("*")[0].replace(/\/$/, "") === sourceDirectory(project))) { notices.push(item.file+": outside src checking scope"); continue }
     for (const [key,value] of Object.entries(config.compilerOptions ?? {})) {
       if (noEmitOptions.has(key)) { notices.push(key+": no-emit checker does not produce files"); continue }
       if (!allowed.has(key)) throw new Error("Unsupported semantic compiler option: "+key)
       if (key in options && JSON.stringify(options[key]) !== JSON.stringify(value)) throw new Error("Conflicting semantic compiler option: "+key)
-      options[key]=value
+      options[key] = key === 'baseUrl' && typeof value === 'string' ? path.posix.join(path.posix.dirname(item.file), value) : value
     }
   }
   const files=Array.from(source,([name,text])=>({path:name,text}));let size=files.reduce((n,f)=>n+Buffer.byteLength(f.text),0)
@@ -42,7 +43,7 @@ export function semanticSnapshot(project: ProjectRecord, applicationRoot: string
     if(/^typescript\/lib\/lib\..*\.d\.ts$/.test(name))continue
     add(name,file)
   }
-  const body=Buffer.from(JSON.stringify({schema:1,files,options,scope:"src",notices}))
+  const body=Buffer.from(JSON.stringify({schema:1,files,options,scope:sourceDirectory(project),notices}))
   return snapshotPreview({html:"",files:new Map([["/_wcb/typecheck.json",{contentType:"application/json",body}]])})
 }
 export function semanticResult(value: unknown): SourceValidation {

@@ -49,8 +49,8 @@ export class HostedProjectRegistry {
         if (entries.length === 1 && entries[0].isDirectory()) root = path.join(root, entries[0].name)
       }
       const id = randomUUID(), detection = detectProject(root, this.applicationRoot)
-      if (!detection.supported || !fs.existsSync(path.join(root, "src"))) throw new Error(detection.reason ?? "Unsupported project intake.")
-      const project: ProjectRecord = { id, name: name.slice(0, 200), root, sourceRoot: path.join(root, "src"), imported: true, detection, history: new MutationHistory() }
+      if (!detection.supported || !detection.sourceDirectory) throw new Error(detection.reason ?? "Unsupported project intake.")
+      const project: ProjectRecord = { id, name: name.slice(0, 200), root, sourceRoot: path.join(root, detection.sourceDirectory!), imported: true, detection, history: new MutationHistory() }
       const staging = new DurableSource(project, path.join(temporary, "history"), { disposableStaging: true, actor: account.userId })
       const files = new Map(fs.readdirSync(root, { recursive: true, withFileTypes: true }).filter(e => e.isFile()).map(e => {
         const full = path.join(e.parentPath, e.name)

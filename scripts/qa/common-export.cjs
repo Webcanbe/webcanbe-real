@@ -1,14 +1,38 @@
-// Fixed operator QA, never a public API. Source ZIPs are data on the Mac;
-// the original uploaded configuration executes only in the controlled Linux job.
-const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spawnSync,execFileSync}=require('node:child_process'),{randomUUID,createHash}=require('node:crypto'),{buildSync}=require('esbuild');
-const root=path.resolve(__dirname,'../..'),state=path.join(root,'.webcanbe/runner/qa-common-applications'),[name,archive,profile]=process.argv.slice(2),allowed=['react19-vite6','react18-vite5-v1','react19-vite8-v1','react18-vite4-three-v1','react18-vite6-common-v1','react19-vite7-common-v1','react19-vite7.1-v1'];
-if(!/^[a-z][a-z0-9-]{0,50}$/.test(name)||!allowed.includes(profile)||!path.resolve(archive).startsWith(state+'/'))throw Error('Expected a named owned TEST export/profile');
-const hash=b=>createHash('sha256').update(b).digest('hex'),env={...process.env,LIMA_HOME:path.join(root,'.webcanbe/runner/lima')},lima=path.join(root,'.webcanbe/runner/tools/bin/limactl'),run=args=>execFileSync(lima,args,{env,stdio:'pipe',timeout:20000});
-(async()=>{const bundle=path.join(state,'export-intake.cjs');buildSync({stdin:{contents:'export {extractSafeZip,detectProject} from "./src/webcanbe-engine/runtime/projectRegistry";export {inspectRuntime} from "./src/webcanbe-engine/runtime/runtimeCompatibility";export {MutationHistory} from "./src/webcanbe-engine/mutations/sourceMutations";',resolveDir:root},bundle:true,platform:'node',format:'cjs',packages:'external',outfile:bundle,logLevel:'silent'});const dir=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-export-data-')),bytes=fs.readFileSync(archive);let files,mountBase;
-try{const engine=require(bundle);await engine.extractSafeZip(bytes,dir+'/project');const sourceRoot=fs.realpathSync(dir+'/project'),project={id:randomUUID(),name,root:sourceRoot,sourceRoot:path.join(sourceRoot,'src'),imported:true,detection:engine.detectProject(sourceRoot,root),history:new engine.MutationHistory()},report=engine.inspectRuntime(project,root);mountBase=report.base==='./'?'/':report.base;if(!report.supported||report.profile!==profile)throw Error('Export does not match selected supported profile: '+report.profile);files=fs.readdirSync(dir+'/project',{recursive:true,withFileTypes:true}).filter(e=>e.isFile()).map(e=>{const file=path.join(e.parentPath,e.name),b=fs.readFileSync(file);return{path:path.relative(dir+'/project',file),sha256:hash(b),base64:b.toString('base64')}})}finally{fs.rmSync(dir,{recursive:true,force:true})}
-const launcher=path.join(state,'export-launch.sh');fs.writeFileSync(launcher,fs.readFileSync(path.join(root,'scripts/runner/launch.sh'),'utf8').replace('entry=worker.cjs','entry=common-export-build.cjs').replace('--proc /proc','--ro-bind /opt/wcb-export-profiles /opt/wcb-export-profiles --proc /proc'),{mode:0o700});
-for(const[from,to,mode]of [[path.join(__dirname,'export-build-worker.cjs'),'common-export-build.cjs','644'],[launcher,'common-export-build.sh','755']]){run(['copy',from,'wcb:/tmp/'+to]);run(['shell','--workdir=/','wcb','sudo','-n','install','-m',mode,'/tmp/'+to,'/opt/wcb-runtime/'+to]);run(['shell','--workdir=/','wcb','rm','-f','/tmp/'+to])}
-const generation=randomUUID(),began=performance.now(),child=spawnSync(lima,['shell','--workdir=/','wcb','sudo','-n','/opt/wcb-runtime/common-export-build.sh',generation],{env,input:JSON.stringify({profile,files})+'\n',encoding:'utf8',timeout:55000,maxBuffer:24*1024*1024});let result;try{result=JSON.parse(child.stdout.trim())}catch{result={status:'FAIL',error:'Invalid isolated build receipt',stderr:child.stderr.slice(-1500)}}result.totalMs=performance.now()-began;result.archiveSha256=hash(bytes);result.profile=profile;
-if(result.files){result.mountBase=mountBase;const output=result.files;result.artifactFiles=output.map(f=>({path:f.path,sha256:hash(Buffer.from(f.base64,'base64'))}));result.platformMarkersAbsent=output.every(f=>!Buffer.from(f.base64,'base64').toString().match(/data-wcb-id|__webcanbe|wcb-raster/));fs.writeFileSync(path.join(state,'hosted',name+'-artifact.json'),JSON.stringify({html:Buffer.from(output.find(f=>f.path==='/index.html').base64,'base64').toString(),files:output.map(f=>({...f,path:mountBase+f.path.slice(1)}))}),{mode:0o600});delete result.files}
-try{run(['shell','--workdir=/','wcb','sudo','-n','/opt/wcb-runtime/stop.sh',generation]);result.cleanupVerified=true}catch{result.cleanupVerified=false}
-fs.writeFileSync(path.join(state,name+'-build.json'),JSON.stringify(result,null,2)+'\n');fs.copyFileSync(path.join(state,name+'-build.json'),path.join(state,name+'-build-'+Date.now()+'.json'));console.log(JSON.stringify(result));})().catch(e=>{console.error(e);process.exitCode=1});
+// Operator-only independent export gate. The archive and configuration are data;
+// only the trusted compiler and selected pinned dependency graph run in Node.
+const fs = require('node:fs'), path = require('node:path'), { createHash } = require('node:crypto'), { buildSync } = require('esbuild');
+const root = path.resolve(__dirname, '../..'), state = path.join(root, '.webcanbe/runner/qa-common-applications');
+const [name, archive, profile] = process.argv.slice(2);
+if (!/^[a-z][a-z0-9-]{0,50}$/.test(name) || !archive || !path.resolve(archive).startsWith(state + '/')) throw Error('Expected a named owned TEST export/profile');
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+(async () => {
+  const bundle = path.join(state, 'export-intake.cjs');
+  buildSync({ stdin: { contents: 'export {buildIndependentExport} from "./src/webcanbe-engine/runtime/independentExport";export {RUNTIME_PROFILES} from "./src/webcanbe-engine/runtime/runtimeCompatibility";', resolveDir: root }, bundle: true, platform: 'node', format: 'cjs', packages: 'external', outfile: bundle, logLevel: 'silent' });
+  const engine = require(bundle);
+  if (!engine.RUNTIME_PROFILES.includes(profile)) throw Error('Unsupported fixed export profile');
+  const bytes = fs.readFileSync(archive), began = performance.now();
+  const result = { status: 'FAIL', archiveSha256: hash(bytes), profile, boundary: 'Fresh exact ZIP checkout; confined static compiler; pinned immutable Rollup graph; no uploaded config/plugins/scripts or application code execution' };
+  try {
+    const artifact = await engine.buildIndependentExport(bytes, root);
+    if (artifact.profile !== profile) throw Error('Export does not match selected profile');
+    const output = [{ path: '/index.html', body: Buffer.from(artifact.html), contentType: 'text/html' }, ...[...artifact.files].map(([path, file]) => ({ path, ...file }))];
+    result.platformMarkersAbsent = output.every(f => !/data-wcb-id|__webcanbe|wcb-raster/.test(f.body.toString()));
+    if (!result.platformMarkersAbsent) throw Error('Export contains platform instrumentation');
+    const mountBase = artifact.base === './' ? '/' : artifact.base;
+    result.mountBase = mountBase;
+    result.sourceUnchanged = artifact.sourceUnchanged;
+    result.plan = artifact.plan;
+    result.artifactFiles = output.map(f => ({ path: f.path, sha256: hash(f.body) }));
+    result.packageScriptsExecuted = false;
+    result.uploadedConfigurationExecuted = false;
+    result.cleanupVerified = true;
+    fs.mkdirSync(path.join(state, 'hosted'), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(path.join(state, 'hosted', name + '-artifact.json'), JSON.stringify({ html: artifact.html, files: output.map(f => ({ path: f.path.startsWith(mountBase) ? f.path : mountBase + f.path.slice(1), base64: f.body.toString('base64'), contentType: f.contentType })) }), { mode: 0o600 });
+    result.status = 'PASS';
+  } catch (error) { result.error = String(error.message).split(root).join('<repository>'); }
+  result.totalMs = performance.now() - began;
+  fs.writeFileSync(path.join(state, name + '-build.json'), JSON.stringify(result, null, 2) + '\n');
+  fs.copyFileSync(path.join(state, name + '-build.json'), path.join(state, name + '-build-' + Date.now() + '.json'));
+  console.log(JSON.stringify(result));
+  if (result.status !== 'PASS') process.exitCode = 1;
+})().catch(error => { console.error(error); process.exitCode = 1; });

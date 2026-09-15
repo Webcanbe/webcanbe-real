@@ -1,3 +1,4 @@
+import { sourceDirectory } from "./sourceDirectory"
 import { LocalDraftStore } from "./draftStore"
 import { executeSourceOperation } from "./sourceApi"
 import type { HostedLoginBoundary } from "./hostedIdentity"
@@ -119,7 +120,7 @@ export function webCanBeFixturePlugin(projectRoot: string, options: { editorKey?
           if (action === "session") return send(201, { session: registry.createSession(project.id, grant ? roleOperations(grant.role) : undefined, grant ? { grant, check: operation => options.hosted!.memberships.check(grant, operation) } : undefined), project: publicProject(project), runtime: inspectRuntime(project, projectRoot), compatibilityDimensions: {
             runtimeExecution: { admitted: inspectRuntime(project, projectRoot).supported, transport: controlled ? "controlled-raster" : "legacy-local" },
             visualEditability: { status: "per-element-analysis", scoreIsVisualOnly: true },
-            codeEditing: { scope: "src", role: grant?.role ?? "local-operator" },
+            codeEditing: { scope: sourceDirectory(project), role: grant?.role ?? "local-operator" },
             configurationSupport: inspectRuntime(project, projectRoot).configuration,
             securityAdmission: { controlledRunnerRequired: Boolean(options.hosted), importedNodeExecution: false },
             exportBuild: { status: "validation-required", originalSourcePreserved: true },

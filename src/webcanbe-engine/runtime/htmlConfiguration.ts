@@ -39,7 +39,7 @@ export function staticHtml(root:string,publicDir:string|false="public",runtimeRo
       if(tag==='script'){
         if(attrs.type!=='module'||!attrs.src||Object.keys(attrs).some(k=>!['type','src','defer','crossorigin'].includes(k))||attrs.crossorigin!==undefined&&!['','anonymous'].includes(attrs.crossorigin)||node.childNodes?.some((c:any)=>c.value?.trim()))throw Error('Only one local module script entry is supported.')
         const entry=path.posix.join(runtimeRoot,attrs.src.replace(/^\//,'').replace(/^\.\//,''))
-        if(!safeArchivePath(entry)||!entry.startsWith('src/')||!/\.[cm]?[jt]sx?$/.test(entry))throw Error('HTML entry must be a local source module.')
+        if(!safeArchivePath(entry)||!/\.[cm]?[jt]sx?$/.test(entry))throw Error('HTML entry must be a local source module.')
         confinedFile(root,entry);entries.push(entry)
       }
       if(tag==='link'){

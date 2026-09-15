@@ -1,3 +1,4 @@
+import { assertSourceDirectory, sourceDirectory } from "./sourceDirectory"
 import { publicRuntimeValues } from "./publicRuntimeValues"
 import { finiteBuildPlan, type FiniteBuildPlan } from './finiteBuild'
 import { parseYarnClassic, parseBunText, normalizeAlternateLock, npmDescriptor } from "./alternateLockfiles"
@@ -45,6 +46,11 @@ export function confinedFile(root: string, relative: string) {
   if (!safeArchivePath(relative)) throw new Error(`Invalid project-local path: ${relative}`)
   const file = path.resolve(root, relative)
   if (!isWithin(root, file) || !fs.existsSync(file) || !isWithin(root, fs.realpathSync(file))) throw new Error(`Project-local path is unavailable or escapes its root: ${relative}`)
+  let current = root
+  for (const segment of relative.split('/')) {
+    current = path.join(current, segment)
+    if (fs.lstatSync(current).isSymbolicLink()) throw Error('Project-local symlink paths are forbidden.')
+  }
   return fs.realpathSync(file)
 }
 function json(root: string, file: string, comments = false): any {
@@ -299,6 +305,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     try { const config = staticViteConfig(root, declared); report.runtimeRoot=config.runtimeRoot; report.exportBuild=config.exportBuild; report.aliases = config.aliases; report.base = config.base; report.publicDir = config.publicDir; tsconfigPaths=Boolean(config.tsconfigPaths); for (const detail of config.preserved ?? []) report.configuration.push({ file: viteFile!, classification: "preserved-not-applied", detail }); if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
     catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner"); report.configuration.push({ file: viteFile ?? "vite.config", classification: "requires-isolated-execution", detail: (error as Error).message }) }
     try { report.entry = htmlEntry(root,report.publicDir,report.runtimeRoot) ?? (report.runtimeRoot&&report.runtimeRoot!=="."?undefined:project.detection.entry); if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
+    if (report.entry && !isWithin(project.sourceRoot, path.join(root, report.entry))) issue('source-root', 'Runtime entry is outside the registered canonical source tree.')
     report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base, ...publicRuntimeValues(runtimeValues) }
     const configs = new Set<string>()
     const readTsconfig = (file: string) => {
@@ -318,7 +325,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       }
       const config = inherited(file), options = config.compilerOptions ?? {}
       if (options.jsxImportSource && options.jsxImportSource !== "react" || options.experimentalDecorators || options.emitDecoratorMetadata || options.useDefineForClassFields === false || options.plugins || options.jsxFactory || options.jsxFragmentFactory || options.jsx && !["react-jsx", "react-jsxdev", "preserve"].includes(options.jsx)) throw new Error("Unsupported TypeScript runtime transformation setting.")
-      const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && /^src(?:[/*]|$)/.test(item))
+      const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && (path.posix.join(path.posix.dirname(file), item).split("*")[0].replace(/\/$/, "") === sourceDirectory(project)))
       if (appliesToSource) for (const name of ["useDefineForClassFields", "verbatimModuleSyntax", "importsNotUsedAsValues", "preserveValueImports"]) {
         if (options[name] !== undefined) {
           if (report.compilerOptions[name] !== undefined && report.compilerOptions[name] !== options[name]) throw new Error("Conflicting TypeScript client transformation options.")
@@ -349,9 +356,10 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       }
       report.issues.push({ file, code: "css-config", classification: "requires-isolated-execution", message: `${file}: custom Tailwind/PostCSS configuration requires isolated configuration support; only defaults and admitted CSS-first literal themes are supported.`, requiredCapability: "An isolated plugin/configuration profile" })
     }
+    assertSourceDirectory(project)
     for (const entry of fs.readdirSync(project.sourceRoot, { recursive: true })) {
       if (typeof entry !== "string" || !entry.endsWith(".css")) continue
-      const file = "src/" + entry.split(path.sep).join("/")
+      const file = sourceDirectory(project) + "/" + entry.split(path.sep).join("/")
       try {
         const stylesheet = fs.readFileSync(confinedFile(root, file), "utf8")
         if (/@import\s+(?:url\()?\s*[\"\']?https?:|url\(\s*[\"\']?https?:/i.test(stylesheet)) report.notes.push(`${file}: external CSS resource URLs are preserved; controlled preview network access remains denied.`)
@@ -361,9 +369,10 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     }
     // Environment references are statically classified; an unknown variable is
     // never silently replaced with undefined or a platform environment value.
+    assertSourceDirectory(project)
     for (const entry of fs.readdirSync(project.sourceRoot, { recursive: true })) {
       if (typeof entry !== "string" || !/\.[jt]sx?$/.test(entry)) continue
-      const file = "src/" + entry.split(path.sep).join("/"), source = ts.createSourceFile(file, fs.readFileSync(confinedFile(root, file), "utf8"), ts.ScriptTarget.Latest, true)
+      const file = sourceDirectory(project) + "/" + entry.split(path.sep).join("/"), source = ts.createSourceFile(file, fs.readFileSync(confinedFile(root, file), "utf8"), ts.ScriptTarget.Latest, true)
       const visit = (node: ts.Node) => {
         if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.MetaProperty && node.name.text === "env") {
           const parent = node.parent

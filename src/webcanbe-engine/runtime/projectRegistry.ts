@@ -3,7 +3,8 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import fs from "node:fs"
 import path from "node:path"
 import yauzl from "yauzl"
-import { htmlEntry } from "./runtimeCompatibility"
+import { assertSourceDirectory, sourceDirectory } from "./sourceDirectory"
+import { htmlEntry, staticViteConfig } from "./runtimeCompatibility"
 import { crc32 } from "node:zlib"
 import { DurableSource } from "../mutations/durableSource"
 import type { ProjectGrant } from "./hostedAuthority"
@@ -21,6 +22,7 @@ const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "
 export type FrameworkDetection = {
   supported: boolean
   framework: "react-vite" | "unknown"
+  sourceDirectory?: string
   entry?: string
   tailwind: boolean
   reason?: string
@@ -121,10 +123,24 @@ function projectRootFromArchive(root: string) {
   return root
 }
 
-function findEntry(root: string) {
-  try { const entry = htmlEntry(root); if (entry) return entry } catch { /* Intake remains separate from runtime configuration support. */ }
-  for (const candidate of ["src/main.tsx", "src/main.jsx", "src/index.tsx", "src/index.jsx"]) if (fs.existsSync(path.join(root, candidate))) return candidate
-  return undefined
+function findSource(root: string, declared: Record<string, unknown>) {
+  try {
+    const config = staticViteConfig(root, declared), runtimeRoot = config.runtimeRoot ?? '.'
+    const entry = htmlEntry(root, config.publicDir, runtimeRoot)
+    if (!entry) throw Error('Missing static HTML entry.')
+    const relative = path.posix.relative(runtimeRoot, entry), parts = relative.split('/')
+    // The first source directory below the proven HTML root owns the entry.
+    // A Vite root which is itself the source directory owns a direct entry.
+    const directory = parts[0] === '..' ? entry.split('/')[0] : parts.length > 1 ? path.posix.join(runtimeRoot, parts[0]) : runtimeRoot
+    assertSourceDirectory({ root, sourceRoot: path.join(root, directory) })
+    return { entry, sourceDirectory: directory }
+  } catch {
+    // Preserve legacy intake/configuration stage separation only for top-level src.
+    // Nested trees are never guessed when their configuration cannot be proven.
+    try { const entry = htmlEntry(root); if (entry?.startsWith('src/')) return { entry, sourceDirectory: 'src' } } catch { /* Runtime admission still refuses this configuration. */ }
+    for (const entry of ['src/main.tsx', 'src/main.jsx', 'src/index.tsx', 'src/index.jsx']) if (fs.existsSync(path.join(root, entry))) return { entry, sourceDirectory: 'src' }
+    return undefined
+  }
 }
 
 export function detectProject(root: string, dependencyRoot: string): FrameworkDetection {
@@ -132,12 +148,12 @@ export function detectProject(root: string, dependencyRoot: string): FrameworkDe
   if (!manifest) return { supported: false, framework: "unknown", tailwind: false, reason: "package.json is required.", dependencies: [] }
   const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) }
   const dependencies = Object.entries(declared).map(([name, version]) => ({ name, declared: String(version), resolved: false }))
-  const entry = findEntry(root)
+  const source = findSource(root, declared), entry = source?.entry
   const react = Boolean(declared.react && declared["react-dom"])
   const vite = Boolean(declared.vite || fs.existsSync(path.join(root, "vite.config.ts")) || fs.existsSync(path.join(root, "vite.config.js")))
   const tailwind = Boolean(declared.tailwindcss || fs.existsSync(path.join(root, "tailwind.config.ts")) || fs.existsSync(path.join(root, "tailwind.config.js")) || fs.existsSync(path.join(root, "tailwind.config.cjs")))
   if (!react || !vite || !entry) return { supported: false, framework: "unknown", tailwind, reason: "Phase 2 supports React/Vite projects with a conventional src entry point.", dependencies }
-  return { supported: true, framework: "react-vite", entry, tailwind, dependencies }
+  return { supported: true, framework: "react-vite", entry, sourceDirectory: source!.sourceDirectory, tailwind, dependencies }
 }
 
 export class ProjectRegistry {
@@ -158,7 +174,14 @@ export class ProjectRegistry {
       const directory = path.join(this.importedRoot, id)
       if (!fs.lstatSync(directory).isDirectory()) continue
       const root = fs.realpathSync(projectRootFromArchive(directory)), detection = detectProject(root, applicationRoot)
-      if (detection.supported || fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", id, "pending.json"))) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", root, sourceRoot: path.join(root, "src"), imported: true, detection, history: new MutationHistory() })
+      const historyFile = path.join(applicationRoot, '.webcanbe', 'history', id, 'history.json')
+      let canonicalDirectory = detection.sourceDirectory ?? 'src'
+      if (fs.existsSync(historyFile)) {
+        if (fs.statSync(historyFile).size > 64 * 1024 * 1024) throw Error('History bound exceeded.')
+        canonicalDirectory = JSON.parse(fs.readFileSync(historyFile, 'utf8')).sourceDirectory ?? 'src'
+        if (typeof canonicalDirectory !== 'string' || safeArchivePath(canonicalDirectory) !== canonicalDirectory) throw Error('Invalid persisted source canonicalDirectory.')
+      }
+      if (detection.supported || fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", id, "pending.json"))) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", root, sourceRoot: path.join(root, canonicalDirectory), imported: true, detection, history: new MutationHistory() })
     }
     // Recover interrupted source writes before sessions or compilation can start.
     for (const project of this.projects.values()) {
@@ -197,7 +220,7 @@ export class ProjectRegistry {
       await extractSafeZip(archive, destination)
       const root = fs.realpathSync(projectRootFromArchive(destination))
       const detection = detectProject(root, this.applicationRoot)
-      const sourceRoot = path.join(root, "src")
+      const sourceRoot = path.join(root, detection.sourceDirectory ?? "src")
       if (!detection.supported || !fs.existsSync(sourceRoot)) throw new Error(detection.reason ?? "Project is not supported.")
       const record: ProjectRecord = { id, name: name.replace(/\.zip$/i, "") || "Imported project", root, sourceRoot, imported: true, detection, history: new MutationHistory() }
       this.projects.set(id, record)
@@ -254,9 +277,11 @@ export class ProjectRegistry {
   store(projectId: string, authority?: SessionAuthority): SourceStore | undefined {
     const project = this.projects.get(projectId)
     if (!project) return undefined
+    let directory: string
+    try { directory = assertSourceDirectory(project) } catch { return undefined }
     const canonical = fs.realpathSync(project.sourceRoot)
     if (!isWithin(project.root, canonical) || canonical === project.root) return undefined
-    const allowed = (file: string) => file.startsWith("src/") && sourceExtension.test(file) && safeArchivePath(file) === file
+    const allowed = (file: string) => file.startsWith(directory + "/") && sourceExtension.test(file) && safeArchivePath(file) === file
     const absolute = (file: string) => path.resolve(project.root, file)
     const confined = (target: string) => {
       if (!fs.existsSync(target)) return false
@@ -297,7 +322,7 @@ export class ProjectRegistry {
   sourceFiles(projectId: string) {
     const project = this.projects.get(projectId)
     if (!project || !fs.existsSync(project.sourceRoot)) return []
-    return fs.readdirSync(project.sourceRoot, { recursive: true }).filter((entry): entry is string => typeof entry === "string" && /\.(tsx|jsx|ts|js)$/.test(entry)).map((entry) => `src/${entry.split(path.sep).join("/")}`)
+    return fs.readdirSync(project.sourceRoot, { recursive: true }).filter((entry): entry is string => typeof entry === "string" && /\.(tsx|jsx|ts|js)$/.test(entry)).map((entry) => `${sourceDirectory(project)}/${entry.split(path.sep).join("/")}`)
   }
 
   revision(projectId: string) {
