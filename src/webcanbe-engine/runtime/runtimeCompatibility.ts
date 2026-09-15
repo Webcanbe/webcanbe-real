@@ -1,3 +1,5 @@
+import { publicRuntimeValues } from "./publicRuntimeValues"
+import { parseYarnClassic, parseBunText, normalizeAlternateLock } from "./alternateLockfiles"
 import { isDefaultTailwindConfig } from "../adapters/react/defaultTailwindConfig"
 import { validateStylesheetConfiguration } from "./configuration"
 import fs from "node:fs"
@@ -5,11 +7,12 @@ import path from "node:path"
 import ts from "typescript"
 import semver from "semver"
 import { parse as parseJsonc, type ParseError } from "jsonc-parser"
-import { parse as parseHtml } from "parse5"
+import { inspectCssPlan, validateFiniteCss, type CssPlan } from "./staticCss"
+import { staticHtml } from "./htmlConfiguration"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1"] as const
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1", "react18-vite5-css-v1", "react19-vite6-uno-v1"] as const
 export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer"])
 export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported" | "preserved-not-applied"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
@@ -17,14 +20,16 @@ function selectProfile(project: ProjectRecord, applicationRoot: string) {
   try {
     const manifest = json(project.root, "package.json"), declared = { ...manifest.devDependencies, ...manifest.dependencies }
     const lock = fs.existsSync(path.join(project.root, "package-lock.json")) ? json(project.root, "package-lock.json") : undefined
+    const alternate=!lock && fs.existsSync(path.join(project.root,"yarn.lock"))?parseYarnClassic(fs.readFileSync(confinedFile(project.root,"yarn.lock"),"utf8")):!lock&&fs.existsSync(path.join(project.root,"bun.lock"))?parseBunText(fs.readFileSync(confinedFile(project.root,"bun.lock"),"utf8")):undefined
+    const lockedVersion=(name:string)=>lock?.packages?.["node_modules/"+name]?.version??alternate?.resolve(name,String(declared[name]))?.version
     const candidates = RUNTIME_PROFILES.map(id => ({ id, profile: JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8")) })).filter(({ profile }) =>
-      ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name]) }))
-    return candidates.find(({ profile }) => Object.entries(declared).every(([name, range]) => typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock || lock.packages?.["node_modules/" + name]?.version === profile.dependencies[name])))?.id ?? candidates[0]?.id ?? PROFILE
+      ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock && !alternate || lockedVersion(name) === profile.dependencies[name]) }))
+    return candidates.find(({ profile }) => Object.entries(declared).every(([name, range]) => typeof range === "string" && semver.validRange(range) && profile.dependencies[name] && semver.satisfies(profile.dependencies[name], range) && (!lock && !alternate || lockedVersion(name) === profile.dependencies[name])))?.id ?? candidates[0]?.id ?? PROFILE
   } catch { return PROFILE }
 }
 export type RuntimeIssue = { file?: string; classification?: ConfigurationClass; code: string; message: string; requiredCapability: string }
 export type RuntimeReport = {
-  compilerOptions: Record<string, any>; schema: 2; configuration: ConfigurationSupport[]; base: string; environment: Record<string, string | boolean>; profile: string; supported: boolean; entry?: string; aliases: Record<string, string>
+  cssPlan?: CssPlan; compilerOptions: Record<string, any>; publicDir?: string | false; schema: 2; configuration: ConfigurationSupport[]; base: string; environment: Record<string, string | boolean>; profile: string; supported: boolean; entry?: string; aliases: Record<string, string>
   clientDependencies: string[]; dependencies: Array<{ name: string; declared: string; selected?: string; locked?: string }>
   issues: RuntimeIssue[]; notes: string[]
 }
@@ -46,48 +51,45 @@ function json(root: string, file: string, comments = false): any {
   return value
 }
 
-/** HTML is parsed as data. No uploaded scripts, custom templates or head code are run. */
-export function htmlEntry(root: string) {
-  if (!fs.existsSync(path.join(root, "index.html"))) return undefined
-  const document = parseHtml(fs.readFileSync(confinedFile(root, "index.html"), "utf8"))
-  const entries: string[] = []
-  let invalid = false, rootMount = false
-  const walk = (node: any) => {
-    const attrs = Object.fromEntries((node.attrs ?? []).map((attr: any) => [attr.name, attr.value]))
-    if (attrs.id === "root" && node.tagName === "div") rootMount = true
-    if (node.tagName === "script") {
-      if (attrs.type !== "module" || !attrs.src || node.childNodes?.some((child: any) => child.value?.trim())) invalid = true
-      else entries.push(attrs.src.replace(/^\//, ""))
-    }
-    if (["base", "style", "iframe"].includes(node.tagName) || node.tagName === "link" && attrs.rel === "stylesheet" || Object.keys(attrs).some(name => name.startsWith("on"))) invalid = true
-    for (const child of node.childNodes ?? []) walk(child)
-  }
-  walk(document)
-  if (invalid || entries.length !== 1 || !rootMount || !entries[0].startsWith("src/") || !/\.[jt]sx$/.test(entries[0])) throw new Error("index.html requires one local JSX/TSX module and a div#root mount; custom HTML execution needs an isolated Vite runner.")
-  confinedFile(root, entries[0])
-  return entries[0]
-}
+/** Compatibility entry inspection shares the same finite shell parser as compilation. */
+export function htmlEntry(root: string, publicDir?:string|false) { return staticHtml(root,publicDir)?.entry }
 
 /** Interpret only a fixed AST grammar; never import/eval the Vite module. */
-function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string; preserved?: string[] } {
+export function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string; publicDir?: string | false; tsconfigPaths?: boolean; preserved?: string[] } {
   const files = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].filter(file => fs.existsSync(path.join(root, file)))
   if (files.length > 1) throw new Error("Multiple Vite configurations are ambiguous.")
   if (!files.length) return { aliases: {}, base: "/" }
   const source = ts.createSourceFile(files[0], fs.readFileSync(confinedFile(root, files[0]), "utf8"), ts.ScriptTarget.Latest, true)
   if ((source as ts.SourceFile & { parseDiagnostics: unknown[] }).parseDiagnostics.length) throw new Error("Invalid Vite configuration syntax.")
   const bindings = new Map<string, string>()
-  const pluginValues = new Set<unknown>()
+  const bind=(name:string,binding:string)=>{if(bindings.has(name))throw Error("Duplicate configuration import binding.");bindings.set(name,binding)}
+  const pluginValues = new Set<any>()
+  const constants = new Map<string,ts.Expression>(), resolving = new Set<string>()
+  for(const statement of source.statements.filter(ts.isVariableStatement)) {
+    if(!(statement.declarationList.flags & ts.NodeFlags.Const)||statement.modifiers?.length)throw Error("Only unexported literal const configuration bindings are supported.")
+    for(const declaration of statement.declarationList.declarations) {
+      if(!ts.isIdentifier(declaration.name)||!declaration.initializer||constants.has(declaration.name.text)||constants.size>=64)throw Error("Invalid static configuration binding.")
+      constants.set(declaration.name.text,declaration.initializer)
+    }
+  }
   for (const statement of source.statements.filter(ts.isImportDeclaration)) {
     if (!ts.isStringLiteral(statement.moduleSpecifier)) throw new Error("Unknown configuration import.")
     const module = statement.moduleSpecifier.text, clause = statement.importClause
-    if (!["node:url", "url", "node:path", "path"].includes(module) && !declared[module]) throw new Error(`Undeclared Vite configuration dependency: ${module}.`)
+    if (!["node:url", "url", "node:path", "path"].includes(module) && !declared[module.split("/")[0]] && !declared[module]) throw new Error(`Undeclared Vite configuration dependency: ${module}.`)
     if (clause?.isTypeOnly) throw new Error("Type-only configuration imports cannot be runtime bindings.")
-    if (clause?.namedBindings && ts.isNamespaceImport(clause.namedBindings)) bindings.set(clause.namedBindings.name.text, module + ":namespace")
-    if (clause?.name) bindings.set(clause.name.text, module + ":default")
-    if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) for (const item of clause.namedBindings.elements) bindings.set(item.name.text, module + ":" + (item.propertyName?.text ?? item.name.text))
-    if (!["vite", "@vitejs/plugin-react", "@vitejs/plugin-react-swc", "@tailwindcss/vite", "node:url", "url", "node:path", "path"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
+    if (clause?.namedBindings && ts.isNamespaceImport(clause.namedBindings)) bind(clause.namedBindings.name.text, module + ":namespace")
+    if (clause?.name) bind(clause.name.text, module + ":default")
+    if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) for (const item of clause.namedBindings.elements) bind(item.name.text, module + ":" + (item.propertyName?.text ?? item.name.text))
+    if (!["vite", "@vitejs/plugin-react", "@vitejs/plugin-react-swc", "@tailwindcss/vite", "vite-tsconfig-paths", "unocss/vite", "node:url", "url", "node:path", "path"].includes(module)) throw new Error(`Unsupported Vite configuration import: ${module}.`)
   }
+  if([...constants.keys()].some(name=>bindings.has(name)))throw Error("Ambiguous configuration binding.")
+  let visits=0
   const value = (node: ts.Expression): any => {
+    if(++visits>4000)throw Error("Configuration exceeds static complexity bound.")
+    if(ts.isIdentifier(node)&&constants.has(node.text)) {
+      if(resolving.has(node.text)||resolving.size>=32)throw Error("Cyclic/deep static configuration.")
+      resolving.add(node.text);try{return value(constants.get(node.text)!)}finally{resolving.delete(node.text)}
+    }
     if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isSatisfiesExpression(node)) return value(node.expression)
     if (ts.isArrowFunction(node) && !node.parameters.length && !node.modifiers?.length) {
       if (ts.isBlock(node.body)) { if (node.body.statements.length === 1 && ts.isReturnStatement(node.body.statements[0]) && node.body.statements[0].expression) return value(node.body.statements[0].expression) }
@@ -115,14 +117,15 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
       if (["path:resolve", "node:path:resolve"].includes(binding ?? "")) {
         const args = [...node.arguments]
         if (args.length === 2 && ts.isIdentifier(args[0]) && args[0].text === "__dirname" && !bindings.has("__dirname")) args.shift()
-        if (args.length !== 1 || !ts.isStringLiteral(args[0]) || !/^\.?\//.test(args[0].text) || args[0].text.startsWith("/")) throw new Error("Only project-relative literal path.resolve aliases are supported.")
-        return confinedFile(root, args[0].text.replace(/^\.\//, ""))
+        if (!args.length || args.length>8 || args.some(arg=>!ts.isStringLiteral(arg)||arg.text.startsWith("/")||arg.text.includes("\\"))) throw new Error("Only project-relative literal path.resolve aliases are supported.")
+        const relative=path.posix.join(...args.map(arg=>(arg as ts.StringLiteral).text))
+        return relative==="."?root:confinedFile(root,relative.replace(/^\.\//,""))
       }
     }
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const binding = bindings.get(node.expression.text)
       if (binding === "vite:defineConfig" && node.arguments.length === 1) return value(node.arguments[0])
-      if (["@vitejs/plugin-react:default", "@vitejs/plugin-react-swc:default", "@tailwindcss/vite:default"].includes(binding ?? "") && !node.arguments.length) { const plugin = { plugin: binding!.split(":")[0] }; pluginValues.add(plugin); return plugin }
+      if (["@vitejs/plugin-react:default", "@vitejs/plugin-react-swc:default", "@tailwindcss/vite:default", "vite-tsconfig-paths:default", "unocss/vite:default"].includes(binding ?? "") && !node.arguments.length) { const plugin = { plugin: binding!.split(":")[0] }; pluginValues.add(plugin); return plugin }
       if (["node:url:fileURLToPath", "url:fileURLToPath"].includes(binding ?? "") && node.arguments.length === 1) {
         const url = node.arguments[0]
         if (ts.isNewExpression(url) && ts.isIdentifier(url.expression) && url.expression.text === "URL" && !bindings.has("URL") && url.arguments?.length === 2 && ts.isStringLiteral(url.arguments[0]) && url.arguments[1].getText(source) === "import.meta.url") {
@@ -135,12 +138,32 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
     throw new Error("Executable Vite configuration is not supported by the static runtime profile.")
   }
   const exports = source.statements.filter(ts.isExportAssignment)
-  if (exports.length !== 1 || source.statements.some(statement => !ts.isImportDeclaration(statement) && !ts.isExportAssignment(statement))) throw new Error("Vite configuration has executable statements; an isolated configuration runner is required.")
+  if (exports.length !== 1 || source.statements.some(statement => !ts.isImportDeclaration(statement) && !ts.isExportAssignment(statement) && !ts.isVariableStatement(statement))) throw new Error("Vite configuration has executable statements; an isolated configuration runner is required.")
   const config = value(exports[0].expression)
-  if (!object(config) || Object.keys(config).some(key => !["plugins", "resolve", "base", "server", "preview"].includes(key))) throw new Error("Unsupported Vite configuration field; an isolated configuration runner is required.")
+  for(const [name] of constants)value(ts.factory.createIdentifier(name))
+  if (!object(config) || Object.keys(config).some(key => !["plugins", "resolve", "base", "server", "preview", "root", "publicDir", "test", "optimizeDeps"].includes(key))) throw new Error("Unsupported Vite configuration field; an isolated configuration runner is required.")
   if (config.base !== undefined && (typeof config.base !== "string" || !["/", "./"].includes(config.base) && (!/^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\/$/.test(config.base)))) throw new Error("Only bounded local Vite base paths are supported.")
   if (config.plugins !== undefined && (!Array.isArray(config.plugins) || config.plugins.some((plugin: any) => !pluginValues.has(plugin)))) throw new Error("Unsupported Vite build plugin.")
   const preserved: string[] = []
+  if(config.root!==undefined&&![".","./",root].includes(config.root))throw Error("Only explicit project-root Vite root is supported; nested runtime roots require separate source mapping.")
+  let publicDir:string|false="public"
+  if(config.publicDir!==undefined) {
+    if(config.publicDir===false)publicDir=false
+    else if(typeof config.publicDir==="string") {
+      const relative=path.isAbsolute(config.publicDir)?path.relative(root,config.publicDir).split(path.sep).join("/"):config.publicDir.replace(/^\.\//,"")
+      if(!safeArchivePath(relative)||relative.split("/").some(p=>p.startsWith(".")||["src","node_modules","_wcb","api"].includes(p))||!fs.statSync(confinedFile(root,relative)).isDirectory())throw Error("Unsupported publicDir; only a confined inert asset directory is supported.")
+      publicDir=relative
+    } else throw Error("Invalid publicDir.")
+  }
+  if(config.test!==undefined) {
+    const t=config.test
+    if(!object(t)||Object.keys(t).some(k=>!["globals","environment","setupFiles","exclude","include","coverage"].includes(k))||t.globals!==undefined&&typeof t.globals!=="boolean"||t.environment!==undefined&&!["jsdom","happy-dom","node"].includes(t.environment)||t.setupFiles!==undefined&&typeof t.setupFiles!=="string"||["exclude","include"].some(k=>t[k]!==undefined&&(!Array.isArray(t[k])||t[k].some((v:any)=>typeof v!=="string"||v.length>256)))||t.coverage!==undefined&&(!object(t.coverage)||Object.keys(t.coverage).some(k=>!["include","exclude"].includes(k))||Object.values(t.coverage).some(v=>!Array.isArray(v)||v.some(x=>typeof x!=="string"||x.length>256))))throw Error("Unsupported test-only configuration metadata.")
+    preserved.push("test: finite test-only preferences preserved; no uploaded test/setup code is executed.")
+  }
+  if(config.optimizeDeps!==undefined) {
+    if(!object(config.optimizeDeps)||Object.keys(config.optimizeDeps).some(k=>!["include","exclude"].includes(k))||Object.values(config.optimizeDeps).some(v=>!Array.isArray(v)||v.some(x=>typeof x!=="string"||!/^[@a-zA-Z0-9_./-]{1,128}$/.test(x))))throw Error("Unsupported dependency-optimization configuration.")
+    preserved.push("optimizeDeps: finite development prebundle preferences preserved; fixed production compiler still verifies every executed import.")
+  }
   for (const field of ["server", "preview"]) if (config[field] !== undefined) {
     const settings = config[field]
     if (!object(settings) || Object.entries(settings).some(([key, item]) => key === "port" ? !Number.isInteger(item) || item < 1 || item > 65535 : key === "open" ? typeof item !== "boolean" : true)) throw new Error("Only inert local dev-server open/port preferences can be preserved.")
@@ -161,10 +184,10 @@ function staticViteConfig(root: string, declared: Record<string, unknown>): { al
       aliases[key] = path.relative(root, confinedFile(root, path.relative(root, replacement))).split(path.sep).join("/")
     }
   }
-  return { aliases, base: config.base ?? "/", preserved }
+  return { aliases, base: config.base ?? "/", publicDir, tsconfigPaths:(config.plugins??[]).some((p:any)=>p.plugin==="vite-tsconfig-paths"), preserved }
 }
 
-export function inspectRuntime(project: ProjectRecord, applicationRoot: string): RuntimeReport {
+export function inspectRuntime(project: ProjectRecord, applicationRoot: string, runtimeValues: Record<string,string> = {}): RuntimeReport {
   const selectedProfile = selectProfile(project, applicationRoot)
   const report: RuntimeReport = { compilerOptions: {}, schema: 2, configuration: [], base: "/", environment: {}, profile: selectedProfile, supported: false, aliases: {}, clientDependencies: [], dependencies: [], issues: [], notes: [] }
   const issue = (code: string, message: string, requiredCapability = "A separately approved dependency/runtime profile or isolated build runner") => report.issues.push({ code, message, requiredCapability })
@@ -180,11 +203,17 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
     for (const name of ["react", "react-dom", "vite"]) if (!declared[name]) issue("missing-dependency", `Missing required declared dependency: ${name}.`)
     for (const name of Object.keys(manifest.dependencies ?? {})) if (manifest.devDependencies?.[name] && manifest.devDependencies[name] !== manifest.dependencies[name]) issue("dependency-conflict", `Conflicting declarations for ${name}.`)
     const lockNames = ["package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "bun.lockb"].filter(file => fs.existsSync(path.join(root, file)))
-    let lock: any
-    if (lockNames.length > 1 || lockNames.length === 1 && lockNames[0] !== "package-lock.json") issue("unsupported-lockfile", "Only a single npm package-lock v2/v3 is supported; other lockfiles are not ignored.")
+    let lock: any, lockDescription="npm lockfile"
+    if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, Yarn classic or Bun text lock is permitted; Berry, binary Bun and other unimplemented formats are preserved and refused.")
     if (lockNames.includes("package-lock.json")) {
       lock = json(root, "package-lock.json")
       if (![2, 3].includes(lock.lockfileVersion) || !object(lock.packages) || !object(lock.packages[""])) { issue("unsupported-lockfile", "npm package-lock v2/v3 with package records is required."); lock = undefined }
+    }
+    if(lockNames.length===1 && ["yarn.lock","bun.lock"].includes(lockNames[0])) {
+      let alternate
+      try { const text=fs.readFileSync(confinedFile(root,lockNames[0]),"utf8");alternate=lockNames[0]==="yarn.lock"?parseYarnClassic(text):parseBunText(text);lockDescription=alternate.format }
+      catch(error){issue("unsupported-lockfile",(error as Error).message)}
+      if(alternate)try{lock=normalizeAlternateLock(alternate,manifest,profileLock)}catch(error){issue("lock-conflict",(error as Error).message)}
     }
     for (const [name, range] of Object.entries(declared)) {
       const selected = profile.dependencies[name] as string | undefined, locked = lock?.packages[`node_modules/${name}`]?.version as string | undefined
@@ -247,20 +276,31 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
         for (const dependency of Object.keys(selected?.dependencies ?? {})) pending.push(dependency)
       }
     }
-    report.notes.push(lock ? "Client versions checked against the npm lockfile." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
+    report.notes.push(lock ? "Versions, integrity and required dependency/peer graph checked against the "+lockDescription+"." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
     if (object(manifest.scripts) && Object.keys(manifest.scripts).length) report.notes.push("Package scripts, including install/build hooks, are inspected only and never run during intake or preview.")
-    try { report.entry = htmlEntry(root) ?? project.detection.entry; if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
+    let tsconfigPaths = false
     const viteFile = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].find(file => fs.existsSync(path.join(root, file)))
-    try { const config = staticViteConfig(root, declared); report.aliases = config.aliases; report.base = config.base; for (const detail of config.preserved ?? []) report.configuration.push({ file: viteFile!, classification: "preserved-not-applied", detail }); if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
+    try { const config = staticViteConfig(root, declared); report.aliases = config.aliases; report.base = config.base; report.publicDir = config.publicDir; tsconfigPaths=Boolean(config.tsconfigPaths); for (const detail of config.preserved ?? []) report.configuration.push({ file: viteFile!, classification: "preserved-not-applied", detail }); if (viteFile) report.configuration.push({ file: viteFile, classification: "safely-translated", detail: "Static React/Tailwind plugin declarations, project aliases and local base; no config execution." }) }
     catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner"); report.configuration.push({ file: viteFile ?? "vite.config", classification: "requires-isolated-execution", detail: (error as Error).message }) }
-    report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base }
+    try { report.entry = htmlEntry(root,report.publicDir) ?? project.detection.entry; if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
+    report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base, ...publicRuntimeValues(runtimeValues) }
     const configs = new Set<string>()
     const readTsconfig = (file: string) => {
       if (configs.has(file)) return
       if (configs.size >= 8) throw new Error("Too many referenced TypeScript configurations.")
       configs.add(file)
-      const config = json(root, file, true), options = config.compilerOptions ?? {}
-      if (config.extends) throw new Error("Extended TypeScript configurations require explicit isolated resolution.")
+      const inherited = (name:string,chain=new Set<string>()):any => {
+        if(chain.has(name)||chain.size>=8)throw Error("Cyclic/deep TypeScript extends chain.")
+        chain.add(name);const own=json(root,name,true)
+        if(!object(own)||own.compilerOptions!==undefined&&!object(own.compilerOptions))throw Error("Invalid TypeScript config data.")
+        if(!own.extends)return own
+        if(typeof own.extends!=="string"||!/^\.\/[A-Za-z0-9_.-]+\.json$/.test(own.extends))throw Error("Only confined same-directory TypeScript extends files are supported.")
+        const baseFile=path.posix.join(path.posix.dirname(name),own.extends)
+        configs.add(baseFile);if(configs.size>8)throw Error("Too many TypeScript configuration files.")
+        const parent=inherited(baseFile,chain)
+        return {...parent,...own,references:own.references,compilerOptions:{...parent.compilerOptions,...own.compilerOptions}}
+      }
+      const config = inherited(file), options = config.compilerOptions ?? {}
       if (options.jsxImportSource && options.jsxImportSource !== "react" || options.experimentalDecorators || options.emitDecoratorMetadata || options.useDefineForClassFields === false || options.plugins || options.jsxFactory || options.jsxFragmentFactory || options.jsx && !["react-jsx", "react-jsxdev", "preserve"].includes(options.jsx)) throw new Error("Unsupported TypeScript runtime transformation setting.")
       const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && /^src(?:[/*]|$)/.test(item))
       if (appliesToSource) for (const name of ["useDefineForClassFields", "verbatimModuleSyntax", "importsNotUsedAsValues", "preserveValueImports"]) {
@@ -270,11 +310,12 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
         }
       }
       if (options.paths) {
-        if (!object(options.paths) || options.baseUrl && options.baseUrl !== ".") throw new Error("Only project-root TypeScript aliases are supported.")
+        if (!object(options.paths) || options.baseUrl && typeof options.baseUrl!=="string") throw new Error("Only project-root TypeScript aliases are supported.")
         for (const [key, replacements] of Object.entries(options.paths)) {
           if (!key.endsWith("/*") || !Array.isArray(replacements) || replacements.length !== 1 || typeof replacements[0] !== "string" || !replacements[0].endsWith("/*")) throw new Error("Only single-target TypeScript path aliases are supported.")
-          const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), replacements[0].slice(0, -2).replace(/^\.\//, ""))), alias = key.slice(0, -2)
+          const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), options.baseUrl??".", replacements[0].slice(0, -2).replace(/^\.\//, ""))), alias = key.slice(0, -2)
           confinedFile(root, target)
+          if(tsconfigPaths && report.aliases[alias]===undefined) { if(!/^[@~][\w/-]*$/.test(alias))throw Error("Unsupported TypeScript plugin alias.");report.aliases[alias]=target }
           if (report.aliases[alias] !== target) throw new Error(`TypeScript alias ${alias} must match an explicit static Vite alias.`)
         }
       }
@@ -282,9 +323,11 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
     }
     try { for (const file of ["tsconfig.json", "jsconfig.json"]) if (fs.existsSync(path.join(root, file))) readTsconfig(file)
       for (const file of configs) report.configuration.push({ file, classification: "statically-supported", detail: "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate." }) } catch (error) { issue("tsconfig", (error as Error).message) }
+    try { report.cssPlan=inspectCssPlan(root,declared,selectedProfile); for(const file of report.cssPlan?.files??[])report.configuration.push({file,classification:"safely-translated",detail:"Finite static CSS data through the operator-pinned "+report.cssPlan!.kind+" adapter; uploaded configuration is never executed."}) } catch(error) { issue("css-config",(error as Error).message) }
     const cssConfigs = fs.readdirSync(root).filter(file => /^(?:tailwind|postcss)\.config\.(?:[cm]?[jt]s|json)$/.test(file) || /^\.postcssrc(?:\.|$)/.test(file))
     if (manifest.postcss) cssConfigs.push("package.json#postcss")
     for (const file of cssConfigs) {
+      if(report.cssPlan?.files.includes(file))continue
       if(/^tailwind\.config\.[jt]s$/.test(file)&&isDefaultTailwindConfig(fs.readFileSync(confinedFile(root,file),'utf8'))) {
         report.configuration.push({file,classification:'preserved-not-applied',detail:'Finite default legacy Tailwind config; CSS-first compiler defaults are equivalent, bytes preserved and no config executed.'});continue
       }
@@ -296,7 +339,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string):
       try {
         const stylesheet = fs.readFileSync(confinedFile(root, file), "utf8")
         if (/@import\s+(?:url\()?\s*[\"\']?https?:|url\(\s*[\"\']?https?:/i.test(stylesheet)) report.notes.push(`${file}: external CSS resource URLs are preserved; controlled preview network access remains denied.`)
-        const result = validateStylesheetConfiguration(stylesheet, selectedProfile !== PROFILE)
+        const result = report.cssPlan ? (validateFiniteCss(stylesheet,report.cssPlan),{theme:false}) : validateStylesheetConfiguration(stylesheet, selectedProfile !== PROFILE)
         if (result.theme) report.configuration.push({ file, classification: "safely-translated", detail: "Literal CSS @theme custom properties through the pinned Tailwind compiler." })
       } catch (error) { report.issues.push({ file, code: "css-directive", classification: "unsupported", message: file + ": " + (error as Error).message, requiredCapability: "A supported static theme or isolated configuration profile" }) }
     }

@@ -1,0 +1,341 @@
+{
+  "threatModel": {
+    "summary": "Read-only architecture map of WebCanBe P05\u2013P08 at 0f33e11ea60ee4b69ed6a0de5144f73400fe5808. WebCanBe imports React/Vite source, preserves canonical files, interprets a finite static runtime grammar, compiles browser artifacts using repository-owned profiles, and renders hostile project JavaScript inside controlled Chromium. Local Vite mode is a single-operator development path; packaged hosted mode composes PostgreSQL identity/source/artifact/lease authority with an mTLS Linux gateway (vite.config.ts:9; src/webcanbe-engine/runtime/viteFixturePlugin.ts:48; scripts/hosted/editor-main.ts:11; src/webcanbe-engine/runtime/hostedEditor.ts:50). A generic remote static-asset fetch/cache service is absent from the inspected composition: CSS URLs remain external and runtime egress remains denied (src/webcanbe-engine/runtime/isolatedPreview.ts:74; scripts/runner/launch.sh:16). This is architecture mapping, not completed audit coverage.",
+    "assets": [
+      "Canonical imported source bytes and exact export content: local imports reside under <applicationRoot>/.webcanbe/projects/<UUID>[/single archive wrapper]; hosted canonical bytes and revision/history reside in PostgreSQL wcb_projects, with disposable private checkouts (src/webcanbe-engine/runtime/projectRegistry.ts:150; src/webcanbe-engine/runtime/projectRegistry.ts:191; src/webcanbe-engine/runtime/hostedProjectRegistry.ts:40; src/webcanbe-engine/runtime/postgresStores.ts:129; src/webcanbe-engine/runtime/postgresSourceCheckout.ts:15). exportProjectZip reads original file buffers with the same project bounds (src/webcanbe-engine/runtime/projectExport.ts:6).",
+      "Operator-owned browser dependency/compiler graph at <applicationRoot>/runtime-profiles/<selectedProfile>/node_modules, selected from seven named profiles. Manifest ranges and supported npm lock versions/integrities, nested dependencies, optional dependencies and peers constrain available browser packages (src/webcanbe-engine/runtime/runtimeCompatibility.ts:12; src/webcanbe-engine/runtime/runtimeCompatibility.ts:16; src/webcanbe-engine/runtime/runtimeCompatibility.ts:172; src/webcanbe-engine/runtime/runtimeCompatibility.ts:182; src/webcanbe-engine/runtime/runtimeCompatibility.ts:199).",
+      "Platform environment, local filesystem, process/network authority, server credentials, PostgreSQL memberships and source ownership must stay outside uploaded configuration and default preview jobs. Current compiler environment is only MODE=production, PROD=true, DEV=false, SSR=false, BASE_URL=<static base>, with process.env.NODE_ENV=production (src/webcanbe-engine/runtime/runtimeCompatibility.ts:256; src/webcanbe-engine/runtime/isolatedPreview.ts:69). Example env values are inert source metadata (src/webcanbe-engine/runtime/intakeMetadata.ts:1; src/webcanbe-engine/runtime/intakeMetadata.ts:28).",
+      "Immutable compiled snapshot bytes and their workspace/project/revision/generation/digest binding; PostgreSQL wcb_artifacts stores the payload and retirement tombstone, not a client-chosen filesystem object. Per snapshot bounds are 2,000 files/32 MiB decoded and PG verification additionally bounds JSON to 48 MiB; active PG artifacts are capped at 16 per project (src/webcanbe-engine/runtime/controlledPreview.ts:26; src/webcanbe-engine/runtime/controlledPreview.ts:214; src/webcanbe-engine/runtime/postgresStores.ts:199).",
+      "Resource budgets and isolation: ZIP 25 MiB compressed/40 MiB expanded/2 MiB per member/2,000 entries/100 ratio; metadata 16 KiB; compilation cancellation 15 s; preview lease at most 60 s; systemd memory 1536M, no swap, CPU 150%, 192 tasks, 65 s watchdog; user requires these existing bounds unchanged (src/webcanbe-engine/runtime/projectRegistry.ts:14; src/webcanbe-engine/runtime/intakeMetadata.ts:5; src/webcanbe-engine/runtime/incrementalPreview.ts:33; src/webcanbe-engine/runtime/controlledPreview.ts:168; scripts/runner/launch.sh:11)."
+    ],
+    "trustBoundaries": [
+      "Uploader -> archive parser/private storage: safeArchivePath rejects absolute/traversal/noncanonical/reserved paths and installed dependencies; extraction validates every member before creating destination, rejects links/encryption/conflicts, checks inflated sizes and CRC, validates UTF-8 text and finite inert metadata, and writes exclusive files mode 0600 in private directories (src/webcanbe-engine/runtime/projectRegistry.ts:45; src/webcanbe-engine/runtime/projectRegistry.ts:53; src/webcanbe-engine/runtime/projectRegistry.ts:98; src/webcanbe-engine/runtime/intakeMetadata.ts:6). Metadata classification does not grant execution or environment authority.",
+      "Uploaded manifest/lock/config/HTML -> trusted interpretation/compiler: JSON/JSONC, TypeScript AST and parse5 are data parsers. Vite accepts finite imported binding/literal/plugin/base/alias forms and rejects executable statements; HTML requires one local src JSX/TSX module and div#root; TypeScript aliases must match explicit confined Vite aliases. Current generated HTML also uses div#root (src/webcanbe-engine/runtime/runtimeCompatibility.ts:35; src/webcanbe-engine/runtime/runtimeCompatibility.ts:49; src/webcanbe-engine/runtime/runtimeCompatibility.ts:71; src/webcanbe-engine/runtime/runtimeCompatibility.ts:137; src/webcanbe-engine/runtime/runtimeCompatibility.ts:258; src/webcanbe-engine/runtime/isolatedPreview.ts:202).",
+      "Project browser imports -> operator-owned vendor graph: esbuild resolution requires allowed browser packages and realpath containment within the dedicated profile vendor root. Project aliases/relative/public imports must remain within their permitted source roots. Tailwind is required only after checking its resolved compiler path is within that vendor root; Tailwind stylesheet loading accepts only the fixed tailwindcss identifier (src/webcanbe-engine/runtime/isolatedPreview.ts:55; src/webcanbe-engine/runtime/isolatedPreview.ts:84; src/webcanbe-engine/runtime/isolatedPreview.ts:121). Uploaded lifecycle scripts, plugins and package managers are not called by this compilation path.",
+      "CSS -> trusted transformation and static artifact namespace: PostCSS parses data; executable/scanning directives are refused and literal root @theme is bounded. Custom Tailwind/PostCSS config is refused except a finite default legacy config classified preserved-not-applied. HTTP CSS resource URLs are preserved without fetch; public files are limited to the compiler's image/font extensions and do not publish source/config/dotfiles (src/webcanbe-engine/runtime/configuration.ts:12; src/webcanbe-engine/runtime/runtimeCompatibility.ts:285; src/webcanbe-engine/runtime/isolatedPreview.ts:74; src/webcanbe-engine/runtime/isolatedPreview.ts:176). SVG is currently an admitted local image type; this is not evidence that arbitrary remote SVG is inert.",
+      "Browser account/capability -> hosted PG project/source authority: HTTP derives grant from authenticated account and route; caller authority/storage fields are refused. PG checks current session, membership, role and epoch. Hosted private materialization is repopulated from an authorized PG snapshot on every use; after asynchronous action it rereads and matches epoch/revision. A compiler-owned temporary directory is read-only as authority (src/webcanbe-engine/runtime/hostedEditor.ts:79; src/webcanbe-engine/runtime/hostedEditor.ts:120; src/webcanbe-engine/runtime/postgresStores.ts:73; src/webcanbe-engine/runtime/hostedProjectRegistry.ts:119; src/webcanbe-engine/runtime/postgresSourceCheckout.ts:15).",
+      "Compiler/cache -> artifact store -> controlled job: snapshotPreview sorts immutable bytes and hashes exact HTML/file payload; storedSnapshot derives the tenant/project/revision/generation/digest reference from server grant. PG authorizes both put/get, verifies digest/limits, serializes quota/retirement, and refuses resurrection of retired keys. Transport independently checks current authority and revision after compilation and runner update/start, so an artifact key is not authorization (src/webcanbe-engine/runtime/controlledPreview.ts:26; src/webcanbe-engine/runtime/controlledPreview.ts:115; src/webcanbe-engine/runtime/controlledPreview.ts:179; src/webcanbe-engine/runtime/controlledPreview.ts:214; src/webcanbe-engine/runtime/controlledPreview.ts:247; src/webcanbe-engine/runtime/postgresStores.ts:199).",
+      "Hosted control plane -> isolated Linux browser: trusted operator configuration selects mTLS host inventory and credentials; the gateway accepts only fixed fenced RPCs and rejects browser cookies/origins. Linux supervisor launches /opt/wcb-runtime/launch.sh with a generated UUID and minimal environment. systemd plus bwrap --unshare-all/--clearenv/read-only runtime mounts/tmpfs enforce OS isolation; Chromium retains its native sandbox. Worker artifact routing is delivery, not the firewall; external requests continue toward the isolated OS network boundary (scripts/hosted/editor-main.ts:11; src/webcanbe-engine/runtime/hostedLinuxRunner.ts:16; src/webcanbe-engine/runtime/hostedRunnerGateway.ts:14; src/webcanbe-engine/runtime/linuxHostRunner.ts:19; scripts/runner/launch.sh:8; scripts/runner/worker.cjs:34; scripts/runner/worker.cjs:64).",
+      "Existing immutable external source intake is a distinct capability: operator opt-in provides only https://codeload.github.com/<repository>/zip/<full commit>, public IPv4 DNS validation and pinned lookup, no redirect following, 10 s/25 MiB transfer bounds and SHA-256 origin provenance. Hosted authorization surrounds the fetch and intake commit. This fixed GitHub ZIP service does not implement a generic remote asset cache (scripts/hosted/editor-main.ts:15; src/webcanbe-engine/runtime/externalSource.ts:9; src/webcanbe-engine/runtime/externalSource.ts:23; src/webcanbe-engine/runtime/hostedEditor.ts:87; src/webcanbe-engine/runtime/hostedProjectRegistry.ts:25).",
+      "Proposed boundary, user-supplied requirement: remote asset locations/content remain untrusted and must pass a separate server-owned HTTPS-only bounded SSRF-safe fetch service; no cookies, credentials or custom headers; DNS and each redirect revalidated; immutable cached assets only; no JavaScript/executable remote content. New async work must retain fresh PG/project/revision authorization and unchanged source/export bytes. No implementation or deployment for this boundary was found in the scoped composition; its controls are requirements, not established guarantees."
+    ],
+    "attackerCapabilities": [
+      "An authorized owner/editor can supply arbitrary ZIP/source/config/package/HTML/CSS/asset bytes within admitted formats, public source references, and client request data for projects they can access. Such bytes are hostile even when a repository is public. The attacker does not initially control operator applicationRoot, profile installation, PG grants, management PKI, or the fixed runner executable (src/webcanbe-engine/runtime/hostedEditor.ts:79; src/webcanbe-engine/runtime/hostedEditor.ts:87; src/webcanbe-engine/runtime/postgresStores.ts:23; scripts/hosted/editor-main.ts:9).",
+      "A project browser program can execute browser JavaScript inside its isolated preview, issue URL requests and generate app output, but the strict path provides raster output to the user browser and no strict-to-Blob fallback. The existing local non-strict Blob mode is a separate operator-development path and cannot establish OS no-egress (src/webcanbe-engine/runtime/controlledPreview.ts:101; src/webcanbe-engine/runtime/viteFixturePlugin.ts:167; scripts/runner/worker.cjs:64).",
+      "A remote static asset host, if the requested future feature is installed, could control response bytes, redirect targets and changing DNS answers. Crossing that future boundary could add server network reachability or cache-content influence that the isolated app presently lacks; no such capability is assumed granted today.",
+      "Possession of a generation, artifact digest, stale capability or another tenant's project ID does not itself confer authority; server membership/session epochs and current source revisions must continue to govern access (src/webcanbe-engine/runtime/hostedProjectRegistry.ts:90; src/webcanbe-engine/runtime/postgresStores.ts:85; src/webcanbe-engine/runtime/controlledPreview.ts:118)."
+    ],
+    "securityObjectives": [
+      "User requirement: preserve canonical unchanged source and exports; perform compatibility translation in server-owned derived runtime data/artifacts, never by deleting or rewriting uploaded config/locks/files. Preserve exact archive, artifact, timeout and isolation bounds. Existing export reads raw canonical buffers (src/webcanbe-engine/runtime/projectExport.ts:6).",
+      "User requirement: do not execute uploaded Node configuration, plugins, lifecycle hooks or package managers; never resolve application modules from host fallback. Expand only finite static semantics and operator-owned pinned graphs. Existing enforcing compiler paths: src/webcanbe-engine/runtime/runtimeCompatibility.ts:71; src/webcanbe-engine/runtime/isolatedPreview.ts:55.",
+      "User requirement: public environment values require explicit server-owned grants; .env.example admission must remain inert metadata, not automatic runtime injection. Preserve no exposure of process environment or preview credentials. Current fixed environment and unsupported-reference gate: src/webcanbe-engine/runtime/runtimeCompatibility.ts:256; src/webcanbe-engine/runtime/runtimeCompatibility.ts:303.",
+      "User requirement: keep default runner external network denied. A remote asset service must remain separate, HTTPS-only, bounded, SSRF-safe, without cookies/credentials/custom headers; validate DNS and redirects, reject JavaScript/executable content and cache immutable bytes. Do not expose source roots, editor static origin or management network as an asset proxy.",
+      "User requirement: stale/cross-tenant/cross-project/revision cache and artifact references must fail closed; preserve fresh server/PG authority before and after asynchronous operations, exact snapshot integrity and retirement semantics (src/webcanbe-engine/runtime/postgresSourceCheckout.ts:39; src/webcanbe-engine/runtime/controlledPreview.ts:214; src/webcanbe-engine/runtime/controlledPreview.ts:252; src/webcanbe-engine/runtime/postgresStores.ts:226)."
+    ],
+    "assumptions": [
+      "Authorized scope is focused P05\u2013P08 compatibility breadth and supporting callers. P39/P61 input/performance and later product scope are excluded. No application code, tests, network requests, scan or vulnerability-triggering inputs were executed; this reviewer did not modify repository source. Concurrent parent edits appeared during final verification, so all cited architecture facts and line anchors are explicitly pinned to git object 0f33e11ea60ee4b69ed6a0de5144f73400fe5808 rather than the changing worktree.",
+      "Observed startup values are formulas resolved from trusted startup input, not a claim that production deployment exists: local applicationRoot=process.cwd(); hosted applicationRoot=realpath(operator config.applicationRoot); hosted editor static root=realpath(config.applicationRoot/dist). PG connection and mTLS material are private operator references and their values were not read (vite.config.ts:9; scripts/hosted/editor-main.ts:11; src/webcanbe-engine/runtime/hostedEditorServer.ts:12).",
+      "Documented P05\u2013P08 incompleteness agrees with inspected restrictions: Yarn/Bun graphs; custom mount/vite-tsconfig-paths/UnoCSS/alias combinations; public-env and remote assets; Tailwind3/PostCSS/UnoCSS remain open. The report states the Redux .yarn/releases/yarn-4.2.2.cjs member is 2,742,928 bytes; no original archive was remeasured here. With the required unchanged 2 MiB member limit and no file dropping, that specific unchanged import remains blocked by design (docs/reports/phase2-final-internal-closure.md:51; src/webcanbe-engine/runtime/projectRegistry.ts:14).",
+      "Finite default Tailwind config equivalence is a narrow implementation claim, not general Tailwind3/PostCSS support; the report retains the broader gap (src/webcanbe-engine/runtime/runtimeCompatibility.ts:285; docs/reports/phase2-final-internal-closure.md:54).",
+      "Remote asset cache design remains unresolved: exact allowed media/CSS grammar, redirect count, DNS/IP coverage, per-asset/aggregate quotas, cancellation, cache storage/ownership/keying/lifetime and URL-to-artifact binding require implementation evidence. Existing local SVG admission must not be treated as remote-content safety. No current generic public-env grant persistence/API was established.",
+      "Local Blob compatibility and development-provider injection are separate from packaged hosted strict execution. The comment in vite.config.ts:10 describes opaque frames, whereas controlled provider startup in vite.config.ts:9 and ControlledPreviewTransport uses OS-isolated raster execution; the operative paths, not that general comment, define the distinction.",
+      "Hosted readiness is explicitly UNPROVEN/publicImportReady=false in the API and final closure remains incomplete. Deployment PKI, DNS, actual PG/hosts and runtime installation were not verified by this offline mapping (src/webcanbe-engine/runtime/hostedEditor.ts:129; docs/reports/phase2-final-internal-closure.md:3)."
+    ]
+  },
+  "effectiveResources": [
+    {
+      "consumer": "Local import/export source",
+      "deployment": "Local Vite development",
+      "configurationChain": "process.cwd() -> webCanBeFixturePlugin -> ProjectRegistry.importedRoot -> random UUID -> optional single archive wrapper",
+      "effectiveValue": "<applicationRoot>/.webcanbe/projects/<UUID>[/<single wrapper>]; export reads canonical buffers",
+      "recipients": [
+        "Local operator registry/compiler/export"
+      ],
+      "enforcingControl": "safeArchivePath, full validation before writes, 25/40/2 MiB archive bounds, 2,000 entries, ratio 100; local max 20 imports",
+      "evidence": [
+        "vite.config.ts:9",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:45",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:98",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:150",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:191",
+        "src/webcanbe-engine/runtime/projectExport.ts:6"
+      ]
+    },
+    {
+      "consumer": "Hosted canonical source and compilation checkout",
+      "deployment": "Packaged hosted editor",
+      "configurationChain": "operator config.applicationRoot -> HostedEditor PG store -> authorized wcb_projects snapshot -> per-operation or per-generation private materialization",
+      "effectiveValue": "PG wcb_projects.{files,history,revision,source_epoch}; <os.tmpdir()>/wcb-source-checkout-<random>/project or wcb-compiler-checkout-<random>/project; sibling history/<projectId>/history.json",
+      "recipients": [
+        "PG source store",
+        "Server compiler/source adapter"
+      ],
+      "enforcingControl": "PG session/member epoch authorization; repopulate every use; cache cannot write canonical state; post-action PG epoch/revision equality",
+      "evidence": [
+        "scripts/hosted/editor-main.ts:15",
+        "src/webcanbe-engine/runtime/postgresStores.ts:129",
+        "src/webcanbe-engine/runtime/postgresSourceCheckout.ts:15",
+        "src/webcanbe-engine/runtime/postgresSourceCheckout.ts:39",
+        "src/webcanbe-engine/runtime/incrementalPreview.ts:16"
+      ]
+    },
+    {
+      "consumer": "Browser dependency resolution",
+      "deployment": "Both local and hosted compiler",
+      "configurationChain": "applicationRoot -> selected named profile -> pinned package.json/package-lock.json -> dedicated node_modules",
+      "effectiveValue": "<applicationRoot>/runtime-profiles/<selectedProfile>/node_modules; uploaded node_modules forbidden",
+      "recipients": [
+        "Trusted esbuild resolver",
+        "Compiled isolated browser app"
+      ],
+      "enforcingControl": "Declared semver and supported npm lock integrity/version/peer graph checks; realpath containment; client package closure; host fallback refused",
+      "evidence": [
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:16",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:172",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:182",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:199",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:84"
+      ]
+    },
+    {
+      "consumer": "Tailwind compiler and stylesheet loader",
+      "deployment": "Both local and hosted compiler",
+      "configurationChain": "selected profile createRequire -> realpath check -> require(tailwindcss); fixed loadStylesheet identifier",
+      "effectiveValue": "tailwindcss compiler and tailwindcss/index.css from the dedicated profile; transient generated CSS only",
+      "recipients": [
+        "Server compiler",
+        "Derived preview CSS"
+      ],
+      "enforcingControl": "No uploaded configuration evaluation; finite directive/theme grammar; only literal tailwindcss stylesheet loader ID",
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:55",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:121",
+        "src/webcanbe-engine/runtime/configuration.ts:12",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:285"
+      ]
+    },
+    {
+      "consumer": "Compile-time public environment",
+      "deployment": "Both local and hosted compiler",
+      "configurationChain": "Static Vite base -> inspectRuntime.environment -> esbuild define; fast refresh receives same map",
+      "effectiveValue": "MODE=production, PROD=true, DEV=false, SSR=false, BASE_URL=<static base>; process.env.NODE_ENV=production in ordinary compilation",
+      "recipients": [
+        "Compiled browser source"
+      ],
+      "enforcingControl": "Unknown/computed env references refused; .env.example grammar only validates preserved metadata; no platform env lookup here",
+      "evidence": [
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:256",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:303",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:69",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:164",
+        "src/webcanbe-engine/runtime/intakeMetadata.ts:28"
+      ],
+      "missingImpactPrerequisite": "Explicit server-owned public-env grants are requested but absent from this inspected baseline."
+    },
+    {
+      "consumer": "Preview artifact generation",
+      "deployment": "Both controlled compiler paths",
+      "configurationChain": "project root -> write:false virtual output -> generated /_wcb app/bridge/assets; project public images/fonts -> snapshot",
+      "effectiveValue": "In-memory <projectRoot>/.webcanbe-virtual-output filenames; /_wcb/app.js, /_wcb/app.css, /_wcb/bridge.js, hashed assets and admitted /public relative/base paths; generated div#root HTML",
+      "recipients": [
+        "Snapshot builder",
+        "Controlled browser"
+      ],
+      "enforcingControl": "No artifact disk writes; confined asset types/paths; local source/config/dotfiles excluded; 2 MiB public member and 32 MiB/2,000 snapshot bounds",
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:63",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:153",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:176",
+        "src/webcanbe-engine/runtime/controlledPreview.ts:26"
+      ]
+    },
+    {
+      "consumer": "Hosted immutable artifacts",
+      "deployment": "Packaged hosted editor PostgreSQL",
+      "configurationChain": "fresh preview grant -> workspace/project/revision/generation/digest reference -> PG artifact put/get -> controlled snapshot",
+      "effectiveValue": "wcb_artifacts payload keyed by (workspace_id,project_id,revision,generation,digest)",
+      "recipients": [
+        "Authorized server-controlled preview job"
+      ],
+      "enforcingControl": "Fresh PG access, exact digest, immutable payload equality, quota serialization, retired-key tombstones; transport separately validates current revision",
+      "evidence": [
+        "src/webcanbe-engine/runtime/controlledPreview.ts:214",
+        "src/webcanbe-engine/runtime/controlledPreview.ts:252",
+        "src/webcanbe-engine/runtime/postgresStores.ts:199"
+      ],
+      "documentedClaim": "Artifact reference is not authority; stale/retired bytes must not regain access."
+    },
+    {
+      "consumer": "Local controlled browser process",
+      "deployment": "Operator opt-in Lima",
+      "configurationChain": "WCB_PREVIEW_PROVIDER=lima -> LocalLimaRunnerProvider(root) -> repository limactl -> wcb guest -> fixed sudo launch",
+      "effectiveValue": "<applicationRoot>/.webcanbe/runner/tools/bin/limactl; LIMA_HOME=<applicationRoot>/.webcanbe/runner/lima; guest /opt/wcb-runtime/launch.sh <UUID>",
+      "recipients": [
+        "Local operator's Lima management process",
+        "Isolated guest browser"
+      ],
+      "enforcingControl": "VM mounts=[]; no SSH agent/proxy-env forwarding; guest systemd/bwrap boundary; minimal cleared job environment",
+      "evidence": [
+        "vite.config.ts:9",
+        "src/webcanbe-engine/runtime/localLimaRunner.ts:19",
+        "scripts/runner/vm.yaml:10",
+        "scripts/runner/launch.sh:8"
+      ]
+    },
+    {
+      "consumer": "Hosted controlled browser process",
+      "deployment": "Dedicated Linux host",
+      "configurationChain": "operator host inventory/PKI -> HTTPS /rpc -> PG fenced gateway -> fixed LinuxHostRunnerProvider sudo launch",
+      "effectiveValue": "Configured mTLS host.origin/rpc; host /opt/wcb-runtime/launch.sh <UUID>; job HOME=/home/runner, TMPDIR=/tmp, PATH=/usr/bin with tmpfs /tmp and /home; read-only /opt/wcb-runtime",
+      "recipients": [
+        "Management gateway",
+        "Isolated Chromium only for project execution"
+      ],
+      "enforcingControl": "mTLS and fixed RPC set; PG fencing; bwrap --unshare-all, --clearenv, read-only runtime mounts; native Chromium sandbox; network external=deny",
+      "evidence": [
+        "scripts/hosted/editor-main.ts:14",
+        "src/webcanbe-engine/runtime/hostedLinuxRunner.ts:20",
+        "src/webcanbe-engine/runtime/hostedRunnerGateway.ts:14",
+        "src/webcanbe-engine/runtime/linuxHostRunner.ts:19",
+        "scripts/runner/launch.sh:8",
+        "scripts/runner/worker.cjs:34"
+      ]
+    },
+    {
+      "consumer": "Editor/viewer HTTP static delivery",
+      "deployment": "Packaged hosted HTTPS",
+      "configurationChain": "operator applicationRoot -> dist -> realpath static root; configured editor/viewer hosts",
+      "effectiveValue": "<applicationRoot>/dist/index.html and dist/assets/<bounded filename> only; viewer / returns trusted raster viewer document",
+      "recipients": [
+        "Ordinary user browser"
+      ],
+      "enforcingControl": "Host match, method/path/type allowlist, realpath confinement, CSP; imported source/artifacts are outside static namespace",
+      "evidence": [
+        "scripts/hosted/editor-main.ts:16",
+        "src/webcanbe-engine/runtime/hostedEditorServer.ts:8"
+      ]
+    },
+    {
+      "consumer": "Immutable external source transfer",
+      "deployment": "Optional packaged hosted import-source API",
+      "configurationChain": "publicGitHubSourceIntake=true -> GitHubSourceProvider -> validated repository/full commit -> fixed codeload URL",
+      "effectiveValue": "https://codeload.github.com/<owner>/<repo>/zip/<40-hex commit>",
+      "recipients": [
+        "Bounded ZIP intake and origin digest receipt"
+      ],
+      "enforcingControl": "No caller URL/credentials/redirects/proxy/port/DNS override; public IPv4 DNS pinning; 10 s and 25 MiB; identity encoding; fresh authorization around async fetch",
+      "evidence": [
+        "scripts/hosted/editor-main.ts:15",
+        "src/webcanbe-engine/runtime/externalSource.ts:9",
+        "src/webcanbe-engine/runtime/externalSource.ts:23",
+        "src/webcanbe-engine/runtime/hostedEditor.ts:87"
+      ]
+    },
+    {
+      "consumer": "Requested remote static-asset fetch/cache",
+      "deployment": "Not implemented in baseline composition",
+      "configurationChain": "User-required future separate server-owned service; concrete configuration/API/storage not established",
+      "effectiveValue": "Currently HTTP(S) CSS URLs remain external browser data; no generic static asset cache location",
+      "recipients": [
+        "Future bounded compiler-derived immutable artifacts, never canonical source or ordinary editor static files"
+      ],
+      "enforcingControl": "Required, not yet verified: HTTPS only, no cookies/credentials/custom headers, SSRF-safe DNS and redirect revalidation, immutable non-executable assets, fresh tenant/project/revision authority, unchanged runner deny and resource limits",
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:74",
+        "src/webcanbe-engine/runtime/hostedEditor.ts:50",
+        "scripts/hosted/editor-main.ts:15",
+        "docs/reports/phase2-final-internal-closure.md:53"
+      ],
+      "missingImpactPrerequisite": "Feature implementation and deployment are required before its guarantees can be verified."
+    }
+  ],
+  "resolved_questions": [
+    {
+      "question": "Are .env.example values loaded into the preview?",
+      "answer": "No in the inspected baseline. They are finite validated inert metadata; compiler environment is assigned fixed constants. Explicit public-env grants remain an implementation gap.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/intakeMetadata.ts:28",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:256",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:303"
+      ]
+    },
+    {
+      "question": "Can compatibility expansion execute uploaded config/plugin/package scripts?",
+      "answer": "The current path parses a fixed AST/JSON/CSS grammar and compiles against trusted profiles. It does not invoke uploaded config modules, package managers or lifecycle hooks. Existing diagnostic wording about an isolated configuration runner is a required capability message, not an installed fallback.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:71",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:251",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:255",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:55"
+      ]
+    },
+    {
+      "question": "Can the existing archive bounds admit the unchanged oversized Redux Yarn member?",
+      "answer": "No if the report's 2,742,928-byte member measurement is retained. Source enforces 2 MiB independently at metadata and streaming stages. The parent must retain this explicit constraint conflict rather than claim full unchanged Redux intake.",
+      "evidence": [
+        "docs/reports/phase2-final-internal-closure.md:51",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:14",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:69",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:81"
+      ]
+    },
+    {
+      "question": "Is there already a remote asset fetcher that should simply be enabled?",
+      "answer": "No generic static-asset fetcher is in the inspected composition. The compiler preserves external CSS URLs and the only inspected source-fetch provider is operator-enabled fixed codeload ZIP intake. That provider is a separate capability and does not implement redirects, arbitrary asset hosts or cache semantics.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:74",
+        "src/webcanbe-engine/runtime/externalSource.ts:23",
+        "scripts/hosted/editor-main.ts:15"
+      ]
+    },
+    {
+      "question": "What controls own no-egress?",
+      "answer": "The job contract and worker require external=deny; actual network isolation is systemd/bwrap --unshare-all with native Chromium sandbox. Worker routes deliberately continue external requests, so browser routing is not the firewall. Local legacy Blob mode is not equivalent to strict execution.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/controlledPreview.ts:187",
+        "scripts/runner/launch.sh:16",
+        "scripts/runner/worker.cjs:36",
+        "scripts/runner/worker.cjs:64",
+        "src/webcanbe-engine/runtime/viteFixturePlugin.ts:167"
+      ]
+    },
+    {
+      "question": "Can hosted compiler cache state become source authority or serve stale bytes after asynchronous work?",
+      "answer": "The intended current flow rereads authorized PG state, repopulates the per-generation checkout every time, forbids writing a cache checkout, checks PG epoch/revision after the action, and separately checks controlled authority/revision after compilation and runner work. These are the required integration points for new async asset work.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/postgresSourceCheckout.ts:15",
+        "src/webcanbe-engine/runtime/postgresSourceCheckout.ts:39",
+        "src/webcanbe-engine/runtime/controlledPreview.ts:179",
+        "src/webcanbe-engine/runtime/controlledPreview.ts:247"
+      ]
+    },
+    {
+      "question": "Do artifact references alone authorize access and resurrection?",
+      "answer": "No. PG artifact put/get derive and validate a full tenant/project/revision/generation/digest tuple and fresh preview grant. Immutable equality, digest validation, quotas and retired tombstones are distinct controls; transport independently checks current revision.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/controlledPreview.ts:214",
+        "src/webcanbe-engine/runtime/postgresStores.ts:199",
+        "src/webcanbe-engine/runtime/postgresStores.ts:226"
+      ]
+    },
+    {
+      "question": "What prevents derived compatibility work entering source exports or the editor origin?",
+      "answer": "Compilation uses write:false and a virtual artifact map, exports read canonical project files, and hosted static routing only serves platform dist files. A new asset cache must remain outside the canonical source root and this editor namespace.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:63",
+        "src/webcanbe-engine/runtime/projectExport.ts:6",
+        "src/webcanbe-engine/runtime/hostedEditorServer.ts:8"
+      ]
+    },
+    {
+      "question": "Are the broader compatibility gaps external deployment blockers?",
+      "answer": "No. The report explicitly keeps P05\u2013P08 as internal finite-grammar/profile/env/cache work. Only the oversized exact member cannot be reconciled with the requested fixed limit without changing one of those requirements. This pass does not claim completion of those rows.",
+      "evidence": [
+        "docs/reports/phase2-final-internal-closure.md:51",
+        "docs/reports/phase2-final-internal-closure.md:52",
+        "docs/reports/phase2-final-internal-closure.md:53",
+        "docs/reports/phase2-final-internal-closure.md:54"
+      ]
+    }
+  ]
+}

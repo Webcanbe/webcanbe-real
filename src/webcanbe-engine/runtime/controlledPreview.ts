@@ -1,3 +1,5 @@
+import { readPublicRuntimeValues, type PublicRuntimeValueProvider } from "./publicRuntimeValues"
+import { TrustedStaticAssets } from "./staticAssets"
 import { semanticSnapshot, semanticResult } from "./semanticTypecheck"
 import type { ProjectGrant } from "./hostedAuthority"
 import type { RunnerOwner } from "./runnerScheduler"
@@ -107,7 +109,7 @@ export class ControlledPreviewTransport {
   private closed = false
   private quarantined = false
   private readonly sweepTimer: ReturnType<typeof setInterval>
-  constructor(private readonly registry: PreviewRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now, private readonly artifacts?: PreviewArtifactStore, private readonly options: { fastRefresh?: boolean } = {}) {
+  constructor(private readonly registry: PreviewRegistry, private readonly applicationRoot: string, private readonly runner?: ProjectRunner, private readonly now = Date.now, private readonly artifacts?: PreviewArtifactStore, private readonly options: { fastRefresh?: boolean; publicRuntimeValueProvider?: PublicRuntimeValueProvider; staticAssets?: TrustedStaticAssets } = {}) {
     this.sweepTimer = setInterval(() => { void this.sweep().catch(() => { this.quarantined = true }) }, 250)
     this.sweepTimer.unref()
   }
@@ -153,6 +155,18 @@ export class ControlledPreviewTransport {
     if (results.some(result => result.status === "rejected")) throw new Error("Controlled runner cleanup failed; transport quarantined.")
   }
 
+  private async compileWithRuntime(entry: Entry, project: ProjectRecord, revision: string) {
+    const assertCurrent = async () => {
+      if(this.closed||this.quarantined||entry.retired||entry.expiresAt<=this.now()||!await this.authorized(entry.projectId,entry.authority)||await this.registry.revision(entry.projectId,entry.authority.previewId)!==revision)throw Error("Runtime materialization authority/revision expired.")
+    }
+    await assertCurrent()
+    const owner = await this.registry.sessionOwner(entry.projectId,entry.authority.previewId), scope = {...owner,revision}
+    const values = await readPublicRuntimeValues(this.options.publicRuntimeValueProvider,scope,entry.abort.signal,assertCurrent)
+    const build = await buildIsolatedHttpPreview(project,this.applicationRoot,entry.compiler,values)
+    await assertCurrent()
+    return this.options.staticAssets ? this.options.staticAssets.materialize(build,{...scope,signal:entry.abort.signal,assertCurrent}) : build
+  }
+
   async start(projectId: string, authority: SessionAuthority, request: { revision: string; route: string }) {
     authority = { ...authority }
     if (!request || Object.keys(request).some(key => !["revision", "route"].includes(key)) || !routeAllowed(request.route)) throw new Error("Invalid controlled preview request. External networking is not an enabled project capability.")
@@ -178,7 +192,7 @@ export class ControlledPreviewTransport {
       entry.compiler = new IncrementalPreviewCompiler(Boolean(this.options.fastRefresh))
       let snapshot = await this.registry.withPreviewSource(projectId, authority, async (project, files) => {
         entry.sourceHashes = new Map([...files].map(([file, text]) => [file, contentHash(text)]))
-        return snapshotPreview(await buildIsolatedHttpPreview(project, this.applicationRoot, entry.compiler))
+        return snapshotPreview(await this.compileWithRuntime(entry, project, revision))
       }, entry.compiler)
       snapshot = await this.storedSnapshot(entry, snapshot)
       if (!await this.current(entry)) throw new Error("Controlled preview became stale during compilation.")
@@ -245,7 +259,7 @@ export class ControlledPreviewTransport {
         return { ...await this.start(projectId, authority, { revision, route: entry.lastRoute ?? entry.job.route }), updateKind: "generation-restart" }
       }
       const built = await this.registry.withPreviewSource(projectId, authority, async (project, files) => ({
-        snapshot: snapshotPreview(await buildIsolatedHttpPreview(project, this.applicationRoot, entry.compiler)),
+        snapshot: snapshotPreview(await this.compileWithRuntime(entry, project, revision)),
         sourceHashes: new Map([...files].map(([file, text]) => [file, contentHash(text)]))
       }), entry.compiler)
       const { snapshot, sourceHashes } = built

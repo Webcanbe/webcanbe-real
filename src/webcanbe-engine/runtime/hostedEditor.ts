@@ -1,3 +1,5 @@
+import { readPublicRuntimeValues, type PublicRuntimeValueProvider } from "./publicRuntimeValues"
+import { TrustedStaticAssets } from "./staticAssets"
 import { ManagedSecretRunnerProvider, type ManagedPreviewSecrets } from "./managedPreviewSecrets"
 import { sourceReference, type ExternalSourceProvider } from "./externalSource"
 import { PostgresDraftStore } from "./draftStore"
@@ -47,7 +49,7 @@ export class HostedEditor {
   readonly login: HostedLoginBoundary
   private recoveryTimer: ReturnType<typeof setInterval>
   private recovery?: Promise<void>
-  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
+  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; publicRuntimeValueProvider?: PublicRuntimeValueProvider; staticAssets?: TrustedStaticAssets; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
     this.identity = new PostgresIdentityStore(options.pool)
     this.access = new PostgresAccess(options.pool)
     this.source = new PostgresProjectStore(this.access)
@@ -56,7 +58,7 @@ export class HostedEditor {
     this.registry = new HostedProjectRegistry(this.access, this.source, applicationRoot)
     this.leases = new PostgresLeaseStore(options.pool)
     this.provider = new HostedLinuxRunnerProvider(this.leases, options.hosts, owner => this.registry.runnerAuthorized(owner))
-    this.controlled = new ControlledPreviewTransport(this.registry, applicationRoot, options.managedSecrets ? new ManagedSecretRunnerProvider(this.provider, options.managedSecrets) : this.provider, Date.now, this.artifacts, { fastRefresh: options.fastRefresh })
+    this.controlled = new ControlledPreviewTransport(this.registry, applicationRoot, options.managedSecrets ? new ManagedSecretRunnerProvider(this.provider, options.managedSecrets) : this.provider, Date.now, this.artifacts, { fastRefresh: options.fastRefresh, publicRuntimeValueProvider: options.publicRuntimeValueProvider, staticAssets: options.staticAssets })
     this.boundary = new PostgresSessionBoundary(this.identity, options.origins)
     this.login = new HostedLoginBoundary(options.origins.editorOrigin, options.identityProvider, this.identity, this.identity)
     // Recover idle orphans even if no new editor request arrives. Failed cleanup
@@ -124,7 +126,11 @@ export class HostedEditor {
       if (body.workspaceId !== undefined && body.workspaceId !== grant.workspaceId) throw new AuthorityDenied()
       assertAccess = async () => { await this.boundary.authenticate(request); if (!await this.access.check(grant, operation)) throw new AuthorityDenied() }
       if (action === "session") {
-        const { value } = await withHostedSource(this.source, grant, this.applicationRoot, async project => ({ project: await this.registry.publicProject(grant, project), runtime: inspectRuntime(project, this.applicationRoot) }))
+        const { value } = await withHostedSource(this.source, grant, this.applicationRoot, async (project, source) => {
+          const revision=source.revision(),assertCurrent=async()=>{await assertAccess();if((await this.source.read(grant)).revision!==revision)throw new AuthorityDenied()}
+          const values=await readPublicRuntimeValues(this.options.publicRuntimeValueProvider,{userId:grant.userId,sessionId:grant.sessionId,workspaceId:grant.workspaceId,projectId,revision},AbortSignal.timeout(5000),assertCurrent)
+          return {project:await this.registry.publicProject(grant,project),runtime:inspectRuntime(project,this.applicationRoot,values)}
+        })
         const session = await this.registry.createSession(grant)
         return send(201, { ...value, session, role: grant.role, hostedReadiness: "UNPROVEN", compatibilityDimensions: {
           runtimeExecution: { admitted: value.runtime.supported, transport: "controlled-raster" }, securityAdmission: { controlledRunnerRequired: true, importedNodeExecution: false }, hostedReadiness: { status: "UNPROVEN", publicImportReady: false }

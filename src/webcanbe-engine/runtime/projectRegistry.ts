@@ -1,4 +1,4 @@
-import { isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
+import { isOpaqueBunLock, isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
@@ -71,7 +71,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
         if (directory) { zip.readEntry(); return }
-        if (!isInertMetadata(path.posix.basename(name)) && !/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
+        if (path.posix.basename(name)!=="bun.lockb" && !isInertMetadata(path.posix.basename(name)) && !/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock|hbs)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
         zip.openReadStream(entry, async (streamError, stream) => {
           if (streamError || !stream) return fail(streamError ?? new Error("Invalid ZIP stream."))
           try {
@@ -84,7 +84,8 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
             if (size !== entry.uncompressedSize) throw new Error("Invalid ZIP member size.")
             const content = Buffer.concat(chunks)
             if (crc32(content) !== entry.crc32) throw new Error("ZIP member checksum mismatch.")
-            if (!/\.(png|jpe?g|gif|webp|ico|woff2?)$/i.test(name)) { if (content.includes(0)) throw new Error("Binary data in a text file."); new TextDecoder("utf-8", { fatal: true }).decode(content) }
+            if(path.posix.basename(name)==="bun.lockb"&&!isOpaqueBunLock("bun.lockb",content))throw Error("Unsupported opaque Bun lock format.")
+            if (!isOpaqueBunLock(path.posix.basename(name),content) && !/\.(png|jpe?g|gif|webp|ico|woff2?)$/i.test(name)) { if (content.includes(0)) throw new Error("Binary data in a text file."); new TextDecoder("utf-8", { fatal: true }).decode(content) }
             validateIntakeMetadata(path.posix.basename(name), content)
             files.set(name, content)
             if (!stopped) zip.readEntry()
