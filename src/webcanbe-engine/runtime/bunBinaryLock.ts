@@ -5,6 +5,7 @@ const MAX_LOCK_BYTES = 2 * 1024 * 1024
 const MAX_PACKAGES = 12_000
 const DEPENDENCY_BYTES = 26
 const RESOLUTION_BYTES = 4
+const INVALID_PACKAGE_ID = 0xffffffff
 const PACKAGE_FIELD_BYTES = Object.freeze({
   name: 8,
   nameHash: 8,
@@ -20,7 +21,7 @@ const packageName = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i
 export type BunBinaryDependency = Readonly<{
   name: string
   requested: string
-  targetId: number
+  targetId: number | null
   normal: boolean
   optional: boolean
   dev: boolean
@@ -112,12 +113,8 @@ function safeU32Array(bytes: Uint8Array) {
   return Array.from({ length: bytes.byteLength / 4 }, (_, index) => view.getUint32(index * 4, true))
 }
 
-function strictDecoder() {
-  return new TextDecoder('utf-8', { fatal: true })
-}
-
 function stringReader(stringBytes: Uint8Array) {
-  const decoder = strictDecoder()
+  const decoder = new TextDecoder('utf-8', { fatal: true })
   return (reference: Uint8Array) => {
     if (reference.byteLength !== 8) throw new Error('Invalid Bun lock string reference.')
     let bytes: Uint8Array
@@ -170,7 +167,7 @@ function npmResolution(resolution: Uint8Array, readString: (reference: Uint8Arra
   return { version, resolved }
 }
 
-function classifyDependency(record: Uint8Array, targetId: number, readString: (reference: Uint8Array) => string): BunBinaryDependency {
+function classifyDependency(record: Uint8Array, targetId: number | null, readString: (reference: Uint8Array) => string): BunBinaryDependency {
   if (record.byteLength !== DEPENDENCY_BYTES) throw new Error('Invalid Bun dependency record.')
   const name = readString(record.subarray(0, 8)), requested = readString(record.subarray(18, 26)), behavior = record[16]
   if (!packageName.test(name) || !requested || requested.length > 512) throw new Error('Invalid Bun dependency identity.')
@@ -233,6 +230,7 @@ export function decodeBunBinaryLock(input: Uint8Array): BunBinaryGraph {
   const incoming = Array.from({ length: count }, () => [] as string[])
   for (let index = 0; index < allResolutions.length; index++) {
     const target = allResolutions[index]
+    if (target === INVALID_PACKAGE_ID) continue
     if (!Number.isSafeInteger(target) || target < 0 || target >= count) throw new Error('Bun dependency resolution points outside the package table.')
     incoming[target].push(readString(buffers.dependencies.subarray(index * DEPENDENCY_BYTES + 18, index * DEPENDENCY_BYTES + 26)))
   }
@@ -252,9 +250,9 @@ export function decodeBunBinaryLock(input: Uint8Array): BunBinaryGraph {
     const resolutionRows = safeSlice(buffers.resolutions, source.resolutions, RESOLUTION_BYTES)
     if (dependencyRows.length !== resolutionRows.length) throw new Error('Bun package dependency slices disagree.')
     const edges = dependencyRows.map((record, index) => {
-      const target = new DataView(resolutionRows[index].buffer, resolutionRows[index].byteOffset, 4).getUint32(0, true)
-      if (target >= count) throw new Error('Bun package dependency target is invalid.')
-      return classifyDependency(record, target, readString)
+      const rawTarget = new DataView(resolutionRows[index].buffer, resolutionRows[index].byteOffset, 4).getUint32(0, true)
+      if (rawTarget !== INVALID_PACKAGE_ID && rawTarget >= count) throw new Error('Bun package dependency target is invalid.')
+      return classifyDependency(record, rawTarget === INVALID_PACKAGE_ID ? null : rawTarget, readString)
     })
     if (id === 0) {
       if (source.resolution[0] !== 1) throw new Error('Bun package zero is not the root resolution.')
