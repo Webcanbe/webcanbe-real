@@ -1,0 +1,23 @@
+name: P05 Parallel Targeted
+
+on:
+  push:
+    branches:
+      - phase2-p05-parallel
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  berry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts
