@@ -8,7 +8,7 @@ import { PostgresLeaseStore, type Fence } from "./postgresFencing"
 /** Trusted management service on a dedicated Linux host. Mutual TLS credentials
  * remain here, outside every project job. PostgreSQL fences every command/result.
  * No source mounts, arbitrary shell, URLs, HTTP proxy or evaluate. Optional preview values arrive only in a fenced server-owned job. */
-export function hostedRunnerGateway(tls: ServerOptions, hostId: string, leases: PostgresLeaseStore, provider: RunnerProvider) {
+export function hostedRunnerGateway(tls: ServerOptions, hostId: string, leases: PostgresLeaseStore, provider: RunnerProvider, onError?: (error: unknown) => void) {
   if (!tls.key || !tls.cert || !tls.ca || !provider.revoke) throw new Error("Gateway requires private PKI and explicit provider revocation.")
   const handles = new Map<string, { hash: string; opening: Promise<ControlledExecution> }>()
   const server = createServer({ ...tls, requestCert: true, rejectUnauthorized: true, minVersion: "TLSv1.2" }, async (request, response) => {
@@ -50,7 +50,7 @@ export function hostedRunnerGateway(tls: ServerOptions, hostId: string, leases: 
         throw new Error("Unsupported command.")
       }, false, body.command === "open" ? body.job : undefined)
       send(200, result)
-    } catch { if (!response.headersSent) { response.writeHead(409, { "Content-Type": "application/json", "Cache-Control": "no-store" }); response.end('{"error":"Hosted runner request rejected; authority or cleanup may require recovery."}') } else response.destroy() }
+    } catch (error) { onError?.(error); if (!response.headersSent) { response.writeHead(409, { "Content-Type": "application/json", "Cache-Control": "no-store" }); response.end('{"error":"Hosted runner request rejected; authority or cleanup may require recovery."}') } else response.destroy() }
   })
   server.headersTimeout = 5000; server.requestTimeout = 15000; server.keepAliveTimeout = 1000; server.maxConnections = 16
   server.on("upgrade", (_req, socket) => socket.destroy())

@@ -1,4 +1,84 @@
-# P61 bounded attempt — 2026-09-15
+# P61 narrow closure follow-up — 2026-09-15
+
+**P61 remains PARTIAL solely because the historical second-application 422 has
+no retained internal exception and did not reproduce. Zustand and bounded load
+now pass. Internal blockers remain P05 / P39 / P61.**
+
+The reviewed remote probe `b7c8f8bcaa9116e7dd34ffe111e464cd9dd8c202`
+was based exactly on the starting feature tip and was cherry-picked as `901ba83`.
+It admits only a confined local `.json`/`.webmanifest` manifest, validates it
+through the existing path/realpath rules, never reads or interprets its contents,
+and removes its link from generated controlled-preview HTML. Remote, protocol,
+traversing, missing, wrong-extension and variant-attribute forms refuse. Canonical
+`index.html` and exact source export are unchanged; no networking is enabled.
+
+## Zustand: PASS
+
+Exact unchanged `pmndrs/zustand` commit
+`b57db4f86ef179285da216eeb291266da82c361c`, `examples/demo`, ZIP SHA-256
+`bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a`
+passed the ordinary packaged HTTPS/PostgreSQL/mTLS/isolated-Linux path. All
+canonical file hashes matched. Cold start was 4216.40 ms. First raster HTTP time
+was 2992.70 ms (925852 bytes); warm raster was 2116.48 ms (919180 bytes). Both
+passed the unchanged 4000 ms worker/browser bound and exposed the real Zustand
+accessibility text.
+
+The pre-fix diagnostic localized the capture timeout: an isolated-world selection
+query ran on every frame despite no selected element and consumed 2846.79 ms;
+the AX snapshot completed at 3575.54 ms and raster began at 3575.97 ms, leaving
+too little of the 4000 ms budget. The general worker now tracks supervisor-owned
+selection presence and skips only that absent-selection query. Navigation, route
+change, preview updates and non-select pointer actions clear the state; a selected
+or disconnected element is still observed and validated normally. Post-fix first
+capture reached AX readiness at 1313.29 ms, raster completed at 2800.76 ms.
+
+Measured cold path: source read 5.68 ms; materialized by 8.52 ms; compile/build
+1858.91 ms; artifact put/get by 2032.60 ms; Chromium by 290.24 ms and context by
+300.86 ms inside the worker; navigation/load by 1285.21 ms; runner/lease/open by
+4177.70 ms. There was no separate application-defined readiness wait.
+
+## Historical second-app 422: NOT REPRODUCED / UNPROVEN
+
+One instrumented A → B → A sequence completed 16/16 HTTP stages with no retry:
+both exact apps started/captured, then A Code/update/capture, B Code/update/capture,
+and A Code/update/capture. Server-side markers confirmed source commit and preview
+hold, compile/materialization, artifact put/get, fenced runner update, post-update
+authorization/revision validation and capture. Three database checks tied each
+current artifact to the expected project, workspace, revision, generation,
+user/session, fence epoch and running lease.
+
+The historical `resources-1789396020314.json` receipt contains only the generic
+public 422. It cannot identify the internal stage or exception, and the failure
+did not recur. Exact failure stage and root cause therefore remain **UNPROVEN**;
+no retry, expectation change or speculative defect fix was added. Local TEST
+editor/gateway entrypoints now route unexpected errors to the existing server-side
+`onError` boundary while public HTTP and gateway responses stay generic.
+
+## Targeted verification and security
+
+43/43 targeted tests passed, zero failures/skips: 27 finite HTML/runtime cases,
+13 raster/selection cases and 3 hosted mTLS/lease cases. This includes the new
+manifest refusals and actual no-selection/selected-source worker behavior. No
+existing test identity was removed or modified. The 646-test full regression is
+deferred to final Phase-2 closure. Prior bounded load evidence is reused and was
+not rerun.
+
+Changed production paths and direct consumers were reviewed only for manifest
+traversal/symlink/scheme/attribute handling, browser fetch surface, canonical
+source divergence, selection lifecycle/authority and local diagnostic exposure.
+Public responses remain generic. Zero confirmed unresolved vulnerabilities in
+this bounded review. Details: `phase2-p61-evidence/followup.json` and
+`phase2-p61-evidence/security-followup.json`.
+
+## Remaining P61 blocker
+
+The historical second-app warm-update 422 has no provable failure stage or root
+cause. Passing later runs cannot manufacture that missing evidence, so the
+retained P61 definition remains PARTIAL.
+
+---
+
+# Historical P61 bounded attempt — 2026-09-15
 
 **P61 PARTIAL. Internal blockers remain P05 / P39 / P61.**
 Started clean at `427c77be667c620a65a290ffa4f77fb97ab7950c` on

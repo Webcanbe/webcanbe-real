@@ -1094,9 +1094,9 @@
       "id": "P61",
       "requirement": "Representative cold import/start, warm CSS/React/refresh/reload/restart/export and resource measurements (G.1/2G.2)",
       "status": "PARTIAL",
-      "evidence": "P61 bounded attempt: exact Zustand refuses at manifest HTML validation before raster (84.59–97.80 ms startup). Original two-app scenario and 20 A/B/A warm updates pass, historical 422 cause remains unestablished. One actual packaged load passes: 2 users/3 projects/concurrency2/167 operations, 145 success/22 expected refusals, worker tasks/leases return to zero. 19 targeted tests pass; full646 execution deferred.",
+      "evidence": "Exact unchanged Zustand now passes ordinary packaged HTTPS/PG/mTLS/isolated-Linux capture: cold start4216.40ms, first raster2992.70ms, warm raster2116.48ms under unchanged4000ms bound. General worker selection tracking removes measured2846.79ms absent-selection overhead. Prior bounded load remains PASS and was not rerun. One instrumented A→B→A sequence passed16/16 stages plus three artifact/owner/fence identity checks, but the historical generic second-app422 did not reproduce and contains no internal exception. 43 targeted tests pass; full646 execution deferred.",
       "evidenceSource": "docs/reports/phase2-p61-closure.md",
-      "missingProof": "Ordinary unchanged Zustand must pass current manifest validation and then the unchanged 4000ms raster bound; historical capture bottleneck remains unmeasured at this checkpoint. Historical second-app warm-update 422 still lacks an established root cause.",
+      "missingProof": "Historical second-app warm-update 422 still lacks a provable failure stage and root cause; its retained public receipt contains only the deliberately generic response and current instrumented sequences pass.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Final real-app import/start/update/responsive/restart/export/build/render timings and bounded independent cgroup samples recorded. Broader full-app, concurrent/load/long-session/production capacity evidence remains incomplete.",
@@ -1109,9 +1109,11 @@
         "../phase2-p61-evidence/retained-scenario.json",
         "../phase2-p61-evidence/load.json",
         "../phase2-p61-evidence/targeted-tests.json",
-        "../phase2-p61-evidence/security-review.json"
+        "../phase2-p61-evidence/security-review.json",
+        "../phase2-p61-evidence/followup.json",
+        "../phase2-p61-evidence/security-followup.json"
       ],
-      "disposition": "PARTIAL. Bounded local TEST load passes, not production sizing. No production implementation or retained acceptance rule changed; later passing runs do not explain the historical 422. Full regression execution deferred by user instruction."
+      "disposition": "PARTIAL. Zustand and the bounded local TEST load pass. Later instrumented success cannot reconstruct the historical second-app 422 exception, so its exact stage/root cause remain unproven. Full regression execution deferred by user instruction."
     },
     {
       "id": "P62",

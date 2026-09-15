@@ -4,7 +4,7 @@ const {boundedRaster,captureRaster}=require('/opt/wcb-runtime/raster-capture.cjs
 const {refreshChanges,refreshManifest}=require('/opt/wcb-runtime/refresh-policy.cjs');
 const { createHash } = require('node:crypto');
 const { chromium } = require('/opt/wcb-runtime/node_modules/playwright-core');
-let browser, page, cdp, job, artifacts, selectedRoute = '', closed = false;
+let browser, page, cdp, job, artifacts, selectedRoute = '', hasSelection = false, closed = false;
 const logs = [];
 let deliveredSecrets = [];
 let documentEpoch = 0, clipboard;
@@ -55,7 +55,7 @@ async function open(value) {
   const sandbox = await diagnostic.locator('body').innerText(); await diagnostic.close();
   if (!/Layer 1 Sandbox\s+Namespace/.test(sandbox) || !/Seccomp-BPF sandbox\s+Yes/.test(sandbox)) throw Error('Native Chromium sandbox was not verified: ' + sandbox);
   page = await context.newPage();
-  page.on('framenavigated', frame => { if (frame === page.mainFrame()) documentEpoch++; });
+  page.on('framenavigated', frame => { if (frame === page.mainFrame()) { documentEpoch++; hasSelection=false; } });
   page.setDefaultTimeout(4000); page.setDefaultNavigationTimeout(4000);
   context.on('page', extra => { if (extra !== page) void extra.close(); });
   page.on('console', message => { logs.push(deliveredSecrets.length ? 'Runtime logs withheld for managed preview values.' : (message.type() + ': ' + message.text()).slice(0, 300)); if (logs.length > 20) logs.shift(); });
@@ -100,11 +100,12 @@ async function update(value) {
       }
       globalThis.__wcbSelected = null;
     }, css);
+    hasSelection=false;
   } else if (value.kind === 'react-fast-refresh') {
     // This executes only inside the isolated project browser. No imported JS is
     // sent to the ordinary editor/viewer browser, and no new network is enabled.
     await page.evaluate(({manifest,changed}) => { if (window.__wcbApplyRefresh(manifest,changed) !== true) throw Error('Refresh failed'); }, {manifest:refreshManifest(snapshot),changed});
-    await dom(() => { globalThis.__wcbSelected = null; });
+    await dom(() => { globalThis.__wcbSelected = null; });hasSelection=false;
   } else {
     const scroll = await dom(() => ({ x: scrollX, y: scrollY }));
     job = { ...job, snapshot };
@@ -112,7 +113,7 @@ async function update(value) {
     // emitted by the newly accepted document.
     logs.length = 0;
     await page.reload({ waitUntil: 'load' });
-    await dom(position => { scrollTo(position.x, position.y); globalThis.__wcbSelected = null; }, scroll);
+    await dom(position => { scrollTo(position.x, position.y); globalThis.__wcbSelected = null; }, scroll);hasSelection=false;
   }
   job = { ...job, revision: value.revision, snapshot };
   await page.waitForTimeout(40);
@@ -128,8 +129,8 @@ async function input(value) {
     if(value.key==='CopySelection') clipboard=await dom(()=>{const e=document.activeElement;if(e?.tagName==='INPUT'||e?.tagName==='TEXTAREA'){if(e.type==='password'||typeof e.selectionStart!=='number'||typeof e.selectionEnd!=='number')return '';return e.value.slice(e.selectionStart,e.selectionEnd).slice(0,4096);}return (getSelection()?.toString()||'').slice(0,4096);});
     else await page.keyboard.press(value.key==='SelectAll' ?'Control+A':(value.shift?'Shift+':'')+value.key);
   } else if (value.type === 'pointer') {
-    if (value.action === 'select') await dom(point => { globalThis.__wcbSelected = document.elementFromPoint(point.x, point.y)?.closest('[data-wcb-id]') || null; }, value);
-    else { await dom(() => { globalThis.__wcbSelected = null; }); if (value.action === 'click') await page.mouse.click(value.x, value.y); else await page.mouse.move(value.x, value.y); }
+    if (value.action === 'select') hasSelection=await dom(point => { globalThis.__wcbSelected = document.elementFromPoint(point.x, point.y)?.closest('[data-wcb-id]') || null; return Boolean(globalThis.__wcbSelected); }, value);
+    else { await dom(() => { globalThis.__wcbSelected = null; });hasSelection=false;if (value.action === 'click') await page.mouse.click(value.x, value.y); else await page.mouse.move(value.x, value.y); }
   } else if (value.type === 'navigate') await page.goto(job.origin + value.route, { waitUntil: 'load' });
   else if (value.type === 'history') { if (value.action === 'reload') await page.reload(); else if (value.action === 'back') await page.goBack(); else await page.goForward(); }
   else if (value.type === 'scroll') await page.mouse.wheel(value.dx, value.dy);
@@ -148,9 +149,9 @@ async function sample() {
     const url=new URL(href);
     if (url.origin !== authority.origin) throw Error('Application left its preview origin');
     const route=url.pathname+url.search+url.hash;
-    if (selectedRoute && route !== selectedRoute) await dom(()=>{globalThis.__wcbSelected=null;});
+    if (selectedRoute && route !== selectedRoute) { await dom(()=>{globalThis.__wcbSelected=null;});hasSelection=false; }
     selectedRoute=route;
-    const selection=await dom(describeSelected);
+    const selection=hasSelection?await dom(describeSelected):null;if(!selection)hasSelection=false;
     // Chromium computes names, roles and states; project JS cannot override the CDP API.
     const ax = await cdp.send('Accessibility.getFullAXTree');
     const states = new Set(['disabled','expanded','selected','checked','pressed','required','readonly','invalid','level','live','modal','multiline']);

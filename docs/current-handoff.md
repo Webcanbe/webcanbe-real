@@ -17,6 +17,30 @@ See [P61 report](reports/phase2-p61-closure.md) and [P61 evidence](reports/phase
 
 ---
 
+# Current handoff: P61 narrow follow-up (2026-09-15)
+
+**P61 PARTIAL. Zustand PASS; prior bounded load PASS; historical second-app 422
+stage/root cause UNPROVEN. Internal blockers: P05 / P39 / P61.**
+
+Continue from the final pushed feature SHA recorded by the task publication on
+`phase-2-compatible-editor`. See [P61 closure](reports/phase2-p61-closure.md) and
+[P61 evidence](reports/phase2-p61-evidence/index.json). Main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.
+
+- Cherry-picked reviewed manifest probe `b7c8f8bc` as `901ba83`; confined local
+  inert manifests are stripped only from controlled preview HTML. Canonical and
+  exported source stay exact; remote/protocol/traversing/variant forms refuse.
+- Exact frozen Zustand passes packaged HTTPS/PG/mTLS: cold start 4216.40 ms,
+  first raster 2992.70 ms, warm raster 2116.48 ms under unchanged 4000 ms bound.
+  General fix skips a 2846.79 ms selection query when no selection exists.
+- One instrumented A → B → A sequence passed all 16 stages and three independent
+  artifact/owner/fence checks. Historical generic 422 did not reproduce; exact
+  stage/root cause remain unprovable, so P61 remains PARTIAL with no speculative fix.
+- 43 targeted tests pass; prior load reused, not rerun. Full 646 regression stays
+  deferred. No P05/P39 work, matrix rebuild, broad scan or later-phase work.
+
+---
+
 # Current handoff: P39 partial closure (2026-09-15)
 
 **P39 PARTIAL. 48 PASS / 3 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE.

@@ -26,6 +26,27 @@ it('preserves alternate mount, body attributes, local stylesheet and canonical H
 it('retains a declared HTTPS stylesheet as a required resource without fetching during HTML interpretation',()=>{
  const p=project();fs.writeFileSync(path.join(p.root,'index.html'),shell('<link rel="stylesheet" href="https://fonts.example.org/font.css">'));expect(staticHtml(p.root)?.head).toContain('https://fonts.example.org/font.css')
 })
+it('admits only a confined inert local manifest and strips it from controlled preview HTML without changing canonical source',async()=>{
+ const p=project(),original=shell('<link rel="manifest" href="/manifest.webmanifest">')
+ fs.mkdirSync(path.join(p.root,'public'),{recursive:true});fs.writeFileSync(path.join(p.root,'public/manifest.webmanifest'),'{"name":"Static shell"}')
+ fs.writeFileSync(path.join(p.root,'index.html'),original)
+ expect(staticHtml(p.root)?.head).not.toContain('manifest')
+ expect((await buildIsolatedHttpPreview(p,process.cwd())).html).not.toContain('manifest')
+ expect(fs.readFileSync(path.join(p.root,'index.html'),'utf8')).toBe(original)
+})
+it.each([
+ '<link rel="manifest" href="/missing.json">',
+ '<link rel="manifest" href="../manifest.json">',
+ '<link rel="manifest" href="https://external.invalid/manifest.json">',
+ '<link rel="manifest" href="//external.invalid/manifest.json">',
+ '<link rel="manifest" href="data:application/manifest+json,{}">',
+ '<link rel="manifest" href="/manifest.txt">',
+ '<link rel="manifest" href="/manifest.json" crossorigin>',
+ '<link rel="manifest" href="/manifest.json" media="screen">',
+ '<link rel="manifest" href="/manifest.json" sizes="any">'
+])('refuses missing, escaping, remote, protocol and variant manifests: %s',fragment=>{
+ const p=project();fs.mkdirSync(path.join(p.root,'public'),{recursive:true});fs.writeFileSync(path.join(p.root,'public/manifest.json'),'{}');fs.writeFileSync(path.join(p.root,'index.html'),shell(fragment));expect(()=>staticHtml(p.root)).toThrow();expect(inspectRuntime(p,process.cwd()).supported).toBe(false)
+})
 it.each([
  '<script>globalThis.sideEffect=1</script>',
  '<script type="module" src="https://external.invalid/a.js"></script>',

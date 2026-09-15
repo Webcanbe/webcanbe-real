@@ -1,4 +1,18 @@
-# P61 bounded checkpoint — 2026-09-15
+# P61 narrow follow-up — 2026-09-15
+
+P61 remains PARTIAL only because the retained historical second-app 422 has no
+internal exception/stage evidence and did not reproduce. Exact frozen Zustand now
+passes ordinary packaged hosted capture: cold start 4216.40 ms, first raster
+2992.70 ms, warm raster 2116.48 ms under the unchanged 4000 ms bound. Reviewed
+manifest probe `b7c8f8bc` was cherry-picked as `901ba83`; general worker selection
+tracking removes the measured absent-selection overhead. One A → B → A diagnostic
+passed every stage; 43 targeted tests pass. Prior bounded load reused, full 646
+regression deferred. See [closure report](reports/phase2-p61-closure.md).
+Internal blockers remain P05 / P39 / P61; main unchanged.
+
+---
+
+# Historical P61 bounded checkpoint — 2026-09-15
 
 **P61 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NOT YET.**
 Continue on `phase-2-compatible-editor`; product remains `427c77be667c620a65a290ffa4f77fb97ab7950c`.

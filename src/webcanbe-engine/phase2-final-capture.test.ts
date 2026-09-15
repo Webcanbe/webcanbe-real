@@ -53,4 +53,14 @@ it("rejects malformed protocol encoding and clears a successful deadline",async(
       fs.writeFileSync('.webcanbe/final-internal-capture/'+kind+'-metrics.json',JSON.stringify({scope:'Actual local TEST production worker; no deployed capacity claim',captureMs:elapsed,ordinaryDeadlineMs:4000,interaction:true,viewport:true}))
     }finally{await execution.close()}
   },20000)
+  it("skips absent selection work but still returns a later selected source identity",async()=>{
+    const identity=Buffer.from(JSON.stringify({file:"src/App.tsx",elementStart:1})).toString("base64")
+    const html=`<button data-wcb-id="${identity}" style="width:200px;height:80px">Select source</button>`
+    const generation=randomUUID(),runner=new LocalLimaRunnerProvider(process.cwd()),snapshot=snapshotPreview({html,files:new Map()}),execution=await runner.open({generation,origin:'http://wcb-'+generation+'.preview.invalid',expiresAt:Date.now()+60000,revision:'rev_'+randomUUID(),route:'/',network:{external:'deny'},snapshot},new AbortController().signal)
+    try{
+      expect((await execution.sample!()).observation).toMatchObject({selection:null})
+      await execution.input({type:'pointer',action:'select',x:70,y:25})
+      expect((await execution.sample!()).observation).toMatchObject({selection:{identity:{file:"src/App.tsx",elementStart:1},tagName:"button"}})
+    }finally{await execution.close()}
+  },20000)
 })
