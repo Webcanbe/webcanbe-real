@@ -121,7 +121,7 @@
         "id": "P05",
         "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
         "status": "PARTIAL",
-        "evidence": "Added react19-vite7.1-v1 (React 19.2, Vite 7.1.9, Tailwind 4.1.14) without altering the old profiles; Habit’s exact immutable npm graph passes. Static frozen-corpus diagnosis retains all unsupported graphs.",
+        "evidence": "Added react19-vite7.1-v1 (React 19.2, Vite 7.1.9, Tailwind 4.1.14) without altering the old profiles; Habit\u2019s exact immutable npm graph passes. Static frozen-corpus diagnosis retains all unsupported graphs.",
         "evidenceSource": "docs/reports/phase2-common-applications.md",
         "missingProof": "Yarn/Bun lock and pinned dependency/version graphs remain unsupported. The exact Redux archive contains .yarn/releases/yarn-4.2.2.cjs at 2,742,928 bytes, above the retained 2 MiB member limit.",
         "internallyClosable": "Internal work remains; not reclassified as production evidence.",
@@ -132,7 +132,7 @@
           "habit-initial-compatibility.json",
           "full-application-acceptance.json"
         ],
-        "disposition": "General lock adapters need complete immutable version/integrity/peer-graph verification and operator-owned package profiles. Supporting the unchanged oversized Redux member would violate this run’s explicit fixed-limit/no-dropped-file constraint. Other graph gaps remain internal engineering, not external credentials."
+        "disposition": "General lock adapters need complete immutable version/integrity/peer-graph verification and operator-owned package profiles. Supporting the unchanged oversized Redux member would violate this run\u2019s explicit fixed-limit/no-dropped-file constraint. Other graph gaps remain internal engineering, not external credentials."
       }
     },
     {
@@ -208,9 +208,9 @@
         "id": "P07",
         "requirement": "Common dependencies, CSS/Modules, assets/public base, static env (B/G.1)",
         "status": "PARTIAL",
-        "evidence": "All required local Habit/Kanban resources render unchanged, and exports build/render independently. Optional upstream missing favicon is disclosed. Recipe’s required remote assets are still unavailable.",
+        "evidence": "All required local Habit/Kanban resources render unchanged, and exports build/render independently. Optional upstream missing favicon is disclosed. Recipe\u2019s required remote assets are still unavailable.",
         "evidenceSource": "docs/reports/phase2-common-applications.md",
-        "missingProof": "A broader explicit public-env grant model and example-env/file breadth remain unfinished; Recipe Book’s required remote Cloudinary images/Google fonts remain unavailable.",
+        "missingProof": "A broader explicit public-env grant model and example-env/file breadth remain unfinished; Recipe Book\u2019s required remote Cloudinary images/Google fonts remain unavailable.",
         "internallyClosable": "Internal work remains; not reclassified as production evidence.",
         "priorStatus": "PARTIAL",
         "priorEvidence": "Common browser transitive/peer dependencies and preserved CSS resource references work. Required external recipe images/fonts remain unavailable under default egress denial; broader assets/public-env/config support remains.",
@@ -433,7 +433,7 @@
     },
     {
       "id": "P20",
-      "requirement": "Code↔Canvas reanalysis, stale selection/SourceAnchor invalidation (D/E/F)",
+      "requirement": "Code\u2194Canvas reanalysis, stale selection/SourceAnchor invalidation (D/E/F)",
       "status": "PASS",
       "evidence": "Full-app Code/Canvas revisions and mapped identity checks pass. Raster capture mode/callback stability fixed; sequence rebinding only for identical pixels and authority/geometry. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
       "evidenceSource": "docs/reports/phase2-common-applications.md",
@@ -740,18 +740,19 @@
       "id": "P39",
       "requirement": "Viewer keyboard/text input/accessibility/streaming/reconnect ergonomics (C.2/D/E)",
       "status": "PARTIAL",
-      "evidence": "Real native clipboard copy/paste, Korean/accents/emoji/RTL Unicode, role/name announcement, F6 exit, bounded 64-event queue, stale-input discard, hard expiry and rebuilt reconnect pass. Pinned CJK font fixes observed missing glyphs; OS IME/full accessibility/endurance remains open.",
-      "evidenceSource": "docs/reports/phase2-common-applications.md",
-      "missingProof": "Native OS input-method completion, full screen-reader/accessibility behavior and sustained renewed-session/endurance proof remain unverified.",
+      "evidence": "P39 composition provenance/order and focus/session cancellation; numbered-frame replay refusal; actual bounded Chromium AX names/roles/states; existing clipboard/Unicode/F6/64-event queue/hard expiry preserved. 16 hosted renewal iterations with Code/Visual/input/reconnect and 12 browser reconnects pass; zero duplicate/stale delivery and verified worker cleanup.",
+      "evidenceSource": "docs/reports/phase2-p39-closure.md",
+      "missingProof": "Actual OS IME completion/lifecycle proof (including Japanese); full interactive screen-reader/accessibility semantics across the isolated viewer and legitimate screen-reader integration. The read-only flattened AX snapshot does not implement the complete interaction bridge.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Exact-pixel queued pointer rebinding and current mode callbacks fix actual viewer selection workflow. Remaining IME/clipboard/accessibility/streaming/long-session/reconnect breadth unchanged.",
       "evidenceFiles": [
-        "input-final.json",
-        "input-1789394581835.json",
-        "unicode-input-final.png"
+        "docs/reports/phase2-p39-evidence/browser.json",
+        "docs/reports/phase2-p39-evidence/endurance.json",
+        "docs/reports/phase2-p39-evidence/native-probe.json",
+        "docs/reports/phase2-p39-evidence/regressions.json"
       ],
-      "disposition": "Real Chromium clipboard, Unicode, keyboard focus, bounded queue, hard expiry and reconnect pass. CDP compositionend is explicitly untrusted, so CDP cannot establish native OS IME proof. A keyboard-operable raster focus surface is not a full accessibility tree. These are internal proof/implementation gaps."
+      "disposition": "Sustained renewed-session/endurance closes under bounded TEST evidence. Native input attempts did not produce native composition. Actual Chromium and macOS AX inspection is preserved without claiming full screen-reader behavior. Remaining work stays internal, not external/production evidence."
     },
     {
       "id": "P40",
@@ -1045,7 +1046,7 @@
       "id": "P58",
       "requirement": "Corpus provenance/license/hash receipts, failures retained, no compatibility rewrites (G.1/2G.2)",
       "status": "PASS",
-      "evidence": "Original corpus provenance is preserved; Habit’s repository/commit/root scope/license/archive/full manifest/workflow were frozen before package/config/source compatibility inspection. No upstream source/config/dependency mutation or admission filtering.",
+      "evidence": "Original corpus provenance is preserved; Habit\u2019s repository/commit/root scope/license/archive/full manifest/workflow were frozen before package/config/source compatibility inspection. No upstream source/config/dependency mutation or admission filtering.",
       "evidenceSource": "docs/reports/phase2-common-applications.md",
       "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
       "internallyClosable": "Closed at the stated boundary.",
@@ -1161,6 +1162,10 @@
   "compatibilityEdgeBase": "982625986289baf8101a7d73c96fe47ce0602f0d",
   "compatibilityEdgeReport": "docs/reports/phase2-compatibility-edge-closure.md",
   "compatibilityEdgeRegressions": "docs/reports/phase2-compatibility-edge-evidence/regressions.json",
-  "distinctPassingTests": 594,
-  "allPrior549Preserved": true
+  "distinctPassingTests": 646,
+  "allPrior549Preserved": true,
+  "allPrior621Preserved": true,
+  "p39ClosureBase": "705e03f73d2079d021efc14a39aec28569a7dbd9",
+  "p39ClosureCandidate": "a531b323f8160eeed80e3b67077512f76d165bff",
+  "p39ClosureReport": "docs/reports/phase2-p39-closure.md"
 }

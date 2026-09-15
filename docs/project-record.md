@@ -1,3 +1,19 @@
+# P39 checkpoint — 2026-09-15
+
+P39 remains **PARTIAL** at product `a531b323f8160eeed80e3b67077512f76d165bff`.
+[Closure report](reports/phase2-p39-closure.md) and
+[evidence index](reports/phase2-p39-evidence/index.json).
+Composition/focus invalidation and replay hardening, bounded real Chromium AX
+observations and sustained hosted renewal/reconnect evidence are complete as documented.
+Actual OS IME completion and full interactive screen-reader/accessibility remain open;
+the read-only snapshot does not close the latter. 646 distinct passes preserve all
+prior 621 identities; one full suite plus bounded corrections. P39-only security
+review has zero confirmed unresolved vulnerabilities. TEST cleanup complete.
+Internal blockers remain P05 / P39 / P61; Phase 2 internal software closure NOT YET.
+Main unchanged; feature-branch-only normal publication. Historical records below preserved.
+
+---
+
 # WebCanBe project record
 
 ## 2026-09-15: P06 closed

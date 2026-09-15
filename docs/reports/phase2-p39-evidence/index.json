@@ -12,12 +12,15 @@
     "security-review",
     "native-environment",
     "failed-probes",
-    "regressions"
+    "regressions",
+    "regression-runs",
+    "cleanup"
   ],
   "limits": [
     "read-only flattened AX snapshot, not interactive remote accessibility",
     "CDP completion is not OS IME",
     "bounded local TEST endurance, not deployed or multi-hour proof"
   ],
-  "heapInvestigation": "Detached iframe roots were DevTools console/FrameLocator handles. Handle-free input preserved 333 nodes and 217 listeners over all 12 reconnects; no product isolation or cleanup was bypassed."
+  "heapInvestigation": "Detached iframe roots were DevTools console/FrameLocator handles. Handle-free input preserved 333 nodes and 217 listeners over all 12 reconnects; no product isolation or cleanup was bypassed.",
+  "candidate": "a531b323f8160eeed80e3b67077512f76d165bff"
 }

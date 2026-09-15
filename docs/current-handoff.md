@@ -1,3 +1,34 @@
+# Current handoff: P39 partial closure (2026-09-15)
+
+**P39 PARTIAL. 48 PASS / 3 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE.
+Phase 2 internal software closure: NOT YET. Internal blockers: P05 / P39 / P61.**
+
+Continue from P39 product `a531b323f8160eeed80e3b67077512f76d165bff` on `phase-2-compatible-editor`.
+The [P39 report](reports/phase2-p39-closure.md),
+[current ledger](reports/phase2-final-internal-evidence/final-ledger.json), and
+[P39 evidence](reports/phase2-p39-evidence/index.json) are current authority.
+Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.
+
+- Composition provenance/order/focus cancellation, immediate session invalidation,
+  same-frame replay rejection, and bounded Chromium AX descriptions are implemented.
+  Clipboard, Unicode, the 64-event queue and browser/runner isolation are preserved.
+- Native OS IME remains unproven: the correct headed TEST window exposed macOS AX,
+  but the bounded native-input attempt produced no composition events. CDP is not OS proof.
+- Full screen-reader/accessibility remains open: the new snapshot is read-only;
+  interactive remote semantics and a legitimate screen-reader integration are still needed.
+- Sustained session/renewal PASS: 16 hosted iterations/renewals/reconnects, 16 Code and
+  16 Visual edits, plus 12 actual viewer reconnects. Zero duplicate/stale delivery;
+  49 expected authority/replay refusals. Worker jobs return to zero; viewer listeners
+  remain 217 and nodes 333. This is bounded TEST evidence, not deployed capacity.
+- 646 distinct passes; all prior 621 identities and 39 test files preserved.
+  One full run plus bounded correction checks; initial failures remain recorded.
+  TypeScript/build/package pass. P39 changed-path review: zero confirmed unresolved vulnerabilities.
+- All 150 TEST leases stopped; services/tunnels/schema/PKI/password cleaned; VM stopped.
+  No P05/P61 work, corpus rebuild, later phases, payments or final UI work.
+  Only the feature branch is published; no main merge, force push or public deployment.
+
+---
+
 # Current handoff: P06 closure (2026-09-15)
 
 **P06 PASS. 48 PASS / 3 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE.
