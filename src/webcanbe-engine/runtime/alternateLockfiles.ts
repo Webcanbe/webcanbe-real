@@ -17,10 +17,179 @@ export function npmDescriptor(name:string,value:unknown){
   return {name:identity,range:range(target.slice(at+1))}
 }
 function dependencies(value:any){if(value===undefined)return {};if(!object(value))throw Error('Invalid dependency data.');for(const [name,r]of Object.entries(value)){if(!packageName.test(name))throw Error('Invalid dependency name.');range(r)}return value}
-export type AlternateLock={format:'yarn-classic-v1'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>}
+export type AlternateLock={format:'yarn-classic-v1'|'yarn-berry-v8'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>;cacheKey?:string}
+
+type BerryRequest={name:string;range:string;protocol:'npm'|'patch'|'workspace';virtual?:string;raw:string}
+const splitNameRequest=(value:string)=>{const at=value.indexOf('@',value.startsWith('@')?1:0);if(at<1)throw Error('Invalid Yarn descriptor identity.');const name=value.slice(0,at),requested=value.slice(at+1);if(!packageName.test(name)||!requested)return undefined;return{name,requested}}
+function berryPatch(name:string,value:string):BerryRequest|undefined{
+  if(!value.startsWith('patch:'))return
+  const body=value.slice(6),marker=body.indexOf('@npm%3A',body.startsWith('@')?1:0)
+  if(marker<1)return
+  const identity=body.slice(0,marker),after=body.slice(marker+7),builtin='#optional!builtin<compat/'
+  const hashAt=after.indexOf(builtin)
+  if(hashAt<1||!packageName.test(identity)||identity!==name)return
+  const encodedRange=after.slice(0,hashAt),tail=after.slice(hashAt+builtin.length),close=tail.indexOf('>')
+  if(close<1||tail.slice(0,close)!==identity)return
+  const suffix=tail.slice(close+1)
+  if(suffix&&!/^::version=[0-9A-Za-z.+-]{1,80}&hash=[a-f0-9]{6,64}$/.test(suffix))return
+  let decoded:string
+  try{decoded=decodeURIComponent(encodedRange)}catch{return}
+  const requested=npmDescriptor(name,'npm:'+decoded)
+  if(suffix){const exact=/^::version=([^&]+)&hash=/.exec(suffix)![1];if(!semver.valid(exact)||!semver.satisfies(exact,requested.range))return}
+  return{name:requested.name,range:requested.range,protocol:'patch',raw:value}
+}
+function berryRequest(name:string,value:unknown,allowWorkspace=false):BerryRequest{
+  if(!packageName.test(name)||typeof value!=='string'||!value||value.length>512)throw Error('Invalid Yarn Berry dependency descriptor.')
+  let raw=value,virtual:string|undefined
+  if(raw.startsWith('virtual:')){
+    const match=/^virtual:([a-f0-9]{6,64})#(.+)$/i.exec(raw)
+    if(!match)throw Error('Invalid Yarn virtual descriptor.')
+    virtual=match[1].toLowerCase();raw=match[2]
+  }
+  if(raw==='workspace:.'){
+    if(!allowWorkspace||virtual)throw Error('Only the root Yarn workspace is supported; confined workspace graphs require a separate adapter.')
+    return{name,range:raw,protocol:'workspace',raw:value}
+  }
+  const patch=berryPatch(name,raw)
+  if(patch){if(virtual)throw Error('Virtual patched Yarn descriptors are unsupported.');return{...patch,raw:value}}
+  if(!raw.startsWith('npm:'))throw Error('Unsupported Yarn Berry protocol; npm and builtin compatibility patches are the only package records admitted.')
+  const requested=npmDescriptor(name,raw)
+  return{name:requested.name,range:requested.range,protocol:'npm',virtual,raw:value}
+}
+function canonicalBerryRequest(name:string,value:string){
+  if(value.startsWith('npm:')||value.startsWith('virtual:')||value.startsWith('patch:')||value.startsWith('workspace:'))return value
+  npmDescriptor(name,value)
+  return'npm:'+value
+}
+function berryComparable(name:string,value:unknown){
+  const parsed=berryRequest(name,typeof value==='string'&&value.startsWith('virtual:')?value.replace(/^virtual:[a-f0-9]{6,64}#/i,''):value)
+  return parsed.name+'@'+parsed.protocol+':'+parsed.range
+}
+function equivalentDependencyMap(expected:any,received:any,berry=false){
+  const a=expected??{},b=received??{}
+  if(!object(a)||!object(b)||Object.keys(a).length!==Object.keys(b).length)return false
+  try{return Object.keys(a).sort().every(name=>Object.prototype.hasOwnProperty.call(b,name)&&(berry?berryComparable(name,a[name])===berryComparable(name,b[name]):String(a[name])===String(b[name])))}catch{return false}
+}
+function yamlPair(text:string){
+  let key:string,rest:string
+  if(text.startsWith('"')){
+    let end=1,escaped=false
+    for(;end<text.length;end++){const c=text[end];if(!escaped&&c==='"')break;escaped=!escaped&&c==='\\';if(c!=='\\')escaped=false}
+    if(end>=text.length)throw Error('Invalid quoted Yarn key.')
+    key=JSON.parse(text.slice(0,end+1));rest=text.slice(end+1)
+  }else{const colon=text.indexOf(':');if(colon<1)throw Error('Invalid Yarn field.');key=text.slice(0,colon).trim();rest=text.slice(colon)}
+  if(typeof key!=='string'||!key||!rest.startsWith(':'))throw Error('Invalid Yarn field.')
+  const raw=rest.slice(1).trim()
+  if(!raw)return{key,value:undefined as any}
+  let value:any=raw
+  if(raw.startsWith('"')){value=JSON.parse(raw);if(typeof value!=='string')throw Error('Invalid Yarn scalar.')}
+  else if(raw==='true'||raw==='false')value=raw==='true'
+  else if(/^\d+$/.test(raw))value=Number(raw)
+  else if(/[\r\n]/.test(raw))throw Error('Invalid Yarn scalar.')
+  return{key,value}
+}
+/** Yarn Berry v8 is treated only as a finite data graph. No Yarn runtime, plugin,
+ * PnP loader, cache archive or uploaded release bundle is ever executed. Berry
+ * cache checksums are a distinct identity and are never substituted for npm SRI. */
+export function parseYarnBerry(source:string):AlternateLock{
+  bounded(source)
+  const descriptors=new Map<string,any>(),records:any[]=[],metadata:Record<string,any>=Object.create(null)
+  let current:any,group:string|undefined,subgroup:string|undefined,count=0
+  for(const rawLine of source.split(/\r?\n/)){
+    if(!rawLine.trim()||rawLine.startsWith('#'))continue
+    if(/^\s*\t/.test(rawLine))throw Error('Tabs are unsupported in Yarn Berry data.')
+    const indent=/^ */.exec(rawLine)![0].length,line=rawLine.slice(indent)
+    if(indent===0){
+      group=subgroup=undefined
+      if(line==='__metadata:'){current=metadata;continue}
+      if(!line.endsWith(':')||++count>12000)throw Error('Invalid Yarn Berry record.')
+      const top=yamlPair(line.slice(0,-1)+':')
+      if(top.value!==undefined)throw Error('Invalid Yarn Berry record key.')
+      const keys=top.key.split(', ')
+      if(!keys.length||keys.length>64)throw Error('Invalid Yarn Berry descriptor set.')
+      current={descriptorTexts:keys,dependencies:Object.create(null),peerDependencies:Object.create(null),dependenciesMeta:Object.create(null),peerDependenciesMeta:Object.create(null),bin:Object.create(null)}
+      records.push(current)
+      continue
+    }
+    if(!current)throw Error('Yarn Berry field without a record.')
+    if(current===metadata){
+      if(indent!==2)throw Error('Invalid Yarn Berry metadata indentation.')
+      const {key,value}=yamlPair(line);if(!['version','cacheKey'].includes(key)||value===undefined||Object.prototype.hasOwnProperty.call(metadata,key))throw Error('Unsupported Yarn Berry metadata.')
+      metadata[key]=value;continue
+    }
+    if(indent===2){
+      const {key,value}=yamlPair(line)
+      if(['dependencies','peerDependencies','dependenciesMeta','peerDependenciesMeta','bin'].includes(key)){
+        if(value!==undefined||current['_'+key])throw Error('Invalid Yarn Berry map field.');current['_'+key]=true;group=key;subgroup=undefined;continue
+      }
+      if(!['version','resolution','checksum','languageName','linkType','conditions'].includes(key)||value===undefined||current[key]!==undefined)throw Error('Unsupported Yarn Berry record field.')
+      current[key]=value;group=subgroup=undefined;continue
+    }
+    if(indent===4&&group){
+      const {key,value}=yamlPair(line)
+      if(!packageName.test(key)&&group!=='bin')throw Error('Invalid Yarn Berry package key.')
+      if(['dependenciesMeta','peerDependenciesMeta'].includes(group)){
+        if(value!==undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry dependency metadata.');current[group][key]=Object.create(null);subgroup=key;continue
+      }
+      if(value===undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry map value.')
+      current[group][key]=value;subgroup=undefined;continue
+    }
+    if(indent===6&&group&&subgroup&&['dependenciesMeta','peerDependenciesMeta'].includes(group)){
+      const {key,value}=yamlPair(line)
+      if(!['optional','built'].includes(key)||typeof value!=='boolean'||Object.prototype.hasOwnProperty.call(current[group][subgroup],key))throw Error('Unsupported Yarn Berry dependency metadata.')
+      current[group][subgroup][key]=value;continue
+    }
+    throw Error('Unsupported Yarn Berry indentation or structure.')
+  }
+  if(metadata.version!==8||typeof metadata.cacheKey!=='string'||!/^[a-z0-9]{4,16}$/i.test(metadata.cacheKey)||!records.length)throw Error('Only Yarn Berry lockfile version 8 with a bounded cache key is supported.')
+  let root:any
+  for(const record of records){
+    if(typeof record.version!=='string'||typeof record.resolution!=='string'||typeof record.languageName!=='string'||!['hard','soft'].includes(record.linkType))throw Error('Incomplete Yarn Berry record.')
+    const locatorSplit=splitNameRequest(record.resolution);if(!locatorSplit)throw Error('Invalid Yarn Berry locator.')
+    const locator=berryRequest(locatorSplit.name,locatorSplit.requested,true)
+    record.name=locator.name;record.berryLocator=record.resolution
+    if(locator.protocol==='workspace'){
+      if(record.linkType!=='soft'||record.languageName!=='unknown'||record.checksum!==undefined||root)throw Error('Invalid or duplicate Yarn root workspace record.')
+      root=record
+    }else{
+      if(record.linkType!=='hard'||record.languageName!=='node'||!semver.valid(record.version)||typeof record.checksum!=='string'||!new RegExp('^'+metadata.cacheKey.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/[a-f0-9]{128}$','i').test(record.checksum))throw Error('Yarn Berry package records require exact versions and matching cache checksums.')
+      if(!semver.valid(locator.range)||record.version!==locator.range)throw Error('Yarn Berry locator version mismatch.')
+    }
+    for(const [name,value]of Object.entries(record.dependencies)){berryRequest(name,value);if(typeof value!=='string')throw Error('Invalid Yarn Berry dependency.')}
+    for(const [name,value]of Object.entries(record.peerDependencies)){if(!packageName.test(name))throw Error('Invalid Yarn Berry peer.');range(value)}
+    for(const [name,meta]of Object.entries(record.dependenciesMeta)){if(!object(meta)||!Object.prototype.hasOwnProperty.call(record.dependencies,name))throw Error('Dangling Yarn Berry dependency metadata.')}
+    for(const [name,meta]of Object.entries(record.peerDependenciesMeta)){if(!object(meta)||!Object.prototype.hasOwnProperty.call(record.peerDependencies,name))throw Error('Dangling Yarn Berry peer metadata.')}
+    const allDependencies=record.dependencies,optional:Record<string,any>=Object.create(null),required:Record<string,any>=Object.create(null)
+    for(const [name,value]of Object.entries(allDependencies))(record.dependenciesMeta[name]?.optional===true?optional:required)[name]=value
+    record.dependencies=required;record.optionalDependencies=optional
+    for(const text of record.descriptorTexts){
+      const split=splitNameRequest(text);if(!split)throw Error('Invalid Yarn Berry descriptor.')
+      const descriptor=berryRequest(split.name,split.requested,true)
+      if(descriptor.name!==locator.name||descriptor.protocol==='workspace'&&locator.protocol!=='workspace'||descriptor.protocol==='patch'&&locator.protocol!=='patch'||descriptor.virtual!==locator.virtual&&descriptor.virtual!==undefined)throw Error('Yarn Berry descriptor/locator identity mismatch.')
+      const exact=split.name+'@'+split.requested
+      if(descriptors.has(exact))throw Error('Duplicate Yarn Berry descriptor.');descriptors.set(exact,record)
+      // Yarn builtin compatibility patches replace the underlying npm descriptor.
+      // Register that exact underlying descriptor too; any competing record is an ambiguity.
+      if(descriptor.protocol==='patch'){
+        const underlying=split.name+'@npm:'+descriptor.range,prior=descriptors.get(underlying)
+        if(prior&&prior!==record)throw Error('Ambiguous Yarn compatibility patch descriptor.')
+        descriptors.set(underlying,record)
+      }
+    }
+  }
+  if(!root)throw Error('Yarn Berry requires one root workspace record.')
+  return{format:'yarn-berry-v8',packages:Object.create(null),cacheKey:metadata.cacheKey,root:{dependencies:{...root.dependencies,...root.optionalDependencies}},resolve:(name,requested)=>{
+    if(!packageName.test(name)||typeof requested!=='string')throw Error('Invalid Yarn Berry lookup.')
+    const key=name+'@'+canonicalBerryRequest(name,requested),exact=descriptors.get(key)
+    if(exact)return exact
+    throw Error('Exact Yarn Berry descriptor is missing: '+key)
+  }}
+}
+
 export function parseYarnClassic(source:string):AlternateLock {
   bounded(source)
-  if(!/^# yarn lockfile v1\r?$/m.test(source)||/^__metadata:/m.test(source))throw Error('Only Yarn classic v1 with registry SRI is supported; Berry checksums/virtual packages need a separately verified adapter.')
+  if(/^__metadata:/m.test(source))return parseYarnBerry(source)
+  if(!/^# yarn lockfile v1\r?$/m.test(source))throw Error('Only Yarn classic v1 or finite Berry v8 lock data is supported.')
   const descriptors=new Map<string,any>(),byName=new Map<string,any[]>();let current:any,section:string|undefined,records=0,currentNames=new Set<string>()
   const atom=(s:string)=>s.startsWith('"')?JSON.parse(s):s
   for(const line of source.split(/\r?\n/)) {
@@ -89,7 +258,11 @@ export function parseBunText(source:string):AlternateLock {
  * against the operator-owned npm graph. No resolver or package installation runs. */
 export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:any){
   const declared={...manifest.devDependencies,...manifest.dependencies},packages:Record<string,any>={'':{dependencies:manifest.dependencies,devDependencies:manifest.devDependencies}},visited=new Set<string>()
-  if(lock.root){for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')}
+  if(lock.root){
+    if(lock.format==='yarn-berry-v8'){
+      if(!equivalentDependencyMap(declared,lock.root.dependencies,true))throw Error('Yarn root declaration differs from manifest.')
+    }else for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')
+  }
   const located=(parent:string,name:string)=>{let from=parent;while(from){const p=from+'/node_modules/'+name;if(profile.packages[p])return p;const i=from.lastIndexOf('/node_modules/');from=i<0?'':from.slice(0,i)}return 'node_modules/'+name}
   const excludedPlatform=(record:any)=>[ ['os',process.platform],['cpu',process.arch] ].some(([key,current])=>{
     const values=record?.[key];if(!Array.isArray(values))return false
@@ -97,21 +270,24 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
   })
   const visit=(name:string,requested:string,location:string,from:string)=>{
     const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
-    const descriptor=npmDescriptor(name,requested)
-    if(!trusted||trusted.link||!actual||actual.name!==descriptor.name||(trusted.name??name)!==descriptor.name||actual.version!==trusted.version||actual.integrity!==trusted.integrity||!sri(trusted.integrity)||!semver.satisfies(trusted.version,descriptor.range))throw Error('Locked graph does not match pinned identity/version/integrity: '+location)
+    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,requested):npmDescriptor(name,requested)
+    const identity=descriptor.name,versionRange=descriptor.range
+    const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof trusted?.berryChecksum==='string'&&actual.berryChecksum===trusted.berryChecksum&&typeof actual.berryLocator==='string'&&typeof trusted.berryLocator==='string'&&actual.berryLocator===trusted.berryLocator:actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
+    if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
     packages[location]={...actual};if(visited.has(location))return;visited.add(location);if(visited.size>12000)throw Error('Dependency graph bound.')
     for(const group of ['dependencies','optionalDependencies']){
       const expected=trusted[group]??{},received=actual[group]??{}
-      if(JSON.stringify(Object.entries(expected).sort())!==JSON.stringify(Object.entries(received).sort()))throw Error('Lock dependency edges differ from pinned metadata: '+location)
+      if(!(berry?equivalentDependencyMap(expected,received,true):JSON.stringify(Object.entries(expected).sort())===JSON.stringify(Object.entries(received).sort())))throw Error('Lock dependency edges differ from pinned metadata: '+location)
     }
     // Yarn classic does not encode peer metadata: the SRI-verified operator
-    // package metadata supplies it. Bun's explicit peer data must also agree.
-    if(lock.format==='bun-text-v1'&&JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Bun peer metadata differs from pinned graph.')
-    if(lock.format==='bun-text-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Bun optional-peer metadata differs from pinned graph.')
+    // package metadata supplies it. Berry and Bun explicit peer data must agree.
+    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Lock peer metadata differs from pinned graph.')
+    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Lock optional-peer metadata differs from pinned graph.')
     for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
       const next=located(location,dep),isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
       if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
-      visit(dep,String(r),next,location)
+      const lockedRequested=berry&&!isPeer?(actual.dependencies?.[dep]??actual.optionalDependencies?.[dep]??String(r)):String(r)
+      visit(dep,String(lockedRequested),next,location)
     }
   }
   for(const [name,r]of Object.entries(declared))visit(name,String(r),'node_modules/'+name,'')
