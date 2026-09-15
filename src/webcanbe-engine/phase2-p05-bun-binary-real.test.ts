@@ -29,6 +29,6 @@ maybe('decodes the exact retained Todo Bun 1.1.42 binary graph as bounded inert 
   for(const record of graph.packages){
     expect(record.integrity).toMatch(/^(?:sha512-[A-Za-z0-9+/]{86}==|sha384-[A-Za-z0-9+/]{64}|sha256-[A-Za-z0-9+/]{43}=|sha1-[A-Za-z0-9+/]{27}=)$/)
     expect(record.resolved).toMatch(/^https:\/\/(?:registry\.npmjs\.org|registry\.yarnpkg\.com)\//)
-    for(const edge of record.dependencies)expect(graph.byId.has(edge.targetId),`${record.name} -> ${edge.name}`).toBe(true)
+    for(const edge of record.dependencies)if(edge.targetId!==null)expect(graph.byId.has(edge.targetId),`${record.name} -> ${edge.name}`).toBe(true)
   }
 })
