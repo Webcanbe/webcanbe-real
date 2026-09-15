@@ -22,3 +22,16 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx tsc --pretty false
       - run: npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts
+      - name: Fetch exact frozen Redux Berry inputs
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            'https://raw.githubusercontent.com/reduxjs/redux-essentials-example-app/b4414e1504c914ece3253dd8a21adfb2278464d9/yarn.lock' \
+            --output /tmp/redux-yarn.lock
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            'https://raw.githubusercontent.com/reduxjs/redux-essentials-example-app/b4414e1504c914ece3253dd8a21adfb2278464d9/package.json' \
+            --output /tmp/redux-package.json
+      - name: Parse exact frozen Redux Berry lock
+        env:
+          WCB_REDUX_BERRY_LOCK: /tmp/redux-yarn.lock
+          WCB_REDUX_PACKAGE: /tmp/redux-package.json
+        run: npx vitest run src/webcanbe-engine/phase2-p05-redux-real.test.ts
