@@ -22,7 +22,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npx tsc --pretty false
-      - run: npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts
+      - run: npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts src/webcanbe-engine/phase2-p05-inert-tooling.test.ts
       - name: Fetch exact frozen Redux Berry inputs
         run: |
           curl --fail --location --proto '=https' --tlsv1.2 \
