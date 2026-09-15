@@ -19,8 +19,17 @@ export function npmDescriptor(name:string,value:unknown){
 function dependencies(value:any){if(value===undefined)return {};if(!object(value))throw Error('Invalid dependency data.');for(const [name,r]of Object.entries(value)){if(!packageName.test(name))throw Error('Invalid dependency name.');range(r)}return value}
 export type AlternateLock={format:'yarn-classic-v1'|'yarn-berry-v8'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>;cacheKey?:string}
 
-type BerryRequest={name:string;range:string;protocol:'npm'|'patch'|'workspace';virtual?:string;raw:string}
-const splitNameRequest=(value:string)=>{const at=value.indexOf('@',value.startsWith('@')?1:0);if(at<1)throw Error('Invalid Yarn descriptor identity.');const name=value.slice(0,at),requested=value.slice(at+1);if(!packageName.test(name)||!requested)return undefined;return{name,requested}}
+type BerryRequest={name:string;range:string;selector:string;protocol:'npm'|'patch'|'workspace';virtual?:string;raw:string}
+const splitNameRequest=(value:string)=>{const at=value.indexOf('@',value.startsWith('@')?1:0);if(at<1)throw Error('Invalid Yarn descriptor identity.');const name=value.slice(0,at),requested=value.slice(at+1);if(!packageName.test(name)||!requested)throw Error('Invalid Yarn descriptor identity.');return{name,requested}}
+function berryNpmDescriptor(name:string,value:string){
+  if(!value.startsWith('npm:'))throw Error('Invalid Yarn npm descriptor.')
+  const target=value.slice(4),at=target.indexOf('@',target.startsWith('@')?1:0),identity=at<0?name:target.slice(0,at),selector=at<0?target:target.slice(at+1)
+  if(!packageName.test(identity)||!selector||selector.length>256)throw Error('Invalid Yarn npm descriptor.')
+  const valid=semver.validRange(selector)
+  if(valid)return{name:identity,range:selector,selector}
+  if(!/^[a-z][a-z0-9._-]{0,31}$/i.test(selector))throw Error('Unsupported Yarn npm selector.')
+  return{name:identity,range:'*',selector:'tag:'+selector}
+}
 function berryPatch(name:string,value:string):BerryRequest|undefined{
   if(!value.startsWith('patch:'))return
   const body=value.slice(6),marker=body.indexOf('@npm%3A',body.startsWith('@')?1:0)
@@ -34,9 +43,10 @@ function berryPatch(name:string,value:string):BerryRequest|undefined{
   if(suffix&&!/^::version=[0-9A-Za-z.+-]{1,80}&hash=[a-f0-9]{6,64}$/.test(suffix))return
   let decoded:string
   try{decoded=decodeURIComponent(encodedRange)}catch{return}
-  const requested=npmDescriptor(name,'npm:'+decoded)
+  const requested=berryNpmDescriptor(name,'npm:'+decoded)
+  if(requested.selector.startsWith('tag:'))return
   if(suffix){const exact=/^::version=([^&]+)&hash=/.exec(suffix)![1];if(!semver.valid(exact)||!semver.satisfies(exact,requested.range))return}
-  return{name:requested.name,range:requested.range,protocol:'patch',raw:value}
+  return{name:requested.name,range:requested.range,selector:requested.selector,protocol:'patch',raw:value}
 }
 function berryRequest(name:string,value:unknown,allowWorkspace=false):BerryRequest{
   if(!packageName.test(name)||typeof value!=='string'||!value||value.length>512)throw Error('Invalid Yarn Berry dependency descriptor.')
@@ -48,22 +58,26 @@ function berryRequest(name:string,value:unknown,allowWorkspace=false):BerryReque
   }
   if(raw==='workspace:.'){
     if(!allowWorkspace||virtual)throw Error('Only the root Yarn workspace is supported; confined workspace graphs require a separate adapter.')
-    return{name,range:raw,protocol:'workspace',raw:value}
+    return{name,range:'*',selector:raw,protocol:'workspace',raw:value}
   }
   const patch=berryPatch(name,raw)
   if(patch){if(virtual)throw Error('Virtual patched Yarn descriptors are unsupported.');return{...patch,raw:value}}
   if(!raw.startsWith('npm:'))throw Error('Unsupported Yarn Berry protocol; npm and builtin compatibility patches are the only package records admitted.')
-  const requested=npmDescriptor(name,raw)
-  return{name:requested.name,range:requested.range,protocol:'npm',virtual,raw:value}
+  const requested=berryNpmDescriptor(name,raw)
+  return{name:requested.name,range:requested.range,selector:requested.selector,protocol:'npm',virtual,raw:value}
 }
 function canonicalBerryRequest(name:string,value:string){
   if(value.startsWith('npm:')||value.startsWith('virtual:')||value.startsWith('patch:')||value.startsWith('workspace:'))return value
-  npmDescriptor(name,value)
+  // Project/package metadata expresses ordinary npm selectors without the protocol.
+  berryNpmDescriptor(name,'npm:'+value)
   return'npm:'+value
 }
 function berryComparable(name:string,value:unknown){
-  const parsed=berryRequest(name,typeof value==='string'&&value.startsWith('virtual:')?value.replace(/^virtual:[a-f0-9]{6,64}#/i,''):value)
-  return parsed.name+'@'+parsed.protocol+':'+parsed.range
+  let raw=String(value)
+  if(raw.startsWith('virtual:'))raw=raw.replace(/^virtual:[a-f0-9]{6,64}#/i,'')
+  if(!/^(?:npm:|patch:|workspace:)/.test(raw))raw='npm:'+raw
+  const parsed=berryRequest(name,raw,true)
+  return parsed.name+'@'+parsed.protocol+':'+parsed.selector
 }
 function equivalentDependencyMap(expected:any,received:any,berry=false){
   const a=expected??{},b=received??{}
@@ -74,11 +88,11 @@ function yamlPair(text:string){
   let key:string,rest:string
   if(text.startsWith('"')){
     let end=1,escaped=false
-    for(;end<text.length;end++){const c=text[end];if(!escaped&&c==='"')break;escaped=!escaped&&c==='\\';if(c!=='\\')escaped=false}
+    for(;end<text.length;end++){const c=text[end];if(!escaped&&c==='"')break;if(c==='\\'&&!escaped)escaped=true;else escaped=false}
     if(end>=text.length)throw Error('Invalid quoted Yarn key.')
     key=JSON.parse(text.slice(0,end+1));rest=text.slice(end+1)
   }else{const colon=text.indexOf(':');if(colon<1)throw Error('Invalid Yarn field.');key=text.slice(0,colon).trim();rest=text.slice(colon)}
-  if(typeof key!=='string'||!key||!rest.startsWith(':'))throw Error('Invalid Yarn field.')
+  if(typeof key!=='string'||!key||key.length>1024||!rest.startsWith(':'))throw Error('Invalid Yarn field.')
   const raw=rest.slice(1).trim()
   if(!raw)return{key,value:undefined as any}
   let value:any=raw
@@ -86,6 +100,7 @@ function yamlPair(text:string){
   else if(raw==='true'||raw==='false')value=raw==='true'
   else if(/^\d+$/.test(raw))value=Number(raw)
   else if(/[\r\n]/.test(raw))throw Error('Invalid Yarn scalar.')
+  if(typeof value==='string'&&value.length>2048)throw Error('Yarn scalar exceeds bound.')
   return{key,value}
 }
 /** Yarn Berry v8 is treated only as a finite data graph. No Yarn runtime, plugin,
@@ -93,7 +108,7 @@ function yamlPair(text:string){
  * cache checksums are a distinct identity and are never substituted for npm SRI. */
 export function parseYarnBerry(source:string):AlternateLock{
   bounded(source)
-  const descriptors=new Map<string,any>(),records:any[]=[],metadata:Record<string,any>=Object.create(null)
+  const descriptors=new Map<string,any>(),patchAliases=new Map<string,any>(),records:any[]=[],metadata:Record<string,any>=Object.create(null)
   let current:any,group:string|undefined,subgroup:string|undefined,count=0
   for(const rawLine of source.split(/\r?\n/)){
     if(!rawLine.trim()||rawLine.startsWith('#'))continue
@@ -103,7 +118,7 @@ export function parseYarnBerry(source:string):AlternateLock{
       group=subgroup=undefined
       if(line==='__metadata:'){current=metadata;continue}
       if(!line.endsWith(':')||++count>12000)throw Error('Invalid Yarn Berry record.')
-      const top=yamlPair(line.slice(0,-1)+':')
+      const top=yamlPair(line)
       if(top.value!==undefined)throw Error('Invalid Yarn Berry record key.')
       const keys=top.key.split(', ')
       if(!keys.length||keys.length>64)throw Error('Invalid Yarn Berry descriptor set.')
@@ -127,7 +142,8 @@ export function parseYarnBerry(source:string):AlternateLock{
     }
     if(indent===4&&group){
       const {key,value}=yamlPair(line)
-      if(!packageName.test(key)&&group!=='bin')throw Error('Invalid Yarn Berry package key.')
+      if(group!=='bin'&&!packageName.test(key))throw Error('Invalid Yarn Berry package key.')
+      if(group==='bin'&&(key.length>128||value===undefined||typeof value!=='string'||value.length>512||value.startsWith('/')||value.includes('\\')||value.split('/').some(p=>!p||p==='.'||p==='..')))throw Error('Invalid inert Yarn bin metadata.')
       if(['dependenciesMeta','peerDependenciesMeta'].includes(group)){
         if(value!==undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry dependency metadata.');current[group][key]=Object.create(null);subgroup=key;continue
       }
@@ -142,17 +158,18 @@ export function parseYarnBerry(source:string):AlternateLock{
     throw Error('Unsupported Yarn Berry indentation or structure.')
   }
   if(metadata.version!==8||typeof metadata.cacheKey!=='string'||!/^[a-z0-9]{4,16}$/i.test(metadata.cacheKey)||!records.length)throw Error('Only Yarn Berry lockfile version 8 with a bounded cache key is supported.')
+  const checksumPattern=new RegExp('^'+metadata.cacheKey.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/[a-f0-9]{128}$','i')
   let root:any
   for(const record of records){
     if(typeof record.version!=='string'||typeof record.resolution!=='string'||typeof record.languageName!=='string'||!['hard','soft'].includes(record.linkType))throw Error('Incomplete Yarn Berry record.')
-    const locatorSplit=splitNameRequest(record.resolution);if(!locatorSplit)throw Error('Invalid Yarn Berry locator.')
-    const locator=berryRequest(locatorSplit.name,locatorSplit.requested,true)
-    record.name=locator.name;record.berryLocator=record.resolution
+    if(record.conditions!==undefined&&(typeof record.conditions!=='string'||!/^(?:(?:os|cpu|libc)=[a-z0-9_-]+)(?: & (?:os|cpu|libc)=[a-z0-9_-]+)*$/i.test(record.conditions)))throw Error('Unsupported Yarn Berry platform condition.')
+    const locatorSplit=splitNameRequest(record.resolution),locator=berryRequest(locatorSplit.name,locatorSplit.requested,true)
+    record.name=locator.name;record.berryLocator=record.resolution;record.berryChecksum=record.checksum
     if(locator.protocol==='workspace'){
       if(record.linkType!=='soft'||record.languageName!=='unknown'||record.checksum!==undefined||root)throw Error('Invalid or duplicate Yarn root workspace record.')
       root=record
     }else{
-      if(record.linkType!=='hard'||record.languageName!=='node'||!semver.valid(record.version)||typeof record.checksum!=='string'||!new RegExp('^'+metadata.cacheKey.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/[a-f0-9]{128}$','i').test(record.checksum))throw Error('Yarn Berry package records require exact versions and matching cache checksums.')
+      if(record.linkType!=='hard'||record.languageName!=='node'||!semver.valid(record.version)||record.checksum!==undefined&&(!checksumPattern.test(record.checksum))||record.checksum===undefined&&record.conditions===undefined)throw Error('Yarn Berry package records require exact versions and matching cache checksums; only conditional unmaterialized records may omit a checksum.')
       if(!semver.valid(locator.range)||record.version!==locator.range)throw Error('Yarn Berry locator version mismatch.')
     }
     for(const [name,value]of Object.entries(record.dependencies)){berryRequest(name,value);if(typeof value!=='string')throw Error('Invalid Yarn Berry dependency.')}
@@ -163,24 +180,22 @@ export function parseYarnBerry(source:string):AlternateLock{
     for(const [name,value]of Object.entries(allDependencies))(record.dependenciesMeta[name]?.optional===true?optional:required)[name]=value
     record.dependencies=required;record.optionalDependencies=optional
     for(const text of record.descriptorTexts){
-      const split=splitNameRequest(text);if(!split)throw Error('Invalid Yarn Berry descriptor.')
-      const descriptor=berryRequest(split.name,split.requested,true)
+      const split=splitNameRequest(text),descriptor=berryRequest(split.name,split.requested,true)
       if(descriptor.name!==locator.name||descriptor.protocol==='workspace'&&locator.protocol!=='workspace'||descriptor.protocol==='patch'&&locator.protocol!=='patch'||descriptor.virtual!==locator.virtual&&descriptor.virtual!==undefined)throw Error('Yarn Berry descriptor/locator identity mismatch.')
+      if(descriptor.protocol!=='workspace'&&!semver.satisfies(record.version,descriptor.range))throw Error('Yarn Berry descriptor does not admit its locator version.')
       const exact=split.name+'@'+split.requested
       if(descriptors.has(exact))throw Error('Duplicate Yarn Berry descriptor.');descriptors.set(exact,record)
-      // Yarn builtin compatibility patches replace the underlying npm descriptor.
-      // Register that exact underlying descriptor too; any competing record is an ambiguity.
       if(descriptor.protocol==='patch'){
-        const underlying=split.name+'@npm:'+descriptor.range,prior=descriptors.get(underlying)
+        const underlying=split.name+'@npm:'+descriptor.selector,prior=patchAliases.get(underlying)
         if(prior&&prior!==record)throw Error('Ambiguous Yarn compatibility patch descriptor.')
-        descriptors.set(underlying,record)
+        patchAliases.set(underlying,record)
       }
     }
   }
   if(!root)throw Error('Yarn Berry requires one root workspace record.')
   return{format:'yarn-berry-v8',packages:Object.create(null),cacheKey:metadata.cacheKey,root:{dependencies:{...root.dependencies,...root.optionalDependencies}},resolve:(name,requested)=>{
     if(!packageName.test(name)||typeof requested!=='string')throw Error('Invalid Yarn Berry lookup.')
-    const key=name+'@'+canonicalBerryRequest(name,requested),exact=descriptors.get(key)
+    const key=name+'@'+canonicalBerryRequest(name,requested),exact=descriptors.get(key)??patchAliases.get(key)
     if(exact)return exact
     throw Error('Exact Yarn Berry descriptor is missing: '+key)
   }}
@@ -270,7 +285,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
   })
   const visit=(name:string,requested:string,location:string,from:string)=>{
     const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
-    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,requested):npmDescriptor(name,requested)
+    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):npmDescriptor(name,requested)
     const identity=descriptor.name,versionRange=descriptor.range
     const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof trusted?.berryChecksum==='string'&&actual.berryChecksum===trusted.berryChecksum&&typeof actual.berryLocator==='string'&&typeof trusted.berryLocator==='string'&&actual.berryLocator===trusted.berryLocator:actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
     if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
