@@ -151,11 +151,19 @@ async function sample() {
     if (selectedRoute && route !== selectedRoute) await dom(()=>{globalThis.__wcbSelected=null;});
     selectedRoute=route;
     const selection=await dom(describeSelected);
-    const focused=await dom(()=>{const e=document.activeElement;if(!e||e===document.body)return {role:'unknown',name:'No focused control'};const role=e.tagName==='BUTTON'?'button':e.tagName==='A'?'link':e.tagName==='SELECT'?'combobox':e.tagName==='TEXTAREA'?'textbox':e.tagName==='INPUT'?(['checkbox','radio','range'].includes(e.type)?e.type==='range'?'slider':e.type:'textbox'):'unknown';const name=e.getAttribute('aria-label')||[...(e.labels||[])].map(n=>n.textContent).join(' ')||e.getAttribute('placeholder')||e.getAttribute('title')||(role==='button'||role==='link'?e.textContent:'')||e.tagName.toLowerCase();return{role,name:name.slice(0,200)};});
+    // Chromium computes names, roles and states; project JS cannot override the CDP API.
+    const ax = await cdp.send('Accessibility.getFullAXTree');
+    const states = new Set(['disabled','expanded','selected','checked','pressed','required','readonly','invalid','level','live','modal','multiline']);
+    const roles = new Set(['button','textbox','link','checkbox','radio','combobox','slider','heading','paragraph','StaticText','list','listitem','navigation','main','dialog','alert','status','tab','tablist','tabpanel','menu','menuitem','option','listbox','table','row','cell','columnheader','rowheader','progressbar','spinbutton','switch','searchbox']);
+    const describe = n => ({role:n.role?.value||'unknown',name:String(n.name?.value||'').slice(0,200),description:String(n.description?.value||'').slice(0,200),states:Object.fromEntries((n.properties||[]).filter(p=>states.has(p.name)&&['string','boolean','number'].includes(typeof p.value?.value)).map(p=>[p.name,String(p.value.value).slice(0,100)]))});
+    const focusedNode=ax.nodes.find(n=>!n.ignored&&(n.properties||[]).some(p=>p.name==='focused'&&p.value?.value===true)&&n.role?.value!=='RootWebArea');
+    const focused=focusedNode?describe(focusedNode):{role:'unknown',name:'No focused control'};
+    if(!roles.has(focused.role))focused.role='unknown';
+    const accessibility=ax.nodes.filter(n=>!n.ignored&&roles.has(n.role?.value)&&n.role?.value!=='InlineTextBox').slice(0,256).map(describe);
     assertCurrent();
     const png=await captureRaster(cdp,viewport);
     assertCurrent();
-    const copied=clipboard;clipboard=undefined;return {png:png.toString('base64'),observation:{route,viewport,selection,focused,logs:logs.slice(),...(copied!==undefined?{clipboard:copied}:{})}};
+    const copied=clipboard;clipboard=undefined;return {png:png.toString('base64'),observation:{route,viewport,selection,focused,accessibility,logs:logs.slice(),...(copied!==undefined?{clipboard:copied}:{})}};
   },close);
 }
 let buffer = '', chain = Promise.resolve();

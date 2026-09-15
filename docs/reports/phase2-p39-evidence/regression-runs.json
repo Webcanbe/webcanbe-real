@@ -1,0 +1,82 @@
+[
+  {
+    "run": "full-regressions",
+    "passed": 638,
+    "failed": 8,
+    "failures": [
+      {
+        "test": "delivers and rotates generated TEST values through real fenced mTLS and native sandbox without source or log exposure",
+        "messages": [
+          "Error: Managed preview startup unavailable.\n    at ManagedSecretRunnerProvider.open (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/managedPreviewSecrets.ts:89:98)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2-final-secrets.test.ts:39:33\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "hosted actual API source/history boundary enforces viewer writes through HTTP and records the authenticated actor on real source transactions",
+        "messages": [
+          "Error: ENOTEMPTY, Directory not empty: /private/var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-2g-authority-zlt8n4 '/private/var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-2g-authority-zlt8n4'\n    at Object.rmSync (node:fs:1484:18)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g-authority.test.ts:23:26\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g-authority.test.ts:19:81"
+        ]
+      },
+      {
+        "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) the production-built editor uses cookie/CSRF HTTP for rendered Code/Canvas/history and separate-site viewer",
+        "messages": [
+          "Error: Cannot find module 'playwright'\nRequire stack:\n- /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-hosted-editor.test.ts\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1568:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1122:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1146:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1173:12)\n    at Module._load (node:internal/modules/cjs/loader:1345:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:260:19)\n    at Module.require (node:internal/modules/cjs/loader:1689:12)\n    at require (node:internal/modules/helpers:191:16)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-hosted-editor.test.ts:316:61\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:1628:35"
+        ]
+      },
+      {
+        "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) A owns a real runner, A is SIGKILLed, B retires it and A's late message cannot regain authority",
+        "messages": [
+          "Error: Invalid execution deadline.\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresFencing.ts:43:40\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at pgTransaction (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresTransaction.ts:7:20)\n    at HostedLinuxRunnerProvider.allocate (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/hostedLinuxRunner.ts:56:19)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-hosted-runner.test.ts:72:19\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses epochs to reject late controller A after B takes over; uncertain cleanup retains capacity",
+        "messages": [
+          "Error: Invalid execution deadline.\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresFencing.ts:43:40\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at pgTransaction (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresTransaction.ts:7:20)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-postgres.test.ts:145:19\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "real PostgreSQL integration \u2014 local VM, not managed cloud enforces per-host capacity across project/session allocations",
+        "messages": [
+          "Error: Invalid execution deadline.\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresFencing.ts:43:40\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at pgTransaction (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresTransaction.ts:7:20)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-postgres.test.ts:156:5\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "real PostgreSQL integration \u2014 local VM, not managed cloud prevents concurrent duplicate starts and admission races, never resurrects stopped generations",
+        "messages": [
+          "AssertionError: expected [] to have a length of 1 but got +0\n    at Proxy.<anonymous> (file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:2137:20)\n    at Proxy.<anonymous> (file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:1934:14)\n    at Proxy.methodWrapper (file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/chai/index.js:1700:25)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-postgres.test.ts:163:56\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rejects a result whose lease expired during the operation",
+        "messages": [
+          "Error: Invalid execution deadline.\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresFencing.ts:43:40\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at pgTransaction (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresTransaction.ts:7:20)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-postgres.test.ts:169:95\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      }
+    ]
+  },
+  {
+    "run": "targeted-correction",
+    "passed": 80,
+    "failed": 2,
+    "failures": [
+      {
+        "test": "delivers and rotates generated TEST values through real fenced mTLS and native sandbox without source or log exposure",
+        "messages": [
+          "Error: Managed preview startup unavailable.\n    at ManagedSecretRunnerProvider.open (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/managedPreviewSecrets.ts:89:98)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2-final-secrets.test.ts:39:1025\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      },
+      {
+        "test": "real PostgreSQL integration \u2014 local VM, not managed cloud enforces per-host capacity across project/session allocations",
+        "messages": [
+          "Error: Invalid execution deadline.\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresFencing.ts:43:40\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at pgTransaction (/Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/runtime/postgresTransaction.ts:7:20)\n    at /Users/olivertaylor/Developer/WebCanBe-recovery/src/webcanbe-engine/phase2g2-postgres.test.ts:158:13\n    at file:///Users/olivertaylor/Developer/WebCanBe-recovery/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+        ]
+      }
+    ]
+  },
+  {
+    "run": "deadline-correction",
+    "passed": 26,
+    "failed": 0,
+    "failures": []
+  }
+]

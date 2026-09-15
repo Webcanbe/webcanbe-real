@@ -1,0 +1,135 @@
+[
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789464805838/receipt.json",
+    "failure": "Timed out native composition committed once",
+    "events": null,
+    "iterations": null
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789466377354/receipt.json",
+    "failure": "browserContext.newCDPSession: This frame does not have a separate CDP session, it is a part of the parent frame's session",
+    "events": null,
+    "iterations": null
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789467174496/receipt.json",
+    "failure": "Timed out native OS Korean commit",
+    "events": [],
+    "iterations": null
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789465048182/receipt.json",
+    "failure": "Timed out native OS Korean commit",
+    "events": [],
+    "iterations": null
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789464863813/receipt.json",
+    "failure": "Timed out browser composition committed once",
+    "events": [
+      {
+        "type": "compositionstart",
+        "trusted": true,
+        "data": null,
+        "inputType": null
+      },
+      {
+        "type": "compositionupdate",
+        "trusted": true,
+        "data": "\u314e",
+        "inputType": null
+      },
+      {
+        "type": "beforeinput",
+        "trusted": true,
+        "data": "\u314e",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "input",
+        "trusted": true,
+        "data": "\u314e",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "compositionupdate",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": null
+      },
+      {
+        "type": "beforeinput",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "input",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "compositionupdate",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": null
+      },
+      {
+        "type": "beforeinput",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "input",
+        "trusted": true,
+        "data": "\ud55c\uae00",
+        "inputType": "insertCompositionText"
+      },
+      {
+        "type": "compositionend",
+        "trusted": false,
+        "data": "\ud55c\uae00",
+        "inputType": null
+      }
+    ],
+    "iterations": null
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789466469622/receipt.json",
+    "failure": "The expression evaluated to a falsy value:\n\n  assert(last.jsEventListeners<first.jsEventListeners+8)\n",
+    "events": null,
+    "iterations": 12
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789467008371/receipt.json",
+    "failure": "The expression evaluated to a falsy value:\n\n  assert(receipt.browserEndurance.listenerRange[1]-receipt.browserEndurance.listenerRange[0]<=4)\n",
+    "events": null,
+    "iterations": 6
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789466652556/receipt.json",
+    "failure": "The expression evaluated to a falsy value:\n\n  assert(receipt.browserEndurance.listenerRange[1]-receipt.browserEndurance.listenerRange[0]<=4)\n",
+    "events": null,
+    "iterations": 12
+  },
+  {
+    "probe": ".webcanbe/runner/qa-final-internal/input-1789466876388/receipt.json",
+    "failure": "The expression evaluated to a falsy value:\n\n  assert(receipt.browserEndurance.listenerRange[1]-receipt.browserEndurance.listenerRange[0]<=4)\n",
+    "events": null,
+    "iterations": 12
+  },
+  {
+    "probe": ".webcanbe/runner/qa-p39/endurance-1789466019632/receipt.json",
+    "failure": "preview: {\"error\":\"Error: Controlled preview is unavailable.\"}\n\n422 !== 200\n",
+    "events": null,
+    "iterations": 0
+  },
+  {
+    "probe": ".webcanbe/runner/qa-p39/endurance-1789465902184/receipt.json",
+    "failure": "preview: {\"error\":\"The hosted operation failed. Accepted source and history remain authoritative.\"}\n\n422 !== 200\n",
+    "events": null,
+    "iterations": 0
+  }
+]

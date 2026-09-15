@@ -1,0 +1,12 @@
+{
+  "os": "macOS",
+  "enabledInputMethod": "com.apple.inputmethod.Korean.2SetKorean",
+  "swiftAXTrusted": false,
+  "swiftOutsideShellSandboxAXTrusted": false,
+  "nativeDriver": "cua native app control; exact chromium-1234 headed hosted TEST window verified by URL and macOS AX tree",
+  "nativeCompositionEvents": 0,
+  "nativeAttempt": "45-second bounded correct-window attempt timed out; driver focus guard/targeting did not produce composition",
+  "screenReaderIntegration": "not established; macOS AX inspection is not VoiceOver integration",
+  "newOSPermissions": false,
+  "thirdPartyAutomationInstalled": false
+}

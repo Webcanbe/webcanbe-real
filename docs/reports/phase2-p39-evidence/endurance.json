@@ -1,0 +1,272 @@
+{
+  "scope": "Owned TEST; production interfaces and defaults; short verified-session lifetime supplied only by this QA caller",
+  "iterations": 16,
+  "sessionRenewals": 16,
+  "reconnects": 16,
+  "leaseRenewalsObserved": 16,
+  "sourceReads": 33,
+  "codeEdits": 16,
+  "visualEdits": 16,
+  "duplicateEvents": 0,
+  "staleEventsDelivered": 0,
+  "expectedAuthorizationFailures": 49,
+  "unexpectedAuthorizationFailures": 0,
+  "samples": [
+    {
+      "iteration": 0,
+      "point": "start",
+      "MemoryCurrent": "369770496",
+      "MemoryPeak": "369770496",
+      "TasksCurrent": "115"
+    },
+    {
+      "iteration": 0,
+      "point": "end",
+      "MemoryCurrent": "475144192",
+      "MemoryPeak": "484466688",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 1,
+      "point": "start",
+      "MemoryCurrent": "409923584",
+      "MemoryPeak": "409923584",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 1,
+      "point": "end",
+      "MemoryCurrent": "443424768",
+      "MemoryPeak": "488603648",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 2,
+      "point": "start",
+      "MemoryCurrent": "396742656",
+      "MemoryPeak": "396742656",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 2,
+      "point": "end",
+      "MemoryCurrent": "436879360",
+      "MemoryPeak": "478793728",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 3,
+      "point": "start",
+      "MemoryCurrent": "406929408",
+      "MemoryPeak": "406929408",
+      "TasksCurrent": "112"
+    },
+    {
+      "iteration": 3,
+      "point": "end",
+      "MemoryCurrent": "472150016",
+      "MemoryPeak": "481361920",
+      "TasksCurrent": "111"
+    },
+    {
+      "iteration": 4,
+      "point": "start",
+      "MemoryCurrent": "364122112",
+      "MemoryPeak": "364122112",
+      "TasksCurrent": "113"
+    },
+    {
+      "iteration": 4,
+      "point": "end",
+      "MemoryCurrent": "471949312",
+      "MemoryPeak": "481484800",
+      "TasksCurrent": "112"
+    },
+    {
+      "iteration": 5,
+      "point": "start",
+      "MemoryCurrent": "380141568",
+      "MemoryPeak": "380141568",
+      "TasksCurrent": "119"
+    },
+    {
+      "iteration": 5,
+      "point": "end",
+      "MemoryCurrent": "446312448",
+      "MemoryPeak": "483905536",
+      "TasksCurrent": "119"
+    },
+    {
+      "iteration": 6,
+      "point": "start",
+      "MemoryCurrent": "373579776",
+      "MemoryPeak": "373817344",
+      "TasksCurrent": "112"
+    },
+    {
+      "iteration": 6,
+      "point": "end",
+      "MemoryCurrent": "467230720",
+      "MemoryPeak": "476274688",
+      "TasksCurrent": "111"
+    },
+    {
+      "iteration": 7,
+      "point": "start",
+      "MemoryCurrent": "394829824",
+      "MemoryPeak": "395141120",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 7,
+      "point": "end",
+      "MemoryCurrent": "434675712",
+      "MemoryPeak": "477085696",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 8,
+      "point": "start",
+      "MemoryCurrent": "365015040",
+      "MemoryPeak": "365015040",
+      "TasksCurrent": "116"
+    },
+    {
+      "iteration": 8,
+      "point": "end",
+      "MemoryCurrent": "468975616",
+      "MemoryPeak": "478105600",
+      "TasksCurrent": "115"
+    },
+    {
+      "iteration": 9,
+      "point": "start",
+      "MemoryCurrent": "397795328",
+      "MemoryPeak": "398041088",
+      "TasksCurrent": "110"
+    },
+    {
+      "iteration": 9,
+      "point": "end",
+      "MemoryCurrent": "485371904",
+      "MemoryPeak": "494866432",
+      "TasksCurrent": "110"
+    },
+    {
+      "iteration": 10,
+      "point": "start",
+      "MemoryCurrent": "378675200",
+      "MemoryPeak": "378724352",
+      "TasksCurrent": "117"
+    },
+    {
+      "iteration": 10,
+      "point": "end",
+      "MemoryCurrent": "468828160",
+      "MemoryPeak": "477978624",
+      "TasksCurrent": "116"
+    },
+    {
+      "iteration": 11,
+      "point": "start",
+      "MemoryCurrent": "376262656",
+      "MemoryPeak": "376520704",
+      "TasksCurrent": "118"
+    },
+    {
+      "iteration": 11,
+      "point": "end",
+      "MemoryCurrent": "421588992",
+      "MemoryPeak": "460656640",
+      "TasksCurrent": "117"
+    },
+    {
+      "iteration": 12,
+      "point": "start",
+      "MemoryCurrent": "378462208",
+      "MemoryPeak": "378720256",
+      "TasksCurrent": "115"
+    },
+    {
+      "iteration": 12,
+      "point": "end",
+      "MemoryCurrent": "473870336",
+      "MemoryPeak": "483258368",
+      "TasksCurrent": "114"
+    },
+    {
+      "iteration": 13,
+      "point": "start",
+      "MemoryCurrent": "380469248",
+      "MemoryPeak": "380469248",
+      "TasksCurrent": "116"
+    },
+    {
+      "iteration": 13,
+      "point": "end",
+      "MemoryCurrent": "431042560",
+      "MemoryPeak": "470175744",
+      "TasksCurrent": "115"
+    },
+    {
+      "iteration": 14,
+      "point": "start",
+      "MemoryCurrent": "368513024",
+      "MemoryPeak": "368513024",
+      "TasksCurrent": "112"
+    },
+    {
+      "iteration": 14,
+      "point": "end",
+      "MemoryCurrent": "466501632",
+      "MemoryPeak": "476028928",
+      "TasksCurrent": "111"
+    },
+    {
+      "iteration": 15,
+      "point": "start",
+      "MemoryCurrent": "386265088",
+      "MemoryPeak": "386273280",
+      "TasksCurrent": "112"
+    },
+    {
+      "iteration": 15,
+      "point": "end",
+      "MemoryCurrent": "468140032",
+      "MemoryPeak": "477376512",
+      "TasksCurrent": "111"
+    }
+  ],
+  "generations": [
+    "b453dd0d-aa82-4be3-9b0b-1c406182fa2e",
+    "e10cf164-7069-40c7-a2ad-1389dd1f64b2",
+    "39a36a3a-c9f1-468d-bccd-917900b9ca36",
+    "373f79b1-8db6-48e8-8b26-5eae2db8794f",
+    "8086f767-99a3-4f94-a983-49e2d7f0aa75",
+    "c3c992e4-87b1-40ea-91f8-9300f843583d",
+    "55a8f917-05d2-4ec7-9ca8-e6011c4a8398",
+    "b26d1a14-bfb3-4182-a4aa-a7933a78d323",
+    "04cac390-620b-47da-a737-f7cdff1bf9eb",
+    "b1892535-08cf-412b-b950-a480c36710d6",
+    "9f4db44b-46a5-4444-a602-cc93546e60b0",
+    "620d0ab6-b8a2-4bc5-b9e2-6d5a3af1334e",
+    "d4107aad-db7e-42dd-82d9-4ecf5bd84581",
+    "e8ef2cf8-54f8-4951-998c-2c1ce29250d0",
+    "965c647c-ac7b-4723-a66a-255e040814b2",
+    "f015c307-0a8b-493f-9e95-602ca9e601e6",
+    "157ae13f-139c-4935-904d-889a46b6dc88"
+  ],
+  "startingJobs": 0,
+  "stage": "iteration 15",
+  "status": "PASS",
+  "finalJobs": 0,
+  "durationMs": 93104,
+  "resources": {
+    "startingTasks": 115,
+    "peakTasks": 119,
+    "finalTasks": 0,
+    "startingMemory": 369770496,
+    "peakMemory": 494866432,
+    "finalMemory": 0
+  }
+}

@@ -52,7 +52,8 @@ export type ControlledJob = Readonly<{
 }>
 export type PreviewKey = "Tab" | "Enter" | "Escape" | "Backspace" | "Delete" | "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End" | "PageUp" | "PageDown" | "SelectAll" | "CopySelection"
 export type PreviewInput = Readonly<{ type: "text"; text: string }> | Readonly<{ type: "key"; key: PreviewKey; shift: boolean }> | Readonly<{ type: "pointer"; x: number; y: number; action: "move" | "click" | "select" }> | Readonly<{ type: "navigate"; route: string }> | Readonly<{ type: "scroll"; dx: number; dy: number }> | Readonly<{ type: "history"; action: "back" | "forward" | "reload" }> | Readonly<{ type: "viewport"; width: number; height: number }>
-export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[]; clipboard?: string; focused?: { role: string; name: string } }
+export type AccessibilityDescription = { role: string; name: string; description?: string; states?: Record<string, string> }
+export type RunnerObservation = { route: string; viewport: { width: number; height: number }; selection: PreviewElement | null; logs: string[]; clipboard?: string; focused?: AccessibilityDescription; accessibility?: AccessibilityDescription[] }
 export type RunnerSample = { bytes: Uint8Array; observation: unknown }
 export interface ControlledExecution {
   check?(): Promise<unknown>
@@ -93,6 +94,7 @@ export interface PreviewArtifactStore {
   retire: (ref: ArtifactReference) => Awaitable<void>
 }
 type Entry = {
+  consumedInputSequence?: number
   projectId: string; authority: SessionAuthority; job?: ControlledJob; compiler?: IncrementalPreviewCompiler; updating?: boolean; heldForUpdate?: boolean; restartRequired?: boolean; lastRoute?: string; artifactRef?: ArtifactReference; sourceHashes?: Map<string, string>
   generation: string; revision: string; expiresAt: number; sequence: number; abort: AbortController
   timer: ReturnType<typeof setTimeout>; retired: boolean; pending: boolean; busy: boolean
@@ -321,7 +323,8 @@ export class ControlledPreviewTransport {
     entry.busy = true
     try {
       if (!await this.current(entry)) throw new Error("Controlled preview expired before input.")
-      if (sequence !== undefined && sequence !== entry.sequence) throw new Error("Preview frame is stale.")
+      if (sequence !== undefined && (sequence !== entry.sequence || sequence === entry.consumedInputSequence)) throw new Error("Preview frame is stale or already consumed.")
+      if (sequence !== undefined) entry.consumedInputSequence = sequence
       await entry.execution!.input(command)
       if (!await this.current(entry)) throw new Error("Controlled preview expired during input.")
     }
@@ -360,6 +363,26 @@ function sanitizeObservation(value: unknown): RunnerObservation {
     if (e.parentIdentity) { selection.parentIdentity = identity(e.parentIdentity); selection.parentLayoutContext = layout(e.parentLayoutContext!) }
   }
   if (v.clipboard !== undefined && (typeof v.clipboard !== "string" || v.clipboard !== "" && !validPreviewInput({ type: "text", text: v.clipboard }))) throw new Error("Invalid clipboard text.")
-  if (v.focused !== undefined && (!v.focused || !["button","textbox","link","checkbox","radio","combobox","slider","unknown"].includes(v.focused.role) || typeof v.focused.name !== "string" || v.focused.name.length > 200)) throw new Error("Invalid focus description.")
-  return { route: v.route, viewport: { width: v.viewport.width, height: v.viewport.height }, selection, logs: v.logs.slice(), ...(v.clipboard !== undefined ? { clipboard: v.clipboard } : {}), ...(v.focused ? { focused: { role: v.focused.role, name: v.focused.name } } : {}) }
+  const focused = v.focused === undefined ? undefined : accessibilityDescription(v.focused)
+  if (v.accessibility !== undefined && (!Array.isArray(v.accessibility) || v.accessibility.length > 256)) throw new Error("Invalid accessibility snapshot.")
+  const accessibility = v.accessibility?.map(accessibilityDescription)
+  return { route: v.route, viewport: { width: v.viewport.width, height: v.viewport.height }, selection, logs: v.logs.slice(), ...(v.clipboard !== undefined ? { clipboard: v.clipboard } : {}), ...(focused ? { focused } : {}), ...(accessibility ? { accessibility } : {}) }
+
+}
+
+/** Untrusted project accessibility text is bounded data, never HTML, URLs or authority. */
+export function accessibilityDescription(value: unknown): AccessibilityDescription {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid accessibility description.")
+  const v = value as Record<string, unknown>
+  const roles = ["unknown","button","textbox","link","checkbox","radio","combobox","slider","heading","paragraph","StaticText","list","listitem","navigation","main","dialog","alert","status","tab","tablist","tabpanel","menu","menuitem","option","listbox","table","row","cell","columnheader","rowheader","progressbar","spinbutton","switch","searchbox"]
+  if (typeof v.role !== "string" || !roles.includes(v.role) || typeof v.name !== "string" || v.name.length > 200 || v.description !== undefined && (typeof v.description !== "string" || v.description.length > 200)) throw new Error("Invalid accessibility description.")
+  const states: Record<string,string> = {}
+  if (v.states !== undefined) {
+    if (!v.states || typeof v.states !== "object" || Array.isArray(v.states) || Object.keys(v.states).length > 13) throw new Error("Invalid accessibility states.")
+    for (const [key, item] of Object.entries(v.states)) {
+      if (!["disabled","expanded","selected","checked","pressed","required","readonly","invalid","level","live","modal","multiline"].includes(key) || typeof item !== "string" || item.length > 100) throw new Error("Invalid accessibility state.")
+      states[key] = item
+    }
+  }
+  return { role: v.role, name: v.name, ...(v.description === undefined ? {} : { description: v.description as string }), states }
 }

@@ -1,0 +1,16 @@
+{
+  "diagnosticBuild": false,
+  "boundary": "Packaged hosted editor / isolated Linux project / native Chromium input events",
+  "browserPath": "Browser plugin not available; retained Playwright",
+  "checks": [
+    {
+      "name": "real focused native control has bounded accessible role/name",
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "failure": "Timed out native OS Korean commit",
+  "status": "FAIL",
+  "pending": [],
+  "events": []
+}

@@ -1,0 +1,23 @@
+{
+  "base": "705e03f73d2079d021efc14a39aec28569a7dbd9",
+  "P39": "PARTIAL",
+  "nativeIME": "NOT YET",
+  "accessibilityScreenReader": "NOT YET",
+  "sustainedSession": "PASS",
+  "evidence": [
+    "browser",
+    "endurance",
+    "hard-expiry",
+    "native-probe",
+    "security-review",
+    "native-environment",
+    "failed-probes",
+    "regressions"
+  ],
+  "limits": [
+    "read-only flattened AX snapshot, not interactive remote accessibility",
+    "CDP completion is not OS IME",
+    "bounded local TEST endurance, not deployed or multi-hour proof"
+  ],
+  "heapInvestigation": "Detached iframe roots were DevTools console/FrameLocator handles. Handle-free input preserved 333 nodes and 217 listeners over all 12 reconnects; no product isolation or cleanup was bypassed."
+}

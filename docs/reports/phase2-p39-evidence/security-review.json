@@ -1,0 +1,29 @@
+{
+  "base": "705e03f73d2079d021efc14a39aec28569a7dbd9",
+  "scope": "P39 changed paths and direct consumers only",
+  "paths": {
+    "scripts/runner/worker.cjs": "24612732dab031aedd156ee13cc0023559eb22a28032db0965a177432c4dfc06",
+    "src/webcanbe-engine/runtime/controlledPreview.ts": "308a29adc05f04f33f277afcd67a238181d65340a7f849ddafc3b4154e968db8",
+    "src/webcanbe-engine/runtime/rasterViewer.ts": "6001b7719ac508394b6496aa0e53d4081fbc2680fa05313e903ac5888a2b9dcf",
+    "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx": "13f468884ed74cac889929cdc3505e00080ba07b9416501d3943c4c6ba02ad33"
+  },
+  "confirmedUnresolvedVulnerabilities": 0,
+  "checks": [
+    "constructed/stale composition and focus-epoch cancellation",
+    "exact trusted-text restriction for retained CDP completion",
+    "immediate editor invalidation and bounded 64-event queue discard",
+    "same numbered frame replay refused before runner input",
+    "fresh authority/revision checks at dispatch and result",
+    "read-only AX data allowlists/size caps/textContent only/no values or executable content",
+    "unchanged mTLS fences, deadline-capped lease renewal, native sandbox and denied project networking",
+    "provider listener/timer/worker cleanup and bounded endurance"
+  ],
+  "testHarnessReview": {
+    "files": [
+      "scripts/qa/p39-browser.cjs",
+      "scripts/qa/p39-endurance.cjs",
+      "src/webcanbe-engine/phase2-p39.test.ts"
+    ],
+    "notes": "Owned TEST fixtures only; 1\u201324 optional browser iterations; no production TTL override, uploaded executable automation, or permission grant; private heap deleted after retaining-root diagnosis."
+  }
+}
