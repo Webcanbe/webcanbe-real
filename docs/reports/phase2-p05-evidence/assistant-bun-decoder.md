@@ -18,27 +18,41 @@ The decoder does **not** execute Bun, package scripts, bunfig, plugins, network 
 
 The official serializer's buffers are interleaved as descriptor `[start,end]` followed by that buffer; the first draft incorrectly treated them as a single descriptor table. The exact retained lock exposed and corrected that error. The exact lock also exposed `0xffffffff` unresolved resolution sentinels; these are now represented as `targetId: null` and are never treated as resolved package authority.
 
+`src/webcanbe-engine/runtime/bunBinaryAlternate.ts` now adapts that decoded graph to the existing finite lock interface without running a package manager. It resolves only exact descriptors that the binary graph maps to one unique package identity. If the same descriptor maps to multiple package ids, the adapter refuses instead of guessing Bun hoisting. Root dependency/dev/optional/peer groups are preserved; transitive normal/optional/peer edges are retained; unsupported behavior fails closed.
+
 ## Verification
 
-Temporary branch-only GitHub Actions run `34976264726`, job `104404634351`, completed successfully. It:
+Two branch-only GitHub Actions checkpoints completed successfully.
 
-1. checked out this safe branch;
-2. installed the repository's pinned dependencies with lifecycle scripts disabled (`npm ci --ignore-scripts --no-audit --no-fund`);
-3. downloaded the exact retained Todo `bun.lockb` and `package.json` from the pinned upstream commit;
-4. verified the exact `bun.lockb` SHA-256 above;
-5. ran `tsc --noEmit --pretty false` successfully;
-6. ran only `phase2-p05-bun-binary-decoder.test.ts` and `phase2-p05-bun-binary-real.test.ts` successfully.
+First decoder checkpoint: run `34976264726`, job `104404634351`.
+
+Final decoder + finite-lock adapter checkpoint: run `34977998722`, job `104410603896`. Every step passed:
+
+1. checkout of the safe branch;
+2. repository pinned dependency install with lifecycle scripts disabled (`npm ci --ignore-scripts --no-audit --no-fund`);
+3. exact retained Todo `bun.lockb` and `package.json` download from the pinned upstream commit;
+4. exact `bun.lockb` SHA-256 verification;
+5. `tsc --noEmit --pretty false`;
+6. targeted `phase2-p05-bun-binary-decoder.test.ts`;
+7. targeted `phase2-p05-bun-binary-real.test.ts`;
+8. targeted `phase2-p05-bun-binary-alternate.test.ts`.
+
+The exact retained binary test additionally checks that decoded root dependency/dev-dependency maps equal the frozen upstream `package.json`, each direct descriptor resolves to a semver-compatible exact package record, registry resolution is HTTPS npm/Yarn registry data, SRI is present, and every non-null dependency target points to an existing decoded package record.
 
 The temporary CI workflow was deleted afterward and is not part of the branch tip.
 
 ## What this does and does not close
 
-This removes the earlier uncertainty that the retained 262443-byte Bun binary lock could not be decoded safely without invoking uploaded project code. It is **not yet P05 PASS**. The active feature branch still needs an independently reviewed integration of this metadata into runtime admission/trusted profiles, and the retained Redux/Bulletproof/Todo executable graphs still need their operator-owned exact version/integrity/dependency/peer closure.
+This removes the earlier uncertainty that the retained 262443-byte Bun binary lock could not be decoded safely without invoking uploaded project code, and demonstrates a bounded path into WebCanBe's finite lock abstraction. It is **not yet P05 PASS**. The active feature branch still needs an independently reviewed integration of this metadata into runtime admission/trusted profiles, and the retained Redux/Bulletproof/Todo executable graphs still need their operator-owned exact version/integrity/dependency/peer closure.
+
+The current decoder is intentionally limited to the retained npm-resolution boundary. Before claiming broad Bun-format support, optional serializer tail sections and other resolution/workspace forms would need explicit bounded semantics or refusal. Do not broaden that claim from this checkpoint.
 
 If reused, selectively port/review only:
 
 - `src/webcanbe-engine/runtime/bunBinaryLock.ts`
+- `src/webcanbe-engine/runtime/bunBinaryAlternate.ts`
 - `src/webcanbe-engine/phase2-p05-bun-binary-decoder.test.ts`
 - `src/webcanbe-engine/phase2-p05-bun-binary-real.test.ts`
+- `src/webcanbe-engine/phase2-p05-bun-binary-alternate.test.ts`
 
 Do not merge this branch wholesale. Full Phase-2 regression remains deferred to the final closure run.
