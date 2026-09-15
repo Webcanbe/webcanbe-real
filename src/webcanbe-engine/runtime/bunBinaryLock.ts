@@ -213,18 +213,18 @@ export function decodeBunBinaryLock(input: Uint8Array): BunBinaryGraph {
   }
   if (reader.pos > packageEnd) throw new Error('Invalid Bun package table size.')
 
+  // Bun's Buffers serializer stores each absolute [start,end] descriptor directly
+  // before that buffer, then the next descriptor begins at the previous end. Do
+  // not reinterpret these as one descriptor table; doing so would read payload
+  // bytes as offsets.
   reader.seek(packageEnd)
   const buffers: Record<string, Uint8Array> = Object.create(null)
-  const ranges: Array<{ start: number; end: number }> = []
   for (const name of ['trees', 'hoistedDependencies', 'resolutions', 'dependencies', 'externalStrings', 'stringBytes']) {
+    const descriptorEnd = reader.pos + 16
     const start = reader.u64(), end = reader.u64()
-    if (start < packageEnd || start > end || end > serializedEnd) throw new Error('Invalid Bun buffer range.')
-    ranges.push({ start, end })
-    const saved = reader.pos
-    reader.seek(start); buffers[name] = reader.read(end - start); reader.seek(saved)
+    if (start < descriptorEnd || start > end || end > serializedEnd) throw new Error('Invalid Bun buffer range.')
+    reader.seek(start); buffers[name] = reader.read(end - start); reader.seek(end)
   }
-  const occupied = ranges.filter(range => range.end > range.start).sort((a, b) => a.start - b.start)
-  for (let index = 1; index < occupied.length; index++) if (occupied[index - 1].end > occupied[index].start) throw new Error('Overlapping Bun serialized buffers.')
   if (buffers.dependencies.byteLength % DEPENDENCY_BYTES || buffers.resolutions.byteLength % RESOLUTION_BYTES) throw new Error('Misaligned Bun dependency buffers.')
   const allResolutions = safeU32Array(buffers.resolutions)
   if (allResolutions.length !== buffers.dependencies.byteLength / DEPENDENCY_BYTES) throw new Error('Bun dependency/resolution buffers disagree.')
