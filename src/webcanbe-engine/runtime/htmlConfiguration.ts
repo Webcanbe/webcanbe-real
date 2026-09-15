@@ -43,7 +43,7 @@ export function staticHtml(root:string,publicDir:string|false="public",runtimeRo
         confinedFile(root,entry);entries.push(entry)
       }
       if(tag==='link'){
-        if(!['stylesheet','icon','apple-touch-icon','canonical','preconnect','dns-prefetch'].includes(attrs.rel)||!attrs.href||Object.keys(attrs).some(k=>!['rel','href','type','media','sizes','crossorigin'].includes(k)))throw Error('Unsupported HTML link semantics.')
+        if(!['stylesheet','icon','apple-touch-icon','canonical','preconnect','dns-prefetch','manifest'].includes(attrs.rel)||!attrs.href||Object.keys(attrs).some(k=>!['rel','href','type','media','sizes','crossorigin'].includes(k)))throw Error('Unsupported HTML link semantics.')
         if(attrs.rel==='stylesheet'&&!/^https:\/\//i.test(attrs.href)){
           if(attrs.media!==undefined&&attrs.media!=='all')throw Error('Conditional local HTML stylesheets are unsupported.')
           const href=attrs.href.replace(/^\//,'').replace(/^\.\//,'')
@@ -52,10 +52,18 @@ export function staticHtml(root:string,publicDir:string|false="public",runtimeRo
           if(!fs.existsSync(path.join(root,file))&&publicDir!==false)file=path.posix.join(publicDir,href)
           confinedFile(root,file);styles.push(file)
         }
+        if(attrs.rel==='manifest'){
+          if(/^https:\/\//i.test(attrs.href)||attrs.media!==undefined||attrs.sizes!==undefined||attrs.crossorigin!==undefined)throw Error('Only local inert HTML manifests are supported.')
+          const href=attrs.href.replace(/^\//,'').replace(/^\.\//,'')
+          let file=path.posix.join(runtimeRoot,href)
+          if(!safeArchivePath(file)||!/\.(?:json|webmanifest)$/.test(file))throw Error('Invalid local HTML manifest.')
+          if(!fs.existsSync(path.join(root,file))&&publicDir!==false)file=path.posix.join(publicDir,href)
+          confinedFile(root,file)
+        }
       }
     }
     for(const child of [...node.childNodes??[]])walk(child)
-    if(node.childNodes)node.childNodes=node.childNodes.filter((c:any)=>c.tagName!=='script'&&!(c.tagName==='link'&&c.attrs?.some((a:any)=>a.name==='rel'&&['preconnect','dns-prefetch'].includes(a.value)))&&!(c.tagName==='link'&&c.attrs?.some((a:any)=>a.name==='rel'&&a.value==='stylesheet')&&!c.attrs?.some((a:any)=>a.name==='href'&&/^https:\/\//i.test(a.value))))
+    if(node.childNodes)node.childNodes=node.childNodes.filter((c:any)=>c.tagName!=='script'&&!(c.tagName==='link'&&c.attrs?.some((a:any)=>a.name==='rel'&&['preconnect','dns-prefetch','manifest'].includes(a.value)))&&!(c.tagName==='link'&&c.attrs?.some((a:any)=>a.name==='rel'&&a.value==='stylesheet')&&!c.attrs?.some((a:any)=>a.name==='href'&&/^https:\/\//i.test(a.value))))
   }
   walk(document)
   if(entries.length!==1||!mount||!body||!head||!html)throw Error('HTML requires one local module and an identified div/main mount.')
