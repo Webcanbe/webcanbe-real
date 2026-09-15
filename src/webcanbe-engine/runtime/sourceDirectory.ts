@@ -23,3 +23,9 @@ export const editableModule = /\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/
 export function sourceMember(file: string, directory = 'src', scope?: 2) {
   return safeArchivePath(file) === file && file.startsWith(directory + '/') && (scope === 2 ? editableModule : /\.(?:tsx?|jsx?|css|json)$/).test(file)
 }
+
+/** Whether a finite TS include prefix intersects the canonical source tree. */
+export function includesSource(configFile: string, include: string, directory: string) {
+  const prefix = path.posix.join(path.posix.dirname(configFile), include).split('*')[0].replace(/\/$/, '')
+  return prefix === '.' || prefix === directory || prefix.startsWith(directory + '/') || directory.startsWith(prefix + '/')
+}

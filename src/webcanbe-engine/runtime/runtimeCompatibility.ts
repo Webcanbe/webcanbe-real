@@ -1,4 +1,4 @@
-import { assertSourceDirectory, sourceDirectory } from "./sourceDirectory"
+import { assertSourceDirectory, sourceDirectory, includesSource } from "./sourceDirectory"
 import { publicRuntimeValues } from "./publicRuntimeValues"
 import { finiteBuildPlan, type FiniteBuildPlan } from './finiteBuild'
 import { parseYarnClassic, parseBunText, normalizeAlternateLock, npmDescriptor } from "./alternateLockfiles"
@@ -325,7 +325,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       }
       const config = inherited(file), options = config.compilerOptions ?? {}
       if (options.jsxImportSource && options.jsxImportSource !== "react" || options.experimentalDecorators || options.emitDecoratorMetadata || options.useDefineForClassFields === false || options.plugins || options.jsxFactory || options.jsxFragmentFactory || options.jsx && !["react-jsx", "react-jsxdev", "preserve"].includes(options.jsx)) throw new Error("Unsupported TypeScript runtime transformation setting.")
-      const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && (path.posix.join(path.posix.dirname(file), item).split("*")[0].replace(/\/$/, "") === sourceDirectory(project)))
+      const appliesToSource = file === "tsconfig.json" || file === "jsconfig.json" || !Array.isArray(config.include) || config.include.some((item: unknown) => typeof item === "string" && includesSource(file, item, sourceDirectory(project)))
       if (appliesToSource) for (const name of ["useDefineForClassFields", "verbatimModuleSyntax", "importsNotUsedAsValues", "preserveValueImports"]) {
         if (options[name] !== undefined) {
           if (report.compilerOptions[name] !== undefined && report.compilerOptions[name] !== options[name]) throw new Error("Conflicting TypeScript client transformation options.")
