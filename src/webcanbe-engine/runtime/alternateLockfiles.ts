@@ -178,7 +178,7 @@ export function parseYarnBerry(source:string):AlternateLock{
     for(const [name,value]of Object.entries(record.dependencies)){berryRequest(name,value);if(typeof value!=='string')throw Error('Invalid Yarn Berry dependency.')}
     for(const [name,value]of Object.entries(record.peerDependencies)){if(!packageName.test(name))throw Error('Invalid Yarn Berry peer.');range(value)}
     for(const [name,meta]of Object.entries(record.dependenciesMeta)){if(!object(meta)||!Object.prototype.hasOwnProperty.call(record.dependencies,name))throw Error('Dangling Yarn Berry dependency metadata.')}
-    for(const [name,meta]of Object.entries(record.peerDependenciesMeta)){if(!object(meta)||!Object.prototype.hasOwnProperty.call(record.peerDependencies,name))throw Error('Dangling Yarn Berry peer metadata.')}
+    for(const meta of Object.values(record.peerDependenciesMeta))if(!object(meta))throw Error('Invalid Yarn Berry peer metadata.')
     const allDependencies=record.dependencies,optional:Record<string,any>=Object.create(null),required:Record<string,any>=Object.create(null)
     for(const [name,value]of Object.entries(allDependencies))(record.dependenciesMeta[name]?.optional===true?optional:required)[name]=value
     record.dependencies=required;record.optionalDependencies=optional
