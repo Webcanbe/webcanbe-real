@@ -1,0 +1,18 @@
+{
+  "boundary": "AUTHORED fixture, not a retained corpus application; actual unchanged native sandbox",
+  "status": "PASS",
+  "desktop": {
+    "width": 1280,
+    "padding": "32px",
+    "card": "16px",
+    "appearance": "none"
+  },
+  "mobile": {
+    "width": 390,
+    "padding": "8px",
+    "card": "16px",
+    "appearance": "none"
+  },
+  "directExternalNetwork": "deny",
+  "screenshot": "uno-native.png"
+}

@@ -1,3 +1,21 @@
+# Current handoff: Phase 2 narrow compatibility edges (2026-09-15)
+
+**P05 PARTIAL / P06 PARTIAL / P08 PASS / P07 regression PASS. 47 PASS / 4 PARTIAL / 1 deferred FAIL / 12 EXTERNAL-EVIDENCE. Internal and overall Phase 2: NOT YET. Phase 3 may begin: NO.**
+
+Continue from final product `775f9b67ed3aa9e0465fed446029ee5502192b2a`; the [edge closure report](reports/phase2-compatibility-edge-closure.md), [current ledger](reports/phase2-final-internal-evidence/final-ledger.json) and [edge evidence index](reports/phase2-compatibility-edge-evidence/index.json) are current authority. Documentation/evidence commits follow the product. The final task publication receipt identifies the pushed feature SHA. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. Historical sections below remain intact.
+
+- Closed the retained P08 finite forms/directives/variant-group/dark-media requirements with exact Uno65/forms1 and retained Uno66 operator graphs. Source/config/export bytes remain unchanged; no uploaded executable configuration or managers run.
+- P05 adds npm protocol/scoped alias identity support. Remaining: Berry checksum/virtual peers; confined workspaces/non-npm protocols; binary Bun decoder/boundary; exact retained app graphs; general inert-tool role for oversized Redux Yarn. The 2 MiB member boundary is unchanged.
+- P06 adds confined non-root Vite relationships within canonical src and finite Rollup build-plan/helper support. Remaining: separate nested source trees and full independent app export/build integration. Todo's TS alias lacks an actual runtime mechanism and remains an upstream incompatibility.
+- Exact Redux intake fails; Bulletproof/Todo intake passes but dependencies/configuration still fail. Their compilation/runtime/render are not reached. Recipe's unchanged 67-file input produces the prior byte-exact HTML/36-file artifact; valid prior native/cache/export evidence is reused. P07 stays PASS.
+- Every prior 549 test identity is preserved: 594 distinct passing tests, 45 new, all 45 default skips exercised separately, no outstanding skips. Build/package and authored native CSS render pass.
+- Sealed immutable 12-path security review plus separate independent final correction rereads: zero confirmed unresolved vulnerabilities. Three compatibility defects fixed and tested; no broad repeated scan or production pentest claim.
+- Only P05/P06/P08 ledger rows changed; all other requirement rows and old profiles are preserved. Internal blockers: P05/P06/P39/P61. No P39/P61 or Phase 3/4/5 work, main merge, public deployment or force push. Owned TEST services/tunnels/schema/password/PKI cleaned and VM stopped.
+
+---
+
+## Historical handoffs
+
 # Current handoff: Phase 2 compatibility breadth (2026-09-15)
 
 **P05 PARTIAL / P06 PARTIAL / P07 PASS / P08 PARTIAL. INTERNAL CLOSURE: NOT YET. MATRIX:46 PASS /5 PARTIAL /1 deferred later-phase FAIL /12 EXTERNAL-EVIDENCE. OVERALL PHASE2:NOT YET. PUBLIC HOSTED IMPORT:NO. PHASE3 MAY BEGIN:NO.**

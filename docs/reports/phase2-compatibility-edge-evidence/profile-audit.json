@@ -1,0 +1,11 @@
+{
+  "rootPins": 13,
+  "lockedPackages": 220,
+  "invalidRecords": [],
+  "manifestSha256": "ea314db6cdd66b961570c59f33b48baf3599289b8ca396a05e7d05f179e2285a",
+  "lockSha256": "0a5e774f6c44f283c33034291801bc72a4e32ca200b325a150d6d3ff2af95dc6",
+  "managerPreparation": "npm ci --ignore-scripts; operator-owned graph only",
+  "formsPeer": {
+    "unocss": "^0.31.0 || ^65.0.0"
+  }
+}

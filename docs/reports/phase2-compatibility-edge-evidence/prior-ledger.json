@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "candidate": "775f9b67ed3aa9e0465fed446029ee5502192b2a",
+  "candidate": "bc19fac8d91d7360c409285e8613509c3c4e7404",
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
-    "PASS": 47,
-    "PARTIAL": 4,
+    "PASS": 46,
+    "PARTIAL": 5,
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
@@ -15,6 +15,7 @@
   "internalRemaining": [
     "P05",
     "P06",
+    "P08",
     "P39",
     "P61"
   ],
@@ -104,20 +105,18 @@
       "id": "P05",
       "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
       "status": "PARTIAL",
-      "evidence": "Retains Yarn classic/Bun text exact graph admission and adds npm protocol/scoped alias descriptor-to-real-identity normalization with exact version/SRI/dependency/required-peer checks. Adds pinned Uno65/forms1 graph; old profiles unchanged. No uploaded manager execution.",
-      "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
-      "missingProof": "Berry cache checksum/descriptor/locator/virtual-peer graph adapter; confined workspace and remaining non-npm protocol resolution; verified Bun binary decoder or pinned metadata-only boundary; missing exact retained Redux/Bulletproof/Todo graphs; general end-to-end inert-tool role for Redux 2,742,928-byte Yarn member. Global 2 MiB bound unchanged.",
+      "evidence": "Yarn classic v1 registry/SRI and Bun text JSONC v1 deterministic adapters; full operator version/integrity/dependency/required-peer checks; two new dedicated CSS profiles, no package-manager execution.",
+      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
+      "missingProof": "Berry/checksum/virtual graphs and Yarn npm-alias/protocol/workspace cases remain unimplemented; binary Bun graph resolution remains unsupported. Exact retained corpus root/version gaps are in application-stage-results.json. Redux bundled Yarn is2,742,928bytes and still exceeds the unchanged2MiB member limit.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
       "evidenceFiles": [
-        "../phase2-compatibility-edge-evidence/regressions.json",
-        "../phase2-compatibility-edge-evidence/application-stage-results.json",
-        "../phase2-compatibility-edge-evidence/profile-audit.json",
-        "../phase2-compatibility-edge-evidence/uno-native.json",
-        "../phase2-compatibility-edge-evidence/security/final-reread.json"
+        "../phase2-compatibility-breadth-evidence/regressions.json",
+        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
+        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
       ],
-      "disposition": "Five explicit internal blockers remain. No parse-error fallback, integrity substitution, peer override, host fallback or dropped tooling bytes. Exact application root/version issues are retained in the stage receipt.",
+      "disposition": "Unknown or incomplete lock semantics must not fall through to a convenient profile. General tooling-artifact preservation beyond the retained member bound needs a separate role/transport/export design; no dropped bytes or limit exception was introduced. These remain internal engineering requirements, not external evidence.",
       "priorCheckpoint": {
         "id": "P05",
         "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
@@ -140,20 +139,18 @@
       "id": "P06",
       "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
       "status": "PARTIAL",
-      "evidence": "Literal confined non-root Vite relationships derive HTML/public/entry paths when source remains in canonical src; matching aliases retain their explicit base. Finite Rollup external fs/promises/minChunkSize3500 production-build plan and isolated immutable-graph helper tested. Todo missing runtime alias mechanism correctly refused.",
-      "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
-      "missingProof": "Separate nested source trees outside canonical top-level src; full independent canonical application export-to-resolved-graph composition and finite Rollup helper integration. Direct helper tests do not prove full application export parity.",
+      "evidence": "Finite custom HTML mount/single module/static resources; literal nested/path/URL aliases, root/publicDir/base, same-directory TS relationships; trusted React/Tailwind4/tsconfig-paths/Uno declarations; unknown effects preserved/refused.",
+      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
+      "missingProof": "Non-root Vite root semantics and arbitrary build/plugin effects remain unsupported. Retained Bulletproof build.rollupOptions external fs/promises and output experimentalMinChunkSize are not applied. Todo tsconfig @ alias has no matching static Vite alias or recognized tsconfig-paths plugin, so resolution remains ambiguous.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
       "evidenceFiles": [
-        "../phase2-compatibility-edge-evidence/regressions.json",
-        "../phase2-compatibility-edge-evidence/application-stage-results.json",
-        "../phase2-compatibility-edge-evidence/profile-audit.json",
-        "../phase2-compatibility-edge-evidence/uno-native.json",
-        "../phase2-compatibility-edge-evidence/security/final-reread.json"
+        "../phase2-compatibility-breadth-evidence/regressions.json",
+        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
+        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
       ],
-      "disposition": "Two internal integration blockers remain. Production chunk settings do not affect preview; reachable Node imports are still refused. Todo undeclared runtime alias is an upstream incompatibility, not an invented mapping. Unknown dynamic config/plugins remain unsupported.",
+      "disposition": "A runtime compiler cannot pretend a Rollup build external/chunk setting or undeclared Vite alias has equivalent browser semantics. A separately verified finite adapter is needed; unchanged source is not rewritten and generic plugin execution is not claimed.",
       "priorCheckpoint": {
         "id": "P06",
         "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
@@ -207,21 +204,19 @@
     {
       "id": "P08",
       "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
-      "status": "PASS",
-      "evidence": "Retains Tailwind3/4/PostCSS and Uno66 finite adapters; adds pinned Uno65.5.0/forms1.0.0, directives and variant-group transformers, literal presetUno dark media/class options, responsive interaction, immutable transformed JS/HTML/CSS sources and export preservation. Positive compiler/native-render and malformed/dynamic refusal tests pass.",
-      "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
-      "missingProof": "NONE for the requested retained finite compiler semantics. Todo exact dependency graph and forms1/Uno66 peer conflict remain P05/application issues.",
-      "internallyClosable": "Retained finite internal requirement closed; no external evidence substitution.",
+      "status": "PARTIAL",
+      "evidence": "Pinned Tailwind3.4.17/PostCSS8.5.8/autoprefixer10.4.21 and Uno66.0.0 finite data adapters in confined bounded workers. Literal Tailwind theme/content/screens/extend and trusted typography/animate; Uno static rules/shortcuts/presetUno/presetAttributify.",
+      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
+      "missingProof": "Retained Todo needs @julr/unocss-preset-forms, transformerDirectives, transformerVariantGroup and additional preset options such as presetUno dark:media; these finite adapters and its exact older graph are not implemented. Non-admitted CSS compiler versions and additional plugin semantics remain Code-only.",
+      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Finite literal numeric @theme colors added on pinned Tailwind4. Tailwind3/PostCSS/UnoCSS and broader configuration/vocabulary remain unsupported.",
       "evidenceFiles": [
-        "../phase2-compatibility-edge-evidence/regressions.json",
-        "../phase2-compatibility-edge-evidence/application-stage-results.json",
-        "../phase2-compatibility-edge-evidence/profile-audit.json",
-        "../phase2-compatibility-edge-evidence/uno-native.json",
-        "../phase2-compatibility-edge-evidence/security/final-reread.json"
+        "../phase2-compatibility-breadth-evidence/regressions.json",
+        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
+        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
       ],
-      "disposition": "Operator-owned normalized literal config only; uploaded configuration/plugins never execute. Unknown executable adapters and compiler versions remain explicitly unsupported. PASS does not imply universal plugin support or force every retained application to full PASS.",
+      "disposition": "Only trusted pinned transformations with completely parsed finite inputs may run. Existing functions/regex/dynamic config are preserved and refused; those are explicit unsupported semantics, not generic plugin support. Remaining retained finite Uno/config breadth stays internal work.",
       "priorCheckpoint": {
         "id": "P08",
         "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
@@ -1140,10 +1135,5 @@
     }
   ],
   "compatibilityBreadthBase": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
-  "compatibilityBreadthReport": "docs/reports/phase2-compatibility-breadth-closure.md",
-  "compatibilityEdgeBase": "982625986289baf8101a7d73c96fe47ce0602f0d",
-  "compatibilityEdgeReport": "docs/reports/phase2-compatibility-edge-closure.md",
-  "compatibilityEdgeRegressions": "docs/reports/phase2-compatibility-edge-evidence/regressions.json",
-  "distinctPassingTests": 594,
-  "allPrior549Preserved": true
+  "compatibilityBreadthReport": "docs/reports/phase2-compatibility-breadth-closure.md"
 }

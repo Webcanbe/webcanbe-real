@@ -1,0 +1,82 @@
+{
+  "base": "982625986289baf8101a7d73c96fe47ce0602f0d",
+  "sealedCandidate": "fb861acbb8e490ae65e71821e70ef3bce5765e95",
+  "finalImplementation": "775f9b67ed3aa9e0465fed446029ee5502192b2a",
+  "scanId": "d5962344-0b45-4600-98c7-972dce940e1a",
+  "sealedArtifactsUnmodified": true,
+  "scope": "All 12 changed paths and direct trust-boundary consumers; final compatibility corrections separately reread by parent and independent CSS/config reviewers.",
+  "confirmedUnresolvedVulnerabilities": 0,
+  "compatibilityDefectsFixed": [
+    "Renew esbuild context for immutable Uno source-content changes",
+    "Retain transformed HTML through complete HTML revalidation",
+    "Include all supported canonical JS/TS module extensions and confined helper modules"
+  ],
+  "preventiveCorrection": "Use a per-record Set instead of redundant alias-name list scans.",
+  "securityPreflight": {
+    "status": "ready",
+    "checksPassed": 3,
+    "configurationChanged": false,
+    "daybreakStatus": "not_granted",
+    "toolMeasuredTokenUsage": null
+  },
+  "validation": [
+    "45 new targeted tests; full preserved regression union 594 PASS",
+    "Pinned operator profile npm ci --ignore-scripts and npm ls --all PASS",
+    "Final native authored CSS render and exact retained Recipe artifact preservation PASS"
+  ],
+  "limitations": [
+    "Static security review, not professional penetration testing",
+    "No quantitative resource-exhaustion claim",
+    "Seal identifies its immutable candidate; final correction hashes are separate evidence"
+  ],
+  "files": [
+    {
+      "path": "docs/reports/phase2-compatibility-edge-evidence/threat-model.md",
+      "sha256": "c8f2cd1da8f122626f67c8074b040c728162975229cbba6b379b053e6c6a310c"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6-uno65-v1/package-lock.json",
+      "sha256": "0a5e774f6c44f283c33034291801bc72a4e32ca200b325a150d6d3ff2af95dc6"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6-uno65-v1/package.json",
+      "sha256": "ea314db6cdd66b961570c59f33b48baf3599289b8ca396a05e7d05f179e2285a"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-css.test.ts",
+      "sha256": "eb5db14ac48d9d838b3afc2a2b36afcfd8679e63db40663eb4fa907d0fb925e6"
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "sha256": "1d316c48b2cf42e8e6171925330c7aa387346f8a18f79be0446f1f13e86c789e"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/alternateLockfiles.ts",
+      "sha256": "8f90355192de167e42f3c605ed47e5c02bfcb74d023f28a7dde71c59d836d649"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/cssWorkerSource.ts",
+      "sha256": "c0b8b26f408ee9c63302def6b3c4aa654a1f34eeb2e220c65ab737e323ed6535"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/finiteBuild.ts",
+      "sha256": "24e008d0997d7e4132d234efe9bb843929ad0f4da4c52b51265834212b041b5f"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+      "sha256": "9554fcbb604896703f72485d575ccebedf924562af9e72732b75763c9f964869"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "sha256": "d74a409b44330ab85645a02f8b7e9384e6e6141f4b2c0ed14cdad473d7b95dca"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+      "sha256": "fa41d819a3a24ac9fa7b3e06455ae7535b7a9a8215e35ac9e01786ac97f6f263"
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/staticCss.ts",
+      "sha256": "481dbb96bd1a06c901d9428236b2f7671bc24485fcec6014257894c935ff763c"
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "base": "982625986289baf8101a7d73c96fe47ce0602f0d",
+  "files": [
+    {
+      "path": "runtime-profiles/react18-vite4-three-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "ecee101a660b6536c05cdc2782fd4a8b403c82ec7ec092cafaa84b40651cb642"
+    },
+    {
+      "path": "runtime-profiles/react18-vite4-three-v1/package.json",
+      "byteExact": true,
+      "sha256": "83db55e00f874132f87429a43a6263741a76c355c27908516d97e54d9d2c34c9"
+    },
+    {
+      "path": "runtime-profiles/react18-vite5-css-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "64cb392196fc6a2c81c693720dcd4cdf30a7694d538a918fa2ba67c70b1aa8cc"
+    },
+    {
+      "path": "runtime-profiles/react18-vite5-css-v1/package.json",
+      "byteExact": true,
+      "sha256": "cc81751dd90fdbb5560a558a30747dcccc0c8e7907b59c2c2b6802007f0acc0d"
+    },
+    {
+      "path": "runtime-profiles/react18-vite5-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "176c93168f751be31c3e861800114bca891bade74c5366428c2a43f87f71c313"
+    },
+    {
+      "path": "runtime-profiles/react18-vite5-v1/package.json",
+      "byteExact": true,
+      "sha256": "a85892d16f78b914dcc6a65058384758e36eba447e78de00d945c699e46b68d3"
+    },
+    {
+      "path": "runtime-profiles/react18-vite6-common-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "d66fffa9f96f6e0c3bfeb04eb1edfd31d13e69cc58629a8a3bf089003c7f6a2c"
+    },
+    {
+      "path": "runtime-profiles/react18-vite6-common-v1/package.json",
+      "byteExact": true,
+      "sha256": "84d4479ed1bd239500c0601c4a5717e408517901a639fbcbe3fe5ab4886ff278"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6-uno-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "4ee1d90171bb860a0463e0a0ed58b08bd00728200651941075bf49b16389d434"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6-uno-v1/package.json",
+      "byteExact": true,
+      "sha256": "67729056e299c2abd4ceb8c7522eb72dd6ec61883aae59cf41e98e5943b049a2"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6/package-lock.json",
+      "byteExact": true,
+      "sha256": "166d9ffda1e4f67ced3967e467b0148cc7bb5a525970df5762e8e5bc78fa059a"
+    },
+    {
+      "path": "runtime-profiles/react19-vite6/package.json",
+      "byteExact": true,
+      "sha256": "8693a43d3361d8b3efb6ad927286aee98da58e2be1dea3275577d508c970224f"
+    },
+    {
+      "path": "runtime-profiles/react19-vite7-common-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "404cd66c2f3531ec937f383f31ecb8b85bd27b7bc07c1379a9d192e4222f04ba"
+    },
+    {
+      "path": "runtime-profiles/react19-vite7-common-v1/package.json",
+      "byteExact": true,
+      "sha256": "1d65be3afe1702e8435d6fd7af8f19b762661e1e749b8e95a7d922aa84156c70"
+    },
+    {
+      "path": "runtime-profiles/react19-vite7.1-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "a87debb3afe89fa11bd92154309bcfc804ec62ca7b7685dbe70f8cb015c82764"
+    },
+    {
+      "path": "runtime-profiles/react19-vite7.1-v1/package.json",
+      "byteExact": true,
+      "sha256": "c09ab3c0c8e5c246d4d3a2e65dd96bfefbe1b2a8e0c38eb950618f15911f1910"
+    },
+    {
+      "path": "runtime-profiles/react19-vite8-v1/package-lock.json",
+      "byteExact": true,
+      "sha256": "0db8e7133796550f2a95c216d20024ba0b9ef2f89d0a7a4ed3ce2799f233ab70"
+    },
+    {
+      "path": "runtime-profiles/react19-vite8-v1/package.json",
+      "byteExact": true,
+      "sha256": "88d1b516743375c3fa3e4f46df817d85d0812c5d41257c0ff36a7aff2f1a0070"
+    }
+  ]
+}

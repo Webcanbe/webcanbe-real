@@ -1,0 +1,425 @@
+{
+  "success": true,
+  "counts": {
+    "file": "native-final.json",
+    "passed": 69,
+    "skipped": 0,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "captures only the fixed bounded PNG command and validates exact viewport and raster integrity",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured dimensions corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured checksum corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured truncated corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured trailing corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured missing-end corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured oversize corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects captured signature corruption",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "closes once at the unchanged deadline and never returns a late raster",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "rejects malformed protocol encoding and clears a successful deadline",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "production fixed capture in actual no-egress native-sandbox Linux captures dom, input and viewport changes within 4000 ms",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "production fixed capture in actual no-egress native-sandbox Linux captures webgl, input and viewport changes within 4000 ms",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "compacts losslessly, retains idempotency and selective inverse evidence, and restores an undoable old checkpoint",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "recovers a compaction fault at journal with exact source and verifiable archives",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "recovers a compaction fault at committed with exact source and verifiable archives",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "rolls back a partially written multi-file restore and rejects missing checkpoints and damaged archives",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "commits source plus compaction atomically in PG and refuses rewritten archived ancestry, stale restore and revocation",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "rejects branch names, arbitrary endpoints, credentials and ambiguous external references",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "rejects private, loopback, metadata, reserved, multicast and non-IPv4 source DNS",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "uses fixed credential-free HTTPS and pins returned archive integrity",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "rejects redirects, compression, oversized declarations and oversized streamed bytes",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "cancels a stalled transfer and enforces a whole-transfer deadline",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "shares intake slots across registries, releases on failure and refuses revocation before atomic acceptance",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "keeps legacy canonical digests and bytes stable until an explicit accepted scope migration",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "recovers scope migration after failure at journal without changing source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "recovers scope migration after failure at committed without changing source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "refuses unknown scope versions and external edits instead of adopting them",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "migrates legacy PostgreSQL source atomically; rollback, stale writer, downgrade and revocation stay refused",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "admits finite declarations but never treats top-level execution as pure refresh",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "refuses propagation into entries, side-effect modules, graph changes, removed boundaries and cycles",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "native cross-file refresh preserves React18 state through a helper and barrel, and labels graph replacement as reload",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "native cross-file refresh preserves React19 state through a helper and barrel, and labels graph replacement as reload",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "keeps default empty grants value-free and never reads the provider",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "rejects cross-tenant, cross-project, non-preview, private-server, duplicate and malformed grants",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "checks fresh authority, unavailable versions and bounded values before delivery",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "detects rotation, revocation and missing secrets and removes reachable delivery values",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "rejects delayed provider work without exposing its errors or returning late values",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "adds delivery only to runner messages, withholds encoded logs, and closes a revoked generation",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "rejects caller-supplied delivery and never gives the semantic compiler managed values",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "delivers and rotates generated TEST values through real fenced mTLS and native sandbox without source or log exposure",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "keeps transpilation distinct from semantics and never runs config or changes source",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "does not silently claim support for unknown semantic options or a missing dedicated profile",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "projects and bounds semantic diagnostics, rejects contradictory and forged success",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React18 cross-file types and diagnoses a transpiling type error",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React19 cross-file types and diagnoses a transpiling type error",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) executes native-sandbox Chromium, renders/input/updates and verifies explicit cleanup",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) rejects missing mTLS credentials and a forged fencing token",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) A owns a real runner, A is SIGKILLed, B retires it and A's late message cannot regain authority",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses one durable PostgreSQL login/session authority and cannot reissue a revoked user",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud denies an artifact put already queued behind a project-delete transaction",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=disable",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=no-verify",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslrootcert=untrusted",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud commits canonical source/history atomically and rejects stale CAS/digest/revision reuse",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses the existing source transaction/history/export interfaces through a private checkout",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud durably appends rejected history receipts without changing source, and refuses old-history rewrites",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rolls back a storage error and permits an exact retry after a new client starts",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rolls back an actual source transaction when its client is SIGKILLed",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud serializes concurrent acceptance from two clients without losing a revision",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud denies tenant prefix/project/session/epoch forgery, viewer writes and revoked grants",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud keeps digest-bound artifacts tenant-scoped and tombstones revoke/delete against late puts",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud requires TLS for a production pool configuration",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses epochs to reject late controller A after B takes over; uncertain cleanup retains capacity",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud enforces per-host capacity across project/session allocations",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud prevents concurrent duplicate starts and admission races, never resurrects stopped generations",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rejects a result whose lease expired during the operation",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "confined React refresh compiler classifies an existing component boundary, CSS and a non-component entry accurately",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "real native-sandbox React Fast Refresh preserves React18 counter state through a changed component and CSS without document reload",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "real native-sandbox React Fast Refresh preserves React19 counter state through a changed component and CSS without document reload",
+      "occurrence": 1,
+      "status": "passed"
+    }
+  ]
+}
