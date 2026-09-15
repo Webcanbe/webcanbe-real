@@ -2,10 +2,12 @@ import { assertSourceDirectory, sourceDirectory, includesSource } from "./source
 import { publicRuntimeValues } from "./publicRuntimeValues"
 import { finiteBuildPlan, type FiniteBuildPlan } from './finiteBuild'
 import { parseYarnClassic, parseBunText, normalizeAlternateLock, npmDescriptor } from "./alternateLockfiles"
+import { parseBunBinary } from "./bunBinaryLock"
 import { isDefaultTailwindConfig } from "../adapters/react/defaultTailwindConfig"
 import { validateStylesheetConfiguration } from "./configuration"
 import fs from "node:fs"
 import path from "node:path"
+import { builtinModules } from "node:module"
 import ts from "typescript"
 import semver from "semver"
 import { parse as parseJsonc, type ParseError } from "jsonc-parser"
@@ -14,21 +16,62 @@ import { staticHtml } from "./htmlConfiguration"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1", "react18-vite5-css-v1", "react19-vite6-uno-v1", "react19-vite6-uno65-v1"] as const
-export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer"])
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-redux-msw-v1", "react18-vite5-tailwind3-query-radix-v1", "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1", "react18-vite5-css-v1", "react19-vite6-uno-v1", "react19-vite6-uno65-v1"] as const
+export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer", "@faker-js/faker", "@mswjs/data", "@reduxjs/toolkit", "date-fns", "mock-socket", "msw", "react-redux", "react-tiny-toast", "@hookform/resolvers", "@ngneat/falso", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-icons", "@radix-ui/react-label", "@radix-ui/react-slot", "@radix-ui/react-switch", "@tanstack/react-query", "@tanstack/react-query-devtools", "axios", "class-variance-authority", "dayjs", "dompurify", "js-cookie", "marked", "react-error-boundary", "react-helmet-async", "react-hook-form", "react-query-auth", "tailwind-merge", "zod", "@unocss/reset", "sonner", "swr", "uuid"])
 export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported" | "preserved-not-applied"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
-function selectProfile(project: ProjectRecord, applicationRoot: string) {
+function packageRoot(specifier:string){return specifier.startsWith('@')?specifier.split('/').slice(0,2).join('/'):specifier.split('/')[0]}
+function executablePackageRoots(project:ProjectRecord,manifest:any){
+  const root=project.root,declared={...manifest.devDependencies,...manifest.dependencies},config=staticViteConfig(root,declared),aliases={...config.aliases},entry=htmlEntry(root,config.publicDir,config.runtimeRoot)??project.detection.entry
+  if(!entry)throw Error('No supported client entry found.')
+  if(config.tsconfigPaths&&fs.existsSync(path.join(root,'tsconfig.json'))){
+    const options=json(root,'tsconfig.json',true)?.compilerOptions
+    if(!object(options)||!object(options.paths))throw Error('Vite tsconfig paths require finite compilerOptions.paths.')
+    for(const [key,replacements]of Object.entries(options.paths)){
+      if(!key.endsWith('/*')||!Array.isArray(replacements)||replacements.length!==1||typeof replacements[0]!=='string'||!replacements[0].endsWith('/*'))throw Error('Only single-target TypeScript path aliases are supported.')
+      const alias=key.slice(0,-2),target=path.posix.normalize(path.posix.join(options.baseUrl??'.',replacements[0].slice(0,-2).replace(/^\.\//,'')))
+      if(!/^[@~][\w/-]*$/.test(alias)||!safeArchivePath(target)||!fs.statSync(confinedFile(root,target)).isDirectory())throw Error('Invalid TypeScript path alias.')
+      if(aliases[alias]!==undefined&&aliases[alias]!==target)throw Error('Conflicting Vite/TypeScript path alias.')
+      aliases[alias]=target
+    }
+  }
+  const pending=[entry],visited=new Set<string>(),packages=new Set<string>(),extensions=['','.tsx','.jsx','.ts','.js','.mts','.cts','.mjs','.cjs','.css','.json','/index.tsx','/index.jsx','/index.ts','/index.js']
+  const local=(from:string,specifier:string)=>{
+    const alias=Object.keys(aliases).sort((a,b)=>b.length-a.length).find(key=>specifier===key||specifier.startsWith(key+'/'))
+    const candidate=alias?path.posix.join(aliases[alias],specifier.slice(alias.length+1)):specifier.startsWith('/')?specifier.slice(1):path.posix.join(path.posix.dirname(from),specifier)
+    for(const extension of extensions){const relative=path.posix.normalize(candidate+extension);if(!safeArchivePath(relative))continue;const file=path.join(root,relative);if(fs.existsSync(file)&&fs.statSync(file).isFile())return relative}
+    throw Error('Static source dependency is unresolved: '+specifier)
+  }
+  while(pending.length){const file=pending.pop()!;if(visited.has(file))continue;if(visited.size>=2000)throw Error('Static source graph bound.');visited.add(file)
+    const code=fs.readFileSync(confinedFile(root,file),'utf8')
+    if(file.endsWith('.css')){for(const match of code.matchAll(/@import\s+(?:url\()?\s*["']([^"']+)["']/g)){const specifier=match[1];if(specifier.startsWith('.')||specifier.startsWith('/'))pending.push(local(file,specifier));else packages.add(packageRoot(specifier))}continue}
+    if(!/\.(?:[cm]?[jt]sx?|json)$/.test(file))continue
+    const source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true),add=(specifier:string)=>{if(specifier.startsWith('.')||specifier.startsWith('/')||Object.keys(aliases).some(key=>specifier===key||specifier.startsWith(key+'/')))pending.push(local(file,specifier));else if(specifier!=='virtual:uno.css'&&!specifier.startsWith('data:')&&!specifier.startsWith('node:')&&!builtinModules.includes(packageRoot(specifier)))packages.add(packageRoot(specifier))}
+    const visit=(node:ts.Node)=>{if(ts.isImportDeclaration(node)&&!node.importClause?.isTypeOnly&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isExportDeclaration(node)&&!node.isTypeOnly&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword&&node.arguments.length===1&&ts.isStringLiteral(node.arguments[0]))add(node.arguments[0].text);ts.forEachChild(node,visit)};visit(source)
+  }
+  const names=fs.readdirSync(root),cssConfigs=names.filter(name=>/^(?:tailwind|postcss|uno)\.config\.[cm]?[jt]s$/.test(name))
+  for(const file of cssConfigs){
+    const prefix=file.slice(0,file.indexOf('.')),code=fs.readFileSync(confinedFile(root,file),'utf8'),source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true)
+    const add=(specifier:string)=>{const name=packageRoot(specifier);if(Object.prototype.hasOwnProperty.call(declared,name))packages.add(name)}
+    const visit=(node:ts.Node)=>{if(ts.isImportDeclaration(node)&&!node.importClause?.isTypeOnly&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isCallExpression(node)&&ts.isIdentifier(node.expression)&&node.expression.text==='require'&&node.arguments.length===1&&ts.isStringLiteral(node.arguments[0]))add(node.arguments[0].text);ts.forEachChild(node,visit)};visit(source)
+    if(prefix==='tailwind'&&declared.tailwindcss)packages.add('tailwindcss')
+    if(prefix==='uno'&&declared.unocss)packages.add('unocss')
+    if(prefix==='postcss')for(const name of ['postcss','tailwindcss','autoprefixer'])if(declared[name])packages.add(name)
+  }
+  return packages
+}
+function selectProfile(project: ProjectRecord, applicationRoot: string, required:Set<string>) {
   const matches=(name:string,requested:unknown,pin:unknown)=>{try{const r=npmDescriptor(name,requested),p=npmDescriptor(name,pin);return r.name===p.name&&!!semver.valid(p.range)&&semver.satisfies(p.range,r.range)}catch{return false}}
   const version=(name:string,pin:unknown)=>npmDescriptor(name,pin).range
   try {
     const manifest = json(project.root, "package.json"), declared = { ...manifest.devDependencies, ...manifest.dependencies }
     const lock = fs.existsSync(path.join(project.root, "package-lock.json")) ? json(project.root, "package-lock.json") : undefined
-    const alternate=!lock && fs.existsSync(path.join(project.root,"yarn.lock"))?parseYarnClassic(fs.readFileSync(confinedFile(project.root,"yarn.lock"),"utf8")):!lock&&fs.existsSync(path.join(project.root,"bun.lock"))?parseBunText(fs.readFileSync(confinedFile(project.root,"bun.lock"),"utf8")):undefined
+    const needed=Object.fromEntries([...new Set([...required,'react','react-dom','vite'])].filter(name=>Object.prototype.hasOwnProperty.call(declared,name)).map(name=>[name,String(declared[name])]))
+    const alternate=!lock && fs.existsSync(path.join(project.root,"yarn.lock"))?parseYarnClassic(fs.readFileSync(confinedFile(project.root,"yarn.lock"),"utf8"),needed):!lock&&fs.existsSync(path.join(project.root,"bun.lock"))?parseBunText(fs.readFileSync(confinedFile(project.root,"bun.lock"),"utf8")):!lock&&fs.existsSync(path.join(project.root,"bun.lockb"))?parseBunBinary(fs.readFileSync(confinedFile(project.root,"bun.lockb"))):undefined
     const lockedVersion=(name:string)=>lock?.packages?.["node_modules/"+name]?.version??alternate?.resolve(name,String(declared[name]))?.version
     const candidates = RUNTIME_PROFILES.map(id => ({ id, profile: JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8")) })).filter(({ profile }) =>
       ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return matches(name,range,profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name])) }))
-    return candidates.find(({ profile }) => Object.entries(declared).every(([name, range]) => matches(name,range,profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name]))))?.id ?? candidates[0]?.id ?? PROFILE
+    return candidates.find(({ profile }) => [...required].every(name => matches(name,declared[name],profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name]))))?.id ?? candidates[0]?.id ?? PROFILE
   } catch { return PROFILE }
 }
 export type RuntimeIssue = { file?: string; classification?: ConfigurationClass; code: string; message: string; requiredCapability: string }
@@ -206,7 +249,9 @@ export function staticViteConfig(root: string, declared: Record<string, unknown>
 }
 
 export function inspectRuntime(project: ProjectRecord, applicationRoot: string, runtimeValues: Record<string,string> = {}): RuntimeReport {
-  const selectedProfile = selectProfile(project, applicationRoot)
+  let manifestForSelection:any,required=new Set<string>()
+  try{manifestForSelection=json(project.root,"package.json");required=executablePackageRoots(project,manifestForSelection)}catch{/* surfaced by the full inspection below */}
+  const selectedProfile = selectProfile(project, applicationRoot,required)
   const report: RuntimeReport = { compilerOptions: {}, schema: 2, configuration: [], base: "/", environment: {}, profile: selectedProfile, supported: false, aliases: {}, clientDependencies: [], dependencies: [], issues: [], notes: [] }
   const issue = (code: string, message: string, requiredCapability = "A separately approved dependency/runtime profile or isolated build runner") => report.issues.push({ code, message, requiredCapability })
   const root = project.root
@@ -222,16 +267,16 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     for (const name of Object.keys(manifest.dependencies ?? {})) if (manifest.devDependencies?.[name] && manifest.devDependencies[name] !== manifest.dependencies[name]) issue("dependency-conflict", `Conflicting declarations for ${name}.`)
     const lockNames = ["package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "bun.lockb"].filter(file => fs.existsSync(path.join(root, file)))
     let lock: any, lockDescription="npm lockfile"
-    if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, finite Yarn classic/Berry v8 or Bun text lock is permitted; binary Bun and other unimplemented formats are preserved and refused.")
+    if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock","bun.lockb"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, finite Yarn classic/Berry v8, or Bun text/binary lock is permitted.")
     if (lockNames.includes("package-lock.json")) {
       lock = json(root, "package-lock.json")
       if (![2, 3].includes(lock.lockfileVersion) || !object(lock.packages) || !object(lock.packages[""])) { issue("unsupported-lockfile", "npm package-lock v2/v3 with package records is required."); lock = undefined }
     }
-    if(lockNames.length===1 && ["yarn.lock","bun.lock"].includes(lockNames[0])) {
+    if(lockNames.length===1 && ["yarn.lock","bun.lock","bun.lockb"].includes(lockNames[0])) {
       let alternate
-      try { const text=fs.readFileSync(confinedFile(root,lockNames[0]),"utf8");alternate=lockNames[0]==="yarn.lock"?parseYarnClassic(text):parseBunText(text);lockDescription=alternate.format }
+      try { const bytes=fs.readFileSync(confinedFile(root,lockNames[0])),needed=Object.fromEntries([...new Set([...required,'react','react-dom','vite'])].filter(name=>declared[name]!==undefined).map(name=>[name,String(declared[name])]));alternate=lockNames[0]==="yarn.lock"?parseYarnClassic(bytes.toString("utf8"),needed):lockNames[0]==="bun.lock"?parseBunText(bytes.toString("utf8")):parseBunBinary(bytes);lockDescription=alternate.format }
       catch(error){issue("unsupported-lockfile",(error as Error).message)}
-      if(alternate)try{lock=normalizeAlternateLock(alternate,manifest,profileLock)}catch(error){issue("lock-conflict",(error as Error).message)}
+      if(alternate)try{lock=normalizeAlternateLock(alternate,manifest,profileLock,required)}catch(error){issue("lock-conflict",(error as Error).message)}
     }
     for (const [name, range] of Object.entries(declared)) {
       const pin = profile.dependencies[name] as string | undefined
@@ -239,16 +284,16 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       try {requested=npmDescriptor(name,range);const target=npmDescriptor(name,pin);if(target.name===requested.name&&semver.valid(target.range))selected=target.range}catch { /* Unsupported descriptor remains an admission issue below. */ }
       const locked = lock?.packages[`node_modules/${name}`]?.version as string | undefined
       report.dependencies.push({ name, declared: String(range), selected, locked })
-      if (!requested || !selected || !semver.satisfies(selected, requested.range)) issue("unsupported-version", `${name}@${String(range)} cannot use this profile${selected ? ` (${selected})` : " (package not provided)"}.`)
-      if (lock && (!locked || locked !== selected || (lock.packages[`node_modules/${name}`]?.name??name)!==requested?.name || lock.packages[`node_modules/${name}`]?.integrity !== profileLock.packages[`node_modules/${name}`]?.integrity || (lock.packages[""].dependencies?.[name] ?? lock.packages[""].devDependencies?.[name]) !== range)) issue("lock-conflict", `${name} lockfile version/declaration does not match the selected profile and manifest.`)
-      if (selected) {
+      if (required.has(name) && (!requested || !selected || !semver.satisfies(selected, requested.range))) issue("unsupported-version", `${name}@${String(range)} cannot use this profile${selected ? ` (${selected})` : " (package not provided)"}.`)
+      if (required.has(name) && lock && (!locked || locked !== selected || (lock.packages[`node_modules/${name}`]?.name??name)!==requested?.name || lock.packages[`node_modules/${name}`]?.integrity !== profileLock.packages[`node_modules/${name}`]?.integrity || (lock.packages[""].dependencies?.[name] ?? lock.packages[""].devDependencies?.[name]) !== range)) issue("lock-conflict", `${name} lockfile version/declaration does not match the selected profile and manifest.`)
+      if (required.has(name) && selected) {
         const installed = path.join(profileRoot, "node_modules", name, "package.json")
         if (!fs.existsSync(installed) || !isWithin(fs.realpathSync(path.join(profileRoot, "node_modules")), fs.realpathSync(installed)) || JSON.parse(fs.readFileSync(installed, "utf8")).version !== selected || JSON.parse(fs.readFileSync(installed, "utf8")).name !== requested?.name) issue("profile-unavailable", `The dedicated profile package ${name}@${selected} is missing or changed.`, "Operator installation of the repository-owned locked runtime profile with scripts disabled")
       }
     }
     // Only the dependency closure of explicitly admitted browser packages is
     // available to application imports. Tooling and the editor graph are excluded.
-    const clientRoot=(name:string)=>{try{return clientPackages.has(npmDescriptor(name,declared[name]).name)}catch{return false}}
+    const clientRoot=(name:string)=>{try{return required.has(name)&&clientPackages.has(npmDescriptor(name,declared[name]).name)}catch{return false}}
     const pendingClients = Object.keys(declared).filter(clientRoot).map(name => "node_modules/" + name), clients = new Set<string>(), visited = new Set<string>()
     const nestedDependency = (location: string, name: string) => {
       let parent = location
@@ -284,7 +329,8 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     if (lock) for (const [location, record] of Object.entries(lock.packages) as Array<[string, any]>) {
       const name = location.split("node_modules/").at(-1)!
       if (["react", "react-dom", "scheduler", "react-router-dom", "react-router", "cookie", "set-cookie-parser", "clsx", "classnames"].includes(name)) {
-        if (record.link || record.version !== profileLock.packages[`node_modules/${name}`]?.version || record.integrity !== profileLock.packages[`node_modules/${name}`]?.integrity) issue("lock-conflict", `Locked client package ${location} differs from the dedicated runtime profile.`)
+        const trusted = profileLock.packages[location]
+        if (!trusted || record.link || record.version !== trusted.version || record.integrity !== trusted.integrity) issue("lock-conflict", `Locked client package ${location} differs from the dedicated runtime profile.`)
       }
     }
     if (lock) {
@@ -306,7 +352,7 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     catch (error) { issue("executable-config", (error as Error).message, "An isolated Vite configuration/plugin runner"); report.configuration.push({ file: viteFile ?? "vite.config", classification: "requires-isolated-execution", detail: (error as Error).message }) }
     try { report.entry = htmlEntry(root,report.publicDir,report.runtimeRoot) ?? (report.runtimeRoot&&report.runtimeRoot!=="."?undefined:project.detection.entry); if (!report.entry) throw new Error("No supported client entry found.") } catch (error) { issue("html-entry", (error as Error).message) }
     if (report.entry && !isWithin(project.sourceRoot, path.join(root, report.entry))) issue('source-root', 'Runtime entry is outside the registered canonical source tree.')
-    report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, BASE_URL: report.base, ...publicRuntimeValues(runtimeValues) }
+    report.environment = { MODE: "production", PROD: true, DEV: false, SSR: false, TEST: false, BASE_URL: report.base, ...publicRuntimeValues(runtimeValues) }
     const configs = new Set<string>()
     const readTsconfig = (file: string) => {
       if (configs.has(file)) return
@@ -376,7 +422,8 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       const visit = (node: ts.Node) => {
         if (ts.isPropertyAccessExpression(node) && node.expression.kind === ts.SyntaxKind.MetaProperty && node.name.text === "env") {
           const parent = node.parent
-          if (!ts.isPropertyAccessExpression(parent) || parent.expression !== node || !Object.prototype.hasOwnProperty.call(report.environment, parent.name.text)) {
+          const finiteEnumeration=ts.isCallExpression(parent)&&parent.arguments.length===1&&parent.arguments[0]===node&&ts.isPropertyAccessExpression(parent.expression)&&ts.isIdentifier(parent.expression.expression)&&parent.expression.expression.text==='Object'&&parent.expression.name.text==='entries'
+          if (!finiteEnumeration&&(!ts.isPropertyAccessExpression(parent) || parent.expression !== node || !Object.prototype.hasOwnProperty.call(report.environment, parent.name.text))) {
             report.issues.push({ code: "environment-reference", file, classification: "unsupported", message: `${file}: environment references require an explicitly granted static public value; platform env is never exposed.`, requiredCapability: "Explicit project public environment configuration" })
           }
         }

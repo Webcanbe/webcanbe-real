@@ -5,6 +5,11 @@ const object=(v:any):v is Record<string,any>=>Boolean(v&&typeof v==='object'&&!A
 const sri=(v:unknown)=>typeof v==='string'&&/^(?:sha512-[A-Za-z0-9+/]{86}==|sha384-[A-Za-z0-9+/]{64}|sha256-[A-Za-z0-9+/]{43}=|sha1-[A-Za-z0-9+/]{27}=)$/.test(v)
 function bounded(source:string){if(Buffer.byteLength(source)>2*1024*1024||source.includes('\0'))throw Error('Lock data exceeds the supported text bound.')}
 function range(value:any){if(typeof value!=='string'||value.length>256||!semver.validRange(value))throw Error('Only npm semver dependency descriptors are supported.');return value}
+function finitePeerRange(requested:string){
+  const branches=requested.split('||').map(value=>value.trim()),ranges=branches.filter(value=>semver.validRange(value))
+  if(!ranges.length||branches.some(value=>!semver.validRange(value)&&!/^[a-z][a-z0-9._-]{0,31}$/i.test(value)))throw Error('Unsupported peer range.')
+  return ranges.join(' || ')
+}
 /** Keep the requested dependency name separate from the registry package identity.
  * file/link/git/workspace protocols need a distinct graph adapter and never become npm ranges. */
 export function npmDescriptor(name:string,value:unknown){
@@ -17,7 +22,7 @@ export function npmDescriptor(name:string,value:unknown){
   return {name:identity,range:range(target.slice(at+1))}
 }
 function dependencies(value:any){if(value===undefined)return {};if(!object(value))throw Error('Invalid dependency data.');for(const [name,r]of Object.entries(value)){if(!packageName.test(name))throw Error('Invalid dependency name.');range(r)}return value}
-export type AlternateLock={format:'yarn-classic-v1'|'yarn-berry-v8'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>;cacheKey?:string}
+export type AlternateLock={format:'yarn-classic-v1'|'yarn-berry-v8'|'bun-text-v1'|'bun-binary-v2';packages:Record<string,any>;resolve:(name:string,range:string,from?:string,location?:string)=>any;root?:Record<string,any>;cacheKey?:string}
 
 type BerryRequest={name:string;range:string;selector:string;protocol:'npm'|'patch'|'workspace';virtual?:string;raw:string}
 const splitNameRequest=(value:string)=>{const at=value.indexOf('@',value.startsWith('@')?1:0);if(at<1)throw Error('Invalid Yarn descriptor identity.');const name=value.slice(0,at),requested=value.slice(at+1);if(!packageName.test(name)||!requested)throw Error('Invalid Yarn descriptor identity.');return{name,requested}}
@@ -208,7 +213,7 @@ export function parseYarnBerry(source:string):AlternateLock{
   }}
 }
 
-export function parseYarnClassic(source:string):AlternateLock {
+export function parseYarnClassic(source:string,requiredRoots?:Record<string,string>):AlternateLock {
   bounded(source)
   if(/^__metadata:/m.test(source))return parseYarnBerry(source)
   if(!/^# yarn lockfile v1\r?$/m.test(source))throw Error('Only Yarn classic v1 or finite Berry v8 lock data is supported.')
@@ -221,7 +226,7 @@ export function parseYarnClassic(source:string):AlternateLock {
       const keys=line.slice(0,-1).match(/"(?:[^"\\]|\\.)*"|[^,]+/g)
       if(!keys?.length)throw Error('Missing Yarn descriptor.')
       current={dependencies:{},optionalDependencies:{}};currentNames=new Set();section=undefined
-      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');const descriptor=npmDescriptor(name,requested);descriptors.set(key,current);if(current.name&&current.name!==descriptor.name)throw Error('Cross-package Yarn descriptor alias.');current.name=descriptor.name;const list=byName.get(name)??[];if(!currentNames.has(name)){currentNames.add(name);list.push(current);byName.set(name,list)}}
+      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');let identity=name;try{identity=npmDescriptor(name,requested).name}catch{if(typeof requested!=='string'||!/^[a-z][a-z0-9._-]{0,31}$/i.test(requested))throw Error('Unsupported Yarn descriptor.')}descriptors.set(key,current);if(current.name&&current.name!==identity)throw Error('Cross-package Yarn descriptor alias.');current.name=identity;const list=byName.get(name)??[];if(!currentNames.has(name)){currentNames.add(name);list.push(current);byName.set(name,list)}}
       continue
     }
     if(!current)throw Error('Yarn field without a record.')
@@ -231,20 +236,27 @@ export function parseYarnClassic(source:string):AlternateLock {
     if(group){if(current['_'+group[1]])throw Error('Duplicate Yarn dependency group.');current['_'+group[1]]=true;section=group[1];continue}
     const dep=/^    ("(?:[^"\\]|\\.)*"|[^ ]+) (.+)$/.exec(line)
     if(!dep||!section)throw Error('Unsupported Yarn lock syntax.')
-    const name=atom(dep[1]);if(!packageName.test(name)||Object.prototype.hasOwnProperty.call(current[section],name))throw Error('Duplicate/invalid Yarn dependency.');const requested=atom(dep[2]);npmDescriptor(name,requested);current[section][name]=requested
+    const name=atom(dep[1]);if(!packageName.test(name)||Object.prototype.hasOwnProperty.call(current[section],name))throw Error('Duplicate/invalid Yarn dependency.');const requested=atom(dep[2]);
+    try{npmDescriptor(name,requested)}catch{if(typeof requested!=='string'||!/^[a-z][a-z0-9._-]{0,31}$/i.test(requested))throw Error('Unsupported Yarn dependency descriptor.')}
+    current[section][name]=requested
   }
   if(!records)throw Error('Empty Yarn lock.')
-  for(const list of byName.values())for(const record of list){
+  const find=(name:string,requested:string)=>{
+    const exact=descriptors.get(name+'@'+requested);if(exact)return exact
+    if(requested.startsWith('npm:'))throw Error('Exact Yarn npm alias/protocol descriptor is missing: '+name)
+    let resolvedRange=requested;try{resolvedRange=finitePeerRange(requested)}catch{/* Invalid normal descriptors remain unresolved. */}
+    const matches=(byName.get(name)??[]).filter(x=>semver.satisfies(x.version,resolvedRange));if(matches.length===1)return matches[0]
+    throw Error('Yarn resolution is missing or ambiguous: '+name)
+  }
+  const admitted=new Set<any>()
+  if(requiredRoots){const pending=Object.entries(requiredRoots);while(pending.length){const [name,requested]=pending.pop()!,record=find(name,requested);if(admitted.has(record))continue;if(admitted.size>=12000)throw Error('Yarn reachable graph bound.');admitted.add(record);for(const [dependency,value]of Object.entries({...record.dependencies,...record.optionalDependencies}))pending.push([dependency,String(value)])}}
+  else for(const list of byName.values())for(const record of list)admitted.add(record)
+  for(const record of admitted){
     if(!semver.valid(record.version)||!sri(record.integrity)||typeof record.resolved!=='string')throw Error('Yarn records require exact versions and registry SRI.')
     const url=new URL(record.resolved);if(url.protocol!=='https:'||url.username||url.password||url.port||url.search||!['registry.npmjs.org','registry.yarnpkg.com'].includes(url.hostname)||url.hash&&!/^#[a-f0-9]{40}$/i.test(url.hash))throw Error('Only immutable public registry Yarn tarballs are supported.')
   }
   return {format:'yarn-classic-v1',packages:Object.create(null),resolve:(name,requested)=>{
-    const exact=descriptors.get(name+'@'+requested)
-    if(exact)return exact
-    // Alternate identities require their exact descriptor, never a range heuristic.
-    if(requested.startsWith('npm:'))throw Error('Exact Yarn npm alias/protocol descriptor is missing: '+name)
-    const matches=(byName.get(name)??[]).filter(x=>semver.satisfies(x.version,requested));if(matches.length===1)return matches[0]
-    throw Error('Yarn resolution is missing or ambiguous: '+name)
+    const record=find(name,requested);if(!admitted.has(record))throw Error('Yarn package is outside the statically admitted graph: '+name);return record
   }}
 }
 /** Only npm tuples in the versioned text format. Binary locks remain opaque and unsupported. */
@@ -278,23 +290,29 @@ export function parseBunText(source:string):AlternateLock {
 }
 /** Normalize only after proving every reachable declared dependency and required peer
  * against the operator-owned npm graph. No resolver or package installation runs. */
-export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:any){
-  const declared={...manifest.devDependencies,...manifest.dependencies},packages:Record<string,any>={'':{dependencies:manifest.dependencies,devDependencies:manifest.devDependencies}},visited=new Set<string>()
+export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:any,requiredNames?:Iterable<string>){
+  const declared={...manifest.devDependencies,...manifest.dependencies},required=requiredNames?new Set(requiredNames):new Set(Object.keys(declared)),packages:Record<string,any>={'':{dependencies:manifest.dependencies,devDependencies:manifest.devDependencies}},visited=new Set<string>()
   if(lock.root){
     if(lock.format==='yarn-berry-v8'){
       if(!equivalentDependencyMap(declared,lock.root.dependencies,true))throw Error('Yarn root declaration differs from manifest.')
     }else for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')
   }
-  const located=(parent:string,name:string)=>{let from=parent;while(from){const p=from+'/node_modules/'+name;if(profile.packages[p])return p;const i=from.lastIndexOf('/node_modules/');from=i<0?'':from.slice(0,i)}return 'node_modules/'+name}
+  const located=(parent:string,name:string,requested:string,peer=false)=>{
+    let descriptor:{name:string;range:string};try{descriptor=peer?{name,range:finitePeerRange(requested)}:npmDescriptor(name,requested)}catch{return 'node_modules/'+name}
+    const accepts=(location:string)=>{const record=profile.packages[location];return record&&!record.link&&(record.name??name)===descriptor.name&&semver.satisfies(record.version,descriptor.range)}
+    let from=parent
+    while(from){const candidate=from+'/node_modules/'+name;if(accepts(candidate))return candidate;const index=from.lastIndexOf('/node_modules/');from=index<0?'':from.slice(0,index)}
+    return 'node_modules/'+name
+  }
   const excludedPlatform=(record:any)=>[ ['os',process.platform],['cpu',process.arch] ].some(([key,current])=>{
     const values=record?.[key];if(!Array.isArray(values))return false
     return values.includes('!'+current)||values.filter((x:any)=>typeof x==='string'&&!x.startsWith('!')).length>0&&!values.includes(current)
   })
   const berryPeers:Array<{name:string;requested:string;location:string}>=[]
   let depth=0
-  const visit=(name:string,requested:string,location:string,from:string)=>{
-    const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
-    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):npmDescriptor(name,requested)
+  const visit=(name:string,requested:string,location:string,from:string,peerRequest=false)=>{
+    const trusted=profile.packages[location],actual=lock.resolve(name,requested,from,location)
+    const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):peerRequest?{name,range:finitePeerRange(requested)}:npmDescriptor(name,requested)
     const identity=descriptor.name,versionRange=descriptor.range
     const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof actual?.berryLocator==='string'&&sri(trusted?.integrity):actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
     if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
@@ -319,25 +337,25 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
     if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Lock optional-peer metadata differs from pinned graph.')
     if(berry){
       for(const dep of Object.keys({...trusted.dependencies,...trusted.optionalDependencies})){
-        const next=located(location,dep),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)
+        const request=String(actual.dependencies?.[dep]??actual.optionalDependencies?.[dep]),next=located(location,dep,request),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)
         if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
-        visit(dep,String(actual.dependencies?.[dep]??actual.optionalDependencies?.[dep]),next,location)
+        visit(dep,request,next,location)
       }
       // A name may be both an optional dependency and a required peer. Keep the
       // two obligations separate so an omitted optional edge cannot erase a peer.
       for(const [dep,r]of Object.entries(trusted.peerDependencies??{})){
-        const next=located(location,dep)
+        const next=located(location,dep,String(r),true)
         if(trusted.peerDependenciesMeta?.[dep]?.optional===true&&!profile.packages[next])continue
         berryPeers.push({name:dep,requested:String(r),location:next})
       }
     }else for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
-      const next=located(location,dep),isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
+      const isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),next=located(location,dep,String(r),isPeer),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
       if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
-      visit(dep,String(r),next,location)
+      visit(dep,String(r),next,location,isPeer)
     }
     depth--
   }
-  for(const [name,r]of Object.entries(declared))visit(name,String(r),'node_modules/'+name,'')
+  for(const name of required){if(!Object.prototype.hasOwnProperty.call(declared,name))throw Error('Required package is undeclared: '+name);visit(name,String(declared[name]),'node_modules/'+name,'')}
   // Peer ranges are constraints on the provider selected by the dependency
   // graph, not additional descriptors that must occur in a Yarn lockfile.
   for(const peer of berryPeers){

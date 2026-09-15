@@ -12,7 +12,7 @@ export function isInertToolingPath(name: string) {
 /** All uploaded Yarn loaders/plugins remain outside the executable graph,
  * including small files that do not qualify for the larger preservation limit. */
 export function isPackageManagerToolingPath(name: string) {
-  return /(?:^|\/)\.yarn(?:\/|$)/.test(name) || /(?:^|\/)\.pnp(?:\.loader)?\.[cm]?js$/.test(name)
+  return /(?:^|\/)\.(?:yarn|husky)(?:\/|$)/.test(name) || /(?:^|\/)\.pnp(?:\.loader)?\.[cm]?js$/.test(name)
 }
 export function archiveMemberLimit(name: string) { return isInertToolingPath(name) ? INERT_TOOL_BYTES : 2 * 1024 * 1024 }
 export function validateIntakeMetadata(name: string, bytes: Buffer) {
@@ -55,7 +55,7 @@ export function validateIntakeMetadata(name: string, bytes: Buffer) {
     const seen = new Set<string>()
     for (const line of text.split(/\r?\n/)) {
       if (!line.trim() || /^\s*#/.test(line)) continue
-      const match = /^(VITE_[A-Z][A-Z0-9_]{0,79})=(.*)$/.exec(line)
+      const match = /^((?:VITE_|NEXT_PUBLIC_)[A-Z][A-Z0-9_]{0,79})=(.*)$/.exec(line)
       if (!match || seen.has(match[1]) || /TOKEN|SECRET|PASSWORD|PRIVATE|CREDENTIAL|API_KEY|ACCESS_KEY/.test(match[1])) throw new Error("Unsupported or secret example environment data.")
       seen.add(match[1])
       const value = match[2].trim()

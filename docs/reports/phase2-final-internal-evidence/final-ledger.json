@@ -103,9 +103,9 @@
       "id": "P05",
       "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
       "status": "PARTIAL",
-      "evidence": "Finite Berry v8 data parser with descriptor/locator/alias/virtual and required-peer checks against operator-owned profiles. Cache labels remain distinct from npm SRI; patched-byte substitution refuses without explicit trusted identity. Oversized inert Yarn release round-trips exactly and cannot enter preview/export compilation. 76 targeted tests and TypeScript pass; full regression deferred.",
+      "evidence": "Finite Berry v8 handling remains proven. An internal bounded Bun v1.1.42 format-2 decoder validates the exact retained Todo binary lock and extracts npm identities, SHA-512 integrity and dependency edges without executing Bun. Exact operator-owned reachable profiles admit and build frozen Redux and Bulletproof; generic confined nested-root selection chooses Bulletproof apps/react-vite and preserves the full archive. 49 newly/directly affected tests and TypeScript pass; prior 76 P05 passes are reused and full regression remains deferred.",
       "evidenceSource": "docs/reports/phase2-p05-closure.md",
-      "missingProof": "Verified Bun binary decoder or trusted isolated metadata-only boundary; exact retained Redux/Bulletproof/Todo operator-owned version/integrity/package graphs and any required graph-specific adapters. Redux lock/root locators parse, but executable graph admission remains refused for missing packages. Only root workspace and finite builtin patch metadata are supported; arbitrary local/workspace/patch forms remain refused.",
+      "missingProof": "Exact Todo graph peer mismatch only: @julr/unocss-preset-forms@1.0.0 requires unocss ^0.31.0 || ^65.0.0, while the frozen binary lock selects unocss@66.0.0. Strict trusted-peer admission correctly refuses; no legacy-peer or relaxed path was introduced.",
       "internallyClosable": "Internal work remains; not reclassified as production evidence.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
@@ -117,7 +117,7 @@
         "../phase2-compatibility-edge-evidence/security/final-reread.json",
         "../phase2-p05-evidence/targeted-tests.json"
       ],
-      "disposition": "P05 remains PARTIAL. Two retained requirement areas remain; Bun is not the sole blocker. No uploaded manager/plugin/script execution, no package installation/network resolution or host fallback. Berry cache labels are not npm integrity proof. P39/P61 and every other row are untouched.",
+      "disposition": "P05 remains PARTIAL solely for the exact retained Todo peer conflict. Bun binary decoding, Redux graph admission, and Bulletproof nested-root/graph admission pass. No uploaded manager/plugin/script execution, package installation, online resolution, host fallback, or source/export mutation. P39/P61 and every other row are untouched.",
       "priorCheckpoint": {
         "id": "P05",
         "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",

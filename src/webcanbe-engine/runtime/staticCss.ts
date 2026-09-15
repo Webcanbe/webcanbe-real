@@ -114,7 +114,7 @@ function contentPattern(pattern:string):RegExp|undefined {
 }
 export function inspectCssPlan(root:string,declared:Record<string,any>,profile:string):CssPlan|undefined {
   const names=fs.readdirSync(root), pick=(prefix:string)=>{const all=names.filter(n=>new RegExp('^'+prefix+'\\.config\\.[cm]?[jt]s$').test(n));if(all.length>1)fail('Ambiguous CSS configuration.');return all[0]}
-  const tailwind=pick('tailwind'),post=pick('postcss'),uno=pick('uno'),kind=declared.unocss?'unocss':declared.tailwindcss&&profile==='react18-vite5-css-v1'?'tailwind3':undefined
+  const tailwind=pick('tailwind'),post=pick('postcss'),uno=pick('uno'),kind=declared.unocss?'unocss':declared.tailwindcss&&['react18-vite5-css-v1','react18-vite5-tailwind3-query-radix-v1'].includes(profile)?'tailwind3':undefined
   if(!kind)return
   if(kind==='unocss'&&!['react19-vite6-uno-v1','react19-vite6-uno65-v1'].includes(profile))fail('A pinned UnoCSS operator profile is required.')
   if(kind==='unocss'&&(tailwind||post))fail('Combined UnoCSS/PostCSS configurations are unsupported.')

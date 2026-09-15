@@ -33,6 +33,26 @@ function historyImport(code: string, file: string) {
   })
 }
 
+/** Fold only the standard unshadowed browser-presence guard. This prevents
+ * unreachable Node-only dynamic imports from entering the browser graph. */
+function browserPresence(code:string,file:string) {
+  const source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),edits:Array<{start:number;end:number;text:string}>=[]
+  let shadowed=false
+  const scan=(node:ts.Node)=>{
+    if((ts.isVariableDeclaration(node)||ts.isParameter(node)||ts.isBindingElement(node))&&ts.isIdentifier(node.name)&&node.name.text==='window')shadowed=true
+    if(ts.isImportClause(node)&&node.name?.text==='window'||ts.isImportSpecifier(node)&&node.name.text==='window'||ts.isNamespaceImport(node)&&node.name.text==='window')shadowed=true
+    ts.forEachChild(node,scan)
+  };scan(source);if(shadowed)return code
+  const visit=(node:ts.Node)=>{
+    if(ts.isBinaryExpression(node)&&[ts.SyntaxKind.EqualsEqualsToken,ts.SyntaxKind.EqualsEqualsEqualsToken,ts.SyntaxKind.ExclamationEqualsToken,ts.SyntaxKind.ExclamationEqualsEqualsToken].includes(node.operatorToken.kind)){
+      const guard=(candidate:ts.Expression,value:ts.Expression)=>ts.isTypeOfExpression(candidate)&&ts.isIdentifier(candidate.expression)&&candidate.expression.text==='window'&&ts.isStringLiteral(value)&&value.text==='undefined'
+      if(guard(node.left,node.right)||guard(node.right,node.left))edits.push({start:node.getStart(source),end:node.getEnd(),text:[ts.SyntaxKind.ExclamationEqualsToken,ts.SyntaxKind.ExclamationEqualsEqualsToken].includes(node.operatorToken.kind)?'true':'false'})
+    }
+    ts.forEachChild(node,visit)
+  };visit(source)
+  return edits.sort((a,b)=>b.start-a.start).reduce((text,edit)=>text.slice(0,edit.start)+edit.text+text.slice(edit.end),code)
+}
+
 /** Conservative transport selection; the compiler also enforces the Blob guard. */
 export function requiresHttpPreview(project: ProjectRecord) {
   let bytes = 0
@@ -50,7 +70,7 @@ export function requiresHttpPreview(project: ProjectRecord) {
 
 async function boundedBuild(options: BuildOptions) {
   const compiler = await context(options)
-  const timeout = setTimeout(() => { void compiler.cancel() }, 15_000)
+  const timeout = setTimeout(() => { void compiler.cancel() }, 25_000)
   try { return await compiler.rebuild() }
   finally { clearTimeout(timeout); await compiler.dispose() }
 }
@@ -65,9 +85,11 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
   const vendorRoot = fs.realpathSync(path.join(profileRoot, "node_modules"))
   // Finite CSS toolchains are loaded only inside their confined worker.
   let compile: typeof import("tailwindcss").compile | undefined
-  if (!runtime.cssPlan) {
+  const tailwindCompiler = () => {
+    if (compile) return compile
     if (!isWithin(vendorRoot, fs.realpathSync(require.resolve("tailwindcss")))) throw new Error("Dedicated Tailwind compiler is unavailable; host fallback is forbidden.")
     compile = (require("tailwindcss") as typeof import("tailwindcss")).compile
+    return compile
   }
   const root = fs.realpathSync(project.root)
   let shell = staticHtml(root,runtime.publicDir,runtime.runtimeRoot)
@@ -83,7 +105,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
   const options: BuildOptions = {
     entryPoints: [runtime.entry!], absWorkingDir: root, bundle: true, write: false, outdir: outputRoot,
     entryNames: productionExport ? "assets/app" : "_wcb/app", chunkNames: "assets/[name]-[hash]", assetNames: productionExport ? "assets/[name]-[hash]" : "_wcb/assets/[name]-[hash]", publicPath: productionExport ? runtime.base : "/", format: productionExport ? "esm" : "iife", splitting: productionExport, platform: "browser", jsx: "automatic", minify: true,
-    metafile: true, tsconfigRaw: { compilerOptions: runtime.compilerOptions }, define: { "process.env.NODE_ENV": '"production"', ...Object.fromEntries(Object.entries(runtime.environment).map(([key, value]) => ["import.meta.env." + key, JSON.stringify(value)])) }, logLevel: "silent",
+    metafile: true, tsconfigRaw: { compilerOptions: runtime.compilerOptions }, define: { "process.env.NODE_ENV": '"production"', "import.meta.env": JSON.stringify(runtime.environment), ...Object.fromEntries(Object.entries(runtime.environment).map(([key, value]) => ["import.meta.env." + key, JSON.stringify(value)])) }, logLevel: "silent",
     plugins: [{ name: "confined-source", setup(builder) {
       builder.onStart(() => { bytes = 0; tailwindOutputs.clear() })
       builder.onResolve({ filter: /.*/ }, async args => {
@@ -101,6 +123,11 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
           if (args.kind === "url-token" && /^data:(?:image\/(?:png|jpeg|gif|webp|avif|svg\+xml)|font\/(?:woff2?|ttf|otf))(?:;[^,]*)?,/i.test(args.path)) return { path: args.path, external: true }
         }
         const vendorImporter = isWithin(vendorRoot, args.importer)
+        if(vendorImporter){
+          const resolved=await builder.resolve(args.path,{kind:args.kind,resolveDir:path.dirname(args.importer),pluginData:{profileResolution:true}})
+          if(resolved.errors.length||resolved.external||!resolved.path||!fs.existsSync(resolved.path)||!isWithin(vendorRoot,fs.realpathSync(resolved.path)))throw Error('Trusted package import escaped its dedicated browser profile: '+args.path)
+          return {path:fs.realpathSync(resolved.path),namespace:'confined'}
+        }
         const alias = Object.keys(runtime.aliases).sort((a, b) => b.length - a.length).find(key => args.path === key || args.path.startsWith(key + "/"))
         let candidate: string
         if (args.kind === "entry-point") candidate = path.resolve(root, args.path)
@@ -114,7 +141,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         } else {
           const name = args.path.startsWith("@") ? args.path.split("/").slice(0, 2).join("/") : args.path.split("/")[0]
           if (!vendorImporter && !runtime.clientDependencies.includes(name)) throw new Error('Unknown or undeclared preview import: ' + args.path)
-          const resolved = await builder.resolve(args.path, { kind: args.kind, resolveDir: vendorImporter ? path.dirname(args.importer) : profileRoot, pluginData: { profileResolution: true } })
+          const resolved = await builder.resolve(args.path, { kind: args.kind, resolveDir: profileRoot, pluginData: { profileResolution: true } })
           if (resolved.errors.length || !resolved.path || !isWithin(vendorRoot, fs.realpathSync(resolved.path))) throw new Error('Dependency is unavailable in the dedicated profile: ' + args.path)
           return { path: resolved.path, namespace: "confined" }
         }
@@ -150,6 +177,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const cached = incremental?.transforms.get(args.path)
         if (ext !== "css" && cached?.source === code) return cached.result
         const originalCode = code
+        if (!vendor && /^(tsx|jsx|ts|js)$/.test(ext)) code = browserPresence(code,args.path)
         if (vendor && incremental?.fastRefresh && /^(tsx|jsx|ts|js)$/.test(ext)) code = developmentVendor(code)
         if (ext === "css" && finiteCss) code = await finiteCss(code,path.relative(root,args.path).split(path.sep).join('/'))
         else if (ext === "css") {
@@ -159,7 +187,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
             const themeKey = cssConfig.theme ? code : "default"
             let tailwind = tailwindOutputs.get(themeKey)
             if (!tailwind) {
-              const compiler = await compile!(cssConfig.theme ? code : '@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
+            const compiler = await tailwindCompiler()(cssConfig.theme ? code : '@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
               const sources = fs.readdirSync(project.sourceRoot, { recursive: true }).filter((file): file is string => typeof file === "string" && /\.(tsx?|jsx?)$/.test(file))
               const candidates = sources.flatMap(file => {
                 const absolute = fs.realpathSync(path.join(project.sourceRoot, file))

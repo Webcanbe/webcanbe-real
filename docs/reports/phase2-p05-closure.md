@@ -1,146 +1,113 @@
-# P05 targeted closure — 2026-09-15
+# P05 final narrow follow-up — 2026-09-16
 
 **P05 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NO.**
 
-## Scope and verification
+## Scope
 
-Verified the clean `phase-2-compatible-editor` checkout at
-`9a5c7579ec831d047df19cf5efbba676a6853279` in
-`/Users/olivertaylor/Developer/WebCanBe-recovery`. Fetched origin and verified the
-feature tip, main `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`, and ancestry.
-There is no local main branch. No main push, merge, deployment, installation,
-project script execution, P39/P61 work, or later-phase work occurred.
+Continued the clean `phase-2-compatible-editor` checkout from
+`6e55240cfe498808129f5237eb7bda298bc18071`. Main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. This follow-up changed only the two
+retained P05 areas: verified Bun binary-lock decoding and exact trusted graphs for
+the frozen Redux, Bulletproof, and Todo applications. Prior Berry, inert tooling,
+archive, export, source, security, and 76-test evidence was reused.
 
-Selectively restored these eight files from parallel snapshot
-`862575adbc617465db1d74d5ec343c8f691edc97`, then reviewed and corrected them:
+No package manager, lifecycle script, uploaded config, uploaded plugin, or host
+`node_modules` was executed. No admission-time installation or network resolution
+was added. P39, P61, later phases, payments, UI, and main were untouched.
 
-- `src/webcanbe-engine/runtime/alternateLockfiles.ts`
-- `src/webcanbe-engine/runtime/intakeMetadata.ts`
-- `src/webcanbe-engine/runtime/projectRegistry.ts`
-- `src/webcanbe-engine/runtime/projectExport.ts`
-- `src/webcanbe-engine/runtime/isolatedPreview.ts`
-- `src/webcanbe-engine/phase2-p05-berry.test.ts`
-- `src/webcanbe-engine/phase2-p05-inert-tooling.test.ts`
-- `src/webcanbe-engine/phase2-p05-redux-real.test.ts`
+## Bun v1 binary decoder
 
-This includes the inert-tool product work from
-`6f7cff2e7e85ce9c3b6ebd3a812c790d2360d3cb`. Relevant earlier product/test commits:
-`487b5ea`, `8aa7b35`, `2dd58e4`, `b59ccf5`, `b8163ef`, `73a0767`, `d099fe5`,
-`265941d`. No parallel workflow or unrelated history was merged.
+`runtime/bunBinaryLock.ts` is an internal data-only decoder for the pinned Bun
+v1.1.42 format-2 serializer. It validates the fixed header and version, bounded
+file and record counts, checked integer arithmetic, table alignment, typed-buffer
+ranges, non-overlap, UTF-8 strings, dependency/resolution slices, target
+identities, registry URLs, SHA-512 integrity, and parent-scoped descriptors.
+Unsupported resolution forms and optional workspace/trust/override/patch extension
+sections refuse instead of being guessed. The parser does not invoke Bun or read
+project configuration or environment.
 
-Additional changes: three P05-only test files (`phase2-p05-trust.test.ts`,
-`phase2-p05-boundaries.test.ts`, `phase2-p05-frozen-admission.test.ts`) and two
-reporting strings in the direct consumer `runtime/runtimeCompatibility.ts`.
-The latter now states checksum provenance accurately and no longer labels all
-Berry input unsupported.
+The exact retained Todo `bun.lockb` is 262,443 bytes with SHA-256
+`4a6802815bb395350e14d4bd5d2162157bc2a21de755ca72c82a09dc8808c143`.
+It decodes successfully and its package names, exact versions, npm integrity, and
+dependency edges enter the same trusted normalization boundary as other locks.
+The original binary bytes remain unchanged through source storage and export.
 
-## Berry trust and finite forms
+## Exact application graphs
 
-The bounded parser accepts lock version 8, exact npm descriptors/locators and
-aliases, finite hexadecimal virtual identities (including Yarn's 128-digit
-hashes), one `workspace:.` root, finite builtin compatibility patch metadata,
-conditions, dependency/peer metadata and inert bin paths. It executes no YAML,
-Yarn, PnP loader, uploaded plugin, script or package-manager configuration.
+### Redux
 
-Descriptor and locator package names, exact version and virtual identity must
-agree. Repeated locators cannot disagree about graph/checksum data; different
-virtual locators cannot overwrite one trusted package location. Peer constraints
-are checked against graph-selected providers, without inventing peer descriptors.
-An optional dependency cannot erase an overlapping required peer obligation.
-
-Berry checksums are **unverified cache metadata**, constrained to the exact cache
-key and a 128-digit lowercase hexadecimal label. They do not authenticate npm
-package bytes. Changing a syntactically valid untrusted digest changes only that
-label. If an operator provides a Berry locator/checksum attestation, mismatches
-refuse. Required names, versions, dependency/peer edges and SRI come from the
-operator-owned profile. Admission performs no network resolution, installation
-or host-node_modules fallback. Existing operator provisioning remains responsible
-for verified package bytes; this task does not independently rehash installed
-packages or claim to verify absent Yarn cache ZIPs.
-
-[Yarn 4.2.2 Cache.ts](https://github.com/yarnpkg/berry/blob/%40yarnpkg/cli/4.2.2/packages/yarnpkg-core/sources/Cache.ts)
-computes the checksum from its cache archive. Its cache key and archive bytes
-cannot be replaced with npm tarball SRI. The pinned source was inspected as data.
-
-Builtin patches parse, but normalization refuses unpatched-package substitution:
-execution requires an explicit operator-owned patched locator and trusted byte
-integrity. No uploaded patch is applied. Arbitrary file/link/portal/git/patch and
-non-root workspace dependencies still refuse. Root-only support does not claim
-universal workspace or patch support.
-
-Conditional records may omit a checksum while inert. Only optional dependencies
-absent from the trusted graph or excluded by its OS/CPU metadata are omitted;
-required edges and required peers cannot silently disappear. Libc conditions are
-preserved as data, not evaluated as permission to execute a package.
-
-## Frozen Redux and oversized inert Yarn
-
-Frozen application: `reduxjs/redux-essentials-example-app` commit
+Frozen application: `reduxjs/redux-essentials-example-app` at
 `b4414e1504c914ece3253dd8a21adfb2278464d9`.
-The exact Yarn 4.2.2 lock parses; all declared root locators resolve. Full ZIP
-intake and export preserve every original file byte, including the bundled Yarn
-release. No upstream file, source or configuration was edited or removed.
 
-- Lock: 96,291 bytes; SHA-256 `1d757201762d9525bed90f1ce55fed9f38ee99af895876674020d3cf87823abd`.
-- Yarn release: 2,742,928 bytes; SHA-256 `1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef`.
-- Needed executable graph: **FAIL / unprovided**. Current profile lacks required
-  Redux packages, including `@reduxjs/toolkit` and `react-redux`; normalization and
-  runtime admission correctly refuse. Parsing is not application acceptance.
+The `react18-vite5-redux-msw-v1` operator profile provides the exact reachable
+browser/build graph with npm SRI, frozen dependency edges, and peer validation.
+Static source reachability includes `@reduxjs/toolkit`, `@mswjs/data`, MSW,
+faker, date-fns, mock-socket, React, React DOM, and React Router. Declared packages
+that are not reachable from the admitted browser/build path, including
+`react-redux`, are not provisioned merely because they are present in the root
+manifest. The exact unchanged application admits and builds.
 
-Only exact `.yarn/releases/yarn-X.Y.Z.cjs` paths receive the 4 MiB inert member
-limit. Ordinary files retain 2 MiB; uploads retain 25 MiB, total inflated bytes
-40 MiB, 2,000 entries and 100:1 compression ratio. CRC/size/path/symlink checks
-remain. Generic `.yarn` tooling and PnP loaders, including small uploaded plugins,
-are refused in Blob/HTTP preview and independent export compilation. Static Vite
-plugin loading and source symlinks cannot bypass the boundary. ZIP export stores
-bytes only; WebCanBe does not run the exported project's package manager.
+### Bulletproof
 
-## Bun binary and exact remaining requirements
+Frozen application: `alan2207/bulletproof-react` at
+`9506629ed003a561c6627735480cce4994244bb4e`.
 
-The retained ledger explicitly requires the Todo binary lock: 262,443 bytes,
-SHA-256 `4a6802815bb395350e14d4bd5d2162157bc2a21de755ca72c82a09dc8808c143`, from
-`tuanductran/todo-list-react` commit `f48aef130c31452341450adfb6c3fc2234b79389`.
-Its opaque-byte round trip and runtime refusal pass. Binary graph support **FAILS**.
+The deterministic application root is `apps/react-vite`. Generic nested-root
+selection remains confined to imported archive paths, prefers a supported archive
+root, accepts exactly one supported nested root, and rejects ambiguity. Compilation
+uses the selected application root while export preserves the entire archive and
+canonical paths unchanged.
 
-The [Bun binary serializer](https://github.com/oven-sh/bun/blob/bun-v1.2.0/src/install/lockfile.zig)
-uses versioned package structures, typed buffer offsets, alignment and additional
-workspace/override/patch sections. A header check is insufficient to establish
-those graph semantics. No exact decoder or isolated trusted inspector was proven
-within this bounded task; implementation stopped without executing Bun.
+The `react18-vite5-tailwind3-query-radix-v1` profile provides the exact reachable
+browser graph plus the finite trusted Tailwind 3/PostCSS build closure. Storybook,
+Playwright, test, lint, and server packages are excluded because static source and
+configuration analysis does not reach them. The exact unchanged application
+admits, builds, and exports from `apps/react-vite`.
 
-Remaining P05 blockers:
+### Todo
 
-1. Verified Bun binary decoder or trusted isolated metadata-only boundary.
-2. Exact retained Redux/Bulletproof/Todo operator-owned version, integrity and
-   package graphs, including any required graph-specific adapters. Redux was
-   freshly checked; Bulletproof/Todo graph gaps remain as retained in the ledger,
-   without rerunning the common-app corpus or waiving their requirements.
+Frozen application: `tuanductran/todo-list-react` at
+`f48aef130c31452341450adfb6c3fc2234b79389`.
 
-Bun cannot honestly be reported as the sole blocker. P05 remains PARTIAL.
+The binary lock decodes and matches the manifest. Strict graph admission then
+finds one exact upstream incompatibility: `@julr/unocss-preset-forms@1.0.0`
+declares peer `unocss: ^0.31.0 || ^65.0.0`, while the frozen lock resolves
+`unocss@66.0.0`. Trusted metadata and npm SRI confirm both identities. The peer
+range does not admit 66.0.0, so Todo remains refused. The preinstall command
+`npx only-allow bun` is never run. No legacy-peer or relaxed admission path was
+introduced.
 
-## Targeted validation and changed-path security review
+## Targeted validation
 
-**76 distinct targeted passes, 0 failures, 0 P05 skips.** TypeScript compile passed
-(`tsc --noEmit --pretty false`). The 35 unrelated tests in the alias test file were
-excluded by name filter. The full 646+ regression is deferred to final Phase-2
-closure. All 40 existing test files remain byte-identical to the starting feature
-HEAD; all prior test identities are retained. Three test files imported from the
-parallel branch preserve their test names while strengthening fixtures/assertions.
+The newly and directly affected set passes **49/49 tests in 7 files**, with zero
+failures. It covers Bun exact/malformed decoding, the exact Todo lock, exact Redux
+admission/build, exact Bulletproof root/admission/build/export, nested-root
+ambiguity, P05 boundaries, inert tooling, alternate-lock behavior, and directly
+affected CSS/runtime compatibility. TypeScript passes with `tsc --noEmit`.
 
-Tests cover Berry identity/checksum/alias/peer mismatch, conditional omissions,
-patch trust, unsupported protocols, the real frozen inputs, byte-exact round trips,
-ordinary/inert/archive/aggregate/entry limits, compression bombs, traversal,
-symlinks, plugin/PnP imports, preview/export refusal and existing alternate-lock
-and npm-alias admission behavior. See [targeted receipt](phase2-p05-evidence/targeted-tests.json).
+The previously established 76 P05 passes were not rerun broadly. The full 646+
+regression remains deferred to final Phase-2 closure. No prior test identity was
+removed or modified.
 
-One intermediate imported test failed before reaching its assertion because
-macOS's temporary path was noncanonical. The fixture now uses `realpath`; its
-execution-refusal assertion passes. No production path-confinement check was weakened.
+## Changed-path security review
 
-Manual security review covered the five changed production files listed above
-and the direct `runtimeCompatibility.ts` consumer. Corrected descriptor/locator
-confusion, virtual location overwrite, patch byte substitution, optional/required
-peer overlap and tooling import gaps. Cache identities are case-sensitive.
-No new network/process/package-install path exists. Confirmed unresolved
-vulnerabilities in changed paths: **0**. This is a scoped manual review, not a
-claim of exhaustive security or application acceptance.
+Reviewed `bunBinaryLock.ts`, `alternateLockfiles.ts`, `runtimeCompatibility.ts`,
+`projectRegistry.ts`, `projectExport.ts`, `intakeMetadata.ts`, `isolatedPreview.ts`,
+`staticCss.ts`, and their new direct tests/profiles. The review covered malformed
+binary offsets and lengths, overflow, resource exhaustion, protocol acceptance,
+path/workspace escape, dependency and integrity substitution, peer mismatch,
+package-manager/config/plugin execution, host fallback, nested-root ambiguity, and
+source/export mutation.
+
+All binary tables and strings are bounded before access. Lock resolution is limited
+to the statically required closure and cannot expose inert unrelated records.
+Nested roots and resolved profile modules must remain beneath their respective
+confined roots. Uploaded tooling remains inert archive data. Confirmed unresolved
+vulnerabilities in the changed surfaces: **0**.
+
+## Remaining P05 blocker
+
+Exact Todo graph peer mismatch only:
+`@julr/unocss-preset-forms@1.0.0` requires
+`unocss ^0.31.0 || ^65.0.0`, but the frozen lock selects `unocss@66.0.0`.
+P05 therefore remains PARTIAL under strict admission.

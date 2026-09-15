@@ -6,7 +6,8 @@ import { archiveMemberLimit } from "./intakeMetadata"
 
 export async function exportProjectZip(project: ProjectRecord): Promise<Buffer> {
   const zip = new ZipFile()
-  const root = fs.realpathSync(project.root)
+  const root = fs.realpathSync(project.archiveRoot ?? project.root)
+  if (!isWithin(root, fs.realpathSync(project.root))) throw new Error("Registered application root escaped its archive.")
   let total = 0, entries = 0
   const walk = (dir: string) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

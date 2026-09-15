@@ -1,4 +1,4 @@
-import { archiveMemberLimit, isInertToolingPath, isOpaqueBunLock, isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
+import { archiveMemberLimit, isInertToolingPath, isPackageManagerToolingPath, isOpaqueBunLock, isExampleEnvironment, isInertMetadata, validateIntakeMetadata } from "./intakeMetadata"
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
@@ -32,6 +32,8 @@ export type FrameworkDetection = {
 export type ProjectRecord = {
   id: string
   name: string
+  /** Original extracted archive root. Compilation remains confined to root. */
+  archiveRoot?: string
   root: string
   sourceRoot: string
   imported: boolean
@@ -73,7 +75,7 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
         if (seen.has(key) || [...seen].some(([other, dir]) => key.startsWith(other + "/") && !dir || other.startsWith(key + "/") && !directory)) return fail(new Error("Duplicate or conflicting ZIP path."))
         seen.set(key, directory)
         if (directory) { zip.readEntry(); return }
-        if (path.posix.basename(name)!=="bun.lockb" && !isInertMetadata(path.posix.basename(name)) && !/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock|hbs)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
+        if (path.posix.basename(name)!=="bun.lockb" && !isInertMetadata(path.posix.basename(name)) && !isPackageManagerToolingPath(name) && !/\.(tsx?|jsx?|css|json|html|md|txt|svg|png|jpe?g|gif|webp|ico|woff2?|mjs|cjs|mts|cts|yaml|yml|lock|hbs)$/i.test(name) && !/(^|\/)(LICENSE|_gitignore|\.gitignore|\.env.example)$/.test(name)) return fail(new Error("Unsupported archive file type."))
         zip.openReadStream(entry, async (streamError, stream) => {
           if (streamError || !stream) return fail(streamError ?? new Error("Invalid ZIP stream."))
           try {
@@ -113,8 +115,26 @@ function packageAt(root: string) {
   try { return JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")) as { name?: string; dependencies?: Record<string, string>; devDependencies?: Record<string, string> } } catch { return undefined }
 }
 
-function projectRootFromArchive(root: string) {
-  if (packageAt(root)) return root
+function projectRootFromArchive(root: string, dependencyRoot: string) {
+  const top = packageAt(root)
+  if (top && detectProject(root, dependencyRoot).supported) return root
+  const candidates: string[] = []
+  let visited = 0
+  const walk = (directory: string, depth: number) => {
+    if (depth > 4) return
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (++visited > ZIP_LIMITS.entries) throw Error("Nested application-root search bound exceeded.")
+      if (!entry.isDirectory() || entry.name.startsWith(".") || ["node_modules", "dist", "build"].includes(entry.name)) continue
+      const nested = path.join(directory, entry.name)
+      if (!isWithin(root, nested)) throw Error("Nested application root escaped its archive.")
+      if (packageAt(nested) && detectProject(nested, dependencyRoot).supported) candidates.push(nested)
+      walk(nested, depth + 1)
+    }
+  }
+  walk(root, 1)
+  if (candidates.length > 1) throw Error("Archive contains multiple supported application roots.")
+  if (candidates.length === 1) return candidates[0]
+  if (top) return root
   const entries = fs.readdirSync(root, { withFileTypes: true }).filter((entry) => entry.name !== ".upload.zip")
   if (entries.length === 1 && entries[0].isDirectory()) {
     const nested = path.join(root, entries[0].name)
@@ -173,7 +193,7 @@ export class ProjectRegistry {
       if (!/^[a-f0-9-]{36}$/.test(id)) continue
       const directory = path.join(this.importedRoot, id)
       if (!fs.lstatSync(directory).isDirectory()) continue
-      const root = fs.realpathSync(projectRootFromArchive(directory)), detection = detectProject(root, applicationRoot)
+      const root = fs.realpathSync(projectRootFromArchive(directory, applicationRoot)), detection = detectProject(root, applicationRoot)
       const historyFile = path.join(applicationRoot, '.webcanbe', 'history', id, 'history.json')
       let canonicalDirectory = detection.sourceDirectory ?? 'src'
       if (fs.existsSync(historyFile)) {
@@ -181,7 +201,7 @@ export class ProjectRegistry {
         canonicalDirectory = JSON.parse(fs.readFileSync(historyFile, 'utf8')).sourceDirectory ?? 'src'
         if (typeof canonicalDirectory !== 'string' || safeArchivePath(canonicalDirectory) !== canonicalDirectory) throw Error('Invalid persisted source canonicalDirectory.')
       }
-      if (detection.supported || fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", id, "pending.json"))) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", root, sourceRoot: path.join(root, canonicalDirectory), imported: true, detection, history: new MutationHistory() })
+      if (detection.supported || fs.existsSync(path.join(applicationRoot, ".webcanbe", "history", id, "pending.json"))) this.projects.set(id, { id, name: packageAt(root)?.name ?? "Imported project", archiveRoot: fs.realpathSync(directory), root, sourceRoot: path.join(root, canonicalDirectory), imported: true, detection, history: new MutationHistory() })
     }
     // Recover interrupted source writes before sessions or compilation can start.
     for (const project of this.projects.values()) {
@@ -210,7 +230,7 @@ export class ProjectRegistry {
   }
 
   get(id: string) { return this.projects.get(id) }
-  list() { return [...this.projects.values()].map(({ history: _history, root: _root, sourceRoot: _sourceRoot, ...project }) => project) }
+  list() { return [...this.projects.values()].map(({ history: _history, archiveRoot: _archiveRoot, root: _root, sourceRoot: _sourceRoot, ...project }) => project) }
 
   async importZip(name: string, archive: Buffer) {
     if (fs.readdirSync(this.importedRoot).length >= 20) throw new Error("Local import storage limit reached (20 projects).")
@@ -218,11 +238,11 @@ export class ProjectRegistry {
     const destination = path.join(this.importedRoot, id)
     try {
       await extractSafeZip(archive, destination)
-      const root = fs.realpathSync(projectRootFromArchive(destination))
+      const root = fs.realpathSync(projectRootFromArchive(destination, this.applicationRoot))
       const detection = detectProject(root, this.applicationRoot)
       const sourceRoot = path.join(root, detection.sourceDirectory ?? "src")
       if (!detection.supported || !fs.existsSync(sourceRoot)) throw new Error(detection.reason ?? "Project is not supported.")
-      const record: ProjectRecord = { id, name: name.replace(/\.zip$/i, "") || "Imported project", root, sourceRoot, imported: true, detection, history: new MutationHistory() }
+      const record: ProjectRecord = { id, name: name.replace(/\.zip$/i, "") || "Imported project", archiveRoot: fs.realpathSync(destination), root, sourceRoot, imported: true, detection, history: new MutationHistory() }
       this.projects.set(id, record)
       return record
     } catch (error) {
