@@ -143,7 +143,10 @@ export function parseYarnBerry(source:string):AlternateLock{
     if(indent===4&&group){
       const {key,value}=yamlPair(line)
       if(group!=='bin'&&!packageName.test(key))throw Error('Invalid Yarn Berry package key.')
-      if(group==='bin'&&(key.length>128||value===undefined||typeof value!=='string'||value.length>512||value.startsWith('/')||value.includes('\\')||value.split('/').some(p=>!p||p==='.'||p==='..')))throw Error('Invalid inert Yarn bin metadata.')
+      if(group==='bin'){
+        const binPath=typeof value==='string'?value.replace(/^\.\//,''):''
+        if(key.length>128||typeof value!=='string'||value.length>512||!binPath||binPath.startsWith('/')||binPath.includes('\\')||binPath.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Invalid inert Yarn bin metadata.')
+      }
       if(['dependenciesMeta','peerDependenciesMeta'].includes(group)){
         if(value!==undefined||Object.prototype.hasOwnProperty.call(current[group],key))throw Error('Invalid Yarn Berry dependency metadata.');current[group][key]=Object.create(null);subgroup=key;continue
       }
