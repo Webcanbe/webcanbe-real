@@ -11,15 +11,21 @@ import { builtinModules } from "node:module"
 import ts from "typescript"
 import semver from "semver"
 import { parse as parseJsonc, type ParseError } from "jsonc-parser"
-import { inspectCssPlan, validateFiniteCss, type CssPlan } from "./staticCss"
+import { cssData, inspectCssPlan, UNO_FORMS_V1_MARKER, UNO_V65_MARKER, UNO_V66_MARKER, validateFiniteCss, type CssPlan } from "./staticCss"
 import { staticHtml } from "./htmlConfiguration"
 import { isWithin, safeArchivePath, type ProjectRecord } from "./projectRegistry"
 
 export const PROFILE = "react19-vite6"
-export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-redux-msw-v1", "react18-vite5-tailwind3-query-radix-v1", "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1", "react18-vite5-css-v1", "react19-vite6-uno-v1", "react19-vite6-uno65-v1"] as const
+export const RUNTIME_PROFILES = [PROFILE, "react18-vite5-redux-msw-v1", "react18-vite5-tailwind3-query-radix-v1", "react18-vite5-v1", "react19-vite8-v1", "react18-vite4-three-v1", "react18-vite6-common-v1", "react19-vite7-common-v1", "react19-vite7.1-v1", "react18-vite5-css-v1", "react19-vite6-uno-v1", "react19-vite6-uno65-v1", "react19-vite6-uno66-forms-v1"] as const
 export const clientPackages = new Set(["react", "react-dom", "react-router-dom", "react-router", "clsx", "classnames", "zustand", "nanoid", "@react-three/drei", "@react-three/fiber", "@react-three/postprocessing", "three", "postprocessing", "meshline", "prism-react-renderer", "prismjs", "lucide-react", "@tippyjs/react", "immer", "use-immer", "@faker-js/faker", "@mswjs/data", "@reduxjs/toolkit", "date-fns", "mock-socket", "msw", "react-redux", "react-tiny-toast", "@hookform/resolvers", "@ngneat/falso", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-icons", "@radix-ui/react-label", "@radix-ui/react-slot", "@radix-ui/react-switch", "@tanstack/react-query", "@tanstack/react-query-devtools", "axios", "class-variance-authority", "dayjs", "dompurify", "js-cookie", "marked", "react-error-boundary", "react-helmet-async", "react-hook-form", "react-query-auth", "tailwind-merge", "zod", "@unocss/reset", "sonner", "swr", "uuid"])
 export type ConfigurationClass = "statically-supported" | "safely-translated" | "requires-isolated-execution" | "unsupported" | "preserved-not-applied"
 export type ConfigurationSupport = { file: string; classification: ConfigurationClass; detail: string }
+const STATIC_VITE_MARKERS = Object.freeze({
+  '@vitejs/plugin-react': {
+    version: '4.3.4',
+    integrity: 'sha512-SCCPBJtYLdE8PX/7ZQAs1QAZ8Jqwih+0VBLum1EGqmCCQal+MIUqLCzj3ZUy8ufbC0cAM4LRlSTm7IQJwWT4ug==',
+  },
+})
 function packageRoot(specifier:string){return specifier.startsWith('@')?specifier.split('/').slice(0,2).join('/'):specifier.split('/')[0]}
 function executablePackageRoots(project:ProjectRecord,manifest:any){
   const root=project.root,declared={...manifest.devDependencies,...manifest.dependencies},config=staticViteConfig(root,declared),aliases={...config.aliases},entry=htmlEntry(root,config.publicDir,config.runtimeRoot)??project.detection.entry
@@ -46,16 +52,17 @@ function executablePackageRoots(project:ProjectRecord,manifest:any){
     const code=fs.readFileSync(confinedFile(root,file),'utf8')
     if(file.endsWith('.css')){for(const match of code.matchAll(/@import\s+(?:url\()?\s*["']([^"']+)["']/g)){const specifier=match[1];if(specifier.startsWith('.')||specifier.startsWith('/'))pending.push(local(file,specifier));else packages.add(packageRoot(specifier))}continue}
     if(!/\.(?:[cm]?[jt]sx?|json)$/.test(file))continue
-    const source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true),add=(specifier:string)=>{if(specifier.startsWith('.')||specifier.startsWith('/')||Object.keys(aliases).some(key=>specifier===key||specifier.startsWith(key+'/')))pending.push(local(file,specifier));else if(specifier!=='virtual:uno.css'&&!specifier.startsWith('data:')&&!specifier.startsWith('node:')&&!builtinModules.includes(packageRoot(specifier)))packages.add(packageRoot(specifier))}
+    const source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true),add=(specifier:string)=>{if(specifier.startsWith('.')||specifier.startsWith('/')||Object.keys(aliases).some(key=>specifier===key||specifier.startsWith(key+'/')))pending.push(local(file,specifier));else if(!['virtual:uno.css','uno.css'].includes(specifier)&&!specifier.startsWith('data:')&&!specifier.startsWith('node:')&&!builtinModules.includes(packageRoot(specifier)))packages.add(packageRoot(specifier))}
     const visit=(node:ts.Node)=>{if(ts.isImportDeclaration(node)&&!node.importClause?.isTypeOnly&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isExportDeclaration(node)&&!node.isTypeOnly&&node.moduleSpecifier&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword&&node.arguments.length===1&&ts.isStringLiteral(node.arguments[0]))add(node.arguments[0].text);ts.forEachChild(node,visit)};visit(source)
   }
   const names=fs.readdirSync(root),cssConfigs=names.filter(name=>/^(?:tailwind|postcss|uno)\.config\.[cm]?[jt]s$/.test(name))
   for(const file of cssConfigs){
     const prefix=file.slice(0,file.indexOf('.')),code=fs.readFileSync(confinedFile(root,file),'utf8'),source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true)
-    const add=(specifier:string)=>{const name=packageRoot(specifier);if(Object.prototype.hasOwnProperty.call(declared,name))packages.add(name)}
+    const config=prefix==='uno'?cssData(code,'unocss'):undefined
+    const fixedForms=Boolean(config?.presets?.some((preset:any)=>preset.adapter==='presetForms'&&Object.keys(preset.options??{}).length===0))
+    const add=(specifier:string)=>{const name=packageRoot(specifier);if(name===UNO_V66_MARKER.name&&prefix==='uno'&&config||name===UNO_FORMS_V1_MARKER.name&&fixedForms)return;if(Object.prototype.hasOwnProperty.call(declared,name))packages.add(name)}
     const visit=(node:ts.Node)=>{if(ts.isImportDeclaration(node)&&!node.importClause?.isTypeOnly&&ts.isStringLiteral(node.moduleSpecifier))add(node.moduleSpecifier.text);if(ts.isCallExpression(node)&&ts.isIdentifier(node.expression)&&node.expression.text==='require'&&node.arguments.length===1&&ts.isStringLiteral(node.arguments[0]))add(node.arguments[0].text);ts.forEachChild(node,visit)};visit(source)
     if(prefix==='tailwind'&&declared.tailwindcss)packages.add('tailwindcss')
-    if(prefix==='uno'&&declared.unocss)packages.add('unocss')
     if(prefix==='postcss')for(const name of ['postcss','tailwindcss','autoprefixer'])if(declared[name])packages.add(name)
   }
   return packages
@@ -70,7 +77,8 @@ function selectProfile(project: ProjectRecord, applicationRoot: string, required
     const alternate=!lock && fs.existsSync(path.join(project.root,"yarn.lock"))?parseYarnClassic(fs.readFileSync(confinedFile(project.root,"yarn.lock"),"utf8"),needed):!lock&&fs.existsSync(path.join(project.root,"bun.lock"))?parseBunText(fs.readFileSync(confinedFile(project.root,"bun.lock"),"utf8")):!lock&&fs.existsSync(path.join(project.root,"bun.lockb"))?parseBunBinary(fs.readFileSync(confinedFile(project.root,"bun.lockb"))):undefined
     const lockedVersion=(name:string)=>lock?.packages?.["node_modules/"+name]?.version??alternate?.resolve(name,String(declared[name]))?.version
     const candidates = RUNTIME_PROFILES.map(id => ({ id, profile: JSON.parse(fs.readFileSync(path.join(applicationRoot, "runtime-profiles", id, "package.json"), "utf8")) })).filter(({ profile }) =>
-      ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return matches(name,range,profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name])) }))
+      ["react", "react-dom", "vite"].every(name => { const range = declared[name]; return matches(name,range,profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name])) }) &&
+      (!declared.unocss || matches('unocss',declared.unocss,profile.webcanbe?.unoCompiler??profile.dependencies.unocss) && (!lock&&!alternate||lockedVersion('unocss')===version('unocss',profile.webcanbe?.unoCompiler??profile.dependencies.unocss))))
     return candidates.find(({ profile }) => [...required].every(name => matches(name,declared[name],profile.dependencies[name]) && (!lock && !alternate || lockedVersion(name) === version(name,profile.dependencies[name]))))?.id ?? candidates[0]?.id ?? PROFILE
   } catch { return PROFILE }
 }
@@ -108,7 +116,7 @@ function json(root: string, file: string, comments = false): any {
 export function htmlEntry(root: string, publicDir?:string|false,runtimeRoot='.') { return staticHtml(root,publicDir,runtimeRoot)?.entry }
 
 /** Interpret only a fixed AST grammar; never import/eval the Vite module. */
-export function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string; runtimeRoot?:string; exportBuild?:FiniteBuildPlan; publicDir?: string | false; tsconfigPaths?: boolean; preserved?: string[] } {
+export function staticViteConfig(root: string, declared: Record<string, unknown>): { aliases: Record<string, string>; base: string; runtimeRoot?:string; exportBuild?:FiniteBuildPlan; publicDir?: string | false; tsconfigPaths?: boolean; preserved?: string[]; staticMarkers?: string[] } {
   const files = ["vite.config.ts", "vite.config.js", "vite.config.mts", "vite.config.mjs", "vite.config.cts", "vite.config.cjs"].filter(file => fs.existsSync(path.join(root, file)))
   if (files.length > 1) throw new Error("Multiple Vite configurations are ambiguous.")
   if (!files.length) return { aliases: {}, base: "/" }
@@ -245,7 +253,7 @@ export function staticViteConfig(root: string, declared: Record<string, unknown>
       aliases[key] = path.relative(root, confinedFile(root, path.relative(root, replacement))).split(path.sep).join("/")
     }
   }
-  return { aliases, base: config.base ?? "/", runtimeRoot, exportBuild, publicDir, tsconfigPaths:(config.plugins??[]).some((p:any)=>p.plugin==="vite-tsconfig-paths"), preserved }
+  return { aliases, base: config.base ?? "/", runtimeRoot, exportBuild, publicDir, tsconfigPaths:(config.plugins??[]).some((p:any)=>p.plugin==="vite-tsconfig-paths"), preserved, staticMarkers:(config.plugins??[]).map((p:any)=>p.plugin).filter((name:string)=>Object.prototype.hasOwnProperty.call(STATIC_VITE_MARKERS,name)) }
 }
 
 export function inspectRuntime(project: ProjectRecord, applicationRoot: string, runtimeValues: Record<string,string> = {}): RuntimeReport {
@@ -266,15 +274,16 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     for (const name of ["react", "react-dom", "vite"]) if (!declared[name]) issue("missing-dependency", `Missing required declared dependency: ${name}.`)
     for (const name of Object.keys(manifest.dependencies ?? {})) if (manifest.devDependencies?.[name] && manifest.devDependencies[name] !== manifest.dependencies[name]) issue("dependency-conflict", `Conflicting declarations for ${name}.`)
     const lockNames = ["package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "bun.lockb"].filter(file => fs.existsSync(path.join(root, file)))
-    let lock: any, lockDescription="npm lockfile"
+    let lock: any, sourceLock:any, alternateLock:any, lockDescription="npm lockfile"
     if (lockNames.length > 1 || lockNames.length === 1 && !["package-lock.json","yarn.lock","bun.lock","bun.lockb"].includes(lockNames[0])) issue("unsupported-lockfile", "Only one supported npm, finite Yarn classic/Berry v8, or Bun text/binary lock is permitted.")
     if (lockNames.includes("package-lock.json")) {
       lock = json(root, "package-lock.json")
+      sourceLock=lock
       if (![2, 3].includes(lock.lockfileVersion) || !object(lock.packages) || !object(lock.packages[""])) { issue("unsupported-lockfile", "npm package-lock v2/v3 with package records is required."); lock = undefined }
     }
     if(lockNames.length===1 && ["yarn.lock","bun.lock","bun.lockb"].includes(lockNames[0])) {
       let alternate
-      try { const bytes=fs.readFileSync(confinedFile(root,lockNames[0])),needed=Object.fromEntries([...new Set([...required,'react','react-dom','vite'])].filter(name=>declared[name]!==undefined).map(name=>[name,String(declared[name])]));alternate=lockNames[0]==="yarn.lock"?parseYarnClassic(bytes.toString("utf8"),needed):lockNames[0]==="bun.lock"?parseBunText(bytes.toString("utf8")):parseBunBinary(bytes);lockDescription=alternate.format }
+      try { const bytes=fs.readFileSync(confinedFile(root,lockNames[0])),needed=Object.fromEntries([...new Set([...required,'react','react-dom','vite'])].filter(name=>declared[name]!==undefined).map(name=>[name,String(declared[name])]));alternate=lockNames[0]==="yarn.lock"?parseYarnClassic(bytes.toString("utf8"),needed):lockNames[0]==="bun.lock"?parseBunText(bytes.toString("utf8")):parseBunBinary(bytes);alternateLock=alternate;lockDescription=alternate.format }
       catch(error){issue("unsupported-lockfile",(error as Error).message)}
       if(alternate)try{lock=normalizeAlternateLock(alternate,manifest,profileLock,required)}catch(error){issue("lock-conflict",(error as Error).message)}
     }
@@ -334,14 +343,14 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       }
     }
     if (lock) {
-      const checked = new Set<string>(), pending = Object.keys(declared).filter(clientRoot)
+      const checked = new Set<string>(), pending = Object.keys(declared).filter(clientRoot).map(name=>'node_modules/'+name)
       while (pending.length) {
-        const name = pending.pop()!
-        if (checked.has(name)) continue
-        checked.add(name)
-        const selected = profileLock.packages[`node_modules/${name}`], locked = lock.packages[`node_modules/${name}`]
-        if (!selected || !locked || locked.version !== selected.version || locked.integrity !== selected.integrity || locked.link) issue("lock-conflict", `Required client dependency ${name} is missing or differs in the uploaded lock.`)
-        for (const dependency of Object.keys(selected?.dependencies ?? {})) pending.push(dependency)
+        const location = pending.pop()!
+        if (checked.has(location)) continue
+        checked.add(location)
+        const selected = profileLock.packages[location], locked = lock.packages[location]
+        if (!selected || !locked || locked.version !== selected.version || locked.integrity !== selected.integrity || locked.link) issue("lock-conflict", `Required client dependency ${location} is missing or differs in the uploaded lock.`)
+        for (const dependency of Object.keys(selected?.dependencies ?? {})) pending.push(nestedDependency(location,dependency))
       }
     }
     report.notes.push(lock && lockDescription === "yarn-berry-v8" ? "Berry descriptors, locators, versions and dependency/peer graph checked against the operator-owned profile. Berry cache checksums remain unverified cache metadata; executable package integrity comes from the operator-owned profile." : lock ? "Versions, integrity and required dependency/peer graph checked against the "+lockDescription+"." : lockNames.length ? "The uploaded lockfile is unsupported; it is preserved and runtime admission is refused." : "No lockfile: disclosed pinned profile versions must satisfy every declared range.")
@@ -385,6 +394,16 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
           const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), options.baseUrl??".", replacements[0].slice(0, -2).replace(/^\.\//, ""))), alias = key.slice(0, -2)
           confinedFile(root, target)
           if(tsconfigPaths && report.aliases[alias]===undefined) { if(!/^[@~][\w/-]*$/.test(alias))throw Error("Unsupported TypeScript plugin alias.");report.aliases[alias]=target }
+          if(report.aliases[alias]===undefined&&options.moduleResolution==='bundler'&&options.baseUrl==='.'){
+            let used=false,count=0
+            for(const entry of fs.readdirSync(project.sourceRoot,{recursive:true})){
+              if(typeof entry!=='string'||!/\.[cm]?[jt]sx?$/.test(entry))continue
+              if(++count>2000)throw Error('TypeScript alias analysis bound.')
+              const source=ts.createSourceFile(entry,fs.readFileSync(path.join(project.sourceRoot,entry),'utf8'),ts.ScriptTarget.Latest,true)
+              const visit=(node:ts.Node)=>{const specifier=ts.isImportDeclaration(node)||ts.isExportDeclaration(node)?node.moduleSpecifier:ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword?node.arguments[0]:undefined;if(specifier&&ts.isStringLiteral(specifier)&&(specifier.text===alias||specifier.text.startsWith(alias+'/')))used=true;ts.forEachChild(node,visit)};visit(source)
+            }
+            if(!used)continue
+          }
           if (report.aliases[alias] !== target) throw new Error(`TypeScript alias ${alias} must match an explicit static Vite alias.`)
         }
       }
@@ -392,7 +411,22 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
     }
     try { for (const file of ["tsconfig.json", "jsconfig.json"]) if (fs.existsSync(path.join(root, file))) readTsconfig(file)
       for (const file of configs) report.configuration.push({ file, classification: "statically-supported", detail: "Client transpilation and matching explicit aliases; semantic type checking is an independent export gate." }) } catch (error) { issue("tsconfig", (error as Error).message) }
-    try { report.cssPlan=inspectCssPlan(root,declared,selectedProfile); for(const file of report.cssPlan?.files??[])report.configuration.push({file,classification:"safely-translated",detail:"Finite static CSS data through the operator-pinned "+report.cssPlan!.kind+" adapter; uploaded configuration is never executed."}) } catch(error) { issue("css-config",(error as Error).message) }
+    try {
+      report.cssPlan=inspectCssPlan(root,declared,selectedProfile)
+      const marker=(attestation:{name:string;version:string;integrity:string})=>{
+        let requested:ReturnType<typeof npmDescriptor>|undefined,record:any
+        try{requested=npmDescriptor(attestation.name,declared[attestation.name]);record=alternateLock?.resolve(attestation.name,String(declared[attestation.name]))??sourceLock?.packages?.['node_modules/'+attestation.name]}catch{/* reported below */}
+        return requested?.name===attestation.name&&semver.satisfies(attestation.version,requested.range)&&(record?.name===undefined||record.name===attestation.name)&&record?.version===attestation.version&&record?.integrity===attestation.integrity
+      }
+      const unoCompiler=profile.webcanbe?.unoCompiler??profile.dependencies.unocss
+      const unoMarker=unoCompiler===UNO_V66_MARKER.version?UNO_V66_MARKER:unoCompiler===UNO_V65_MARKER.version?UNO_V65_MARKER:undefined
+      if(report.cssPlan?.kind==='unocss'&&(!unoMarker||!marker(unoMarker)&&!(lockNames.length===0&&npmDescriptor(unoMarker.name,declared[unoMarker.name]).name===unoMarker.name&&semver.satisfies(unoMarker.version,npmDescriptor(unoMarker.name,declared[unoMarker.name]).range))))issue('css-config',`The finite Uno compiler requires an exact unocss@${unoCompiler??'supported'} marker.`)
+      if(report.cssPlan?.config.presets?.some((preset:any)=>preset.adapter==='presetForms')){
+        if(!marker(UNO_FORMS_V1_MARKER))issue('css-config','The fixed forms adapter requires an exact lock-attested @julr/unocss-preset-forms@1.0.0 marker.')
+        else report.notes.push('The exact @julr/unocss-preset-forms@1.0.0 lock record is a configuration marker only; fixed operator-owned rules run under UnoCSS 66 and the third-party package is never executed.')
+      }
+      for(const file of report.cssPlan?.files??[])report.configuration.push({file,classification:"safely-translated",detail:"Finite static CSS data through the operator-pinned "+report.cssPlan!.kind+" adapter; uploaded configuration is never executed."})
+    } catch(error) { issue("css-config",(error as Error).message) }
     const cssConfigs = fs.readdirSync(root).filter(file => /^(?:tailwind|postcss)\.config\.(?:[cm]?[jt]s|json)$/.test(file) || /^\.postcssrc(?:\.|$)/.test(file))
     if (manifest.postcss) cssConfigs.push("package.json#postcss")
     for (const file of cssConfigs) {

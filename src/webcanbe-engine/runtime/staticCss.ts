@@ -8,6 +8,21 @@ import { CSS_WORKER_SOURCE } from './cssWorkerSource'
 import { isWithin, safeArchivePath } from './projectRegistry'
 
 export type CssPlan = { kind: 'tailwind3' | 'unocss'; files: string[]; config: Record<string, any>; autoprefixer?: Record<string, any> }
+export const UNO_FORMS_V1_MARKER = Object.freeze({
+  name: '@julr/unocss-preset-forms',
+  version: '1.0.0',
+  integrity: 'sha512-A0Q40kazPG7CblrXyMNMBYpOPyUncmNTS+65XzaCCEZ8r5v+W5qEp+cI0SKG/XwCsw0aE8zeaB3IvETJLGkWgw==',
+})
+export const UNO_V66_MARKER = Object.freeze({
+  name: 'unocss',
+  version: '66.0.0',
+  integrity: 'sha512-SHstiv1s7zGPSjzOsADzlwRhQM+6817+OqQE3Fv+N/nn2QLNx1bi3WXybFfz5tWkzBtyTZlwdPmeecsIs1yOCA==',
+})
+export const UNO_V65_MARKER = Object.freeze({
+  name: 'unocss',
+  version: '65.5.0',
+  integrity: 'sha512-dLTW89YK+5KCcB3vG/wxiwdpejkLLmZlK9hjWmP52sdeUFcmywc+/khD2/nid7or8dL3YCv1gwoyvnA7JRCwjA==',
+})
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k)
 const object = (v: any) => v && typeof v === 'object' && !Array.isArray(v)
 const fail = (message: string): never => { throw Error(message) }
@@ -60,6 +75,7 @@ export function cssData(code: string, kind: 'tailwind3' | 'unocss' | 'postcss') 
       }
       if(binding==='unocss:defineConfig'&&kind==='unocss'&&node.arguments.length===1)return value(node.arguments[0])
       if(kind==='unocss'&&['unocss:presetUno','unocss:presetAttributify','@julr/unocss-preset-forms:presetForms','unocss:transformerDirectives','unocss:transformerVariantGroup'].includes(binding??'')&&node.arguments.length<=1) {
+        if(binding==='@julr/unocss-preset-forms:presetForms'&&node.arguments.length)fail('Only zero-argument presetForms() is supported by the fixed adapter.')
         const options=node.arguments.length?value(node.arguments[0]):{}
         if(!object(options)||Object.keys(options).some(k=>binding!=='unocss:presetUno'||k!=='dark')||options.dark!==undefined&&!['class','media'].includes(options.dark))fail('Unsupported Uno preset/transformer options.')
         return token(binding!.split(':')[1],options)
@@ -116,11 +132,11 @@ export function inspectCssPlan(root:string,declared:Record<string,any>,profile:s
   const names=fs.readdirSync(root), pick=(prefix:string)=>{const all=names.filter(n=>new RegExp('^'+prefix+'\\.config\\.[cm]?[jt]s$').test(n));if(all.length>1)fail('Ambiguous CSS configuration.');return all[0]}
   const tailwind=pick('tailwind'),post=pick('postcss'),uno=pick('uno'),kind=declared.unocss?'unocss':declared.tailwindcss&&['react18-vite5-css-v1','react18-vite5-tailwind3-query-radix-v1'].includes(profile)?'tailwind3':undefined
   if(!kind)return
-  if(kind==='unocss'&&!['react19-vite6-uno-v1','react19-vite6-uno65-v1'].includes(profile))fail('A pinned UnoCSS operator profile is required.')
+  if(kind==='unocss'&&!['react19-vite6-uno-v1','react19-vite6-uno65-v1','react19-vite6-uno66-forms-v1'].includes(profile))fail('A pinned UnoCSS operator profile is required.')
   if(kind==='unocss'&&(tailwind||post))fail('Combined UnoCSS/PostCSS configurations are unsupported.')
   const read=(name:string,k:'tailwind3'|'unocss'|'postcss')=>{const file=fs.realpathSync(path.join(root,name));if(!isWithin(root,file))fail('CSS configuration escaped its project.');return cssData(fs.readFileSync(file,'utf8'),k)}
   const config=(kind==='tailwind3'?tailwind:uno)?read((kind==='tailwind3'?tailwind:uno)!,kind):{}
-  if(config.presets?.some((p:any)=>p.adapter==='presetForms')&&(!declared['@julr/unocss-preset-forms']||profile!=='react19-vite6-uno65-v1'))fail('Forms requires the declared, peer-complete pinned Uno65/forms1 graph.')
+  if(config.presets?.some((p:any)=>p.adapter==='presetForms')&&(!declared[UNO_FORMS_V1_MARKER.name]||!['react19-vite6-uno-v1','react19-vite6-uno65-v1','react19-vite6-uno66-forms-v1'].includes(profile)))fail('Forms requires the declared forms1 marker and a supported pinned Uno compiler profile.')
   const postConfig=post?read(post,'postcss'):undefined
   if(kind==='tailwind3'&&postConfig&&!own(postConfig.plugins,'tailwindcss'))fail('Tailwind requires its declared PostCSS transformation.')
   for(const name of [...(config.plugins??[]).filter((p:any)=>typeof p==='string'),...(postConfig?Object.keys(postConfig.plugins):[])])if(!declared[name])fail('CSS adapter dependency must be declared: '+name)

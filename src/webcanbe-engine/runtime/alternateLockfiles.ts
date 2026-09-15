@@ -315,7 +315,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
     const berry=lock.format==='yarn-berry-v8',descriptor=berry?berryRequest(name,canonicalBerryRequest(name,requested),true):peerRequest?{name,range:finitePeerRange(requested)}:npmDescriptor(name,requested)
     const identity=descriptor.name,versionRange=descriptor.range
     const lockIdentity=berry?typeof actual?.berryChecksum==='string'&&typeof actual?.berryLocator==='string'&&sri(trusted?.integrity):actual?.integrity===trusted?.integrity&&sri(trusted?.integrity)
-    if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location)
+    if(!trusted||trusted.link||!actual||actual.name!==identity||(trusted.name??name)!==identity||actual.version!==trusted.version||!lockIdentity||!semver.satisfies(trusted.version,versionRange))throw Error('Locked graph does not match pinned identity/version/checksum: '+location+` from ${from||'root'} (lock ${actual?.version??'missing'}, profile ${trusted?.version??'missing'})`)
     // Uploaded cache hashes are labels, not evidence of npm tarball bytes. An
     // optional operator-owned Berry attestation binds the exact label/locator.
     if(berry && (trusted.berryChecksum!==undefined&&trusted.berryChecksum!==actual.berryChecksum || trusted.berryLocator!==undefined&&trusted.berryLocator!==actual.berryLocator))throw Error('Operator Berry checksum/locator mismatch.')
@@ -332,9 +332,18 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
       if(!(berry?equivalentDependencyMap(expected,received,true):JSON.stringify(Object.entries(expected).sort())===JSON.stringify(Object.entries(received).sort())))throw Error('Lock dependency edges differ from pinned metadata: '+location)
     }
     // Yarn classic does not encode peer metadata: the SRI-verified operator
-    // package metadata supplies it. Berry and Bun explicit peer data must agree.
-    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Lock peer metadata differs from pinned graph.')
-    if(lock.format!=='yarn-classic-v1'&&JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Lock optional-peer metadata differs from pinned graph.')
+    // package metadata supplies it. Bun omits unresolved optional peers, so its
+    // present peers and every required trusted peer must agree while absent
+    // operator-attested optional peers remain non-executable.
+    if(lock.format==='bun-text-v1'||lock.format==='bun-binary-v2'){
+      const trustedPeers=trusted.peerDependencies??{},actualPeers=actual.peerDependencies??{}
+      for(const [peer,range]of Object.entries(actualPeers))if(trustedPeers[peer]!==range)throw Error('Lock peer metadata differs from pinned graph: '+location)
+      for(const [peer,range]of Object.entries(trustedPeers))if(trusted.peerDependenciesMeta?.[peer]?.optional!==true&&actualPeers[peer]!==range)throw Error('Required lock peer metadata differs from pinned graph: '+location)
+      for(const peer of Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true))if(trusted.peerDependenciesMeta?.[peer]?.optional!==true)throw Error('Lock optional-peer metadata differs from pinned graph: '+location)
+    }else if(lock.format!=='yarn-classic-v1'){
+      if(JSON.stringify(Object.entries(trusted.peerDependencies??{}).sort())!==JSON.stringify(Object.entries(actual.peerDependencies??{}).sort()))throw Error('Lock peer metadata differs from pinned graph.')
+      if(JSON.stringify(Object.keys(trusted.peerDependenciesMeta??{}).filter(n=>trusted.peerDependenciesMeta[n]?.optional===true).sort())!==JSON.stringify(Object.keys(actual.peerDependenciesMeta??{}).filter(n=>actual.peerDependenciesMeta[n]?.optional===true).sort()))throw Error('Lock optional-peer metadata differs from pinned graph: '+location)
+    }
     if(berry){
       for(const dep of Object.keys({...trusted.dependencies,...trusted.optionalDependencies})){
         const request=String(actual.dependencies?.[dep]??actual.optionalDependencies?.[dep]),next=located(location,dep,request),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)
@@ -350,6 +359,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
       }
     }else for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
       const isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),next=located(location,dep,String(r),isPeer),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
+      if((lock.format==='bun-text-v1'||lock.format==='bun-binary-v2')&&isPeer&&optional&&(!Object.prototype.hasOwnProperty.call(actual.peerDependencies??{},dep)||actual.unresolvedOptionalPeers?.includes(dep)))continue
       if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
       visit(dep,String(r),next,location,isPeer)
     }

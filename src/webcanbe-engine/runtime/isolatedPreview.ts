@@ -111,7 +111,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
       builder.onResolve({ filter: /.*/ }, async args => {
         if (args.pluginData?.profileResolution) return
         if (productionExport && runtime.exportBuild?.external.includes(args.path)) return { path: args.path, external: true }
-        if(args.path==="virtual:uno.css"&&runtime.cssPlan?.kind==="unocss")return {path:"uno.css",namespace:"trusted-uno"}
+        if(["virtual:uno.css","uno.css"].includes(args.path)&&runtime.cssPlan?.kind==="unocss")return {path:"uno.css",namespace:"trusted-uno"}
         // Preserve CSS resource URLs as browser data; never fetch them in the
         // compiler. The controlled HTTP runner still denies all external egress.
         if (transport === "http" && args.importer.endsWith(".css") && ["url-token", "import-rule"].includes(args.kind)) {

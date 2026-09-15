@@ -18,6 +18,7 @@ function fixture(profile='react19-vite6-uno65-v1'){
  const manifest=JSON.parse(fs.readFileSync('runtime-profiles/'+profile+'/package.json','utf8'))
  const write=(file:string,code:string)=>{fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.writeFileSync(path.join(root,file),code)}
  write('package.json',JSON.stringify({dependencies:manifest.dependencies}));write('index.html','<div id="root"></div><script type="module" src="/src/main.jsx"></script>');write('src/main.jsx','import {createRoot} from "react-dom/client";createRoot(document.getElementById("root")).render(<h1>Edge</h1>)')
+ if(profile==='react19-vite6-uno65-v1')fs.copyFileSync('runtime-profiles/'+profile+'/package-lock.json',path.join(root,'package-lock.json'))
  const project=()=>({id:randomUUID(),name:'Edge fixture',root,sourceRoot:path.join(root,'src'),imported:true,detection:detectProject(root,process.cwd()),history:new MutationHistory()})
  return {root,write,manifest,project,profileRoot:path.resolve('runtime-profiles/'+profile)}
 }

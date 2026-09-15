@@ -1,22 +1,18 @@
 # P05 final narrow follow-up — 2026-09-16
 
-**P05 PARTIAL. Internal blockers: P05 / P39 / P61. Phase 2 internal closure: NO.**
+**P05 PASS. Internal blockers: P39 / P61. Phase 2 internal closure: NO.**
 
-- Internal Bun v1.1.42 format-2 decoder validates the exact 262,443-byte Todo
-  lock, bounded offsets/ranges/tables/strings, npm resolutions, SHA-512 integrity,
-  and dependency edges. Bun, project scripts, configs, and networking never run.
-- Exact frozen Redux admits and builds through the operator-owned
-  `react18-vite5-redux-msw-v1` reachable graph.
-- Generic confined nested-root selection chooses Bulletproof `apps/react-vite`,
-  rejects ambiguity, and preserves the full archive on export. Its exact reachable
-  browser/Tailwind 3 graph admits and builds.
-- Todo remains refused at one exact trusted-peer conflict:
-  `@julr/unocss-preset-forms@1.0.0` requires
-  `unocss ^0.31.0 || ^65.0.0`, while the frozen lock selects `unocss@66.0.0`.
-- Newly/directly affected validation: 49/49 passes in 7 files; TypeScript passes.
-  The prior 76 P05 passes were reused and the full 646+ regression remains deferred.
-  No prior test identity changed. Changed-path review found zero confirmed
-  unresolved vulnerabilities.
+- The exact `@julr/unocss-preset-forms@1.0.0` zero-argument behavior is a fixed
+  operator-owned rules/preflight adapter under the pinned UnoCSS 66.0.0 compiler.
+  The project package remains an exact lock-attested configuration marker and is
+  never executed; arbitrary arguments and substituted markers refuse.
+- Exact unchanged Todo now passes Bun decode, trusted graph and Uno admission,
+  representative forms CSS semantics, browser/export compilation, and byte-exact
+  source/export preservation. `npx only-allow bun` never runs.
+- Directly affected validation: 67/67 passes in 4 files; TypeScript passes. Prior
+  evidence was reused, full 646+ remains deferred, and no prior test identity was
+  removed or modified. Changed-path review found zero confirmed vulnerabilities.
+- Remaining P05 blockers: NONE. P39 and P61 remain unchanged.
 - Main unchanged; feature-only publication. No P39/P61 or later-phase work.
 
 See [P05 report](reports/phase2-p05-closure.md) and

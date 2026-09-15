@@ -123,7 +123,7 @@ export function parseBunBinary(bytes: Buffer): AlternateLock {
     const dependencySlice = slice(raw.dependencies, 26, buffers.dependencies.length / 26, `${name} dependencies`)
     const resolutionSlice = slice(raw.resolutions, 4, buffers.resolutions.length / 4, `${name} resolutions`)
     if (dependencySlice.offset !== resolutionSlice.offset || dependencySlice.length !== resolutionSlice.length) throw new Error(`Bun package ${name} dependency/resolution slices differ.`)
-    return { name, version: resolution?.version, resolved: resolution?.url, integrity: index === 0 ? undefined : integrity(raw.meta, name), dependencySlice, targets: new Map<string, any>(), dependencies: Object.create(null), optionalDependencies: Object.create(null), peerDependencies: Object.create(null), peerDependenciesMeta: Object.create(null) } as any
+    return { name, version: resolution?.version, resolved: resolution?.url, integrity: index === 0 ? undefined : integrity(raw.meta, name), dependencySlice, targets: new Map<string, any>(), dependencies: Object.create(null), optionalDependencies: Object.create(null), peerDependencies: Object.create(null), peerDependenciesMeta: Object.create(null), unresolvedOptionalDependencies: [] as string[], unresolvedOptionalPeers: [] as string[] } as any
   })
   for (let packageIndex = 0; packageIndex < records.length; packageIndex++) {
     const record = records[packageIndex]
@@ -136,7 +136,17 @@ export function parseBunBinary(bytes: Buffer): AlternateLock {
       if (tag !== 1 || behavior & ~0x3e || !(behavior & (0x02 | 0x04 | 0x08 | 0x10))) throw new Error(`Unsupported Bun dependency metadata for ${name}.`)
       const targetIndex = buffers.resolutions.readUInt32LE(dependencyIndex * 4)
       if (targetIndex === 0xffffffff || targetIndex >= records.length) {
-        if (behavior & 0x04) continue
+        if (behavior & 0x04) {
+          if (behavior & 0x10) {
+            record.peerDependencies[name] = requested
+            record.peerDependenciesMeta[name] = { optional: true }
+            record.unresolvedOptionalPeers.push(name)
+          } else {
+            record.optionalDependencies[name] = requested
+            record.unresolvedOptionalDependencies.push(name)
+          }
+          continue
+        }
         throw new Error(`Missing Bun resolution for ${name}.`)
       }
       const target = records[targetIndex]
@@ -160,7 +170,7 @@ export function parseBunBinary(bytes: Buffer): AlternateLock {
     const parent = from ? locations.get(from) : rootRecord
     if (!parent) throw new Error(`Missing Bun binary parent context: ${from}`)
     const exact = parent.targets.get(`${name}@${requested}`)
-    if (!exact) throw new Error(`Exact Bun binary descriptor is missing: ${name}@${requested}`)
+    if (!exact) throw new Error(`Exact Bun binary descriptor is missing: ${name}@${requested} from ${from || "root"}`)
     if (location) {
       const previous = locations.get(location)
       if (previous && previous !== exact) throw new Error(`Conflicting Bun package identity at ${location}.`)

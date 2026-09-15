@@ -4,8 +4,8 @@
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
-    "PASS": 48,
-    "PARTIAL": 3,
+    "PASS": 49,
+    "PARTIAL": 2,
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
@@ -13,7 +13,6 @@
   "commonApplicationCheckpoint": "PASS",
   "completeApplications": 2,
   "internalRemaining": [
-    "P05",
     "P39",
     "P61"
   ],
@@ -102,11 +101,11 @@
     {
       "id": "P05",
       "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
-      "status": "PARTIAL",
-      "evidence": "Finite Berry v8 handling remains proven. An internal bounded Bun v1.1.42 format-2 decoder validates the exact retained Todo binary lock and extracts npm identities, SHA-512 integrity and dependency edges without executing Bun. Exact operator-owned reachable profiles admit and build frozen Redux and Bulletproof; generic confined nested-root selection chooses Bulletproof apps/react-vite and preserves the full archive. 49 newly/directly affected tests and TypeScript pass; prior 76 P05 passes are reused and full regression remains deferred.",
+      "status": "PASS",
+      "evidence": "Finite Berry v8 and bounded Bun v1.1.42 binary decoding remain proven. Exact operator-owned reachable profiles admit frozen Redux and Bulletproof. The exact @julr/unocss-preset-forms@1.0.0 zero-argument behavior is statically translated to fixed operator-owned rules and preflight under pinned UnoCSS 66.0.0; the incompatible third-party package is an exact lock-attested configuration marker and is never executed. Exact unchanged Todo passes graph admission, CSS/browser/export compilation and byte preservation without running preinstall. 67/67 directly affected tests and TypeScript pass; prior evidence is reused and full regression remains deferred.",
       "evidenceSource": "docs/reports/phase2-p05-closure.md",
-      "missingProof": "Exact Todo graph peer mismatch only: @julr/unocss-preset-forms@1.0.0 requires unocss ^0.31.0 || ^65.0.0, while the frozen binary lock selects unocss@66.0.0. Strict trusted-peer admission correctly refuses; no legacy-peer or relaxed path was introduced.",
-      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+      "missingProof": "None for the retained finite P05 software requirement.",
+      "internallyClosable": "Closed at the retained bounded runtime/dependency/lockfile requirement.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
       "evidenceFiles": [
@@ -117,7 +116,7 @@
         "../phase2-compatibility-edge-evidence/security/final-reread.json",
         "../phase2-p05-evidence/targeted-tests.json"
       ],
-      "disposition": "P05 remains PARTIAL solely for the exact retained Todo peer conflict. Bun binary decoding, Redux graph admission, and Bulletproof nested-root/graph admission pass. No uploaded manager/plugin/script execution, package installation, online resolution, host fallback, or source/export mutation. P39/P61 and every other row are untouched.",
+      "disposition": "P05 PASS. The exact forms package identity remains validated as source metadata while fixed operator-owned behavior runs inside the strict locked UnoCSS 66 compiler closure. Executed packages retain normal dependency and peer validation. No uploaded manager/plugin/script execution, package installation, online resolution, host fallback, or source/export mutation. P39/P61 and every other row are untouched.",
       "priorCheckpoint": {
         "id": "P05",
         "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
