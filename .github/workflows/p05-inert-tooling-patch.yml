@@ -12,7 +12,7 @@ jobs:
   patch:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
         with:
@@ -73,6 +73,7 @@ jobs:
           import fs from 'node:fs'
           import os from 'node:os'
           import path from 'node:path'
+          import {randomBytes} from 'node:crypto'
           import {ZipFile} from 'yazl'
           import {archiveMemberLimit,isInertToolingPath} from './runtime/intakeMetadata'
           import {extractSafeZip,detectProject,type ProjectRecord} from './runtime/projectRegistry'
@@ -93,7 +94,7 @@ jobs:
 
           it('round-trips an oversized inert Yarn release while the ordinary 2 MiB member boundary remains',async()=>{
             const root=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-'));dirs.push(root)
-            const inert=Buffer.alloc(2_742_928,0x61)
+            const inert=randomBytes(2_742_928)
             const archive=await zipOf({'.yarn/releases/yarn-4.2.2.cjs':inert,'package.json':'{}'})
             await extractSafeZip(archive,root)
             expect(fs.readFileSync(path.join(root,'.yarn/releases/yarn-4.2.2.cjs')).equals(inert)).toBe(true)
@@ -101,7 +102,7 @@ jobs:
             const out=await exportProjectZip(project),copy=fs.mkdtempSync(path.join(os.tmpdir(),'wcb-inert-copy-'));dirs.push(copy)
             await extractSafeZip(out,copy)
             expect(fs.readFileSync(path.join(copy,'.yarn/releases/yarn-4.2.2.cjs')).equals(inert)).toBe(true)
-            await expect(extractSafeZip(await zipOf({'src/large.cjs':Buffer.alloc(2*1024*1024+1,0x61)}),fs.mkdtempSync(path.join(os.tmpdir(),'wcb-large-')))).rejects.toThrow('Unsafe ZIP')
+            await expect(extractSafeZip(await zipOf({'src/large.cjs':randomBytes(2*1024*1024+1)}),fs.mkdtempSync(path.join(os.tmpdir(),'wcb-large-')))).rejects.toThrow('Unsafe ZIP')
           })
 
           it('preserves inert tooling as source-owned bytes but refuses importing it into the controlled browser graph',async()=>{
@@ -119,6 +120,7 @@ jobs:
       - name: Verify targeted P05 slice
         run: |
           npm ci --ignore-scripts
+          npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6
           npx tsc --pretty false
           npx vitest run src/webcanbe-engine/phase2-p05-berry.test.ts src/webcanbe-engine/phase2-p05-inert-tooling.test.ts
       - name: Commit verified changes
