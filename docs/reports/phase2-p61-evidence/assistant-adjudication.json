@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase2-p61-assistant-closure",
+  "base": "4cce6c861b8a47b224ee2b73f3f644731af53feb",
+  "p61Status": "PASS",
+  "boundary": "Retained internal local TEST measurement/evidence boundary only; not production sizing, SLO, multi-hour soak, or deployed reliability proof.",
+  "retainedRequirement": "Representative cold import/start, warm CSS/React/refresh/reload/restart/export and resource measurements (G.1/2G.2)",
+  "retainedMissingProof": "Reproducible representative cold/warm/capture/export measurements plus sustained concurrent/load/long-session/resource evidence, with failures retained; deployed performance remains external.",
+  "adjudication": {
+    "measurementRequirementSatisfied": true,
+    "failureRetentionSatisfied": true,
+    "historical422Resolved": false,
+    "historical422Erased": false,
+    "historical422ClaimedHarmless": false,
+    "historical422ExactStage": "UNPROVEN",
+    "historical422RootCause": "UNPROVEN",
+    "reasonRootCauseIsNotAClosureRequirement": "The exact pre-implementation P61 DoD requires reproducible representative measurements and sustained/load/resource evidence with failures retained. It does not require a post-hoc exact root cause for every retained historical anomaly. Requiring an unavailable internal exception after the intentionally generic receipt would add a stronger criterion after the fact rather than preserve the original requirement.",
+    "reasonHistoricalCauseCannotBeRecovered": "The failed receipt contains only the generic public 422. The committed final-resource-load harness already contains stage/acceptedRevision/leaseStates instrumentation absent from that receipt, proving the pre-instrumentation working-tree harness state was not retained as a Git object. No matching server stderr/onError trace is present in the published evidence. Later onError instrumentation did not reproduce the failure."
+  },
+  "evidence": {
+    "historicalFailure": "docs/reports/phase2-final-internal-evidence/resources-1789396020314.json",
+    "instrumentedFollowup": "docs/reports/phase2-final-internal-evidence/resources-1789396118017.json",
+    "failureClassification": "docs/reports/phase2-final-internal-evidence/harness-and-failure-notes.json",
+    "runtimeAttempts": "docs/reports/phase2-final-internal-evidence/runtime-attempts.json",
+    "zustandAndHistoricalFollowup": "docs/reports/phase2-p61-evidence/followup.json",
+    "boundedLoad": "docs/reports/phase2-p61-evidence/load.json",
+    "retainedScenario": "docs/reports/phase2-p61-evidence/retained-scenario.json",
+    "sustainedSessionCrossEvidence": "docs/reports/phase2-p39-closure.md",
+    "reconstructionCheckpoint": "docs/reports/phase2-p61-evidence/assistant-progress.md"
+  },
+  "currentPositiveEvidence": {
+    "zustand": "PASS: exact unchanged application, cold start 4216.40 ms, first raster 2992.70 ms, warm raster 2116.48 ms under unchanged 4000 ms raster bound.",
+    "instrumentedABAFollowup": "PASS: 16/16 stages, zero operation failures, three independent artifact/owner/fence checks.",
+    "boundedLoad": "PASS: 58.01 s, 2 users, 3 projects, concurrency 2, 167 API operations, 145 successes, 22 expected refusals, zero unexpected failures, repeated warm updates/session turnover/resource sampling, final zero jobs/leases.",
+    "sustainedSession": "PASS as separate bounded evidence: 93.104 s packaged session/renewal run with 16 iterations and verified cleanup; this does not alter P39 native-IME/accessibility status.",
+    "targetedTests": "43/43 prior P61 targeted tests pass; not rerun for this documentation-only adjudication.",
+    "full646": "DEFERRED to final Phase-2 integration/closure run."
+  },
+  "residualRisk": "The historical second-application 422 remains an unresolved retained anomaly. It is not relabeled as fixed or harmless. Future unexpected hosted errors are diagnosable through the later server-side TEST onError boundary. A recurrence must be treated as a new failure and investigated with the retained diagnostics.",
+  "productionCodeChanged": false,
+  "p05Touched": false,
+  "p39Touched": false,
+  "mainTouched": false,
+  "ledgerIntegration": "DEFERRED_PARALLEL_BRANCH_RECONCILIATION",
+  "ledgerIntegrationReason": "P05 and P39 are concurrently advancing on separate branches. Do not overwrite their newer ledger/handoff state from this older P61 base. At final integration, apply only the P61 PASS delta and preserve the historical 422 evidence/disclosure."
+}
