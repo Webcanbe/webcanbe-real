@@ -66,9 +66,13 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
     compile = (require("tailwindcss") as typeof import("tailwindcss")).compile
   }
   const root = fs.realpathSync(project.root)
-  const shell = staticHtml(root,runtime.publicDir,runtime.runtimeRoot)
+  let shell = staticHtml(root,runtime.publicDir,runtime.runtimeRoot)
   const prepareCssSource=(file:string,code:string)=>/\.[jt]sx$/.test(file)?instrumentReactSource(file,code):code
   const finiteCss = runtime.cssPlan ? await cssCompiler(root,profileRoot,runtime.cssPlan,prepareCssSource,runtime.runtimeRoot) : undefined
+  if(runtime.cssPlan?.kind==='unocss'&&shell){
+    const index=path.posix.join(runtime.runtimeRoot??'.','index.html')
+    shell=staticHtml(root,runtime.publicDir,runtime.runtimeRoot,await finiteCss!.source(index,fs.readFileSync(path.join(root,index),'utf8')))
+  }
   const outputRoot = path.join(root, ".webcanbe-virtual-output")
   let bytes = 0
   const tailwindOutputs = new Map<string, string>()
@@ -163,7 +167,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
       })
     } }],
   }
-  const fingerprint = JSON.stringify({ root, transport, runtime, shell })
+  const fingerprint = JSON.stringify({ root, transport, runtime, shell, cssSources:finiteCss?.fingerprint })
   const bundle = incremental ? await incremental.build("app", fingerprint, options) : await boundedBuild(options)
   const bridgeOptions: BuildOptions = { entryPoints: [path.join(applicationRoot, "src/webcanbe-engine/runtime/previewBridge.ts")], bundle: true, write: false, outfile: path.join(outputRoot, "_wcb/bridge.js"), format: "iife", minify: true, logLevel: "silent", define: { __WCB_HTTP_PREVIEW__: String(transport === "http") } }
   const bridge = incremental ? await incremental.build("bridge", transport, bridgeOptions) : await boundedBuild(bridgeOptions)

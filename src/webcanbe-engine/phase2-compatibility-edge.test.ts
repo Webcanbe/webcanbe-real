@@ -94,3 +94,15 @@ it('applies Rollup minimum chunk size to an eligible independent export graph',a
  const before=await buildFiniteExportGraph(f.profileRoot,'src/entry.js',modules,{external:[],output:{experimentalMinChunkSize:0}}),after=await buildFiniteExportGraph(f.profileRoot,'src/entry.js',modules,{external:[],output:{experimentalMinChunkSize:3500}})
  expect(after.length).toBeLessThan(before.length)
 })
+it('rebuilds Uno snapshots after source edits and applies HTML groups and admitted module extensions',async()=>{
+ const {IncrementalPreviewCompiler}=await import('./runtime/incrementalPreview'),f=fixture(),compiler=new IncrementalPreviewCompiler()
+ f.write('uno.config.ts',uno);f.write('index.html','<body class="md:(p-4 m-2)"><div id="root"></div><script type="module" src="/src/main.jsx"></script></body>')
+ f.write('shared/helper.mjs',`export const classes='lg:(p-2 m-2)'`);f.write('src/value.mts',`export const value:string='edge';`)
+ const app=(padding:string)=>`import {createRoot} from 'react-dom/client';import 'virtual:uno.css';import {classes} from '../shared/helper.mjs';import {value} from './value.mts';createRoot(document.getElementById('root')).render(<main className={classes}><h1 className="dark:(${padding} bg-black)">{value}</h1></main>)`
+ const p=f.project();try{
+  f.write('src/main.jsx',app('p-2'));const first=await buildIsolatedHttpPreview(p,process.cwd(),compiler)
+  expect(first.html).toContain('class="md:p-4 md:m-2"');expect(first.files.get('/_wcb/app.js')!.body.toString()).toContain('lg:p-2 lg:m-2')
+  f.write('src/main.jsx',app('p-8'));const next=await buildIsolatedHttpPreview(p,process.cwd(),compiler)
+  expect(next.files.get('/_wcb/app.js')!.body.toString()).toContain('dark:p-8 dark:bg-black');expect(next.files.get('/_wcb/app.css')!.body.toString()).toContain('padding:2rem');expect(compiler.configurationChanged).toBe(true)
+ }finally{await compiler.close()}
+})

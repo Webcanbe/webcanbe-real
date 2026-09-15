@@ -10,10 +10,10 @@ const attributes=(node:any)=>(node?.attrs??[]).map((a:any)=>` ${a.name}="${escap
 const ordinary=new Set(['html','head','body','meta','title','link','noscript','div','main','section','article','header','footer','nav','aside','p','span','h1','h2','h3','h4','h5','h6','ul','ol','li','a','img','br','hr','strong','em','small','label','button'])
 /** Parse a finite static shell as data. Only the single local module entry is compiled.
  * The generated shell is preview instrumentation; original index.html is never edited. */
-export function staticHtml(root:string,publicDir:string|false="public",runtimeRoot='.') :StaticHtml|undefined {
+export function staticHtml(root:string,publicDir:string|false="public",runtimeRoot='.',transformedSource?:string) :StaticHtml|undefined {
   const index=path.posix.join(runtimeRoot,'index.html')
   if(!fs.existsSync(path.join(root,index)))return
-  const source=fs.readFileSync(confinedFile(root,index),'utf8')
+  const source=transformedSource??fs.readFileSync(confinedFile(root,index),'utf8')
   if(Buffer.byteLength(source)>256*1024)throw Error('HTML shell exceeds its bounded static grammar.')
   const document:any=parse(source),entries:string[]=[],styles:string[]=[],ids=new Set<string>()
   let html:any,head:any,body:any,nodes=0,mount=false

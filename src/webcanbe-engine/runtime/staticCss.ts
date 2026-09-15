@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import {createHash} from 'node:crypto'
 import path from 'node:path'
 import ts from 'typescript'
 import postcss from 'postcss'
@@ -135,9 +136,10 @@ export function validateFiniteCss(code:string,plan:CssPlan) {
 }
 export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan,prepareSource=(_file:string,code:string)=>code,runtimeRoot=".") {
   const sources:Array<{raw:string;extension:string;file:string}>=[];let bytes=0
-  for(const file of [path.posix.join(runtimeRoot,'index.html'),...fs.readdirSync(path.join(root,'src'),{recursive:true}).filter((f):f is string=>typeof f==='string'&&/\.(?:[jt]sx?|css)$/.test(f)).map(f=>'src/'+f)]) {
+  for(const file of [path.posix.join(runtimeRoot,'index.html'),...fs.readdirSync(root,{recursive:true}).filter((f):f is string=>typeof f==='string'&&/\.(?:[cm]?[jt]sx?|css)$/.test(f)&&!f.split('/').some(p=>['node_modules','.git','.webcanbe'].includes(p)))]) {
     if(!safeArchivePath(file))fail('Invalid CSS candidate path.')
     const absolute=fs.realpathSync(path.join(root,file));if(!isWithin(root,absolute))fail('CSS candidates escaped project.')
+    if(!fs.statSync(absolute).isFile()||fs.statSync(absolute).size>2*1024*1024)fail('CSS candidate member limit exceeded.')
     const raw=fs.readFileSync(absolute,'utf8');bytes+=Buffer.byteLength(raw);if(bytes>40*1024*1024||sources.length>=2000)fail('CSS candidate limit exceeded.')
     if(file.endsWith('.css'))validateFiniteCss(raw,plan)
     sources.push({raw:prepareSource(file,raw),extension:path.extname(file).slice(1),file})
@@ -163,6 +165,8 @@ export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan,pr
     if(!original||original.raw!==code)fail('Uno source snapshot changed during compilation.')
     return (await compiled()).sources![file]
   }
+  const hash=createHash('sha256');for(const source of sources){hash.update(JSON.stringify([source.file,source.raw]))}
+  compile.fingerprint=hash.digest('hex')
   return compile
 }
 type CssWorkerResult={css:string;sources?:Record<string,string>}

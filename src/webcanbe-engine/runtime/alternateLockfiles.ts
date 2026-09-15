@@ -21,7 +21,7 @@ export type AlternateLock={format:'yarn-classic-v1'|'bun-text-v1';packages:Recor
 export function parseYarnClassic(source:string):AlternateLock {
   bounded(source)
   if(!/^# yarn lockfile v1\r?$/m.test(source)||/^__metadata:/m.test(source))throw Error('Only Yarn classic v1 with registry SRI is supported; Berry checksums/virtual packages need a separately verified adapter.')
-  const descriptors=new Map<string,any>(),byName=new Map<string,any[]>();let current:any,section:string|undefined,records=0
+  const descriptors=new Map<string,any>(),byName=new Map<string,any[]>();let current:any,section:string|undefined,records=0,currentNames=new Set<string>()
   const atom=(s:string)=>s.startsWith('"')?JSON.parse(s):s
   for(const line of source.split(/\r?\n/)) {
     if(!line.trim()||line.startsWith('#'))continue
@@ -29,8 +29,8 @@ export function parseYarnClassic(source:string):AlternateLock {
       if(!line.endsWith(':')||++records>12000)throw Error('Invalid Yarn record.')
       const keys=line.slice(0,-1).match(/"(?:[^"\\]|\\.)*"|[^,]+/g)
       if(!keys?.length)throw Error('Missing Yarn descriptor.')
-      current={dependencies:{},optionalDependencies:{}};section=undefined
-      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');const descriptor=npmDescriptor(name,requested);descriptors.set(key,current);if(current.name&&current.name!==descriptor.name)throw Error('Cross-package Yarn descriptor alias.');current.name=descriptor.name;const list=byName.get(name)??[];if(!list.includes(current))list.push(current);byName.set(name,list)}
+      current={dependencies:{},optionalDependencies:{}};currentNames=new Set();section=undefined
+      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');const descriptor=npmDescriptor(name,requested);descriptors.set(key,current);if(current.name&&current.name!==descriptor.name)throw Error('Cross-package Yarn descriptor alias.');current.name=descriptor.name;const list=byName.get(name)??[];if(!currentNames.has(name)){currentNames.add(name);list.push(current);byName.set(name,list)}}
       continue
     }
     if(!current)throw Error('Yarn field without a record.')
