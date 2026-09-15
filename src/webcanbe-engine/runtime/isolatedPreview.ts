@@ -66,8 +66,9 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
     compile = (require("tailwindcss") as typeof import("tailwindcss")).compile
   }
   const root = fs.realpathSync(project.root)
-  const shell = staticHtml(root,runtime.publicDir)
-  const finiteCss = runtime.cssPlan ? await cssCompiler(root,profileRoot,runtime.cssPlan) : undefined
+  const shell = staticHtml(root,runtime.publicDir,runtime.runtimeRoot)
+  const prepareCssSource=(file:string,code:string)=>/\.[jt]sx$/.test(file)?instrumentReactSource(file,code):code
+  const finiteCss = runtime.cssPlan ? await cssCompiler(root,profileRoot,runtime.cssPlan,prepareCssSource,runtime.runtimeRoot) : undefined
   const outputRoot = path.join(root, ".webcanbe-virtual-output")
   let bytes = 0
   const tailwindOutputs = new Map<string, string>()
@@ -128,7 +129,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         if (ext !== "css" && cached?.source === code) return cached.result
         const originalCode = code
         if (vendor && incremental?.fastRefresh && /^(tsx|jsx|ts|js)$/.test(ext)) code = developmentVendor(code)
-        if (ext === "css" && finiteCss) code = await finiteCss(code)
+        if (ext === "css" && finiteCss) code = await finiteCss(code,path.relative(root,args.path).split(path.sep).join('/'))
         else if (ext === "css") {
           const cssConfig = validateStylesheetConfiguration(code, runtime.profile !== "react19-vite6")
           if (/@import\s+["']tailwindcss["']\s*;/.test(code)) {
@@ -151,6 +152,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         }
         if (!vendor && /^(tsx|jsx|ts|js)$/.test(ext) && transport === "blob" && historyImport(code, args.path)) throw new Error("Browser-history router requires an isolated HTTP preview runner. HashRouter is supported.")
         if (!vendor && /^(tsx|jsx)$/.test(ext)) code = instrumentReactSource(path.relative(root, args.path).split(path.sep).join("/"), code)
+        if (!vendor && runtime.cssPlan?.kind==='unocss' && /^(tsx|jsx|ts|js)$/.test(ext)) code = await finiteCss!.source(path.relative(root,args.path).split(path.sep).join('/'),code)
         if (!vendor && path.relative(root,args.path).split(path.sep).join("/") === runtime.entry && shell?.styles.length) code = shell.styles.map(file => { const relative=path.relative(path.dirname(args.path),path.join(root,file)).split(path.sep).join("/"); return "import "+JSON.stringify(relative.startsWith(".")?relative:"./"+relative)+";" }).join("\n")+"\n"+code
         const result = { contents: code, loader: args.path.endsWith(".module.css") ? "local-css" as const : ext as Loader, resolveDir: path.dirname(args.path) }
         if (ext !== "css" && incremental) {

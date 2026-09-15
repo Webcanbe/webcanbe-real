@@ -23,7 +23,7 @@ export function cssData(code: string, kind: 'tailwind3' | 'unocss' | 'postcss') 
     if(ts.isImportDeclaration(statement)) {
       if(!ts.isStringLiteral(statement.moduleSpecifier)||statement.importClause?.isTypeOnly)fail('Unsupported CSS import.')
       const module=(statement.moduleSpecifier as ts.StringLiteral).text, clause=statement.importClause
-      if(!['unocss','tailwindcss/defaultTheme'].includes(module))fail('Unknown CSS configuration import; preserved but not applied.')
+      if(!['unocss','@julr/unocss-preset-forms','tailwindcss/defaultTheme'].includes(module)||!clause||statement.attributes)fail('Unknown CSS configuration import; preserved but not applied.')
       if(clause?.name)bind(clause.name.text,module+':default')
       if(clause?.namedBindings) { if(!ts.isNamedImports(clause.namedBindings))fail('Unsupported CSS namespace import.');for(const item of (clause.namedBindings as ts.NamedImports).elements)bind(item.name.text,module+':'+(item.propertyName?.text??item.name.text)) }
     } else if(ts.isVariableStatement(statement)) {
@@ -58,9 +58,9 @@ export function cssData(code: string, kind: 'tailwind3' | 'unocss' | 'postcss') 
         if(['tailwindcss/defaultTheme','@tailwindcss/typography','tailwindcss-animate'].includes(module))return token(module)
       }
       if(binding==='unocss:defineConfig'&&kind==='unocss'&&node.arguments.length===1)return value(node.arguments[0])
-      if(kind==='unocss'&&['unocss:presetUno','unocss:presetAttributify'].includes(binding??'')&&node.arguments.length<=1) {
+      if(kind==='unocss'&&['unocss:presetUno','unocss:presetAttributify','@julr/unocss-preset-forms:presetForms','unocss:transformerDirectives','unocss:transformerVariantGroup'].includes(binding??'')&&node.arguments.length<=1) {
         const options=node.arguments.length?value(node.arguments[0]):{}
-        if(!object(options)||Object.keys(options).some(k=>k!=='dark')||options.dark!==undefined&&!['class','media'].includes(options.dark))fail('Unsupported Uno preset options.')
+        if(!object(options)||Object.keys(options).some(k=>binding!=='unocss:presetUno'||k!=='dark')||options.dark!==undefined&&!['class','media'].includes(options.dark))fail('Unsupported Uno preset/transformer options.')
         return token(binding!.split(':')[1],options)
       }
     }
@@ -84,8 +84,10 @@ export function cssData(code: string, kind: 'tailwind3' | 'unocss' | 'postcss') 
     if(config.plugins!==undefined&&(!Array.isArray(config.plugins)||config.plugins.length>2||config.plugins.some((p:any)=>!object(p)||!tokens.has(p)||!['@tailwindcss/typography','tailwindcss-animate'].includes(p.adapter))))fail('Unknown Tailwind plugins are preserved but not applied.')
     config.plugins=(config.plugins??[]).map((p:any)=>p.adapter)
   } else if(kind==='unocss') {
-    if(Object.keys(config).some(k=>!['presets','rules','shortcuts','safelist','theme'].includes(k)))fail('Unsupported UnoCSS configuration; transforms/functions require a separately implemented adapter.')
-    if(config.presets!==undefined&&(!Array.isArray(config.presets)||config.presets.length>2||config.presets.some((p:any)=>!object(p)||!tokens.has(p)||!['presetUno','presetAttributify'].includes(p.adapter))))fail('Only trusted Uno/Attributify presets are supported.')
+    if(Object.keys(config).some(k=>!['presets','transformers','rules','shortcuts','safelist','theme'].includes(k)))fail('Unsupported UnoCSS configuration; transforms/functions require a separately implemented adapter.')
+    if(config.presets!==undefined&&(!Array.isArray(config.presets)||config.presets.length>3||config.presets.some((p:any)=>!object(p)||!tokens.has(p)||!['presetUno','presetAttributify','presetForms'].includes(p.adapter))))fail('Only trusted Uno/Attributify/Forms presets are supported.')
+    if(config.transformers!==undefined&&(!Array.isArray(config.transformers)||config.transformers.length>2||config.transformers.some((p:any)=>!object(p)||!tokens.has(p)||!['transformerDirectives','transformerVariantGroup'].includes(p.adapter))))fail('Only trusted Uno transformers are supported.')
+    for(const group of ['presets','transformers'])if(new Set((config[group]??[]).map((p:any)=>p.adapter)).size!==(config[group]??[]).length)fail('Duplicate Uno adapter.')
     if(config.rules!==undefined&&(!Array.isArray(config.rules)||config.rules.length>256||config.rules.some((r:any)=>!Array.isArray(r)||r.length!==2||typeof r[0]!=='string'||!object(r[1])||Object.entries(r[1]).some(([k,v])=>!/^--?[a-z-]+$|^[a-z][a-z-]*$/.test(k)||typeof v!=='string'))))fail('Only literal Uno rule declarations are supported.')
     if(config.shortcuts!==undefined&&(!object(config.shortcuts)||Object.entries(config.shortcuts).some(([k,v])=>k.length>128||typeof v!=='string'||v.length>512)))fail('Only literal Uno shortcuts are supported.')
     if(config.safelist!==undefined&&(!Array.isArray(config.safelist)||config.safelist.length>512||config.safelist.some((v:any)=>typeof v!=='string'||v.length>128)))fail('Invalid Uno safelist.')
@@ -113,10 +115,11 @@ export function inspectCssPlan(root:string,declared:Record<string,any>,profile:s
   const names=fs.readdirSync(root), pick=(prefix:string)=>{const all=names.filter(n=>new RegExp('^'+prefix+'\\.config\\.[cm]?[jt]s$').test(n));if(all.length>1)fail('Ambiguous CSS configuration.');return all[0]}
   const tailwind=pick('tailwind'),post=pick('postcss'),uno=pick('uno'),kind=declared.unocss?'unocss':declared.tailwindcss&&profile==='react18-vite5-css-v1'?'tailwind3':undefined
   if(!kind)return
-  if(kind==='unocss'&&profile!=='react19-vite6-uno-v1')fail('A pinned UnoCSS operator profile is required.')
+  if(kind==='unocss'&&!['react19-vite6-uno-v1','react19-vite6-uno65-v1'].includes(profile))fail('A pinned UnoCSS operator profile is required.')
   if(kind==='unocss'&&(tailwind||post))fail('Combined UnoCSS/PostCSS configurations are unsupported.')
   const read=(name:string,k:'tailwind3'|'unocss'|'postcss')=>{const file=fs.realpathSync(path.join(root,name));if(!isWithin(root,file))fail('CSS configuration escaped its project.');return cssData(fs.readFileSync(file,'utf8'),k)}
   const config=(kind==='tailwind3'?tailwind:uno)?read((kind==='tailwind3'?tailwind:uno)!,kind):{}
+  if(config.presets?.some((p:any)=>p.adapter==='presetForms')&&(!declared['@julr/unocss-preset-forms']||profile!=='react19-vite6-uno65-v1'))fail('Forms requires the declared, peer-complete pinned Uno65/forms1 graph.')
   const postConfig=post?read(post,'postcss'):undefined
   if(kind==='tailwind3'&&postConfig&&!own(postConfig.plugins,'tailwindcss'))fail('Tailwind requires its declared PostCSS transformation.')
   for(const name of [...(config.plugins??[]).filter((p:any)=>typeof p==='string'),...(postConfig?Object.keys(postConfig.plugins):[])])if(!declared[name])fail('CSS adapter dependency must be declared: '+name)
@@ -124,39 +127,55 @@ export function inspectCssPlan(root:string,declared:Record<string,any>,profile:s
 }
 export function validateFiniteCss(code:string,plan:CssPlan) {
   const root=postcss.parse(code)
+  if(plan.kind==='unocss'&&!plan.config.transformers?.some((p:any)=>p.adapter==='transformerDirectives'))root.walkDecls(decl=>{if(['--at-apply','--uno-apply','--uno'].includes(decl.prop)||/\btheme\(/.test(decl.value))fail('Uno directive syntax requires its declared transformer.')})
   root.walkAtRules(rule=>{
-    if(['config','plugin','source','theme','reference','utility','variant','custom-variant'].includes(rule.name)||plan.kind==='unocss'&&['apply','screen','tailwind','unocss'].includes(rule.name))fail('Unsupported CSS scanning/plugin directive.')
+    if(['config','plugin','source','theme','reference','utility','variant','custom-variant'].includes(rule.name)||plan.kind==='unocss'&&(['tailwind','unocss'].includes(rule.name)||['apply','screen'].includes(rule.name)&&!plan.config.transformers?.some((p:any)=>p.adapter==='transformerDirectives')))fail('Unsupported CSS scanning/plugin directive.')
     if(rule.name==='tailwind'&&!['base','components','utilities'].includes(rule.params.trim()))fail('Unknown Tailwind layer.')
   })
 }
-export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan) {
+export async function cssCompiler(root:string,profileRoot:string,plan:CssPlan,prepareSource=(_file:string,code:string)=>code,runtimeRoot=".") {
   const sources:Array<{raw:string;extension:string;file:string}>=[];let bytes=0
-  for(const file of ['index.html',...fs.readdirSync(path.join(root,'src'),{recursive:true}).filter((f):f is string=>typeof f==='string'&&/\.[jt]sx?$/.test(f)).map(f=>'src/'+f)]) {
+  for(const file of [path.posix.join(runtimeRoot,'index.html'),...fs.readdirSync(path.join(root,'src'),{recursive:true}).filter((f):f is string=>typeof f==='string'&&/\.(?:[jt]sx?|css)$/.test(f)).map(f=>'src/'+f)]) {
     if(!safeArchivePath(file))fail('Invalid CSS candidate path.')
     const absolute=fs.realpathSync(path.join(root,file));if(!isWithin(root,absolute))fail('CSS candidates escaped project.')
     const raw=fs.readFileSync(absolute,'utf8');bytes+=Buffer.byteLength(raw);if(bytes>40*1024*1024||sources.length>=2000)fail('CSS candidate limit exceeded.')
-    sources.push({raw,extension:path.extname(file).slice(1),file})
+    if(file.endsWith('.css'))validateFiniteCss(raw,plan)
+    sources.push({raw:prepareSource(file,raw),extension:path.extname(file).slice(1),file})
   }
   const patterns=(plan.config.content??['./index.html','./src/**/*.{js,ts,jsx,tsx}']).map(contentPattern)
-  const candidates=(plan.kind==='tailwind3'?sources.filter(s=>patterns.some((p:RegExp)=>p.test(s.file))):sources).map(({raw,extension})=>({raw,extension}))
-  let uno:Promise<string>|undefined
-  return async(code:string)=>{
+  const candidates=plan.kind==='tailwind3'?sources.filter(s=>patterns.some((p:RegExp)=>p.test(s.file))):sources
+  let uno:Promise<CssWorkerResult>|undefined
+  const compiled=()=>uno??=runCssWorker({profileRoot,kind:plan.kind,config:plan.config,sources:candidates,code:'/* webcanbe uno entry */'})
+  const compile=async(code:string,file?:string)=>{
     validateFiniteCss(code,plan)
-    if(plan.kind==='unocss'&&code!=='/* webcanbe uno entry */')return code
-    const run=()=>runCssWorker({profileRoot,kind:plan.kind,config:plan.config,autoprefixer:plan.autoprefixer,sources:candidates,code})
-    return plan.kind==='unocss'?(uno??=run()):run()
+    if(plan.kind==='unocss'){
+      const result=await compiled()
+      if(code==='/* webcanbe uno entry */')return result.css
+      const original=sources.find(s=>s.file===file)
+      if(original?.raw===code&&result.sources?.[file!])return result.sources[file!]
+      return (await runCssWorker({profileRoot,kind:plan.kind,config:plan.config,sources:[{file:'style.css',raw:code}],code})).sources!['style.css']
+    }
+    return (await runCssWorker({profileRoot,kind:plan.kind,config:plan.config,autoprefixer:plan.autoprefixer,sources:candidates,code})).css
   }
+  compile.source=async(file:string,code:string)=>{
+    if(plan.kind!=='unocss')return code
+    const original=sources.find(s=>s.file===file)
+    if(!original||original.raw!==code)fail('Uno source snapshot changed during compilation.')
+    return (await compiled()).sources![file]
+  }
+  return compile
 }
+type CssWorkerResult={css:string;sources?:Record<string,string>}
 let activeWorkers=0
-function runCssWorker(data:Record<string,any>):Promise<string> {
+function runCssWorker(data:Record<string,any>):Promise<CssWorkerResult> {
   if(activeWorkers>=2)return Promise.reject(Error('CSS compiler capacity reached.'))
   activeWorkers++
   return new Promise((resolve,reject)=>{
     let done=false
     const worker=new Worker(CSS_WORKER_SOURCE,{eval:true,workerData:data,execArgv:[],env:{NODE_ENV:'production',BROWSERSLIST_IGNORE_OLD_DATA:'true'},resourceLimits:{maxOldGenerationSizeMb:128,maxYoungGenerationSizeMb:16,stackSizeMb:4}})
-    const finish=(error?:Error,css?:string)=>{if(done)return;done=true;clearTimeout(timer);void worker.terminate().finally(()=>{activeWorkers--;error?reject(error):resolve(css!)})}
+    const finish=(error?:Error,result?:CssWorkerResult)=>{if(done)return;done=true;clearTimeout(timer);void worker.terminate().finally(()=>{activeWorkers--;error?reject(error):resolve(result!)})}
     const timer=setTimeout(()=>finish(Error('CSS compiler deadline exceeded.')),8000)
-    worker.on('message',message=>typeof message.css==='string'?finish(undefined,message.css):finish(Error('Bounded CSS compilation failed.')))
+    worker.on('message',message=>typeof message.css==='string'?finish(undefined,message):finish(Error('Bounded CSS compilation failed.')))
     worker.on('error',()=>finish(Error('CSS worker resource/error boundary.')))
     worker.on('exit',()=>{if(!done)finish(Error('CSS worker exited without output.'))})
   })

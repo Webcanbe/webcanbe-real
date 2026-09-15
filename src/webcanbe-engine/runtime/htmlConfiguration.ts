@@ -10,9 +10,10 @@ const attributes=(node:any)=>(node?.attrs??[]).map((a:any)=>` ${a.name}="${escap
 const ordinary=new Set(['html','head','body','meta','title','link','noscript','div','main','section','article','header','footer','nav','aside','p','span','h1','h2','h3','h4','h5','h6','ul','ol','li','a','img','br','hr','strong','em','small','label','button'])
 /** Parse a finite static shell as data. Only the single local module entry is compiled.
  * The generated shell is preview instrumentation; original index.html is never edited. */
-export function staticHtml(root:string,publicDir:string|false="public"):StaticHtml|undefined {
-  if(!fs.existsSync(path.join(root,'index.html')))return
-  const source=fs.readFileSync(confinedFile(root,'index.html'),'utf8')
+export function staticHtml(root:string,publicDir:string|false="public",runtimeRoot='.') :StaticHtml|undefined {
+  const index=path.posix.join(runtimeRoot,'index.html')
+  if(!fs.existsSync(path.join(root,index)))return
+  const source=fs.readFileSync(confinedFile(root,index),'utf8')
   if(Buffer.byteLength(source)>256*1024)throw Error('HTML shell exceeds its bounded static grammar.')
   const document:any=parse(source),entries:string[]=[],styles:string[]=[],ids=new Set<string>()
   let html:any,head:any,body:any,nodes=0,mount=false
@@ -37,7 +38,7 @@ export function staticHtml(root:string,publicDir:string|false="public"):StaticHt
       if(tag==='noscript'&&node.childNodes?.some((c:any)=>c.value?.includes('<')))throw Error('Only text noscript fallbacks are supported.')
       if(tag==='script'){
         if(attrs.type!=='module'||!attrs.src||Object.keys(attrs).some(k=>!['type','src','defer','crossorigin'].includes(k))||attrs.crossorigin!==undefined&&!['','anonymous'].includes(attrs.crossorigin)||node.childNodes?.some((c:any)=>c.value?.trim()))throw Error('Only one local module script entry is supported.')
-        const entry=attrs.src.replace(/^\//,'').replace(/^\.\//,'')
+        const entry=path.posix.join(runtimeRoot,attrs.src.replace(/^\//,'').replace(/^\.\//,''))
         if(!safeArchivePath(entry)||!entry.startsWith('src/')||!/\.[cm]?[jt]sx?$/.test(entry))throw Error('HTML entry must be a local source module.')
         confinedFile(root,entry);entries.push(entry)
       }
@@ -45,9 +46,10 @@ export function staticHtml(root:string,publicDir:string|false="public"):StaticHt
         if(!['stylesheet','icon','apple-touch-icon','canonical','preconnect','dns-prefetch'].includes(attrs.rel)||!attrs.href||Object.keys(attrs).some(k=>!['rel','href','type','media','sizes','crossorigin'].includes(k)))throw Error('Unsupported HTML link semantics.')
         if(attrs.rel==='stylesheet'&&!/^https:\/\//i.test(attrs.href)){
           if(attrs.media!==undefined&&attrs.media!=='all')throw Error('Conditional local HTML stylesheets are unsupported.')
-          let file=attrs.href.replace(/^\//,'').replace(/^\.\//,'')
+          const href=attrs.href.replace(/^\//,'').replace(/^\.\//,'')
+          let file=path.posix.join(runtimeRoot,href)
           if(!safeArchivePath(file)||!file.endsWith('.css'))throw Error('Invalid local HTML stylesheet.')
-          if(!fs.existsSync(path.join(root,file))&&publicDir!==false)file=path.posix.join(publicDir,file)
+          if(!fs.existsSync(path.join(root,file))&&publicDir!==false)file=path.posix.join(publicDir,href)
           confinedFile(root,file);styles.push(file)
         }
       }

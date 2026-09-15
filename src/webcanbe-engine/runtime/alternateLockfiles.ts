@@ -5,6 +5,17 @@ const object=(v:any):v is Record<string,any>=>Boolean(v&&typeof v==='object'&&!A
 const sri=(v:unknown)=>typeof v==='string'&&/^(?:sha512-[A-Za-z0-9+/]{86}==|sha384-[A-Za-z0-9+/]{64}|sha256-[A-Za-z0-9+/]{43}=|sha1-[A-Za-z0-9+/]{27}=)$/.test(v)
 function bounded(source:string){if(Buffer.byteLength(source)>2*1024*1024||source.includes('\0'))throw Error('Lock data exceeds the supported text bound.')}
 function range(value:any){if(typeof value!=='string'||value.length>256||!semver.validRange(value))throw Error('Only npm semver dependency descriptors are supported.');return value}
+/** Keep the requested dependency name separate from the registry package identity.
+ * file/link/git/workspace protocols need a distinct graph adapter and never become npm ranges. */
+export function npmDescriptor(name:string,value:unknown){
+  if(!packageName.test(name)||typeof value!=='string'||value.length>256)throw Error('Invalid npm dependency descriptor.')
+  if(!value.startsWith('npm:'))return {name,range:range(value)}
+  const target=value.slice(4),at=target.indexOf('@',target.startsWith('@')?1:0)
+  if(at<0)return {name,range:range(target)}
+  const identity=target.slice(0,at)
+  if(!packageName.test(identity))throw Error('Invalid npm alias identity.')
+  return {name:identity,range:range(target.slice(at+1))}
+}
 function dependencies(value:any){if(value===undefined)return {};if(!object(value))throw Error('Invalid dependency data.');for(const [name,r]of Object.entries(value)){if(!packageName.test(name))throw Error('Invalid dependency name.');range(r)}return value}
 export type AlternateLock={format:'yarn-classic-v1'|'bun-text-v1';packages:Record<string,any>;resolve:(name:string,range:string,location?:string)=>any;root?:Record<string,any>}
 export function parseYarnClassic(source:string):AlternateLock {
@@ -19,8 +30,8 @@ export function parseYarnClassic(source:string):AlternateLock {
       const keys=line.slice(0,-1).match(/"(?:[^"\\]|\\.)*"|[^,]+/g)
       if(!keys?.length)throw Error('Missing Yarn descriptor.')
       current={dependencies:{},optionalDependencies:{}};section=undefined
-      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');range(requested);descriptors.set(key,current);if(current.name&&current.name!==name)throw Error('Cross-package Yarn descriptor alias.');current.name=name}
-      const list=byName.get(current.name)??[];list.push(current);byName.set(current.name,list);continue
+      for(const raw of keys){const key=atom(raw.trim()),at=key.indexOf('@',key.startsWith('@')?1:0),name=key.slice(0,at),requested=key.slice(at+1);if(at<1||!packageName.test(name)||descriptors.has(key))throw Error('Duplicate/invalid Yarn descriptor.');const descriptor=npmDescriptor(name,requested);descriptors.set(key,current);if(current.name&&current.name!==descriptor.name)throw Error('Cross-package Yarn descriptor alias.');current.name=descriptor.name;const list=byName.get(name)??[];if(!list.includes(current))list.push(current);byName.set(name,list)}
+      continue
     }
     if(!current)throw Error('Yarn field without a record.')
     const field=/^  (version|resolved|integrity) (.+)$/.exec(line)
@@ -29,7 +40,7 @@ export function parseYarnClassic(source:string):AlternateLock {
     if(group){if(current['_'+group[1]])throw Error('Duplicate Yarn dependency group.');current['_'+group[1]]=true;section=group[1];continue}
     const dep=/^    ("(?:[^"\\]|\\.)*"|[^ ]+) (.+)$/.exec(line)
     if(!dep||!section)throw Error('Unsupported Yarn lock syntax.')
-    const name=atom(dep[1]);if(!packageName.test(name)||Object.prototype.hasOwnProperty.call(current[section],name))throw Error('Duplicate/invalid Yarn dependency.');current[section][name]=range(atom(dep[2]))
+    const name=atom(dep[1]);if(!packageName.test(name)||Object.prototype.hasOwnProperty.call(current[section],name))throw Error('Duplicate/invalid Yarn dependency.');const requested=atom(dep[2]);npmDescriptor(name,requested);current[section][name]=requested
   }
   if(!records)throw Error('Empty Yarn lock.')
   for(const list of byName.values())for(const record of list){
@@ -39,6 +50,8 @@ export function parseYarnClassic(source:string):AlternateLock {
   return {format:'yarn-classic-v1',packages:Object.create(null),resolve:(name,requested)=>{
     const exact=descriptors.get(name+'@'+requested)
     if(exact)return exact
+    // Alternate identities require their exact descriptor, never a range heuristic.
+    if(requested.startsWith('npm:'))throw Error('Exact Yarn npm alias/protocol descriptor is missing: '+name)
     const matches=(byName.get(name)??[]).filter(x=>semver.satisfies(x.version,requested));if(matches.length===1)return matches[0]
     throw Error('Yarn resolution is missing or ambiguous: '+name)
   }}
@@ -84,7 +97,8 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
   })
   const visit=(name:string,requested:string,location:string,from:string)=>{
     const trusted=profile.packages[location],actual=lock.resolve(name,requested,from)
-    if(!trusted||trusted.link||!actual||actual.version!==trusted.version||actual.integrity!==trusted.integrity||!sri(trusted.integrity)||!semver.satisfies(trusted.version,range(requested)))throw Error('Locked graph does not match pinned version/integrity: '+location)
+    const descriptor=npmDescriptor(name,requested)
+    if(!trusted||trusted.link||!actual||actual.name!==descriptor.name||(trusted.name??name)!==descriptor.name||actual.version!==trusted.version||actual.integrity!==trusted.integrity||!sri(trusted.integrity)||!semver.satisfies(trusted.version,descriptor.range))throw Error('Locked graph does not match pinned identity/version/integrity: '+location)
     packages[location]={...actual};if(visited.has(location))return;visited.add(location);if(visited.size>12000)throw Error('Dependency graph bound.')
     for(const group of ['dependencies','optionalDependencies']){
       const expected=trusted[group]??{},received=actual[group]??{}

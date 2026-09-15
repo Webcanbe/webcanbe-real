@@ -33,7 +33,7 @@ it.each([
 it('refuses arbitrary PostCSS and Uno plugin/transformer functions',()=>{
  expect(()=>cssData(`module.exports={plugins:{'postcss-import':{}}}`,'postcss')).toThrow('preserved but not applied')
  expect(()=>cssData(`import {defineConfig} from 'unocss';export default defineConfig({rules:[[/x/,()=>({color:'red'})]]})`,'unocss')).toThrow()
- expect(()=>cssData(`import {defineConfig,transformerDirectives} from 'unocss';export default defineConfig({transformers:[transformerDirectives()]})`,'unocss')).toThrow()
+ expect(()=>cssData(`import {defineConfig,transformerDirectives} from 'unocss';export default defineConfig({transformers:[transformerDirectives({applyVariable:()=>process.env})]})`,'unocss')).toThrow()
 })
 it('refuses transitive compiler substitution outside the dedicated toolchain',async()=>{
  const {cssCompiler}=await import('./runtime/staticCss'),root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'wcb-css-confine-')));dirs.push(root);fs.mkdirSync(path.join(root,'src'));fs.writeFileSync(path.join(root,'index.html'),'<div/>');const profile=path.join(root,'profile'),module=path.join(profile,'node_modules/tailwindcss');fs.mkdirSync(module,{recursive:true});fs.writeFileSync(path.join(profile,'package.json'),'{}');fs.writeFileSync(path.join(module,'package.json'),'{"main":"index.cjs"}');fs.writeFileSync(path.join(root,'outside.cjs'),'module.exports=()=>{}');fs.writeFileSync(path.join(module,'index.cjs'),'module.exports=require('+JSON.stringify(path.join(root,'outside.cjs'))+')');const compile=await cssCompiler(root,profile,{kind:'tailwind3',files:[],config:{}});await expect(compile('@tailwind utilities;')).rejects.toThrow('Bounded CSS compilation failed')
