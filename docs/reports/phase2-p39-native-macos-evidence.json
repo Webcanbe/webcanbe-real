@@ -1,0 +1,24 @@
+{
+  "base": "4cce6c861b8a47b224ee2b73f3f644731af53feb",
+  "P39": "PARTIAL",
+  "nativeIME": "FAIL",
+  "voiceOver": "FAIL",
+  "inputSourceObserved": "com.apple.inputmethod.Korean.2SetKorean",
+  "syntheticCompositionAccepted": false,
+  "axSnapshotAcceptedAsVoiceOver": false,
+  "productionCodeChanged": false,
+  "securityUnresolved": "N/A",
+  "targetedTests": {
+    "passed": 28,
+    "total": 30,
+    "unitAndHarnessContract": "28/28",
+    "nativeIMEAcceptance": "FAIL",
+    "voiceOverAcceptance": "FAIL"
+  },
+  "harness": [
+    "scripts/qa/p39-native-macos.cjs",
+    "scripts/qa/p39-input-source.swift",
+    "src/webcanbe-engine/phase2-p39-native-harness.test.ts"
+  ],
+  "humanAction": "At IME_READY physically press g,k,s,r,m,f,Return,Tab,Return with Korean 2-Set selected; at VOICEOVER_READY with VoiceOver running and Code focused physically press Control-Option-Left then Control-Option-Space."
+}
