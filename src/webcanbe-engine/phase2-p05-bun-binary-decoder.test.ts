@@ -6,7 +6,7 @@ const widths=[8,8,64,8,8,88,20,48]
 const u32=(n:number)=>{const b=Buffer.alloc(4);b.writeUInt32LE(n);return b}
 const u64=(n:number)=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(n));return b}
 const inline=(value:string)=>{const b=Buffer.alloc(8);Buffer.from(value).copy(b);return b}
-const external=(offset:number,length:number)=>{const b=Buffer.alloc(8);b.writeUInt32LE(offset,0);b.writeUInt32LE(length|0x80000000,4);return b}
+const external=(offset:number,length:number)=>{const b=Buffer.alloc(8);b.writeUInt32LE(offset,0);b.writeUInt32LE(length+0x80000000,4);return b}
 const slice=(offset:number,length:number)=>Buffer.concat([u32(offset),u32(length)])
 
 function fixture(options:{behavior?:number;resolutionTag?:number;target?:number}={}){
@@ -14,11 +14,10 @@ function fixture(options:{behavior?:number;resolutionTag?:number;target?:number}
   const stringBytes=url
   const begin=header.length+4+32+8+8+8+8+8+8
   const packageTableBytes=2*widths.reduce((a,b)=>a+b,0),end=begin+packageTableBytes
-  const descriptorBytes=6*16,bufferStart=end+descriptorBytes
   const dep=Buffer.alloc(26);inline('react').copy(dep,0);dep[16]=options.behavior??2;dep[17]=0;inline('^19.0.0').copy(dep,18)
   const buffers=[Buffer.alloc(0),Buffer.alloc(0),u32(options.target??1),dep,Buffer.alloc(0),stringBytes]
-  const ranges:Buffer[]=[];let cursor=bufferStart
-  for(const b of buffers){ranges.push(u64(cursor),u64(cursor+b.length));cursor+=b.length}
+  const serialized:Buffer[]=[];let cursor=end
+  for(const b of buffers){const start=cursor+16,finish=start+b.length;serialized.push(u64(start),u64(finish),b);cursor=finish}
   const serializedEnd=cursor
 
   const rootName=inline('app'),pkgName=inline('react')
@@ -39,7 +38,7 @@ function fixture(options:{behavior?:number;resolutionTag?:number;target?:number}
   expect(packageTable.length).toBe(packageTableBytes)
   return Buffer.concat([
     header,u32(2),Buffer.alloc(32,7),u64(serializedEnd),u64(2),u64(8),u64(8),u64(begin),u64(end),
-    packageTable,...ranges,...buffers,
+    packageTable,...serialized,
   ])
 }
 
