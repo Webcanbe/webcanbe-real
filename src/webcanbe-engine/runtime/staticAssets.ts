@@ -127,16 +127,41 @@ export class TrustedStaticAssets {
       }
       return root.toString()
     }
+    const rewriteJavaScript=async(code:string)=>{
+      if(!/https:/i.test(code))return code
+      const source=ts.createSourceFile('artifact.js',code,ts.ScriptTarget.Latest,true),edits:Array<{start:number;end:number;url:string}>=[]
+      const visit=(n:ts.Node)=>{if(ts.isStringLiteral(n)&&/^https:\/\//i.test(n.text)&&/\.(?:png|jpe?g|gif|webp|avif|woff2?|ttf|otf)(?:\?|$)/i.test(n.text))edits.push({start:n.getStart(source),end:n.end,url:n.text});ts.forEachChild(n,visit)};visit(source)
+      const urls=[...new Set(edits.map(e=>e.url))],replacements=new Map<string,string>()
+      for(let i=0;i<urls.length;i+=STATIC_ASSET_LIMITS.concurrency)await Promise.all(urls.slice(i,i+STATIC_ASSET_LIMITS.concurrency).map(async url=>{replacements.set(url,await fetchAsset(url,'binary'))}))
+      // AST traversal yields disjoint literals in source order. Build once:
+      // repeated URLs must not cause a full-artifact copy for every literal.
+      const chunks:string[]=[];let cursor=0
+      for(const e of edits){chunks.push(code.slice(cursor,e.start),JSON.stringify(replacements.get(e.url)));cursor=e.end}
+      chunks.push(code.slice(cursor))
+      return chunks.join('')
+    }
     try {
-      for(const [name,file]of build.files) {
+      // This reserved artifact is emitted by our compiler, never read from source.
+      // Keep initial bootstrap and subsequent refresh payload byte-consistent.
+      const refresh=build.files.get('/_wcb/refresh.json')
+      if(refresh){
+        if(refresh.contentType!=='application/json'||refresh.body.length>24*1024*1024)throw Error('Invalid compiler refresh artifact.')
+        const manifest=JSON.parse(refresh.body.toString()),original=JSON.stringify(manifest)
+        if(manifest.version!==1||typeof manifest.entry!=='string'||!manifest.modules||Array.isArray(manifest.modules)||typeof manifest.modules!=='object'||Object.keys(manifest.modules).length>2000)throw Error('Invalid compiler refresh manifest.')
+        for(const module of Object.values(manifest.modules) as Array<{code:string}>){
+          if(!module||typeof module.code!=='string'||Buffer.byteLength(module.code)>2*1024*1024)throw Error('Invalid compiler refresh module.')
+          module.code=await rewriteJavaScript(module.code)
+        }
+        const app=build.files.get('/_wcb/app.js'),code=app?.body.toString(),marker='let manifest='+original+';const cache=',at=code?.indexOf(marker)??-1
+        if(!app||!code||at<0||code.indexOf(marker,at+marker.length)!==-1)throw Error('Compiler refresh bootstrap mismatch.')
+        const updated=JSON.stringify(manifest)
+        files.set('/_wcb/app.js',{...app,body:Buffer.from(code.slice(0,at)+'let manifest='+updated+';const cache='+code.slice(at+marker.length))})
+        files.set('/_wcb/refresh.json',{...refresh,body:Buffer.from(updated)})
+      }
+      for(const [name,file]of [...files]) {
         if(file.contentType.startsWith('text/css'))files.set(name,{...file,body:Buffer.from(await rewriteCss(file.body.toString()))})
         if(file.contentType.startsWith('text/javascript')) {
-          const code=file.body.toString(),source=ts.createSourceFile('artifact.js',code,ts.ScriptTarget.Latest,true),edits:Array<{start:number;end:number;url:string}>=[]
-          const visit=(n:ts.Node)=>{if(ts.isStringLiteral(n)&&/^https:\/\//i.test(n.text)&&/\.(?:png|jpe?g|gif|webp|avif|woff2?|ttf|otf)(?:\?|$)/i.test(n.text))edits.push({start:n.getStart(source),end:n.end,url:n.text});ts.forEachChild(n,visit)};visit(source)
-          const urls=[...new Set(edits.map(e=>e.url))],replacements=new Map<string,string>()
-          for(let i=0;i<urls.length;i+=STATIC_ASSET_LIMITS.concurrency)await Promise.all(urls.slice(i,i+STATIC_ASSET_LIMITS.concurrency).map(async url=>{replacements.set(url,await fetchAsset(url,'binary'))}))
-          let rewritten=code;for(const e of edits.reverse())rewritten=rewritten.slice(0,e.start)+JSON.stringify(replacements.get(e.url))+rewritten.slice(e.end)
-          files.set(name,{...file,body:Buffer.from(rewritten)})
+          files.set(name,{...file,body:Buffer.from(await rewriteJavaScript(file.body.toString()))})
         }
       }
       const document=parse(build.html)

@@ -35,3 +35,22 @@ it('preserves already admitted source data images but refuses SVG supplied by re
  const css='body{background:url("data:image/svg+xml,%3Csvg%3E%3C/svg%3E")}',local={html:'<div/>',files:new Map([['/app.css',{body:Buffer.from(css),contentType:'text/css'}]])};expect((await new TrustedStaticAssets(net()).materialize(local,scope())).files.get('/app.css')!.body.toString()).toContain('data:image/svg+xml')
  await expect(new TrustedStaticAssets(net({get:async()=>({status:200,headers:{'content-type':'text/css'},body:Buffer.from(css)})})).materialize({html:'<link rel="stylesheet" href="https://assets.publicdomain.com/style.css">',files:new Map()},scope())).rejects.toThrow('data URL')
 })
+
+it('rewrites repeated literals in source order with one fetch and preserves all surrounding JavaScript',async()=>{
+ const url='https://assets.publicdomain.com/picture.png',get=vi.fn(async()=>response()),input=build(),code='globalThis.images=['+Array.from({length:128},(_,i)=>'{index:'+i+',src:'+JSON.stringify(url)+'}').join(',')+'];'
+ input.files.get('/_wcb/app.js')!.body=Buffer.from(code)
+ const out=await new TrustedStaticAssets(net({get})).materialize(input,scope()),local=[...out.files.keys()].find(k=>k.endsWith('.png'))!
+ expect(get).toHaveBeenCalledTimes(1);expect(out.audit).toHaveLength(1)
+ expect(out.files.get('/_wcb/app.js')!.body.toString()).toBe(code.split(JSON.stringify(url)).join(JSON.stringify(local)))
+ expect(input.files.get('/_wcb/app.js')!.body.toString()).toBe(code)
+})
+
+it('materializes compiler refresh module resources in both startup and update artifacts',async()=>{
+ const url='https://assets.publicdomain.com/picture.png',manifest={version:1,entry:'a',modules:{a:{code:'module.exports='+JSON.stringify(url),imports:{},boundary:false}}},serialized=JSON.stringify(manifest),input=build()
+ input.files.set('/_wcb/app.js',{body:Buffer.from('(()=>{let manifest='+serialized+';const cache={};globalThis.result=manifest;})();'),contentType:'text/javascript'})
+ input.files.set('/_wcb/refresh.json',{body:Buffer.from(serialized),contentType:'application/json'})
+ const get=vi.fn(async()=>response()),out=await new TrustedStaticAssets(net({get})).materialize(input,scope()),updated=out.files.get('/_wcb/refresh.json')!.body.toString()
+ expect(get).toHaveBeenCalledTimes(1);expect(updated).toContain('/_wcb/static/');expect(out.files.get('/_wcb/app.js')!.body.toString()).toContain('let manifest='+updated+';const cache=');expect(input.files.get('/_wcb/refresh.json')!.body.toString()).toBe(serialized)
+ input.files.get('/_wcb/app.js')!.body=Buffer.from('let manifest={};')
+ await expect(new TrustedStaticAssets(net()).materialize(input,scope())).rejects.toThrow('bootstrap mismatch')
+})

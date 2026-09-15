@@ -35,6 +35,10 @@ it.each([
  '<base href="https://external.invalid">',
  '<svg><script>alert(1)</script></svg>',
  '<a href="javascript:alert(1)">run</a>',
+ '<a href="java&#x09;script:alert(1)">run</a>',
+ '<a href="java&#x0a;script:alert(1)">run</a>',
+ '<a href="java&#x0d;script:alert(1)">run</a>',
+ '<img src=" https://assets.example.org/a.png">',
  '<template><script>alert(1)</script></template>',
  '<div id="app"></div>',
  '<link rel="stylesheet" href="../outside.css">'

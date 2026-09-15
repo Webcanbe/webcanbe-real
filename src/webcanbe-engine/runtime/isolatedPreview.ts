@@ -59,8 +59,12 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
   const profileRoot = path.join(applicationRoot, "runtime-profiles", runtime.profile)
   const require = createRequire(path.join(profileRoot, "package.json"))
   const vendorRoot = fs.realpathSync(path.join(profileRoot, "node_modules"))
-  if (!isWithin(vendorRoot, fs.realpathSync(require.resolve("tailwindcss")))) throw new Error("Dedicated Tailwind compiler is unavailable; host fallback is forbidden.")
-  const { compile } = require("tailwindcss") as typeof import("tailwindcss")
+  // Finite CSS toolchains are loaded only inside their confined worker.
+  let compile: typeof import("tailwindcss").compile | undefined
+  if (!runtime.cssPlan) {
+    if (!isWithin(vendorRoot, fs.realpathSync(require.resolve("tailwindcss")))) throw new Error("Dedicated Tailwind compiler is unavailable; host fallback is forbidden.")
+    compile = (require("tailwindcss") as typeof import("tailwindcss")).compile
+  }
   const root = fs.realpathSync(project.root)
   const shell = staticHtml(root,runtime.publicDir)
   const finiteCss = runtime.cssPlan ? await cssCompiler(root,profileRoot,runtime.cssPlan) : undefined
@@ -132,7 +136,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
             const themeKey = cssConfig.theme ? code : "default"
             let tailwind = tailwindOutputs.get(themeKey)
             if (!tailwind) {
-              const compiler = await compile(cssConfig.theme ? code : '@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
+              const compiler = await compile!(cssConfig.theme ? code : '@import "tailwindcss";', { loadStylesheet: async id => { if (id !== "tailwindcss") throw new Error("External Tailwind stylesheet denied."); return { path: require.resolve("tailwindcss/index.css"), content: fs.readFileSync(require.resolve("tailwindcss/index.css"), "utf8"), base: "" } } })
               const sources = fs.readdirSync(project.sourceRoot, { recursive: true }).filter((file): file is string => typeof file === "string" && /\.(tsx?|jsx?)$/.test(file))
               const candidates = sources.flatMap(file => {
                 const absolute = fs.realpathSync(path.join(project.sourceRoot, file))

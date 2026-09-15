@@ -25,6 +25,7 @@ export function staticHtml(root:string,publicDir:string|false="public"):StaticHt
       if(attrs['http-equiv']!==undefined&&!(tag==='meta'&&attrs['http-equiv'].toLowerCase()==='x-ua-compatible'&&attrs.content==='IE=edge'))throw Error('Active HTTP-equivalent HTML metadata is unsupported.')
       for(const [key,value]of Object.entries(attrs)){
         if(value.length>4096||/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value))throw Error('Invalid HTML attribute.')
+        if(['href','src'].includes(key)&&/[\x00-\x20\x7f]/.test(value))throw Error('Whitespace/control bytes in HTML URLs are unsupported.')
         if(['href','src'].includes(key)&&/^https:\/\//i.test(value)){const url=new URL(value);if(url.username||url.password)throw Error('HTML URL credentials are forbidden.')}
         if(key==='style')throw Error('Inline HTML styles require explicit stylesheet source.')
         if(['href','src'].includes(key)&&(/^[\s]*[a-z][a-z0-9+.-]*:/i.test(value)&&!/^https:\/\//i.test(value)||value.startsWith('//')||value.includes('\\')))throw Error('Unsupported HTML resource URL.')
