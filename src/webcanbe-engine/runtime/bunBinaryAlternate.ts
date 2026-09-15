@@ -3,6 +3,40 @@ import {decodeBunBinaryLock,type BunBinaryDependency,type BunBinaryPackage} from
 
 const objectMap=<T>()=>Object.create(null) as Record<string,T>
 const descriptor=(name:string,requested:string)=>`${name}@${requested}`
+const BUN_HEADER=Buffer.from('#!/usr/bin/env bun\nbun-lockfile-format-v0\n','utf8')
+
+function u64(view:DataView,offset:number){
+  if(offset<0||offset+8>view.byteLength)throw Error('Truncated Bun binary lock metadata.')
+  const value=view.getUint32(offset,true)+view.getUint32(offset+4,true)*2**32
+  if(!Number.isSafeInteger(value))throw Error('Unsafe Bun binary lock metadata integer.')
+  return value
+}
+
+/**
+ * The retained Todo lock has no workspace/trusted/override/patch serializer tail.
+ * We validate that exact finite boundary before adapting the graph. Optional Bun
+ * serializer extensions need their own bounded semantics; silently ignoring them
+ * would let uninspected resolver metadata influence a future wider admission.
+ */
+function assertRetainedSerializerBoundary(bytes:Uint8Array){
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength)
+  const prefix=BUN_HEADER.length+4+32
+  if(view.byteLength<prefix+8+5*8)throw Error('Truncated Bun binary lock metadata.')
+  const serializedEnd=u64(view,prefix)
+  if(serializedEnd>view.byteLength)throw Error('Bun binary lock serialized length escapes input.')
+  const packageEnd=u64(view,prefix+8+4*8)
+  if(packageEnd<0||packageEnd>serializedEnd)throw Error('Invalid Bun package table end.')
+  let cursor=packageEnd
+  for(let index=0;index<6;index++){
+    if(cursor+16>serializedEnd)throw Error('Truncated Bun serialized buffer descriptor.')
+    const start=u64(view,cursor),end=u64(view,cursor+8),descriptorEnd=cursor+16
+    if(start<descriptorEnd||start>end||end>serializedEnd)throw Error('Invalid Bun serialized buffer range.')
+    cursor=end
+  }
+  if(cursor+8>serializedEnd||u64(view,cursor)!==0)throw Error('Invalid Bun core serializer terminator.')
+  cursor+=8
+  if(cursor!==serializedEnd)throw Error('Unsupported Bun binary serializer tail metadata.')
+}
 
 /**
  * Adapt a decoded Bun binary graph to the same finite lock interface used by
@@ -16,6 +50,7 @@ const descriptor=(name:string,requested:string)=>`${name}@${requested}`
  * which package id a descriptor resolved to.
  */
 export function parseBunBinary(bytes:Uint8Array):AlternateLock {
+  assertRetainedSerializerBoundary(bytes)
   const graph=decodeBunBinaryLock(bytes)
   const records=new Map<number,any>(),targets=new Map<string,number>(),ambiguous=new Set<string>()
   const edgeMaps=(edges:readonly BunBinaryDependency[])=>{
