@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "af00daf79fa94defd348c1643932f76c0fe4bb7a",
+  "status": "PASS",
+  "scope": {
+    "assessmentRequestAdmission": true,
+    "assessmentExecution": false,
+    "submittedCodeExecution": false,
+    "externalNetwork": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 16,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller assessment admission\" --maxWorkers=1"
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "approvedOnlyAdmission": "PASS",
+    "operatorAuthority": "PASS",
+    "snapshotBinding": "PASS",
+    "reviewDecisionBinding": "PASS",
+    "requestImmutability": "PASS",
+    "idempotentAdmission": "PASS",
+    "crossSellerAuthority": "PASS",
+    "crossSubmissionSubstitution": "REFUSED",
+    "codeExecution": "ABSENT",
+    "externalNetwork": "ABSENT",
+    "implicitPublication": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "implicitMaterialization": "REFUSED"
+  },
+  "security": {
+    "scanId": "7c115169-baed-4daa-b46d-2f0310948d1d",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

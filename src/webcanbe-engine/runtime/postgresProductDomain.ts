@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -209,6 +209,36 @@ export class PostgresProductDomainStore {
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,clock_timestamp()) RETURNING *`, [randomUUID(), submissionId, submission.seller_application_id, submission.seller_user_id, submission.source_project_id, submission.source_revision_id, submission.source_content_hash, expectedSnapshotHash, decision, operator.userId, key])).rows[0]
       await this.requireOperatorIn(client, operator)
       return this.sellerReviewDecisionFrom(row)
+    })
+  }
+
+  async admitSellerAssessment(operator: ServerSession, submissionId: string, expectedSellerUserId: string, expectedSnapshotHash: string, reviewDecisionId: string, idempotencyKey: string): Promise<SellerAssessmentRequest> {
+    identifier(submissionId); identifier(expectedSellerUserId); identifier(reviewDecisionId); const key = cleanKey(idempotencyKey)
+    if (!/^[a-f0-9]{64}$/.test(expectedSnapshotHash)) throw new Error("Invalid seller assessment admission.")
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,94))", [submissionId])
+      const submission = (await client.query(`SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s
+        JOIN wcb_seller_submission_states st ON st.submission_id=s.submission_id WHERE s.submission_id=$1 FOR SHARE`, [submissionId])).rows[0]
+      if (!submission) throw new AuthorityDenied()
+      const decision = (await client.query("SELECT * FROM wcb_seller_review_decisions WHERE submission_id=$1", [submissionId])).rows[0]
+      if (!decision || decision.decision !== "approved_for_next_stage") throw new ProductConflict("Submission is not approved for assessment admission.")
+      if (submission.submission_status !== "pending_review" || String(submission.seller_user_id) !== expectedSellerUserId || String(submission.snapshot_hash) !== expectedSnapshotHash || String(decision.decision_id) !== reviewDecisionId) throw new ProductConflict("Assessment admission references do not match the approved submission.")
+      if (String(decision.seller_application_id) !== String(submission.seller_application_id) || String(decision.seller_user_id) !== String(submission.seller_user_id) || String(decision.source_project_id) !== String(submission.source_project_id) || String(decision.source_revision_id) !== String(submission.source_revision_id) || String(decision.source_content_hash) !== String(submission.source_content_hash) || String(decision.submission_snapshot_hash) !== String(submission.snapshot_hash)) throw new Error("Stored review provenance does not match its immutable submission.")
+      const byKey = (await client.query("SELECT * FROM wcb_seller_assessment_requests WHERE admitted_by=$1 AND idempotency_key=$2", [operator.userId, key])).rows[0]
+      if (byKey) {
+        if (String(byKey.submission_id) !== submissionId || String(byKey.seller_user_id) !== expectedSellerUserId || String(byKey.submission_snapshot_hash) !== expectedSnapshotHash || String(byKey.review_decision_id) !== reviewDecisionId) throw new ProductConflict("Assessment idempotency key was already used for a different admission.")
+        await this.requireOperatorIn(client, operator); return this.sellerAssessmentRequestFrom(byKey)
+      }
+      const existing = (await client.query("SELECT * FROM wcb_seller_assessment_requests WHERE submission_id=$1", [submissionId])).rows[0]
+      if (existing) {
+        if (String(existing.seller_user_id) !== expectedSellerUserId || String(existing.submission_snapshot_hash) !== expectedSnapshotHash || String(existing.review_decision_id) !== reviewDecisionId) throw new ProductConflict("Submission already has a conflicting assessment request.")
+        await this.requireOperatorIn(client, operator); return this.sellerAssessmentRequestFrom(existing)
+      }
+      const row = (await client.query(`INSERT INTO wcb_seller_assessment_requests(assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,status,admitted_by,idempotency_key,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,'requested',$9,$10,clock_timestamp()) RETURNING *`, [randomUUID(), submissionId, submission.seller_user_id, submission.source_project_id, submission.source_revision_id, submission.source_content_hash, submission.snapshot_hash, reviewDecisionId, operator.userId, key])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return this.sellerAssessmentRequestFrom(row)
     })
   }
 
@@ -463,6 +493,10 @@ export class PostgresProductDomainStore {
 
   private sellerReviewDecisionFrom(row: Record<string, unknown>): SellerReviewDecision {
     return Object.freeze({ decisionId: String(row.decision_id), submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), decision: row.decision as SellerReviewDecision["decision"], decidedBy: String(row.reviewer_user_id), createdAt: iso(row.created_at) })
+  }
+
+  private sellerAssessmentRequestFrom(row: Record<string, unknown>): SellerAssessmentRequest {
+    return Object.freeze({ assessmentRequestId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), status: "requested", createdAt: iso(row.created_at) })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

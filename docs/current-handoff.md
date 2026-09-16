@@ -1,3 +1,43 @@
+# Phase 3 seller assessment admission — 2026-09-16
+
+**ASSESSMENT ADMISSION PASS. An active product operator can admit only an
+`approved_for_next_stage` immutable seller submission into one snapshot-bound,
+non-executing assessment request. The request does not build, run, fetch,
+publish, entitle, or materialize anything.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `af00daf79fa94defd348c1643932f76c0fe4bb7a`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[assessment-admission report](reports/phase3-seller-assessment-admission.md) and
+[machine evidence](reports/phase3-seller-assessment-admission-evidence/index.json).
+
+- The new authenticated controller route accepts only submission, seller,
+  snapshot, review-decision, and idempotency references. Durable active product
+  operator authority is checked inside the PostgreSQL transaction.
+- Admission requires the submission's immutable decision to be exactly
+  `approved_for_next_stage`. Pending and rejected submissions refuse.
+- The stored request copies and binds submission ID, seller ID, source project,
+  source revision, source content hash, submission snapshot hash, review
+  decision ID, `requested` status, admitting operator, and creation time.
+- Full decision provenance is compared against the immutable submission before
+  insert. Same-snapshot cross-seller, cross-submission, decision, snapshot, and
+  idempotency-key substitutions refuse.
+- One request per submission/decision is returned idempotently. PostgreSQL
+  rejects request update or deletion, leaving future execution state to a
+  separate isolated boundary.
+- The admission path contains no subprocess, package-manager, uploaded hook or
+  config execution, external network, checkout/materialization, public product,
+  or entitlement operation.
+- Focused verification passes 4/4; TypeScript and production build pass. A
+  complete five-file security diff review found zero unresolved findings. The
+  full default regression was not run.
+
+Next bounded task: implement restart-safe server-side leasing and claiming for
+`requested` assessment jobs while preserving snapshot binding and still
+performing no submitted-code execution.
+
+---
+
 # Phase 3 seller quarantine review foundation — 2026-09-16
 
 **QUARANTINE REVIEW FOUNDATION PASS. Privileged operators can read the

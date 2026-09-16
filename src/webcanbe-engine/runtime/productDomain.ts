@@ -117,6 +117,19 @@ export type SellerQuarantineItem = Readonly<{
   decision?: SellerReviewDecision
 }>
 
+export type SellerAssessmentRequest = Readonly<{
+  assessmentRequestId: string
+  submissionId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  reviewDecisionId: string
+  status: "requested"
+  createdAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

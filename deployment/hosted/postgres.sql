@@ -140,3 +140,20 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_seller_review_decision ON wcb_seller_review_decisions;
 CREATE TRIGGER wcb_immutable_seller_review_decision BEFORE UPDATE OR DELETE ON wcb_seller_review_decisions
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_review_decision_mutation();
+-- Admission records only bind an approved immutable snapshot to a future
+-- isolated assessment. Execution state belongs to a later, separate boundary.
+CREATE TABLE IF NOT EXISTS wcb_seller_assessment_requests (
+  assessment_request_id uuid PRIMARY KEY, submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
+  seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL, source_revision_id text NOT NULL,
+  source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
+  review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions,
+  status text NOT NULL CHECK(status='requested'), admitted_by uuid NOT NULL, idempotency_key text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(admitted_by,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_assessment_request_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerAssessmentRequest is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_assessment_request ON wcb_seller_assessment_requests;
+CREATE TRIGGER wcb_immutable_seller_assessment_request BEFORE UPDATE OR DELETE ON wcb_seller_assessment_requests
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_assessment_request_mutation();

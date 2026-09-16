@@ -112,6 +112,10 @@ export class HostedProductController {
         if (!["approved_for_next_stage", "rejected"].includes(decision)) throw new Error("Invalid seller review decision.")
         return send(201, { decision: await this.store.createSellerReviewDecision(session, text(body, "submissionId"), text(body, "snapshotHash"), decision as "approved_for_next_stage" | "rejected", text(body, "idempotencyKey")) })
       }
+      if (action === "/seller/assessment/requests/admit") {
+        exact(body, ["submissionId", "sellerUserId", "snapshotHash", "reviewDecisionId", "idempotencyKey"])
+        return send(201, { assessmentRequest: await this.store.admitSellerAssessment(session, text(body, "submissionId"), text(body, "sellerUserId"), text(body, "snapshotHash"), text(body, "reviewDecisionId"), text(body, "idempotencyKey")) })
+      }
       throw new AuthorityDenied()
     } catch (error) {
       this.onError?.(error)

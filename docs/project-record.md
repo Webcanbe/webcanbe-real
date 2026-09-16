@@ -1,5 +1,31 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller assessment admission
+
+Approved seller submissions can now enter the future assessment pipeline only
+through an active product operator and an immutable `approved_for_next_stage`
+review decision. Admission reuses the existing authenticated hosted controller
+and stores one separate `requested` record; client IDs remain expected
+references, never authority.
+
+The request binds seller, submission, source project/revision/content/snapshot,
+and review-decision provenance. The store verifies the decision's complete
+copied provenance against the immutable submission, serializes duplicate
+admission, returns identical requests idempotently, and refuses conflicting
+seller, submission, decision, snapshot, or key reuse. PostgreSQL rejects request
+update and deletion.
+
+This is a data-only admission record. It invokes no worker, submitted code,
+package manager, uploaded hook/config, network, publication, entitlement, or
+workspace-copy path. Focused tests pass 4/4; TypeScript and build pass; the
+complete five-file security diff review reports zero unresolved findings. The
+full default regression was not run. See the
+[assessment-admission report](reports/phase3-seller-assessment-admission.md),
+[evidence](reports/phase3-seller-assessment-admission-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller quarantine review foundation
 
 The hosted seller intake now has an operator-only quarantine queue and an

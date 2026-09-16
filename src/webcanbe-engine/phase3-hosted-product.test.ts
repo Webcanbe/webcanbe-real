@@ -40,6 +40,7 @@ CREATE TABLE wcb_seller_applications(application_id uuid PRIMARY KEY,user_id uui
 CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,files jsonb NOT NULL,history jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_application_id,source_project_id,source_revision_id));
 CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions(submission_id),status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
+CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -338,5 +339,69 @@ describe("Phase 3 seller quarantine review", () => {
     expect({ catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }).toEqual(before)
     expect(await f.product.browse()).toHaveLength(1)
     expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states ORDER BY updated_at")).rows.map(row => row.status)).toEqual(["pending_review", "pending_review"])
+  })
+})
+
+describe("Phase 3 seller assessment admission", () => {
+  const admissionFixture = async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const call = async (user: Partial<User>, body: Record<string, unknown>) => {
+      const exchange = httpRequest(user, "/__webcanbe/api/product/seller/assessment/requests/admit", body)
+      await controller.handle(exchange.request, exchange.response)
+      return exchange.result()
+    }
+    const application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, f.sourceProjectId)
+    return { ...f, call, application, submission }
+  }
+
+  const approve = (f: Awaited<ReturnType<typeof admissionFixture>>, submission = f.submission, key = "assessment-approval") =>
+    f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", key)
+
+  it("admits only an operator-authorized approved snapshot with exact immutable provenance", async () => {
+    const f = await admissionFixture(), decision = await approve(f)
+    const input = { submissionId: f.submission.submissionId, sellerUserId: f.a.id, snapshotHash: f.submission.snapshotHash, reviewDecisionId: decision.decisionId, idempotencyKey: "assessment-a" }
+    expect(await f.call(f.a, input)).toMatchObject({ status: 403 })
+    expect(await f.call(f.b, { ...input, operator: true })).toMatchObject({ status: 403 })
+    expect(await f.call(f.operator, input)).toMatchObject({ status: 201, body: { assessmentRequest: { submissionId: f.submission.submissionId, sellerUserId: f.a.id, sourceProjectId: f.sourceProjectId, sourceRevisionId: f.submission.sourceRevisionId, sourceContentHash: f.submission.sourceContentHash, snapshotHash: f.submission.snapshotHash, reviewDecisionId: decision.decisionId, status: "requested" } } })
+  })
+
+  it("refuses pending and rejected submissions", async () => {
+    const f = await admissionFixture()
+    await expect(f.product.admitSellerAssessment(f.operator.session, f.submission.submissionId, f.a.id, f.submission.snapshotHash, randomUUID(), "pending-refused")).rejects.toThrow(ProductConflict)
+    const rejected = await f.product.createSellerReviewDecision(f.operator.session, f.submission.submissionId, f.submission.snapshotHash, "rejected", "assessment-rejected")
+    await expect(f.product.admitSellerAssessment(f.operator.session, f.submission.submissionId, f.a.id, f.submission.snapshotHash, rejected.decisionId, "rejected-refused")).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_requests")).rows[0].n)).toBe(0)
+  })
+
+  it("is idempotent and refuses cross-seller, cross-submission, decision, or snapshot substitution", async () => {
+    const f = await admissionFixture(), decisionA = await approve(f)
+    const input = { submissionId: f.submission.submissionId, sellerUserId: f.a.id, snapshotHash: f.submission.snapshotHash, reviewDecisionId: decisionA.decisionId, idempotencyKey: "admit-once" }
+    const first = await f.product.admitSellerAssessment(f.operator.session, input.submissionId, input.sellerUserId, input.snapshotHash, input.reviewDecisionId, input.idempotencyKey)
+    expect(await f.product.admitSellerAssessment(f.operator.session, input.submissionId, input.sellerUserId, input.snapshotHash, input.reviewDecisionId, input.idempotencyKey)).toEqual(first)
+    expect(await f.product.admitSellerAssessment(f.operator.session, input.submissionId, input.sellerUserId, input.snapshotHash, input.reviewDecisionId, "admit-again")).toEqual(first)
+
+    await f.access.workspace(f.workspaceA, f.b.id, "editor"); await f.access.member(f.sourceProjectId, f.b.id, "editor")
+    const applicationB = await f.product.applySeller(f.b.session); await f.product.transitionSellerApplication(f.operator.session, applicationB.applicationId, "approved")
+    const submissionB = await f.product.createSellerSubmission(f.b.session, applicationB.applicationId, f.workspaceA, f.sourceProjectId)
+    const decisionB = await f.product.createSellerReviewDecision(f.operator.session, submissionB.submissionId, submissionB.snapshotHash, "approved_for_next_stage", "assessment-approval-b")
+    await expect(f.product.admitSellerAssessment(f.operator.session, submissionB.submissionId, f.a.id, submissionB.snapshotHash, decisionB.decisionId, "wrong-seller")).rejects.toThrow(ProductConflict)
+    await expect(f.product.admitSellerAssessment(f.operator.session, f.submission.submissionId, f.a.id, f.submission.snapshotHash, decisionB.decisionId, "wrong-decision")).rejects.toThrow(ProductConflict)
+    await expect(f.product.admitSellerAssessment(f.operator.session, submissionB.submissionId, f.b.id, "0".repeat(64), decisionB.decisionId, "wrong-snapshot")).rejects.toThrow(ProductConflict)
+    await expect(f.product.admitSellerAssessment(f.operator.session, submissionB.submissionId, f.b.id, submissionB.snapshotHash, decisionB.decisionId, input.idempotencyKey)).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_requests")).rows[0].n)).toBe(1)
+    const migration = fs.readFileSync("deployment/hosted/postgres.sql", "utf8")
+    expect(migration).toContain("wcb_immutable_seller_assessment_request"); expect(migration).toContain("BEFORE UPDATE OR DELETE ON wcb_seller_assessment_requests")
+  })
+
+  it("creates only a non-executing request and no public product, entitlement, or working copy", async () => {
+    const f = await admissionFixture(), decision = await approve(f), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }
+    await f.product.admitSellerAssessment(f.operator.session, f.submission.submissionId, f.a.id, f.submission.snapshotHash, decision.decisionId, "request-only")
+    expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }).toEqual(before)
+    expect((await f.pool.query("SELECT status,submission_snapshot_hash,review_decision_id FROM wcb_seller_assessment_requests")).rows[0]).toEqual({ status: "requested", submission_snapshot_hash: f.submission.snapshotHash, review_decision_id: decision.decisionId })
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerAssessment", 2)[1].split("async createCatalogProject", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
   })
 })
