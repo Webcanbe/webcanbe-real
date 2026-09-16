@@ -197,6 +197,24 @@ export type AssessmentResult = Readonly<{
   completedAt: string
 }>
 
+export type SellerReleasePromotion = Readonly<{
+  promotionId: string
+  resultId: string
+  assessmentJobId: string
+  submissionId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  reviewDecisionId: string
+  catalogProjectId: string
+  releaseId: string
+  version: string
+  promotedBy: string
+  createdAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

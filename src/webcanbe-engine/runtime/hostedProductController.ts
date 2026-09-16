@@ -116,6 +116,10 @@ export class HostedProductController {
         exact(body, ["submissionId", "sellerUserId", "snapshotHash", "reviewDecisionId", "idempotencyKey"])
         return send(201, { assessmentRequest: await this.store.admitSellerAssessment(session, text(body, "submissionId"), text(body, "sellerUserId"), text(body, "snapshotHash"), text(body, "reviewDecisionId"), text(body, "idempotencyKey")) })
       }
+      if (action === "/seller/assessment/results/promote") {
+        exact(body, ["resultId", "assessmentJobId", "submissionId", "sellerUserId", "snapshotHash", "catalogProjectId", "version", "idempotencyKey"])
+        return send(201, await this.store.promoteAssessmentResult(session, { resultId: text(body, "resultId"), assessmentJobId: text(body, "assessmentJobId"), submissionId: text(body, "submissionId"), sellerUserId: text(body, "sellerUserId"), snapshotHash: text(body, "snapshotHash"), catalogProjectId: text(body, "catalogProjectId"), version: text(body, "version"), idempotencyKey: text(body, "idempotencyKey") }))
+      }
       throw new AuthorityDenied()
     } catch (error) {
       this.onError?.(error)

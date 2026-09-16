@@ -1,3 +1,45 @@
+# Phase 3 passed-assessment release promotion — 2026-09-16
+
+**RELEASE PROMOTION PASS. An explicitly authenticated active product operator
+can promote exactly one accepted `passed` assessment result into exactly one
+immutable `ProjectRelease` copied from the frozen seller submission. Listing
+publication, purchasability, payments, and entitlements remain separate and
+non-automatic.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `7335204d594a76ce75b4fda33b5357bd306d8021`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[promotion report](reports/phase3-seller-release-promotion.md) and
+[machine evidence](reports/phase3-seller-release-promotion-evidence/index.json).
+
+- The authenticated HTTP action accepts references only. Durable active
+  product-operator authority is checked inside the transaction before access
+  and again before return; a client flag cannot assert authority.
+- Promotion joins the immutable result, assessment request, seller submission,
+  review decision, and completed lease. Every seller/source/revision/content/
+  snapshot/job/result/worker/generation reference must agree, and the result
+  outcome must be exactly `passed`.
+- The target active catalog must belong to the assessed seller, workspace, and
+  source project. Stored submission history/content/snapshot integrity is
+  recomputed before release creation; current seller HEAD is never read.
+- One transaction creates the immutable release and append-only promotion
+  record. A per-result lock and database uniqueness make an exact duplicate
+  idempotent while conflicting result, key, version, seller, submission,
+  snapshot, job, or catalog attempts refuse.
+- Promotion creates no `Listing`, entitlement, payment, purchase, workspace
+  copy, network request, package-manager action, or code execution, and does
+  not modify seller HEAD. The release is therefore not automatically public or
+  purchasable.
+- Focused verification passes 6/6; TypeScript and production build pass. The
+  complete five-file security diff scan found zero findings and zero unresolved
+  items. The full default regression was not run.
+
+Next bounded task: implement an explicit operator-authenticated Listing
+publication decision for one promoted immutable `ProjectRelease`, without
+payment or entitlement side effects.
+
+---
+
 # Phase 3 isolated seller assessment worker — 2026-09-16
 
 **ISOLATED ASSESSMENT WORKER PASS. A server-provisioned worker holding the

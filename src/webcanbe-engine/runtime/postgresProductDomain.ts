@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -430,6 +430,60 @@ export class PostgresProductDomainStore {
     })
   }
 
+  async promoteAssessmentResult(operator: ServerSession, input: { resultId: string; assessmentJobId: string; submissionId: string; sellerUserId: string; snapshotHash: string; catalogProjectId: string; version: string; idempotencyKey: string }): Promise<Readonly<{ promotion: SellerReleasePromotion; release: ProjectRelease }>> {
+    identifier(input.resultId); identifier(input.assessmentJobId); identifier(input.submissionId); identifier(input.sellerUserId); identifier(input.catalogProjectId)
+    if (!/^[a-f0-9]{64}$/.test(input.snapshotHash)) throw new Error("Invalid promotion snapshot.")
+    const version = cleanText(input.version, "release version", 100), key = cleanKey(input.idempotencyKey)
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,96))", [input.resultId])
+      const row = (await client.query(`SELECT ar.*,req.status AS request_status,req.submission_id AS request_submission_id,req.seller_user_id AS request_seller_user_id,
+        req.source_project_id AS request_source_project_id,req.source_revision_id AS request_source_revision_id,req.source_content_hash AS request_source_content_hash,
+        req.submission_snapshot_hash AS request_snapshot_hash,req.review_decision_id AS request_review_decision_id,
+        s.seller_application_id,s.workspace_id,s.source_project_id AS submission_source_project_id,s.source_revision_id AS submission_source_revision_id,
+        s.source_content_hash AS submission_source_content_hash,s.snapshot_hash AS immutable_snapshot_hash,s.files AS submission_files,s.history AS submission_history,
+        d.decision,d.submission_id AS decision_submission_id,d.seller_user_id AS decision_seller_user_id,d.source_project_id AS decision_source_project_id,
+        d.source_revision_id AS decision_source_revision_id,d.source_content_hash AS decision_source_content_hash,d.submission_snapshot_hash AS decision_snapshot_hash,
+        l.state AS lease_state,l.worker_id AS lease_worker_id,l.generation AS current_generation
+        FROM wcb_seller_assessment_results ar JOIN wcb_seller_assessment_requests req ON req.assessment_request_id=ar.assessment_request_id
+        JOIN wcb_seller_submissions s ON s.submission_id=ar.submission_id JOIN wcb_seller_review_decisions d ON d.decision_id=ar.review_decision_id
+        JOIN wcb_seller_assessment_leases l ON l.assessment_request_id=ar.assessment_request_id WHERE ar.result_id=$1 FOR SHARE`, [input.resultId])).rows[0]
+      if (!row) throw new AuthorityDenied()
+      const exact = row.result_status === "passed" && String(row.assessment_request_id) === input.assessmentJobId && String(row.submission_id) === input.submissionId && String(row.seller_user_id) === input.sellerUserId && String(row.submission_snapshot_hash) === input.snapshotHash
+        && row.request_status === "requested" && String(row.request_submission_id) === input.submissionId && String(row.request_seller_user_id) === input.sellerUserId && String(row.request_source_project_id) === String(row.source_project_id) && String(row.request_source_revision_id) === String(row.source_revision_id) && String(row.request_source_content_hash) === String(row.source_content_hash) && String(row.request_snapshot_hash) === input.snapshotHash && String(row.request_review_decision_id) === String(row.review_decision_id)
+        && String(row.submission_source_project_id) === String(row.source_project_id) && String(row.submission_source_revision_id) === String(row.source_revision_id) && String(row.submission_source_content_hash) === String(row.source_content_hash) && String(row.immutable_snapshot_hash) === input.snapshotHash
+        && row.decision === "approved_for_next_stage" && String(row.decision_submission_id) === input.submissionId && String(row.decision_seller_user_id) === input.sellerUserId && String(row.decision_source_project_id) === String(row.source_project_id) && String(row.decision_source_revision_id) === String(row.source_revision_id) && String(row.decision_source_content_hash) === String(row.source_content_hash) && String(row.decision_snapshot_hash) === input.snapshotHash
+        && row.lease_state === "completed" && String(row.lease_worker_id) === String(row.worker_id) && String(row.current_generation) === String(row.lease_generation)
+      if (!exact) throw new ProductConflict("Promotion references do not match one passed immutable assessment result.")
+
+      const byKey = (await client.query("SELECT * FROM wcb_seller_release_promotions WHERE promoted_by=$1 AND idempotency_key=$2 FOR SHARE", [operator.userId, key])).rows[0]
+      const existing = (await client.query("SELECT * FROM wcb_seller_release_promotions WHERE result_id=$1 FOR SHARE", [input.resultId])).rows[0]
+      if (byKey || existing) {
+        if (!byKey || !existing || String(byKey.promotion_id) !== String(existing.promotion_id) || String(existing.assessment_request_id) !== input.assessmentJobId || String(existing.submission_id) !== input.submissionId || String(existing.seller_user_id) !== input.sellerUserId || String(existing.submission_snapshot_hash) !== input.snapshotHash || String(existing.catalog_project_id) !== input.catalogProjectId || String(existing.version) !== version || String(existing.idempotency_key) !== key) throw new ProductConflict("Assessment result already has a conflicting promotion.")
+        const releaseRow = (await client.query("SELECT * FROM wcb_project_releases WHERE release_id=$1 AND catalog_project_id=$2 FOR SHARE", [existing.release_id, existing.catalog_project_id])).rows[0]
+        if (!releaseRow || String(releaseRow.source_project_id) !== String(existing.source_project_id) || String(releaseRow.source_revision_id) !== String(existing.source_revision_id) || String(releaseRow.source_content_hash) !== String(existing.source_content_hash) || String(releaseRow.snapshot_hash) !== String(existing.submission_snapshot_hash)) throw new Error("Promoted release provenance is inconsistent.")
+        await this.requireOperatorIn(client, operator)
+        return Object.freeze({ promotion: this.sellerReleasePromotionFrom(existing), release: releaseFrom(releaseRow as ReleaseRow) })
+      }
+
+      const catalog = (await client.query("SELECT * FROM wcb_catalog_projects WHERE catalog_project_id=$1 AND status='active' FOR UPDATE", [input.catalogProjectId])).rows[0]
+      if (!catalog || String(catalog.source_project_id) !== String(row.source_project_id) || String(catalog.owner_workspace_id) !== String(row.workspace_id) || String(catalog.created_by) !== input.sellerUserId) throw new ProductConflict("Promotion catalog does not belong to the assessed seller snapshot.")
+      const files = filesFrom(row.submission_files), history = structuredClone(row.submission_history) as RevisionLedger
+      if (verifyHistory(String(row.source_project_id), files, history) !== String(row.source_revision_id)) throw new Error("Promoted submission history integrity failed.")
+      const head = history.revisions.find(item => item.revisionId === String(row.source_revision_id))
+      if (!head || head.contentHash !== String(row.source_content_hash) || snapshotHash({ projectId: String(row.source_project_id), revisionId: String(row.source_revision_id), contentHash: String(row.source_content_hash), files, history }) !== input.snapshotHash) throw new Error("Promoted submission snapshot integrity failed.")
+      if ((await client.query("SELECT release_id FROM wcb_project_releases WHERE catalog_project_id=$1 AND version=$2 FOR SHARE", [input.catalogProjectId, version])).rowCount) throw new ProductConflict("Release version already exists.")
+
+      const releaseId = randomUUID(), promotionId = randomUUID()
+      const releaseRow = (await client.query(`INSERT INTO wcb_project_releases(release_id,catalog_project_id,version,status,source_project_id,source_revision_id,source_content_hash,snapshot_hash,files,history,created_by,created_at)
+        VALUES($1,$2,$3,'published',$4,$5,$6,$7,$8,$9,$10,clock_timestamp()) RETURNING *`, [releaseId, input.catalogProjectId, version, row.source_project_id, row.source_revision_id, row.source_content_hash, input.snapshotHash, JSON.stringify(encodeFiles(files)), JSON.stringify(history), operator.userId])).rows[0]
+      const promotionRow = (await client.query(`INSERT INTO wcb_seller_release_promotions(promotion_id,result_id,assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,catalog_project_id,release_id,version,promoted_by,idempotency_key,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,clock_timestamp()) RETURNING *`, [promotionId, input.resultId, input.assessmentJobId, input.submissionId, input.sellerUserId, row.source_project_id, row.source_revision_id, row.source_content_hash, input.snapshotHash, row.review_decision_id, input.catalogProjectId, releaseId, version, operator.userId, key])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return Object.freeze({ promotion: this.sellerReleasePromotionFrom(promotionRow), release: releaseFrom(releaseRow as ReleaseRow) })
+    })
+  }
+
   async createCatalogProject(session: ServerSession, workspaceId: string, sourceProjectId: string, input: { slug: string; title: string; summary: string; publicMetadata?: Record<string, unknown> }): Promise<CatalogProject> {
     identifier(workspaceId); identifier(sourceProjectId)
     const grant = await this.access.grant(session, sourceProjectId, "source")
@@ -730,6 +784,10 @@ export class PostgresProductDomainStore {
     const metadata = typeof row.assessment_metadata === "string" ? JSON.parse(row.assessment_metadata) : structuredClone(row.assessment_metadata ?? {})
     const artifactRefs = typeof row.artifact_refs === "string" ? JSON.parse(row.artifact_refs) : structuredClone(row.artifact_refs ?? [])
     return Object.freeze({ resultId: String(row.result_id), assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), admittedBy: String(row.admitted_by), admissionCreatedAt: iso(row.admission_created_at), workerId: String(row.worker_id), leaseGeneration: String(row.lease_generation), status: row.result_status as AssessmentResultStatus, metadata: Object.freeze(metadata as Record<string, unknown>), artifactRefs: Object.freeze(artifactRefs as string[]), completedAt: iso(row.completed_at) })
+  }
+
+  private sellerReleasePromotionFrom(row: Record<string, unknown>): SellerReleasePromotion {
+    return Object.freeze({ promotionId: String(row.promotion_id), resultId: String(row.result_id), assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), version: String(row.version), promotedBy: String(row.promoted_by), createdAt: iso(row.created_at) })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

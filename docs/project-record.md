@@ -1,5 +1,36 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 passed-assessment release promotion
+
+The seller pipeline now has an explicit operator-authenticated promotion
+decision. It accepts only an immutable assessment result whose terminal outcome
+is `passed`, then verifies the complete submission, review, admission, lease,
+worker generation, result, seller, and source snapshot lineage in one
+PostgreSQL transaction.
+
+Promotion reads the frozen files and history stored on the seller submission,
+recomputes revision/content/snapshot integrity, and requires an active catalog
+owned by that exact seller, workspace, and source project. It never reads or
+changes current seller HEAD. The resulting `ProjectRelease` therefore preserves
+the assessed snapshot even when the editable source changes later.
+
+The append-only promotion record binds the operator and resulting release to
+that exact lineage. Transaction locking plus unique result, release, catalog
+version, and operator/idempotency constraints make exact replay idempotent and
+conflicting promotion impossible. Database triggers keep both historical
+promotion decisions and releases immutable.
+
+No `Listing`, entitlement, payment, purchase, workspace copy, execution, or
+network action is implicit. A promoted release remains non-public and
+non-purchasable until a later separate listing decision. Focused tests pass
+6/6; TypeScript and build pass; the complete five-file security diff scan
+reports zero unresolved findings. The full default regression was not run. See
+the [promotion report](reports/phase3-seller-release-promotion.md),
+[evidence](reports/phase3-seller-release-promotion-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 isolated seller assessment worker
 
 The seller pipeline now has a real out-of-process assessment worker without a

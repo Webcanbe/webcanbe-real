@@ -217,3 +217,21 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_seller_assessment_result ON wcb_seller_assessment_results;
 CREATE TRIGGER wcb_immutable_seller_assessment_result BEFORE UPDATE OR DELETE ON wcb_seller_assessment_results
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_assessment_result_mutation();
+CREATE TABLE IF NOT EXISTS wcb_seller_release_promotions (
+  promotion_id uuid PRIMARY KEY, result_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_assessment_results,
+  assessment_request_id uuid NOT NULL REFERENCES wcb_seller_assessment_requests, submission_id uuid NOT NULL REFERENCES wcb_seller_submissions,
+  seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL, source_revision_id text NOT NULL,
+  source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
+  review_decision_id uuid NOT NULL REFERENCES wcb_seller_review_decisions,
+  catalog_project_id uuid NOT NULL, release_id uuid NOT NULL UNIQUE, version text NOT NULL,
+  promoted_by uuid NOT NULL REFERENCES wcb_product_operators, idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(promoted_by,idempotency_key),
+  FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_release_promotion_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerReleasePromotion is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_release_promotion ON wcb_seller_release_promotions;
+CREATE TRIGGER wcb_immutable_seller_release_promotion BEFORE UPDATE OR DELETE ON wcb_seller_release_promotions
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_release_promotion_mutation();
