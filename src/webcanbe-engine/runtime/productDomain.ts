@@ -168,6 +168,35 @@ export type AssessmentJobCancellation = Readonly<{
   state: "cancelled"
 }>
 
+export type AssessmentResultStatus = "passed" | "failed" | "errored"
+
+export type AssessmentResultInput = Readonly<{
+  idempotencyKey: string
+  status: AssessmentResultStatus
+  metadata?: Record<string, unknown>
+  artifactRefs?: string[]
+}>
+
+export type AssessmentResult = Readonly<{
+  resultId: string
+  assessmentJobId: string
+  submissionId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  reviewDecisionId: string
+  admittedBy: string
+  admissionCreatedAt: string
+  workerId: string
+  leaseGeneration: string
+  status: AssessmentResultStatus
+  metadata: Readonly<Record<string, unknown>>
+  artifactRefs: readonly string[]
+  completedAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

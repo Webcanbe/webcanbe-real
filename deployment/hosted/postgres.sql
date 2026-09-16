@@ -170,14 +170,16 @@ CREATE TABLE IF NOT EXISTS wcb_seller_assessment_leases (
   submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
   worker_id uuid NOT NULL REFERENCES wcb_assessment_workers, generation bigint NOT NULL CHECK(generation>0),
   claimed_at timestamptz NOT NULL, lease_until timestamptz NOT NULL CHECK(lease_until>claimed_at),
-  state text NOT NULL CHECK(state IN ('leased','cancelled')), cancelled_at timestamptz,
-  CHECK((state='leased' AND cancelled_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL))
+  state text NOT NULL CHECK(state IN ('leased','cancelled','completed')), cancelled_at timestamptz, completed_at timestamptz,
+  CHECK((state='leased' AND cancelled_at IS NULL AND completed_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL AND completed_at IS NULL) OR (state='completed' AND cancelled_at IS NULL AND completed_at IS NOT NULL))
 );
 ALTER TABLE wcb_seller_assessment_leases ADD COLUMN IF NOT EXISTS cancelled_at timestamptz;
+ALTER TABLE wcb_seller_assessment_leases ADD COLUMN IF NOT EXISTS completed_at timestamptz;
 ALTER TABLE wcb_seller_assessment_leases DROP CONSTRAINT IF EXISTS wcb_seller_assessment_leases_state_check;
-ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_state_check CHECK(state IN ('leased','cancelled'));
+ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_state_check CHECK(state IN ('leased','cancelled','completed'));
 ALTER TABLE wcb_seller_assessment_leases DROP CONSTRAINT IF EXISTS wcb_seller_assessment_leases_cancelled_check;
-ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_cancelled_check CHECK((state='leased' AND cancelled_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL));
+ALTER TABLE wcb_seller_assessment_leases DROP CONSTRAINT IF EXISTS wcb_seller_assessment_leases_terminal_check;
+ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_terminal_check CHECK((state='leased' AND cancelled_at IS NULL AND completed_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL AND completed_at IS NULL) OR (state='completed' AND cancelled_at IS NULL AND completed_at IS NOT NULL));
 CREATE INDEX IF NOT EXISTS wcb_expired_seller_assessment_leases ON wcb_seller_assessment_leases(state,lease_until);
 CREATE OR REPLACE FUNCTION wcb_guard_seller_assessment_lease() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
@@ -187,7 +189,7 @@ BEGIN
     OR NEW.submission_snapshot_hash IS DISTINCT FROM OLD.submission_snapshot_hash THEN
     RAISE EXCEPTION 'Assessment lease provenance is immutable';
   END IF;
-  IF OLD.state='cancelled' THEN RAISE EXCEPTION 'Cancelled assessment lease is terminal'; END IF;
+  IF OLD.state IN ('cancelled','completed') THEN RAISE EXCEPTION 'Terminal assessment lease cannot be changed'; END IF;
   IF NEW.generation < OLD.generation OR NEW.generation > OLD.generation+1 THEN RAISE EXCEPTION 'Invalid assessment lease generation'; END IF;
   RETURN NEW;
 END
@@ -195,3 +197,23 @@ $$;
 DROP TRIGGER IF EXISTS wcb_guard_seller_assessment_lease ON wcb_seller_assessment_leases;
 CREATE TRIGGER wcb_guard_seller_assessment_lease BEFORE UPDATE OR DELETE ON wcb_seller_assessment_leases
   FOR EACH ROW EXECUTE FUNCTION wcb_guard_seller_assessment_lease();
+CREATE TABLE IF NOT EXISTS wcb_seller_assessment_results (
+  result_id uuid PRIMARY KEY, assessment_request_id uuid NOT NULL REFERENCES wcb_seller_assessment_requests,
+  submission_id uuid NOT NULL, seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
+  review_decision_id uuid NOT NULL REFERENCES wcb_seller_review_decisions, admitted_by uuid NOT NULL, admission_created_at timestamptz NOT NULL,
+  worker_id uuid NOT NULL REFERENCES wcb_assessment_workers, lease_generation bigint NOT NULL CHECK(lease_generation>0),
+  result_status text NOT NULL CHECK(result_status IN ('passed','failed','errored')),
+  assessment_metadata jsonb NOT NULL CHECK(jsonb_typeof(assessment_metadata)='object'),
+  artifact_refs jsonb NOT NULL CHECK(jsonb_typeof(artifact_refs)='array'),
+  result_digest text NOT NULL CHECK(result_digest ~ '^[a-f0-9]{64}$'),
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'), completed_at timestamptz NOT NULL,
+  UNIQUE(assessment_request_id,lease_generation), UNIQUE(worker_id,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_assessment_result_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerAssessmentResult is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_assessment_result ON wcb_seller_assessment_results;
+CREATE TRIGGER wcb_immutable_seller_assessment_result BEFORE UPDATE OR DELETE ON wcb_seller_assessment_results
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_assessment_result_mutation();

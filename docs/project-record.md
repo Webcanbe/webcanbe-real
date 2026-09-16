@@ -1,5 +1,36 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller assessment result acceptance
+
+The hosted seller assessment pipeline now has an immutable result-acceptance
+boundary. An active server-provisioned worker may submit only while it owns the
+exact current live job/submission/snapshot/generation fence. PostgreSQL locks,
+database-clock expiry, credential rechecks, and a terminal conditional update
+keep acceptance atomic with job completion.
+
+Each server-generated result identity stores the submitted source revision,
+content hash and snapshot, review decision, admitting operator and time, worker,
+fence generation, `passed`/`failed`/`errored` outcome, bounded JSON metadata,
+opaque artifact references, idempotency key, and completion time. The artifact
+IDs do not confer authority. Results reject update/delete, and completed jobs
+cannot renew, cancel, reclaim, or accept a conflicting outcome.
+
+Canonicalized content plus the same idempotency key allows an exact duplicate
+to return the original result across restart. Stale, expired, cancelled,
+wrong-worker, cross-job, substituted-snapshot, fresh-key, and conflicting-
+content deliveries refuse without changing history. The boundary performs no
+submitted-code execution, package-manager/script/config/plugin/hook invocation,
+network request, publication, entitlement, purchase, or materialization.
+
+Focused tests pass 6/6; TypeScript and build pass; the complete four-file
+security diff scan reports zero unresolved findings. The full default
+regression was not run. See the
+[result-acceptance report](reports/phase3-seller-assessment-result-acceptance.md),
+[evidence](reports/phase3-seller-assessment-result-acceptance-evidence/index.json),
+and [current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller assessment lease lifecycle
 
 Already-claimed seller assessment jobs now support server-side renewal and

@@ -42,7 +42,8 @@ CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFEREN
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
 CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
 CREATE TABLE wcb_assessment_workers(worker_id uuid PRIMARY KEY,credential_hash text NOT NULL,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
-CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),generation bigint NOT NULL,claimed_at timestamptz NOT NULL,lease_until timestamptz NOT NULL,state text NOT NULL,cancelled_at timestamptz);
+CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),generation bigint NOT NULL,claimed_at timestamptz NOT NULL,lease_until timestamptz NOT NULL,state text NOT NULL,cancelled_at timestamptz,completed_at timestamptz);
+CREATE TABLE wcb_seller_assessment_results(result_id uuid PRIMARY KEY,assessment_request_id uuid NOT NULL REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL REFERENCES wcb_seller_review_decisions(decision_id),admitted_by uuid NOT NULL,admission_created_at timestamptz NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),lease_generation bigint NOT NULL,result_status text NOT NULL,assessment_metadata jsonb NOT NULL,artifact_refs jsonb NOT NULL,result_digest text NOT NULL,idempotency_key text NOT NULL,completed_at timestamptz NOT NULL,UNIQUE(assessment_request_id,lease_generation),UNIQUE(worker_id,idempotency_key));
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -534,6 +535,72 @@ describe("Phase 3 seller assessment lease lifecycle", () => {
     const before = { projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }
     const lease = await f.claim(); const renewed = await f.product.renewAssessmentJobLease(f.workerA, lease); await f.product.cancelAssessmentJob(f.workerA, renewed)
     expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }).toEqual(before)
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
+  })
+})
+
+describe("Phase 3 seller assessment result acceptance", () => {
+  const resultFixture = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, f.sourceProjectId)
+    const decision = await f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", "result-approval")
+    const request = await f.product.admitSellerAssessment(f.operator.session, submission.submissionId, f.a.id, submission.snapshotHash, decision.decisionId, "result-admission")
+    const workerA = await f.product.provisionAssessmentWorker(randomUUID()), workerB = await f.product.provisionAssessmentWorker(randomUUID())
+    const lease = await f.product.claimAssessmentJob(workerA, request.assessmentRequestId, submission.submissionId, f.a.id, submission.snapshotHash)
+    const input = { idempotencyKey: "result-1", status: "passed" as const, metadata: { checks: 12, profile: "isolated" }, artifactRefs: [randomUUID(), randomUUID()] }
+    return { ...f, application, submission, decision, request, workerA, workerB, lease, input }
+  }
+
+  it("accepts a bounded terminal result only from the exact current live fence", async () => {
+    const f = await resultFixture(), result = await f.product.acceptAssessmentResult(f.workerA, f.lease, f.input)
+    expect(result).toMatchObject({ assessmentJobId: f.request.assessmentRequestId, submissionId: f.submission.submissionId, sellerUserId: f.a.id, sourceProjectId: f.sourceProjectId, sourceRevisionId: f.submission.sourceRevisionId, sourceContentHash: f.submission.sourceContentHash, snapshotHash: f.submission.snapshotHash, reviewDecisionId: f.decision.decisionId, admittedBy: f.operator.id, workerId: f.workerA.workerId, leaseGeneration: f.lease.generation, status: "passed", metadata: f.input.metadata, artifactRefs: [...f.input.artifactRefs].sort() })
+    expect((await f.pool.query("SELECT state,completed_at FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1", [f.request.assessmentRequestId])).rows[0]).toMatchObject({ state: "completed" })
+  })
+
+  it("rejects expired, stale, cancelled, and wrong-worker result delivery", async () => {
+    const expired = await resultFixture()
+    await expired.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [expired.request.assessmentRequestId])
+    await expect(expired.product.acceptAssessmentResult(expired.workerA, expired.lease, expired.input)).rejects.toThrow(AuthorityDenied)
+    const current = await expired.product.claimAssessmentJob(expired.workerB, expired.request.assessmentRequestId, expired.submission.submissionId, expired.a.id, expired.submission.snapshotHash)
+    await expect(expired.product.acceptAssessmentResult(expired.workerA, expired.lease, expired.input)).rejects.toThrow(AuthorityDenied)
+    await expect(expired.product.acceptAssessmentResult(expired.workerA, current, expired.input)).rejects.toThrow(AuthorityDenied)
+    const cancelled = await resultFixture(); await cancelled.product.cancelAssessmentJob(cancelled.workerA, cancelled.lease)
+    await expect(cancelled.product.acceptAssessmentResult(cancelled.workerA, cancelled.lease, cancelled.input)).rejects.toThrow(AuthorityDenied)
+  })
+
+  it("rejects substituted job, submission, and snapshot references", async () => {
+    const f = await resultFixture()
+    await expect(f.product.acceptAssessmentResult(f.workerA, { ...f.lease, assessmentJobId: randomUUID() }, f.input)).rejects.toThrow(AuthorityDenied)
+    await expect(f.product.acceptAssessmentResult(f.workerA, { ...f.lease, submissionId: randomUUID() }, f.input)).rejects.toThrow(AuthorityDenied)
+    await expect(f.product.acceptAssessmentResult(f.workerA, { ...f.lease, snapshotHash: "0".repeat(64) }, f.input)).rejects.toThrow(AuthorityDenied)
+  })
+
+  it("acknowledges exact replay but rejects conflicting results without rewriting history", async () => {
+    const f = await resultFixture(), first = await f.product.acceptAssessmentResult(f.workerA, f.lease, f.input)
+    expect(await f.product.acceptAssessmentResult(f.workerA, f.lease, { ...f.input, metadata: { profile: "isolated", checks: 12 }, artifactRefs: [...f.input.artifactRefs].reverse() })).toEqual(first)
+    await expect(f.product.acceptAssessmentResult(f.workerA, f.lease, { ...f.input, status: "failed" })).rejects.toThrow(ProductConflict)
+    await expect(f.product.acceptAssessmentResult(f.workerA, f.lease, { ...f.input, idempotencyKey: "result-2" })).rejects.toThrow(ProductConflict)
+    const stored = (await f.pool.query("SELECT result_id,result_status,result_digest,assessment_metadata,artifact_refs FROM wcb_seller_assessment_results WHERE result_id=$1", [first.resultId])).rows[0]
+    expect(stored).toMatchObject({ result_id: first.resultId, result_status: "passed", assessment_metadata: f.input.metadata, artifact_refs: [...f.input.artifactRefs].sort() })
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_results")).rows[0].n)).toBe(1)
+  })
+
+  it("preserves accepted result, idempotency, stale rejection, and exact provenance across restart", async () => {
+    const f = await resultFixture(), accepted = await f.product.acceptAssessmentResult(f.workerA, f.lease, f.input), restarted = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    expect(await restarted.acceptAssessmentResult(f.workerA, f.lease, f.input)).toEqual(accepted)
+    await expect(restarted.acceptAssessmentResult(f.workerB, f.lease, f.input)).rejects.toThrow(AuthorityDenied)
+    await expect(restarted.claimAssessmentJob(f.workerB, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)).rejects.toThrow(ProductConflict)
+    expect((await f.pool.query("SELECT source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,admitted_by,lease_generation FROM wcb_seller_assessment_results WHERE result_id=$1", [accepted.resultId])).rows[0]).toEqual({ source_revision_id: f.submission.sourceRevisionId, source_content_hash: f.submission.sourceContentHash, submission_snapshot_hash: f.submission.snapshotHash, review_decision_id: f.decision.decisionId, admitted_by: f.operator.id, lease_generation: 1 })
+  })
+
+  it("stores only the result boundary and has no execution, network, publication, entitlement, or copy side effects", async () => {
+    const f = await resultFixture(), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }
+    await f.product.acceptAssessmentResult(f.workerA, f.lease, f.input)
+    expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }).toEqual(before)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_results")).rows[0].n)).toBe(1)
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
   })

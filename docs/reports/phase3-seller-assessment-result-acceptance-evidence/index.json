@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "ba9bc31f0e6460832fb063cd4b63b893b07cc3fc",
+  "status": "PASS",
+  "scope": {
+    "liveFenceResultAcceptance": true,
+    "immutableResultStorage": true,
+    "assessmentExecution": false,
+    "submittedCodeExecution": false,
+    "externalNetwork": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "purchasability": false,
+    "workspaceMaterialization": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 6,
+      "total": 6,
+      "skippedUnrelated": 30,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller assessment result acceptance\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "liveFenceResultAuthority": "PASS",
+    "staleResultRejection": "PASS",
+    "expiredResultRejection": "PASS",
+    "cancelledResultRejection": "PASS",
+    "wrongWorkerRejection": "PASS",
+    "snapshotBinding": "PASS",
+    "reviewAdmissionBinding": "PASS",
+    "resultImmutability": "PASS",
+    "exactReplayIdempotency": "PASS",
+    "conflictingResultRejection": "PASS",
+    "restartSafety": "PASS",
+    "inProcessCodeExecution": "ABSENT",
+    "externalNetwork": "ABSENT",
+    "implicitPublication": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "implicitPurchasability": "REFUSED",
+    "implicitMaterialization": "REFUSED"
+  },
+  "security": {
+    "scanId": "0d377165-dd82-40cc-b63e-19008e1bf15f",
+    "coverage": "complete",
+    "changedFilesReviewed": 4,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

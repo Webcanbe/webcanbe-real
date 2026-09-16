@@ -1,3 +1,43 @@
+# Phase 3 seller assessment result acceptance — 2026-09-16
+
+**ASSESSMENT RESULT ACCEPTANCE PASS. A server-provisioned worker holding the
+exact current live lease fence can atomically store one immutable, snapshot-
+bound terminal assessment outcome. Exact replay is idempotent; stale,
+cancelled, expired, substituted, wrong-worker, and conflicting delivery refuse.
+This slice does not execute submitted code or publish a product.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `ba9bc31f0e6460832fb063cd4b63b893b07cc3fc`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[result-acceptance report](reports/phase3-seller-assessment-result-acceptance.md)
+and [machine evidence](reports/phase3-seller-assessment-result-acceptance-evidence/index.json).
+
+- Acceptance authenticates the active provisioned worker and requires the
+  exact job, submission, snapshot, worker owner, and current lease generation.
+  The lease must remain database-clock live at the terminal conditional update.
+- One transaction stores a server-generated result identity and atomically
+  moves the lease from `leased` to durable terminal `completed`.
+- The result copies exact seller/source revision/content/snapshot provenance,
+  review-decision and admission lineage, worker, generation, outcome, bounded
+  metadata, reference-only artifact IDs, idempotency key, and completion time.
+- Outcomes are `passed`, `failed`, or `errored`; none is a publication or
+  approval decision. One immutable result is allowed per job generation.
+- Canonical metadata and sorted references make exact same-key replay stable.
+  Different content or key for the completed attempt conflicts and cannot
+  rewrite the immutable row.
+- No browser result route, in-process execution, package manager, uploaded
+  hook/config/plugin, network access, release/listing, entitlement, purchase,
+  or workspace-copy side effect exists in this slice.
+- Focused verification passes 6/6; TypeScript and production build pass. The
+  complete four-file security diff scan found zero unresolved findings. The
+  full default regression was not run.
+
+Next bounded task: implement an out-of-process isolated assessment worker that
+consumes the exact leased snapshot and submits through this result boundary,
+without release/listing publication.
+
+---
+
 # Phase 3 seller assessment lease lifecycle — 2026-09-16
 
 **ASSESSMENT LEASE LIFECYCLE PASS. The exact current live worker fence can

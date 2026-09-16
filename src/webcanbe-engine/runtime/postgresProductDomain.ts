@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -34,6 +34,19 @@ const jsonObject = (value: Record<string, unknown> | undefined, label: string) =
   const parsed: unknown = JSON.parse(encoded)
   if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") throw new Error(`Invalid ${label}.`)
   return parsed as Record<string, unknown>
+}
+const canonicalJson = (value: unknown): string => {
+  if (value === null || typeof value !== "object") return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`
+  const object = value as Record<string, unknown>
+  return `{${Object.keys(object).sort().map(key => `${JSON.stringify(key)}:${canonicalJson(object[key])}`).join(",")}}`
+}
+const assessmentArtifactRefs = (values: string[] | undefined) => {
+  if (values === undefined) return []
+  if (!Array.isArray(values) || values.length > 20) throw new Error("Invalid assessment artifact references.")
+  const refs = values.map(value => identifier(value))
+  if (new Set(refs).size !== refs.length) throw new Error("Invalid assessment artifact references.")
+  return refs.sort()
 }
 const cleanTags = (values: string[] | undefined) => {
   if (!values) return []
@@ -267,7 +280,7 @@ export class PostgresProductDomainStore {
       const current = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [assessmentJobId])).rows[0]
       if (current) {
         this.assertAssessmentLeaseBinding(current, request)
-        if (current.state !== "leased") throw new ProductConflict("Assessment job is cancelled and terminal.")
+        if (current.state !== "leased") throw new ProductConflict("Assessment job is terminal.")
         if (current.live) {
           if (String(current.worker_id) !== worker.workerId) throw new ProductConflict("Assessment job already has a live worker lease.")
           await this.requireAssessmentWorkerIn(client, worker); return this.assessmentJobLeaseFrom(current)
@@ -340,6 +353,42 @@ export class PostgresProductDomainStore {
       this.assertAssessmentLeaseBinding(cancelled, request)
       await this.requireAssessmentWorkerIn(client, worker)
       return this.assessmentJobCancellationFrom(cancelled)
+    })
+  }
+
+  async acceptAssessmentResult(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence, input: AssessmentResultInput): Promise<AssessmentResult> {
+    this.validateAssessmentFence(worker, fence)
+    const status = input.status as AssessmentResultStatus
+    if (!( ["passed", "failed", "errored"] as string[]).includes(status)) throw new Error("Invalid assessment result status.")
+    const normalized = { idempotencyKey: cleanKey(input.idempotencyKey), status, metadata: jsonObject(input.metadata, "assessment metadata"), artifactRefs: assessmentArtifactRefs(input.artifactRefs) }
+    const digest = sha256(canonicalJson({ status: normalized.status, metadata: normalized.metadata, artifactRefs: normalized.artifactRefs }))
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [fence.assessmentJobId])
+      const request = await this.assessmentRequestForClaim(client, fence.assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      const lease = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!lease || String(lease.worker_id) !== worker.workerId || String(lease.generation) !== fence.generation || String(lease.submission_id) !== fence.submissionId || String(lease.submission_snapshot_hash) !== fence.snapshotHash) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(lease, request)
+      const existing = (await client.query("SELECT * FROM wcb_seller_assessment_results WHERE assessment_request_id=$1 AND lease_generation=$2 FOR SHARE", [fence.assessmentJobId, fence.generation])).rows[0]
+      const keyed = (await client.query("SELECT * FROM wcb_seller_assessment_results WHERE worker_id=$1 AND idempotency_key=$2 FOR SHARE", [worker.workerId, normalized.idempotencyKey])).rows[0]
+      if (lease.state === "completed") {
+        if (existing && (!keyed || String(keyed.result_id) === String(existing.result_id)) && this.assessmentResultMatches(existing, worker, fence, normalized.idempotencyKey, digest)) {
+          await this.requireAssessmentWorkerIn(client, worker)
+          return this.assessmentResultFrom(existing)
+        }
+        throw new ProductConflict("Assessment result is already final.")
+      }
+      if (lease.state !== "leased" || !lease.live) throw new AuthorityDenied()
+      if (existing || keyed) throw new ProductConflict("Assessment result conflicts with an existing result or idempotency key.")
+      const resultId = randomUUID()
+      const row = (await client.query(`INSERT INTO wcb_seller_assessment_results(result_id,assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,admitted_by,admission_created_at,worker_id,lease_generation,result_status,assessment_metadata,artifact_refs,result_digest,idempotency_key,completed_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,clock_timestamp()) RETURNING *`, [resultId, fence.assessmentJobId, request.submission_id, request.seller_user_id, request.source_project_id, request.source_revision_id, request.source_content_hash, request.submission_snapshot_hash, request.review_decision_id, request.admitted_by, request.created_at, worker.workerId, fence.generation, normalized.status, JSON.stringify(normalized.metadata), JSON.stringify(normalized.artifactRefs), digest, normalized.idempotencyKey])).rows[0]
+      const completed = await client.query(`UPDATE wcb_seller_assessment_leases SET state='completed',completed_at=$4
+        WHERE assessment_request_id=$1 AND worker_id=$2 AND generation=$3 AND state='leased' AND lease_until>clock_timestamp()`, [fence.assessmentJobId, worker.workerId, fence.generation, row.completed_at])
+      if (!completed.rowCount) throw new AuthorityDenied()
+      await this.requireAssessmentWorkerIn(client, worker)
+      return this.assessmentResultFrom(row)
     })
   }
 
@@ -633,6 +682,16 @@ export class PostgresProductDomainStore {
 
   private assessmentJobCancellationFrom(row: Record<string, unknown>): AssessmentJobCancellation {
     return Object.freeze({ assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), workerId: String(row.worker_id), generation: String(row.generation), claimedAt: iso(row.claimed_at), leaseExpiresAt: iso(row.lease_until), cancelledAt: iso(row.cancelled_at), state: "cancelled" })
+  }
+
+  private assessmentResultMatches(row: Record<string, unknown>, worker: AssessmentWorkerAuthority, fence: AssessmentJobFence, key: string, digest: string) {
+    return String(row.assessment_request_id) === fence.assessmentJobId && String(row.submission_id) === fence.submissionId && String(row.submission_snapshot_hash) === fence.snapshotHash && String(row.worker_id) === worker.workerId && String(row.lease_generation) === fence.generation && String(row.idempotency_key) === key && String(row.result_digest) === digest
+  }
+
+  private assessmentResultFrom(row: Record<string, unknown>): AssessmentResult {
+    const metadata = typeof row.assessment_metadata === "string" ? JSON.parse(row.assessment_metadata) : structuredClone(row.assessment_metadata ?? {})
+    const artifactRefs = typeof row.artifact_refs === "string" ? JSON.parse(row.artifact_refs) : structuredClone(row.artifact_refs ?? [])
+    return Object.freeze({ resultId: String(row.result_id), assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), admittedBy: String(row.admitted_by), admissionCreatedAt: iso(row.admission_created_at), workerId: String(row.worker_id), leaseGeneration: String(row.lease_generation), status: row.result_status as AssessmentResultStatus, metadata: Object.freeze(metadata as Record<string, unknown>), artifactRefs: Object.freeze(artifactRefs as string[]), completedAt: iso(row.completed_at) })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {
