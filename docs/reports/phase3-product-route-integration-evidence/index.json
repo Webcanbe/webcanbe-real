@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "3d4053427a2db3196174acf2aeffddb77373686e",
+  "status": "PASS",
+  "scope": {
+    "routeIntegration": true,
+    "landingChanged": false,
+    "productSemanticsChanged": false,
+    "realPayments": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 12,
+      "total": 12,
+      "files": [
+        "src/hostedProductClient.test.ts",
+        "src/webcanbe-engine/phase3-hosted-product.test.ts"
+      ],
+      "command": "npx vitest run src/hostedProductClient.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts --maxWorkers=1"
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN",
+    "preservedPriorFullRegression": "686/687"
+  },
+  "guarantees": {
+    "browseHostedController": "PASS",
+    "purchaseEntitlementRoute": "PASS",
+    "workspaceMaterializationRoute": "PASS",
+    "myProjectsHostedAccess": "PASS",
+    "authentication": "PASS",
+    "operatorTestAuthority": "PASS",
+    "crossTenantAuthority": "PASS",
+    "sourceProvenance": "PASS",
+    "releaseImmutability": "PASS",
+    "entitlementIdempotency": "PASS",
+    "purchasesDistinctFromProjects": "PASS"
+  },
+  "security": {
+    "scanId": "cf1289a0-1407-4b17-98e2-222f43732b94",
+    "coverage": "complete",
+    "changedFilesReviewed": 6,
+    "findings": 0,
+    "unresolved": 0
+  },
+  "knownException": "The preserved prior full default run remains 686/687 because the untouched Phase-2 afterEach Vite temporary-cache cleanup raced with cache population and raised ENOTEMPTY at src/webcanbe-engine/phase2de.test.ts:16. The full regression was not rerun and is not represented as green."
+}

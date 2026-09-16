@@ -86,6 +86,32 @@ function httpRequest(user: Partial<User>, url: string, body: Record<string, unkn
 }
 
 describe("Phase 3 hosted product persistence and HTTP controller", () => {
+  it("wires authenticated catalog, operator TEST purchase, idempotent materialization, My Projects, and tenant isolation", async () => {
+    const f = await setup(), boundary = new PostgresSessionBoundary(f.identity, origins), controller = new HostedProductController(f.product, boundary)
+    const call = async (user: Partial<User>, action: string, body: Record<string, unknown>) => {
+      const exchange = httpRequest(user, `/__webcanbe/api/product${action}`, body)
+      await controller.handle(exchange.request, exchange.response)
+      return exchange.result()
+    }
+
+    expect(await call({}, "/catalog/browse", {})).toMatchObject({ status: 403 })
+    expect(await call(f.a, "/catalog/browse", { query: "hosted", tags: ["react"] })).toMatchObject({ status: 200, body: { listings: [{ listingId: f.listing.listingId, releaseId: f.release.releaseId }] } })
+    expect(await call(f.a, "/entitlements/test/grant-self", { releaseId: f.release.releaseId, idempotencyKey: "route-grant" })).toMatchObject({ status: 403 })
+
+    await f.product.provisionOperator(f.a.id)
+    const grant = await call(f.a, "/entitlements/test/grant-self", { releaseId: f.release.releaseId, idempotencyKey: "route-grant" })
+    expect(grant).toMatchObject({ status: 201, body: { entitlement: { userId: f.a.id, releaseId: f.release.releaseId, status: "active" } } })
+    const entitlementId = grant.body.entitlement.entitlementId as string
+    const input = { workspaceId: f.workspaceA, entitlementId, idempotencyKey: "route-copy", name: "Route copy" }
+    const first = await call(f.a, "/workspace-projects/materialize", input), replay = await call(f.a, "/workspace-projects/materialize", input)
+    expect(replay.body.workspaceProject.workspaceProjectId).toBe(first.body.workspaceProject.workspaceProjectId)
+    expect(first.body.workspaceProject).toMatchObject({ entitlementId, releaseId: f.release.releaseId, sourceProjectId: f.sourceProjectId, sourceRevisionId: f.release.sourceRevisionId, sourceContentHash: f.release.sourceContentHash, releaseSnapshotHash: f.release.snapshotHash })
+    expect(await call(f.a, "/workspace-projects/list", {})).toMatchObject({ status: 200, body: { workspaceProjects: [{ workspaceProjectId: first.body.workspaceProject.workspaceProjectId }] } })
+    expect(await call(f.b, "/workspace-projects/list", {})).toEqual({ status: 200, body: { workspaceProjects: [] } })
+    expect(await call(f.b, "/workspace-projects/get", { workspaceProjectId: first.body.workspaceProject.workspaceProjectId })).toMatchObject({ status: 403 })
+    expect(await call(f.b, "/workspace-projects/materialize", { ...input, workspaceId: f.workspaceB, idempotencyKey: "stolen-copy" })).toMatchObject({ status: 403 })
+  })
+
   it("persists catalog/listing/release lineage across store restart and declares release immutability in the hosted migration", async () => {
     const f = await setup(), restarted = new PostgresProductDomainStore(f.pool, f.access, f.source)
     expect((await restarted.browse({ query: "real hosted", tags: ["react"] }))[0]).toMatchObject({ listingId: f.listing.listingId, releaseId: f.release.releaseId, sourceRevisionId: f.release.sourceRevisionId, snapshotHash: f.release.snapshotHash })

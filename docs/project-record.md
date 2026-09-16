@@ -1,5 +1,30 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 hosted product route integration
+
+The existing product routes now use the Stage-B authenticated hosted product
+controller in hosted mode without a route redesign. Browse and listing detail
+read authoritative hosted catalog data; the existing action creates or reuses
+an operator-authorized TEST entitlement and materializes it through the
+idempotent controller contract; My Projects lists owned workspace copies and
+purchase entitlements as separate concepts.
+
+The browser adapter sends no identity, membership, workspace-authority, or
+operator assertions. The server binds TEST self-grants to the authenticated
+user while retaining the durable operator check, chooses only authenticated
+workspace results, rechecks project authority for My Projects, and preserves
+the existing immutable release and exact source-provenance contract.
+
+Focused route/controller verification passes 12/12; TypeScript and build pass;
+the complete six-file security diff review reports zero unresolved findings.
+The full default regression was not rerun. The landing page, Stage-B product
+semantics, Phase-3 foundation, Phase 2, and main are unchanged. See the
+[route-integration report](reports/phase3-product-route-integration.md),
+[evidence](reports/phase3-product-route-integration-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 hosted product
 
 The `phase-3-hosted-product` branch continues the frozen Phase-3 foundation

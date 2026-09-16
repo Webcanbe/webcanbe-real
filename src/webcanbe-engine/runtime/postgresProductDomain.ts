@@ -191,6 +191,10 @@ export class PostgresProductDomainStore {
     })
   }
 
+  async grantTestEntitlementForSelf(operator: ServerSession, releaseId: string, idempotencyKey: string) {
+    return this.grantTestEntitlement(operator, operator.userId, releaseId, idempotencyKey)
+  }
+
   async transitionTestEntitlement(operator: ServerSession, entitlementId: string, status: "revoked" | "invalid"): Promise<LicenseEntitlement> {
     identifier(entitlementId)
     if (!["revoked", "invalid"].includes(status)) throw new Error("Invalid entitlement state.")
@@ -288,6 +292,21 @@ export class PostgresProductDomainStore {
       WHERE m.workspace_project_id=$1 AND m.workspace_id=$2 AND m.status='ready'`, [workspaceProjectId, grant.workspaceId])).rows[0]
     if (!row || !await this.access.check(grant, "inspect")) return undefined
     return Object.freeze({ workspaceProjectId, workspaceId: String(row.workspace_id), entitlementId: String(row.entitlement_id), releaseId: String(row.release_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), releaseSnapshotHash: String(row.snapshot_hash), createdAt: iso(row.created_at) })
+  }
+
+  async workspaceProjects(session: ServerSession): Promise<WorkspaceProject[]> {
+    const ids = await pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const rows = (await client.query("SELECT workspace_project_id FROM wcb_entitlement_materializations WHERE user_id=$1 AND status='ready' ORDER BY updated_at DESC LIMIT 100", [session.userId])).rows
+      await this.requireSessionIn(client, session)
+      return rows.map(row => String(row.workspace_project_id))
+    })
+    const result: WorkspaceProject[] = []
+    for (const id of ids) {
+      try { const project = await this.workspaceProject(session, id); if (project) result.push(project) }
+      catch (error) { if (!(error instanceof AuthorityDenied)) throw error }
+    }
+    return result
   }
 
   private decodeRelease(row: ReleaseRow) {

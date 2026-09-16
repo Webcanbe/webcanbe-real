@@ -70,12 +70,17 @@ export class HostedProductController {
         const entitlement = await this.store.grantTestEntitlement(session, text(body, "beneficiaryUserId"), text(body, "releaseId"), text(body, "idempotencyKey"))
         return send(201, { entitlement })
       }
+      if (action === "/entitlements/test/grant-self") {
+        exact(body, ["releaseId", "idempotencyKey"])
+        return send(201, { entitlement: await this.store.grantTestEntitlementForSelf(session, text(body, "releaseId"), text(body, "idempotencyKey")) })
+      }
       if (action === "/entitlements/test/transition") {
         exact(body, ["entitlementId", "status"]); const status = text(body, "status")
         if (!["revoked", "invalid"].includes(status)) throw new Error("Invalid entitlement state.")
         return send(200, { entitlement: await this.store.transitionTestEntitlement(session, text(body, "entitlementId"), status as "revoked" | "invalid") })
       }
       if (action === "/purchases") { exact(body, []); return send(200, { entitlements: await this.store.purchases(session) }) }
+      if (action === "/workspace-projects/list") { exact(body, []); return send(200, { workspaceProjects: await this.store.workspaceProjects(session) }) }
       if (action === "/workspace-projects/materialize") {
         exact(body, ["workspaceId", "entitlementId", "idempotencyKey", "name"])
         const workspaceProject = await this.store.materialize(session, text(body, "workspaceId"), text(body, "entitlementId"), text(body, "idempotencyKey"), body.name === undefined ? undefined : text(body, "name"))

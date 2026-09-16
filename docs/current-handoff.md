@@ -1,3 +1,43 @@
+# Phase 3 hosted product route integration — 2026-09-16
+
+**ROUTE INTEGRATION PASS. Existing browse, listing detail, TEST purchase,
+materialization, My Projects, and workspace access now use the authenticated
+hosted product controller on `phase-3-hosted-product`. The landing page and
+product-domain semantics are unchanged.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at the pushed Stage-B checkpoint
+`3d4053427a2db3196174acf2aeffddb77373686e`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[route-integration report](reports/phase3-product-route-integration.md) and
+[machine evidence](reports/phase3-product-route-integration-evidence/index.json).
+
+- Hosted browse and listing detail read through the existing authenticated
+  product controller. Local static data remains only for the existing
+  non-hosted UI mode.
+- The existing action creates or reuses an active TEST entitlement through a
+  server-bound self-beneficiary route. Durable product-operator authority is
+  still mandatory; the client cannot submit user, membership, or operator
+  claims.
+- Materialization uses a workspace returned by the existing authenticated
+  workspace controller and the existing idempotent entitlement-copy contract.
+  The returned authoritative WorkspaceProject ID opens the retained hosted
+  editor route.
+- My Projects reads owned materialized copies separately from purchase
+  entitlements. The PostgreSQL list is user-filtered and every result receives
+  the existing fresh project/session/membership authorization check.
+- Focused verification passes 12/12; TypeScript and production build pass. A
+  complete six-file security diff review found zero unresolved findings.
+- The full default regression was not run, as explicitly required. The prior
+  preserved Stage-B truth remains 686/687 with the unrelated Phase-2 temporary
+  cache cleanup-race exception; it is not relabeled green.
+
+Next bounded task: add a verified payment-provider event adapter that grants or
+transitions the existing provider-agnostic entitlement contract without
+changing materialization, provenance, or tenant-authority semantics.
+
+---
+
 # Phase 3 hosted product — 2026-09-16
 
 **STAGE B PRODUCT STATUS PASS. Hosted PostgreSQL product persistence,
