@@ -130,7 +130,7 @@ describe("authorized HTTP artifacts, isolation and lifecycle", () => {
   })
   it("denies preview A's credential at B and rejects forged hosts, methods and duplicate cookies", async () => {
     const data = await setup(), a = await start(data), authA = await bootstrap(a)
-    const otherProject = await data.registry.importZip("other-project", await exportProjectZip({ ...data.project, root: path.join(process.cwd(), "fixtures/harbor-desk") }))
+    const otherProject = await data.registry.importZip("other-project", await exportProjectZip({ ...data.project, archiveRoot: undefined, root: path.join(process.cwd(), "fixtures/harbor-desk") }))
     const second = data.registry.createSession(otherProject.id)!
     const b = await data.server.start(otherProject, second.previewId, "/desk/", "http://127.0.0.1:5183")
     await bootstrap(b)

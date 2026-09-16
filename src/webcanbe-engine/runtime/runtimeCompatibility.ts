@@ -44,7 +44,7 @@ function executablePackageRoots(project:ProjectRecord,manifest:any){
   const pending=[entry],visited=new Set<string>(),packages=new Set<string>(),extensions=['','.tsx','.jsx','.ts','.js','.mts','.cts','.mjs','.cjs','.css','.json','/index.tsx','/index.jsx','/index.ts','/index.js']
   const local=(from:string,specifier:string)=>{
     const alias=Object.keys(aliases).sort((a,b)=>b.length-a.length).find(key=>specifier===key||specifier.startsWith(key+'/'))
-    const candidate=alias?path.posix.join(aliases[alias],specifier.slice(alias.length+1)):specifier.startsWith('/')?specifier.slice(1):path.posix.join(path.posix.dirname(from),specifier)
+    const candidate=alias?path.posix.join(aliases[alias],specifier.slice(alias.length+1)):specifier.startsWith('/')?path.posix.join(config.publicDir===false?'__disabled_public__':config.publicDir??'public',specifier.slice(1)):path.posix.join(path.posix.dirname(from),specifier)
     for(const extension of extensions){const relative=path.posix.normalize(candidate+extension);if(!safeArchivePath(relative))continue;const file=path.join(root,relative);if(fs.existsSync(file)&&fs.statSync(file).isFile())return relative}
     throw Error('Static source dependency is unresolved: '+specifier)
   }
@@ -280,6 +280,10 @@ export function inspectRuntime(project: ProjectRecord, applicationRoot: string, 
       lock = json(root, "package-lock.json")
       sourceLock=lock
       if (![2, 3].includes(lock.lockfileVersion) || !object(lock.packages) || !object(lock.packages[""])) { issue("unsupported-lockfile", "npm package-lock v2/v3 with package records is required."); lock = undefined }
+      else {
+        const lockedRoot={...lock.packages[""].devDependencies,...lock.packages[""].dependencies}
+        for(const [name,range]of Object.entries(declared))if(lockedRoot[name]!==range)issue("lock-conflict",`${name} root lock declaration does not match the manifest.`)
+      }
     }
     if(lockNames.length===1 && ["yarn.lock","bun.lock","bun.lockb"].includes(lockNames[0])) {
       let alternate

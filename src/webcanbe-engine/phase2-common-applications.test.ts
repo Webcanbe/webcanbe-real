@@ -64,7 +64,7 @@ it("admits only lock-verified client transitives and rejects tampered transitive
   const names = ['react','react-dom','vite','@vitejs/plugin-react','@tippyjs/react','tailwindcss']
   fs.writeFileSync(path.join(p.root,'package.json'),JSON.stringify({type:'module',dependencies:Object.fromEntries(names.map(name=>[name,profile.dependencies[name]]))}))
   const lock=JSON.parse(fs.readFileSync('runtime-profiles/react19-vite7-common-v1/package-lock.json','utf8'));fs.writeFileSync(path.join(p.root,'package-lock.json'),JSON.stringify(lock))
-  fs.writeFileSync(path.join(p.root,'src/App.tsx'),"import 'tippy.js/dist/tippy.css'; export default function App(){return <main>Verified client closure</main>}")
+  fs.writeFileSync(path.join(p.root,'src/App.tsx'),"import Tippy from '@tippyjs/react';import 'tippy.js/dist/tippy.css'; export default function App(){return <Tippy content='verified'><main>Verified client closure</main></Tippy>}")
   const report=inspectRuntime(p,process.cwd());expect(report.profile).toBe('react19-vite7-common-v1');expect(report.issues).toEqual([]);expect(report.clientDependencies).toContain('tippy.js');expect(report.clientDependencies).not.toContain('eslint');expect((await buildIsolatedHttpPreview(p,process.cwd())).files.has('/_wcb/app.css')).toBe(true)
   lock.packages['node_modules/tippy.js'].integrity='sha512-untrusted';fs.writeFileSync(path.join(p.root,'package-lock.json'),JSON.stringify(lock));expect(inspectRuntime(p,process.cwd()).supported).toBe(false)
 })
@@ -97,6 +97,7 @@ function lockedClientProject(profileName: string, client: string) {
   const lock = JSON.parse(fs.readFileSync(`runtime-profiles/${profileName}/package-lock.json`, 'utf8'))
   lock.packages[''].dependencies = dependencies; delete lock.packages[''].devDependencies
   fs.writeFileSync(path.join(p.root, 'package.json'), JSON.stringify({ type: 'module', dependencies }))
+  fs.writeFileSync(path.join(p.root, 'src/App.tsx'), `import * as client from ${JSON.stringify(client)};export default function App(){return <main>{Object.keys(client).length}</main>}`)
   const save = () => fs.writeFileSync(path.join(p.root, 'package-lock.json'), JSON.stringify(lock))
   save(); return { p, lock, save }
 }

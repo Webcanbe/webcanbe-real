@@ -19,6 +19,38 @@ export type PreviewArtifact = { body: Buffer; contentType: string }
 export type HttpPreviewBuild = { html: string; files: Map<string, PreviewArtifact> }
 const historyRouters = new Set(["BrowserRouter", "createBrowserRouter", "unstable_HistoryRouter"])
 const assetTypes: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml", ico: "image/x-icon", woff: "font/woff", woff2: "font/woff2" }
+const lucideExports = new Map<string, Map<string,string>>()
+
+/** Resolve finite named Lucide exports to the operator-owned ESM leaf modules.
+ * This avoids walking the package's thousands-entry barrel while preserving the
+ * package's own exact export aliases. Namespace/default/side-effect imports keep
+ * their ordinary confined resolution. */
+function directLucideImports(profileRoot:string,code:string,file:string) {
+  if(!code.includes("lucide-react"))return code
+  let exports=lucideExports.get(profileRoot)
+  if(!exports){
+    exports=new Map();const barrel=path.join(profileRoot,"node_modules/lucide-react/dist/esm/lucide-react.js"),vendor=fs.realpathSync(path.join(profileRoot,"node_modules"))
+    if(fs.existsSync(barrel)&&isWithin(vendor,fs.realpathSync(barrel))){
+      const source=ts.createSourceFile(barrel,fs.readFileSync(barrel,"utf8"),ts.ScriptTarget.Latest,true,ts.ScriptKind.JS)
+      for(const statement of source.statements){
+        if(!ts.isExportDeclaration(statement)||!statement.moduleSpecifier||!ts.isStringLiteral(statement.moduleSpecifier))continue
+        const clause=statement.exportClause
+        if(!clause||!ts.isNamedExports(clause))continue
+        for(const item of clause.elements)if(item.propertyName?.text==='default')exports.set(item.name.text,statement.moduleSpecifier.text)
+      }
+    }
+    lucideExports.set(profileRoot,exports)
+  }
+  const source=ts.createSourceFile(file,code,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),edits:Array<{start:number;end:number;text:string}>=[]
+  for(const statement of source.statements){
+    if(!ts.isImportDeclaration(statement)||!ts.isStringLiteral(statement.moduleSpecifier)||statement.moduleSpecifier.text!=="lucide-react"||statement.importClause?.isTypeOnly||statement.importClause?.name||!statement.importClause?.namedBindings||!ts.isNamedImports(statement.importClause.namedBindings))continue
+    const bindings=statement.importClause.namedBindings.elements
+    if(!bindings.length||bindings.some(item=>item.isTypeOnly||!exports!.has(item.propertyName?.text??item.name.text)))continue
+    const replacement=bindings.map(item=>`import {default as ${item.name.text}} from ${JSON.stringify("lucide-react/dist/esm/"+exports!.get(item.propertyName?.text??item.name.text)!.replace(/^\.\//,""))};`).join("\n")
+    edits.push({start:statement.getStart(source),end:statement.getEnd(),text:replacement})
+  }
+  return edits.sort((a,b)=>b.start-a.start).reduce((text,edit)=>text.slice(0,edit.start)+edit.text+text.slice(edit.end),code)
+}
 
 function historyImport(code: string, file: string) {
   const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
@@ -177,7 +209,7 @@ async function compilePreview(project: ProjectRecord, applicationRoot: string, t
         const cached = incremental?.transforms.get(args.path)
         if (ext !== "css" && cached?.source === code) return cached.result
         const originalCode = code
-        if (!vendor && /^(tsx|jsx|ts|js)$/.test(ext)) code = browserPresence(code,args.path)
+        if (!vendor && /^(tsx|jsx|ts|js)$/.test(ext)) code = browserPresence(directLucideImports(profileRoot,code,args.path),args.path)
         if (vendor && incremental?.fastRefresh && /^(tsx|jsx|ts|js)$/.test(ext)) code = developmentVendor(code)
         if (ext === "css" && finiteCss) code = await finiteCss(code,path.relative(root,args.path).split(path.sep).join('/'))
         else if (ext === "css") {

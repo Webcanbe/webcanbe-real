@@ -38,7 +38,7 @@ async function readBody(request: IncomingMessage, limit: number) {
   return body as Record<string, unknown>
 }
 function publicProject(project: NonNullable<ReturnType<ProjectRegistry["get"]>>) {
-  const { history: _history, root: _root, sourceRoot: _sourceRoot, ...safe } = project
+  const { history: _history, archiveRoot: _archiveRoot, root: _root, sourceRoot: _sourceRoot, ...safe } = project
   return safe
 }
 export function validEditorOrigin(request: IncomingMessage) {

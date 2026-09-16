@@ -67,6 +67,7 @@ export async function fastRefreshArtifacts(bundle: BuildResult, sources: Map<str
     }
     let code: string, boundary = false, propagate = false
     if (key.endsWith(".css")) code = "module.exports = {}"
+    else if (key === "<define:import.meta.env>") code = "module.exports = " + JSON.stringify(environment)
     else if (!source) {
       const artifact = Object.entries(metadata.outputs).find(([name,output]) => output.inputs[key] && !output.entryPoint && !/\.(?:js|css)$/.test(name))
       // File loader outputs have exactly one matching input and an inert extension.

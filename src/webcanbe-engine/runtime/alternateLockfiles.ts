@@ -298,7 +298,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
     }else for(const group of ['dependencies','devDependencies','optionalDependencies','peerDependencies'])if(JSON.stringify(Object.entries(lock.root[group]??{}).sort())!==JSON.stringify(Object.entries(manifest[group]??{}).sort()))throw Error('Bun root declaration differs from manifest.')
   }
   const located=(parent:string,name:string,requested:string,peer=false)=>{
-    let descriptor:{name:string;range:string};try{descriptor=peer?{name,range:finitePeerRange(requested)}:npmDescriptor(name,requested)}catch{return 'node_modules/'+name}
+    let descriptor:{name:string;range:string};try{descriptor=peer?{name,range:finitePeerRange(requested)}:lock.format==='yarn-berry-v8'?berryRequest(name,canonicalBerryRequest(name,requested),true):npmDescriptor(name,requested)}catch{return 'node_modules/'+name}
     const accepts=(location:string)=>{const record=profile.packages[location];return record&&!record.link&&(record.name??name)===descriptor.name&&semver.satisfies(record.version,descriptor.range)}
     let from=parent
     while(from){const candidate=from+'/node_modules/'+name;if(accepts(candidate))return candidate;const index=from.lastIndexOf('/node_modules/');from=index<0?'':from.slice(0,index)}
@@ -335,7 +335,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
     // package metadata supplies it. Bun omits unresolved optional peers, so its
     // present peers and every required trusted peer must agree while absent
     // operator-attested optional peers remain non-executable.
-    if(lock.format==='bun-text-v1'||lock.format==='bun-binary-v2'){
+    if(lock.format==='bun-binary-v2'){
       const trustedPeers=trusted.peerDependencies??{},actualPeers=actual.peerDependencies??{}
       for(const [peer,range]of Object.entries(actualPeers))if(trustedPeers[peer]!==range)throw Error('Lock peer metadata differs from pinned graph: '+location)
       for(const [peer,range]of Object.entries(trustedPeers))if(trusted.peerDependenciesMeta?.[peer]?.optional!==true&&actualPeers[peer]!==range)throw Error('Required lock peer metadata differs from pinned graph: '+location)
@@ -359,7 +359,7 @@ export function normalizeAlternateLock(lock:AlternateLock,manifest:any,profile:a
       }
     }else for(const [dep,r]of Object.entries({...trusted.dependencies,...trusted.optionalDependencies,...trusted.peerDependencies})){
       const isPeer=Object.prototype.hasOwnProperty.call(trusted.peerDependencies??{},dep),next=located(location,dep,String(r),isPeer),optional=Object.prototype.hasOwnProperty.call(trusted.optionalDependencies??{},dep)||isPeer&&trusted.peerDependenciesMeta?.[dep]?.optional
-      if((lock.format==='bun-text-v1'||lock.format==='bun-binary-v2')&&isPeer&&optional&&(!Object.prototype.hasOwnProperty.call(actual.peerDependencies??{},dep)||actual.unresolvedOptionalPeers?.includes(dep)))continue
+      if(lock.format==='bun-binary-v2'&&isPeer&&optional&&(!Object.prototype.hasOwnProperty.call(actual.peerDependencies??{},dep)||actual.unresolvedOptionalPeers?.includes(dep)))continue
       if(optional&&(!profile.packages[next]||excludedPlatform(profile.packages[next])))continue
       visit(dep,String(r),next,location,isPeer)
     }
