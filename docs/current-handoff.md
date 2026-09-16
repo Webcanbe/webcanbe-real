@@ -1,3 +1,43 @@
+# Phase 3 promoted-release Listing publication — 2026-09-17
+
+**LISTING PUBLICATION PASS. An explicitly authenticated active product
+operator can publish exactly one public `Listing` from exactly one already-
+promoted immutable `ProjectRelease`. Seller/client input cannot publish or
+rebind a Listing, and publication creates no money, entitlement, workspace, or
+execution side effect.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `c1babdd86dbdfbab4843fe126a2d6414578452ab`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[publication report](reports/phase3-listing-publication.md) and
+[machine evidence](reports/phase3-listing-publication-evidence/index.json).
+
+- The existing authenticated controller accepts only publication references
+  and bounded Listing metadata. Durable active product-operator authority is
+  checked inside the transaction before protected reads and before return.
+- Publication joins the append-only promotion, immutable release, and active
+  catalog. Seller, catalog, source project/revision/content, and snapshot
+  provenance must agree exactly; raw, unpromoted, substituted, or cross-tenant
+  references refuse.
+- One catalog-scoped transaction creates the public Listing and immutable
+  publication decision. Unique promotion/catalog/release/listing/key
+  constraints make exact replay idempotent and conflicts unambiguous.
+- The retained seller metadata route can no longer create a published Listing,
+  transition a draft to published, change a published Listing's status, or
+  swap its release. Marketplace metadata remains editable on the same binding.
+- A promoted release without a Listing stays absent from public browse/detail.
+  After publication, the existing hosted read paths expose the exact release,
+  revision, and snapshot lineage without UI redesign.
+- Focused verification passes 4/4; TypeScript and production build pass. The
+  complete five-file security diff scan found zero findings and zero unresolved
+  items. The full default regression was not run.
+
+Next bounded task: implement a non-executing seller ZIP-import admission
+contract that reuses existing source/revision quarantine and freezes exact
+provenance before review.
+
+---
+
 # Phase 3 passed-assessment release promotion — 2026-09-16
 
 **RELEASE PROMOTION PASS. An explicitly authenticated active product operator

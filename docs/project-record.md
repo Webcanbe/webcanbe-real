@@ -1,5 +1,39 @@
 # WebCanBe project record
 
+## 2026-09-17: Phase 3 promoted-release Listing publication
+
+The seller pipeline now ends in a separate explicit Listing-publication
+decision. The existing hosted session boundary authenticates the request, and
+the PostgreSQL product store requires durable active operator authority before
+reading protected lineage and again before returning from the transaction.
+
+Publication accepts only an existing append-only promotion and its exact
+immutable release. It verifies seller, active catalog, source project,
+revision, content hash, and snapshot across the promotion, release, and catalog
+records. A catalog-scoped lock plus unique promotion, catalog, release, Listing,
+and operator/idempotency constraints creates one unambiguous Listing and one
+immutable publication record atomically.
+
+Normal seller metadata editing cannot create published state, promote a draft,
+change published state, or swap the published release. The database also
+refuses publication-record mutation and published release rebinding. Listing
+metadata can still evolve without changing its source identity.
+
+Promoted-but-unpublished releases remain outside browse/detail; the published
+Listing appears through the existing hosted catalog read path with exact
+release revision and snapshot provenance. Publication invokes no checkout,
+payment provider, payout, entitlement, materialization, project creation,
+network operation, or submitted-code execution.
+
+Focused tests pass 4/4; TypeScript and build pass; the complete five-file
+security diff scan reports zero unresolved findings. The full default
+regression was not run. See the
+[publication report](reports/phase3-listing-publication.md),
+[evidence](reports/phase3-listing-publication-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 passed-assessment release promotion
 
 The seller pipeline now has an explicit operator-authenticated promotion

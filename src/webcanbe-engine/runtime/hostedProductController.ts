@@ -120,6 +120,10 @@ export class HostedProductController {
         exact(body, ["resultId", "assessmentJobId", "submissionId", "sellerUserId", "snapshotHash", "catalogProjectId", "version", "idempotencyKey"])
         return send(201, await this.store.promoteAssessmentResult(session, { resultId: text(body, "resultId"), assessmentJobId: text(body, "assessmentJobId"), submissionId: text(body, "submissionId"), sellerUserId: text(body, "sellerUserId"), snapshotHash: text(body, "snapshotHash"), catalogProjectId: text(body, "catalogProjectId"), version: text(body, "version"), idempotencyKey: text(body, "idempotencyKey") }))
       }
+      if (action === "/seller/releases/listings/publish") {
+        exact(body, ["promotionId", "sellerUserId", "catalogProjectId", "releaseId", "idempotencyKey", "slug", "title", "summary", "tags", "demoMetadata"])
+        return send(201, await this.store.publishPromotedListing(session, { promotionId: text(body, "promotionId"), sellerUserId: text(body, "sellerUserId"), catalogProjectId: text(body, "catalogProjectId"), releaseId: text(body, "releaseId"), idempotencyKey: text(body, "idempotencyKey"), slug: text(body, "slug"), title: text(body, "title"), summary: text(body, "summary"), tags: body.tags as string[] | undefined, demoMetadata: body.demoMetadata as Record<string, unknown> | undefined }))
+      }
       throw new AuthorityDenied()
     } catch (error) {
       this.onError?.(error)

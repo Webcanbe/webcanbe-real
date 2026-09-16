@@ -235,3 +235,29 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_seller_release_promotion ON wcb_seller_release_promotions;
 CREATE TRIGGER wcb_immutable_seller_release_promotion BEFORE UPDATE OR DELETE ON wcb_seller_release_promotions
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_release_promotion_mutation();
+CREATE TABLE IF NOT EXISTS wcb_listing_publications (
+  publication_id uuid PRIMARY KEY, promotion_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_release_promotions,
+  result_id uuid NOT NULL REFERENCES wcb_seller_assessment_results, seller_user_id uuid NOT NULL,
+  catalog_project_id uuid NOT NULL UNIQUE, release_id uuid NOT NULL UNIQUE, listing_id uuid NOT NULL UNIQUE REFERENCES wcb_listings,
+  status text NOT NULL CHECK(status='published'), published_by uuid NOT NULL REFERENCES wcb_product_operators,
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  published_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(published_by,idempotency_key),
+  FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_listing_publication_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'ListingPublication is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_listing_publication ON wcb_listing_publications;
+CREATE TRIGGER wcb_immutable_listing_publication BEFORE UPDATE OR DELETE ON wcb_listing_publications
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_listing_publication_mutation();
+CREATE OR REPLACE FUNCTION wcb_guard_published_listing_release() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.status='published' AND NEW.release_id IS DISTINCT FROM OLD.release_id THEN
+    RAISE EXCEPTION 'Published Listing release binding is immutable';
+  END IF;
+  RETURN NEW;
+END
+$$;
+DROP TRIGGER IF EXISTS wcb_guard_published_listing_release ON wcb_listings;
+CREATE TRIGGER wcb_guard_published_listing_release BEFORE UPDATE ON wcb_listings
+  FOR EACH ROW EXECUTE FUNCTION wcb_guard_published_listing_release();

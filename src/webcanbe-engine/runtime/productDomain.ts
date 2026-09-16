@@ -215,6 +215,19 @@ export type SellerReleasePromotion = Readonly<{
   createdAt: string
 }>
 
+export type ListingPublication = Readonly<{
+  publicationId: string
+  promotionId: string
+  resultId: string
+  sellerUserId: string
+  catalogProjectId: string
+  releaseId: string
+  listingId: string
+  status: "published"
+  publishedBy: string
+  publishedAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

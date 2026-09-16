@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ListingPublication, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -530,12 +530,53 @@ export class PostgresProductDomainStore {
       if (!catalog) throw new AuthorityDenied()
       await this.access.requireWorkspaceIn(client, session, String(catalog.owner_workspace_id))
       if (!(await client.query("SELECT release_id FROM wcb_project_releases WHERE release_id=$1 AND catalog_project_id=$2", [releaseId, catalogProjectId])).rowCount) throw new ProductConflict("Listing release does not belong to its catalog project.")
-      const prior = (await client.query("SELECT listing_id FROM wcb_listings WHERE catalog_project_id=$1", [catalogProjectId])).rows[0]
+      const prior = (await client.query("SELECT listing_id,release_id,status FROM wcb_listings WHERE catalog_project_id=$1 FOR UPDATE", [catalogProjectId])).rows[0]
+      if (!prior && listing.status === "published") throw new AuthorityDenied()
+      if (prior && (String(prior.release_id) !== releaseId || listing.status === "published" && prior.status !== "published" || prior.status === "published" && listing.status !== "published")) throw new ProductConflict("Listing release/publication state requires an explicit operator decision.")
       const listingId = prior ? String(prior.listing_id) : randomUUID()
       const row = (await client.query(`INSERT INTO wcb_listings(listing_id,catalog_project_id,release_id,slug,title,summary,status,availability,tags,demo_metadata,updated_at)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,clock_timestamp()) ON CONFLICT(catalog_project_id) DO UPDATE SET release_id=excluded.release_id,slug=excluded.slug,title=excluded.title,summary=excluded.summary,status=excluded.status,availability=excluded.availability,tags=excluded.tags,demo_metadata=excluded.demo_metadata,updated_at=excluded.updated_at RETURNING updated_at`, [listingId, catalogProjectId, releaseId, listing.slug, listing.title, listing.summary, listing.status, listing.availability, JSON.stringify(listing.tags), JSON.stringify(listing.demoMetadata)])).rows[0]
       await this.access.requireWorkspaceIn(client, session, String(catalog.owner_workspace_id))
       return Object.freeze({ listingId, catalogProjectId, releaseId, ...listing, updatedAt: iso(row.updated_at) })
+    })
+  }
+
+  async publishPromotedListing(operator: ServerSession, input: { promotionId: string; sellerUserId: string; catalogProjectId: string; releaseId: string; idempotencyKey: string; slug: string; title: string; summary: string; tags?: string[]; demoMetadata?: Record<string, unknown> }): Promise<Readonly<{ publication: ListingPublication; listing: Listing }>> {
+    identifier(input.promotionId); identifier(input.sellerUserId); identifier(input.catalogProjectId); identifier(input.releaseId)
+    const key = cleanKey(input.idempotencyKey), listing = { slug: cleanSlug(input.slug), title: cleanText(input.title, "listing title", 200), summary: cleanText(input.summary, "listing summary", 2000), tags: cleanTags(input.tags), demoMetadata: jsonObject(input.demoMetadata, "demo metadata") }
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,97))", [input.catalogProjectId])
+      const lineage = (await client.query(`SELECT p.*,r.status AS release_status,r.source_project_id AS release_source_project_id,r.source_revision_id AS release_source_revision_id,
+        r.source_content_hash AS release_source_content_hash,r.snapshot_hash AS release_snapshot_hash,c.source_project_id AS catalog_source_project_id,
+        c.created_by,c.status AS catalog_status
+        FROM wcb_seller_release_promotions p JOIN wcb_project_releases r ON r.release_id=p.release_id AND r.catalog_project_id=p.catalog_project_id
+        JOIN wcb_catalog_projects c ON c.catalog_project_id=p.catalog_project_id WHERE p.promotion_id=$1 FOR SHARE`, [input.promotionId])).rows[0]
+      const exact = lineage && String(lineage.seller_user_id) === input.sellerUserId && String(lineage.catalog_project_id) === input.catalogProjectId && String(lineage.release_id) === input.releaseId
+        && lineage.release_status === "published" && lineage.catalog_status === "active" && String(lineage.release_source_project_id) === String(lineage.source_project_id)
+        && String(lineage.release_source_revision_id) === String(lineage.source_revision_id) && String(lineage.release_source_content_hash) === String(lineage.source_content_hash)
+        && String(lineage.release_snapshot_hash) === String(lineage.submission_snapshot_hash) && String(lineage.catalog_source_project_id) === String(lineage.source_project_id)
+        && String(lineage.created_by) === input.sellerUserId
+      if (!exact) throw new ProductConflict("Listing publication does not match one promoted immutable release.")
+
+      const byKey = (await client.query("SELECT * FROM wcb_listing_publications WHERE published_by=$1 AND idempotency_key=$2 FOR SHARE", [operator.userId, key])).rows[0]
+      const existing = (await client.query("SELECT * FROM wcb_listing_publications WHERE promotion_id=$1 FOR SHARE", [input.promotionId])).rows[0]
+      if (byKey || existing) {
+        if (!byKey || !existing || String(byKey.publication_id) !== String(existing.publication_id) || String(existing.seller_user_id) !== input.sellerUserId || String(existing.catalog_project_id) !== input.catalogProjectId || String(existing.release_id) !== input.releaseId || String(existing.idempotency_key) !== key) throw new ProductConflict("Promoted release already has a conflicting Listing publication.")
+        const listingRow = (await client.query("SELECT * FROM wcb_listings WHERE listing_id=$1 AND catalog_project_id=$2 AND release_id=$3 AND status='published' FOR SHARE", [existing.listing_id, input.catalogProjectId, input.releaseId])).rows[0]
+        if (!listingRow) throw new ProductConflict("Published Listing binding is inconsistent.")
+        await this.requireOperatorIn(client, operator)
+        return Object.freeze({ publication: this.listingPublicationFrom(existing), listing: this.listingFrom(listingRow) })
+      }
+      if ((await client.query("SELECT listing_id FROM wcb_listings WHERE catalog_project_id=$1 OR slug=$2 FOR SHARE", [input.catalogProjectId, listing.slug])).rowCount) throw new ProductConflict("Catalog project or slug already has a Listing.")
+
+      const listingId = randomUUID(), publicationId = randomUUID()
+      const listingRow = (await client.query(`INSERT INTO wcb_listings(listing_id,catalog_project_id,release_id,slug,title,summary,status,availability,tags,demo_metadata,updated_at)
+        VALUES($1,$2,$3,$4,$5,$6,'published','available',$7,$8,clock_timestamp()) RETURNING *`, [listingId, input.catalogProjectId, input.releaseId, listing.slug, listing.title, listing.summary, JSON.stringify(listing.tags), JSON.stringify(listing.demoMetadata)])).rows[0]
+      const publicationRow = (await client.query(`INSERT INTO wcb_listing_publications(publication_id,promotion_id,result_id,seller_user_id,catalog_project_id,release_id,listing_id,status,published_by,idempotency_key,published_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,'published',$8,$9,clock_timestamp()) RETURNING *`, [publicationId, input.promotionId, lineage.result_id, input.sellerUserId, input.catalogProjectId, input.releaseId, listingId, operator.userId, key])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return Object.freeze({ publication: this.listingPublicationFrom(publicationRow), listing: this.listingFrom(listingRow) })
     })
   }
 
@@ -559,6 +600,12 @@ export class PostgresProductDomainStore {
 
   private publicListing(row: Record<string, unknown>): Listing & { releaseVersion: string; sourceRevisionId: string; snapshotHash: string } {
     return Object.freeze({ listingId: String(row.listing_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), slug: String(row.slug), title: String(row.title), summary: String(row.summary), status: row.status as Listing["status"], availability: row.availability as Listing["availability"], tags: structuredClone(row.tags) as string[], demoMetadata: structuredClone(row.demo_metadata) as Record<string, unknown>, updatedAt: iso(row.updated_at), releaseVersion: String(row.version), sourceRevisionId: String(row.source_revision_id), snapshotHash: String(row.snapshot_hash) })
+  }
+
+  private listingFrom(row: Record<string, unknown>): Listing {
+    const tags = typeof row.tags === "string" ? JSON.parse(row.tags) : structuredClone(row.tags ?? [])
+    const demoMetadata = typeof row.demo_metadata === "string" ? JSON.parse(row.demo_metadata) : structuredClone(row.demo_metadata ?? {})
+    return Object.freeze({ listingId: String(row.listing_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), slug: String(row.slug), title: String(row.title), summary: String(row.summary), status: row.status as Listing["status"], availability: row.availability as Listing["availability"], tags, demoMetadata, updatedAt: iso(row.updated_at) })
   }
 
   async grantTestEntitlement(operator: ServerSession, beneficiaryUserId: string, releaseId: string, idempotencyKey: string): Promise<LicenseEntitlement> {
@@ -788,6 +835,10 @@ export class PostgresProductDomainStore {
 
   private sellerReleasePromotionFrom(row: Record<string, unknown>): SellerReleasePromotion {
     return Object.freeze({ promotionId: String(row.promotion_id), resultId: String(row.result_id), assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), version: String(row.version), promotedBy: String(row.promoted_by), createdAt: iso(row.created_at) })
+  }
+
+  private listingPublicationFrom(row: Record<string, unknown>): ListingPublication {
+    return Object.freeze({ publicationId: String(row.publication_id), promotionId: String(row.promotion_id), resultId: String(row.result_id), sellerUserId: String(row.seller_user_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), listingId: String(row.listing_id), status: "published", publishedBy: String(row.published_by), publishedAt: iso(row.published_at) })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

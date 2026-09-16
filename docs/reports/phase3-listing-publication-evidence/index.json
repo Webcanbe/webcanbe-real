@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "date": "2026-09-17",
+  "branch": "phase-3-hosted-product",
+  "base": "c1babdd86dbdfbab4843fe126a2d6414578452ab",
+  "status": "PASS",
+  "scope": {
+    "operatorAuthenticatedPublication": true,
+    "promotedReleaseOnly": true,
+    "exactReleaseBinding": true,
+    "immutablePublicationDecision": true,
+    "publicCatalogReadPath": true,
+    "automaticEntitlement": false,
+    "automaticWorkspaceProject": false,
+    "paymentOrCheckout": false,
+    "releaseMutation": false,
+    "sellerCodeExecution": false,
+    "landingChanged": false,
+    "browseUiChanged": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 46,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 promoted release Listing publication\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "operatorPublicationAuthority": "PASS",
+    "promotedReleaseOnly": "PASS",
+    "releaseBinding": "PASS",
+    "publicationIdempotency": "PASS",
+    "conflictingPublicationRejection": "PASS",
+    "publicCatalogVisibility": "PASS",
+    "crossSellerAuthority": "PASS",
+    "releaseImmutability": "PASS",
+    "paymentEntitlementWorkspaceSideEffect": "REFUSED"
+  },
+  "security": {
+    "scanId": "1681d588-bdb5-481d-8db4-240021cd59c7",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0,
+    "daybreakAccess": "not_granted"
+  }
+}
