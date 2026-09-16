@@ -130,6 +130,26 @@ export type SellerAssessmentRequest = Readonly<{
   createdAt: string
 }>
 
+export type AssessmentWorkerAuthority = Readonly<{
+  workerId: string
+  credential: string
+}>
+
+export type AssessmentJobLease = Readonly<{
+  assessmentJobId: string
+  submissionId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  workerId: string
+  generation: string
+  claimedAt: string
+  leaseExpiresAt: string
+  state: "leased"
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

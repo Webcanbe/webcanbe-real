@@ -1,3 +1,43 @@
+# Phase 3 seller assessment leasing — 2026-09-16
+
+**ASSESSMENT LEASING PASS. Requested assessment jobs now have restart-safe,
+server-side worker claims with exclusive live leases, database-clock expiry,
+monotonic reclaim fencing, and exact immutable snapshot provenance. This slice
+still performs no submitted-code execution or publication.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `ce5a064ba06227a9e7e3162229188df9f2cecc1a`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[assessment-leasing report](reports/phase3-seller-assessment-leasing.md) and
+[machine evidence](reports/phase3-seller-assessment-leasing-evidence/index.json).
+
+- Workers are provisioned only through a trusted server seam. PostgreSQL stores
+  only the SHA-256 credential digest, and the browser product controller has no
+  assessment-claim endpoint.
+- Claim admission revalidates the immutable `requested` assessment record, its
+  `approved_for_next_stage` decision, and exact submission, seller, source
+  project/revision/content, and snapshot provenance.
+- An advisory transaction lock plus one lease row per assessment request gives
+  one live owner. A duplicate claim by that owner returns the same lease; a
+  competing worker cannot steal it.
+- PostgreSQL's clock determines live/expired state. Expiry permits a bounded
+  reclaim that preserves provenance and increments a monotonic generation, so
+  stale workers and later stale results are rejectable through the mandatory
+  fence check.
+- Requested jobs and live lease rows persist across store/process restart. No
+  claim path executes code, invokes a package manager or uploaded hook, accesses
+  the network, publishes a release/listing, grants an entitlement, or creates a
+  workspace copy.
+- Focused verification passes 5/5; TypeScript and production build pass. The
+  focused four-file security diff review found zero unresolved findings. The
+  full default regression was not run.
+
+Next bounded task: implement live-fence-guarded lease renewal and cancellation
+transitions for claimed assessment jobs, still without executing submitted
+code.
+
+---
+
 # Phase 3 seller assessment admission — 2026-09-16
 
 **ASSESSMENT ADMISSION PASS. An active product operator can admit only an

@@ -1,10 +1,10 @@
-import { createHash, randomUUID } from "node:crypto"
+import { createHash, randomBytes, randomUUID } from "node:crypto"
 import type { Pool, PoolClient } from "pg"
 import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobLease, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -22,6 +22,10 @@ const cleanSlug = (value: string) => {
 }
 const cleanKey = (value: string) => {
   if (typeof value !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(value)) throw new Error("Invalid idempotency key.")
+  return value
+}
+const assessmentCredential = (value: string) => {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) throw new AuthorityDenied()
   return value
 }
 const jsonObject = (value: Record<string, unknown> | undefined, label: string) => {
@@ -239,6 +243,60 @@ export class PostgresProductDomainStore {
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,'requested',$9,$10,clock_timestamp()) RETURNING *`, [randomUUID(), submissionId, submission.seller_user_id, submission.source_project_id, submission.source_revision_id, submission.source_content_hash, submission.snapshot_hash, reviewDecisionId, operator.userId, key])).rows[0]
       await this.requireOperatorIn(client, operator)
       return this.sellerAssessmentRequestFrom(row)
+    })
+  }
+
+  /** Trusted server provisioning seam. Worker credentials are never accepted by
+   * the browser product controller and only their digest is persisted. */
+  async provisionAssessmentWorker(workerId: string, active = true): Promise<AssessmentWorkerAuthority> {
+    identifier(workerId); const credential = randomBytes(32).toString("base64url")
+    await this.pool.query(`INSERT INTO wcb_assessment_workers(worker_id,credential_hash,active,epoch) VALUES($1,$2,$3,1)
+      ON CONFLICT(worker_id) DO UPDATE SET credential_hash=excluded.credential_hash,active=excluded.active,epoch=wcb_assessment_workers.epoch+1`, [workerId, sha256(credential), active])
+    return Object.freeze({ workerId, credential })
+  }
+
+  async claimAssessmentJob(worker: AssessmentWorkerAuthority, assessmentJobId: string, expectedSubmissionId: string, expectedSellerUserId: string, expectedSnapshotHash: string): Promise<AssessmentJobLease> {
+    identifier(assessmentJobId); identifier(expectedSubmissionId); identifier(expectedSellerUserId); identifier(worker.workerId); assessmentCredential(worker.credential)
+    if (!/^[a-f0-9]{64}$/.test(expectedSnapshotHash)) throw new Error("Invalid assessment claim.")
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [assessmentJobId])
+      const request = await this.assessmentRequestForClaim(client, assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      this.assertAssessmentRequestBinding(request, expectedSubmissionId, expectedSellerUserId, expectedSnapshotHash)
+      const current = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [assessmentJobId])).rows[0]
+      if (current) {
+        this.assertAssessmentLeaseBinding(current, request)
+        if (current.live) {
+          if (String(current.worker_id) !== worker.workerId) throw new ProductConflict("Assessment job already has a live worker lease.")
+          await this.requireAssessmentWorkerIn(client, worker); return this.assessmentJobLeaseFrom(current)
+        }
+        const reclaimed = (await client.query(`UPDATE wcb_seller_assessment_leases SET worker_id=$2,generation=generation+1,claimed_at=clock_timestamp(),lease_until=clock_timestamp()+interval '5 seconds',state='leased'
+          WHERE assessment_request_id=$1 RETURNING *`, [assessmentJobId, worker.workerId])).rows[0]
+        await this.requireAssessmentWorkerIn(client, worker); return this.assessmentJobLeaseFrom(reclaimed)
+      }
+      const row = (await client.query(`INSERT INTO wcb_seller_assessment_leases(assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,worker_id,generation,claimed_at,lease_until,state)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,clock_timestamp(),clock_timestamp()+interval '5 seconds','leased') RETURNING *`, [assessmentJobId, request.submission_id, request.seller_user_id, request.source_project_id, request.source_revision_id, request.source_content_hash, request.submission_snapshot_hash, worker.workerId])).rows[0]
+      await this.requireAssessmentWorkerIn(client, worker)
+      return this.assessmentJobLeaseFrom(row)
+    })
+  }
+
+  /** Mandatory fence check for any future heartbeat or result boundary. */
+  async assertAssessmentLease(worker: AssessmentWorkerAuthority, fence: Pick<AssessmentJobLease, "assessmentJobId" | "submissionId" | "snapshotHash" | "generation">): Promise<AssessmentJobLease> {
+    identifier(fence.assessmentJobId); identifier(fence.submissionId); identifier(worker.workerId); assessmentCredential(worker.credential)
+    if (!/^[a-f0-9]{64}$/.test(fence.snapshotHash) || !/^[1-9]\d{0,18}$/.test(fence.generation)) throw new AuthorityDenied()
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      const row = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!row || !row.live || row.state !== "leased" || String(row.worker_id) !== worker.workerId || String(row.generation) !== fence.generation || String(row.submission_id) !== fence.submissionId || String(row.submission_snapshot_hash) !== fence.snapshotHash) throw new AuthorityDenied()
+      const request = await this.assessmentRequestForClaim(client, fence.assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(row, request)
+      await this.requireAssessmentWorkerIn(client, worker)
+      const final = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!final?.live || String(final.worker_id) !== worker.workerId || String(final.generation) !== fence.generation) throw new AuthorityDenied()
+      return this.assessmentJobLeaseFrom(final)
     })
   }
 
@@ -497,6 +555,32 @@ export class PostgresProductDomainStore {
 
   private sellerAssessmentRequestFrom(row: Record<string, unknown>): SellerAssessmentRequest {
     return Object.freeze({ assessmentRequestId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), reviewDecisionId: String(row.review_decision_id), status: "requested", createdAt: iso(row.created_at) })
+  }
+
+  private async requireAssessmentWorkerIn(client: PoolClient, worker: AssessmentWorkerAuthority) {
+    const row = await client.query("SELECT worker_id FROM wcb_assessment_workers WHERE worker_id=$1 AND credential_hash=$2 AND active FOR SHARE", [worker.workerId, sha256(worker.credential)])
+    if (!row.rowCount) throw new AuthorityDenied()
+  }
+
+  private async assessmentRequestForClaim(client: PoolClient, assessmentJobId: string) {
+    return (await client.query(`SELECT r.*,s.submission_id AS immutable_submission_id,s.seller_user_id AS immutable_seller_user_id,s.source_project_id AS immutable_source_project_id,
+      s.source_revision_id AS immutable_source_revision_id,s.source_content_hash AS immutable_source_content_hash,s.snapshot_hash AS immutable_snapshot_hash,
+      d.decision_id AS immutable_decision_id,d.submission_id AS decision_submission_id,d.seller_user_id AS decision_seller_user_id,d.source_project_id AS decision_source_project_id,
+      d.source_revision_id AS decision_source_revision_id,d.source_content_hash AS decision_source_content_hash,d.submission_snapshot_hash AS decision_snapshot_hash,d.decision
+      FROM wcb_seller_assessment_requests r JOIN wcb_seller_submissions s ON s.submission_id=r.submission_id
+      JOIN wcb_seller_review_decisions d ON d.decision_id=r.review_decision_id WHERE r.assessment_request_id=$1`, [assessmentJobId])).rows[0]
+  }
+
+  private assertAssessmentRequestBinding(row: Record<string, unknown>, submissionId: string, sellerUserId: string, snapshot: string) {
+    if (row.status !== "requested" || String(row.submission_id) !== submissionId || String(row.seller_user_id) !== sellerUserId || String(row.submission_snapshot_hash) !== snapshot || String(row.immutable_submission_id) !== submissionId || String(row.immutable_seller_user_id) !== sellerUserId || String(row.immutable_source_project_id) !== String(row.source_project_id) || String(row.immutable_source_revision_id) !== String(row.source_revision_id) || String(row.immutable_source_content_hash) !== String(row.source_content_hash) || String(row.immutable_snapshot_hash) !== snapshot || row.decision !== "approved_for_next_stage" || String(row.immutable_decision_id) !== String(row.review_decision_id) || String(row.decision_submission_id) !== submissionId || String(row.decision_seller_user_id) !== sellerUserId || String(row.decision_source_project_id) !== String(row.source_project_id) || String(row.decision_source_revision_id) !== String(row.source_revision_id) || String(row.decision_source_content_hash) !== String(row.source_content_hash) || String(row.decision_snapshot_hash) !== snapshot) throw new ProductConflict("Assessment job provenance does not match its immutable approved snapshot.")
+  }
+
+  private assertAssessmentLeaseBinding(lease: Record<string, unknown>, request: Record<string, unknown>) {
+    if (String(lease.submission_id) !== String(request.submission_id) || String(lease.seller_user_id) !== String(request.seller_user_id) || String(lease.source_project_id) !== String(request.source_project_id) || String(lease.source_revision_id) !== String(request.source_revision_id) || String(lease.source_content_hash) !== String(request.source_content_hash) || String(lease.submission_snapshot_hash) !== String(request.submission_snapshot_hash)) throw new ProductConflict("Assessment lease provenance does not match its immutable request.")
+  }
+
+  private assessmentJobLeaseFrom(row: Record<string, unknown>): AssessmentJobLease {
+    return Object.freeze({ assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), workerId: String(row.worker_id), generation: String(row.generation), claimedAt: iso(row.claimed_at), leaseExpiresAt: iso(row.lease_until), state: "leased" })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

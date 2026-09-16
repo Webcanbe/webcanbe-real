@@ -1,5 +1,31 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller assessment leasing
+
+Immutable `requested` assessment jobs can now be claimed by a server-provisioned
+worker under a durable PostgreSQL lease. Worker credentials are returned only
+by the trusted provisioning seam and persisted only as SHA-256 digests; no
+browser controller route accepts worker claims or client-supplied authority.
+
+Every lease copies the request's exact submission, seller, source
+project/revision/content, and snapshot provenance. Transaction serialization
+prevents two live owners. PostgreSQL's clock controls expiry, and reclaim keeps
+the same provenance while increasing a monotonic fencing generation. The
+explicit fence assertion rejects expired, replaced, cross-job, cross-seller,
+cross-submission, and substituted-snapshot ownership.
+
+Requested jobs and active leases survive store/process restart. Claiming only
+changes lease database state and performs no submitted-code execution, package
+manager or uploaded hook invocation, external network access, publication,
+entitlement grant, or materialization. Focused tests pass 5/5; TypeScript and
+build pass; the focused four-file security diff review reports zero unresolved
+findings. The full default regression was not run. See the
+[assessment-leasing report](reports/phase3-seller-assessment-leasing.md),
+[evidence](reports/phase3-seller-assessment-leasing-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller assessment admission
 
 Approved seller submissions can now enter the future assessment pipeline only

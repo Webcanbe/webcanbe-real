@@ -157,3 +157,19 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_seller_assessment_request ON wcb_seller_assessment_requests;
 CREATE TRIGGER wcb_immutable_seller_assessment_request BEFORE UPDATE OR DELETE ON wcb_seller_assessment_requests
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_assessment_request_mutation();
+-- Worker provisioning is a server-only seam. Credentials are stored only as
+-- digests; browser product routes have no assessment claim endpoint.
+CREATE TABLE IF NOT EXISTS wcb_assessment_workers (
+  worker_id uuid PRIMARY KEY, credential_hash text NOT NULL CHECK(credential_hash ~ '^[a-f0-9]{64}$'),
+  active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS wcb_seller_assessment_leases (
+  assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests,
+  submission_id uuid NOT NULL, seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
+  worker_id uuid NOT NULL REFERENCES wcb_assessment_workers, generation bigint NOT NULL CHECK(generation>0),
+  claimed_at timestamptz NOT NULL, lease_until timestamptz NOT NULL CHECK(lease_until>claimed_at),
+  state text NOT NULL CHECK(state='leased')
+);
+CREATE INDEX IF NOT EXISTS wcb_expired_seller_assessment_leases ON wcb_seller_assessment_leases(state,lease_until);

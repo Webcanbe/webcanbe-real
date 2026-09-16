@@ -41,6 +41,8 @@ CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_applic
 CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions(submission_id),status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
 CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
+CREATE TABLE wcb_assessment_workers(worker_id uuid PRIMARY KEY,credential_hash text NOT NULL,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
+CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),generation bigint NOT NULL,claimed_at timestamptz NOT NULL,lease_until timestamptz NOT NULL,state text NOT NULL);
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -402,6 +404,76 @@ describe("Phase 3 seller assessment admission", () => {
     expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations") }).toEqual(before)
     expect((await f.pool.query("SELECT status,submission_snapshot_hash,review_decision_id FROM wcb_seller_assessment_requests")).rows[0]).toEqual({ status: "requested", submission_snapshot_hash: f.submission.snapshotHash, review_decision_id: decision.decisionId })
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerAssessment", 2)[1].split("async createCatalogProject", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
+  })
+})
+
+describe("Phase 3 seller assessment leasing", () => {
+  const leasingFixture = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, f.sourceProjectId)
+    const decision = await f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", "lease-approval")
+    const request = await f.product.admitSellerAssessment(f.operator.session, submission.submissionId, f.a.id, submission.snapshotHash, decision.decisionId, "lease-admission")
+    const workerA = await f.product.provisionAssessmentWorker(randomUUID()), workerB = await f.product.provisionAssessmentWorker(randomUUID())
+    return { ...f, application, submission, decision, request, workerA, workerB }
+  }
+
+  const claim = (f: Awaited<ReturnType<typeof leasingFixture>>, worker = f.workerA) =>
+    f.product.claimAssessmentJob(worker, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)
+
+  it("claims a valid requested job only for a server-provisioned worker with exact provenance", async () => {
+    const f = await leasingFixture(), unprovisioned = { workerId: randomUUID(), credential: randomBytes(32).toString("base64url") }
+    await expect(claim(f, unprovisioned)).rejects.toThrow(AuthorityDenied)
+    const lease = await claim(f)
+    expect(lease).toMatchObject({ assessmentJobId: f.request.assessmentRequestId, submissionId: f.submission.submissionId, sellerUserId: f.a.id, sourceProjectId: f.sourceProjectId, sourceRevisionId: f.submission.sourceRevisionId, sourceContentHash: f.submission.sourceContentHash, snapshotHash: f.submission.snapshotHash, workerId: f.workerA.workerId, generation: "1", state: "leased" })
+    expect(new Date(lease.leaseExpiresAt).getTime()).toBeGreaterThan(new Date(lease.claimedAt).getTime())
+    const controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins)), exchange = httpRequest(f.operator, "/__webcanbe/api/product/seller/assessment/jobs/claim", { ...lease, credential: f.workerA.credential })
+    await controller.handle(exchange.request, exchange.response); expect(exchange.result().status).toBe(403)
+  })
+
+  it("protects a live lease from a competing worker and replays the valid owner's claim idempotently", async () => {
+    const f = await leasingFixture(), first = await claim(f)
+    await expect(claim(f, f.workerB)).rejects.toThrow(ProductConflict)
+    expect(await claim(f)).toEqual(first)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_leases")).rows[0].n)).toBe(1)
+  })
+
+  it("survives restart, reclaims only after expiry, and rejects the stale owner fence", async () => {
+    const f = await leasingFixture(), restarted = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    const first = await restarted.claimAssessmentJob(f.workerA, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)
+    const restartedAgain = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    expect(await restartedAgain.claimAssessmentJob(f.workerA, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)).toEqual(first)
+    await expect(restartedAgain.claimAssessmentJob(f.workerB, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)).rejects.toThrow(ProductConflict)
+    await f.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [f.request.assessmentRequestId])
+    const reclaimed = await restartedAgain.claimAssessmentJob(f.workerB, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)
+    expect(reclaimed).toMatchObject({ assessmentJobId: first.assessmentJobId, submissionId: first.submissionId, snapshotHash: first.snapshotHash, workerId: f.workerB.workerId, generation: "2", state: "leased" })
+    await expect(restartedAgain.assertAssessmentLease(f.workerA, first)).rejects.toThrow(AuthorityDenied)
+    expect(await restartedAgain.assertAssessmentLease(f.workerB, reclaimed)).toEqual(reclaimed)
+  })
+
+  it("refuses cross-job, cross-seller, submission, and snapshot substitution even for the same source snapshot", async () => {
+    const f = await leasingFixture()
+    await f.access.workspace(f.workspaceA, f.b.id, "editor"); await f.access.member(f.sourceProjectId, f.b.id, "editor")
+    const applicationB = await f.product.applySeller(f.b.session); await f.product.transitionSellerApplication(f.operator.session, applicationB.applicationId, "approved")
+    const submissionB = await f.product.createSellerSubmission(f.b.session, applicationB.applicationId, f.workspaceA, f.sourceProjectId)
+    const decisionB = await f.product.createSellerReviewDecision(f.operator.session, submissionB.submissionId, submissionB.snapshotHash, "approved_for_next_stage", "lease-approval-b")
+    const requestB = await f.product.admitSellerAssessment(f.operator.session, submissionB.submissionId, f.b.id, submissionB.snapshotHash, decisionB.decisionId, "lease-admission-b")
+    expect(submissionB.snapshotHash).toBe(f.submission.snapshotHash)
+    await expect(f.product.claimAssessmentJob(f.workerA, requestB.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)).rejects.toThrow(ProductConflict)
+    await expect(f.product.claimAssessmentJob(f.workerA, f.request.assessmentRequestId, submissionB.submissionId, f.a.id, f.submission.snapshotHash)).rejects.toThrow(ProductConflict)
+    await expect(f.product.claimAssessmentJob(f.workerA, f.request.assessmentRequestId, f.submission.submissionId, f.b.id, f.submission.snapshotHash)).rejects.toThrow(ProductConflict)
+    await expect(f.product.claimAssessmentJob(f.workerA, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, "0".repeat(64))).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_leases")).rows[0].n)).toBe(0)
+  })
+
+  it("leases only database state and has no execution, network, publication, entitlement, or copy side effects", async () => {
+    const f = await leasingFixture(), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }
+    await claim(f)
+    expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }).toEqual(before)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_leases")).rows[0].n)).toBe(1)
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
   })
 })
