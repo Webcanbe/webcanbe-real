@@ -146,6 +146,7 @@ export class PostgresProjectStore {
       const old = (await client.query("SELECT revision,source_epoch,history FROM wcb_projects WHERE project_id=$1 AND workspace_id=$2 AND NOT deleted FOR UPDATE", [grant.projectId, grant.workspaceId])).rows[0]
       if (!old) throw new AuthorityDenied()
       if (old.history && JSON.stringify(old.history.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"]) !== JSON.stringify(ledger.importOrigin ?? null, ["provider", "repository", "commit", "archiveSha256"])) throw new Error("Import provenance cannot change.")
+      if (old.history && JSON.stringify(old.history.releaseOrigin ?? null) !== JSON.stringify(ledger.releaseOrigin ?? null)) throw new Error("Release provenance cannot change.")
       if (old.history && (old.history.sourceDirectory ?? "src") !== (ledger.sourceDirectory ?? "src")) throw Error("Canonical source directory cannot change.")
       if(old.history && old.history.sourceScope!==ledger.sourceScope){
         const last=ledger.transactions.at(-1),same=(await client.query("SELECT files=$2::jsonb AS same FROM wcb_projects WHERE project_id=$1",[grant.projectId,JSON.stringify(payload)])).rows[0]

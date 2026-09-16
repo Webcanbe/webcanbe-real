@@ -3,14 +3,15 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import fs from "node:fs"
 import path from "node:path"
 import yauzl from "yauzl"
-import { assertSourceDirectory, sourceDirectory } from "./sourceDirectory"
+import { assertSourceDirectory, sourceDirectory, sourceMember } from "./sourceDirectory"
 import { htmlEntry, staticViteConfig } from "./runtimeCompatibility"
 import { crc32 } from "node:zlib"
-import { DurableSource } from "../mutations/durableSource"
+import { DurableSource, SourceConflict, treeHash } from "../mutations/durableSource"
 import type { ProjectGrant } from "./hostedAuthority"
 import type { ProjectPersistence, ProjectStoreFactory } from "./storageContracts"
 import type { RunnerOwner } from "./runnerScheduler"
 import { MutationHistory, type SourceStore } from "../mutations/sourceMutations"
+import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 
 export const ZIP_LIMITS = Object.freeze({ archiveBytes: 25 * 1024 * 1024, totalBytes: 40 * 1024 * 1024, fileBytes: 2 * 1024 * 1024, entries: 2_000, ratio: 100 })
 const sourceExtension = /\.([cm]?[jt]sx?|css|json)$/
@@ -40,6 +41,14 @@ export type ProjectRecord = {
   detection: FrameworkDetection
   history: MutationHistory
 }
+
+export type ImmutableProjectSnapshot = Readonly<{
+  projectId: string
+  revisionId: string
+  contentHash: string
+  files: Map<string, Buffer>
+  history: RevisionLedger
+}>
 
 export type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
 
@@ -231,6 +240,75 @@ export class ProjectRegistry {
 
   get(id: string) { return this.projects.get(id) }
   list() { return [...this.projects.values()].map(({ history: _history, archiveRoot: _archiveRoot, root: _root, sourceRoot: _sourceRoot, ...project }) => project) }
+
+  /** Trusted product-domain seam. Callers establish fresh project authority
+   * before capture; a project identifier is never authority. */
+  immutableSnapshot(projectId: string): ImmutableProjectSnapshot {
+    const project = this.projects.get(projectId)
+    if (!project) throw new Error("Project is unavailable.")
+    const source = this.durable(projectId), history = source.history(), revisionId = source.revision(), head = history.revisions.at(-1)
+    if (!head || revisionId !== head.revisionId) throw new SourceConflict("Source changed outside its accepted revision.")
+    const files = new Map<string, Buffer>(), seen = new Set<string>()
+    let total = 0
+    for (const entry of fs.readdirSync(project.root, { recursive: true, withFileTypes: true })) {
+      if (entry.isSymbolicLink()) throw new Error("Project snapshot contains an unsupported link.")
+      if (!entry.isFile()) continue
+      const full = path.join(entry.parentPath, entry.name), file = path.relative(project.root, full).split(path.sep).join("/")
+      if (safeArchivePath(file) !== file || seen.has(file.toLowerCase())) throw new Error("Project snapshot contains an unsafe path.")
+      const bytes = fs.readFileSync(full); total += bytes.length
+      if (bytes.length > ZIP_LIMITS.fileBytes || total > ZIP_LIMITS.totalBytes || files.size >= ZIP_LIMITS.entries) throw new Error("Project snapshot exceeds source limits.")
+      seen.add(file.toLowerCase()); files.set(file, bytes)
+    }
+    return Object.freeze({ projectId, revisionId, contentHash: head.contentHash, files, history })
+  }
+
+  /** Materialize immutable release bytes into the existing editable source
+   * system. The copy receives a new project-scoped revision identity while the
+   * exact release/source identity is retained in protected ledger provenance. */
+  materializeRelease(projectId: string, name: string, snapshot: ImmutableProjectSnapshot, origin: ReleaseOrigin, actor: string) {
+    if (!/^[a-f0-9-]{36}$/.test(projectId)) throw new Error("Invalid workspace project identity.")
+    const destination = path.join(this.importedRoot, projectId)
+    const existing = this.projects.get(projectId)
+    if (existing) {
+      const current = this.immutableSnapshot(projectId)
+      const encode = (files: Map<string, Buffer>) => JSON.stringify([...files].sort(([a], [b]) => a.localeCompare(b)).map(([file, bytes]) => [file, bytes.toString("base64")]))
+      if (encode(current.files) !== encode(snapshot.files) || JSON.stringify(current.history.releaseOrigin) !== JSON.stringify(origin)) throw new SourceConflict("Materialization identity already has different source or provenance.")
+      return existing
+    }
+    if (fs.existsSync(destination)) throw new SourceConflict("Materialization source exists but is not registered.")
+    const temporary = fs.mkdtempSync(path.join(this.importedRoot, ".materialize-"))
+    for (const [file, bytes] of snapshot.files) {
+      if (safeArchivePath(file) !== file || bytes.length > ZIP_LIMITS.fileBytes) throw new Error("Release snapshot contains invalid source.")
+      const target = path.join(temporary, file); fs.mkdirSync(path.dirname(target), { recursive: true, mode: 0o700 }); fs.writeFileSync(target, bytes, { flag: "wx", mode: 0o600 })
+    }
+    const detection = detectProject(temporary, this.applicationRoot)
+    if (!detection.supported || !detection.sourceDirectory) throw new Error(detection.reason ?? "Release source is no longer supported.")
+    const canonicalDirectory = snapshot.history.sourceDirectory ?? "src"
+    if (detection.sourceDirectory !== canonicalDirectory) throw new Error("Release source directory does not match its provenance.")
+    const editable = new Map<string, string>()
+    for (const [file, bytes] of snapshot.files) if (sourceMember(file, canonicalDirectory, snapshot.history.sourceScope)) editable.set(file, new TextDecoder("utf-8", { fatal: true }).decode(bytes))
+    const contentHash = treeHash(editable)
+    if (contentHash !== snapshot.contentHash || origin.sourceContentHash !== snapshot.contentHash || origin.sourceRevisionId !== snapshot.revisionId || origin.sourceProjectId !== snapshot.projectId) throw new Error("Release source provenance does not match its immutable snapshot.")
+    const ledger: RevisionLedger = {
+      schema: 1,
+      ...(snapshot.history.importOrigin ? { importOrigin: structuredClone(snapshot.history.importOrigin) } : {}),
+      releaseOrigin: structuredClone(origin),
+      sourceScope: snapshot.history.sourceScope ?? 2,
+      ...(canonicalDirectory === "src" ? {} : { sourceDirectory: canonicalDirectory }),
+      projectId,
+      revisions: [{ revisionId: `rev_${randomUUID()}`, projectId, parentRevisionId: null, createdAt: new Date().toISOString(), actor, producer: "system", contentHash }],
+      transactions: [], past: [], future: []
+    }
+    const stagedHistory = fs.mkdtempSync(path.join(this.applicationRoot, ".webcanbe", "history-stage-"))
+    fs.writeFileSync(path.join(stagedHistory, "history.json"), JSON.stringify(ledger), { flag: "wx", mode: 0o600 })
+    const historyDirectory = path.join(this.applicationRoot, ".webcanbe", "history", projectId)
+    if (fs.existsSync(historyDirectory)) throw new SourceConflict("Materialization history identity already exists.")
+    fs.renameSync(temporary, destination)
+    fs.renameSync(stagedHistory, historyDirectory)
+    const root = fs.realpathSync(destination), record: ProjectRecord = { id: projectId, name: name.slice(0, 200), archiveRoot: root, root, sourceRoot: path.join(root, canonicalDirectory), imported: true, detection, history: new MutationHistory() }
+    this.projects.set(projectId, record); this.durable(projectId)
+    return record
+  }
 
   async importZip(name: string, archive: Buffer) {
     if (fs.readdirSync(this.importedRoot).length >= 20) throw new Error("Local import storage limit reached (20 projects).")

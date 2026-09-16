@@ -1,3 +1,25 @@
+# WebCanBe project record
+
+## 2026-09-16: Phase 3 product-domain foundation
+
+Phase 3 begins from the exact frozen Phase-2 closure
+`545eb5b388c9062fc46361cd62e74a78466bd095` on the new
+`phase-3-product-foundation` branch. The first marketplace backend slice is
+complete: catalog projects publish byte-exact immutable releases; listings can
+change independently; internal TEST entitlements remain separate from editable
+workspace copies; and an authorized entitlement materializes one idempotent
+copy through the existing project/source/revision system with exact provenance.
+
+The acceptance flow and negative authority cases pass 10/10 focused tests. The
+full default regression passes 679 tests with 61 existing environment-gated
+skips; TypeScript and production build pass. Changed-surface security review has
+zero unresolved reportable findings. No payment provider, final marketplace UI,
+or public HTTP controller is included. See the
+[Phase-3 foundation report](reports/phase3-product-foundation.md) and
+[current handoff](current-handoff.md). Phase-2 and main remain unchanged.
+
+---
+
 # P61 narrow follow-up — 2026-09-15
 
 P61 remains PARTIAL only because the retained historical second-app 422 has no

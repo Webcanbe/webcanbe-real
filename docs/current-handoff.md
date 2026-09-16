@@ -1,3 +1,45 @@
+# Phase 3 product-domain foundation — 2026-09-16
+
+**PHASE3_FOUNDATION PASS. Catalog/listing → immutable release → internal TEST
+entitlement → authorized editable WorkspaceProject is proven end to end. The
+frozen Phase-2 branch and main are unchanged.**
+
+Continue only from the published `phase-3-product-foundation` branch, based
+exactly on Phase-2 closure `545eb5b388c9062fc46361cd62e74a78466bd095`.
+Do not resume ordinary development on `phase-2-compatible-editor`, merge to
+main, or reopen the deferred P39/P61 residuals. The detailed design and evidence
+are in [the Phase-3 foundation report](reports/phase3-product-foundation.md).
+
+- The canonical product domain is `CatalogProject`, immutable
+  `ProjectRelease`, independently mutable `Listing`, provider-agnostic
+  `LicenseEntitlement`, and owned `WorkspaceProject`. Releases and working
+  copies reuse the existing project/source/revision infrastructure.
+- A release stores a byte-exact accepted source snapshot and its source project,
+  revision, content, and snapshot hashes. SQLite triggers reject release update
+  or deletion; a new accepted source revision requires a new release identity.
+- Public catalog browse/search/tag filtering and listing detail expose only
+  published, available listings and carry exact listing → release → source
+  lineage.
+- TEST entitlement grant, purchase listing, and working-copy materialization
+  are distinct operations. Materialization is idempotent, binds exactly one
+  entitlement to one copy, and stores immutable release provenance in the copy's
+  root revision. Later edits affect only the copy.
+- Active session, workspace membership, source/revision grant, entitlement
+  owner, and copy ownership are checked server-side. Cross-user, cross-workspace,
+  guessed-ID, revoked, and invalid-entitlement cases refuse.
+- Verification: Phase-3 focused tests 10/10; full default suite 679 passed with
+  61 pre-existing environment-gated skips; TypeScript PASS; production build
+  PASS. Changed-surface security review found 0 unresolved reportable findings.
+- This pass is a backend/service foundation with single-host SQLite product
+  persistence; it intentionally does not add real payment processing, final UI,
+  or a public HTTP controller.
+- Next bounded task: add hosted PostgreSQL persistence and an authenticated HTTP
+  controller for this exact contract, including restart-safe reconciliation of
+  pending entitlement materializations and an explicit operator capability for
+  TEST entitlement grant/revocation.
+
+---
+
 # Phase 2 final reconciliation — 2026-09-16
 
 **P05 PASS. P61 PASS at the retained internal local-TEST measurement boundary.

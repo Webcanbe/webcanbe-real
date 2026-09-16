@@ -165,8 +165,17 @@ export type FileOperation =
 export type SourceValidation = { level: "parse" | "compile" | "checkpoint" | "semantic"; passed: boolean; diagnostics: Array<{ file: string; message: string; line?: number; column?: number }> }
 export type SourceRevision = { revisionId: string; projectId: string; parentRevisionId: string | null; createdAt: string; actor: string; producer: "visual" | "code" | "system"; contentHash: string; transactionId?: string }
 export type SourceImportOrigin = Readonly<{ provider: "github"; repository: string; commit: string; archiveSha256: string }>
+export type ReleaseOrigin = Readonly<{
+  entitlementId: string
+  releaseId: string
+  catalogProjectId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  releaseSnapshotHash: string
+}>
 export type HistoryArchive = Readonly<{ schema: 1; digest: string; rawBytes: number; revisions: number; transactions: number; data: string }>
-export type RevisionLedger = { schema: 1; archives?: HistoryArchive[]; importOrigin?: SourceImportOrigin; sourceScope?: 2; sourceDirectory?: string; projectId: string; revisions: SourceRevision[]; transactions: MutationTransaction[]; past: string[]; future: string[] }
+export type RevisionLedger = { schema: 1; archives?: HistoryArchive[]; importOrigin?: SourceImportOrigin; releaseOrigin?: ReleaseOrigin; sourceScope?: 2; sourceDirectory?: string; projectId: string; revisions: SourceRevision[]; transactions: MutationTransaction[]; past: string[]; future: string[] }
 
 export type CompatibilitySummary = {
   total: number

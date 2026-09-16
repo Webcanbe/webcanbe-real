@@ -104,8 +104,14 @@ export class SqliteAuthorityStore implements AuthenticatedSessionStore, Membersh
     this.db.exec("BEGIN IMMEDIATE")
     try {
       this.requireWorkspace(session, workspaceId)
-      this.db.prepare("INSERT INTO projects VALUES(?,?)").run(projectId, workspaceId)
-      this.setProjectMember(projectId, session.userId, "owner")
+      const existing = this.db.prepare("SELECT workspace_id FROM projects WHERE id=?").get(projectId)
+      if (existing) {
+        const member = this.db.prepare("SELECT role,active FROM members WHERE project_id=? AND user_id=?").get(projectId, session.userId)
+        if (String(existing.workspace_id) !== workspaceId || member?.role !== "owner" || Number(member.active) !== 1) throw new AuthorityDenied()
+      } else {
+        this.db.prepare("INSERT INTO projects VALUES(?,?)").run(projectId, workspaceId)
+        this.setProjectMember(projectId, session.userId, "owner")
+      }
       this.db.exec("COMMIT")
     } catch (error) { this.db.exec("ROLLBACK"); throw error }
   }

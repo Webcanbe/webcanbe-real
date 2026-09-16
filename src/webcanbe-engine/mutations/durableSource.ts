@@ -24,6 +24,8 @@ function readHistoryFile(file: string, limit = HISTORY_LIMITS.bytes) {
 export function boundedHistory(ledger: RevisionLedger) {
   const origin = ledger.importOrigin
   if (origin !== undefined && (!origin || typeof origin !== "object" || Object.keys(origin).length !== 4 || origin.provider !== "github" || typeof origin.repository !== "string" || !/^[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$/.test(origin.repository) || !/^[a-f0-9]{40}$/.test(origin.commit) || !/^[a-f0-9]{64}$/.test(origin.archiveSha256))) throw new Error("Invalid immutable import provenance.")
+  const release = ledger.releaseOrigin
+  if (release !== undefined && (!release || typeof release !== "object" || Object.keys(release).length !== 7 || ![release.entitlementId, release.releaseId, release.catalogProjectId, release.sourceProjectId].every(value => typeof value === "string" && /^[a-f0-9-]{36}$/.test(value)) || typeof release.sourceRevisionId !== "string" || !/^rev_[a-f0-9-]{36}$/.test(release.sourceRevisionId) || !/^[a-f0-9]{64}$/.test(release.sourceContentHash) || !/^[a-f0-9]{64}$/.test(release.releaseSnapshotHash))) throw new Error("Invalid immutable release provenance.")
   if (ledger.sourceDirectory !== undefined && (typeof ledger.sourceDirectory !== "string" || safeArchivePath(ledger.sourceDirectory) !== ledger.sourceDirectory || ledger.sourceDirectory.split("/").some(p => p.startsWith(".")))) throw Error("Invalid history source directory.")
   if(ledger.sourceScope!==undefined&&ledger.sourceScope!==2)throw new Error("Unsupported source scope version.")
   if (ledger.transactions.length > HISTORY_LIMITS.transactions || ledger.revisions.length > HISTORY_LIMITS.revisions) throw historyFull()
