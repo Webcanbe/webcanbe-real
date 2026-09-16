@@ -170,6 +170,28 @@ CREATE TABLE IF NOT EXISTS wcb_seller_assessment_leases (
   submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
   worker_id uuid NOT NULL REFERENCES wcb_assessment_workers, generation bigint NOT NULL CHECK(generation>0),
   claimed_at timestamptz NOT NULL, lease_until timestamptz NOT NULL CHECK(lease_until>claimed_at),
-  state text NOT NULL CHECK(state='leased')
+  state text NOT NULL CHECK(state IN ('leased','cancelled')), cancelled_at timestamptz,
+  CHECK((state='leased' AND cancelled_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL))
 );
+ALTER TABLE wcb_seller_assessment_leases ADD COLUMN IF NOT EXISTS cancelled_at timestamptz;
+ALTER TABLE wcb_seller_assessment_leases DROP CONSTRAINT IF EXISTS wcb_seller_assessment_leases_state_check;
+ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_state_check CHECK(state IN ('leased','cancelled'));
+ALTER TABLE wcb_seller_assessment_leases DROP CONSTRAINT IF EXISTS wcb_seller_assessment_leases_cancelled_check;
+ALTER TABLE wcb_seller_assessment_leases ADD CONSTRAINT wcb_seller_assessment_leases_cancelled_check CHECK((state='leased' AND cancelled_at IS NULL) OR (state='cancelled' AND cancelled_at IS NOT NULL));
 CREATE INDEX IF NOT EXISTS wcb_expired_seller_assessment_leases ON wcb_seller_assessment_leases(state,lease_until);
+CREATE OR REPLACE FUNCTION wcb_guard_seller_assessment_lease() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.assessment_request_id IS DISTINCT FROM OLD.assessment_request_id OR NEW.submission_id IS DISTINCT FROM OLD.submission_id
+    OR NEW.seller_user_id IS DISTINCT FROM OLD.seller_user_id OR NEW.source_project_id IS DISTINCT FROM OLD.source_project_id
+    OR NEW.source_revision_id IS DISTINCT FROM OLD.source_revision_id OR NEW.source_content_hash IS DISTINCT FROM OLD.source_content_hash
+    OR NEW.submission_snapshot_hash IS DISTINCT FROM OLD.submission_snapshot_hash THEN
+    RAISE EXCEPTION 'Assessment lease provenance is immutable';
+  END IF;
+  IF OLD.state='cancelled' THEN RAISE EXCEPTION 'Cancelled assessment lease is terminal'; END IF;
+  IF NEW.generation < OLD.generation OR NEW.generation > OLD.generation+1 THEN RAISE EXCEPTION 'Invalid assessment lease generation'; END IF;
+  RETURN NEW;
+END
+$$;
+DROP TRIGGER IF EXISTS wcb_guard_seller_assessment_lease ON wcb_seller_assessment_leases;
+CREATE TRIGGER wcb_guard_seller_assessment_lease BEFORE UPDATE OR DELETE ON wcb_seller_assessment_leases
+  FOR EACH ROW EXECUTE FUNCTION wcb_guard_seller_assessment_lease();

@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobLease, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -267,6 +267,7 @@ export class PostgresProductDomainStore {
       const current = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [assessmentJobId])).rows[0]
       if (current) {
         this.assertAssessmentLeaseBinding(current, request)
+        if (current.state !== "leased") throw new ProductConflict("Assessment job is cancelled and terminal.")
         if (current.live) {
           if (String(current.worker_id) !== worker.workerId) throw new ProductConflict("Assessment job already has a live worker lease.")
           await this.requireAssessmentWorkerIn(client, worker); return this.assessmentJobLeaseFrom(current)
@@ -283,9 +284,8 @@ export class PostgresProductDomainStore {
   }
 
   /** Mandatory fence check for any future heartbeat or result boundary. */
-  async assertAssessmentLease(worker: AssessmentWorkerAuthority, fence: Pick<AssessmentJobLease, "assessmentJobId" | "submissionId" | "snapshotHash" | "generation">): Promise<AssessmentJobLease> {
-    identifier(fence.assessmentJobId); identifier(fence.submissionId); identifier(worker.workerId); assessmentCredential(worker.credential)
-    if (!/^[a-f0-9]{64}$/.test(fence.snapshotHash) || !/^[1-9]\d{0,18}$/.test(fence.generation)) throw new AuthorityDenied()
+  async assertAssessmentLease(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence): Promise<AssessmentJobLease> {
+    this.validateAssessmentFence(worker, fence)
     return pgTransaction(this.pool, async client => {
       await this.requireAssessmentWorkerIn(client, worker)
       const row = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
@@ -297,6 +297,49 @@ export class PostgresProductDomainStore {
       const final = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
       if (!final?.live || String(final.worker_id) !== worker.workerId || String(final.generation) !== fence.generation) throw new AuthorityDenied()
       return this.assessmentJobLeaseFrom(final)
+    })
+  }
+
+  async renewAssessmentJobLease(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence): Promise<AssessmentJobLease> {
+    this.validateAssessmentFence(worker, fence)
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [fence.assessmentJobId])
+      const request = await this.assessmentRequestForClaim(client, fence.assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      const current = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!current || current.state !== "leased" || !current.live || String(current.worker_id) !== worker.workerId || String(current.generation) !== fence.generation || String(current.submission_id) !== fence.submissionId || String(current.submission_snapshot_hash) !== fence.snapshotHash) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(current, request)
+      const renewed = (await client.query(`UPDATE wcb_seller_assessment_leases SET lease_until=lease_until+interval '5 seconds'
+        WHERE assessment_request_id=$1 AND worker_id=$2 AND generation=$3 AND state='leased' AND lease_until>clock_timestamp() RETURNING *`, [fence.assessmentJobId, worker.workerId, fence.generation])).rows[0]
+      if (!renewed) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(renewed, request)
+      await this.requireAssessmentWorkerIn(client, worker)
+      return this.assessmentJobLeaseFrom(renewed)
+    })
+  }
+
+  async cancelAssessmentJob(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence): Promise<AssessmentJobCancellation> {
+    this.validateAssessmentFence(worker, fence)
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [fence.assessmentJobId])
+      const request = await this.assessmentRequestForClaim(client, fence.assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      const current = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!current || String(current.worker_id) !== worker.workerId || String(current.generation) !== fence.generation || String(current.submission_id) !== fence.submissionId || String(current.submission_snapshot_hash) !== fence.snapshotHash) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(current, request)
+      if (current.state === "cancelled" && current.cancelled_at) {
+        await this.requireAssessmentWorkerIn(client, worker)
+        return this.assessmentJobCancellationFrom(current)
+      }
+      if (current.state !== "leased" || !current.live) throw new AuthorityDenied()
+      const cancelled = (await client.query(`UPDATE wcb_seller_assessment_leases SET state='cancelled',cancelled_at=clock_timestamp()
+        WHERE assessment_request_id=$1 AND worker_id=$2 AND generation=$3 AND state='leased' AND lease_until>clock_timestamp() RETURNING *`, [fence.assessmentJobId, worker.workerId, fence.generation])).rows[0]
+      if (!cancelled) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(cancelled, request)
+      await this.requireAssessmentWorkerIn(client, worker)
+      return this.assessmentJobCancellationFrom(cancelled)
     })
   }
 
@@ -562,6 +605,11 @@ export class PostgresProductDomainStore {
     if (!row.rowCount) throw new AuthorityDenied()
   }
 
+  private validateAssessmentFence(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence) {
+    identifier(fence.assessmentJobId); identifier(fence.submissionId); identifier(worker.workerId); assessmentCredential(worker.credential)
+    if (!/^[a-f0-9]{64}$/.test(fence.snapshotHash) || !/^[1-9]\d{0,18}$/.test(fence.generation)) throw new AuthorityDenied()
+  }
+
   private async assessmentRequestForClaim(client: PoolClient, assessmentJobId: string) {
     return (await client.query(`SELECT r.*,s.submission_id AS immutable_submission_id,s.seller_user_id AS immutable_seller_user_id,s.source_project_id AS immutable_source_project_id,
       s.source_revision_id AS immutable_source_revision_id,s.source_content_hash AS immutable_source_content_hash,s.snapshot_hash AS immutable_snapshot_hash,
@@ -581,6 +629,10 @@ export class PostgresProductDomainStore {
 
   private assessmentJobLeaseFrom(row: Record<string, unknown>): AssessmentJobLease {
     return Object.freeze({ assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), workerId: String(row.worker_id), generation: String(row.generation), claimedAt: iso(row.claimed_at), leaseExpiresAt: iso(row.lease_until), state: "leased" })
+  }
+
+  private assessmentJobCancellationFrom(row: Record<string, unknown>): AssessmentJobCancellation {
+    return Object.freeze({ assessmentJobId: String(row.assessment_request_id), submissionId: String(row.submission_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), workerId: String(row.worker_id), generation: String(row.generation), claimedAt: iso(row.claimed_at), leaseExpiresAt: iso(row.lease_until), cancelledAt: iso(row.cancelled_at), state: "cancelled" })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

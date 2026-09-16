@@ -42,7 +42,7 @@ CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFEREN
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
 CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
 CREATE TABLE wcb_assessment_workers(worker_id uuid PRIMARY KEY,credential_hash text NOT NULL,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
-CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),generation bigint NOT NULL,claimed_at timestamptz NOT NULL,lease_until timestamptz NOT NULL,state text NOT NULL);
+CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),generation bigint NOT NULL,claimed_at timestamptz NOT NULL,lease_until timestamptz NOT NULL,state text NOT NULL,cancelled_at timestamptz);
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -473,6 +473,67 @@ describe("Phase 3 seller assessment leasing", () => {
     await claim(f)
     expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }).toEqual(before)
     expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_leases")).rows[0].n)).toBe(1)
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
+  })
+})
+
+describe("Phase 3 seller assessment lease lifecycle", () => {
+  const lifecycleFixture = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, f.sourceProjectId)
+    const decision = await f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", "lifecycle-approval")
+    const request = await f.product.admitSellerAssessment(f.operator.session, submission.submissionId, f.a.id, submission.snapshotHash, decision.decisionId, "lifecycle-admission")
+    const workerA = await f.product.provisionAssessmentWorker(randomUUID()), workerB = await f.product.provisionAssessmentWorker(randomUUID())
+    const claim = (store = f.product, worker = workerA) => store.claimAssessmentJob(worker, request.assessmentRequestId, submission.submissionId, f.a.id, submission.snapshotHash)
+    return { ...f, application, submission, decision, request, workerA, workerB, claim }
+  }
+
+  it("renews only the exact live owner fence while preserving ownership and immutable provenance", async () => {
+    const f = await lifecycleFixture(), lease = await f.claim(), renewed = await f.product.renewAssessmentJobLease(f.workerA, lease)
+    expect(new Date(renewed.leaseExpiresAt).getTime()).toBeGreaterThan(new Date(lease.leaseExpiresAt).getTime())
+    expect({ ...renewed, leaseExpiresAt: lease.leaseExpiresAt }).toEqual(lease)
+    await expect(f.product.renewAssessmentJobLease(f.workerB, lease)).rejects.toThrow(AuthorityDenied)
+    await expect(f.product.renewAssessmentJobLease(f.workerA, { ...lease, snapshotHash: "0".repeat(64) })).rejects.toThrow(AuthorityDenied)
+  })
+
+  it("refuses expired and stale-generation renewal", async () => {
+    const f = await lifecycleFixture(), first = await f.claim()
+    await f.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [f.request.assessmentRequestId])
+    await expect(f.product.renewAssessmentJobLease(f.workerA, first)).rejects.toThrow(AuthorityDenied)
+    const current = await f.claim(f.product, f.workerB)
+    await expect(f.product.renewAssessmentJobLease(f.workerA, first)).rejects.toThrow(AuthorityDenied)
+    expect(current.generation).toBe("2")
+  })
+
+  it("cancels only the exact live fence, replays identically, and makes the job terminal", async () => {
+    const f = await lifecycleFixture(), lease = await f.claim(), cancelled = await f.product.cancelAssessmentJob(f.workerA, lease)
+    expect(cancelled).toMatchObject({ assessmentJobId: lease.assessmentJobId, submissionId: lease.submissionId, snapshotHash: lease.snapshotHash, workerId: lease.workerId, generation: lease.generation, state: "cancelled" })
+    expect(await f.product.cancelAssessmentJob(f.workerA, lease)).toEqual(cancelled)
+    await expect(f.product.renewAssessmentJobLease(f.workerA, lease)).rejects.toThrow(AuthorityDenied)
+    await f.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [f.request.assessmentRequestId])
+    await expect(f.claim(f.product, f.workerB)).rejects.toThrow(ProductConflict)
+  })
+
+  it("rejects stale cancellation and preserves renewal/cancellation across restart", async () => {
+    const f = await lifecycleFixture(), first = await f.claim()
+    await f.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [f.request.assessmentRequestId])
+    const current = await f.claim(f.product, f.workerB), restarted = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    await expect(restarted.cancelAssessmentJob(f.workerA, first)).rejects.toThrow(AuthorityDenied)
+    const renewed = await restarted.renewAssessmentJobLease(f.workerB, current), restartedAgain = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    expect((await restartedAgain.assertAssessmentLease(f.workerB, renewed)).leaseExpiresAt).toBe(renewed.leaseExpiresAt)
+    const cancelled = await restartedAgain.cancelAssessmentJob(f.workerB, renewed), afterCancel = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    expect(await afterCancel.cancelAssessmentJob(f.workerB, renewed)).toEqual(cancelled)
+    await expect(afterCancel.assertAssessmentLease(f.workerB, renewed)).rejects.toThrow(AuthorityDenied)
+    expect((await f.pool.query("SELECT submission_id,submission_snapshot_hash,state FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1", [f.request.assessmentRequestId])).rows[0]).toEqual({ submission_id: f.submission.submissionId, submission_snapshot_hash: f.submission.snapshotHash, state: "cancelled" })
+  })
+
+  it("changes only lease lifecycle state and has no execution, network, publication, entitlement, or copy side effects", async () => {
+    const f = await lifecycleFixture(), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }
+    const lease = await f.claim(); const renewed = await f.product.renewAssessmentJobLease(f.workerA, lease); await f.product.cancelAssessmentJob(f.workerA, renewed)
+    expect({ projects: await count("wcb_projects"), catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), copies: await count("wcb_entitlement_materializations"), requests: await count("wcb_seller_assessment_requests") }).toEqual(before)
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
   })

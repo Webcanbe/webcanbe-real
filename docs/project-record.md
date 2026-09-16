@@ -1,5 +1,32 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller assessment lease lifecycle
+
+Already-claimed seller assessment jobs now support server-side renewal and
+durable cancellation. Both operations authenticate the provisioned worker and
+bind to the exact current job, submission, snapshot, worker owner, and fencing
+generation under PostgreSQL transaction locks.
+
+Renewal requires the lease to remain live at its conditional write and extends
+only its database expiry. Cancellation requires the same live fence, persists a
+terminal state/timestamp, and returns the same record for an identical valid
+retry. A stale generation, expired lease, competing worker, or substituted
+identity refuses. Claim, renewal, and fence assertion all reject cancellation,
+so a cancelled job cannot later be reclaimed or treated as runnable.
+
+PostgreSQL preserves the lifecycle state across restart, constrains valid state
+and cancellation-time combinations, and prevents mutation of copied assessment
+provenance or a terminal record. The code adds no execution, package-manager,
+uploaded-script/config/plugin/hook, network, publication, entitlement, or
+materialization side effect. Focused tests pass 5/5; TypeScript and build pass;
+the complete four-file security diff scan reports zero unresolved findings. The
+full default regression was not run. See the
+[lease-lifecycle report](reports/phase3-seller-assessment-lease-lifecycle.md),
+[evidence](reports/phase3-seller-assessment-lease-lifecycle-evidence/index.json),
+and [current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller assessment leasing
 
 Immutable `requested` assessment jobs can now be claimed by a server-provisioned

@@ -1,3 +1,40 @@
+# Phase 3 seller assessment lease lifecycle — 2026-09-16
+
+**ASSESSMENT LEASE LIFECYCLE PASS. The exact current live worker fence can
+renew an assessment lease or durably cancel it. Cancellation is terminal across
+restart; stale, expired, competing, and substituted fences refuse. This slice
+still performs no submitted-code execution or publication.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `f364e58b6fb5758a5b18ebecc813b6c14961d11f`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[lease-lifecycle report](reports/phase3-seller-assessment-lease-lifecycle.md)
+and [machine evidence](reports/phase3-seller-assessment-lease-lifecycle-evidence/index.json).
+
+- Renewal requires an active server-provisioned worker credential plus the
+  exact job, submission, snapshot, worker owner, and current generation. Both
+  the locked read and conditional update require a database-clock-live lease.
+- Renewal changes only expiry. It preserves job identity, worker, generation,
+  claimed time, and all immutable seller/source/snapshot provenance.
+- Cancellation requires the same exact live fence and records a durable
+  `cancelled` state and timestamp. An identical authenticated retry returns the
+  same cancellation record without another mutation.
+- Cancelled rows cannot renew, satisfy the live fence, or be reclaimed by the
+  claim path after expiry. PostgreSQL constraints and a provenance/terminality
+  trigger preserve the historical record across restart.
+- The lifecycle seam remains server-only and has no browser controller route.
+  It executes no submitted code, package manager, uploaded hook/config/plugin,
+  or network operation and creates no release, listing, entitlement, or copy.
+- Focused verification passes 5/5; TypeScript and production build pass. The
+  complete four-file security diff scan found zero unresolved findings. The
+  full default regression was not run.
+
+Next bounded task: implement immutable assessment-result acceptance guarded by
+the current live lease fence, without in-process submitted-code execution or
+release/listing publication.
+
+---
+
 # Phase 3 seller assessment leasing — 2026-09-16
 
 **ASSESSMENT LEASING PASS. Requested assessment jobs now have restart-safe,

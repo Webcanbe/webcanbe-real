@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "f364e58b6fb5758a5b18ebecc813b6c14961d11f",
+  "status": "PASS",
+  "scope": {
+    "liveFenceRenewal": true,
+    "durableCancellation": true,
+    "assessmentExecution": false,
+    "submittedCodeExecution": false,
+    "externalNetwork": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "workspaceMaterialization": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 5,
+      "total": 5,
+      "skippedUnrelated": 25,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller assessment lease lifecycle\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "liveFenceRenewal": "PASS",
+    "staleRenewalRejection": "PASS",
+    "expiredRenewalRejection": "PASS",
+    "competingOwnerRejection": "PASS",
+    "cancellation": "PASS",
+    "staleCancellationRejection": "PASS",
+    "idempotentCancellation": "PASS",
+    "cancellationTerminality": "PASS",
+    "restartSafety": "PASS",
+    "snapshotBinding": "PASS",
+    "codeExecution": "ABSENT",
+    "externalNetwork": "ABSENT",
+    "implicitPublication": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "implicitMaterialization": "REFUSED"
+  },
+  "security": {
+    "scanId": "b839e337-1808-45ea-a5b9-a23006cd47a3",
+    "coverage": "complete",
+    "changedFilesReviewed": 4,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

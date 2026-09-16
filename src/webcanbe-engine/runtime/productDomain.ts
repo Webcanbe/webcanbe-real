@@ -150,6 +150,24 @@ export type AssessmentJobLease = Readonly<{
   state: "leased"
 }>
 
+export type AssessmentJobFence = Pick<AssessmentJobLease, "assessmentJobId" | "submissionId" | "snapshotHash" | "generation">
+
+export type AssessmentJobCancellation = Readonly<{
+  assessmentJobId: string
+  submissionId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  workerId: string
+  generation: string
+  claimedAt: string
+  leaseExpiresAt: string
+  cancelledAt: string
+  state: "cancelled"
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 
