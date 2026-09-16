@@ -1,5 +1,30 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller quarantine review foundation
+
+The hosted seller intake now has an operator-only quarantine queue and an
+immutable review-decision record. Queue list/inspect and decision creation reuse
+the existing hosted authentication/session boundary and durable product
+operator capability; clients cannot supply a reviewer or administrator claim.
+The queue returns only review metadata and exact submitted provenance.
+
+A decision records either `approved_for_next_stage` or `rejected` against the
+exact immutable submission snapshot. Submission locking, expected-snapshot
+matching, idempotency constraints, one-decision-per-submission uniqueness, and
+database update/delete refusal preserve history. Conflicting retries and
+cross-submission substitutions refuse.
+
+Neither decision changes the permanent `pending_review` quarantine boundary or
+creates a catalog project, release, listing, entitlement, materialization, build,
+or execution path. Focused tests pass 4/4; TypeScript and build pass; the complete
+five-file security diff review reports zero unresolved findings. The full
+default regression was not run. See the
+[quarantine-review report](reports/phase3-seller-quarantine-review.md),
+[evidence](reports/phase3-seller-quarantine-review-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller intake foundation
 
 The hosted product backend now provides the first real seller-side boundary:

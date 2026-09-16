@@ -125,3 +125,18 @@ CREATE TABLE IF NOT EXISTS wcb_seller_submission_states (
   status text NOT NULL CHECK(status='pending_review'), updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE INDEX IF NOT EXISTS wcb_seller_submission_review_queue ON wcb_seller_submission_states(status,updated_at);
+CREATE TABLE IF NOT EXISTS wcb_seller_review_decisions (
+  decision_id uuid PRIMARY KEY, submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
+  seller_application_id uuid NOT NULL, seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  submission_snapshot_hash text NOT NULL CHECK(submission_snapshot_hash ~ '^[a-f0-9]{64}$'),
+  decision text NOT NULL CHECK(decision IN ('approved_for_next_stage','rejected')),
+  reviewer_user_id uuid NOT NULL, idempotency_key text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(reviewer_user_id,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_review_decision_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerReviewDecision is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_review_decision ON wcb_seller_review_decisions;
+CREATE TRIGGER wcb_immutable_seller_review_decision BEFORE UPDATE OR DELETE ON wcb_seller_review_decisions
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_review_decision_mutation();

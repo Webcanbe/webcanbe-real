@@ -102,6 +102,16 @@ export class HostedProductController {
         return send(201, { submission: await this.store.createSellerSubmission(session, text(body, "sellerApplicationId"), text(body, "workspaceId"), text(body, "sourceProjectId")) })
       }
       if (action === "/seller/submissions/list") { exact(body, []); return send(200, { submissions: await this.store.sellerSubmissions(session) }) }
+      if (action === "/seller/review/queue") { exact(body, []); return send(200, { submissions: await this.store.sellerQuarantineQueue(session) }) }
+      if (action === "/seller/review/inspect") {
+        exact(body, ["submissionId"]); const submission = await this.store.sellerQuarantineSubmission(session, text(body, "submissionId"))
+        return send(submission ? 200 : 404, submission ? { submission } : { error: "Seller submission not found." })
+      }
+      if (action === "/seller/review/decisions/create") {
+        exact(body, ["submissionId", "snapshotHash", "decision", "idempotencyKey"]); const decision = text(body, "decision")
+        if (!["approved_for_next_stage", "rejected"].includes(decision)) throw new Error("Invalid seller review decision.")
+        return send(201, { decision: await this.store.createSellerReviewDecision(session, text(body, "submissionId"), text(body, "snapshotHash"), decision as "approved_for_next_stage" | "rejected", text(body, "idempotencyKey")) })
+      }
       throw new AuthorityDenied()
     } catch (error) {
       this.onError?.(error)

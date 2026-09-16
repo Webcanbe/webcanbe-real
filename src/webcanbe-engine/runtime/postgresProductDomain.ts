@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerQuarantineItem, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -162,6 +162,53 @@ export class PostgresProductDomainStore {
         WHERE s.seller_user_id=$1 ORDER BY s.created_at DESC LIMIT 100`, [session.userId])).rows
       await this.requireSessionIn(client, session)
       return rows.map(row => this.sellerSubmissionFrom(row))
+    })
+  }
+
+  async sellerQuarantineQueue(operator: ServerSession): Promise<SellerQuarantineItem[]> {
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      const rows = (await client.query(`${this.sellerReviewSelect()} ORDER BY s.created_at ASC LIMIT 100`)).rows
+      await this.requireOperatorIn(client, operator)
+      return rows.map(row => this.sellerQuarantineItemFrom(row))
+    })
+  }
+
+  async sellerQuarantineSubmission(operator: ServerSession, submissionId: string): Promise<SellerQuarantineItem | undefined> {
+    identifier(submissionId)
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      const row = (await client.query(`${this.sellerReviewSelect()} WHERE s.submission_id=$1`, [submissionId])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return row ? this.sellerQuarantineItemFrom(row) : undefined
+    })
+  }
+
+  async createSellerReviewDecision(operator: ServerSession, submissionId: string, expectedSnapshotHash: string, decision: "approved_for_next_stage" | "rejected", idempotencyKey: string): Promise<SellerReviewDecision> {
+    identifier(submissionId); const key = cleanKey(idempotencyKey)
+    if (!/^[a-f0-9]{64}$/.test(expectedSnapshotHash) || !["approved_for_next_stage", "rejected"].includes(decision)) throw new Error("Invalid seller review decision.")
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,93))", [submissionId])
+      const submission = (await client.query(`SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s
+        JOIN wcb_seller_submission_states st USING(submission_id) WHERE s.submission_id=$1 FOR SHARE`, [submissionId])).rows[0]
+      if (!submission) throw new AuthorityDenied()
+      if (String(submission.snapshot_hash) !== expectedSnapshotHash) throw new ProductConflict("Review decision snapshot does not match the immutable submission.")
+      const byKey = (await client.query("SELECT * FROM wcb_seller_review_decisions WHERE reviewer_user_id=$1 AND idempotency_key=$2", [operator.userId, key])).rows[0]
+      if (byKey) {
+        if (String(byKey.submission_id) !== submissionId || String(byKey.submission_snapshot_hash) !== expectedSnapshotHash || byKey.decision !== decision) throw new ProductConflict("Review idempotency key was already used for a different decision.")
+        await this.requireOperatorIn(client, operator); return this.sellerReviewDecisionFrom(byKey)
+      }
+      const existing = (await client.query("SELECT * FROM wcb_seller_review_decisions WHERE submission_id=$1", [submissionId])).rows[0]
+      if (existing) {
+        if (String(existing.submission_snapshot_hash) !== expectedSnapshotHash || existing.decision !== decision) throw new ProductConflict("Submission already has an immutable review decision.")
+        await this.requireOperatorIn(client, operator); return this.sellerReviewDecisionFrom(existing)
+      }
+      if (submission.submission_status !== "pending_review") throw new ProductConflict("Submission is not pending review.")
+      const row = (await client.query(`INSERT INTO wcb_seller_review_decisions(decision_id,submission_id,seller_application_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,decision,reviewer_user_id,idempotency_key,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,clock_timestamp()) RETURNING *`, [randomUUID(), submissionId, submission.seller_application_id, submission.seller_user_id, submission.source_project_id, submission.source_revision_id, submission.source_content_hash, expectedSnapshotHash, decision, operator.userId, key])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return this.sellerReviewDecisionFrom(row)
     })
   }
 
@@ -403,5 +450,23 @@ export class PostgresProductDomainStore {
 
   private sellerSubmissionFrom(row: Record<string, unknown>): SellerSubmission {
     return Object.freeze({ submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), workspaceId: String(row.workspace_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), status: row.status as "pending_review", createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) })
+  }
+
+  private sellerReviewSelect() {
+    return `SELECT s.submission_id,s.seller_application_id,s.seller_user_id,s.source_project_id,s.source_revision_id,s.source_content_hash,s.snapshot_hash,s.created_at,
+      st.status AS submission_status,st.updated_at AS submission_updated_at,d.decision_id,d.decision,d.reviewer_user_id,d.idempotency_key,d.created_at AS decision_created_at,
+      d.seller_application_id AS decision_seller_application_id,d.seller_user_id AS decision_seller_user_id,d.source_project_id AS decision_source_project_id,
+      d.source_revision_id AS decision_source_revision_id,d.source_content_hash AS decision_source_content_hash,d.submission_snapshot_hash
+      FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st ON st.submission_id=s.submission_id
+      LEFT JOIN wcb_seller_review_decisions d ON d.submission_id=s.submission_id`
+  }
+
+  private sellerReviewDecisionFrom(row: Record<string, unknown>): SellerReviewDecision {
+    return Object.freeze({ decisionId: String(row.decision_id), submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.submission_snapshot_hash), decision: row.decision as SellerReviewDecision["decision"], decidedBy: String(row.reviewer_user_id), createdAt: iso(row.created_at) })
+  }
+
+  private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {
+    const decision = row.decision_id ? this.sellerReviewDecisionFrom({ ...row, seller_application_id: row.decision_seller_application_id, seller_user_id: row.decision_seller_user_id, source_project_id: row.decision_source_project_id, source_revision_id: row.decision_source_revision_id, source_content_hash: row.decision_source_content_hash, created_at: row.decision_created_at }) : undefined
+    return Object.freeze({ submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), status: decision?.decision ?? "pending_review", submittedAt: iso(row.created_at), updatedAt: decision?.createdAt ?? iso(row.submission_updated_at), ...(decision ? { decision } : {}) })
   }
 }

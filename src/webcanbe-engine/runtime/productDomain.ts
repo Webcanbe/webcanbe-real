@@ -89,6 +89,34 @@ export type SellerSubmission = Readonly<{
   updatedAt: string
 }>
 
+export type SellerReviewDecision = Readonly<{
+  decisionId: string
+  submissionId: string
+  sellerApplicationId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  decision: "approved_for_next_stage" | "rejected"
+  decidedBy: string
+  createdAt: string
+}>
+
+export type SellerQuarantineItem = Readonly<{
+  submissionId: string
+  sellerApplicationId: string
+  sellerUserId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  status: "pending_review" | SellerReviewDecision["decision"]
+  submittedAt: string
+  updatedAt: string
+  decision?: SellerReviewDecision
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

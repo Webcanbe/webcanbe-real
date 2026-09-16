@@ -1,3 +1,43 @@
+# Phase 3 seller quarantine review foundation — 2026-09-16
+
+**QUARANTINE REVIEW FOUNDATION PASS. Privileged operators can read the
+metadata-only seller quarantine queue and append one immutable, exact-snapshot
+review decision. Approval only means approved for a later stage: it does not
+publish, build, execute, list, release, entitle, or materialize anything.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `aba9d0f7abc64d782ab3620218ddfa63136b8d0a`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[quarantine-review report](reports/phase3-seller-quarantine-review.md) and
+[machine evidence](reports/phase3-seller-quarantine-review-evidence/index.json).
+
+- Queue list and inspect routes reuse the existing authenticated hosted product
+  controller. Each transaction requires a fresh active session and durable
+  active product-operator row; ordinary users and sellers refuse.
+- Queue output is restricted to submission/seller identity, exact source
+  project/revision/content/snapshot provenance, status, timestamps, and an
+  existing decision. Stored source files/history and authority internals are
+  not returned.
+- Each decision is bound to the submitted snapshot hash and copies its exact
+  provenance. Identical retries return the original record; idempotency-key
+  reuse for different input, a different snapshot, or a conflicting later
+  decision refuses.
+- PostgreSQL permits only one decision per submission and rejects decision-row
+  update or deletion. Submission source snapshots retain their existing
+  immutable database boundary.
+- Both `approved_for_next_stage` and `rejected` remain quarantined and
+  non-public. No catalog project, ProjectRelease, Listing, entitlement,
+  materialization, build, or execution side effect exists in this slice.
+- Focused verification passes 4/4; TypeScript and production build pass. A
+  complete five-file security diff review found zero unresolved findings. The
+  full default regression was not run.
+
+Next bounded task: implement snapshot-bound admission of only
+`approved_for_next_stage` submissions into an isolated assessment-job request,
+without executing the job or publishing a release.
+
+---
+
 # Phase 3 seller intake foundation — 2026-09-16
 
 **SELLER INTAKE PASS. Seller application → operator-approved seller identity →
