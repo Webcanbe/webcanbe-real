@@ -146,6 +146,24 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_seller_zip_admission ON wcb_seller_zip_admissions;
 CREATE TRIGGER wcb_immutable_seller_zip_admission BEFORE UPDATE OR DELETE ON wcb_seller_zip_admissions
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_zip_admission_mutation();
+CREATE TABLE IF NOT EXISTS wcb_seller_github_admissions (
+  github_admission_id uuid PRIMARY KEY, zip_admission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_zip_admissions,
+  archive_id uuid NOT NULL, repository text NOT NULL CHECK(repository ~ '^[a-z0-9][a-z0-9-]{0,38}/[a-z0-9][a-z0-9_.-]{0,99}$'),
+  commit_sha text NOT NULL CHECK(commit_sha ~ '^[a-f0-9]{40}$'), archive_sha256 text NOT NULL CHECK(archive_sha256 ~ '^[a-f0-9]{64}$'),
+  seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications, seller_user_id uuid NOT NULL,
+  workspace_id uuid NOT NULL, source_project_id uuid NOT NULL REFERENCES wcb_projects,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  snapshot_hash text NOT NULL CHECK(snapshot_hash ~ '^[a-f0-9]{64}$'), submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(seller_user_id,repository,commit_sha), UNIQUE(seller_user_id,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_github_admission_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerGitHubAdmission provenance is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_github_admission ON wcb_seller_github_admissions;
+CREATE TRIGGER wcb_immutable_seller_github_admission BEFORE UPDATE OR DELETE ON wcb_seller_github_admissions
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_github_admission_mutation();
 CREATE TABLE IF NOT EXISTS wcb_seller_review_decisions (
   decision_id uuid PRIMARY KEY, submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
   seller_application_id uuid NOT NULL, seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL,

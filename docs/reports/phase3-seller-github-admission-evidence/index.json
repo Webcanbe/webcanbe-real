@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "date": "2026-09-17",
+  "branch": "phase-3-hosted-product",
+  "base": "e6a146ee8f87ff55bde73111009ce94b618361c7",
+  "status": "PASS",
+  "scope": {
+    "authenticatedApprovedSeller": true,
+    "serverControlledGitHubAdapter": true,
+    "arbitraryUrlAccepted": false,
+    "fullImmutableCommitRequired": true,
+    "expectedArchiveSha256Required": true,
+    "existingHostedSourceSystem": true,
+    "existingZipSafetyPath": true,
+    "existingSellerQuarantine": true,
+    "codeExecution": false,
+    "assessmentTriggered": false,
+    "releaseOrListingCreated": false,
+    "entitlementOrPaymentCreated": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 54,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 non-executing seller GitHub admission\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "sellerAuthority": "PASS",
+    "immutableCommitPinning": "PASS",
+    "archiveDigestBinding": "PASS",
+    "trustedGitHubFetchBoundary": "PASS",
+    "arbitraryUrlRefusal": "PASS",
+    "archiveSafetyReuse": "PASS",
+    "idempotentAdmission": "PASS",
+    "crossSellerAuthority": "PASS",
+    "noCodeExecution": "PASS",
+    "quarantineOnly": "PASS",
+    "noImplicitPublication": "PASS"
+  },
+  "security": {
+    "scanId": "0bcbda2f-ce8c-40b9-a9be-48d8a872bb43",
+    "snapshotCoverage": "complete",
+    "changedFilesReviewed": 6,
+    "findings": 0,
+    "unresolved": 0,
+    "daybreakAccess": "not_granted"
+  }
+}

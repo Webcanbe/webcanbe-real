@@ -22,6 +22,7 @@ import type { ControlledJob } from "./runtime/controlledPreview"
 import { detectProject, type ProjectRecord } from "./runtime/projectRegistry"
 import { withHostedSource } from "./runtime/postgresSourceCheckout"
 import { PostgresAccess, PostgresProjectStore } from "./runtime/postgresStores"
+import type { ExternalSourceProvider } from "./runtime/externalSource"
 
 const clean: Array<() => unknown | Promise<unknown>> = []
 afterEach(async () => { for (const close of clean.splice(0).reverse()) await close() })
@@ -44,6 +45,7 @@ CREATE TABLE wcb_seller_applications(application_id uuid PRIMARY KEY,user_id uui
 CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,files jsonb NOT NULL,history jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_application_id,source_project_id,source_revision_id));
 CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions(submission_id),status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE wcb_seller_zip_admissions(admission_id uuid PRIMARY KEY,archive_id uuid NOT NULL UNIQUE,archive_name text NOT NULL,archive_sha256 text NOT NULL,archive_bytes bigint NOT NULL,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL UNIQUE REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_user_id,archive_sha256),UNIQUE(seller_user_id,idempotency_key));
+CREATE TABLE wcb_seller_github_admissions(github_admission_id uuid PRIMARY KEY,zip_admission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_zip_admissions(admission_id),archive_id uuid NOT NULL,repository text NOT NULL,commit_sha text NOT NULL,archive_sha256 text NOT NULL,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_user_id,repository,commit_sha),UNIQUE(seller_user_id,idempotency_key));
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
 CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
 CREATE TABLE wcb_assessment_workers(worker_id uuid PRIMARY KEY,credential_hash text NOT NULL,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
@@ -54,7 +56,7 @@ CREATE TABLE wcb_listing_publications(publication_id uuid PRIMARY KEY,promotion_
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
-async function setup(faults: { afterMaterializationReservation?: () => Promise<void> } = {}) {
+async function setup(faults: { afterMaterializationReservation?: () => Promise<void> } = {}, externalSource?: ExternalSourceProvider) {
   const db = newDb({ autoCreateForeignKeyIndices: true })
   db.public.registerFunction({ name: "clock_timestamp", returns: DataType.timestamptz, impure: true, implementation: () => new Date() })
   db.public.registerFunction({ name: "date_trunc", args: [DataType.text, DataType.timestamptz], returns: DataType.timestamptz, implementation: (_part: string, value: Date) => new Date(Math.trunc(value.getTime())) })
@@ -81,7 +83,7 @@ async function setup(faults: { afterMaterializationReservation?: () => Promise<v
   const durable = new DurableSource(record, path.join(temporary, "history"), { actor: a.id })
   const files = new Map<string, Buffer>(fs.readdirSync(projectRoot, { recursive: true, withFileTypes: true }).filter(entry => entry.isFile()).map(entry => { const full = path.join(entry.parentPath, entry.name); return [path.relative(projectRoot, full).split(path.sep).join("/"), fs.readFileSync(full)] }))
   await source.create(a.session, workspaceA, sourceProjectId, "Hosted source", files, durable.history())
-  const product = new PostgresProductDomainStore(pool, access, source, faults); await product.provisionOperator(operator.id)
+  const product = new PostgresProductDomainStore(pool, access, source, faults, externalSource); await product.provisionOperator(operator.id)
   const catalog = await product.createCatalogProject(a.session, workspaceA, sourceProjectId, { slug: "hosted-foundation", title: "Hosted Foundation", summary: "Immutable hosted source.", publicMetadata: { framework: "react-vite" } })
   const release = await product.publishRelease(a.session, catalog.catalogProjectId, "1.0.0")
   const listingId = randomUUID(), listingTime = new Date()
@@ -921,5 +923,76 @@ describe("Phase 3 non-executing seller ZIP admission", () => {
     expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [admission.submissionId])).rows[0].status).toBe("pending_review")
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerZip", 2)[1].split("async sellerSubmissions", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\/|wcb_project_releases|wcb_listings|wcb_license_entitlements|wcb_seller_assessment_requests/)
+  })
+})
+
+describe("Phase 3 non-executing seller GitHub admission", () => {
+  const commit = "a".repeat(40)
+  const archive = () => zipArchive([
+    { name: `project-${commit}/src/App.tsx`, content: "export const App=()=> <main>GitHub source</main>" },
+    { name: `project-${commit}/src/payload.ts`, content: "throw new Error('must never be evaluated')" },
+    { name: `project-${commit}/vite.config.ts`, content: "throw new Error('must never be loaded')" },
+    { name: `project-${commit}/README.md`, content: "# Immutable GitHub source" }
+  ])
+  const providerFor = (bytes: Buffer) => {
+    const calls: Array<Record<string, unknown>> = [], digest = createHash("sha256").update(bytes).digest("hex")
+    const provider: ExternalSourceProvider = { fetch: async reference => {
+      calls.push({ ...reference })
+      if (reference.expectedArchiveSha256 !== digest) throw new Error("Source archive integrity check failed.")
+      return { archive: Buffer.from(bytes), origin: { provider: "github", repository: reference.repository, commit: reference.commit, archiveSha256: digest } }
+    } }
+    return { provider, calls, digest }
+  }
+  const approved = async (bytes = archive()) => {
+    const remote = providerFor(bytes), f = await setup({}, remote.provider), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    return { ...f, ...remote, application }
+  }
+
+  it("admits one canonical full commit with exact archive/source provenance and idempotent replay", async () => {
+    const f = await approved(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const input = { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, repository: "Example/Project", commit, expectedArchiveSha256: f.digest, projectName: "GitHub project", idempotencyKey: "github-admission" }
+    const call = async (body: Record<string, unknown>) => { const exchange = httpRequest(f.a, "/__webcanbe/api/product/seller/imports/github/admit", body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    const first = await call(input), replay = await call({ ...input, idempotencyKey: "github-admission-replay" })
+    expect(first).toMatchObject({ status: 201, body: { admission: { repository: "example/project", commitSha: commit, archiveSha256: f.digest, sellerUserId: f.a.id, workspaceId: f.workspaceA } } })
+    expect(replay.body.admission).toEqual(first.body.admission); expect(f.calls).toEqual([{ provider: "github", repository: "example/project", commit, expectedArchiveSha256: f.digest }])
+    const admission = first.body.admission, source = await f.source.read(await f.access.grant(f.a.session, admission.sourceProjectId, "source"))
+    expect(source.files.get("src/App.tsx")?.toString()).toContain("GitHub source"); expect([...source.files.keys()].some(file => file.startsWith(`project-${commit}/`))).toBe(false)
+    expect((await f.product.sellerSubmissions(f.a.session)).find(item => item.submissionId === admission.submissionId)).toMatchObject({ sourceRevisionId: admission.sourceRevisionId, sourceContentHash: admission.sourceContentHash, snapshotHash: admission.snapshotHash, status: "pending_review" })
+    await expect(f.product.admitSellerGitHub(f.a.session, { ...input, workspaceId: f.workspaceA2, idempotencyKey: "github-cross-workspace" })).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_github_admissions")).rows[0].n)).toBe(1)
+  })
+
+  it("requires approved seller authority, rejects moving refs and arbitrary URL input, and denies cross-seller substitution", async () => {
+    const remote = providerFor(archive()), f = await setup({}, remote.provider), application = await f.product.applySeller(f.a.session)
+    const input = { sellerApplicationId: application.applicationId, workspaceId: f.workspaceA, repository: "example/project", commit, expectedArchiveSha256: remote.digest, projectName: "GitHub project", idempotencyKey: "github-authority" }
+    await expect(f.product.admitSellerGitHub(f.a.session, input)).rejects.toThrow(AuthorityDenied)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    await expect(f.product.admitSellerGitHub(f.a.session, { ...input, commit: "main" })).rejects.toThrow()
+    await expect(f.product.admitSellerGitHub(f.b.session, { ...input, workspaceId: f.workspaceB })).rejects.toThrow(AuthorityDenied)
+    const controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins)), exchange = httpRequest(f.a, "/__webcanbe/api/product/seller/imports/github/admit", { ...input, url: "https://example.invalid/archive.zip" })
+    await controller.handle(exchange.request, exchange.response); expect(exchange.result().status).toBe(403)
+    expect(remote.calls).toEqual([]); expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_github_admissions")).rows[0].n)).toBe(0)
+  })
+
+  it("refuses a conflicting digest for the same immutable repository commit", async () => {
+    const f = await approved(), input = { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, repository: "example/project", commit, expectedArchiveSha256: f.digest, projectName: "GitHub project", idempotencyKey: "github-digest" }
+    const admitted = await f.product.admitSellerGitHub(f.a.session, input)
+    await expect(f.product.admitSellerGitHub(f.a.session, { ...input, expectedArchiveSha256: "f".repeat(64), idempotencyKey: "github-conflict" })).rejects.toThrow(ProductConflict)
+    expect(f.calls).toHaveLength(1); expect((await f.pool.query("SELECT archive_sha256 FROM wcb_seller_github_admissions WHERE github_admission_id=$1", [admitted.githubAdmissionId])).rows[0].archive_sha256).toBe(f.digest)
+  })
+
+  it("reuses ZIP safety and remains inert, quarantined, and non-public", async () => {
+    const unsafe = zipArchive([{ name: `project-${commit}/../escape.ts`, content: "escape" }]), rejected = await approved(unsafe)
+    await expect(rejected.product.admitSellerGitHub(rejected.a.session, { sellerApplicationId: rejected.application.applicationId, workspaceId: rejected.workspaceA, repository: "example/project", commit, expectedArchiveSha256: rejected.digest, projectName: "Unsafe", idempotencyKey: "github-unsafe" })).rejects.toThrow()
+    expect(Number((await rejected.pool.query("SELECT count(*) AS n FROM wcb_seller_github_admissions")).rows[0].n)).toBe(0)
+
+    const f = await approved(), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), assessments: await count("wcb_seller_assessment_requests") }
+    const admission = await f.product.admitSellerGitHub(f.a.session, { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, repository: "example/project", commit, expectedArchiveSha256: f.digest, projectName: "Inert GitHub", idempotencyKey: "github-inert" })
+    expect({ releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), assessments: await count("wcb_seller_assessment_requests") }).toEqual(before)
+    expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [admission.submissionId])).rows[0].status).toBe("pending_review")
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerGitHub", 2)[1].split("async sellerSubmissions", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|eval\(|Function\(|wcb_project_releases|wcb_listings|wcb_license_entitlements|wcb_seller_assessment_requests/)
   })
 })

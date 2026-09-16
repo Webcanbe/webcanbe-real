@@ -1,3 +1,44 @@
+# Phase 3 non-executing seller GitHub admission — 2026-09-17
+
+**GITHUB IMPORT ADMISSION PASS. An authenticated approved seller can admit one
+public GitHub repository archive pinned to a full immutable commit and exact
+SHA-256 digest into an authorized workspace. The validated source enters the
+existing pending-review quarantine path without execution or publication.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `e6a146ee8f87ff55bde73111009ce94b618361c7`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[GitHub admission report](reports/phase3-seller-github-admission.md) and
+[machine evidence](reports/phase3-seller-github-admission-evidence/index.json).
+
+- The authenticated hosted controller accepts only a canonical repository,
+  full lowercase 40-hex commit, exact 64-hex expected archive digest, and
+  seller/workspace references. It refuses arbitrary URL fields and moving refs.
+- The server-controlled GitHub adapter alone constructs the fixed
+  `codeload.github.com` request. It refuses redirects and encoded responses,
+  validates and pins public DNS addresses, bounds headers/bytes/time, and
+  verifies the fetched archive digest before returning bytes.
+- The store verifies approved-seller ownership and workspace authority before
+  the fetch and again in the commit transaction. It rechecks adapter origin and
+  archive digest, then feeds bytes through the same ZIP safety boundary proven
+  by seller ZIP admission and safely strips only one canonical codeload root.
+- One transaction creates the existing hosted source/revision, immutable
+  pending-review submission, ZIP admission, and immutable GitHub provenance.
+  Repository, commit, archive, source, snapshot, and submission identities stay
+  exact. Exact replay is idempotent; conflicting digest or context refuses.
+- Admission runs no package manager, uploaded code/config/plugin/hook, network
+  selected by the client, assessment, publication, entitlement, workspace
+  materialization, checkout, payment, or payout action.
+- Focused verification passes 4/4; TypeScript and production build pass. The
+  complete six-file security diff scan found zero findings and zero unresolved
+  items. The full default regression was not run.
+
+Next bounded task: define the smallest WebCanBe Ready certification-evidence
+contract over immutable assessment results, without changing assessment
+execution, Listing publication, entitlements, or payments.
+
+---
+
 # Phase 3 non-executing seller ZIP admission — 2026-09-17
 
 **ZIP IMPORT ADMISSION PASS. An authenticated approved seller can admit one

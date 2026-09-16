@@ -111,6 +111,10 @@ export class HostedProductController {
         exact(body, ["sellerApplicationId", "workspaceId", "archiveName", "projectName", "archiveBase64", "idempotencyKey"])
         return send(201, { admission: await this.store.admitSellerZip(session, { sellerApplicationId: text(body, "sellerApplicationId"), workspaceId: text(body, "workspaceId"), archiveName: text(body, "archiveName"), projectName: text(body, "projectName"), archive: archiveBytes(body), idempotencyKey: text(body, "idempotencyKey") }) })
       }
+      if (action === "/seller/imports/github/admit") {
+        exact(body, ["sellerApplicationId", "workspaceId", "repository", "commit", "expectedArchiveSha256", "projectName", "idempotencyKey"])
+        return send(201, { admission: await this.store.admitSellerGitHub(session, { sellerApplicationId: text(body, "sellerApplicationId"), workspaceId: text(body, "workspaceId"), repository: text(body, "repository"), commit: text(body, "commit"), expectedArchiveSha256: text(body, "expectedArchiveSha256"), projectName: text(body, "projectName"), idempotencyKey: text(body, "idempotencyKey") }) })
+      }
       if (action === "/seller/submissions/list") { exact(body, []); return send(200, { submissions: await this.store.sellerSubmissions(session) }) }
       if (action === "/seller/review/queue") { exact(body, []); return send(200, { submissions: await this.store.sellerQuarantineQueue(session) }) }
       if (action === "/seller/review/inspect") {

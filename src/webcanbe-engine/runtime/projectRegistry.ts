@@ -114,6 +114,21 @@ export async function readSafeZip(archive: Buffer) {
   return files
 }
 
+/** GitHub codeload archives wrap source in one repository/commit directory.
+ * Strip only a proven single root after every member has passed ZIP safety. */
+export function stripSingleArchiveRoot(files: Map<string, Buffer>) {
+  const roots = new Set([...files.keys()].map(file => file.split("/")[0]))
+  if (roots.size !== 1 || [...files.keys()].some(file => !file.includes("/"))) throw new Error("GitHub archive does not have one canonical source root.")
+  const root = [...roots][0], stripped = new Map<string, Buffer>(), seen = new Set<string>()
+  for (const [file, bytes] of files) {
+    const relative = file.slice(root.length + 1), key = relative.toLowerCase()
+    if (safeArchivePath(relative) !== relative || seen.has(key)) throw new Error("GitHub archive root contains conflicting source paths.")
+    seen.add(key); stripped.set(relative, bytes)
+  }
+  if (!stripped.size) throw new Error("GitHub archive contains no source files.")
+  return stripped
+}
+
 /** Validate every member before writing. Never follow archive links or run project code. */
 export async function extractSafeZip(archive: Buffer, destination: string) {
   const files = await readSafeZip(archive)

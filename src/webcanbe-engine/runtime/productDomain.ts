@@ -106,6 +106,24 @@ export type SellerZipAdmission = Readonly<{
   createdAt: string
 }>
 
+export type SellerGitHubAdmission = Readonly<{
+  githubAdmissionId: string
+  zipAdmissionId: string
+  archiveId: string
+  repository: string
+  commitSha: string
+  archiveSha256: string
+  sellerApplicationId: string
+  sellerUserId: string
+  workspaceId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  submissionId: string
+  createdAt: string
+}>
+
 export type SellerReviewDecision = Readonly<{
   decisionId: string
   submissionId: string
