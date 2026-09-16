@@ -1,5 +1,38 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 isolated seller assessment worker
+
+The seller pipeline now has a real out-of-process assessment worker without a
+parallel execution architecture. It reads only the immutable submission bytes
+bound to the current live assessment fence, revalidates their stored
+history/content/snapshot provenance, and never substitutes current seller HEAD.
+
+Static profile preparation remains inert in the server process. Production
+execution is composed directly from the retained hosted Linux runner and
+PostgreSQL runner-fencing store. The fixed semantic TypeScript command receives
+a digest-bound snapshot with external networking denied and no secrets; the
+existing pinned compiler, OS namespaces, cleared environment, fixed command,
+resource/time limits, mTLS transport, cleanup, and orphan recovery remain the
+enforcing boundary. No local or host-process fallback exists in production.
+
+The worker renews its product lease, aborts on lost authority, and submits
+bounded `passed`/`failed`/`errored` evidence only through the existing immutable
+live-fence result API after cleanup. Stale, cancelled, expired, reclaimed, or
+wrong-worker output cannot become accepted. Crash/restart recovery reuses the
+existing lease expiry/reclaim generation and preserves the exact snapshot.
+
+Focused tests pass 4/4, including a real child-process boundary check, exact
+snapshot consumption after seller HEAD advances, default network denial,
+fail-closed hosted isolation selection, timeout, cancellation, stale reclaim,
+immutable result submission, and no publication side effects. TypeScript and
+build pass; the complete five-file security diff scan found zero unresolved
+items. The full default regression was not run. See the
+[worker report](reports/phase3-isolated-assessment-worker.md),
+[evidence](reports/phase3-isolated-assessment-worker-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 seller assessment result acceptance
 
 The hosted seller assessment pipeline now has an immutable result-acceptance

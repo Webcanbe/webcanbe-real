@@ -9,6 +9,7 @@ export type HostedRunnerHost = { id: string; origin: string; ca: string; cert: s
 /** A real remote-provider client. A configured HTTPS/mTLS Linux gateway performs
  * fixed OS-isolated jobs. Tests using local Lima are explicitly local evidence. */
 export class HostedLinuxRunnerProvider implements RunnerProvider {
+  readonly isolationBoundary = "hosted-linux" as const
   private readonly controller = randomUUID()
   private readonly active = new Map<string, { fence: Fence; close: () => Promise<void> }>()
   private readonly pending = new Map<string, { hash: string; result: Promise<ControlledExecution> }>()

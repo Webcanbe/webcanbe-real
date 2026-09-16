@@ -3,6 +3,7 @@ import os from "node:os"
 import path from "node:path"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
 import { Readable } from "node:stream"
+import { spawn } from "node:child_process"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Pool } from "pg"
 import { DataType, newDb } from "pg-mem"
@@ -15,6 +16,8 @@ import { HostedProductController } from "./runtime/hostedProductController"
 import { PostgresIdentityStore, PostgresSessionBoundary } from "./runtime/postgresIdentity"
 import { EntitlementUnavailable, ProductConflict } from "./runtime/productDomain"
 import { PostgresProductDomainStore } from "./runtime/postgresProductDomain"
+import { IsolatedAssessmentWorker, type HostedAssessmentRunnerFactory } from "./runtime/isolatedAssessmentWorker"
+import type { ControlledJob } from "./runtime/controlledPreview"
 import { detectProject, type ProjectRecord } from "./runtime/projectRegistry"
 import { withHostedSource } from "./runtime/postgresSourceCheckout"
 import { PostgresAccess, PostgresProjectStore } from "./runtime/postgresStores"
@@ -604,4 +607,88 @@ describe("Phase 3 seller assessment result acceptance", () => {
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async claimAssessmentJob", 2)[1].split("async createCatalogProject", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\//)
   })
+})
+
+describe("Phase 3 isolated seller assessment worker", () => {
+  const workerFixture = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, f.sourceProjectId)
+    const decision = await f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", "worker-approval")
+    const request = await f.product.admitSellerAssessment(f.operator.session, submission.submissionId, f.a.id, submission.snapshotHash, decision.decisionId, "worker-admission")
+    const authority = await f.product.provisionAssessmentWorker(randomUUID()), alternate = await f.product.provisionAssessmentWorker(randomUUID())
+    const lease = await f.product.claimAssessmentJob(authority, request.assessmentRequestId, submission.submissionId, f.a.id, submission.snapshotHash)
+    return { ...f, application, submission, decision, request, authority, alternate, lease }
+  }
+
+  const factory = (jobs: ControlledJob[], check: (job: ControlledJob) => Promise<unknown>): HostedAssessmentRunnerFactory => authorized => ({
+    isolationBoundary: "hosted-linux",
+    async open(job, signal) {
+      if (signal.aborted || !job.allocation || !await authorized(job.allocation.owner)) throw new Error("runner authorization rejected")
+      jobs.push(job)
+      return { check: () => check(job), capture: async () => new Uint8Array(), input: async () => {}, close: async () => {} }
+    },
+    async close() {},
+  })
+
+  const childCheck = (observed: { pid?: number; source?: string }) => async (job: ControlledJob) => {
+    const artifact = job.snapshot.files.find(file => file.path === "/_wcb/typecheck.json")!
+    return new Promise<unknown>((resolve, reject) => {
+      const child = spawn(process.execPath, ["-e", `let d='';process.stdin.setEncoding('utf8');process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d),s=i.files.find(f=>f.path==='src/App.tsx');process.stdout.write(JSON.stringify({pid:process.pid,source:s?.text||'',level:'semantic',toolchain:'typescript@5.9.3',passed:true,diagnostics:[]}))})`], { stdio: ["pipe", "pipe", "ignore"] })
+      let output = ""
+      child.stdout.setEncoding("utf8"); child.stdout.on("data", value => { output += value })
+      child.once("error", reject); child.once("exit", code => { if (code) return reject(new Error("trusted child checker failed")); const result = JSON.parse(output); observed.pid = result.pid; observed.source = result.source; resolve(result) })
+      child.stdin.end(Buffer.from(artifact.base64, "base64"))
+    })
+  }
+
+  it("runs the exact frozen snapshot out of process under the live lease and accepts only through the result boundary", async () => {
+    const f = await workerFixture(), submitted = (await f.pool.query("SELECT files FROM wcb_seller_submissions WHERE submission_id=$1", [f.submission.submissionId])).rows[0].files
+    const original = Buffer.from(submitted.find((entry: string[]) => entry[0] === "src/App.tsx")[1], "base64").toString("utf8")
+    const grant = await f.access.grant(f.a.session, f.sourceProjectId, "code")
+    await withHostedSource(f.source, grant, process.cwd(), async (_project, source) => {
+      const before = source.files().get("src/App.tsx")!, base = source.revision(), entry = transactionEntry(f.sourceProjectId, base, "code", randomUUID(), "post-submit", "Edit seller HEAD after submission", { level: "parse", passed: true, diagnostics: [] }); entry.actor = f.a.id
+      source.commit({ expectedRevision: base, operations: [{ kind: "update", file: "src/App.tsx", expectedHash: contentHash(before), content: `${before}\n// newer seller HEAD\n` }], entry, authorize: () => {} })
+    }, true)
+    const jobs: ControlledJob[] = [], observed: { pid?: number; source?: string } = {}, count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements") }
+    const result = await new IsolatedAssessmentWorker(f.product, process.cwd(), factory(jobs, childCheck(observed))).run(f.authority, f.lease)
+    expect(result).toMatchObject({ assessmentJobId: f.request.assessmentRequestId, submissionId: f.submission.submissionId, snapshotHash: f.submission.snapshotHash, workerId: f.authority.workerId, leaseGeneration: f.lease.generation, status: "passed" })
+    expect(observed.pid).not.toBe(process.pid); expect(observed.source).toBe(original); expect(observed.source).not.toContain("newer seller HEAD")
+    expect(jobs[0]).toMatchObject({ purpose: "semantic-typescript-v1", revision: f.submission.sourceRevisionId, network: { external: "deny" }, allocation: { budget: { memoryMiB: 1536, cpuPercent: 150, tasks: 192 } } })
+    expect({ releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements") }).toEqual(before)
+  }, 15_000)
+
+  it("fails closed without the hosted isolation marker and bounds checker timeout as an errored immutable result", async () => {
+    const denied = await workerFixture(), jobs: ControlledJob[] = []
+    const untrusted = (() => ({ isolationBoundary: "local" as "hosted-linux", open: async () => { throw new Error("must not open") }, close: async () => {} })) as HostedAssessmentRunnerFactory
+    await expect(new IsolatedAssessmentWorker(denied.product, process.cwd(), untrusted).run(denied.authority, denied.lease)).rejects.toThrow("hosted Linux isolation")
+    const timed = await workerFixture(), result = await new IsolatedAssessmentWorker(timed.product, process.cwd(), factory(jobs, async () => new Promise(() => {})), 25).run(timed.authority, timed.lease)
+    expect(result).toMatchObject({ status: "errored", snapshotHash: timed.submission.snapshotHash, leaseGeneration: timed.lease.generation, metadata: { error: "execution_timeout", bounded: true } })
+  }, 15_000)
+
+  it("rejects cancelled and stale-worker delivery even after isolated work returns", async () => {
+    const cancelled = await workerFixture(), jobs: ControlledJob[] = []
+    const cancelCheck = async () => { await cancelled.product.cancelAssessmentJob(cancelled.authority, cancelled.lease); return { level: "semantic", toolchain: "typescript@5.9.3", passed: true, diagnostics: [] } }
+    await expect(new IsolatedAssessmentWorker(cancelled.product, process.cwd(), factory(jobs, cancelCheck)).run(cancelled.authority, cancelled.lease)).rejects.toThrow(AuthorityDenied)
+    expect(Number((await cancelled.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_results")).rows[0].n)).toBe(0)
+
+    const reclaimed = await workerFixture()
+    const staleCheck = async () => {
+      await reclaimed.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [reclaimed.request.assessmentRequestId])
+      await reclaimed.product.claimAssessmentJob(reclaimed.alternate, reclaimed.request.assessmentRequestId, reclaimed.submission.submissionId, reclaimed.a.id, reclaimed.submission.snapshotHash)
+      return { level: "semantic", toolchain: "typescript@5.9.3", passed: true, diagnostics: [] }
+    }
+    await expect(new IsolatedAssessmentWorker(reclaimed.product, process.cwd(), factory([], staleCheck)).run(reclaimed.authority, reclaimed.lease)).rejects.toThrow(AuthorityDenied)
+    expect(Number((await reclaimed.pool.query("SELECT count(*) AS n FROM wcb_seller_assessment_results")).rows[0].n)).toBe(0)
+  }, 15_000)
+
+  it("survives a pre-result worker loss by reclaiming the same snapshot under a newer fence", async () => {
+    const f = await workerFixture(), restarted = new PostgresProductDomainStore(f.pool, f.access, f.source)
+    await f.pool.query("UPDATE wcb_seller_assessment_leases SET lease_until=clock_timestamp()-interval '1 second' WHERE assessment_request_id=$1", [f.request.assessmentRequestId])
+    const current = await restarted.claimAssessmentJob(f.alternate, f.request.assessmentRequestId, f.submission.submissionId, f.a.id, f.submission.snapshotHash)
+    const result = await new IsolatedAssessmentWorker(restarted, process.cwd(), factory([], async () => ({ level: "semantic", toolchain: "typescript@5.9.3", passed: false, diagnostics: [{ file: "src/App.tsx", message: "bounded assessment failure" }] }))).run(f.alternate, current)
+    expect(result).toMatchObject({ status: "failed", snapshotHash: f.submission.snapshotHash, leaseGeneration: "2", workerId: f.alternate.workerId })
+    await expect(f.product.acceptAssessmentResult(f.authority, f.lease, { idempotencyKey: "late-old-worker", status: "passed" })).rejects.toThrow(AuthorityDenied)
+  }, 15_000)
 })

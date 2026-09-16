@@ -79,6 +79,18 @@ const releaseFrom = (row: ReleaseRow): ProjectRelease => Object.freeze({
 })
 
 export type MaterializationReconciliation = Readonly<{ examined: number; ready: number; failed: number; pending: number }>
+export type AssessmentExecutionSnapshot = Readonly<{
+  assessmentJobId: string
+  submissionId: string
+  sellerUserId: string
+  workspaceId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  files: ReadonlyMap<string, Buffer>
+  history: RevisionLedger
+}>
 
 /** Hosted Phase-3 product persistence. PostgreSQL stores both immutable release
  * snapshots and materialization intent. Editable working copies are created in
@@ -310,6 +322,32 @@ export class PostgresProductDomainStore {
       const final = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
       if (!final?.live || String(final.worker_id) !== worker.workerId || String(final.generation) !== fence.generation) throw new AuthorityDenied()
       return this.assessmentJobLeaseFrom(final)
+    })
+  }
+
+  /** Returns only the immutable submitted bytes bound to the current live fence.
+   * Current project HEAD is deliberately not consulted. */
+  async assessmentExecutionSnapshot(worker: AssessmentWorkerAuthority, fence: AssessmentJobFence): Promise<AssessmentExecutionSnapshot> {
+    this.validateAssessmentFence(worker, fence)
+    return pgTransaction(this.pool, async client => {
+      await this.requireAssessmentWorkerIn(client, worker)
+      const lease = (await client.query("SELECT *,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!lease || !lease.live || lease.state !== "leased" || String(lease.worker_id) !== worker.workerId || String(lease.generation) !== fence.generation || String(lease.submission_id) !== fence.submissionId || String(lease.submission_snapshot_hash) !== fence.snapshotHash) throw new AuthorityDenied()
+      const request = await this.assessmentRequestForClaim(client, fence.assessmentJobId)
+      if (!request) throw new AuthorityDenied()
+      this.assertAssessmentLeaseBinding(lease, request)
+      const submission = (await client.query("SELECT * FROM wcb_seller_submissions WHERE submission_id=$1 FOR SHARE", [fence.submissionId])).rows[0]
+      if (!submission) throw new AuthorityDenied()
+      const files = filesFrom(submission.files), history = structuredClone(submission.history) as RevisionLedger
+      const projectId = String(submission.source_project_id), revisionId = String(submission.source_revision_id), contentHash = String(submission.source_content_hash)
+      if (verifyHistory(projectId, files, history) !== revisionId) throw new Error("Stored assessment source/history integrity failed.")
+      const head = history.revisions.find(item => item.revisionId === revisionId)
+      if (!head || head.contentHash !== contentHash || snapshotHash({ projectId, revisionId, contentHash, files, history }) !== fence.snapshotHash) throw new Error("Stored assessment snapshot integrity failed.")
+      if (String(submission.submission_id) !== fence.submissionId || String(submission.seller_user_id) !== String(request.seller_user_id) || projectId !== String(request.source_project_id) || revisionId !== String(request.source_revision_id) || contentHash !== String(request.source_content_hash) || String(submission.snapshot_hash) !== fence.snapshotHash) throw new ProductConflict("Assessment snapshot does not match its immutable request.")
+      await this.requireAssessmentWorkerIn(client, worker)
+      const final = (await client.query("SELECT worker_id,generation,state,lease_until>clock_timestamp() AS live FROM wcb_seller_assessment_leases WHERE assessment_request_id=$1 FOR UPDATE", [fence.assessmentJobId])).rows[0]
+      if (!final?.live || final.state !== "leased" || String(final.worker_id) !== worker.workerId || String(final.generation) !== fence.generation) throw new AuthorityDenied()
+      return Object.freeze({ assessmentJobId: fence.assessmentJobId, submissionId: fence.submissionId, sellerUserId: String(submission.seller_user_id), workspaceId: String(submission.workspace_id), sourceProjectId: projectId, sourceRevisionId: revisionId, sourceContentHash: contentHash, snapshotHash: fence.snapshotHash, files: new Map(files), history })
     })
   }
 

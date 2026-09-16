@@ -1,3 +1,48 @@
+# Phase 3 isolated seller assessment worker — 2026-09-16
+
+**ISOLATED ASSESSMENT WORKER PASS. A server-provisioned worker holding the
+exact current live assessment fence can run the existing fixed semantic check
+on the immutable submitted snapshot in the existing hosted Linux isolation
+boundary, then submit only through immutable result acceptance. No release,
+listing, entitlement, or purchase is created.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `15b8f4a2254d81cb11e0d502f47f6b1274145d73`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[worker report](reports/phase3-isolated-assessment-worker.md) and
+[machine evidence](reports/phase3-isolated-assessment-worker-evidence/index.json).
+
+- A live-fence-only snapshot read authenticates the provisioned worker and
+  verifies the job, submission, seller, source revision/content, immutable
+  history, snapshot digest, worker owner, and fencing generation in PostgreSQL.
+- The worker stages only those frozen bytes for the existing static runtime
+  admission. Uploaded Vite/TypeScript configuration is parsed as bounded data;
+  no uploaded configuration, plugin, hook, script, or package manager runs in
+  the web/server process.
+- Production composition is hardwired to the retained
+  `HostedLinuxRunnerProvider` plus `PostgresLeaseStore`. The assessment job uses
+  the existing fixed `semantic-typescript-v1` command, pinned checker, mTLS
+  gateway, OS namespaces, cleared environment, external-network denial,
+  resource ceilings, deadline, durable runner fencing, and verified cleanup.
+  There is no production host/local execution fallback.
+- The worker renews its assessment lease while active, aborts when renewal or
+  authority fails, bounds execution, and closes the isolated allocation before
+  result acceptance. Cancellation, expiry, reclaim, or worker revocation makes
+  stale output fail the existing immutable acceptance boundary.
+- Outcomes are only `passed`, `failed`, or `errored` assessment evidence with
+  bounded diagnostics. They do not create a release/listing, grant an
+  entitlement, make anything purchasable, or materialize a workspace project.
+- Focused verification passes 4/4; TypeScript and production build pass. The
+  complete five-file security diff scan found zero findings and zero unresolved
+  items. No live cloud-host assertion is added; the full default regression was
+  not run.
+
+Next bounded task: add an explicit operator-authenticated promotion decision
+that can create one immutable `ProjectRelease` from a passed assessment result,
+while keeping Listing publication separate and non-automatic.
+
+---
+
 # Phase 3 seller assessment result acceptance — 2026-09-16
 
 **ASSESSMENT RESULT ACCEPTANCE PASS. A server-provisioned worker holding the

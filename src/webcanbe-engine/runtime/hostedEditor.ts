@@ -21,6 +21,7 @@ import { SourceConflict } from "../mutations/durableSource"
 import type { SessionOperation } from "./projectRegistry"
 import { PostgresProductDomainStore } from "./postgresProductDomain"
 import { HostedProductController } from "./hostedProductController"
+import { hostedIsolatedAssessmentWorker, type IsolatedAssessmentWorker } from "./isolatedAssessmentWorker"
 
 function json(response: ServerResponse, result: SourceResponse) {
   response.writeHead(result.status, { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" })
@@ -51,6 +52,7 @@ export class HostedEditor {
   readonly login: HostedLoginBoundary
   readonly products: PostgresProductDomainStore
   readonly productController: HostedProductController
+  readonly assessmentWorker: IsolatedAssessmentWorker
   private recoveryTimer: ReturnType<typeof setInterval>
   private recovery?: Promise<void>
   private productRecovery?: Promise<void>
@@ -68,6 +70,7 @@ export class HostedEditor {
     this.login = new HostedLoginBoundary(options.origins.editorOrigin, options.identityProvider, this.identity, this.identity)
     this.products = new PostgresProductDomainStore(options.pool, this.access, this.source)
     this.productController = new HostedProductController(this.products, this.boundary, options.onError)
+    this.assessmentWorker = hostedIsolatedAssessmentWorker(this.products, applicationRoot, options.pool, options.hosts)
     this.startProductRecovery()
     // Recover idle orphans even if no new editor request arrives. Failed cleanup
     // remains in PostgreSQL accounting/quarantine for the next bounded attempt.
