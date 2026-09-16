@@ -75,12 +75,12 @@ export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
   }
   async resolve(token: string): Promise<ServerSession | undefined> {
     if (!/^[\w-]{43}$/.test(token)) return undefined
-    const row = (await this.pool.query("SELECT session_id,user_id,expires_at FROM wcb_sessions s WHERE token_hash=$1 AND active AND expires_at>clock_timestamp() AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=s.user_id)", [hash(token)])).rows[0]
+    const row = (await this.pool.query("SELECT s.session_id,s.user_id,s.expires_at FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE token_hash=$1 AND active AND expires_at>clock_timestamp() AND d.user_id IS NULL", [hash(token)])).rows[0]
     return row ? Object.freeze({ sessionId: row.session_id, userId: row.user_id, expiresAt: new Date(row.expires_at).getTime() }) : undefined
   }
   async csrf(session: ServerSession, token: string) {
     if (!/^[\w-]{43}$/.test(token)) return false
-    return Boolean((await this.pool.query("SELECT session_id FROM wcb_sessions s WHERE session_id=$1 AND user_id=$2 AND expires_at=to_timestamp($3/1000.0) AND expires_at>clock_timestamp() AND active AND csrf_hash=$4 AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=s.user_id)", [session.sessionId, session.userId, session.expiresAt, hash(token)])).rowCount)
+    return Boolean((await this.pool.query("SELECT s.session_id FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE s.session_id=$1 AND s.user_id=$2 AND expires_at=to_timestamp($3/1000.0) AND expires_at>clock_timestamp() AND active AND csrf_hash=$4 AND d.user_id IS NULL", [session.sessionId, session.userId, session.expiresAt, hash(token)])).rowCount)
   }
   async rotateCsrf(session: ServerSession) {
     const token = random()

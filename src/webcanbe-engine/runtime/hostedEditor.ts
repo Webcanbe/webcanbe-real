@@ -19,6 +19,8 @@ import { executeSourceOperation, type SourceResponse } from "./sourceApi"
 import { inspectRuntime } from "./runtimeCompatibility"
 import { SourceConflict } from "../mutations/durableSource"
 import type { SessionOperation } from "./projectRegistry"
+import { PostgresProductDomainStore } from "./postgresProductDomain"
+import { HostedProductController } from "./hostedProductController"
 
 function json(response: ServerResponse, result: SourceResponse) {
   response.writeHead(result.status, { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" })
@@ -47,8 +49,11 @@ export class HostedEditor {
   readonly controlled: ControlledPreviewTransport
   readonly boundary: PostgresSessionBoundary
   readonly login: HostedLoginBoundary
+  readonly products: PostgresProductDomainStore
+  readonly productController: HostedProductController
   private recoveryTimer: ReturnType<typeof setInterval>
   private recovery?: Promise<void>
+  private productRecovery?: Promise<void>
   constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; publicRuntimeValueProvider?: PublicRuntimeValueProvider; staticAssets?: TrustedStaticAssets; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
     this.identity = new PostgresIdentityStore(options.pool)
     this.access = new PostgresAccess(options.pool)
@@ -61,21 +66,26 @@ export class HostedEditor {
     this.controlled = new ControlledPreviewTransport(this.registry, applicationRoot, options.managedSecrets ? new ManagedSecretRunnerProvider(this.provider, options.managedSecrets) : this.provider, Date.now, this.artifacts, { fastRefresh: options.fastRefresh, publicRuntimeValueProvider: options.publicRuntimeValueProvider, staticAssets: options.staticAssets })
     this.boundary = new PostgresSessionBoundary(this.identity, options.origins)
     this.login = new HostedLoginBoundary(options.origins.editorOrigin, options.identityProvider, this.identity, this.identity)
+    this.products = new PostgresProductDomainStore(options.pool, this.access, this.source)
+    this.productController = new HostedProductController(this.products, this.boundary, options.onError)
+    this.startProductRecovery()
     // Recover idle orphans even if no new editor request arrives. Failed cleanup
     // remains in PostgreSQL accounting/quarantine for the next bounded attempt.
     this.recoveryTimer = setInterval(() => {
       if (!this.recovery) this.recovery = this.provider.recover().catch(() => {}).finally(() => { this.recovery = undefined })
+      this.startProductRecovery()
     }, 5000)
     this.recoveryTimer.unref()
   }
   async close() {
     clearInterval(this.recoveryTimer)
-    await this.recovery
+    await Promise.all([this.recovery, this.productRecovery])
     try { await this.controlled.close() } finally { await this.provider.close() }
   }
   async handle(request: IncomingMessage, response: ServerResponse): Promise<boolean> {
     const pathname = request.url?.split("?")[0] ?? ""
     if (pathname.startsWith("/__webcanbe/auth/")) return this.login.handle(request, response)
+    if (pathname.startsWith("/__webcanbe/api/product/")) return this.productController.handle(request, response)
     if (!pathname.startsWith("/__webcanbe/api/")) return false
     try {
       const account = await this.boundary.authenticate(request)
@@ -188,6 +198,10 @@ export class HostedEditor {
       else json(response, { status: error instanceof AuthorityDenied ? 403 : error instanceof SourceConflict ? 409 : 422, value: { error: error instanceof AuthorityDenied ? "Project authority is unavailable." : error instanceof SourceConflict ? "Source or preview changed; reload and retry." : "The hosted operation failed. Accepted source and history remain authoritative." } })
       return true
     }
+  }
+
+  private startProductRecovery() {
+    if (!this.productRecovery) this.productRecovery = this.products.reconcilePending(20).then(() => {}).catch(error => { this.options.onError?.(error) }).finally(() => { this.productRecovery = undefined })
   }
 }
 

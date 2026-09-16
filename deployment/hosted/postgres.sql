@@ -51,3 +51,48 @@ CREATE TABLE IF NOT EXISTS wcb_drafts (
   project_id uuid NOT NULL REFERENCES wcb_projects, user_id uuid NOT NULL,
   version bigint NOT NULL, payload jsonb NOT NULL, PRIMARY KEY(project_id,user_id)
 );
+
+-- Phase 3 product domain. Listings may move to a different release, but a
+-- published release row and its byte-exact source snapshot are immutable.
+CREATE TABLE IF NOT EXISTS wcb_catalog_projects (
+  catalog_project_id uuid PRIMARY KEY, source_project_id uuid NOT NULL, owner_workspace_id uuid NOT NULL, created_by uuid NOT NULL,
+  slug text NOT NULL UNIQUE, title text NOT NULL, summary text NOT NULL,
+  status text NOT NULL CHECK(status IN ('active','archived')), public_metadata jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+CREATE TABLE IF NOT EXISTS wcb_project_releases (
+  release_id uuid PRIMARY KEY, catalog_project_id uuid NOT NULL REFERENCES wcb_catalog_projects, version text NOT NULL,
+  status text NOT NULL CHECK(status='published'), source_project_id uuid NOT NULL, source_revision_id text NOT NULL,
+  source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'), snapshot_hash text NOT NULL CHECK(snapshot_hash ~ '^[a-f0-9]{64}$'),
+  files jsonb NOT NULL, history jsonb NOT NULL, created_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(catalog_project_id,version), UNIQUE(catalog_project_id,release_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_project_release_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'ProjectRelease is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_project_release ON wcb_project_releases;
+CREATE TRIGGER wcb_immutable_project_release BEFORE UPDATE OR DELETE ON wcb_project_releases
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_project_release_mutation();
+CREATE TABLE IF NOT EXISTS wcb_listings (
+  listing_id uuid PRIMARY KEY, catalog_project_id uuid NOT NULL, release_id uuid NOT NULL, slug text NOT NULL UNIQUE,
+  title text NOT NULL, summary text NOT NULL, status text NOT NULL CHECK(status IN ('draft','published','archived')),
+  availability text NOT NULL CHECK(availability IN ('available','unavailable')), tags jsonb NOT NULL DEFAULT '[]', demo_metadata jsonb NOT NULL DEFAULT '{}',
+  updated_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(catalog_project_id),
+  FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id)
+);
+CREATE TABLE IF NOT EXISTS wcb_license_entitlements (
+  entitlement_id uuid PRIMARY KEY, user_id uuid NOT NULL, release_id uuid NOT NULL REFERENCES wcb_project_releases,
+  provider text NOT NULL, provider_reference text NOT NULL UNIQUE, status text NOT NULL CHECK(status IN ('active','revoked','invalid')),
+  granted_at timestamptz NOT NULL DEFAULT clock_timestamp(), revoked_at timestamptz, UNIQUE(user_id,release_id,provider)
+);
+CREATE TABLE IF NOT EXISTS wcb_product_operators (
+  user_id uuid PRIMARY KEY, active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS wcb_entitlement_materializations (
+  entitlement_id uuid PRIMARY KEY REFERENCES wcb_license_entitlements, workspace_id uuid NOT NULL, user_id uuid NOT NULL,
+  workspace_project_id uuid NOT NULL UNIQUE, idempotency_key text NOT NULL, project_name text NOT NULL,
+  status text NOT NULL CHECK(status IN ('pending','ready','failed')), attempts integer NOT NULL DEFAULT 0,
+  last_error text, created_at timestamptz NOT NULL DEFAULT clock_timestamp(), updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(user_id,idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS wcb_pending_materializations ON wcb_entitlement_materializations(status,created_at);

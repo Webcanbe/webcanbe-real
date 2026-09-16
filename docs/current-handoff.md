@@ -1,3 +1,45 @@
+# Phase 3 hosted product — 2026-09-16
+
+**STAGE B PRODUCT STATUS PASS. Hosted PostgreSQL product persistence,
+authenticated HTTP authority, operator-only TEST entitlement transitions, and
+restart-safe materialization reconciliation are complete on
+`phase-3-hosted-product`. Stage A is frozen at `f8e03a6`; Phase 2, the Phase-3
+foundation, and main remain unchanged.**
+
+Continue only from the published `phase-3-hosted-product` branch. The exact
+foundation base is `5cdd40cd5e9ff08d3e1c3aeb3f670e0bf7ed5fdf`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[hosted-product report](reports/phase3-hosted-product.md) and
+[machine evidence](reports/phase3-hosted-product-evidence/index.json).
+
+- The existing product-domain contract now persists CatalogProject,
+  immutable ProjectRelease snapshots, Listing, LicenseEntitlement, and
+  materialization provenance in PostgreSQL while editable copies remain in the
+  existing `wcb_projects` source/history store.
+- The hosted controller reuses the Phase-2 TLS/origin/cookie/CSRF session
+  boundary and current membership/project authority. IDs remain references.
+- TEST grant/revoke/invalidate operations require an active, server-provisioned
+  product operator. Clients cannot self-assert operator authority.
+- Pending materializations retain a stable copy identity and reconcile in a
+  bounded, idempotent startup/periodic pass. Current entitlement state,
+  workspace membership, snapshot integrity, and exact provenance are rechecked.
+- Focused Stage A/Foundation/Stage B verification is 18/18; TypeScript and the
+  production build pass. The focused security scan found zero unresolved
+  reportable findings.
+- The one preserved full default run remains **686/687**, with 61 skips. Its
+  only failure was an untouched Phase-2 `afterEach` Vite temporary-cache cleanup
+  race (`ENOTEMPTY` at `src/webcanbe-engine/phase2de.test.ts:16`), not a product
+  assertion. Under the user-approved closure policy, the exact failing test was
+  rerun alone in one Node worker and passed 1/1; the full suite was not rerun and
+  is not relabeled green. No Phase-2 code changed.
+- Real payments and all later Phase-3 areas remain out of scope for this pass.
+
+Next bounded task: connect the existing browse, purchase, and workspace-project
+product routes to the authenticated hosted product controller without changing
+the landing page or product-domain semantics.
+
+---
+
 # Phase 3 product-domain foundation — 2026-09-16
 
 **PHASE3_FOUNDATION PASS. Catalog/listing → immutable release → internal TEST

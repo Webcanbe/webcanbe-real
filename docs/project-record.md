@@ -1,5 +1,31 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 hosted product
+
+The `phase-3-hosted-product` branch continues the frozen Phase-3 foundation
+`5cdd40cd5e9ff08d3e1c3aeb3f670e0bf7ed5fdf`. Stage A ports the long Mainline
+homepage to the existing React 19/Vite/Tailwind application without Next.js and
+without changing product routes. Stage B adds the authenticated hosted product
+controller, PostgreSQL persistence, server-provisioned TEST operator authority,
+and bounded restart reconciliation for pending entitlement materializations.
+
+The existing session/membership/project checks remain authoritative. Immutable
+release snapshots retain exact source revision/content lineage; working copies
+reuse `wcb_projects`, preserve `releaseOrigin`, and stay distinct from purchase
+entitlements. Cross-user and cross-workspace attempts refuse.
+
+Focused verification is 18/18; TypeScript/build pass; the changed-surface
+security scan reports zero unresolved findings. The single preserved default
+run remains 686/687 because an untouched Phase-2 Vite cache directory was still
+being populated during `afterEach` cleanup. The exact failed test then passed
+1/1 serialized. Per the approved closure policy, the full suite was not rerun,
+the preserved run is not called green, and no Phase-2 code changed. See the
+[hosted-product report](reports/phase3-hosted-product.md),
+[evidence](reports/phase3-hosted-product-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 product-domain foundation
 
 Phase 3 begins from the exact frozen Phase-2 closure

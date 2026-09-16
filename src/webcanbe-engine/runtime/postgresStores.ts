@@ -26,7 +26,7 @@ export class PostgresAccess {
     const row = await client.query(`SELECT w.workspace_id FROM wcb_workspace_members w JOIN wcb_sessions s ON s.user_id=w.user_id
       WHERE w.workspace_id=$1 AND w.user_id=$2 AND w.active AND w.role IN ('owner','editor') AND s.session_id=$3 AND s.active
       AND s.expires_at=to_timestamp($4/1000.0) AND s.expires_at>clock_timestamp()
-      AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=s.user_id) FOR SHARE OF w,s`, [workspaceId, session.userId, session.sessionId, session.expiresAt])
+      AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=$2) FOR SHARE`, [workspaceId, session.userId, session.sessionId, session.expiresAt])
     if (!row.rowCount) throw new AuthorityDenied()
   }
   async requireWorkspace(session: ServerSession, workspaceId: string) { await pgTransaction(this.pool, client => this.requireWorkspaceIn(client, session, workspaceId)) }
@@ -77,8 +77,8 @@ export class PostgresAccess {
       JOIN wcb_project_members m ON m.user_id=s.user_id AND m.project_id=$1 AND m.active
       JOIN wcb_projects p ON p.project_id=m.project_id AND NOT p.deleted
       JOIN wcb_workspace_members w ON w.workspace_id=p.workspace_id AND w.user_id=s.user_id AND w.active
-      WHERE s.session_id=$2 AND s.user_id=$3 AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=s.user_id) AND s.active AND s.expires_at=to_timestamp($4/1000.0) AND s.expires_at>clock_timestamp()
-      FOR SHARE OF s,m,w`, [project, session.sessionId, session.userId, session.expiresAt])
+      WHERE s.session_id=$2 AND s.user_id=$3 AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=$3) AND s.active AND s.expires_at=to_timestamp($4/1000.0) AND s.expires_at>clock_timestamp()
+      FOR SHARE`, [project, session.sessionId, session.userId, session.expiresAt])
     const row = rows[0]
     if (!row || !roleOperations(row.role).includes(operation)) throw new AuthorityDenied()
     return { ...session, projectId: project, workspaceId: row.workspace_id, role: row.role, membershipVersion: Number(row.epoch), workspaceVersion: Number(row.workspace_epoch) }
@@ -124,6 +124,31 @@ export class PostgresProjectStore {
       await this.access.requireWorkspaceIn(client, session, workspaceId)
     }
     if (admissionClient) await commit(admissionClient); else await pgTransaction(this.access.pool, commit)
+  }
+  /** Server-owned product reconciliation seam. The caller supplies identities
+   * read from durable product rows, never browser assertions. Current workspace
+   * membership is rechecked in the same transaction that creates the source
+   * row, its owner grant, and (by the caller) the ready materialization state. */
+  async createMaterializedIn(client: PoolClient, owner: { userId: string; workspaceId: string }, projectId: string, name: string, files: Map<string, Buffer>, history: RevisionLedger) {
+    requireOpaqueId(owner.userId); requireOpaqueId(owner.workspaceId); requireOpaqueId(projectId)
+    const payload = filePayload(files), ledger = structuredClone(history), revision = verifyHistory(projectId, files, ledger)
+    const membership = await client.query("SELECT workspace_id FROM wcb_workspace_members WHERE workspace_id=$1 AND user_id=$2 AND active AND role IN ('owner','editor') FOR SHARE", [owner.workspaceId, owner.userId])
+    if (!membership.rowCount) throw new AuthorityDenied()
+    await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [owner.workspaceId])
+    const existing = (await client.query("SELECT workspace_id FROM wcb_projects WHERE project_id=$1 AND NOT deleted FOR UPDATE", [projectId])).rows[0]
+    if (existing) {
+      const member = await client.query("SELECT project_id FROM wcb_project_members WHERE project_id=$1 AND user_id=$2 AND active AND role='owner'", [projectId, owner.userId])
+      const state = (await client.query("SELECT files=$2::jsonb AND history=$3::jsonb AS same FROM wcb_projects WHERE project_id=$1", [projectId, JSON.stringify(payload), JSON.stringify(ledger)])).rows[0]
+      const same = existing.workspace_id === owner.workspaceId && member.rowCount && state?.same
+      if (!same) throw new SourceConflict("Materialization identity already has different source or provenance.")
+      return { revision, replayed: true }
+    }
+    if (Number((await client.query("SELECT count(*) AS n FROM wcb_projects WHERE workspace_id=$1 AND NOT deleted", [owner.workspaceId])).rows[0].n) >= 20) throw new Error("Workspace project capacity reached.")
+    await client.query("INSERT INTO wcb_projects(project_id,workspace_id,name,revision,files,history,source_epoch) VALUES($1,$2,$3,$4,$5,$6,1)", [projectId, owner.workspaceId, name.slice(0, 200), revision, JSON.stringify(payload), JSON.stringify(ledger)])
+    await client.query("INSERT INTO wcb_project_members(project_id,user_id,role,epoch,active) VALUES($1,$2,'owner',1,true)", [projectId, owner.userId])
+    const current = await client.query("SELECT workspace_id FROM wcb_workspace_members WHERE workspace_id=$1 AND user_id=$2 AND active AND role IN ('owner','editor') FOR SHARE", [owner.workspaceId, owner.userId])
+    if (!current.rowCount) throw new AuthorityDenied()
+    return { revision, replayed: false }
   }
   async read(grant: ProjectGrant): Promise<HostedSourceState> {
     return pgTransaction(this.access.pool, async client => {
