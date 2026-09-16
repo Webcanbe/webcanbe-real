@@ -4,7 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type CatalogProject, type LicenseEntitlement, type Listing, type ProjectRelease, type SellerApplication, type SellerSubmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
@@ -88,6 +88,81 @@ export class PostgresProductDomainStore {
   async provisionOperator(userId: string, active = true) {
     identifier(userId)
     await this.pool.query("INSERT INTO wcb_product_operators(user_id,active,epoch) VALUES($1,$2,1) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,epoch=wcb_product_operators.epoch+1", [userId, active])
+  }
+
+  async applySeller(session: ServerSession): Promise<SellerApplication> {
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const existing = (await client.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1 FOR UPDATE", [session.userId])).rows[0]
+      if (existing) { await this.requireSessionIn(client, session); return this.sellerApplicationFrom(existing) }
+      const row = (await client.query(`INSERT INTO wcb_seller_applications(application_id,user_id,status,created_at,updated_at)
+        VALUES($1,$2,'pending',clock_timestamp(),clock_timestamp()) RETURNING *`, [randomUUID(), session.userId])).rows[0]
+      await this.requireSessionIn(client, session)
+      return this.sellerApplicationFrom(row)
+    })
+  }
+
+  async sellerApplication(session: ServerSession): Promise<SellerApplication | undefined> {
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const row = (await client.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1", [session.userId])).rows[0]
+      await this.requireSessionIn(client, session)
+      return row ? this.sellerApplicationFrom(row) : undefined
+    })
+  }
+
+  async transitionSellerApplication(operator: ServerSession, applicationId: string, status: "approved" | "rejected"): Promise<SellerApplication> {
+    identifier(applicationId)
+    if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      const current = (await client.query("SELECT * FROM wcb_seller_applications WHERE application_id=$1 FOR UPDATE", [applicationId])).rows[0]
+      if (!current) throw new AuthorityDenied()
+      if (current.status === status) { await this.requireOperatorIn(client, operator); return this.sellerApplicationFrom(current) }
+      if (current.status === "rejected") throw new ProductConflict("Rejected seller application cannot be reopened by this intake workflow.")
+      const row = (await client.query(`UPDATE wcb_seller_applications SET status=$2,decision_by=$3,decided_at=clock_timestamp(),updated_at=clock_timestamp()
+        WHERE application_id=$1 RETURNING *`, [applicationId, status, operator.userId])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return this.sellerApplicationFrom(row)
+    })
+  }
+
+  async createSellerSubmission(session: ServerSession, sellerApplicationId: string, workspaceId: string, sourceProjectId: string): Promise<SellerSubmission> {
+    identifier(sellerApplicationId); identifier(workspaceId); identifier(sourceProjectId)
+    const grant = await this.access.grant(session, sourceProjectId, "source")
+    if (grant.workspaceId !== workspaceId) throw new AuthorityDenied()
+    return pgTransaction(this.pool, async client => {
+      const seller = (await client.query("SELECT application_id FROM wcb_seller_applications WHERE application_id=$1 AND user_id=$2 AND status='approved' FOR SHARE", [sellerApplicationId, session.userId])).rows[0]
+      if (!seller) throw new AuthorityDenied()
+      await this.access.requireWorkspaceIn(client, session, workspaceId); await this.access.authorize(client, grant, "source")
+      const row = (await client.query("SELECT revision,files,history FROM wcb_projects WHERE project_id=$1 AND workspace_id=$2 AND NOT deleted FOR SHARE", [sourceProjectId, workspaceId])).rows[0]
+      if (!row?.revision || !row.files || !row.history) throw new AuthorityDenied()
+      const files = new Map<string, Buffer>(Object.entries(row.files as Record<string, unknown>).map(([file, base64]) => [file, Buffer.from(String(base64), "base64")]))
+      const history = structuredClone(row.history) as RevisionLedger; boundedHistory(history)
+      if (verifyHistory(sourceProjectId, files, history) !== row.revision) throw new Error("Stored source integrity failed.")
+      const head = history.revisions.at(-1)!
+      const immutable = snapshotHash({ projectId: sourceProjectId, revisionId: String(row.revision), contentHash: head.contentHash, files, history })
+      const existing = (await client.query(`SELECT s.*,st.status,st.updated_at FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id)
+        WHERE s.seller_application_id=$1 AND s.source_project_id=$2 AND s.source_revision_id=$3`, [sellerApplicationId, sourceProjectId, row.revision])).rows[0]
+      if (existing) { await this.access.authorize(client, grant, "source"); return this.sellerSubmissionFrom(existing) }
+      await this.access.authorize(client, grant, "source"); await this.access.requireWorkspaceIn(client, session, workspaceId)
+      const submissionId = randomUUID()
+      const inserted = (await client.query(`INSERT INTO wcb_seller_submissions(submission_id,seller_application_id,seller_user_id,workspace_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,files,history,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,clock_timestamp()) RETURNING *`, [submissionId, sellerApplicationId, session.userId, workspaceId, sourceProjectId, row.revision, head.contentHash, immutable, JSON.stringify(encodeFiles(files)), JSON.stringify(history)])).rows[0]
+      const state = (await client.query("INSERT INTO wcb_seller_submission_states(submission_id,status,updated_at) VALUES($1,'pending_review',clock_timestamp()) RETURNING status,updated_at", [submissionId])).rows[0]
+      await this.access.authorize(client, grant, "source"); await this.access.requireWorkspaceIn(client, session, workspaceId)
+      return this.sellerSubmissionFrom({ ...inserted, ...state })
+    })
+  }
+
+  async sellerSubmissions(session: ServerSession): Promise<SellerSubmission[]> {
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const rows = (await client.query(`SELECT s.*,st.status,st.updated_at FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id)
+        WHERE s.seller_user_id=$1 ORDER BY s.created_at DESC LIMIT 100`, [session.userId])).rows
+      await this.requireSessionIn(client, session)
+      return rows.map(row => this.sellerSubmissionFrom(row))
+    })
   }
 
   async createCatalogProject(session: ServerSession, workspaceId: string, sourceProjectId: string, input: { slug: string; title: string; summary: string; publicMetadata?: Record<string, unknown> }): Promise<CatalogProject> {
@@ -320,5 +395,13 @@ export class PostgresProductDomainStore {
 
   private entitlement(row: Record<string, unknown>): LicenseEntitlement {
     return Object.freeze({ entitlementId: String(row.entitlement_id), userId: String(row.user_id), releaseId: String(row.release_id), provider: String(row.provider), providerReference: String(row.provider_reference), status: row.status as LicenseEntitlement["status"], grantedAt: iso(row.granted_at), ...(row.revoked_at ? { revokedAt: iso(row.revoked_at) } : {}) })
+  }
+
+  private sellerApplicationFrom(row: Record<string, unknown>): SellerApplication {
+    return Object.freeze({ applicationId: String(row.application_id), userId: String(row.user_id), status: row.status as SellerApplication["status"], createdAt: iso(row.created_at), updatedAt: iso(row.updated_at), ...(row.decided_at ? { decidedAt: iso(row.decided_at) } : {}), ...(row.decision_by ? { decidedBy: String(row.decision_by) } : {}) })
+  }
+
+  private sellerSubmissionFrom(row: Record<string, unknown>): SellerSubmission {
+    return Object.freeze({ submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), workspaceId: String(row.workspace_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), status: row.status as "pending_review", createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) })
   }
 }

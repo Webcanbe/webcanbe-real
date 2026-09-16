@@ -65,6 +65,30 @@ export type WorkspaceProject = Readonly<{
   createdAt: string
 }>
 
+export type SellerApplication = Readonly<{
+  applicationId: string
+  userId: string
+  status: "pending" | "approved" | "rejected"
+  createdAt: string
+  updatedAt: string
+  decidedAt?: string
+  decidedBy?: string
+}>
+
+export type SellerSubmission = Readonly<{
+  submissionId: string
+  sellerApplicationId: string
+  sellerUserId: string
+  workspaceId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  status: "pending_review"
+  createdAt: string
+  updatedAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

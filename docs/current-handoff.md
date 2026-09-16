@@ -1,3 +1,38 @@
+# Phase 3 seller intake foundation — 2026-09-16
+
+**SELLER INTAKE PASS. Seller application → operator-approved seller identity →
+immutable source submission → non-public pending-review quarantine is complete
+on `phase-3-hosted-product`. Payments remain Phase 5. Buyer routes, landing,
+entitlement/materialization semantics, Phase 2, and main are unchanged.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `4ede26c09a7e197294a5a170309cfe4c82fb1c9f`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[seller-intake report](reports/phase3-seller-intake.md) and
+[machine evidence](reports/phase3-seller-intake-evidence/index.json).
+
+- Seller applications are session-bound and begin `pending`. Only a durable,
+  server-provisioned product operator can approve or reject them. Rejection of
+  an approved seller acts as revocation for new submissions.
+- Only the approved application owner can submit. Application, workspace, and
+  source-project IDs remain references; fresh existing session, workspace,
+  project-role, and source-revision authority is required.
+- Each submission freezes the exact authorized `wcb_projects` files, history,
+  source revision, source content hash, and snapshot hash. Immutable provenance
+  is stored separately from the mutable review-state record, so later source
+  edits require a new submission identity.
+- Every new submission begins `pending_review`. Submission creates no catalog
+  project, ProjectRelease, Listing, entitlement, buyer copy, or execution job.
+- Seller-intake-only verification passes 4/4; TypeScript and production build
+  pass. A complete five-file security diff review found zero unresolved
+  findings. The full default regression was not run.
+
+Next bounded task: add an operator-authenticated review-decision record and
+read-only quarantine queue for submitted snapshots, without executing project
+code or publishing an approved release.
+
+---
+
 # Phase 3 hosted product route integration — 2026-09-16
 
 **ROUTE INTEGRATION PASS. Existing browse, listing detail, TEST purchase,

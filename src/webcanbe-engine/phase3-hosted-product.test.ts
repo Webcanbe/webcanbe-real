@@ -36,6 +36,9 @@ CREATE TABLE wcb_listings(listing_id uuid PRIMARY KEY,catalog_project_id uuid NO
 CREATE TABLE wcb_license_entitlements(entitlement_id uuid PRIMARY KEY,user_id uuid NOT NULL,release_id uuid NOT NULL REFERENCES wcb_project_releases(release_id),provider text NOT NULL,provider_reference text NOT NULL UNIQUE,status text NOT NULL,granted_at timestamptz NOT NULL DEFAULT now(),revoked_at timestamptz,UNIQUE(user_id,release_id,provider));
 CREATE TABLE wcb_product_operators(user_id uuid PRIMARY KEY,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
 CREATE TABLE wcb_entitlement_materializations(entitlement_id uuid PRIMARY KEY REFERENCES wcb_license_entitlements(entitlement_id),workspace_id uuid NOT NULL,user_id uuid NOT NULL,workspace_project_id uuid NOT NULL UNIQUE,idempotency_key text NOT NULL,project_name text NOT NULL,status text NOT NULL,attempts integer NOT NULL DEFAULT 0,last_error text,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now(),UNIQUE(user_id,idempotency_key));
+CREATE TABLE wcb_seller_applications(application_id uuid PRIMARY KEY,user_id uuid NOT NULL UNIQUE,status text NOT NULL,decision_by uuid,decided_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,files jsonb NOT NULL,history jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_application_id,source_project_id,source_revision_id));
+CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions(submission_id),status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -189,5 +192,78 @@ describe("Phase 3 hosted product persistence and HTTP controller", () => {
     await f.access.workspace(f.workspaceA, f.a.id, "owner")
     const retried = await restarted.materialize(f.a.session, f.workspaceA, entitlement.entitlementId, "copy-authority")
     expect(retried.entitlementId).toBe(entitlement.entitlementId)
+  })
+})
+
+describe("Phase 3 seller intake", () => {
+  const controllerFor = async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const call = async (user: Partial<User>, action: string, body: Record<string, unknown> = {}) => {
+      const exchange = httpRequest(user, `/__webcanbe/api/product${action}`, body)
+      await controller.handle(exchange.request, exchange.response)
+      return exchange.result()
+    }
+    return { ...f, call }
+  }
+
+  it("keeps seller application pending until an operator explicitly approves or rejects it", async () => {
+    const f = await controllerFor()
+    expect(await f.call({}, "/seller/applications/apply")).toMatchObject({ status: 403 })
+    const pending = await f.call(f.a, "/seller/applications/apply")
+    expect(pending).toMatchObject({ status: 201, body: { application: { userId: f.a.id, status: "pending" } } })
+    const applicationId = pending.body.application.applicationId as string
+    expect(await f.call(f.a, "/seller/applications/transition", { applicationId, status: "approved" })).toMatchObject({ status: 403 })
+    expect(await f.call(f.operator, "/seller/applications/transition", { applicationId, status: "approved" })).toMatchObject({ status: 200, body: { application: { userId: f.a.id, status: "approved", decidedBy: f.operator.id } } })
+    const rejected = await f.call(f.b, "/seller/applications/apply"), rejectedId = rejected.body.application.applicationId as string
+    expect(await f.call(f.operator, "/seller/applications/transition", { applicationId: rejectedId, status: "rejected" })).toMatchObject({ status: 200, body: { application: { userId: f.b.id, status: "rejected" } } })
+    expect(await f.call(f.b, "/seller/applications/get")).toMatchObject({ status: 200, body: { application: { status: "rejected" } } })
+  })
+
+  it("allows only the approved application owner to submit and refuses rejected sellers", async () => {
+    const f = await controllerFor(), aPending = await f.call(f.a, "/seller/applications/apply"), bPending = await f.call(f.b, "/seller/applications/apply")
+    const aId = aPending.body.application.applicationId as string, bId = bPending.body.application.applicationId as string
+    const input = { sellerApplicationId: aId, workspaceId: f.workspaceA, sourceProjectId: f.sourceProjectId }
+    expect(await f.call(f.a, "/seller/submissions/create", input)).toMatchObject({ status: 403 })
+    await f.call(f.operator, "/seller/applications/transition", { applicationId: aId, status: "approved" })
+    await f.call(f.operator, "/seller/applications/transition", { applicationId: bId, status: "approved" })
+    expect(await f.call(f.a, "/seller/submissions/create", { ...input, sellerApplicationId: bId })).toMatchObject({ status: 403 })
+    expect(await f.call(f.b, "/seller/submissions/create", { ...input, sellerApplicationId: aId, workspaceId: f.workspaceB })).toMatchObject({ status: 403 })
+    const submitted = await f.call(f.a, "/seller/submissions/create", input)
+    expect(submitted).toMatchObject({ status: 201, body: { submission: { sellerApplicationId: aId, sellerUserId: f.a.id, sourceProjectId: f.sourceProjectId, status: "pending_review" } } })
+    expect(await f.call(f.a, "/seller/submissions/list")).toMatchObject({ status: 200, body: { submissions: [{ submissionId: submitted.body.submission.submissionId }] } })
+    expect(await f.call(f.b, "/seller/submissions/list")).toEqual({ status: 200, body: { submissions: [] } })
+    await f.call(f.operator, "/seller/applications/transition", { applicationId: aId, status: "rejected" })
+    expect(await f.call(f.a, "/seller/submissions/create", input)).toMatchObject({ status: 403 })
+  })
+
+  it("freezes exact submitted source provenance and requires a new submission for a later revision", async () => {
+    const f = await controllerFor(), pending = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, pending.applicationId, "approved")
+    const first = await f.product.createSellerSubmission(f.a.session, pending.applicationId, f.workspaceA, f.sourceProjectId)
+    const storedBefore = (await f.pool.query("SELECT source_revision_id,source_content_hash,snapshot_hash,files,history FROM wcb_seller_submissions WHERE submission_id=$1", [first.submissionId])).rows[0]
+    expect(first).toMatchObject({ sourceRevisionId: f.release.sourceRevisionId, sourceContentHash: f.release.sourceContentHash, snapshotHash: f.release.snapshotHash, status: "pending_review" })
+    const grant = await f.access.grant(f.a.session, f.sourceProjectId, "code")
+    await withHostedSource(f.source, grant, process.cwd(), async (_project, source) => {
+      const before = source.files().get("src/App.tsx")!, base = source.revision(), entry = transactionEntry(f.sourceProjectId, base, "code", randomUUID(), "seller-edit", "Edit after submission", { level: "parse", passed: true, diagnostics: [] }); entry.actor = f.a.id
+      source.commit({ expectedRevision: base, operations: [{ kind: "update", file: "src/App.tsx", expectedHash: contentHash(before), content: `${before}\n// later seller revision\n` }], entry, authorize: () => {} })
+    }, true)
+    const storedAfter = (await f.pool.query("SELECT source_revision_id,source_content_hash,snapshot_hash,files,history FROM wcb_seller_submissions WHERE submission_id=$1", [first.submissionId])).rows[0]
+    expect(storedAfter).toEqual(storedBefore)
+    const second = await f.product.createSellerSubmission(f.a.session, pending.applicationId, f.workspaceA, f.sourceProjectId)
+    expect(second.submissionId).not.toBe(first.submissionId); expect(second.sourceRevisionId).not.toBe(first.sourceRevisionId); expect(second.snapshotHash).not.toBe(first.snapshotHash)
+    const migration = fs.readFileSync("deployment/hosted/postgres.sql", "utf8")
+    expect(migration).toContain("wcb_immutable_seller_submission"); expect(migration).toContain("BEFORE UPDATE OR DELETE ON wcb_seller_submissions")
+  })
+
+  it("keeps submissions quarantined and creates no public product or entitlement implicitly", async () => {
+    const f = await controllerFor(), pending = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, pending.applicationId, "approved")
+    const count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements") }
+    const submission = await f.product.createSellerSubmission(f.a.session, pending.applicationId, f.workspaceA, f.sourceProjectId)
+    expect(submission.status).toBe("pending_review")
+    expect(await f.product.browse()).toHaveLength(1)
+    expect({ catalog: await count("wcb_catalog_projects"), releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements") }).toEqual(before)
+    expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [submission.submissionId])).rows[0].status).toBe("pending_review")
   })
 })

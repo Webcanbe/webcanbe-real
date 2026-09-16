@@ -90,6 +90,18 @@ export class HostedProductController {
         exact(body, ["workspaceProjectId"]); const workspaceProject = await this.store.workspaceProject(session, text(body, "workspaceProjectId"))
         return send(workspaceProject ? 200 : 404, workspaceProject ? { workspaceProject } : { error: "Workspace project not found." })
       }
+      if (action === "/seller/applications/apply") { exact(body, []); return send(201, { application: await this.store.applySeller(session) }) }
+      if (action === "/seller/applications/get") { exact(body, []); const application = await this.store.sellerApplication(session); return send(application ? 200 : 404, application ? { application } : { error: "Seller application not found." }) }
+      if (action === "/seller/applications/transition") {
+        exact(body, ["applicationId", "status"]); const status = text(body, "status")
+        if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
+        return send(200, { application: await this.store.transitionSellerApplication(session, text(body, "applicationId"), status as "approved" | "rejected") })
+      }
+      if (action === "/seller/submissions/create") {
+        exact(body, ["sellerApplicationId", "workspaceId", "sourceProjectId"])
+        return send(201, { submission: await this.store.createSellerSubmission(session, text(body, "sellerApplicationId"), text(body, "workspaceId"), text(body, "sourceProjectId")) })
+      }
+      if (action === "/seller/submissions/list") { exact(body, []); return send(200, { submissions: await this.store.sellerSubmissions(session) }) }
       throw new AuthorityDenied()
     } catch (error) {
       this.onError?.(error)

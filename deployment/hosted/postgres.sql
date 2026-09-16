@@ -96,3 +96,32 @@ CREATE TABLE IF NOT EXISTS wcb_entitlement_materializations (
   UNIQUE(user_id,idempotency_key)
 );
 CREATE INDEX IF NOT EXISTS wcb_pending_materializations ON wcb_entitlement_materializations(status,created_at);
+
+-- Seller intake is deliberately separate from catalog/release/listing. An
+-- approved seller can freeze an authorized source revision for later review,
+-- but this migration creates no execution or publication path for submissions.
+CREATE TABLE IF NOT EXISTS wcb_seller_applications (
+  application_id uuid PRIMARY KEY, user_id uuid NOT NULL UNIQUE,
+  status text NOT NULL CHECK(status IN ('pending','approved','rejected')),
+  decision_by uuid, decided_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+CREATE TABLE IF NOT EXISTS wcb_seller_submissions (
+  submission_id uuid PRIMARY KEY, seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications,
+  seller_user_id uuid NOT NULL, workspace_id uuid NOT NULL, source_project_id uuid NOT NULL REFERENCES wcb_projects,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  snapshot_hash text NOT NULL CHECK(snapshot_hash ~ '^[a-f0-9]{64}$'), files jsonb NOT NULL, history jsonb NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(seller_application_id,source_project_id,source_revision_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_submission_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerSubmission snapshot is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_submission ON wcb_seller_submissions;
+CREATE TRIGGER wcb_immutable_seller_submission BEFORE UPDATE OR DELETE ON wcb_seller_submissions
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_submission_mutation();
+CREATE TABLE IF NOT EXISTS wcb_seller_submission_states (
+  submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions,
+  status text NOT NULL CHECK(status='pending_review'), updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+CREATE INDEX IF NOT EXISTS wcb_seller_submission_review_queue ON wcb_seller_submission_states(status,updated_at);

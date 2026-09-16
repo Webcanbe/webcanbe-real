@@ -1,5 +1,30 @@
 # WebCanBe project record
 
+## 2026-09-16: Phase 3 seller intake foundation
+
+The hosted product backend now provides the first real seller-side boundary:
+session-bound seller applications begin pending, durable product operators may
+approve or reject them, and only the approved application owner may submit a
+currently authorized project revision. Rejection of an approved application
+prevents new submissions.
+
+Submissions reuse the existing hosted project/source/revision authority and
+freeze exact files, history, revision, content hash, and snapshot hash. The
+snapshot row is database-immutable; its separate state row begins only as
+`pending_review`. A later source revision receives a new submission identity.
+No catalog project, release, listing, entitlement, materialized copy, or
+execution job is created implicitly.
+
+Seller-intake-only tests pass 4/4; TypeScript and build pass; the complete
+five-file security diff review reports zero unresolved findings. The full
+default regression was not run. Payments remain Phase 5, and landing, buyer
+routes, product-domain purchase semantics, Phase 2, and main are unchanged. See
+the [seller-intake report](reports/phase3-seller-intake.md),
+[evidence](reports/phase3-seller-intake-evidence/index.json), and
+[current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-16: Phase 3 hosted product route integration
 
 The existing product routes now use the Stage-B authenticated hosted product
