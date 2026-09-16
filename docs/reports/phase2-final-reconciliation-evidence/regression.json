@@ -1,62 +1,51 @@
 {
   "schema": 1,
   "date": "2026-09-16",
-  "commandClass": "single repository-derived full preserved Phase-2 Vitest identity run with all required gates and frozen corpora enabled",
+  "commandClass": "single final repository-derived full preserved Phase-2 Vitest identity run with every required gate and frozen corpus enabled",
+  "configuration": {
+    "fileParallelism": false,
+    "maxWorkers": 1,
+    "playwrightModuleResolved": true,
+    "sharedRunnerGatewaySerialized": true
+  },
   "fullRun": {
     "testSuites": {
       "total": 88,
-      "passed": 86,
-      "failed": 2,
+      "passed": 88,
+      "failed": 0,
       "pending": 0
     },
     "tests": {
       "total": 730,
-      "passed": 725,
-      "failed": 5,
+      "passed": 730,
+      "failed": 0,
       "pending": 0
     },
     "priorTestIdentitiesPreserved": true,
-    "rerunAsFullSuite": false
+    "normalizedIdentityDelta": {
+      "missing": 0,
+      "added": 0
+    },
+    "receipt": "full-regression.json",
+    "receiptBytes": 263990,
+    "receiptSha256": "fff357b8b9fc767ae99a99cc6be644beb6aa9ed6a700098b82975a23f18490dd"
   },
-  "fullRunFailures": [
-    {
-      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
-      "title": "admits only lock-verified client transitives and rejects tampered transitive locks",
-      "classification": "fixture reachability defect",
-      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
-    },
-    {
-      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
-      "title": "verifies required peer locks even when the peer is not directly declared",
-      "classification": "fixture reachability defect",
-      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
-    },
-    {
-      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
-      "title": "skips absent optional peers but verifies present optional peer locks",
-      "classification": "fixture reachability defect",
-      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
-    },
-    {
-      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
-      "title": "round-trips every exact frozen Redux file, including its 2742928-byte Yarn release, and retains missing-graph refusal",
-      "classification": "preserved historical negative assertion conflicts with newer accepted exact frozen Berry support",
-      "afterRunDisposition": "retained visible; not weakened or rewritten to manufacture green"
-    },
-    {
-      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
-      "title": "preserves the retained Todo binary Bun lock as opaque bytes and refuses graph admission",
-      "classification": "preserved historical negative assertion conflicts with newer accepted exact frozen Bun support",
-      "afterRunDisposition": "retained visible; not weakened or rewritten to manufacture green"
-    }
-  ],
-  "targetedAfterLocalization": {
-    "commonApplicationFile": "16/16 PASS",
-    "expandedP05": "69/69 PASS with 3 explicit skips",
-    "retainedP05Closure": "67/67 PASS",
+  "diagnosticBeforeFinalRun": {
+    "targetedTests": "97/97 PASS",
+    "realRegressions": 0,
+    "harnessReportDefectsResolved": true,
+    "negativeSecurityCoveragePreserved": true
+  },
+  "historicalReceiptsPreserved": {
+    "priorCompleteRun": "725/730",
+    "diagnosticMisconfiguredRun": "720/730",
+    "disposition": "Preserved as historical evidence; neither is relabeled or substituted for the final corrected run."
+  },
+  "validation": {
     "typeScript": "PASS",
-    "build": "PASS"
+    "build": "PASS",
+    "securityFinalization": "PASS"
   },
-  "authoritativeResult": "725/730",
-  "closure": "NOT_GREEN"
+  "authoritativeResult": "730/730",
+  "closure": "GREEN"
 }

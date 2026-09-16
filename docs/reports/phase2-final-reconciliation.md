@@ -1,13 +1,15 @@
 # Phase 2 final reconciliation and regression closure — 2026-09-16
 
-**Strict Phase 2 remains NOT YET.** P05 is PASS, P61 is PASS only at its
-retained internal local-TEST measurement/evidence boundary, and P39 remains
-PARTIAL with native acceptance explicitly DEFERRED. The one-time all-identity
-regression receipt is **725/730**. Phase 3 has not started.
+**Practical Phase 2 engineering is CLOSED; strict Phase 2 remains NOT YET.**
+P05 is PASS, P61 is PASS only at its retained internal local-TEST
+measurement/evidence boundary, and P39 remains PARTIAL with native acceptance
+explicitly DEFERRED. The one final all-identity regression receipt is
+**730/730**. Phase 3 has not started in this run.
 
-The implementation candidate reviewed here is
-`7be9fdf9347f47a07440e5a6eb4f359001451eb6` on
-`phase-2-compatible-editor`. The parallel evidence branches were reconciled by
+The final cleanup is based on
+`9ad95e54aa3e5a00c6426f2cd13c0b150315b797` on
+`phase-2-compatible-editor`; the publication commit contains this report and the
+test-only expectation correction. The parallel evidence branches were reconciled by
 cherry-picking evidence-only commits and manually applying only their truthful
 status deltas to the newest feature ledger; their stale shared documents were
 not merged. Main remains
@@ -17,13 +19,14 @@ not merged. Main remains
 
 | Question | Result | Boundary |
 | --- | --- | --- |
-| P05 | PASS | The retained closure remains 67/67 directly affected tests with no P05 blocker. The final expanded P05 confirmation was 69/69 with three explicit skips; it does not rewrite the retained 67/67 receipt. |
+| P05 | PASS | The retained closure remains 67/67 with no P05 blocker. The final diagnostic covered 42/42 directly affected P05 identities plus 55/55 affected hosted/semantic identities; the complete preserved regression is 730/730. Historical receipts remain preserved. |
 | P39 | PARTIAL | Native IME FAIL, VoiceOver FAIL, 28/30 targeted acceptance, production code unchanged by the native branch. Physical native acceptance is DEFERRED. |
 | P61 | PASS | Retained internal local-TEST measurement/evidence DoD only. This is not production sizing, SLO, multihour soak, or deployed reliability proof. |
-| Internal Phase-2 software | NOT YET | P39 remains PARTIAL and the complete preserved regression receipt is not green. |
+| Practical Phase-2 engineering | CLOSED | The preserved 730-identity regression, TypeScript, build and final security construction are green. No further Phase-2 engineering task is open except the explicitly deferred P39 native acceptance. |
+| Strict Phase-2 DoD | NOT YET | P39 remains PARTIAL because physical native IME and real interactive VoiceOver acceptance are still unproven. |
 | External / production evidence | INCOMPLETE | Twelve ledger rows remain EXTERNAL-EVIDENCE: P29, P41, P43, P45, P46, P48, P49, P50, P51, P52, P55 and P56. |
-| Phase 3 under the original strict DoD | NO | P39 still lacks the required physical native IME and real interactive VoiceOver acceptance; the full regression also retains failures. |
-| Phase 3 with P39 deferred | NO | The user's deferral is recorded, but it does not turn P39 into PASS or waive the independent 725/730 regression residual. |
+| Phase 3 under the original strict DoD | NO | P39 still lacks the required physical native IME and real interactive VoiceOver acceptance. |
+| Phase 3 with P39 deferred | YES | The user explicitly deferred P39 native acceptance, and all remaining practical engineering gates are green. P39 is not relabeled PASS. |
 
 The authoritative 64-row ledger now computes exactly **50 PASS / 1 PARTIAL /
 12 EXTERNAL-EVIDENCE / 1 FAIL**. The PARTIAL row is P39. The FAIL is P64's
@@ -66,24 +69,22 @@ It is not described as fixed, harmless, explained or nonexistent. See the
 ## One-time full regression
 
 The repository-derived all-identity run discovered 730 tests across 88 suites.
-Its immutable receipt is 725 passed, 5 failed and 0 pending; 86 suites passed and
-2 failed. No prior identity was deleted, renamed away, skipped, weakened or
-silently replaced.
+Its immutable final receipt is 730 passed, 0 failed and 0 pending; all 88 suites
+passed. The normalized identity set exactly matches the prior 730 identities.
+No identity was deleted, renamed away, skipped, weakened or silently replaced.
 
-Three failures were fixture reachability defects in
-`phase2-common-applications.test.ts`. After the single full run they were
-localized, corrected without weakening the tested lock rules, and confirmed by
-the minimum targeted rerun: 16/16 PASS. The two remaining failures are preserved
-historical P05 assertions which still expect Berry/Bun refusal even though the
-newer accepted P05 implementation deliberately supports those exact frozen
-inputs. Rewriting those negative identities merely to obtain green was rejected.
-Consequently the authoritative complete-run result remains **725/730**, not an
-inferred 728/730 or a fabricated PASS.
+The run used `--no-file-parallelism --maxWorkers=1` for the shared hosted
+runner/gateway infrastructure and resolved the trusted installed Playwright
+module explicitly. The two stale historical P05 expectations now assert the
+accepted exact Redux Berry graph and the recognized Bun binary plus substituted
+root-manifest refusal. Missing operator graph entries and the retained malformed,
+tampered, substituted and untrusted Berry/Bun cases still refuse. The directly
+affected diagnostic set passed 97/97 before this final run.
 
-TypeScript (`npx tsc -b`) and the production build (`npm run build`) pass. The
+TypeScript (`npx tsc -b`) and the production build (`npx vite build`) pass. The
 required browser, hosted authority/isolation, exact export/build/render and
-expanded P05 targeted checks used the preserved gates and frozen corpora. No
-second full-suite rerun was used to conceal the original receipt.
+expanded P05 gates ran within the preserved 730 identities. This was the single
+final full-suite run authorized after the bounded diagnostic pass.
 
 ## Changed-surface security review
 
@@ -95,13 +96,19 @@ intact. No host fallback, uploaded package-manager/script/config/plugin executio
 unsafe path/archive escape, source/export mutation, secret exposure, or relaxed
 admission/capacity/retry/timeout rule was introduced.
 
-The review has **zero unresolved reportable findings**. This is a bounded source,
-diff and local-TEST review, not a professional penetration test and not proof of
-a production deployment. Canonical artifacts are under
-[`phase2-final-reconciliation-evidence/security`](phase2-final-reconciliation-evidence/security/report.md).
+The review has **zero unresolved reportable findings**. The final test-only
+cleanup report is bound to the exact dirty worktree with a non-empty
+`scan.target.snapshotDigest`; every coverage receipt points to a regular file
+under `artifacts/`, and finalization passes. This is a bounded source, diff and
+local-TEST review, not a professional penetration test and not proof of a
+production deployment. The prior broad review remains under
+[`security`](phase2-final-reconciliation-evidence/security/report.md); the final
+cleanup package is under
+[`security-p05-cleanup`](phase2-final-reconciliation-evidence/security-p05-cleanup/report.md).
 
 ## Publication boundary
 
 Only `phase-2-compatible-editor` is published. Main is not merged or modified.
-Phase 3 implementation is prohibited until a later explicit decision addresses
-the retained acceptance and regression state.
+Practical Phase 2 engineering stops here. Under the original strict DoD, Phase 3
+remains blocked by P39; under the user's explicit decision to defer that native
+acceptance, Phase 3 may begin in a separate subsequent task.

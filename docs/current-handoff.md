@@ -1,8 +1,9 @@
 # Phase 2 final reconciliation — 2026-09-16
 
 **P05 PASS. P61 PASS at the retained internal local-TEST measurement boundary.
-P39 PARTIAL with native acceptance DEFERRED. Full regression 725/730. Strict
-Phase 2: NOT YET. Phase 3: DO NOT START.**
+P39 PARTIAL with native acceptance DEFERRED. Full regression 730/730. Practical
+Phase 2 engineering: CLOSED. Strict Phase 2: NOT YET. Phase 3 may begin only
+under the user's explicit decision to defer P39 native acceptance.**
 
 Continue only from the final pushed `phase-2-compatible-editor` publication for
 this run. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b` and must
@@ -19,15 +20,20 @@ supersede older status summaries while preserving their receipts.
 - P61 is PASS only at its retained internal local-TEST measurement/evidence DoD.
   The historical second-app warm-update HTTP 422 remains a real unresolved
   historical anomaly; exact stage and root cause are UNPROVEN.
-- The single complete all-identity receipt is 725/730. Three fixture failures
-  were corrected and passed 16/16 targeted checks; two contradictory historical
-  P05 refusal assertions remain visible and were not rewritten to manufacture
-  green. TypeScript and build pass. Prior identities remain preserved.
+- The one final complete all-identity receipt is 730/730 across 88 suites. It
+  used serialized shared runner/gateway infrastructure and the trusted installed
+  Playwright module. The two stale P05 expectations now describe the accepted
+  exact frozen inputs while malformed, tampered, substituted and untrusted lock
+  refusals remain covered. TypeScript and build pass. All prior 730 identities
+  are preserved.
 - Changed-surface security review found zero unresolved reportable findings;
-  this is not a penetration test or production-deployment proof.
-- Even with P39 deferred, Phase 3 may not begin from this state because the
-  complete preserved regression is not green. External production evidence is
-  also incomplete across twelve rows.
+  its final manifest carries a non-empty worktree snapshot digest and valid
+  artifact receipt references. This is not a penetration test or
+  production-deployment proof.
+- Under the original strict DoD, Phase 3 may not begin because P39 remains
+  PARTIAL. Under the user's explicit P39 deferral, practical Phase 2 is closed
+  and Phase 3 may begin. External production evidence remains incomplete across
+  twelve rows and is not relabeled as internal failure.
 
 ---
 

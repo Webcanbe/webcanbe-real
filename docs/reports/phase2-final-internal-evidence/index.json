@@ -85,9 +85,9 @@
     },
     {
       "path": "final-ledger.json",
-      "bytes": 85180,
-      "sha256": "24019c608996a83dd14f4e427f94c9deac18130887c2e418a941cf1f2e7f8b1c",
-      "purpose": "Current authoritative ledger, updated only for compatibility breadth rows; prior ledger preserved in the dedicated breadth evidence."
+      "bytes": 90034,
+      "sha256": "725e76ff31e4536db304c2185eb2d8cc6f4f0e2c2812de31f70ad8b224454920",
+      "purpose": "Current authoritative 64-row ledger with P05 PASS, P61 bounded PASS, P39 PARTIAL/deferred, exact counts, and final 730/730 regression closure."
     },
     {
       "path": "final-validation-stages.json",

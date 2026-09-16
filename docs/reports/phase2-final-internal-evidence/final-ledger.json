@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "candidate": "7be9fdf9347f47a07440e5a6eb4f359001451eb6",
+  "candidate": "containing phase-2-compatible-editor publication commit",
+  "candidateBase": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797",
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
@@ -9,7 +10,8 @@
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
-  "internalClosure": "NOT YET",
+  "practicalPhase2": "CLOSED",
+  "internalClosure": "NOT YET under the original strict DoD because P39 native acceptance is deferred",
   "commonApplicationCheckpoint": "PASS",
   "completeApplications": 2,
   "internalRemaining": [
@@ -101,7 +103,7 @@
       "id": "P05",
       "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
       "status": "PASS",
-      "evidence": "Finite Berry v8 and bounded Bun v1.1.42 binary decoding remain proven. Exact operator-owned reachable profiles admit frozen Redux and Bulletproof. The exact @julr/unocss-preset-forms@1.0.0 zero-argument behavior is statically translated to fixed operator-owned rules and preflight under pinned UnoCSS 66.0.0; the incompatible third-party package is an exact lock-attested configuration marker and is never executed. Exact unchanged Todo passes graph admission, CSS/browser/export compilation and byte preservation without running preinstall. 67/67 directly affected tests and TypeScript pass; prior evidence is reused and full regression remains deferred.",
+      "evidence": "Finite Berry v8 and bounded Bun v1.1.42 binary decoding remain proven. Exact operator-owned reachable profiles admit frozen Redux and Bulletproof. The exact @julr/unocss-preset-forms@1.0.0 zero-argument behavior is statically translated to fixed operator-owned rules and preflight under pinned UnoCSS 66.0.0; the incompatible third-party package is an exact lock-attested configuration marker and is never executed. Exact unchanged Todo passes graph admission, CSS/browser/export compilation and byte preservation without running preinstall. The final stale-expectation cleanup retains missing-profile and malformed/tampered/substituted/untrusted lock refusal coverage; targeted diagnostics pass 97/97 and the final preserved regression passes 730/730. TypeScript and build pass.",
       "evidenceSource": "docs/reports/phase2-p05-closure.md",
       "missingProof": "None for the retained finite P05 software requirement.",
       "internallyClosable": "Closed at the retained bounded runtime/dependency/lockfile requirement.",
@@ -1173,10 +1175,10 @@
   "compatibilityEdgeBase": "982625986289baf8101a7d73c96fe47ce0602f0d",
   "compatibilityEdgeReport": "docs/reports/phase2-compatibility-edge-closure.md",
   "compatibilityEdgeRegressions": "docs/reports/phase2-compatibility-edge-evidence/regressions.json",
-  "distinctPassingTests": 725,
+  "distinctPassingTests": 730,
   "distinctDiscoveredTests": 730,
-  "finalFullRegression": "725/730",
-  "finalRegressionResidual": "Three reachable-lock fixture failures were corrected and passed targeted validation after the all-identity receipt; two preserved historical P05 assertions still expect Berry/Bun refusal and remain visible because rewriting them would weaken prior negative identities merely to manufacture green.",
+  "finalFullRegression": "730/730",
+  "finalRegressionResidual": "None. The prior 725/730 and diagnostic 720/730 receipts remain preserved as historical failures. The single final corrected run passed all 730 prior identities with serialized shared infrastructure and explicit trusted Playwright resolution.",
   "allPrior549Preserved": true,
   "allPrior621Preserved": true,
   "p39ClosureBase": "705e03f73d2079d021efc14a39aec28569a7dbd9",

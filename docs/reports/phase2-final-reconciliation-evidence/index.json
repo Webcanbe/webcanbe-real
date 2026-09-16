@@ -8,16 +8,18 @@
     "p39": "ba43f3c548e34b3860c8f9e513bf4eff1dd000f3",
     "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
   },
-  "implementationCandidate": "7be9fdf9347f47a07440e5a6eb4f359001451eb6",
+  "implementationCandidate": "containing phase-2-compatible-editor publication commit",
+  "implementationBase": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797",
   "p05": "PASS",
   "p39": "PARTIAL",
   "p39NativeAcceptance": "DEFERRED",
   "p61": "PASS",
-  "internalPhase2": "NOT_YET",
+  "practicalPhase2": "CLOSED",
+  "internalPhase2": "NOT_YET_STRICT_P39_DEFERRED",
   "strictPhase2DoD": "NOT_YET",
   "externalProductionEvidence": "INCOMPLETE",
   "phase3UnderStrictDoD": false,
-  "phase3WithP39Deferred": false,
+  "phase3WithP39Deferred": true,
   "ledgerCounts": {
     "PASS": 50,
     "PARTIAL": 1,
@@ -31,6 +33,8 @@
     "p39Adjudication": "p39-adjudication.json",
     "p61Adjudication": "p61-adjudication.json",
     "cleanup": "cleanup.json",
-    "security": "security/report.md"
+    "securityPriorBroadReview": "security/report.md",
+    "securityFinalCleanup": "security-p05-cleanup/report.md",
+    "fullRegressionReceipt": "full-regression.json"
   }
 }
