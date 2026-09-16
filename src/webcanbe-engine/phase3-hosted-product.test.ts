@@ -4,6 +4,7 @@ import path from "node:path"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
 import { Readable } from "node:stream"
 import { spawn } from "node:child_process"
+import { crc32, deflateRawSync } from "node:zlib"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Pool } from "pg"
 import { DataType, newDb } from "pg-mem"
@@ -42,6 +43,7 @@ CREATE TABLE wcb_entitlement_materializations(entitlement_id uuid PRIMARY KEY RE
 CREATE TABLE wcb_seller_applications(application_id uuid PRIMARY KEY,user_id uuid NOT NULL UNIQUE,status text NOT NULL,decision_by uuid,decided_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,files jsonb NOT NULL,history jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_application_id,source_project_id,source_revision_id));
 CREATE TABLE wcb_seller_submission_states(submission_id uuid PRIMARY KEY REFERENCES wcb_seller_submissions(submission_id),status text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE wcb_seller_zip_admissions(admission_id uuid PRIMARY KEY,archive_id uuid NOT NULL UNIQUE,archive_name text NOT NULL,archive_sha256 text NOT NULL,archive_bytes bigint NOT NULL,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL UNIQUE REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_user_id,archive_sha256),UNIQUE(seller_user_id,idempotency_key));
 CREATE TABLE wcb_seller_review_decisions(decision_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_application_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,decision text NOT NULL,reviewer_user_id uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(reviewer_user_id,idempotency_key));
 CREATE TABLE wcb_seller_assessment_requests(assessment_request_id uuid PRIMARY KEY,submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_review_decisions(decision_id),status text NOT NULL,admitted_by uuid NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(admitted_by,idempotency_key));
 CREATE TABLE wcb_assessment_workers(worker_id uuid PRIMARY KEY,credential_hash text NOT NULL,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
@@ -99,6 +101,20 @@ function httpRequest(user: Partial<User>, url: string, body: Record<string, unkn
   rawResponse.end = (value?: string) => { payload = value ?? ""; rawResponse.headersSent = true }
   const response = rawResponse as unknown as ServerResponse
   return { request, response, result: () => ({ status, body: payload ? JSON.parse(payload) : {} }) }
+}
+
+function zipArchive(entries: Array<{ name: string; content: string | Buffer; mode?: number; deflate?: boolean }>) {
+  const local: Buffer[] = [], central: Buffer[] = []; let offset = 0
+  for (const entry of entries) {
+    const name = Buffer.from(entry.name), raw = Buffer.isBuffer(entry.content) ? entry.content : Buffer.from(entry.content), compressed = entry.deflate ? deflateRawSync(raw) : raw
+    const method = entry.deflate ? 8 : 0, checksum = crc32(raw) >>> 0
+    const header = Buffer.alloc(30); header.writeUInt32LE(0x04034b50); header.writeUInt16LE(20, 4); header.writeUInt16LE(0x800, 6); header.writeUInt16LE(method, 8); header.writeUInt32LE(checksum, 14); header.writeUInt32LE(compressed.length, 18); header.writeUInt32LE(raw.length, 22); header.writeUInt16LE(name.length, 26)
+    local.push(header, name, compressed)
+    const record = Buffer.alloc(46); record.writeUInt32LE(0x02014b50); record.writeUInt16LE((3 << 8) | 20, 4); record.writeUInt16LE(20, 6); record.writeUInt16LE(0x800, 8); record.writeUInt16LE(method, 10); record.writeUInt32LE(checksum, 16); record.writeUInt32LE(compressed.length, 20); record.writeUInt32LE(raw.length, 24); record.writeUInt16LE(name.length, 28); record.writeUInt32LE(((entry.mode ?? 0o100644) << 16) >>> 0, 38); record.writeUInt32LE(offset, 42)
+    central.push(record, name); offset += header.length + name.length + compressed.length
+  }
+  const centralBytes = Buffer.concat(central), end = Buffer.alloc(22); end.writeUInt32LE(0x06054b50); end.writeUInt16LE(entries.length, 8); end.writeUInt16LE(entries.length, 10); end.writeUInt32LE(centralBytes.length, 12); end.writeUInt32LE(offset, 16)
+  return Buffer.concat([...local, centralBytes, end])
 }
 
 describe("Phase 3 hosted product persistence and HTTP controller", () => {
@@ -842,5 +858,68 @@ describe("Phase 3 promoted release Listing publication", () => {
     expect(migration).toContain("wcb_immutable_listing_publication"); expect(migration).toContain("wcb_guard_published_listing_release"); expect(migration).toContain("wcb_immutable_project_release")
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async publishPromotedListing", 2)[1].split("async browse", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun|stripe|paypal|fastspring)\b|fetch\(|https?:\/\/|wcb_license_entitlements|wcb_entitlement_materializations|wcb_projects/)
+  })
+})
+
+describe("Phase 3 non-executing seller ZIP admission", () => {
+  const approved = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    return { ...f, application }
+  }
+  const archive = () => zipArchive([
+    { name: "src/App.tsx", content: "export const App=()=> <main>ZIP source</main>" },
+    { name: "src/payload.ts", content: "throw new Error('must never be evaluated')" },
+    { name: "vite.config.ts", content: "throw new Error('must never be loaded')" },
+    { name: "README.md", content: "# Seller ZIP" }
+  ])
+
+  it("admits an approved seller ZIP through HTTP with exact immutable provenance and idempotency", async () => {
+    const f = await approved(), bytes = archive(), digest = createHash("sha256").update(bytes).digest("hex")
+    const controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const input = { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, archiveName: "seller-project.zip", projectName: "Seller project", archiveBase64: bytes.toString("base64"), idempotencyKey: "zip-admission" }
+    const call = async (user: Partial<User>, body: Record<string, unknown>) => { const exchange = httpRequest(user, "/__webcanbe/api/product/seller/imports/zip/admit", body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    expect((await call({}, input)).status).toBe(403)
+    const first = await call(f.a, input), replay = await call(f.a, { ...input, idempotencyKey: "zip-admission-replay" })
+    expect(first).toMatchObject({ status: 201, body: { admission: { archiveName: "seller-project.zip", archiveSha256: digest, archiveBytes: bytes.length, sellerApplicationId: f.application.applicationId, sellerUserId: f.a.id, workspaceId: f.workspaceA } } })
+    expect(replay.body.admission).toEqual(first.body.admission)
+    const admission = first.body.admission, submission = (await f.product.sellerSubmissions(f.a.session)).find(item => item.submissionId === admission.submissionId)!
+    expect(submission).toMatchObject({ sourceProjectId: admission.sourceProjectId, sourceRevisionId: admission.sourceRevisionId, sourceContentHash: admission.sourceContentHash, snapshotHash: admission.snapshotHash, status: "pending_review" })
+    const source = await f.source.read(await f.access.grant(f.a.session, admission.sourceProjectId, "source"))
+    expect(source).toMatchObject({ revision: admission.sourceRevisionId, history: { projectId: admission.sourceProjectId, revisions: [{ revisionId: admission.sourceRevisionId, contentHash: admission.sourceContentHash }] } })
+    expect(source.files.get("src/App.tsx")?.toString()).toContain("ZIP source")
+    await expect(f.product.admitSellerZip(f.a.session, { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA2, archiveName: "seller-project.zip", projectName: "Substituted context", archive: bytes, idempotencyKey: "zip-cross-workspace" })).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_zip_admissions WHERE seller_user_id=$1", [f.a.id])).rows[0].n)).toBe(1)
+  })
+
+  it("requires an approved seller and denies cross-seller or cross-workspace substitution", async () => {
+    const f = await setup(), pending = await f.product.applySeller(f.a.session), bytes = archive()
+    const input = { sellerApplicationId: pending.applicationId, workspaceId: f.workspaceA, archiveName: "project.zip", projectName: "Project", archive: bytes, idempotencyKey: "seller-zip" }
+    await expect(f.product.admitSellerZip(f.a.session, input)).rejects.toThrow(AuthorityDenied)
+    await f.product.transitionSellerApplication(f.operator.session, pending.applicationId, "approved")
+    await expect(f.product.admitSellerZip(f.b.session, { ...input, workspaceId: f.workspaceB })).rejects.toThrow(AuthorityDenied)
+    const other = await f.product.applySeller(f.b.session); await f.product.transitionSellerApplication(f.operator.session, other.applicationId, "approved")
+    await expect(f.product.admitSellerZip(f.b.session, { ...input, sellerApplicationId: other.applicationId, workspaceId: f.workspaceA })).rejects.toThrow(AuthorityDenied)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_zip_admissions")).rows[0].n)).toBe(0)
+  })
+
+  it("rejects traversal, normalized duplicates, unsafe links, malformed archives, and decompression bombs", async () => {
+    const f = await approved(), admit = (bytes: Buffer, key: string) => f.product.admitSellerZip(f.a.session, { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, archiveName: "unsafe.zip", projectName: "Unsafe", archive: bytes, idempotencyKey: key })
+    await expect(admit(zipArchive([{ name: "../escape.ts", content: "x" }]), "traversal")).rejects.toThrow()
+    await expect(admit(zipArchive([{ name: "src/App.tsx", content: "a" }, { name: "SRC/app.tsx", content: "b" }]), "duplicate")).rejects.toThrow()
+    await expect(admit(zipArchive([{ name: "src/link.ts", content: "target", mode: 0o120777 }]), "symlink")).rejects.toThrow()
+    await expect(admit(Buffer.from("not a zip"), "malformed")).rejects.toThrow()
+    await expect(admit(zipArchive([{ name: "src/bomb.ts", content: Buffer.alloc(300_000, 65), deflate: true }]), "bomb")).rejects.toThrow()
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_seller_zip_admissions")).rows[0].n)).toBe(0)
+  })
+
+  it("creates quarantine source/submission only, without execution, network, assessment, or publication side effects", async () => {
+    const f = await approved(), count = async (table: string) => Number((await f.pool.query(`SELECT count(*) AS n FROM ${table}`)).rows[0].n)
+    const before = { releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), assessments: await count("wcb_seller_assessment_requests") }
+    const admission = await f.product.admitSellerZip(f.a.session, { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, archiveName: "inert.zip", projectName: "Inert", archive: archive(), idempotencyKey: "inert-zip" })
+    expect({ releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), assessments: await count("wcb_seller_assessment_requests") }).toEqual(before)
+    expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [admission.submissionId])).rows[0].status).toBe("pending_review")
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerZip", 2)[1].split("async sellerSubmissions", 1)[0]
+    expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\/|wcb_project_releases|wcb_listings|wcb_license_entitlements|wcb_seller_assessment_requests/)
   })
 })

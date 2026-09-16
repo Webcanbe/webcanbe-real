@@ -4,9 +4,9 @@ import { PostgresSessionBoundary } from "./postgresIdentity"
 import { EntitlementUnavailable, ProductConflict, type Listing } from "./productDomain"
 import { PostgresProductDomainStore } from "./postgresProductDomain"
 
-async function bodyOf(request: IncomingMessage) {
+async function bodyOf(request: IncomingMessage, maximum = 256 * 1024) {
   const chunks: Buffer[] = []; let size = 0
-  for await (const value of request) { const bytes = Buffer.from(value); size += bytes.length; if (size > 256 * 1024) throw new Error("Request too large."); chunks.push(bytes) }
+  for await (const value of request) { const bytes = Buffer.from(value); size += bytes.length; if (size > maximum) throw new Error("Request too large."); chunks.push(bytes) }
   const value: unknown = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}")
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid request.")
   return value as Record<string, unknown>
@@ -17,6 +17,11 @@ function exact(body: Record<string, unknown>, allowed: readonly string[]) {
 function text(body: Record<string, unknown>, key: string) {
   if (typeof body[key] !== "string") throw new Error(`Invalid ${key}.`)
   return body[key]
+}
+function archiveBytes(body: Record<string, unknown>) {
+  const encoded = text(body, "archiveBase64")
+  if (!encoded.length || encoded.length % 4 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) throw new Error("Invalid archive encoding.")
+  return Buffer.from(encoded, "base64")
 }
 function json(response: ServerResponse, status: number, value: Record<string, unknown>) {
   response.writeHead(status, { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" })
@@ -35,7 +40,8 @@ export class HostedProductController {
     const prefix = "/__webcanbe/api/product"
     if (!pathname.startsWith(prefix + "/")) return false
     try {
-      const session = await this.boundary.authenticate(request), body = await bodyOf(request), action = pathname.slice(prefix.length)
+      const action = pathname.slice(prefix.length), session = await this.boundary.authenticate(request)
+      const body = await bodyOf(request, action === "/seller/imports/zip/admit" ? 36 * 1024 * 1024 : undefined)
       const assertSession = async (expected: ServerSession = session) => {
         const current = await this.boundary.authenticate(request)
         if (current.sessionId !== expected.sessionId || current.userId !== expected.userId || current.expiresAt !== expected.expiresAt) throw new AuthorityDenied()
@@ -100,6 +106,10 @@ export class HostedProductController {
       if (action === "/seller/submissions/create") {
         exact(body, ["sellerApplicationId", "workspaceId", "sourceProjectId"])
         return send(201, { submission: await this.store.createSellerSubmission(session, text(body, "sellerApplicationId"), text(body, "workspaceId"), text(body, "sourceProjectId")) })
+      }
+      if (action === "/seller/imports/zip/admit") {
+        exact(body, ["sellerApplicationId", "workspaceId", "archiveName", "projectName", "archiveBase64", "idempotencyKey"])
+        return send(201, { admission: await this.store.admitSellerZip(session, { sellerApplicationId: text(body, "sellerApplicationId"), workspaceId: text(body, "workspaceId"), archiveName: text(body, "archiveName"), projectName: text(body, "projectName"), archive: archiveBytes(body), idempotencyKey: text(body, "idempotencyKey") }) })
       }
       if (action === "/seller/submissions/list") { exact(body, []); return send(200, { submissions: await this.store.sellerSubmissions(session) }) }
       if (action === "/seller/review/queue") { exact(body, []); return send(200, { submissions: await this.store.sellerQuarantineQueue(session) }) }

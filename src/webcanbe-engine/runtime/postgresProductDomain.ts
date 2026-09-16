@@ -4,10 +4,10 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ListingPublication, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ListingPublication, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type SellerZipAdmission, type WorkspaceProject } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
-import { safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
+import { readSafeZip, safeArchivePath, ZIP_LIMITS } from "./projectRegistry"
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex")
 const identifier = (value: string) => { requireOpaqueId(value); return value }
@@ -181,6 +181,57 @@ export class PostgresProductDomainStore {
       const state = (await client.query("INSERT INTO wcb_seller_submission_states(submission_id,status,updated_at) VALUES($1,'pending_review',clock_timestamp()) RETURNING status,updated_at", [submissionId])).rows[0]
       await this.access.authorize(client, grant, "source"); await this.access.requireWorkspaceIn(client, session, workspaceId)
       return this.sellerSubmissionFrom({ ...inserted, ...state })
+    })
+  }
+
+  /** Admit inert ZIP bytes into the existing hosted source and seller
+   * quarantine transaction. No archive member is imported/evaluated by the
+   * server runtime, and this method has no assessment or publication edge. */
+  async admitSellerZip(session: ServerSession, input: { sellerApplicationId: string; workspaceId: string; archiveName: string; projectName: string; archive: Buffer; idempotencyKey: string }): Promise<SellerZipAdmission> {
+    identifier(input.sellerApplicationId); identifier(input.workspaceId); const key = cleanKey(input.idempotencyKey)
+    const archiveName = cleanText(input.archiveName, "archive name", 200), projectName = cleanText(input.projectName, "project name", 200)
+    if (!/^[^/\\]+\.zip$/i.test(archiveName)) throw new Error("Invalid archive name.")
+    // Reject unauthorized callers before spending archive-inflation resources;
+    // the same authority is locked and rechecked in the commit transaction.
+    await pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const seller = await client.query("SELECT application_id FROM wcb_seller_applications WHERE application_id=$1 AND user_id=$2 AND status='approved' FOR SHARE", [input.sellerApplicationId, session.userId])
+      if (!seller.rowCount) throw new AuthorityDenied()
+      await this.access.requireWorkspaceIn(client, session, input.workspaceId)
+    })
+    const archive = Buffer.from(input.archive), archiveSha256 = createHash("sha256").update(archive).digest("hex")
+    const files = await readSafeZip(archive)
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const seller = (await client.query("SELECT application_id FROM wcb_seller_applications WHERE application_id=$1 AND user_id=$2 AND status='approved' FOR SHARE", [input.sellerApplicationId, session.userId])).rows[0]
+      if (!seller) throw new AuthorityDenied()
+      await this.access.requireWorkspaceIn(client, session, input.workspaceId)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,97))", [`${session.userId}:${archiveSha256}`])
+      const byKey = (await client.query("SELECT * FROM wcb_seller_zip_admissions WHERE seller_user_id=$1 AND idempotency_key=$2", [session.userId, key])).rows[0]
+      if (byKey) {
+        if (String(byKey.archive_sha256) !== archiveSha256 || String(byKey.seller_application_id) !== input.sellerApplicationId || String(byKey.workspace_id) !== input.workspaceId) throw new ProductConflict("ZIP admission idempotency key was already used for different content or context.")
+        await this.requireSessionIn(client, session); return this.sellerZipAdmissionFrom(byKey)
+      }
+      const existing = (await client.query("SELECT * FROM wcb_seller_zip_admissions WHERE seller_user_id=$1 AND archive_sha256=$2", [session.userId, archiveSha256])).rows[0]
+      if (existing) {
+        if (String(existing.seller_application_id) !== input.sellerApplicationId || String(existing.workspace_id) !== input.workspaceId) throw new ProductConflict("This exact archive is already bound to another seller context.")
+        await this.requireSessionIn(client, session); return this.sellerZipAdmissionFrom(existing)
+      }
+
+      const sourceProjectId = randomUUID(), sourceRevisionId = `rev_${randomUUID()}`, createdAt = new Date().toISOString()
+      const editable = new Map<string, string>()
+      for (const [file, bytes] of files) if (sourceMember(file, "src", 2)) editable.set(file, new TextDecoder("utf-8", { fatal: true }).decode(bytes))
+      const sourceContentHash = treeHash(editable)
+      const history: RevisionLedger = { schema: 1, sourceScope: 2, projectId: sourceProjectId, revisions: [{ revisionId: sourceRevisionId, projectId: sourceProjectId, parentRevisionId: null, createdAt, actor: session.userId, producer: "system", contentHash: sourceContentHash }], transactions: [], past: [], future: [] }
+      await this.source.create(session, input.workspaceId, sourceProjectId, projectName, files, history, client)
+      const submissionId = randomUUID(), immutable = snapshotHash({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files, history })
+      await client.query(`INSERT INTO wcb_seller_submissions(submission_id,seller_application_id,seller_user_id,workspace_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,files,history,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [submissionId, input.sellerApplicationId, session.userId, input.workspaceId, sourceProjectId, sourceRevisionId, sourceContentHash, immutable, JSON.stringify(encodeFiles(files)), JSON.stringify(history), createdAt])
+      await client.query("INSERT INTO wcb_seller_submission_states(submission_id,status,updated_at) VALUES($1,'pending_review',$2)", [submissionId, createdAt])
+      const row = (await client.query(`INSERT INTO wcb_seller_zip_admissions(admission_id,archive_id,archive_name,archive_sha256,archive_bytes,seller_application_id,seller_user_id,workspace_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,submission_id,idempotency_key,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`, [randomUUID(), randomUUID(), archiveName, archiveSha256, archive.length, input.sellerApplicationId, session.userId, input.workspaceId, sourceProjectId, sourceRevisionId, sourceContentHash, immutable, submissionId, key, createdAt])).rows[0]
+      await this.requireSessionIn(client, session); await this.access.requireWorkspaceIn(client, session, input.workspaceId)
+      return this.sellerZipAdmissionFrom(row)
     })
   }
 
@@ -769,6 +820,10 @@ export class PostgresProductDomainStore {
 
   private sellerSubmissionFrom(row: Record<string, unknown>): SellerSubmission {
     return Object.freeze({ submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), workspaceId: String(row.workspace_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), status: row.status as "pending_review", createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) })
+  }
+
+  private sellerZipAdmissionFrom(row: Record<string, unknown>): SellerZipAdmission {
+    return Object.freeze({ admissionId: String(row.admission_id), archiveId: String(row.archive_id), archiveName: String(row.archive_name), archiveSha256: String(row.archive_sha256), archiveBytes: Number(row.archive_bytes), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), workspaceId: String(row.workspace_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), submissionId: String(row.submission_id), createdAt: iso(row.created_at) })
   }
 
   private sellerReviewSelect() {

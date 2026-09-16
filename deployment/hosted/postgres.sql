@@ -125,6 +125,27 @@ CREATE TABLE IF NOT EXISTS wcb_seller_submission_states (
   status text NOT NULL CHECK(status='pending_review'), updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 CREATE INDEX IF NOT EXISTS wcb_seller_submission_review_queue ON wcb_seller_submission_states(status,updated_at);
+-- ZIP admission is immutable artifact provenance only. Archive members are
+-- validated/inflated without execution, then committed through wcb_projects
+-- and the same seller-submission quarantine path in one transaction.
+CREATE TABLE IF NOT EXISTS wcb_seller_zip_admissions (
+  admission_id uuid PRIMARY KEY, archive_id uuid NOT NULL UNIQUE, archive_name text NOT NULL,
+  archive_sha256 text NOT NULL CHECK(archive_sha256 ~ '^[a-f0-9]{64}$'), archive_bytes bigint NOT NULL CHECK(archive_bytes>0),
+  seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications, seller_user_id uuid NOT NULL,
+  workspace_id uuid NOT NULL, source_project_id uuid NOT NULL UNIQUE REFERENCES wcb_projects,
+  source_revision_id text NOT NULL, source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  snapshot_hash text NOT NULL CHECK(snapshot_hash ~ '^[a-f0-9]{64}$'),
+  submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(seller_user_id,archive_sha256), UNIQUE(seller_user_id,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_zip_admission_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'SellerZipAdmission provenance is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_zip_admission ON wcb_seller_zip_admissions;
+CREATE TRIGGER wcb_immutable_seller_zip_admission BEFORE UPDATE OR DELETE ON wcb_seller_zip_admissions
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_zip_admission_mutation();
 CREATE TABLE IF NOT EXISTS wcb_seller_review_decisions (
   decision_id uuid PRIMARY KEY, submission_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_submissions,
   seller_application_id uuid NOT NULL, seller_user_id uuid NOT NULL, source_project_id uuid NOT NULL,

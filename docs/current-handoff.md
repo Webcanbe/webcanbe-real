@@ -1,3 +1,45 @@
+# Phase 3 non-executing seller ZIP admission — 2026-09-17
+
+**ZIP IMPORT ADMISSION PASS. An authenticated approved seller can admit one
+bounded, inert ZIP into an authorized workspace, producing exactly one hosted
+source revision and immutable pending-review seller submission with exact
+archive digest provenance. No uploaded code executes and nothing is published.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `df98e5f10a28e5771fe18e4ba7f2718b74111a4f`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[ZIP admission report](reports/phase3-seller-zip-admission.md) and
+[machine evidence](reports/phase3-seller-zip-admission-evidence/index.json).
+
+- The authenticated hosted controller accepts a strictly shaped, bounded
+  base64 ZIP request. The product store checks the current session, ownership
+  of an approved seller application, and active workspace authority before
+  archive inflation, then locks and rechecks the same authority at commit.
+- Intake reuses the existing Phase-2 lazy `yauzl` boundary and limits. Absolute,
+  traversal, non-NFC/control/invalid, case-normalized duplicate/conflicting,
+  symlink/non-file, encrypted, malformed, oversized, excessive-count, excessive
+  total/member, high-ratio, checksum-invalid, and invalid-text inputs refuse.
+- One PostgreSQL transaction creates the existing hosted source project and
+  revision, immutable seller submission, `pending_review` state, and immutable
+  archive admission record. Archive ID/name/byte length/SHA-256, seller,
+  workspace, source revision/content/snapshot, submission, and timestamp stay
+  exact. Same seller/workspace/archive replay is idempotent; changed keys or
+  workspace/seller context conflict or deny.
+- Admission evaluates/imports no JS/TS/config/plugin, starts no process or
+  package manager, performs no network access, and creates no assessment,
+  release, Listing, entitlement, workspace copy, checkout, or payment state.
+- Focused verification passes 4/4; TypeScript and production build pass. The
+  focused six-file security scan found zero findings. Its immutable snapshot
+  preceded the final authority-narrowing replay-context change; that two-line
+  delta was manually reviewed and the focused tests rerun green. Security
+  unresolved is zero. The full default regression was not run.
+
+Next bounded task: implement a non-executing seller GitHub import admission
+contract pinned to an immutable commit and archive digest, reusing this same
+source/quarantine path without starting WebCanBe Ready.
+
+---
+
 # Phase 3 promoted-release Listing publication — 2026-09-17
 
 **LISTING PUBLICATION PASS. An explicitly authenticated active product

@@ -63,8 +63,9 @@ export function safeArchivePath(entryName: string) {
   return parts.join("/")
 }
 
-/** Validate every member before writing. Never follow archive links or run project code. */
-export async function extractSafeZip(archive: Buffer, destination: string) {
+/** Validate and inflate every member in memory without executing or writing any
+ * archive content. Hosted seller intake reuses this exact Phase-2 boundary. */
+export async function readSafeZip(archive: Buffer) {
   if (archive.byteLength > ZIP_LIMITS.archiveBytes) throw new Error("ZIP exceeds the 25 MiB upload limit.")
   const files = new Map<string, Buffer>()
   const seen = new Map<string, boolean>()
@@ -109,6 +110,13 @@ export async function extractSafeZip(archive: Buffer, destination: string) {
       zip.readEntry()
     })
   })
+  if (!files.size) throw new Error("ZIP contains no admissible files.")
+  return files
+}
+
+/** Validate every member before writing. Never follow archive links or run project code. */
+export async function extractSafeZip(archive: Buffer, destination: string) {
+  const files = await readSafeZip(archive)
   // The caller supplies a fresh UUID under a trusted private storage directory.
   fs.mkdirSync(destination, { mode: 0o700 })
   try {

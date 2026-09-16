@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "date": "2026-09-17",
+  "branch": "phase-3-hosted-product",
+  "base": "df98e5f10a28e5771fe18e4ba7f2718b74111a4f",
+  "status": "PASS",
+  "scope": {
+    "authenticatedApprovedSeller": true,
+    "existingHostedSourceSystem": true,
+    "existingSellerQuarantine": true,
+    "archiveSha256Provenance": true,
+    "immutableAdmission": true,
+    "codeExecution": false,
+    "networkAccess": false,
+    "assessmentTriggered": false,
+    "releaseOrListingCreated": false,
+    "entitlementOrPaymentCreated": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 50,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 non-executing seller ZIP admission\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "sellerAuthority": "PASS",
+    "archiveSafety": "PASS",
+    "exactProvenance": "PASS",
+    "idempotentAdmission": "PASS",
+    "crossSellerAuthority": "PASS",
+    "noCodeExecution": "PASS",
+    "quarantineOnly": "PASS",
+    "noImplicitPublication": "PASS"
+  },
+  "security": {
+    "scanId": "692c048b-19b2-4013-8679-8bafac0b9a4e",
+    "snapshotCoverage": "complete",
+    "finalNarrowingDeltaReviewed": true,
+    "changedFilesReviewed": 6,
+    "findings": 0,
+    "unresolved": 0,
+    "daybreakAccess": "not_granted"
+  }
+}
