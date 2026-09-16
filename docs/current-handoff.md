@@ -1,3 +1,36 @@
+# Phase 2 final reconciliation — 2026-09-16
+
+**P05 PASS. P61 PASS at the retained internal local-TEST measurement boundary.
+P39 PARTIAL with native acceptance DEFERRED. Full regression 725/730. Strict
+Phase 2: NOT YET. Phase 3: DO NOT START.**
+
+Continue only from the final pushed `phase-2-compatible-editor` publication for
+this run. Main remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b` and must
+not be changed. The authoritative [final reconciliation](reports/phase2-final-reconciliation.md),
+[64-row ledger](reports/phase2-final-internal-evidence/final-ledger.json) and
+[machine evidence](reports/phase2-final-reconciliation-evidence/index.json)
+supersede older status summaries while preserving their receipts.
+
+- Exact ledger: 50 PASS / 1 PARTIAL / 12 EXTERNAL-EVIDENCE / 1 retained
+  deferred FAIL (P64).
+- P39 remains PARTIAL: Native IME FAIL, VoiceOver FAIL, 28/30, native
+  acceptance DEFERRED. The residual is physical native macOS IME lifecycle and
+  real interactive VoiceOver cursor/activation/focus/screen-reader semantics.
+- P61 is PASS only at its retained internal local-TEST measurement/evidence DoD.
+  The historical second-app warm-update HTTP 422 remains a real unresolved
+  historical anomaly; exact stage and root cause are UNPROVEN.
+- The single complete all-identity receipt is 725/730. Three fixture failures
+  were corrected and passed 16/16 targeted checks; two contradictory historical
+  P05 refusal assertions remain visible and were not rewritten to manufacture
+  green. TypeScript and build pass. Prior identities remain preserved.
+- Changed-surface security review found zero unresolved reportable findings;
+  this is not a penetration test or production-deployment proof.
+- Even with P39 deferred, Phase 3 may not begin from this state because the
+  complete preserved regression is not green. External production evidence is
+  also incomplete across twelve rows.
+
+---
+
 # P05 final narrow follow-up — 2026-09-16
 
 **P05 PASS. Internal blockers: P39 / P61. Phase 2 internal closure: NO.**

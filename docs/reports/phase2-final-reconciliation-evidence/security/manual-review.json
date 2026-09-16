@@ -1,0 +1,19 @@
+{
+  "reviewedRevisionRange": "4cce6c861b8a47b224ee2b73f3f644731af53feb..7be9fdf9347f47a07440e5a6eb4f359001451eb6",
+  "inventoryCount": 17,
+  "productionSurfaces": [
+    "src/webcanbe-engine/runtime/alternateLockfiles.ts",
+    "src/webcanbe-engine/runtime/bunBinaryLock.ts",
+    "src/webcanbe-engine/runtime/cssWorkerSource.ts",
+    "src/webcanbe-engine/runtime/fastRefreshCompiler.ts",
+    "src/webcanbe-engine/runtime/finiteBuild.ts",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts",
+    "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+    "src/webcanbe-engine/runtime/staticCss.ts",
+    "src/webcanbe-engine/runtime/unoFormsV1Adapter.ts",
+    "src/webcanbe-engine/runtime/viteFixturePlugin.ts"
+  ],
+  "candidateLedger": [],
+  "confirmedUnresolved": 0,
+  "reviewBoundary": "Bounded changed-surface source review; no penetration-test or production-deployment claim."
+}

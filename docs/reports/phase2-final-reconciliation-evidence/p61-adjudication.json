@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "sourceBranch": "phase2-p61-assistant-closure",
+  "sourceHead": "60f0f2f6bd081c3c94338a96c0faae581ccf0553",
+  "status": "PASS",
+  "boundary": "retained internal local-TEST measurement/evidence DoD only",
+  "measurements": {
+    "coldStartMs": 4216.40,
+    "firstRasterMs": 2992.70,
+    "warmRasterMs": 2116.48,
+    "rasterBoundMs": 4000,
+    "abaStages": "16/16",
+    "artifactOwnerFenceChecks": "3/3",
+    "loadSeconds": 58.01,
+    "users": 2,
+    "projects": 3,
+    "concurrency": 2,
+    "operations": 167,
+    "successes": 145,
+    "expectedRefusals": 22,
+    "unexpectedFailures": 0,
+    "finalJobs": 0,
+    "finalLeases": 0
+  },
+  "historical422": {
+    "retained": true,
+    "resolved": false,
+    "status": "real retained unresolved historical anomaly",
+    "exactStage": "UNPROVEN",
+    "rootCause": "UNPROVEN",
+    "notClaimed": [
+      "fixed",
+      "harmless",
+      "explained",
+      "nonexistent"
+    ]
+  },
+  "evidence": [
+    "../phase2-p61-final-adjudication.md",
+    "../phase2-p61-evidence/assistant-adjudication.json",
+    "../phase2-p61-evidence/retained-scenario.json",
+    "../phase2-p61-evidence/load.json"
+  ]
+}

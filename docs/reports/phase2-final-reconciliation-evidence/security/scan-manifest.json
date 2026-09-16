@@ -1,0 +1,42 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "schemaVersion": "1.0",
+  "scan": {
+    "id": "scan_phase2_final_reconciliation_20260916",
+    "producer": {"name":"codex-security-plugin","version":"0.1.24"},
+    "status": "completed",
+    "startedAt": "2026-09-16T07:55:00Z",
+    "completedAt": "2026-09-16T08:13:06Z",
+    "sealedAt": "2026-09-16T08:13:06Z",
+    "target": {
+      "kind": "git_diff",
+      "targetId": "phase2-final-reconciliation",
+      "displayName": "WebCanBe Phase-2 final reconciliation changed surfaces",
+      "remote": "https://github.com/Webcanbe/webcanbe-real.git",
+      "baseRevision": "4cce6c861b8a47b224ee2b73f3f644731af53feb",
+      "headRevision": "7be9fdf9347f47a07440e5a6eb4f359001451eb6",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:8b65e2d900026a92e8ffb3ce1a857a3c2953d8f7c86ea97f2b54451fbee1907c"
+    },
+    "scope": {
+      "includePaths": ["."],
+      "excludePaths": [],
+      "summary": "Seventeen changed code/profile/test surfaces since the common P05/P39/P61 branch base, with all changed production paths and direct consumers reviewed.",
+      "artifactsReviewed": ["in-scope-files.txt","threat-model.md","manual-review.json"],
+      "runtimeStatus": "TypeScript and production build pass; all-identity regression receipt is 725/730 with three later targeted fixture corrections and two retained historical P05 expectation conflicts.",
+      "validationMode": "bounded source/diff review plus targeted and gated local TEST validation",
+      "context": "Internal Phase-2 closure review only; not a penetration test or production deployment proof.",
+      "limitations": ["No professional penetration test was performed.","No public production deployment was exercised.","P39 physical native IME and interactive VoiceOver acceptance remains deferred."]
+    },
+    "threatModel": {
+      "summary": "Untrusted imported application archives, manifests, locks, source, and browser input must not become server authority or host execution; operator-owned profiles and controlled runners remain the only executable compiler/runtime authority.",
+      "assets": ["tenant source and history","artifact ownership","session and preview capabilities","operator runtime profiles","runner leases and generations","secrets"],
+      "trustBoundaries": ["browser to editor API","uploaded archive to static intake","project source to operator compiler profile","editor to isolated runner","runner result to fenced durable state"]
+    },
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "artifacts": [
+      {"path":"findings.json","sha256":"ed5a21545b1f405e7debde8271ea790e3ed1c5ea477af085bfa725adbafd9e3d","mediaType":"application/json"},
+      {"path":"coverage.json","sha256":"ae521c8575b01064f8feab8d0f1e3216498da57cc59b178c1588e0a5896a08cd","mediaType":"application/json"}
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "commandClass": "single repository-derived full preserved Phase-2 Vitest identity run with all required gates and frozen corpora enabled",
+  "fullRun": {
+    "testSuites": {
+      "total": 88,
+      "passed": 86,
+      "failed": 2,
+      "pending": 0
+    },
+    "tests": {
+      "total": 730,
+      "passed": 725,
+      "failed": 5,
+      "pending": 0
+    },
+    "priorTestIdentitiesPreserved": true,
+    "rerunAsFullSuite": false
+  },
+  "fullRunFailures": [
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "title": "admits only lock-verified client transitives and rejects tampered transitive locks",
+      "classification": "fixture reachability defect",
+      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "title": "verifies required peer locks even when the peer is not directly declared",
+      "classification": "fixture reachability defect",
+      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "title": "skips absent optional peers but verifies present optional peer locks",
+      "classification": "fixture reachability defect",
+      "afterRunDisposition": "corrected and included in 16/16 targeted PASS"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "title": "round-trips every exact frozen Redux file, including its 2742928-byte Yarn release, and retains missing-graph refusal",
+      "classification": "preserved historical negative assertion conflicts with newer accepted exact frozen Berry support",
+      "afterRunDisposition": "retained visible; not weakened or rewritten to manufacture green"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "title": "preserves the retained Todo binary Bun lock as opaque bytes and refuses graph admission",
+      "classification": "preserved historical negative assertion conflicts with newer accepted exact frozen Bun support",
+      "afterRunDisposition": "retained visible; not weakened or rewritten to manufacture green"
+    }
+  ],
+  "targetedAfterLocalization": {
+    "commonApplicationFile": "16/16 PASS",
+    "expandedP05": "69/69 PASS with 3 explicit skips",
+    "retainedP05Closure": "67/67 PASS",
+    "typeScript": "PASS",
+    "build": "PASS"
+  },
+  "authoritativeResult": "725/730",
+  "closure": "NOT_GREEN"
+}

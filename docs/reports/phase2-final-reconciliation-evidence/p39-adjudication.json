@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "sourceBranch": "phase2-p39-native-evidence",
+  "sourceHead": "ba43f3c548e34b3860c8f9e513bf4eff1dd000f3",
+  "status": "PARTIAL",
+  "nativeIME": "FAIL",
+  "voiceOver": "FAIL",
+  "targetedTests": "28/30",
+  "productionCodeChangedOnSourceBranch": false,
+  "nativeAcceptance": "DEFERRED",
+  "harnessStopped": true,
+  "runnerVMStopped": true,
+  "receiptsPreserved": true,
+  "remaining": "Physical native macOS IME composition completion/lifecycle and real interactive VoiceOver cursor, activation, focus, and screen-reader semantics.",
+  "prohibitedSubstitutes": [
+    "synthetic input",
+    "CDP input",
+    "Playwright input",
+    "Chromium AX snapshots"
+  ],
+  "evidence": [
+    "../phase2-p39-native-macos.md",
+    "../phase2-p39-native-macos-evidence.json",
+    "../phase2-p39-evidence/native-environment.json",
+    "../phase2-p39-evidence/native-probe.json"
+  ]
+}

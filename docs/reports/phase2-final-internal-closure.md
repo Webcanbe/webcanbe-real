@@ -1,3 +1,11 @@
+> **Final reconciliation (2026-09-16):** this historical closure attempt is
+> superseded by [the final Phase-2 reconciliation](phase2-final-reconciliation.md)
+> and the updated [authoritative ledger](phase2-final-internal-evidence/final-ledger.json).
+> Current exact counts are 50 PASS / 1 PARTIAL / 12 EXTERNAL-EVIDENCE / 1
+> retained deferred FAIL. P05=PASS, P61=PASS only at its retained internal
+> local-TEST boundary, P39=PARTIAL with native acceptance DEFERRED, and the
+> single complete regression receipt is 725/730. Strict Phase 2 remains NOT YET.
+
 > Current P05–P08 status is superseded by [the compatibility breadth closure](phase2-compatibility-breadth-closure.md). This historical report remains intact below; the current final-ledger.json carries the updated four rows.
 
 # Phase 2 final internal closure attempt — 2026-09-15

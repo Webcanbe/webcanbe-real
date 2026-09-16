@@ -1,0 +1,24 @@
+{
+  "documentType": "codex-security.coverage",
+  "schemaVersion": "1.0",
+  "scanId": "scan_phase2_final_reconciliation_20260916",
+  "mode": "diff",
+  "completeness": "complete",
+  "inventoryStrategy": "diff",
+  "includePaths": ["."],
+  "excludePaths": [],
+  "surfaces": [
+    {"id":"server_authority","label":"Server-side account/workspace/project authority","riskArea":"authorization","disposition":"no_issue_found","receiptRefs":[],"notes":"The diff does not alter grants, memberships, revocation, or authority decisions; archiveRoot is additionally removed from the local public project projection."},
+    {"id":"artifact_ownership","label":"Artifact and project ownership binding","riskArea":"cross-tenant access","disposition":"no_issue_found","receiptRefs":[],"notes":"Ownership tuples, capability binding, and artifact lookup paths are unchanged; cross-project credential tests pass after correcting fixture archive authority."},
+    {"id":"fencing_freshness","label":"Lease, generation, fence, and stale-result checks","riskArea":"concurrency authority","disposition":"no_issue_found","receiptRefs":[],"notes":"Scheduler and fencing code is outside the changed production surface and the enabled hosted negative paths passed."},
+    {"id":"runtime_isolation","label":"Runtime isolation and default external-network denial","riskArea":"sandbox escape and SSRF","disposition":"no_issue_found","receiptRefs":[],"notes":"Runner network policy and controlled transport are unchanged. New compilation behavior remains inside operator-owned profiles and immutable worker graphs."},
+    {"id":"uploaded_execution","label":"Uploaded package, script, config, and plugin non-execution","riskArea":"code execution","disposition":"no_issue_found","receiptRefs":[],"notes":"Lucide export selection statically parses only the operator-owned profile barrel. Uno/forms and lock data remain data-only; no uploaded lifecycle, manager, config, or plugin is invoked."},
+    {"id":"dependency_identity","label":"Lock identity, integrity, peer, and profile validation","riskArea":"dependency confusion","disposition":"no_issue_found","receiptRefs":[],"notes":"Berry virtual/tag selectors now retain exact parent-scoped locations; Bun text peer metadata is strict and the binary-only unresolved optional-peer exception remains bounded."},
+    {"id":"path_archive","label":"Path, public asset, archive, and symlink containment","riskArea":"path traversal","disposition":"no_issue_found","receiptRefs":[],"notes":"Root-relative asset discovery is mapped only through the already validated publicDir and still passes safeArchivePath/realpath confinement. Export archive containment remains fail closed."},
+    {"id":"source_export_transactions","label":"Source and export immutability","riskArea":"unauthorized mutation","disposition":"no_issue_found","receiptRefs":[],"notes":"The finite export compiler consumes immutable supplied modules in the resource-bounded worker; conditional inlining changes artifacts only and never project source."},
+    {"id":"secrets","label":"Secret and internal-path exposure","riskArea":"information disclosure","disposition":"no_issue_found","receiptRefs":[],"notes":"Public project output now strips archiveRoot in addition to root/sourceRoot; secret stores and redaction boundaries are unchanged."},
+    {"id":"admission_capacity_timeouts","label":"Admission, capacity, retry, cleanup, and timeout rules","riskArea":"availability and stale authority","disposition":"no_issue_found","receiptRefs":[],"notes":"No limits, deadlines, retries, or capacity controls were relaxed. Enabled failure-path tests exercised refusal, quarantine, and stale-result rejection."}
+  ],
+  "explicitExclusions": [],
+  "deferred": []
+}

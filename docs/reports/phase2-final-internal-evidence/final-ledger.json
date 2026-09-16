@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "candidate": "47a97751eee352643ff704886ac1392a812c43a7",
+  "candidate": "7be9fdf9347f47a07440e5a6eb4f359001451eb6",
   "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
   "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
   "counts": {
-    "PASS": 49,
-    "PARTIAL": 2,
+    "PASS": 50,
+    "PARTIAL": 1,
     "EXTERNAL-EVIDENCE": 12,
     "FAIL": 1
   },
@@ -13,8 +13,7 @@
   "commonApplicationCheckpoint": "PASS",
   "completeApplications": 2,
   "internalRemaining": [
-    "P39",
-    "P61"
+    "P39"
   ],
   "externalRemaining": [
     "P29",
@@ -740,19 +739,21 @@
       "id": "P39",
       "requirement": "Viewer keyboard/text input/accessibility/streaming/reconnect ergonomics (C.2/D/E)",
       "status": "PARTIAL",
-      "evidence": "P39 composition provenance/order and focus/session cancellation; numbered-frame replay refusal; actual bounded Chromium AX names/roles/states; existing clipboard/Unicode/F6/64-event queue/hard expiry preserved. 16 hosted renewal iterations with Code/Visual/input/reconnect and 12 browser reconnects pass; zero duplicate/stale delivery and verified worker cleanup.",
-      "evidenceSource": "docs/reports/phase2-p39-closure.md",
-      "missingProof": "Actual OS IME completion/lifecycle proof (including Japanese); full interactive screen-reader/accessibility semantics across the isolated viewer and legitimate screen-reader integration. The read-only flattened AX snapshot does not implement the complete interaction bridge.",
-      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+      "evidence": "Prior browser/endurance/AX evidence remains preserved. The parallel native macOS harness produced 28/30 targeted passes with production code unchanged. Korean 2-Set was observed as the native input source, but the driver did not traverse the OS IME and emitted no native composition lifecycle. VoiceOver was running, but the attempted chord reached the application and did not prove VoiceOver cursor movement or trusted activation. The user explicitly deferred the remaining physical native acceptance; the harness and runner VM were stopped and receipts preserved.",
+      "evidenceSource": "docs/reports/phase2-p39-native-macos.md",
+      "missingProof": "Physical native macOS IME composition completion/lifecycle and real interactive VoiceOver cursor, activation, focus, and screen-reader semantics remain unproven. Synthetic/CDP/Playwright input and AX snapshots are not substitutes.",
+      "internallyClosable": "Native acceptance is explicitly DEFERRED, so P39 remains PARTIAL under the original strict DoD.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Exact-pixel queued pointer rebinding and current mode callbacks fix actual viewer selection workflow. Remaining IME/clipboard/accessibility/streaming/long-session/reconnect breadth unchanged.",
       "evidenceFiles": [
         "docs/reports/phase2-p39-evidence/browser.json",
         "docs/reports/phase2-p39-evidence/endurance.json",
         "docs/reports/phase2-p39-evidence/native-probe.json",
-        "docs/reports/phase2-p39-evidence/regressions.json"
+        "docs/reports/phase2-p39-evidence/regressions.json",
+        "docs/reports/phase2-p39-native-macos.md",
+        "docs/reports/phase2-p39-native-macos-evidence.json"
       ],
-      "disposition": "Sustained renewed-session/endurance closes under bounded TEST evidence. Native input attempts did not produce native composition. Actual Chromium and macOS AX inspection is preserved without claiming full screen-reader behavior. Remaining work stays internal, not external/production evidence."
+      "disposition": "PARTIAL / native acceptance DEFERRED. NATIVE_IME=FAIL, VOICEOVER=FAIL, TARGETED_TESTS=28/30, PRODUCTION_CODE_CHANGED=NO. The residual is explicit and is not reclassified as external evidence or PASS."
     },
     {
       "id": "P40",
@@ -1093,11 +1094,11 @@
     {
       "id": "P61",
       "requirement": "Representative cold import/start, warm CSS/React/refresh/reload/restart/export and resource measurements (G.1/2G.2)",
-      "status": "PARTIAL",
-      "evidence": "Exact unchanged Zustand now passes ordinary packaged HTTPS/PG/mTLS/isolated-Linux capture: cold start4216.40ms, first raster2992.70ms, warm raster2116.48ms under unchanged4000ms bound. General worker selection tracking removes measured2846.79ms absent-selection overhead. Prior bounded load remains PASS and was not rerun. One instrumented A→B→A sequence passed16/16 stages plus three artifact/owner/fence identity checks, but the historical generic second-app422 did not reproduce and contains no internal exception. 43 targeted tests pass; full646 execution deferred.",
-      "evidenceSource": "docs/reports/phase2-p61-closure.md",
-      "missingProof": "Historical second-app warm-update 422 still lacks a provable failure stage and root cause; its retained public receipt contains only the deliberately generic response and current instrumented sequences pass.",
-      "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+      "status": "PASS",
+      "evidence": "PASS at the retained internal local-TEST measurement/evidence boundary. Exact unchanged Zustand recorded cold start 4216.40ms, first raster 2992.70ms, and warm raster 2116.48ms under the unchanged 4000ms raster bound. A→B→A passed 16/16 stages with three artifact/owner/fence checks. The retained load ran 58.01s with 2 users, 3 projects, concurrency 2, 167 operations, 145 successes, 22 expected refusals, zero unexpected failures, and zero final jobs/leases.",
+      "evidenceSource": "docs/reports/phase2-p61-final-adjudication.md",
+      "missingProof": "The historical second-app warm-update HTTP 422 remains a real retained unresolved historical anomaly. Its exact stage and root cause are UNPROVEN. This PASS does not claim production sizing/SLO, multihour soak, deployed reliability, or an explanation/fix for that receipt.",
+      "internallyClosable": "Closed only at the retained internal local-TEST measurement/evidence DoD.",
       "priorStatus": "PARTIAL",
       "priorEvidence": "Final real-app import/start/update/responsive/restart/export/build/render timings and bounded independent cgroup samples recorded. Broader full-app, concurrent/load/long-session/production capacity evidence remains incomplete.",
       "evidenceFiles": [
@@ -1111,9 +1112,12 @@
         "../phase2-p61-evidence/targeted-tests.json",
         "../phase2-p61-evidence/security-review.json",
         "../phase2-p61-evidence/followup.json",
-        "../phase2-p61-evidence/security-followup.json"
+        "../phase2-p61-evidence/security-followup.json",
+        "../phase2-p61-evidence/assistant-adjudication.json",
+        "../phase2-p61-evidence/assistant-progress.md",
+        "../phase2-p61-final-adjudication.md"
       ],
-      "disposition": "PARTIAL. Zustand and the bounded local TEST load pass. Later instrumented success cannot reconstruct the historical second-app 422 exception, so its exact stage/root cause remain unproven. Full regression execution deferred by user instruction."
+      "disposition": "PASS at the retained internal local-TEST boundary only. The historical second-app warm-update HTTP 422 is preserved as unresolved; exact stage/root cause remain UNPROVEN and it is not described as fixed, harmless, explained, or nonexistent."
     },
     {
       "id": "P62",
@@ -1169,7 +1173,10 @@
   "compatibilityEdgeBase": "982625986289baf8101a7d73c96fe47ce0602f0d",
   "compatibilityEdgeReport": "docs/reports/phase2-compatibility-edge-closure.md",
   "compatibilityEdgeRegressions": "docs/reports/phase2-compatibility-edge-evidence/regressions.json",
-  "distinctPassingTests": 646,
+  "distinctPassingTests": 725,
+  "distinctDiscoveredTests": 730,
+  "finalFullRegression": "725/730",
+  "finalRegressionResidual": "Three reachable-lock fixture failures were corrected and passed targeted validation after the all-identity receipt; two preserved historical P05 assertions still expect Berry/Bun refusal and remain visible because rewriting them would weaken prior negative identities merely to manufacture green.",
   "allPrior549Preserved": true,
   "allPrior621Preserved": true,
   "p39ClosureBase": "705e03f73d2079d021efc14a39aec28569a7dbd9",
