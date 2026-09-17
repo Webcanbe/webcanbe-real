@@ -1,0 +1,58 @@
+name: Phase 4 remove public pricing nav
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  remove-pricing-nav:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
+      - name: Remove public top-nav Pricing links only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('src/App.tsx')
+          text = app.read_text()
+          old = 'const publicNav = [["Pricing", "/plans"]]'
+          if old not in text:
+              raise SystemExit('public Pricing nav token not found')
+          app.write_text(text.replace(old, 'const publicNav: string[][] = []', 1))
+
+          home = Path('src/Home.tsx')
+          text = home.read_text()
+          desktop_old = '<a href="#features">Features</a><a href="#marketplace">Marketplace</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>'
+          desktop_new = '<a href="#features">Features</a><a href="#marketplace">Marketplace</a><a href="#faq">FAQ</a>'
+          mobile_old = '<a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#marketplace" onClick={() => setOpen(false)}>Marketplace</a><a href="#pricing" onClick={() => setOpen(false)}>Pricing</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a>'
+          mobile_new = '<a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#marketplace" onClick={() => setOpen(false)}>Marketplace</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a>'
+          if desktop_old not in text or mobile_old not in text:
+              raise SystemExit('landing Pricing nav token not found')
+          text = text.replace(desktop_old, desktop_new, 1).replace(mobile_old, mobile_new, 1)
+          home.write_text(text)
+          PY
+      - run: git diff --check
+      - name: Focused tests
+        run: npx vitest run src/phase3-landing.test.ts src/phase4-public-flow.test.ts src/phase4-public-production.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Publish
+        run: |
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase4-remove-public-pricing-nav.yml
+          git add src/App.tsx src/Home.tsx
+          git commit -m "Remove Pricing from public top navigation"
+          git push origin HEAD:phase-4-product-ux
