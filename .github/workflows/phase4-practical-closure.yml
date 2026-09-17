@@ -1,0 +1,50 @@
+name: Phase 4 practical closure
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - name: Install root dependencies
+        run: npm ci
+      - name: Prepare every committed runtime profile
+        shell: bash
+        run: |
+          shopt -s nullglob
+          locks=(runtime-profiles/*/package-lock.json)
+          for lock in "${locks[@]}"; do
+            profile="${lock%/package-lock.json}"
+            echo "Preparing $profile"
+            npm ci --ignore-scripts --prefix "$profile"
+          done
+      - name: Full preserved regression
+        run: npm test
+      - name: Production TypeScript and Vite build
+        run: npm run build
+      - name: Root dependency audit
+        run: npm audit --audit-level=high
+      - name: Verify frozen Phase 3 and main
+        shell: bash
+        run: |
+          test "$(git ls-remote origin refs/heads/phase-3-hosted-product | cut -f1)" = "5d3aa70dfd42e5706a23bd881e97e46665948a30"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+      - name: Remove temporary closure workflow after green verification
+        run: |
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase4-practical-closure.yml
+          git commit -m "Record green Phase 4 practical regression"
+          git push origin HEAD:phase-4-product-ux
