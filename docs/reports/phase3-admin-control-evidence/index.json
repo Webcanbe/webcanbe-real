@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "date": "2026-09-17",
+  "branch": "phase-3-hosted-product",
+  "base": "b27a775ca014fadfd8fde3715be2c37d5fa54fff",
+  "status": "PASS",
+  "guarantees": {
+    "operatorOnlyRead": "PASS",
+    "ordinaryUserDenied": "PASS",
+    "selfEscalationDenied": "PASS",
+    "revocationEffective": "PASS",
+    "lifecycleBypassDenied": "PASS",
+    "appendOnlyAudit": "PASS",
+    "freshStepUp": "PASS",
+    "missingFakeStaleStepUpDenied": "PASS",
+    "noProductOrMoneySideEffects": "PASS"
+  },
+  "verification": {
+    "targetedTests": { "passed": 3, "total": 3, "skippedUnrelated": 63 },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "security": {
+    "scanId": "499198fe-a246-43b8-871c-fb718b3b6314",
+    "changedFilesReviewed": 4,
+    "threatSurfacesClosed": 4,
+    "findings": 0,
+    "unresolved": 0,
+    "postSnapshotDelta": "One manually reviewed risk-reducing Control response-field omission",
+    "daybreakAccess": "not_granted"
+  }
+}

@@ -1,3 +1,40 @@
+# Phase 3 Admin/Control backend checkpoint — 2026-09-17
+
+**PASS. The smallest operator-only Control backend now reads existing seller,
+review, assessment, release, Listing, Ready, deploy, and audit state; performs
+fresh-step-up operator authority and seller-application transitions; and records
+append-only audit evidence without adding lifecycle bypasses or product/money
+side effects.**
+
+This pass began at `b27a775ca014fadfd8fde3715be2c37d5fa54fff` on
+`phase-3-hosted-product`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[Control report](reports/phase3-admin-control.md) and
+[machine evidence](reports/phase3-admin-control-evidence/index.json).
+
+- Durable active operator authority gates Control reads and mutations.
+  Ordinary users cannot self-promote; operator revocation takes effect on the
+  next authority check.
+- High-risk Control mutations require fresh server-minted evidence bound to the
+  exact operator session. Missing, guessed, cross-session, stale, and revoked
+  evidence refuses; no client route can mint evidence.
+- Seller approval/rejection preserves the retained terminal-rejection rule.
+  Operator grant/revoke and seller transitions atomically append actor,
+  authority, action, target, before/after, evidence, and timestamp audit rows.
+  Production triggers reject audit update/delete.
+- Control exposes bounded metadata only: no source bodies, worker credentials,
+  fencing tokens, secrets, idempotency keys, or step-up evidence identifiers.
+- Focused tests pass 3/3; TypeScript and build pass. Focused security scan
+  `499198fe-a246-43b8-871c-fb718b3b6314` found zero findings. Its immutable
+  snapshot preceded one risk-reducing response-field omission, manually
+  reviewed with zero unresolved items. Full regression was not run.
+
+Next bounded task: reconcile the completed Phase-3 scope, run the default
+regression exactly once, preserve P39/P61 and the known Phase-2 cleanup-race
+disclosures, then publish Phase-3 closure only if the evidence supports it.
+
+---
+
 # Phase 3 final sprint Pass 1 — product residual completion — 2026-09-17
 
 **PASS. WebCanBe Ready qualification, the minimum Creator Studio backend, and

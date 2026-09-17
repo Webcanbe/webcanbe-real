@@ -40,6 +40,8 @@ CREATE TABLE wcb_project_releases(release_id uuid PRIMARY KEY,catalog_project_id
 CREATE TABLE wcb_listings(listing_id uuid PRIMARY KEY,catalog_project_id uuid NOT NULL,release_id uuid NOT NULL,slug text NOT NULL UNIQUE,title text NOT NULL,summary text NOT NULL,status text NOT NULL,availability text NOT NULL,tags jsonb NOT NULL DEFAULT '[]',demo_metadata jsonb NOT NULL DEFAULT '{}',updated_at timestamptz NOT NULL DEFAULT now(),UNIQUE(catalog_project_id),FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id));
 CREATE TABLE wcb_license_entitlements(entitlement_id uuid PRIMARY KEY,user_id uuid NOT NULL,release_id uuid NOT NULL REFERENCES wcb_project_releases(release_id),provider text NOT NULL,provider_reference text NOT NULL UNIQUE,status text NOT NULL,granted_at timestamptz NOT NULL DEFAULT now(),revoked_at timestamptz,UNIQUE(user_id,release_id,provider));
 CREATE TABLE wcb_product_operators(user_id uuid PRIMARY KEY,active boolean NOT NULL DEFAULT true,epoch bigint NOT NULL DEFAULT 1);
+CREATE TABLE wcb_operator_step_up_evidence(evidence_id uuid PRIMARY KEY,operator_user_id uuid NOT NULL REFERENCES wcb_product_operators(user_id),session_id uuid NOT NULL,authority text NOT NULL,verified_at timestamptz NOT NULL,expires_at timestamptz NOT NULL,active boolean NOT NULL DEFAULT true);
+CREATE TABLE wcb_control_audit(audit_id uuid PRIMARY KEY,actor_user_id uuid NOT NULL REFERENCES wcb_product_operators(user_id),actor_authority text NOT NULL,action text NOT NULL,target_type text NOT NULL,target_id uuid NOT NULL,transition jsonb NOT NULL,step_up_evidence_id uuid NOT NULL REFERENCES wcb_operator_step_up_evidence(evidence_id),idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(actor_user_id,idempotency_key));
 CREATE TABLE wcb_entitlement_materializations(entitlement_id uuid PRIMARY KEY REFERENCES wcb_license_entitlements(entitlement_id),workspace_id uuid NOT NULL,user_id uuid NOT NULL,workspace_project_id uuid NOT NULL UNIQUE,idempotency_key text NOT NULL,project_name text NOT NULL,status text NOT NULL,attempts integer NOT NULL DEFAULT 0,last_error text,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now(),UNIQUE(user_id,idempotency_key));
 CREATE TABLE wcb_seller_applications(application_id uuid PRIMARY KEY,user_id uuid NOT NULL UNIQUE,status text NOT NULL,decision_by uuid,decided_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE wcb_seller_submissions(submission_id uuid PRIMARY KEY,seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications(application_id),seller_user_id uuid NOT NULL,workspace_id uuid NOT NULL,source_project_id uuid NOT NULL REFERENCES wcb_projects(project_id),source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,files jsonb NOT NULL,history jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(seller_application_id,source_project_id,source_revision_id));
@@ -1096,5 +1098,51 @@ describe("Phase 3 final sprint Pass 1 product residuals", () => {
     expect({ releases: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_project_releases")).rows[0].n), listings: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_listings")).rows[0].n), entitlements: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_license_entitlements")).rows[0].n) }).toEqual(before)
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async createDeployIntent", 2)[1].split("private decodeRelease", 1)[0]
     expect(implementation).not.toMatch(/fetch\(|https?:\/\/|child_process|vercel|netlify|stripe|paypal|wcb_project_releases|wcb_listings|wcb_license_entitlements/)
+  })
+})
+
+describe("Phase 3 Admin Control backend", () => {
+  const fixture = async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const call = async (user: Partial<User>, action: string, body: Record<string, unknown>) => { const exchange = httpRequest(user, `/__webcanbe/api/product${action}`, body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    return { ...f, controller, call }
+  }
+
+  it("allows only current operators to read Control state and makes revocation immediate", async () => {
+    const f = await fixture(), stepUp = await f.product.provisionControlStepUp(f.operator.session)
+    expect((await f.call(f.operator, "/control/read", {})).status).toBe(200)
+    expect((await f.call(f.a, "/control/read", {})).status).toBe(403)
+    expect((await f.call(f.a, "/control/operators/transition", { stepUpEvidenceId: stepUp.evidenceId, targetUserId: f.a.id, active: true, idempotencyKey: "self-escalate" })).status).toBe(403)
+    expect(await f.call(f.operator, "/control/operators/transition", { stepUpEvidenceId: stepUp.evidenceId, targetUserId: f.b.id, active: true, idempotencyKey: "grant-control-b" })).toMatchObject({ status: 200, body: { operator: { userId: f.b.id, active: true } } })
+    expect((await f.call(f.b, "/control/read", {})).status).toBe(200)
+    expect(await f.call(f.operator, "/control/operators/transition", { stepUpEvidenceId: stepUp.evidenceId, targetUserId: f.b.id, active: false, idempotencyKey: "revoke-control-b" })).toMatchObject({ status: 200, body: { operator: { userId: f.b.id, active: false } } })
+    expect((await f.call(f.b, "/control/read", {})).status).toBe(403)
+  })
+
+  it("requires fresh server-minted step-up and records immutable lifecycle-respecting audit", async () => {
+    const f = await fixture(), application = await f.product.applySeller(f.a.session), fresh = await f.product.provisionControlStepUp(f.operator.session)
+    const body = { applicationId: application.applicationId, status: "approved", stepUpEvidenceId: fresh.evidenceId, idempotencyKey: "control-approve-seller" }
+    expect((await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: randomUUID() })).status).toBe(403)
+    await f.pool.query("UPDATE wcb_operator_step_up_evidence SET expires_at=$2 WHERE evidence_id=$1", [fresh.evidenceId, new Date(Date.now() - 1_000)])
+    expect((await f.call(f.operator, "/seller/applications/transition", body)).status).toBe(403)
+    const current = await f.product.provisionControlStepUp(f.operator.session)
+    const approved = await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })
+    expect(approved).toMatchObject({ status: 200, body: { application: { applicationId: application.applicationId, status: "approved", decidedBy: f.operator.id } } })
+    expect((await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })).body.application).toEqual(approved.body.application)
+    const audit = (await f.pool.query("SELECT * FROM wcb_control_audit WHERE target_id=$1", [application.applicationId])).rows
+    expect(audit).toHaveLength(1); expect(audit[0]).toMatchObject({ actor_user_id: f.operator.id, actor_authority: "product_operator", action: "seller.application.transition", target_type: "seller_application", step_up_evidence_id: current.evidenceId, transition: { before: "pending", after: "approved" } })
+    const rejected = await f.product.applySeller(f.b.session), rejectStep = await f.product.provisionControlStepUp(f.operator.session)
+    await f.product.controlTransitionSellerApplication(f.operator.session, rejectStep.evidenceId, rejected.applicationId, "rejected", "control-reject-seller")
+    await expect(f.product.controlTransitionSellerApplication(f.operator.session, rejectStep.evidenceId, rejected.applicationId, "approved", "control-reopen-rejected")).rejects.toThrow(ProductConflict)
+    expect(fs.readFileSync("deployment/hosted/postgres.sql", "utf8")).toContain("wcb_immutable_control_audit")
+  })
+
+  it("adds no source, release, listing, entitlement, payment, or deploy side effect", async () => {
+    const f = await fixture(), application = await f.product.applySeller(f.a.session), stepUp = await f.product.provisionControlStepUp(f.operator.session)
+    const counts = async () => ({ projects: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_projects")).rows[0].n), releases: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_project_releases")).rows[0].n), listings: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_listings")).rows[0].n), entitlements: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_license_entitlements")).rows[0].n), deploys: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_deploy_intents")).rows[0].n) })
+    const before = await counts(); await f.product.controlTransitionSellerApplication(f.operator.session, stepUp.evidenceId, application.applicationId, "approved", "control-side-effects")
+    expect(await counts()).toEqual(before)
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async controlRead", 2)[1].split("async applySeller", 1)[0]
+    expect(implementation).not.toMatch(/fetch\(|https?:\/\/|child_process|stripe|paypal|INSERT INTO wcb_project_releases|INSERT INTO wcb_listings|INSERT INTO wcb_license_entitlements|INSERT INTO wcb_deploy_intents/)
   })
 })

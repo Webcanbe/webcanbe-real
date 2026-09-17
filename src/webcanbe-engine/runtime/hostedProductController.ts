@@ -116,9 +116,9 @@ export class HostedProductController {
       if (action === "/seller/applications/apply") { exact(body, []); return send(201, { application: await this.store.applySeller(session) }) }
       if (action === "/seller/applications/get") { exact(body, []); const application = await this.store.sellerApplication(session); return send(application ? 200 : 404, application ? { application } : { error: "Seller application not found." }) }
       if (action === "/seller/applications/transition") {
-        exact(body, ["applicationId", "status"]); const status = text(body, "status")
+        exact(body, ["applicationId", "status", "stepUpEvidenceId", "idempotencyKey"]); const status = text(body, "status")
         if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
-        return send(200, { application: await this.store.transitionSellerApplication(session, text(body, "applicationId"), status as "approved" | "rejected") })
+        return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })
       }
       if (action === "/seller/submissions/create") {
         exact(body, ["sellerApplicationId", "workspaceId", "sourceProjectId"])
@@ -163,6 +163,12 @@ export class HostedProductController {
       if (action === "/seller/studio/listings/update") {
         exact(body, ["listingId", "title", "summary", "availability", "tags", "demoMetadata"])
         return send(200, { listing: await this.store.updateCreatorListing(session, text(body, "listingId"), { title: text(body, "title"), summary: text(body, "summary"), availability: text(body, "availability") as Listing["availability"], tags: body.tags as string[] | undefined, demoMetadata: body.demoMetadata as Record<string, unknown> | undefined }) })
+      }
+      if (action === "/control/read") { exact(body, []); return send(200, { control: await this.store.controlRead(session) }) }
+      if (action === "/control/operators/transition") {
+        exact(body, ["stepUpEvidenceId", "targetUserId", "active", "idempotencyKey"])
+        if (typeof body.active !== "boolean") throw new Error("Invalid operator state.")
+        return send(200, { operator: await this.store.controlSetOperatorAuthority(session, text(body, "stepUpEvidenceId"), text(body, "targetUserId"), body.active, text(body, "idempotencyKey")) })
       }
       throw new AuthorityDenied()
     } catch (error) {

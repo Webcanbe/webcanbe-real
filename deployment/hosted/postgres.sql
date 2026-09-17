@@ -88,6 +88,26 @@ CREATE TABLE IF NOT EXISTS wcb_license_entitlements (
 CREATE TABLE IF NOT EXISTS wcb_product_operators (
   user_id uuid PRIMARY KEY, active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1
 );
+CREATE TABLE IF NOT EXISTS wcb_operator_step_up_evidence (
+  evidence_id uuid PRIMARY KEY, operator_user_id uuid NOT NULL REFERENCES wcb_product_operators,
+  session_id uuid NOT NULL, authority text NOT NULL CHECK(authority='control_high_risk'),
+  verified_at timestamptz NOT NULL, expires_at timestamptz NOT NULL, active boolean NOT NULL DEFAULT true,
+  CHECK(expires_at>verified_at)
+);
+CREATE TABLE IF NOT EXISTS wcb_control_audit (
+  audit_id uuid PRIMARY KEY, actor_user_id uuid NOT NULL REFERENCES wcb_product_operators,
+  actor_authority text NOT NULL CHECK(actor_authority='product_operator'), action text NOT NULL,
+  target_type text NOT NULL, target_id uuid NOT NULL, transition jsonb NOT NULL CHECK(jsonb_typeof(transition)='object'),
+  step_up_evidence_id uuid NOT NULL REFERENCES wcb_operator_step_up_evidence,
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(actor_user_id,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_control_audit_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'Control audit evidence is append-only'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_control_audit ON wcb_control_audit;
+CREATE TRIGGER wcb_immutable_control_audit BEFORE UPDATE OR DELETE ON wcb_control_audit
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_control_audit_mutation();
 CREATE TABLE IF NOT EXISTS wcb_entitlement_materializations (
   entitlement_id uuid PRIMARY KEY REFERENCES wcb_license_entitlements, workspace_id uuid NOT NULL, user_id uuid NOT NULL,
   workspace_project_id uuid NOT NULL UNIQUE, idempotency_key text NOT NULL, project_name text NOT NULL,
