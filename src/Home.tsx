@@ -1,7 +1,7 @@
-import { useRef, useState, type MouseEvent, type ReactNode } from "react"
+import { useState, type MouseEvent, type ReactNode } from "react"
 import styles from "./landing.module.css"
 
-const routes = { browse: "/browse", projects: "/projects", plans: "/plans", login: "/login", signup: "/signup" }
+const routes = { browse: "/browse", login: "/login", signup: "/signup" }
 
 let landingRouteTimer: number | undefined
 function route(event: MouseEvent<HTMLAnchorElement>, href: string) {
@@ -26,119 +26,214 @@ function Arrow({ left = false }: { left?: boolean }) {
   return <svg viewBox="0 0 20 20" aria-hidden="true"><path d={left ? "M12.5 4.5 7 10l5.5 5.5M7.5 10H17" : "m7.5 4.5 5.5 5.5-5.5 5.5M3 10h9.5"}/></svg>
 }
 
-function Icon({ name }: { name: "source" | "visual" | "history" | "export" }) {
+function SimpleIcon({ name }: { name: "source" | "visual" | "history" | "export" }) {
   if (name === "source") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4m8-8 4 4-4 4M14 4l-4 16"/></svg>
   if (name === "visual") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4zM8 20h8M12 16v4"/></svg>
   if (name === "history") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5M12 8v4l3 2"/></svg>
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 18v3h14v-3"/></svg>
 }
 
+function DashedLine({ vertical = false, className = "" }: { vertical?: boolean; className?: string }) {
+  return <span aria-hidden="true" className={`${vertical ? styles.dashedVertical : styles.dashedHorizontal} ${className}`}/>
+}
+
 const heroPoints = [
-  { icon: "source" as const, title: "Working projects", body: "Start with routes, components, styles, and real source." },
-  { icon: "visual" as const, title: "Visual + Code + AI", body: "Three ways to work, editing the same files underneath." },
-  { icon: "history" as const, title: "Exact history", body: "Every accepted change belongs to a source revision." },
-  { icon: "export" as const, title: "Yours to export", body: "Take the complete codebase into your own workflow." },
+  { icon: "source" as const, title: "Real source underneath", body: "Every visual change belongs to the same project files you can open and export." },
+  { icon: "visual" as const, title: "Visual + Code", body: "Work visually or directly in code without splitting the project into two truths." },
+  { icon: "history" as const, title: "Revision-aware", body: "Working copies keep their source lineage and accepted change history attached." },
+  { icon: "export" as const, title: "Code you keep", body: "Take the project with you instead of rebuilding it around a proprietary canvas." },
+]
+
+const featureCards = [
+  { title: "Start from a complete working project", image: "/mainline/features/triage-card.svg" },
+  { title: "Edit the same project visually and in code", image: "/mainline/features/cycle-card.svg" },
+  { title: "Keep ownership, history, and portability", image: "/mainline/features/overview-card.svg" },
+]
+
+const logoRows = [
+  [
+    { name: "Mercury", src: "/mainline/logos/mercury.svg" },
+    { name: "Watershed", src: "/mainline/logos/watershed.svg" },
+    { name: "Retool", src: "/mainline/logos/retool.svg" },
+    { name: "Descript", src: "/mainline/logos/descript.svg" },
+  ],
+  [
+    { name: "Perplexity", src: "/mainline/logos/perplexity.svg" },
+    { name: "Monzo", src: "/mainline/logos/monzo.svg" },
+    { name: "Ramp", src: "/mainline/logos/ramp.svg" },
+    { name: "Raycast", src: "/mainline/logos/raycast.svg" },
+    { name: "Arc", src: "/mainline/logos/arc.svg" },
+  ],
+]
+
+const testimonialCards = [
+  { quote: "Start with a real codebase instead of recreating the design after you buy it.", role: "For founders", image: "/mainline/testimonials/amy-chase.webp" },
+  { quote: "Move between the canvas and source without handing the project to a second editor model.", role: "For developers", image: "/mainline/testimonials/jonas-kotara.webp" },
+  { quote: "Use one working copy for visual iteration, code review, export, and handoff.", role: "For studios", image: "/mainline/testimonials/kevin-yam.webp" },
+  { quote: "Buy a project, make it yours, and leave with the code when you are done.", role: "For independent builders", image: "/mainline/testimonials/kundo-marta.webp" },
 ]
 
 const plans = [
-  { name: "Free", monthly: "$0", annual: "$0", note: "For exploring real projects.", features: ["Browse public projects", "Open demos and source details", "One working workspace", "Code export included"] },
-  { name: "Pro", monthly: "$19", annual: "$16", note: "For people building regularly.", features: ["Everything in Free", "Unlimited personal workspaces", "Visual + Code editing", "Larger AI allowance"] },
-  { name: "Studio", monthly: "$49", annual: "$41", note: "For teams and client work.", features: ["Everything in Pro", "Shared workspaces", "Creator tools as they ship", "Priority support"] },
+  { name: "Free", monthly: "$0", annual: "$0", description: "Explore public projects and the product flow.", features: ["Public marketplace", "Project detail and demos", "One working workspace", "Code export"] },
+  { name: "Pro", monthly: "$19", annual: "$16", description: "For one person building regularly.", features: ["Everything in Free", "Unlimited personal workspaces", "Visual + Code editing", "Larger AI allowance in Phase 5"] },
+  { name: "Studio", monthly: "$49", annual: "$41", description: "For client work and shared projects.", features: ["Everything in Pro", "Shared workspaces", "Creator tools", "Priority support"] },
 ]
 
 const faqGroups = [
-  { title: "Projects and purchases", items: [
-    ["Are these templates?", "Listings point to versioned, working source projects. A purchase grants an entitlement to a specific immutable release; it is not a screenshot or an unversioned download."],
-    ["What happens after a purchase?", "The entitlement appears in Purchases first. You can then create an editable workspace copy without changing the original release."],
-    ["Can a listing change after I purchase?", "Listing copy can change, but a referenced release cannot silently mutate. New source requires a new release identity."],
+  { title: "Projects", items: [
+    ["Are these just design templates?", "No. Marketplace listings are intended to point to working, versioned source projects rather than flattened screenshots or proprietary canvas documents."],
+    ["What happens when I buy one?", "After payment is confirmed, the purchase becomes a release-bound entitlement. From there you can create an editable working copy."],
+    ["Can the seller silently replace what I bought?", "No. A purchase stays bound to its immutable release identity. A changed source requires a new release."],
   ] },
-  { title: "Editing and ownership", items: [
-    ["Do visual edits change the source?", "Yes. Visual and code editing operate on the same working copy and its source revision history."],
-    ["Can I export the project?", "Code export remains part of the product contract. License terms still belong to the specific listing and entitlement."],
+  { title: "Editing", items: [
+    ["Do visual edits change the actual source?", "Yes. Visual and code editing are designed to act on the same working copy and revision history."],
+    ["Can I export the code?", "Code export is part of the product contract. The project should remain usable outside WebCanBe."],
   ] },
-  { title: "Accounts and workspaces", items: [
-    ["Is a purchase the same as a project?", "No. Purchases are entitlements; My Projects contains editable workspace copies. A purchase may exist before you create a copy."],
-    ["Can another user open my copy?", "Not by guessing an ID. Sessions, workspace membership, entitlement ownership, and project grants are checked server-side."],
+  { title: "Accounts", items: [
+    ["Is a purchase the same as My Projects?", "No. Purchases are entitlements. My Projects contains editable working copies created from those entitlements."],
+    ["Does WebCanBe expose private projects publicly?", "No. Private app routes and project operations remain behind the hosted session and authority boundaries."],
   ] },
 ]
 
 function Navbar() {
   const [open, setOpen] = useState(false)
+  const [featureOpen, setFeatureOpen] = useState(false)
   return <header className={styles.navbar}>
     <div className={styles.navInner}>
       <AppLink href="/" className={styles.wordmark}>WebCanBe</AppLink>
-      <nav className={styles.desktopNav} aria-label="Main navigation"><a href="#features">Features</a><a href="#marketplace">Marketplace</a><a href="#faq">FAQ</a></nav>
-      <div className={styles.navActions}><AppLink href={routes.login}>Log in</AppLink><AppLink href={routes.browse} className={styles.navPrimary}>Browse projects</AppLink></div>
-      <button className={styles.menuButton} type="button" aria-expanded={open} aria-label="Toggle navigation" onClick={() => setOpen(value => !value)}><span/><span/></button>
+      <nav className={styles.desktopNav} aria-label="Main navigation">
+        <button type="button" onClick={() => setFeatureOpen(value => !value)} className={styles.navDropButton}>Features <span>⌄</span></button>
+        <a href="#about">About</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+        {featureOpen && <div className={styles.featureMenu}><a href="#features" onClick={() => setFeatureOpen(false)}><b>Source-first editing</b><span>Visual and code editing stay attached to the same project.</span></a><a href="#resource-allocation" onClick={() => setFeatureOpen(false)}><b>Working project flow</b><span>Purchase, copy, edit, export, and deploy without canvas lock-in.</span></a></div>}
+      </nav>
+      <div className={styles.navActions}>
+        <button className={styles.themeDot} type="button" aria-label="Light theme"><span/></button>
+        <AppLink href={routes.login} className={styles.loginButton}>Login</AppLink>
+        <button className={styles.iconButton} type="button" aria-label="Open menu" onClick={() => setOpen(value => !value)}>↗</button>
+      </div>
+      <button className={styles.menuButton} type="button" aria-expanded={open} aria-label="Toggle navigation" onClick={() => setOpen(value => !value)}><span/><span/><span/></button>
     </div>
-    <nav className={`${styles.mobileNav} ${open ? styles.mobileNavOpen : ""}`} aria-label="Mobile navigation"><a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#marketplace" onClick={() => setOpen(false)}>Marketplace</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a><AppLink href={routes.login}>Log in</AppLink><AppLink href={routes.browse}>Browse projects</AppLink></nav>
+    <div className={`${styles.mobileMenu} ${open ? styles.mobileMenuOpen : ""}`}>
+      <a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#about" onClick={() => setOpen(false)}>About</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a><a href="#contact" onClick={() => setOpen(false)}>Contact</a><AppLink href={routes.login}>Login</AppLink>
+    </div>
   </header>
 }
 
 function EditorPreview() {
-  const code = ["export default function Hero() {", "  return (", "    <section className=\"hero\">", "      <h1>Make something real.</h1>", "      <ProjectPreview />", "    </section>", "  )", "}"]
-  return <div className={styles.editorPreview} aria-label="WebCanBe editor preview">
-    <div className={styles.editorTop}><b>WebCanBe</b><span>Northstar Studio</span><div><button>Preview</button><button className={styles.darkButton}>Export</button></div></div>
-    <div className={styles.editorBody}>
-      <aside className={styles.fileRail}><b>Files</b><span>▾ src</span><span className={styles.fileActive}>⌘ App.tsx</span><span>⌘ Hero.tsx</span><span>⌘ ProjectCard.tsx</span><span># styles.css</span><span>package.json</span></aside>
-      <section className={styles.editorMain}><div className={styles.editorTabs}><span>Visual</span><b>Code</b><span>Preview</span></div><div className={styles.code}>{code.map((line, index) => <div key={line + index}><i>{index + 1}</i><code>{line}</code></div>)}</div></section>
-      <aside className={styles.aiRail}><b>AI changes</b><div className={styles.aiBubble}>Make the project cards quieter and give the headline more room.</div><p>Updated the working copy.</p><ul><li>ProjectCard.tsx <strong>+18</strong></li><li>styles.css <strong>+12</strong></li></ul><div className={styles.aiInput}>Ask for a change <span>↑</span></div></aside>
+  return <div className={styles.editorPreview} aria-label="Mainline landing preview asset"><img src="/mainline/hero.webp" alt="Product interface preview"/></div>
+}
+
+function Hero() {
+  return <section className={styles.hero}>
+    <div className={styles.container}>
+      <div className={styles.heroGrid}>
+        <div className={styles.heroCopy}>
+          <h1>Real websites.<br/>Real code you keep.</h1>
+          <p>Browse working web projects, buy the release you want, then edit the actual source visually or directly in code.</p>
+          <div className={styles.heroActions}><AppLink href={routes.browse} className={styles.primaryButton}>Browse projects</AppLink><a href="#features" className={styles.outlineButton}>See how it works <Arrow/></a></div>
+        </div>
+        <div className={styles.heroPoints}>
+          <DashedLine vertical className={styles.heroDivider}/>
+          {heroPoints.map(point => <div className={styles.heroPoint} key={point.title}><SimpleIcon name={point.icon}/><div><h2>{point.title}</h2><p>{point.body}</p></div></div>)}
+        </div>
+      </div>
     </div>
-  </div>
+    <div className={styles.heroPreviewWrap}><EditorPreview/></div>
+  </section>
 }
 
-function FeatureVisual({ kind }: { kind: "canvas" | "market" | "history" }) {
-  if (kind === "canvas") return <div className={`${styles.featureVisual} ${styles.canvasVisual}`}><div className={styles.miniToolbar}>Select&nbsp;&nbsp; Text&nbsp;&nbsp; Frame</div><div className={styles.miniPage}><span>NORTHSTAR</span><h4>Independent design<br/>for useful things.</h4><div/><small>Hero.tsx</small></div></div>
-  if (kind === "market") return <div className={`${styles.featureVisual} ${styles.marketVisual}`}><div><small>EDITORIAL</small><b>Fieldnotes</b><span>React · Vite · CSS</span></div><div><small>SAAS</small><b>Relay</b><span>TypeScript · API</span></div></div>
-  return <div className={`${styles.featureVisual} ${styles.historyVisual}`}><div><i/><span><b>Immutable release</b><small>v1.0.0 · rev_7f18</small></span></div><div><i/><span><b>Your working copy</b><small>Editable · exact provenance</small></span></div><div><i/><span><b>Your changes</b><small>rev_12bc · now</small></span></div></div>
+function Logos() {
+  return <section className={styles.logos}>
+    <div className={styles.container}>
+      <h2>Built for the way modern web work already happens.<span> Start from real source and keep the workflow familiar.</span></h2>
+      <div className={styles.logoRows}>{logoRows.map((row, index) => <div className={styles.logoRow} key={index}>{row.map(logo => <span className={styles.logoMark} key={logo.name}><img src={logo.src} alt={logo.name}/></span>)}</div>)}</div>
+    </div>
+  </section>
 }
 
-function ProjectProof({ tone, label, title }: { tone: string; label: string; title: string }) {
-  return <div className={`${styles.projectProof} ${styles[tone]}`}><header><b>{title}</b><span>Index&nbsp;&nbsp; About&nbsp;&nbsp; Contact</span></header><main><small>{label}</small><h4>{title}<br/>made to be used.</h4><i/></main><footer><span>Working source</span><span>01 — 04</span></footer></div>
+function Features() {
+  return <section id="features" className={styles.features}>
+    <div className={styles.container}>
+      <div className={styles.dashedLabel}><DashedLine/><span>THE SOURCE IS THE PRODUCT.</span></div>
+      <div className={styles.featureIntro}><h2>Made for people who want the site and the code.</h2><p>WebCanBe keeps the visual workspace attached to a real source project, so the starting point, edits, history, export, and handoff remain one system.</p></div>
+      <div className={styles.featureCardRow}>{featureCards.map((card, index) => <article className={styles.featureCard} key={card.title}><div className={styles.featureImage}><img src={card.image} alt=""/></div><div className={styles.featureCardTitle}><h3>{card.title}</h3><span>›</span></div>{index < featureCards.length - 1 && <DashedLine vertical className={styles.cardDivider}/>}</article>)}</div>
+    </div>
+  </section>
+}
+
+function ResourceAllocation() {
+  const appTiles = [
+    { name: "Jira", src: "/mainline/logos/jira.svg" },
+    { name: "Excel", src: "/mainline/logos/excel.svg" },
+    { name: "Notion", src: "/mainline/logos/notion.svg" },
+    { name: "Word", src: "/mainline/logos/word.svg" },
+    { name: "Monday", src: "/mainline/logos/monday.svg" },
+    { name: "Drive", src: "/mainline/logos/drive.svg" },
+    { name: "Jira", src: "/mainline/logos/jira.svg" },
+    { name: "Asana", src: "/mainline/logos/asana.svg" },
+  ]
+  return <section id="resource-allocation" className={styles.resource}>
+    <h2 className={styles.resourceTitle}>From marketplace release to a source-backed working copy</h2>
+    <div className={styles.resourceLines}><DashedLine/></div>
+    <div className={`${styles.container} ${styles.resourceGrid}`}>
+      <article className={`${styles.resourceItem} ${styles.resourceTopWide}`}><div><h3>Start from something real.</h3><p>Marketplace projects carry an immutable release identity instead of becoming an untracked download.</p></div><img src="/mainline/resource-allocation/templates.webp" alt=""/></article>
+      <article className={styles.resourceItem}><div><h3>Keep the stack familiar.</h3><p>WebCanBe should fit normal web development rather than replacing it.</p></div><div className={styles.appTiles}>{appTiles.map((app, index) => <span key={`${app.name}-${index}`}><img src={app.src} alt={app.name}/></span>)}</div></article>
+    </div>
+    <div className={styles.resourceLines}><DashedLine/></div>
+    <div className={`${styles.container} ${styles.resourceGridBottom}`}>
+      <article className={styles.resourceItem}><div><h3>Release stays frozen.</h3><p>The purchased source snapshot cannot silently change underneath you.</p></div><img src="/mainline/resource-allocation/graveyard.webp" alt=""/></article>
+      <article className={styles.resourceItem}><div><h3>Changes stay reviewable.</h3><p>Visual and code work belong to the same source revision flow.</p></div><img className={styles.resourceDiscussion} src="/mainline/resource-allocation/discussions.webp" alt=""/></article>
+      <article className={styles.resourceItem}><div><h3>State stays visible.</h3><p>Purchases, working copies, revisions, and Ready evidence remain distinct.</p></div><img src="/mainline/resource-allocation/notifications.webp" alt=""/></article>
+    </div>
+    <div className={styles.resourceLines}><DashedLine/></div>
+  </section>
 }
 
 function Testimonials() {
-  const rail = useRef<HTMLDivElement>(null)
-  const move = (direction: number) => rail.current?.scrollBy({ left: direction * Math.min(390, window.innerWidth * .8), behavior: "smooth" })
-  const items = [
-    { art: "source", quote: "The listing identifies a real source revision — not just an image of a finished page.", label: "Marketplace principle" },
-    { art: "edit", quote: "Visual, code, and AI changes meet in one working copy with one history.", label: "Editing principle" },
-    { art: "own", quote: "A purchase and a project stay separate, so ownership never becomes ambiguous.", label: "Product principle" },
-    { art: "export", quote: "The useful outcome is a codebase you can inspect, change, and take with you.", label: "Portability principle" },
-  ]
-  return <section className={styles.testimonials} data-landing-reveal>
-    <div className={styles.container}><h2>Built around what stays true.</h2><p className={styles.sectionCopy}>WebCanBe keeps the project, its source, and its ownership history legible from marketplace release to working copy.</p><AppLink href={routes.browse} className={styles.outlineButton}>Browse the catalog <Arrow/></AppLink></div>
-    <div className={styles.testimonialRail} ref={rail}>{items.map(item => <article className={styles.testimonialCard} key={item.label}><div className={`${styles.testimonialArt} ${styles[item.art]}`}><span/><span/><span/></div><blockquote>{item.quote}</blockquote><p>{item.label}</p></article>)}</div>
-    <div className={`${styles.container} ${styles.carouselControls}`}><button type="button" aria-label="Previous principles" onClick={() => move(-1)}><Arrow left/></button><button type="button" aria-label="Next principles" onClick={() => move(1)}><Arrow/></button></div>
+  const [page, setPage] = useState(0)
+  return <section id="about" className={styles.testimonials}>
+    <div className={styles.container}>
+      <div className={styles.testimonialIntro}><h2>Built around a simpler ownership model</h2><p>Use the marketplace as a starting point, not a lock-in point. The project should still make sense when WebCanBe is not in the room.</p><AppLink href={routes.browse} className={styles.storyButton}>Browse the marketplace <Arrow/></AppLink></div>
+      <div className={styles.testimonialViewport}><div className={styles.testimonialTrack} style={{ transform: `translateX(-${page * 25}%)` }}>{testimonialCards.concat(testimonialCards).map((card, index) => <article className={styles.testimonialCard} key={`${card.role}-${index}`}><img src={card.image} alt=""/><div><blockquote>{card.quote}</blockquote><footer><strong>{card.role}</strong><span>WebCanBe use case</span></footer></div></article>)}</div></div>
+      <div className={styles.carouselButtons}><button type="button" onClick={() => setPage(value => Math.max(0, value - 1))} aria-label="Previous"><Arrow left/></button><button type="button" onClick={() => setPage(value => Math.min(4, value + 1))} aria-label="Next"><Arrow/></button></div>
+    </div>
+    <DashedLine className={styles.testimonialLine}/>
   </section>
 }
 
 function Pricing() {
   const [annual, setAnnual] = useState(true)
-  return <section className={styles.pricing} id="pricing" data-landing-reveal><div className={`${styles.container} ${styles.narrow}`}>
-    <div className={styles.centerHeading}><h2>Plans for the workspace around your code.</h2><p>Project purchases are separate from workspace plans. Export is never treated as a premium format.</p></div>
-    <div className={styles.planGrid}>{plans.map((plan, index) => <article className={index === 1 ? styles.featuredPlan : ""} key={plan.name}><h3>{plan.name}</h3><div className={styles.price}>{annual ? plan.annual : plan.monthly}{plan.name !== "Free" && <small> / month</small>}</div>{plan.name === "Free" ? <span className={styles.billingNote}>{plan.note}</span> : <label className={styles.billingSwitch}><input type="checkbox" checked={annual} onChange={() => setAnnual(value => !value)}/><i/><span>Billed annually</span></label>}<ul>{plan.features.map(feature => <li key={feature}><span>✓</span>{feature}</li>)}</ul><AppLink href={index ? routes.signup : routes.browse} className={index === 1 ? styles.blackButton : styles.outlineButton}>Get started</AppLink></article>)}</div>
-  </div></section>
+  return <section id="pricing" className={styles.pricing}>
+    <div className={`${styles.container} ${styles.narrow}`}>
+      <div className={styles.centerIntro}><h2>Workspace plans</h2><p>Code ownership is not a premium feature. Paid billing is still a Phase 5 integration; these cards are the current product-plan direction, not a live checkout claim.</p></div>
+      <div className={styles.pricingGrid}>{plans.map(plan => <article className={`${styles.planCard} ${plan.name === "Pro" ? styles.featuredPlan : ""}`} key={plan.name}><div><h3>{plan.name}</h3><p className={styles.price}>{annual ? plan.annual : plan.monthly}{plan.name !== "Free" && <span> / month</span>}</p></div>{plan.name !== "Free" ? <button type="button" className={styles.billingToggle} onClick={() => setAnnual(value => !value)}><span className={annual ? styles.toggleOn : ""}/><b>Billed annually</b></button> : <p className={styles.planNote}>{plan.description}</p>}<ul>{plan.features.map(feature => <li key={feature}>✓ <span>{feature}</span></li>)}</ul><AppLink href={plan.name === "Free" ? routes.browse : routes.signup} className={plan.name === "Pro" ? styles.primaryButton : styles.outlineButton}>Get started</AppLink></article>)}</div>
+    </div>
+  </section>
 }
 
 function FAQ() {
-  return <section className={styles.faq} id="faq" data-landing-reveal><div className={`${styles.container} ${styles.narrow} ${styles.faqGrid}`}><div><h2>Got questions?</h2><p>Start with the product contract: real source, explicit releases, owned working copies, and server-side authority.</p><AppLink href={routes.browse}>Explore projects <Arrow/></AppLink></div><div className={styles.faqGroups}>{faqGroups.map(group => <section key={group.title}><h3>{group.title}</h3>{group.items.map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</section>)}</div></div></section>
+  const [open, setOpen] = useState<string | null>(null)
+  return <section id="faq" className={styles.faq}>
+    <div className={`${styles.container} ${styles.narrow} ${styles.faqGrid}`}>
+      <div><h2>Got Questions?</h2><p>If the answer is not here, use the product flow first and keep the implementation claims tied to what is actually live.</p></div>
+      <div>{faqGroups.map(group => <section className={styles.faqGroup} key={group.title}><h3>{group.title}</h3>{group.items.map(([question, answer], index) => { const id = `${group.title}-${index}`; const active = open === id; return <div className={styles.faqItem} key={question}><button type="button" onClick={() => setOpen(active ? null : id)} aria-expanded={active}><span>{question}</span><b>{active ? "−" : "+"}</b></button>{active && <p>{answer}</p>}</div> })}</section>)}</div>
+    </div>
+  </section>
 }
 
 function Footer() {
-  return <footer className={styles.footer} data-landing-reveal><div className={`${styles.container} ${styles.footerCta}`}><h2>Open a real project.</h2><p>Browse the marketplace, create an editable working copy, and keep the source underneath it.</p><AppLink href={routes.browse} className={styles.blackButton}>Browse projects <Arrow/></AppLink></div><nav className={styles.footerNav}><div><AppLink href={routes.browse}>Browse</AppLink><AppLink href={routes.projects}>My projects</AppLink><AppLink href={routes.plans}>Plans</AppLink><AppLink href={routes.login}>Sign in</AppLink></div><small>© 2026 WebCanBe. Real projects, real source.</small></nav><div className={styles.footerWordmark}>WebCanBe</div></footer>
+  return <footer id="contact" className={styles.footer}>
+    <div className={`${styles.container} ${styles.footerCta}`}><h2>Start from a project you can actually keep.</h2><p>Browse real working releases, make a working copy, and build on the same source.</p><AppLink href={routes.browse} className={styles.primaryButton}>Browse projects</AppLink></div>
+    <nav className={styles.footerNav}><div><a href="#features">Product</a><a href="#about">About</a><a href="#faq">FAQ</a><AppLink href={routes.login}>Login</AppLink></div><div><span>© 2026 WebCanBe</span></div></nav>
+    <div className={styles.footerWordmark}>webcanbe</div>
+  </footer>
 }
 
 export default function Home() {
   return <div className={styles.page}>
     <Navbar/>
     <main>
-      <div className={styles.topShell}>
-        <section className={`${styles.hero} ${styles.container}`} data-landing-reveal><div className={styles.heroGrid}><div><h1>Start with a real project. Keep the real code.</h1><p>Browse working source-code projects, open an editable copy, and build through Visual, Code, or AI — all on the same files.</p><div className={styles.heroActions}><AppLink href={routes.browse} className={styles.blackButton}>Browse projects <Arrow/></AppLink><a href="#features" className={styles.outlineButton}>See how it works <Arrow/></a></div></div><div className={styles.heroPoints}>{heroPoints.map(point => <div key={point.title}><Icon name={point.icon}/><span><b>{point.title}</b><small>{point.body}</small></span></div>)}</div></div><EditorPreview/></section>
-        <section className={`${styles.logos} ${styles.container}`} data-landing-reveal><h2>One source-first workflow, from discovery to export.<br/><span>Built for real projects instead of flattened previews.</span></h2><div className={styles.logoRows}><div>{["React", "Vite", "TypeScript", "Tailwind"].map(item => <span key={item}>{item}</span>)}</div><div>{["Marketplace", "Visual", "Code", "AI", "Export"].map(item => <span key={item}>{item}</span>)}</div></div></section>
-        <section className={`${styles.features} ${styles.container}`} id="features" data-landing-reveal><div className={styles.ruleLabel}><span>REAL SOURCE. ONE HISTORY.</span></div><div className={styles.splitHeading}><h2>Made for people who need a real starting point.</h2><p>WebCanBe joins marketplace discovery with a source-first editor. The release you choose stays fixed; the working copy you create is yours to change.</p></div><div className={styles.featureCards}><article id="editing"><FeatureVisual kind="canvas"/><a href="#editing"><h3>Edit the same project visually</h3><Arrow/></a></article><article><FeatureVisual kind="market"/><a href="#marketplace"><h3>Browse projects that already run</h3><Arrow/></a></article><article id="ownership"><FeatureVisual kind="history"/><a href="#ownership"><h3>Keep release and copy lineage exact</h3><Arrow/></a></article></div></section>
-        <section className={styles.resource} id="marketplace" data-landing-reveal><h2 className={styles.container}>From immutable release to editable working copy.</h2><div className={styles.resourceGrid}><article className={styles.resourceWide}><div><b>Start from a release.</b> <span>The listing identifies an exact source revision and snapshot.</span></div><ProjectProof tone="proofBlue" label="PORTFOLIO" title="Northstar"/></article><article className={styles.resourceWide}><div><b>Choose how you work.</b> <span>Visual, code, and AI stay attached to the same files.</span></div><div className={styles.modeStack}><span>Visual</span><span>Code</span><span>AI</span><span>Preview</span><span>History</span><span>Export</span></div></article><article><div><b>Keep purchases distinct.</b> <span>An entitlement can exist before a workspace copy does.</span></div><div className={styles.resourceMini}><small>PURCHASES</small><strong>Northstar v1.0</strong><span>Ready to create a project</span></div></article><article><div><b>Edit without rewriting history.</b> <span>The original release stays unchanged as your copy moves on.</span></div><div className={styles.changeList}><span>Hero.tsx <b>+12</b></span><span>styles.css <b>+8</b></span><span>README.md <b>+3</b></span></div></article><article><div><b>Take the source with you.</b> <span>Export the codebase and continue in your own tools.</span></div><div className={styles.exportVisual}>↓<span>northstar-studio.zip<small>Complete source · ready</small></span></div></article></div></section>
-      </div>
+      <div className={styles.topShell}><Hero/><Logos/><Features/><ResourceAllocation/></div>
       <Testimonials/>
       <div className={styles.bottomShell}><Pricing/><FAQ/></div>
     </main>
