@@ -6,6 +6,7 @@ import "./phase4.css"
 import "./phase4-product-hub.css"
 import "./phase4-operations.css"
 import "./phase4-public-flow.css"
+import "./phase4-brand.css"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

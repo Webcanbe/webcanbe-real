@@ -148,9 +148,43 @@ function Auth({ signup = false }: { signup?: boolean }) {
       setBusy(false)
     }
   }
-  return <main className="auth"><Link to="/" className="brand auth-brand"><Mark/><span>WebCanBe</span></Link><section><span className="signal">{signup ? "Create your WebCanBe account" : "Welcome back"}</span><h1>{signup ? <>Build on code<br/>you can keep.</> : <>Return to your<br/>real projects.</>}</h1><p>{signup ? "Create an account through the configured identity provider, then start from a working project." : "Sign in through the configured provider to return to your projects and workspace."}</p><button className="google-button provider-button" disabled={busy} onClick={() => void begin()}><b>↗</b>{busy ? "Opening sign-in…" : signup ? "Continue to create account" : "Continue to sign in"}</button>{error && <p className="auth-error" role="alert">{error}</p>}<div className="auth-provider-note"><span>Email sign-in</span><p>Email/password is not enabled by the current hosted identity boundary. This screen does not fake a second authentication system.</p></div>{next !== "/dashboard" && <p className="auth-return">After sign-in, continue to <code>{next}</code>.</p>}<p className="auth-switch">{signup ? "Already have an account?" : "New to WebCanBe?"} <Link to={`${signup ? "/login" : "/signup"}?next=${encodeURIComponent(next)}`}>{signup ? "Log in" : "Create an account"}</Link></p></section><aside><div className="auth-quote"><div className="quote-mark">“</div><p>One account. One working copy. The visual editor and source stay attached to the same project.</p><span>WebCanBe</span></div></aside></main>
-}
 
+  return <main className="auth auth-split">
+    <section className="auth-split-panel">
+      <div className="auth-split-brand">
+        <Link to="/" className="brand auth-brand"><Mark/><span>WebCanBe</span></Link>
+      </div>
+      <div className="auth-split-center">
+        <div className="auth-split-form">
+          <span className="auth-kicker">{signup ? "Create account" : "Welcome back"}</span>
+          <h1>{signup ? "Start with real code." : "Continue building."}</h1>
+          <p>{signup ? "Create your WebCanBe account through the configured identity provider and start from a working project." : "Sign in to return to your projects, purchases, and browser workspace."}</p>
+          <button className="auth-provider-button" disabled={busy} onClick={() => void begin()}>
+            <span className="auth-provider-icon" aria-hidden="true">↗</span>
+            <span>{busy ? "Opening sign-in…" : signup ? "Continue to create account" : "Continue to sign in"}</span>
+          </button>
+          {error && <p className="auth-error" role="alert">{error}</p>}
+          <div className="auth-boundary-note">
+            <span>Secure sign-in</span>
+            <p>Email/password is not enabled by the current hosted identity boundary. Authentication continues through WebCanBe’s configured identity provider, and no second password system is simulated here.</p>
+          </div>
+          {next !== "/dashboard" && <p className="auth-return">After sign-in, continue to <code>{next}</code>.</p>}
+          <p className="auth-switch">{signup ? "Already have an account?" : "New to WebCanBe?"} <Link to={`${signup ? "/login" : "/signup"}?next=${encodeURIComponent(next)}`}>{signup ? "Log in" : "Create an account"}</Link></p>
+        </div>
+      </div>
+      <p className="auth-split-foot">The source is the product.</p>
+    </section>
+    <aside className="auth-split-visual" aria-label="WebCanBe product preview">
+      <div className="auth-visual-glow"/>
+      <div className="auth-visual-copy">
+        <span>Visual editing. Real source.</span>
+        <h2>Edit the interface.<br/>Keep the code.</h2>
+        <p>Visual, Code, and Split stay attached to the same working project.</p>
+      </div>
+      <div className="auth-visual-frame"><img src="/mainline/hero.webp" alt="WebCanBe browser workspace"/></div>
+    </aside>
+  </main>
+}
 
 function AuthComplete() {
   const [message, setMessage] = useState("Finishing sign-in…")
