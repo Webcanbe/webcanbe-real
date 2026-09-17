@@ -6,10 +6,12 @@ const home = fs.readFileSync(new URL("./Home.tsx", import.meta.url), "utf8")
 const client = fs.readFileSync(new URL("./hostedProductClient.ts", import.meta.url), "utf8")
 
 describe("Phase 4 public/auth/purchase flow", () => {
-  it("keeps the Launch UI landing composition and bounded transition behavior", () => {
-    for (const marker of ["function Navbar()", "function EditorPreview()", "function Hero()", "function Items()", "function ProductStory()", "function Pricing()", "function FAQ()", "function CTA()", "function Footer()", "styles.mockupFrame", "styles.itemGrid"]) expect(home).toContain(marker)
-    expect(home).toContain('}, 120)')
-  })
+  it("keeps the exact pinned Launch UI homepage at the public root", () => {
+      const page = fs.readFileSync(new URL("./launch-ui/app/page.tsx", import.meta.url), "utf8")
+      for (const marker of ["<Navbar />", "<Hero />", "<Logos />", "<Items />", "<Stats />", "<Pricing />", "<FAQ />", "<CTA />", "<Footer />"]) expect(page).toContain(marker)
+      expect(home).toContain('LaunchUIHome')
+      expect(home).toContain('launch-ui-page dark')
+    })
   it("removes app navigation from the public top bar and moves authenticated navigation to a sidebar", () => {
     expect(app).toContain('const publicNav: string[][] = []')
     expect(app).toContain('className={`app-sidebar ${menu ? "open" : ""}`}')
