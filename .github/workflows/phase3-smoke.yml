@@ -1,0 +1,10 @@
+name: Phase 3 smoke
+on:
+  push:
+    branches:
+      - phase-3-hosted-product
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo phase3-runner-ok
