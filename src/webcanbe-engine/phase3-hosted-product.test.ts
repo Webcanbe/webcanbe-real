@@ -125,7 +125,7 @@ function zipArchive(entries: Array<{ name: string; content: string | Buffer; mod
 }
 
 describe("Phase 3 hosted product persistence and HTTP controller", () => {
-  it("wires authenticated catalog, operator TEST purchase, idempotent materialization, My Projects, and tenant isolation", async () => {
+  it("wires public catalog, operator TEST purchase, idempotent materialization, My Projects, and tenant isolation", async () => {
     const f = await setup(), boundary = new PostgresSessionBoundary(f.identity, origins), controller = new HostedProductController(f.product, boundary)
     const call = async (user: Partial<User>, action: string, body: Record<string, unknown>) => {
       const exchange = httpRequest(user, `/__webcanbe/api/product${action}`, body)
@@ -133,7 +133,7 @@ describe("Phase 3 hosted product persistence and HTTP controller", () => {
       return exchange.result()
     }
 
-    expect(await call({}, "/catalog/browse", {})).toMatchObject({ status: 403 })
+    expect(await call({}, "/catalog/browse", {})).toMatchObject({ status: 200, body: { listings: [{ listingId: f.listing.listingId, releaseId: f.release.releaseId }] } })
     expect(await call(f.a, "/catalog/browse", { query: "hosted", tags: ["react"] })).toMatchObject({ status: 200, body: { listings: [{ listingId: f.listing.listingId, releaseId: f.release.releaseId }] } })
     expect(await call(f.a, "/entitlements/test/grant-self", { releaseId: f.release.releaseId, idempotencyKey: "route-grant" })).toMatchObject({ status: 403 })
 
@@ -161,10 +161,10 @@ describe("Phase 3 hosted product persistence and HTTP controller", () => {
     expect(migration).toContain("wcb_immutable_project_release"); expect(migration).toContain("BEFORE UPDATE OR DELETE ON wcb_project_releases")
   })
 
-  it("requires authenticated HTTP and ignores client attempts to self-assert operator authority", async () => {
+  it("keeps catalog public while private HTTP ignores client attempts to self-assert operator authority", async () => {
     const f = await setup(), boundary = new PostgresSessionBoundary(f.identity, origins), controller = new HostedProductController(f.product, boundary)
     const unauthenticated = httpRequest({}, "/__webcanbe/api/product/catalog/browse", {})
-    await controller.handle(unauthenticated.request, unauthenticated.response); expect(unauthenticated.result().status).toBe(403)
+    await controller.handle(unauthenticated.request, unauthenticated.response); expect(unauthenticated.result().status).toBe(200)
     const forged = httpRequest(f.a, "/__webcanbe/api/product/entitlements/test/grant", { beneficiaryUserId: f.a.id, releaseId: f.release.releaseId, idempotencyKey: "forged", operator: true })
     await controller.handle(forged.request, forged.response); expect(forged.result().status).toBe(403)
     const granted = httpRequest(f.operator, "/__webcanbe/api/product/entitlements/test/grant", { beneficiaryUserId: f.a.id, releaseId: f.release.releaseId, idempotencyKey: "http-grant" })

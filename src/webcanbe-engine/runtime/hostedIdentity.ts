@@ -141,7 +141,7 @@ export class HostedLoginBoundary {
         const identity = await this.provider.verify(params.get("code")!, attempt)
         if (params.has("iss") && params.get("iss") !== identity.issuer) throw new AuthorityDenied()
         const issued = this.authority.issueVerifiedIdentity ? await this.authority.issueVerifiedIdentity(identity) : await this.authority.issueVerifiedSession(await this.logins.account(identity))
-        response.writeHead(303, { ...headers, "Set-Cookie": [issued.cookie, "__Host-wcb-login=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0"], Location: "/workspace/northstar" }); response.end(); return true
+        response.writeHead(303, { ...headers, "Set-Cookie": [issued.cookie, "__Host-wcb-login=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0"], Location: "/auth/complete" }); response.end(); return true
       }
       if (request.method !== "POST" || request.headers.origin !== this.origin || !/^application\/json(?:;|$)/i.test(request.headers["content-type"] ?? "")) throw new AuthorityDenied()
       if (pathname === "/__webcanbe/auth/start") {

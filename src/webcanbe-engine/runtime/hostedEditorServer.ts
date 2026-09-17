@@ -22,7 +22,8 @@ export function hostedEditorServer(editor: HostedEditor, tls: ServerOptions, dis
       if (request.method !== "GET") { response.writeHead(405); response.end(); return }
       const url = new URL(request.url ?? "/",editor.options.origins.editorOrigin)
       let file = decodeURIComponent(url.pathname).slice(1)
-      const document = file === "" || file === "index.html" || /^workspace\/(?:northstar|[a-f0-9-]{36})$/.test(file)
+      const spaDocument = /^(?:browse|plans|login|signup|auth\/complete|dashboard|projects|purchases|settings|seller(?:\/projects(?:\/new)?)?|control|project\/[a-z0-9-]+|checkout\/[A-Za-z0-9_.:-]+|workspace\/(?:northstar|[a-f0-9-]{36}))$/
+      const document = file === "" || file === "index.html" || spaDocument.test(file)
       if (document) file = "index.html"
       if (safeArchivePath(file) !== file || !document && !/^assets\/[a-zA-Z0-9_.-]+$/.test(file)) { response.writeHead(404); response.end(); return }
       const full = path.resolve(root,file)

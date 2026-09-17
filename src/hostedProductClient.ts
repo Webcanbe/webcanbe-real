@@ -61,6 +61,13 @@ export class HostedProductClient {
     return this.csrf
   }
 
+  private async publicPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
+    const response = await this.request(path, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+    const value = await response.json().catch(() => ({})) as Record<string, unknown>
+    if (!response.ok) throw new HostedProductError(response.status, typeof value.error === "string" ? value.error : "The public product request was refused.")
+    return value as T
+  }
+
   private async post<T>(path: string, body: Record<string, unknown>, retry = true): Promise<T> {
     const csrf = await this.session()
     const response = await this.request(path, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-WCB-CSRF": csrf }, body: JSON.stringify(body) })
@@ -71,11 +78,11 @@ export class HostedProductClient {
   }
 
   async browse(input: { query?: string; tags?: string[]; limit?: number } = {}) {
-    return (await this.post<{ listings: HostedListing[] }>("/__webcanbe/api/product/catalog/browse", input)).listings
+    return (await this.publicPost<{ listings: HostedListing[] }>("/__webcanbe/api/product/catalog/browse", input)).listings
   }
 
   async detail(reference: string) {
-    return (await this.post<{ listing: HostedListingDetail }>("/__webcanbe/api/product/catalog/detail", { reference })).listing
+    return (await this.publicPost<{ listing: HostedListingDetail }>("/__webcanbe/api/product/catalog/detail", { reference })).listing
   }
 
   async purchases() {

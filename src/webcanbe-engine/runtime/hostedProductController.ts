@@ -40,7 +40,20 @@ export class HostedProductController {
     const prefix = "/__webcanbe/api/product"
     if (!pathname.startsWith(prefix + "/")) return false
     try {
-      const action = pathname.slice(prefix.length), session = await this.boundary.authenticate(request)
+      const action = pathname.slice(prefix.length)
+      if (action === "/catalog/browse" || action === "/catalog/detail") {
+        const origin = this.boundary.origins.editorOrigin
+        if (request.method !== "POST" || request.headers.origin !== origin || request.headers.host !== new URL(origin).host || !(request.socket as { encrypted?: boolean }).encrypted || request.headers["x-wcb-editor-key"] !== undefined || !/^application\/json(?:;|$)/i.test(request.headers["content-type"] ?? "")) throw new AuthorityDenied()
+        const body = await bodyOf(request)
+        if (action === "/catalog/browse") {
+          exact(body, ["query", "tags", "limit"])
+          if (body.query !== undefined && typeof body.query !== "string" || body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some(tag => typeof tag !== "string")) || body.limit !== undefined && !Number.isSafeInteger(body.limit)) throw new Error("Invalid catalog filter.")
+          json(response, 200, { listings: await this.store.browse({ query: body.query as string | undefined, tags: body.tags as string[] | undefined, limit: body.limit as number | undefined }) }); return true
+        }
+        exact(body, ["reference"]); const listing = await this.store.listingDetail(text(body, "reference"))
+        json(response, listing ? 200 : 404, listing ? { listing } : { error: "Listing not found." }); return true
+      }
+      const session = await this.boundary.authenticate(request)
       const body = await bodyOf(request, action === "/seller/imports/zip/admit" ? 36 * 1024 * 1024 : undefined)
       const assertSession = async (expected: ServerSession = session) => {
         const current = await this.boundary.authenticate(request)
@@ -48,15 +61,6 @@ export class HostedProductController {
       }
       const send = async (status: number, value: Record<string, unknown>) => { await assertSession(); json(response, status, value); return true }
 
-      if (action === "/catalog/browse") {
-        exact(body, ["query", "tags", "limit"])
-        if (body.query !== undefined && typeof body.query !== "string" || body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some(tag => typeof tag !== "string")) || body.limit !== undefined && !Number.isSafeInteger(body.limit)) throw new Error("Invalid catalog filter.")
-        return send(200, { listings: await this.store.browse({ query: body.query as string | undefined, tags: body.tags as string[] | undefined, limit: body.limit as number | undefined }) })
-      }
-      if (action === "/catalog/detail") {
-        exact(body, ["reference"]); const listing = await this.store.listingDetail(text(body, "reference"))
-        return send(listing ? 200 : 404, listing ? { listing } : { error: "Listing not found." })
-      }
       if (action === "/catalog/projects/create") {
         exact(body, ["workspaceId", "sourceProjectId", "slug", "title", "summary", "publicMetadata"])
         const catalogProject = await this.store.createCatalogProject(session, text(body, "workspaceId"), text(body, "sourceProjectId"), { slug: text(body, "slug"), title: text(body, "title"), summary: text(body, "summary"), publicMetadata: body.publicMetadata as Record<string, unknown> | undefined })
