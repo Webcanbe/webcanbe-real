@@ -1,12 +1,12 @@
-name: Phase 4 practical closure
+name: Phase 4 practical closure diagnostics
 on:
   push:
     branches:
       - phase-4-product-ux
 permissions:
-  contents: write
+  contents: read
 jobs:
-  closure:
+  diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -30,21 +30,53 @@ jobs:
             echo "Preparing $profile"
             npm ci --ignore-scripts --prefix "$profile"
           done
-      - name: Full preserved regression
-        run: npm test
-      - name: Production TypeScript and Vite build
-        run: npm run build
-      - name: Root dependency audit
-        run: npm audit --audit-level=high
-      - name: Verify frozen Phase 3 and main
+      - name: Capture full regression
         shell: bash
         run: |
-          test "$(git ls-remote origin refs/heads/phase-3-hosted-product | cut -f1)" = "5d3aa70dfd42e5706a23bd881e97e46665948a30"
-          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
-      - name: Remove temporary closure workflow after green verification
+          set +e
+          npm test -- --reporter=verbose 2>&1 | tee phase4-full-regression.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > phase4-full-regression.exit
+          exit 0
+      - name: Capture production build
+        shell: bash
         run: |
-          git config user.name "WebCanBe Phase 4 Automation"
-          git config user.email "actions@users.noreply.github.com"
-          git rm .github/workflows/phase4-practical-closure.yml
-          git commit -m "Record green Phase 4 practical regression"
-          git push origin HEAD:phase-4-product-ux
+          set +e
+          npm run build 2>&1 | tee phase4-build.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > phase4-build.exit
+          exit 0
+      - name: Capture root dependency audit
+        shell: bash
+        run: |
+          set +e
+          npm audit --audit-level=high 2>&1 | tee phase4-audit.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > phase4-audit.exit
+          exit 0
+      - name: Capture frozen branch refs
+        shell: bash
+        run: |
+          echo "PHASE3=$(git ls-remote origin refs/heads/phase-3-hosted-product | cut -f1)" | tee phase4-refs.log
+          echo "MAIN=$(git ls-remote origin refs/heads/main | cut -f1)" | tee -a phase4-refs.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase4-practical-closure-diagnostics
+          path: |
+            phase4-full-regression.log
+            phase4-full-regression.exit
+            phase4-build.log
+            phase4-build.exit
+            phase4-audit.log
+            phase4-audit.exit
+            phase4-refs.log
+          retention-days: 7
+      - name: Enforce regression and build result
+        shell: bash
+        run: |
+          test "$(cat phase4-full-regression.exit)" = "0"
+          test "$(cat phase4-build.exit)" = "0"
+          test "$(cat phase4-audit.exit)" = "0"
+          grep -q "PHASE3=5d3aa70dfd42e5706a23bd881e97e46665948a30" phase4-refs.log
+          grep -q "MAIN=dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b" phase4-refs.log
