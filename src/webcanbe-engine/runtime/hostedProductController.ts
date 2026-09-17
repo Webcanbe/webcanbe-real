@@ -116,6 +116,11 @@ export class HostedProductController {
       if (action === "/seller/applications/apply") { exact(body, []); return send(201, { application: await this.store.applySeller(session) }) }
       if (action === "/seller/applications/get") { exact(body, []); const application = await this.store.sellerApplication(session); return send(application ? 200 : 404, application ? { application } : { error: "Seller application not found." }) }
       if (action === "/seller/applications/transition") {
+        exact(body, ["applicationId", "status"]); const status = text(body, "status")
+        if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
+        return send(200, { application: await this.store.transitionSellerApplication(session, text(body, "applicationId"), status as "approved" | "rejected") })
+      }
+      if (action === "/control/seller-applications/transition") {
         exact(body, ["applicationId", "status", "stepUpEvidenceId", "idempotencyKey"]); const status = text(body, "status")
         if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
         return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })

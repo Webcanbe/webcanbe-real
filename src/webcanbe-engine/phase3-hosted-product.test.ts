@@ -926,7 +926,7 @@ describe("Phase 3 non-executing seller ZIP admission", () => {
     const admission = await f.product.admitSellerZip(f.a.session, { sellerApplicationId: f.application.applicationId, workspaceId: f.workspaceA, archiveName: "inert.zip", projectName: "Inert", archive: archive(), idempotencyKey: "inert-zip" })
     expect({ releases: await count("wcb_project_releases"), listings: await count("wcb_listings"), entitlements: await count("wcb_license_entitlements"), assessments: await count("wcb_seller_assessment_requests") }).toEqual(before)
     expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [admission.submissionId])).rows[0].status).toBe("pending_review")
-    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerZip", 2)[1].split("async sellerSubmissions", 1)[0]
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerZip", 2)[1].split("async admitSellerGitHub", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|fetch\(|https?:\/\/|wcb_project_releases|wcb_listings|wcb_license_entitlements|wcb_seller_assessment_requests/)
   })
 })
@@ -1122,13 +1122,13 @@ describe("Phase 3 Admin Control backend", () => {
   it("requires fresh server-minted step-up and records immutable lifecycle-respecting audit", async () => {
     const f = await fixture(), application = await f.product.applySeller(f.a.session), fresh = await f.product.provisionControlStepUp(f.operator.session)
     const body = { applicationId: application.applicationId, status: "approved", stepUpEvidenceId: fresh.evidenceId, idempotencyKey: "control-approve-seller" }
-    expect((await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: randomUUID() })).status).toBe(403)
+    expect((await f.call(f.operator, "/control/seller-applications/transition", { ...body, stepUpEvidenceId: randomUUID() })).status).toBe(403)
     await f.pool.query("UPDATE wcb_operator_step_up_evidence SET expires_at=$2 WHERE evidence_id=$1", [fresh.evidenceId, new Date(Date.now() - 1_000)])
-    expect((await f.call(f.operator, "/seller/applications/transition", body)).status).toBe(403)
+    expect((await f.call(f.operator, "/control/seller-applications/transition", body)).status).toBe(403)
     const current = await f.product.provisionControlStepUp(f.operator.session)
-    const approved = await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })
+    const approved = await f.call(f.operator, "/control/seller-applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })
     expect(approved).toMatchObject({ status: 200, body: { application: { applicationId: application.applicationId, status: "approved", decidedBy: f.operator.id } } })
-    expect((await f.call(f.operator, "/seller/applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })).body.application).toEqual(approved.body.application)
+    expect((await f.call(f.operator, "/control/seller-applications/transition", { ...body, stepUpEvidenceId: current.evidenceId })).body.application).toEqual(approved.body.application)
     const audit = (await f.pool.query("SELECT * FROM wcb_control_audit WHERE target_id=$1", [application.applicationId])).rows
     expect(audit).toHaveLength(1); expect(audit[0]).toMatchObject({ actor_user_id: f.operator.id, actor_authority: "product_operator", action: "seller.application.transition", target_type: "seller_application", step_up_evidence_id: current.evidenceId, transition: { before: "pending", after: "approved" } })
     const rejected = await f.product.applySeller(f.b.session), rejectStep = await f.product.provisionControlStepUp(f.operator.session)
