@@ -20,7 +20,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply Phase 4 public/auth/purchase correction
-        run: python scripts/phase4-public-auth-purchase.py
+        run: |
+          python scripts/phase4-public-auth-purchase.py
+          python scripts/phase4-public-auth-purchase-tests.py
       - run: git diff --check
       - name: Focused Phase 4 tests
         run: npx vitest run src/phase3-landing.test.ts src/phase4-ux-foundation.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts src/phase4-public-flow.test.ts
@@ -34,7 +36,7 @@ jobs:
         run: |
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
-          git rm .github/workflows/phase4-public-auth-purchase.yml scripts/phase4-public-auth-purchase.py
-          git add src/App.tsx src/Home.tsx src/hostedProductClient.ts src/main.tsx src/phase4-public-flow.css src/phase4-public-flow.test.ts
+          git rm .github/workflows/phase4-public-auth-purchase.yml scripts/phase4-public-auth-purchase.py scripts/phase4-public-auth-purchase-tests.py
+          git add src/App.tsx src/Home.tsx src/hostedProductClient.ts src/main.tsx src/phase4-public-flow.css src/phase4-public-flow.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts
           git commit -m "Correct Phase 4 public auth purchase flow"
           git push origin HEAD:phase-4-product-ux
