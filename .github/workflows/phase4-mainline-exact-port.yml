@@ -1,0 +1,59 @@
+name: Phase 4 exact Mainline landing port
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  port:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
+      - name: Pull the selected Mainline template assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth=1 https://github.com/shadcnblocks/mainline-nextjs-template.git /tmp/mainline
+          mkdir -p public/mainline/features public/mainline/resource-allocation public/mainline/testimonials
+          cp /tmp/mainline/public/hero.webp public/mainline/hero.webp
+          cp /tmp/mainline/public/features/triage-card.svg public/mainline/features/triage-card.svg
+          cp /tmp/mainline/public/features/cycle-card.svg public/mainline/features/cycle-card.svg
+          cp /tmp/mainline/public/features/overview-card.svg public/mainline/features/overview-card.svg
+          cp /tmp/mainline/public/resource-allocation/templates.webp public/mainline/resource-allocation/templates.webp
+          cp /tmp/mainline/public/resource-allocation/graveyard.webp public/mainline/resource-allocation/graveyard.webp
+          cp /tmp/mainline/public/resource-allocation/discussions.webp public/mainline/resource-allocation/discussions.webp
+          cp /tmp/mainline/public/resource-allocation/notifications.webp public/mainline/resource-allocation/notifications.webp
+          cp /tmp/mainline/public/testimonials/amy-chase.webp public/mainline/testimonials/amy-chase.webp
+          cp /tmp/mainline/public/testimonials/jonas-kotara.webp public/mainline/testimonials/jonas-kotara.webp
+          cp /tmp/mainline/public/testimonials/kevin-yam.webp public/mainline/testimonials/kevin-yam.webp
+          cp /tmp/mainline/public/testimonials/kundo-marta.webp public/mainline/testimonials/kundo-marta.webp
+      - run: git diff --check
+      - name: Focused landing/public flow tests
+        run: npx vitest run src/phase3-landing.test.ts src/phase4-public-flow.test.ts src/phase4-public-production.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Verify selected assets ship
+        shell: bash
+        run: |
+          test -f dist/mainline/hero.webp
+          test -f dist/mainline/features/triage-card.svg
+          test -f dist/mainline/resource-allocation/templates.webp
+          test -f dist/mainline/testimonials/amy-chase.webp
+      - name: Publish exact Mainline landing port
+        run: |
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase4-mainline-exact-port.yml
+          git add src/Home.tsx src/landing.module.css public/mainline
+          git commit -m "Port Mainline landing composition faithfully"
+          git push origin HEAD:phase-4-product-ux
