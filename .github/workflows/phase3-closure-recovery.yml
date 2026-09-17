@@ -42,29 +42,27 @@ jobs:
 
           controller_path = Path('src/webcanbe-engine/runtime/hostedProductController.ts')
           controller = controller_path.read_text()
-          old = '''      if (action === "/seller/applications/transition") {
-                exact(body, ["applicationId", "status", "stepUpEvidenceId", "idempotencyKey"]); const status = text(body, "status")
-                if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
-                return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })
-              }
-          '''
-          # Preserve the established seller transition route and keep the new
-          # stepped-up Control transition on a separate endpoint.
-          old = old.replace('                ', '        ')
-          new = '''      if (action === "/seller/applications/transition") {
-                exact(body, ["applicationId", "status"]); const status = text(body, "status")
-                if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
-                return send(200, { application: await this.store.transitionSellerApplication(session, text(body, "applicationId"), status as "approved" | "rejected") })
-              }
-              if (action === "/control/seller-applications/transition") {
-                exact(body, ["applicationId", "status", "stepUpEvidenceId", "idempotencyKey"]); const status = text(body, "status")
-                if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
-                return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })
-              }
-          '''.replace('                ', '        ')
-          if controller.count(old) != 1:
-              raise SystemExit(f'controller recovery anchor count={controller.count(old)}; refusing ambiguous edit')
-          controller_path.write_text(controller.replace(old, new))
+          start_marker = '      if (action === "/seller/applications/transition") {'
+          end_marker = '      if (action === "/seller/submissions/create") {'
+          start = controller.find(start_marker)
+          end = controller.find(end_marker, start)
+          if start < 0 or end < 0 or end <= start:
+              raise SystemExit('seller transition route boundary missing; refusing ambiguous edit')
+          existing = controller[start:end]
+          if 'controlTransitionSellerApplication' not in existing or 'stepUpEvidenceId' not in existing:
+              raise SystemExit('seller transition route no longer matches expected closure checkpoint')
+          replacement = '''      if (action === "/seller/applications/transition") {
+            exact(body, ["applicationId", "status"]); const status = text(body, "status")
+            if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
+            return send(200, { application: await this.store.transitionSellerApplication(session, text(body, "applicationId"), status as "approved" | "rejected") })
+          }
+          if (action === "/control/seller-applications/transition") {
+            exact(body, ["applicationId", "status", "stepUpEvidenceId", "idempotencyKey"]); const status = text(body, "status")
+            if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
+            return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })
+          }
+'''
+          controller_path.write_text(controller[:start] + replacement + controller[end:])
 
           test_path = Path('src/webcanbe-engine/phase3-hosted-product.test.ts')
           tests = test_path.read_text()
@@ -74,8 +72,8 @@ jobs:
               raise SystemExit('Admin Control test marker missing')
           old_route = '"/seller/applications/transition"'
           route_count = tail.count(old_route)
-          if route_count != 4:
-              raise SystemExit(f'Admin Control route anchor count={route_count}; expected 4')
+          if route_count < 1:
+              raise SystemExit('Admin Control seller-transition route anchor missing')
           tail = tail.replace(old_route, '"/control/seller-applications/transition"')
           tests = head + sep + tail
 
@@ -89,7 +87,6 @@ jobs:
           git diff -- src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/phase3-hosted-product.test.ts
 
       - name: Run final default regression once
-        id: regression
         shell: bash
         run: |
           set +e
