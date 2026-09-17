@@ -42,6 +42,14 @@ jobs:
               raise SystemExit('landing Pricing nav token not found')
           text = text.replace(desktop_old, desktop_new, 1).replace(mobile_old, mobile_new, 1)
           home.write_text(text)
+
+          test = Path('src/phase4-public-flow.test.ts')
+          text = test.read_text()
+          stale = 'expect(app).toContain(\'const publicNav = [["Pricing", "/plans"]]\')'
+          updated = 'expect(app).toContain(\'const publicNav: string[][] = []\')'
+          if stale not in text:
+              raise SystemExit('stale public-nav test expectation not found')
+          test.write_text(text.replace(stale, updated, 1))
           PY
       - run: git diff --check
       - name: Focused tests
@@ -53,6 +61,6 @@ jobs:
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/phase4-remove-public-pricing-nav.yml
-          git add src/App.tsx src/Home.tsx
+          git add src/App.tsx src/Home.tsx src/phase4-public-flow.test.ts
           git commit -m "Remove Pricing from public top navigation"
           git push origin HEAD:phase-4-product-ux
