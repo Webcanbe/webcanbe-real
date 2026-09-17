@@ -23,16 +23,14 @@ jobs:
         run: |
           python scripts/phase4-public-production-seams.py
           python scripts/phase4-public-production-testfix.py
+          python scripts/phase4-public-production-phase3-tests.py
       - run: git diff --check
       - name: Phase 4 focused tests
         run: npx vitest run src/phase3-landing.test.ts src/phase4-ux-foundation.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts src/phase4-public-flow.test.ts src/phase4-public-production.test.ts
-      - name: Existing hosted auth/product/server tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t tests < <(grep -RIlE 'HostedLoginBoundary|/__webcanbe/auth/callback|HostedProductController|hostedEditorServer' src --include='*.test.ts' | sort -u)
-          printf 'Relevant existing tests:\n%s\n' "${tests[*]:-none}"
-          if [ "${#tests[@]}" -gt 0 ]; then npx vitest run "${tests[@]}"; fi
+      - name: OIDC identity regression
+        run: npx vitest run src/webcanbe-engine/phase2g2-identity.test.ts
+      - name: Hosted product controller regression
+        run: npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t "Phase 3 hosted product persistence and HTTP controller"
       - name: Production build
         run: npm run build
       - name: Verify frozen branches
@@ -43,7 +41,7 @@ jobs:
         run: |
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
-          git rm .github/workflows/phase4-public-production-seams.yml scripts/phase4-public-production-seams.py scripts/phase4-public-production-testfix.py
-          git add src/App.tsx src/hostedProductClient.ts src/phase4-public-flow.css src/phase4-public-production.test.ts src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/runtime/hostedIdentity.ts src/webcanbe-engine/runtime/hostedEditorServer.ts
+          git rm .github/workflows/phase4-public-production-seams.yml scripts/phase4-public-production-seams.py scripts/phase4-public-production-testfix.py scripts/phase4-public-production-phase3-tests.py
+          git add src/App.tsx src/hostedProductClient.ts src/phase4-public-flow.css src/phase4-public-production.test.ts src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/runtime/hostedIdentity.ts src/webcanbe-engine/runtime/hostedEditorServer.ts src/webcanbe-engine/phase3-hosted-product.test.ts
           git commit -m "Finish Phase 4 public auth production seams"
           git push origin HEAD:phase-4-product-ux
