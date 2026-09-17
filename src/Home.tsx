@@ -67,11 +67,11 @@ function Navbar() {
   return <header className={styles.navbar}>
     <div className={styles.navInner}>
       <AppLink href="/" className={styles.wordmark}>WebCanBe</AppLink>
-      <nav className={styles.desktopNav} aria-label="Main navigation"><a href="#features">Features</a><a href="#marketplace">Marketplace</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+      <nav className={styles.desktopNav} aria-label="Main navigation"><a href="#features">Features</a><a href="#marketplace">Marketplace</a><a href="#faq">FAQ</a></nav>
       <div className={styles.navActions}><AppLink href={routes.login}>Log in</AppLink><AppLink href={routes.browse} className={styles.navPrimary}>Browse projects</AppLink></div>
       <button className={styles.menuButton} type="button" aria-expanded={open} aria-label="Toggle navigation" onClick={() => setOpen(value => !value)}><span/><span/></button>
     </div>
-    <nav className={`${styles.mobileNav} ${open ? styles.mobileNavOpen : ""}`} aria-label="Mobile navigation"><a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#marketplace" onClick={() => setOpen(false)}>Marketplace</a><a href="#pricing" onClick={() => setOpen(false)}>Pricing</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a><AppLink href={routes.login}>Log in</AppLink><AppLink href={routes.browse}>Browse projects</AppLink></nav>
+    <nav className={`${styles.mobileNav} ${open ? styles.mobileNavOpen : ""}`} aria-label="Mobile navigation"><a href="#features" onClick={() => setOpen(false)}>Features</a><a href="#marketplace" onClick={() => setOpen(false)}>Marketplace</a><a href="#faq" onClick={() => setOpen(false)}>FAQ</a><AppLink href={routes.login}>Log in</AppLink><AppLink href={routes.browse}>Browse projects</AppLink></nav>
   </header>
 }
 

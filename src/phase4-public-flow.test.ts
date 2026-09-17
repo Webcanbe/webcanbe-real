@@ -11,7 +11,7 @@ describe("Phase 4 public/auth/purchase flow", () => {
     expect(home).toContain('}, 120)')
   })
   it("removes app navigation from the public top bar and moves authenticated navigation to a sidebar", () => {
-    expect(app).toContain('const publicNav = [["Pricing", "/plans"]]')
+    expect(app).toContain('const publicNav: string[][] = []')
     expect(app).toContain('className={`app-sidebar ${menu ? "open" : ""}`}')
     expect(app).toContain('["Marketplace", "/browse"]')
   })

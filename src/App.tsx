@@ -49,7 +49,7 @@ function Arrow() { return <span className="arrow">↗</span> }
 
 function Landing() { return <Home /> }
 
-const publicNav = [["Pricing", "/plans"]]
+const publicNav: string[][] = []
 const appNav = [["Dashboard", "/dashboard"], ["My projects", "/projects"], ["Purchases", "/purchases"], ["Marketplace", "/browse"]]
 
 function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
