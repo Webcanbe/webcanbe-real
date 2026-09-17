@@ -2,55 +2,43 @@ name: Phase 3 closure recovery
 
 on:
   push:
-    branches:
-      - phase-3-hosted-product
+    branches: [phase-3-hosted-product]
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: phase3-closure-recovery
-  cancel-in-progress: false
-
 jobs:
-  close-phase-3:
+  recover-test-and-push:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Check out Phase 3
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: phase-3-hosted-product
           fetch-depth: 0
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Recover the three verified closure fixes
+      - run: npm ci
+      - name: Apply closure recovery fixes
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          controller_path = Path('src/webcanbe-engine/runtime/hostedProductController.ts')
-          controller = controller_path.read_text()
-          start_marker = '      if (action === "/seller/applications/transition") {'
-          end_marker = '      if (action === "/seller/submissions/create") {'
-          start = controller.find(start_marker)
-          end = controller.find(end_marker, start)
-          if start < 0 or end < 0 or end <= start:
-              raise SystemExit('seller transition route boundary missing; refusing ambiguous edit')
-          existing = controller[start:end]
-          if 'controlTransitionSellerApplication' not in existing or 'stepUpEvidenceId' not in existing:
-              raise SystemExit('seller transition route no longer matches expected closure checkpoint')
+          p = Path('src/webcanbe-engine/runtime/hostedProductController.ts')
+          s = p.read_text()
+          a = '      if (action === "/seller/applications/transition") {'
+          b = '      if (action === "/seller/submissions/create") {'
+          i = s.find(a)
+          j = s.find(b, i)
+          if i < 0 or j < 0:
+              raise SystemExit('seller transition boundary missing')
+          block = s[i:j]
+          if 'controlTransitionSellerApplication' not in block:
+              raise SystemExit('unexpected seller transition implementation')
           replacement = '''      if (action === "/seller/applications/transition") {
             exact(body, ["applicationId", "status"]); const status = text(body, "status")
             if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
@@ -62,166 +50,38 @@ jobs:
             return send(200, { application: await this.store.controlTransitionSellerApplication(session, text(body, "stepUpEvidenceId"), text(body, "applicationId"), status as "approved" | "rejected", text(body, "idempotencyKey")) })
           }
 '''
-          controller_path.write_text(controller[:start] + replacement + controller[end:])
+          p.write_text(s[:i] + replacement + s[j:])
 
-          test_path = Path('src/webcanbe-engine/phase3-hosted-product.test.ts')
-          tests = test_path.read_text()
+          p = Path('src/webcanbe-engine/phase3-hosted-product.test.ts')
+          s = p.read_text()
           marker = 'describe("Phase 3 Admin Control backend", () => {'
-          head, sep, tail = tests.partition(marker)
+          h, sep, t = s.partition(marker)
           if not sep:
-              raise SystemExit('Admin Control test marker missing')
-          old_route = '"/seller/applications/transition"'
-          route_count = tail.count(old_route)
-          if route_count < 1:
-              raise SystemExit('Admin Control seller-transition route anchor missing')
-          tail = tail.replace(old_route, '"/control/seller-applications/transition"')
-          tests = head + sep + tail
-
-          old_zip = '.split("async admitSellerZip", 2)[1].split("async sellerSubmissions", 1)[0]'
-          new_zip = '.split("async admitSellerZip", 2)[1].split("async admitSellerGitHub", 1)[0]'
-          if tests.count(old_zip) != 1:
-              raise SystemExit(f'ZIP source-boundary anchor count={tests.count(old_zip)}; expected 1')
-          test_path.write_text(tests.replace(old_zip, new_zip))
+              raise SystemExit('Admin Control test section missing')
+          if '"/seller/applications/transition"' not in t:
+              raise SystemExit('Admin Control route references missing')
+          t = t.replace('"/seller/applications/transition"', '"/control/seller-applications/transition"')
+          s = h + sep + t
+          old = '.split("async admitSellerZip", 2)[1].split("async sellerSubmissions", 1)[0]'
+          new = '.split("async admitSellerZip", 2)[1].split("async admitSellerGitHub", 1)[0]'
+          if s.count(old) != 1:
+              raise SystemExit('ZIP assertion boundary missing or ambiguous')
+          p.write_text(s.replace(old, new))
           PY
           git diff --check
-          git diff -- src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/phase3-hosted-product.test.ts
-
-      - name: Run final default regression once
-        shell: bash
-        run: |
-          set +e
-          NO_COLOR=1 npm test 2>&1 | tee phase3-final-regression.log
-          status=${PIPESTATUS[0]}
-          set -e
-          if [ "$status" -ne 0 ]; then
-            echo "The post-recovery default regression is not green; closure is refused."
-            exit "$status"
-          fi
-
-      - name: Verify production build
+      - name: Final default regression
+        run: npm test
+      - name: Production build
         run: npm run build
-
-      - name: Verify main stayed fixed
+      - name: Verify main
         shell: bash
         run: |
-          expected=dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b
-          actual=$(git ls-remote origin refs/heads/main | awk '{print $1}')
-          test "$actual" = "$expected"
-          echo "main=$actual"
-
-      - name: Write practical Phase 3 closure evidence
-        shell: bash
-        env:
-          CLOSURE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          mkdir -p docs/reports/phase3-closure-evidence
-          cat > docs/reports/phase3-closure.md <<'EOF'
-          # Phase 3 practical closure
-
-          Date: 2026-09-17
-
-          Branch: `phase-3-hosted-product`
-
-          Status: **PRACTICAL CLOSED**
-
-          Phase 3 is closed at the product-functionality/backend boundary. The final
-          post-recovery default regression passed, followed by a production build.
-          The closure recovery restored backward compatibility for the retained
-          seller-application transition endpoint, kept high-risk Control transition
-          on its own stepped-up route, and narrowed the ZIP inertness source assertion
-          to the ZIP method it actually claims to inspect.
-
-          Reconciled Phase-3 scope:
-
-          - product domain and immutable releases — PASS
-          - hosted persistence and authenticated product controller — PASS
-          - Marketplace catalog/browse/detail — PASS
-          - buyer entitlement to workspace materialization — PASS
-          - Purchases vs My Projects semantics — PASS
-          - seller application/onboarding — PASS
-          - submission/quarantine/review — PASS
-          - isolated assessment admission/leasing/execution/result — PASS
-          - passed-result release promotion — PASS
-          - explicit Listing publication — PASS
-          - safe non-executing ZIP import — PASS
-          - immutable-commit GitHub import — PASS
-          - WebCanBe Ready qualification — PASS
-          - Creator Studio functional backend — PASS
-          - share contract — PASS
-          - exact canonical export product flow — PASS
-          - inert exact-revision deploy contract — PASS
-          - Admin/Control backend — PASS
-          - append-only privileged audit and server-side step-up boundary — PASS
-
-          Correct deferrals remain explicit. Phase 4 owns final public/product UX/UI,
-          AuthModal/login/signup UX, Creator Studio UI, Control UI, and responsive /
-          accessibility polish. Phase 5 owns AI editing/metering, real payment/KYC/
-          payout integration, production deployment-provider integration, production
-          WebAuthn/passkey ceremony where still deferred, and launch hardening such as
-          observability, abuse/fraud controls, rate limits, load/reliability and
-          backup/recovery.
-
-          Historical disclosures are preserved rather than relabeled:
-
-          - `P39_NATIVE_ACCEPTANCE=DEFERRED`; strict Phase-2 native macOS IME and
-            interactive VoiceOver evidence remains deferred.
-          - The historical P61 second-app warm-update HTTP 422 remains disclosed;
-            its exact stage/root cause is unproven.
-          - The older untouched Phase-2 `phase2de.test.ts` ENOTEMPTY cleanup race and
-            its serialized 1/1 follow-up remain historical evidence. It is not used to
-            rewrite any raw historical regression result.
-
-          `main` remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.
-          No Phase 4 implementation is started by this closure.
-          EOF
-
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          evidence = {
-            "schema": 1,
-            "date": "2026-09-17",
-            "branch": "phase-3-hosted-product",
-            "preClosureRemoteHead": "d49543735e25803d5a7a0da828ac98b3bf9ef286",
-            "scopeReconciled": "PASS",
-            "defaultRegression": "PASS",
-            "productionBuild": "PASS",
-            "practicalClosure": "PASS",
-            "phase4DeferralsPreserved": "PASS",
-            "phase5DeferralsPreserved": "PASS",
-            "P39_NATIVE_ACCEPTANCE": "DEFERRED",
-            "P61_HISTORICAL_422_DISCLOSURE": "PRESERVED_EXACT_ROOT_CAUSE_UNPROVEN",
-            "historicalPhase2CleanupRace": "PRESERVED",
-            "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
-            "runUrl": os.environ["CLOSURE_RUN_URL"]
-          }
-          Path('docs/reports/phase3-closure-evidence/index.json').write_text(json.dumps(evidence, indent=2) + '\n')
-
-          handoff = Path('docs/current-handoff.md')
-          old = handoff.read_text()
-          prefix = '''# Phase 3 practical closure — 2026-09-17\n\n**PRACTICAL CLOSED.** The retained Phase-3 product scope is reconciled and the\npost-recovery default regression plus production build are green. The full\nseller/import/review/isolated-assessment/release/Listing/Ready/Studio/share/\nexport/deploy/Control path remains server-authoritative and provenance-bound.\n\nSee [the closure report](reports/phase3-closure.md) and\n[machine evidence](reports/phase3-closure-evidence/index.json). Phase 4 owns\nfinal UX/UI. Phase 5 owns AI, real payments/KYC/payout, production deploy-provider\nintegration, remaining production passkey ceremony, and launch hardening.\n\n`P39_NATIVE_ACCEPTANCE=DEFERRED` remains explicit. The historical P61 second-app\nwarm-update HTTP 422 remains disclosed with exact root cause unproven. Historical\nPhase-2 cleanup-race evidence is preserved without rewriting raw prior results.\n`main` remains `dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`.\n\n---\n\n'''
-          handoff.write_text(prefix + old)
-          PY
-
-      - name: Preserve final regression log
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase3-final-regression
-          path: phase3-final-regression.log
-          if-no-files-found: error
-
-      - name: Commit and push closure
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+      - name: Commit recovered fixes
         shell: bash
         run: |
           git config user.name 'WebCanBe Closure Automation'
           git config user.email 'actions@users.noreply.github.com'
-          git rm .github/workflows/phase3-closure-recovery.yml
-          git add src/webcanbe-engine/runtime/hostedProductController.ts \
-                  src/webcanbe-engine/phase3-hosted-product.test.ts \
-                  docs/current-handoff.md \
-                  docs/reports/phase3-closure.md \
-                  docs/reports/phase3-closure-evidence/index.json
-          git diff --cached --check
-          git commit -m 'Close Phase 3 hosted product [phase3-closed]'
+          git add src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/phase3-hosted-product.test.ts
+          git commit -m 'Recover Phase 3 closure compatibility fixes'
           git push origin HEAD:phase-3-hosted-product
-          test -z "$(git status --porcelain)"
