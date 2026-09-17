@@ -1,0 +1,40 @@
+name: Phase 4 auth studio control
+on:
+  push:
+    branches:
+      - phase4-final-work
+permissions:
+  contents: write
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase4-final-work
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
+      - name: Apply authenticated operations pass
+        run: python scripts/phase4-ops-pass.py
+      - run: git diff --check
+      - name: Focused Phase 4 tests
+        run: npx vitest run src/phase3-landing.test.ts src/phase4-ux-foundation.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Verify frozen branches
+        run: |
+          test "$(git ls-remote origin refs/heads/phase-3-hosted-product | cut -f1)" = "5d3aa70dfd42e5706a23bd881e97e46665948a30"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+      - name: Publish authenticated operations pass
+        run: |
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase4-ops-pass.yml scripts/phase4-ops-pass.py
+          git add src/App.tsx src/hostedProductClient.ts src/main.tsx src/phase4-operations.css src/phase4-operations.test.ts
+          git commit -m "Build Phase 4 auth Creator Studio and Control UI"
+          git push origin HEAD:phase4-final-work
