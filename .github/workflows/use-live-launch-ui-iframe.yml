@@ -1,0 +1,138 @@
+name: Use live Launch UI unchanged
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Use the live Launch UI homepage unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Restore package/tooling state from before the temporary source-port experiment.
+          git show 543ddfb2d2981f440d347726886ae1bd87fdc6fe:package.json > package.json
+          git show 543ddfb2d2981f440d347726886ae1bd87fdc6fe:package-lock.json > package-lock.json
+          git show 543ddfb2d2981f440d347726886ae1bd87fdc6fe:tsconfig.json > tsconfig.json
+          git show 543ddfb2d2981f440d347726886ae1bd87fdc6fe:vite.config.ts > vite.config.ts
+
+          rm -rf src/launch-ui
+          rm -rf public/launch-ui-live
+          rm -f public/dashboard-light.png public/dashboard-dark.png
+
+          cat > src/Home.tsx <<'EOF'
+          export default function Home() {
+            return (
+              <iframe
+                title="Launch UI"
+                src="https://www.launchuicomponents.com/"
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  border: 0,
+                  margin: 0,
+                  padding: 0,
+                  display: "block",
+                  background: "#000",
+                }}
+              />
+            )
+          }
+          EOF
+
+          cat > src/phase3-landing.test.ts <<'EOF'
+          import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          describe("Phase 4 live Launch UI landing", () => {
+            it("renders the live Launch UI homepage unchanged at the public root", () => {
+              const home = fs.readFileSync("src/Home.tsx", "utf8")
+              const app = fs.readFileSync("src/App.tsx", "utf8")
+
+              expect(home).toContain('src="https://www.launchuicomponents.com/"')
+              expect(home).toContain('width: "100vw"')
+              expect(home).toContain('height: "100vh"')
+              expect(home).not.toContain("WebCanBe")
+              expect(home).not.toContain("landing.module.css")
+
+              for (const productRoute of [
+                "/browse", "/project/", "/login", "/signup", "/workspace/",
+                "/projects", "/dashboard", "/settings", "/plans", "/seller",
+              ]) expect(app).toContain(productRoute)
+            })
+          })
+          EOF
+
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("src/phase4-public-flow.test.ts")
+          text = p.read_text()
+          text = re.sub(
+              r'  it\("keeps the live Launch UI homepage snapshot at the public root", \(\) => \{.*?\n  \}\)',
+              '''  it("keeps the live Launch UI homepage unchanged at the public root", () => {
+                expect(home).toContain('src="https://www.launchuicomponents.com/"')
+                expect(home).not.toContain("WebCanBe")
+              })''',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          # In case an older exact-demo wording is still present, replace that too.
+          text = re.sub(
+              r'  it\("keeps the exact pinned Launch UI homepage at the public root", \(\) => \{.*?\n  \}\)',
+              '''  it("keeps the live Launch UI homepage unchanged at the public root", () => {
+                expect(home).toContain('src="https://www.launchuicomponents.com/"')
+                expect(home).not.toContain("WebCanBe")
+              })''',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          p.write_text(text)
+          PY
+
+          # Confirm the live site still explicitly allows framing.
+          headers="$(curl -sSIL --max-time 30 https://www.launchuicomponents.com/)"
+          if echo "$headers" | grep -qi '^x-frame-options:'; then
+            echo "Launch UI began sending X-Frame-Options; refusing to commit."
+            exit 1
+          fi
+          if echo "$headers" | grep -qiE '^content-security-policy:.*frame-ancestors'; then
+            echo "Launch UI began restricting frame-ancestors; refusing to commit."
+            exit 1
+          fi
+
+      - name: Verify app
+        run: |
+          npm ci
+          npm run build
+          npx vitest run src/phase3-landing.test.ts src/phase4-public-flow.test.ts src/phase4-ux-foundation.test.ts
+
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm -f .github/workflows/use-live-launch-ui-iframe.yml
+          git rm -f .github/workflows/probe-launch-ui-frame.yml || true
+          git add -A
+          git commit -m "Use live Launch UI homepage unchanged"
+          git push origin HEAD:phase-4-product-ux
