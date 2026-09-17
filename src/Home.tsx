@@ -1,10 +1,17 @@
-import LaunchUIHome from "./launch-ui/app/page"
-import "./launch-ui/app/globals.css"
-
 export default function Home() {
   return (
-    <div className="launch-ui-page dark" style={{ colorScheme: "dark" }}>
-      <LaunchUIHome />
-    </div>
+    <iframe
+      title="Launch UI"
+      src="/launch-ui-live/index.html"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        border: 0,
+        display: "block",
+        background: "#000",
+      }}
+    />
   )
 }
