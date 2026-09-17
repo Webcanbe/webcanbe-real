@@ -5,7 +5,7 @@ describe("Phase 3 Mainline landing port", () => {
   it("preserves the long Mainline homepage section rhythm and WebCanBe route boundary", () => {
     const home = fs.readFileSync("src/Home.tsx", "utf8")
     const app = fs.readFileSync("src/App.tsx", "utf8")
-    const order = ["<Navbar/>", "styles.hero", "styles.logos", "styles.features", "styles.resource", "<Testimonials/>", "<Pricing/>", "<FAQ/>", "<Footer/>"]
+    const order = ["<Navbar/>", "<Hero/>", "<Logos/>", "<Features/>", "<ResourceAllocation/>", "<Testimonials/>", "<Pricing/>", "<FAQ/>", "<Footer/>"]
     let cursor = -1
     for (const marker of order) {
       const next = home.indexOf(marker, cursor + 1)
