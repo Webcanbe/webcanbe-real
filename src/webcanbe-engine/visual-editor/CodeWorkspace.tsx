@@ -29,7 +29,7 @@ function CodeEditor({ file, value, onChange, onSave }: { file: string; value: st
   return <div ref={host} className="source-code-editor" />
 }
 
-export default function CodeWorkspace({ projectId, request, epoch, connected, visible, openFile, onAccepted }: { projectId: string; request: Request; epoch: number; connected: boolean; visible: "canvas" | "code" | "history"; openFile?: string; onAccepted: (data: SourceResponse) => Promise<void> }) {
+export default function CodeWorkspace({ projectId, request, epoch, connected, visible, openFile, onAccepted }: { projectId: string; request: Request; epoch: number; connected: boolean; visible: "canvas" | "code" | "split" | "history"; openFile?: string; onAccepted: (data: SourceResponse) => Promise<void> }) {
   const [files, setFiles] = useState<Array<{ file: string; hash: string }>>([])
   const [drafts, setDrafts] = useState<Record<string, Draft>>({})
   const [active, setActive] = useState("")
@@ -234,7 +234,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   }
 
   return <div className="source-workspace" hidden={visible === "canvas"}>
-    {visible === "code" && <>
+    {(visible === "code" || visible === "split") && <>
       <div className="source-file-tree" aria-label="Source file tree">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => { setActive(item.file); setValidation(undefined) }}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div>
       <div className="source-editor-panel">
         <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
