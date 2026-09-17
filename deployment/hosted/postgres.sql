@@ -300,3 +300,76 @@ $$;
 DROP TRIGGER IF EXISTS wcb_guard_published_listing_release ON wcb_listings;
 CREATE TRIGGER wcb_guard_published_listing_release BEFORE UPDATE ON wcb_listings
   FOR EACH ROW EXECUTE FUNCTION wcb_guard_published_listing_release();
+
+-- Ready is immutable release/evidence qualification, never a seller assertion
+-- or publication/payment transition.
+CREATE TABLE IF NOT EXISTS wcb_ready_qualifications (
+  qualification_id uuid PRIMARY KEY, release_id uuid NOT NULL UNIQUE REFERENCES wcb_project_releases,
+  catalog_project_id uuid NOT NULL, promotion_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_release_promotions,
+  assessment_result_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_assessment_results,
+  source_project_id uuid NOT NULL, source_revision_id text NOT NULL,
+  source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  snapshot_hash text NOT NULL CHECK(snapshot_hash ~ '^[a-f0-9]{64}$'),
+  assessment_result_digest text NOT NULL CHECK(assessment_result_digest ~ '^[a-f0-9]{64}$'),
+  qualification_status text NOT NULL CHECK(qualification_status IN ('ready','partial','code_only')),
+  compatibility_evidence jsonb NOT NULL CHECK(jsonb_typeof(compatibility_evidence)='object'),
+  reasons jsonb NOT NULL CHECK(jsonb_typeof(reasons)='array'),
+  qualification_version text NOT NULL CHECK(length(qualification_version) BETWEEN 1 AND 100),
+  qualified_by uuid NOT NULL REFERENCES wcb_product_operators,
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  qualified_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(qualified_by,idempotency_key),
+  FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_ready_qualification_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'Ready qualification provenance is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_ready_qualification ON wcb_ready_qualifications;
+CREATE TRIGGER wcb_immutable_ready_qualification BEFORE UPDATE OR DELETE ON wcb_ready_qualifications
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_ready_qualification_mutation();
+
+-- Explicit project membership remains authority. The share row is durable
+-- provenance for the bounded grant and allows exact revocation.
+CREATE TABLE IF NOT EXISTS wcb_project_shares (
+  share_id uuid PRIMARY KEY, project_id uuid NOT NULL REFERENCES wcb_projects, workspace_id uuid NOT NULL,
+  owner_user_id uuid NOT NULL, recipient_user_id uuid NOT NULL,
+  permission text NOT NULL CHECK(permission IN ('view','edit')), membership_epoch bigint NOT NULL CHECK(membership_epoch>0),
+  workspace_membership_epoch bigint NOT NULL CHECK(workspace_membership_epoch>0),
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), revoked_at timestamptz,
+  UNIQUE(owner_user_id,idempotency_key), UNIQUE(project_id,recipient_user_id)
+);
+CREATE OR REPLACE FUNCTION wcb_guard_project_share() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.share_id IS DISTINCT FROM OLD.share_id OR NEW.project_id IS DISTINCT FROM OLD.project_id
+    OR NEW.workspace_id IS DISTINCT FROM OLD.workspace_id OR NEW.owner_user_id IS DISTINCT FROM OLD.owner_user_id
+    OR NEW.recipient_user_id IS DISTINCT FROM OLD.recipient_user_id OR NEW.permission IS DISTINCT FROM OLD.permission
+    OR NEW.membership_epoch IS DISTINCT FROM OLD.membership_epoch OR NEW.workspace_membership_epoch IS DISTINCT FROM OLD.workspace_membership_epoch
+    OR NEW.idempotency_key IS DISTINCT FROM OLD.idempotency_key
+    OR NEW.created_at IS DISTINCT FROM OLD.created_at OR OLD.revoked_at IS NOT NULL OR NEW.revoked_at IS NULL THEN
+    RAISE EXCEPTION 'Project share provenance is immutable';
+  END IF;
+  RETURN NEW;
+END
+$$;
+DROP TRIGGER IF EXISTS wcb_guard_project_share ON wcb_project_shares;
+CREATE TRIGGER wcb_guard_project_share BEFORE UPDATE OR DELETE ON wcb_project_shares
+  FOR EACH ROW EXECUTE FUNCTION wcb_guard_project_share();
+
+-- Phase-3 deploy is an inert, immutable request contract. Provider execution
+-- and credentials are deliberately absent until Phase 5.
+CREATE TABLE IF NOT EXISTS wcb_deploy_intents (
+  deploy_intent_id uuid PRIMARY KEY, project_id uuid NOT NULL REFERENCES wcb_projects, workspace_id uuid NOT NULL,
+  requested_by uuid NOT NULL, source_revision_id text NOT NULL,
+  source_content_hash text NOT NULL CHECK(source_content_hash ~ '^[a-f0-9]{64}$'),
+  status text NOT NULL CHECK(status='requested'), history jsonb NOT NULL CHECK(jsonb_typeof(history)='array'),
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(), updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(requested_by,idempotency_key)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_deploy_intent_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'Deploy intent provenance is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_deploy_intent ON wcb_deploy_intents;
+CREATE TRIGGER wcb_immutable_deploy_intent BEFORE UPDATE OR DELETE ON wcb_deploy_intents
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_deploy_intent_mutation();

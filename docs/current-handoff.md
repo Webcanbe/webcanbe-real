@@ -1,3 +1,47 @@
+# Phase 3 final sprint Pass 1 — product residual completion — 2026-09-17
+
+**PASS. WebCanBe Ready qualification, the minimum Creator Studio backend, and
+distinct Share / Export / Deploy product contracts now reuse the retained
+hosted authority and immutable source/product lineage. No payment, real deploy
+provider, Marketplace publication, entitlement, or code-execution side effect
+was added.**
+
+Continue only from the published `phase-3-hosted-product` branch. This bounded
+pass began at `ecd0fe1e96e13beb8008dc78d8ea36f445ade8d0`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[Pass 1 report](reports/phase3-final-sprint-pass1.md) and
+[machine evidence](reports/phase3-final-sprint-pass1-evidence/index.json).
+
+- An active server-side operator can qualify exactly one promoted immutable
+  release against its exact accepted `passed` assessment result. The store
+  revalidates release/promotion/result project, revision, content, and snapshot
+  lineage, derives Ready/partial/code-only from the retained static
+  compatibility analyzer, and writes append-only qualification evidence.
+- An authenticated approved seller can read one seller-scoped Creator Studio
+  aggregate and update only mutable metadata on their own published Listings.
+  Worker/fence credentials and cross-seller records are excluded; release,
+  publication, review, assessment, and qualification provenance cannot change.
+- Project owners can create bounded view/edit shares backed by exact tracked
+  workspace/project membership epochs and revoke those grants idempotently.
+  Existing independent recipient authority is refused so revocation cannot
+  erase or confuse unrelated access.
+- Authorized workspace source can be exported only at the exact current
+  revision through the retained Phase-2 safe ZIP exporter. The response binds
+  project/workspace/revision/content/archive digests and release provenance.
+- Deploy remains an immutable, inert intent tied to the authenticated requester,
+  workspace project, and exact current revision/content digest. It has no
+  provider integration, credential surface, execution, publication, or money
+  movement.
+- Focused verification passes 5/5; TypeScript and production build pass. The
+  complete six-file focused security diff scan found zero findings and zero
+  unresolved items. The full default regression was not run.
+
+Next bounded task: implement the operator-only Admin/Control read and
+state-transition backend over existing product records without adding payment
+or UI work.
+
+---
+
 # Phase 3 non-executing seller GitHub admission — 2026-09-17
 
 **GITHUB IMPORT ADMISSION PASS. An authenticated approved seller can admit one

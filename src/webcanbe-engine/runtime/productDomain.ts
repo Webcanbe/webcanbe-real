@@ -263,6 +263,61 @@ export type ListingPublication = Readonly<{
   publishedAt: string
 }>
 
+export type ReadyQualificationStatus = "ready" | "partial" | "code_only"
+export type ReadyQualification = Readonly<{
+  qualificationId: string
+  releaseId: string
+  catalogProjectId: string
+  promotionId: string
+  assessmentResultId: string
+  sourceProjectId: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  snapshotHash: string
+  assessmentResultDigest: string
+  status: ReadyQualificationStatus
+  compatibility: Readonly<{ total: number; full: number; partial: number; codeOnly: number; score: number }>
+  reasons: readonly string[]
+  qualificationVersion: string
+  qualifiedBy: string
+  qualifiedAt: string
+}>
+
+export type ProjectShare = Readonly<{
+  shareId: string
+  projectId: string
+  workspaceId: string
+  ownerUserId: string
+  recipientUserId: string
+  permission: "view" | "edit"
+  status: "active" | "revoked"
+  createdAt: string
+  revokedAt?: string
+}>
+
+export type WorkspaceProjectExport = Readonly<{
+  projectId: string
+  workspaceId: string
+  revisionId: string
+  sourceContentHash: string
+  archiveSha256: string
+  archiveBase64: string
+  releaseProvenance?: ReleaseOrigin
+}>
+
+export type DeployIntent = Readonly<{
+  deployIntentId: string
+  projectId: string
+  workspaceId: string
+  requestedBy: string
+  sourceRevisionId: string
+  sourceContentHash: string
+  status: "requested"
+  history: readonly Readonly<{ status: "requested"; at: string; actor: string }>[]
+  createdAt: string
+  updatedAt: string
+}>
+
 export class ProductConflict extends Error {}
 export class EntitlementUnavailable extends Error {}
 

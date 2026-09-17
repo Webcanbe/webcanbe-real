@@ -96,6 +96,23 @@ export class HostedProductController {
         exact(body, ["workspaceProjectId"]); const workspaceProject = await this.store.workspaceProject(session, text(body, "workspaceProjectId"))
         return send(workspaceProject ? 200 : 404, workspaceProject ? { workspaceProject } : { error: "Workspace project not found." })
       }
+      if (action === "/workspace-projects/shares/create") {
+        exact(body, ["projectId", "recipientUserId", "permission", "idempotencyKey"]); const permission = text(body, "permission")
+        if (!["view", "edit"].includes(permission)) throw new Error("Invalid share permission.")
+        return send(201, { share: await this.store.createProjectShare(session, text(body, "projectId"), text(body, "recipientUserId"), permission as "view" | "edit", text(body, "idempotencyKey")) })
+      }
+      if (action === "/workspace-projects/shares/revoke") {
+        exact(body, ["shareId"]); return send(200, { share: await this.store.revokeProjectShare(session, text(body, "shareId")) })
+      }
+      if (action === "/workspace-projects/shares/get") {
+        exact(body, ["shareId"]); return send(200, { share: await this.store.projectShare(session, text(body, "shareId")) })
+      }
+      if (action === "/workspace-projects/export") {
+        exact(body, ["projectId", "expectedRevision"]); return send(200, { export: await this.store.exportWorkspaceProject(session, text(body, "projectId"), text(body, "expectedRevision")) })
+      }
+      if (action === "/workspace-projects/deploy-intents/create") {
+        exact(body, ["projectId", "expectedRevision", "idempotencyKey"]); return send(201, { deployIntent: await this.store.createDeployIntent(session, text(body, "projectId"), text(body, "expectedRevision"), text(body, "idempotencyKey")) })
+      }
       if (action === "/seller/applications/apply") { exact(body, []); return send(201, { application: await this.store.applySeller(session) }) }
       if (action === "/seller/applications/get") { exact(body, []); const application = await this.store.sellerApplication(session); return send(application ? 200 : 404, application ? { application } : { error: "Seller application not found." }) }
       if (action === "/seller/applications/transition") {
@@ -137,6 +154,15 @@ export class HostedProductController {
       if (action === "/seller/releases/listings/publish") {
         exact(body, ["promotionId", "sellerUserId", "catalogProjectId", "releaseId", "idempotencyKey", "slug", "title", "summary", "tags", "demoMetadata"])
         return send(201, await this.store.publishPromotedListing(session, { promotionId: text(body, "promotionId"), sellerUserId: text(body, "sellerUserId"), catalogProjectId: text(body, "catalogProjectId"), releaseId: text(body, "releaseId"), idempotencyKey: text(body, "idempotencyKey"), slug: text(body, "slug"), title: text(body, "title"), summary: text(body, "summary"), tags: body.tags as string[] | undefined, demoMetadata: body.demoMetadata as Record<string, unknown> | undefined }))
+      }
+      if (action === "/seller/releases/ready/qualify") {
+        exact(body, ["releaseId", "assessmentResultId", "qualificationVersion", "idempotencyKey"])
+        return send(201, { qualification: await this.store.qualifyReleaseReady(session, { releaseId: text(body, "releaseId"), assessmentResultId: text(body, "assessmentResultId"), qualificationVersion: text(body, "qualificationVersion"), idempotencyKey: text(body, "idempotencyKey") }) })
+      }
+      if (action === "/seller/studio/get") { exact(body, []); return send(200, { studio: await this.store.creatorStudio(session) }) }
+      if (action === "/seller/studio/listings/update") {
+        exact(body, ["listingId", "title", "summary", "availability", "tags", "demoMetadata"])
+        return send(200, { listing: await this.store.updateCreatorListing(session, text(body, "listingId"), { title: text(body, "title"), summary: text(body, "summary"), availability: text(body, "availability") as Listing["availability"], tags: body.tags as string[] | undefined, demoMetadata: body.demoMetadata as Record<string, unknown> | undefined }) })
       }
       throw new AuthorityDenied()
     } catch (error) {

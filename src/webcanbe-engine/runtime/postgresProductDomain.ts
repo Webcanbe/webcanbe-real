@@ -1,14 +1,17 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto"
 import type { Pool, PoolClient } from "pg"
-import type { ReleaseOrigin, RevisionLedger } from "../core/types"
+import type { CompatibilitySummary, ReleaseOrigin, RevisionLedger } from "../core/types"
+import { summarizeCompatibility } from "../core/compatibility"
+import { analyzeReactSource } from "../adapters/react/reactSourceAdapter"
 import { boundedHistory, treeHash } from "../mutations/durableSource"
 import { sourceMember } from "./sourceDirectory"
 import { AuthorityDenied, requireOpaqueId, type ServerSession } from "./hostedAuthority"
-import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type LicenseEntitlement, type Listing, type ListingPublication, type ProjectRelease, type SellerApplication, type SellerAssessmentRequest, type SellerGitHubAdmission, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type SellerZipAdmission, type WorkspaceProject } from "./productDomain"
+import { EntitlementUnavailable, ProductConflict, type AssessmentJobCancellation, type AssessmentJobFence, type AssessmentJobLease, type AssessmentResult, type AssessmentResultInput, type AssessmentResultStatus, type AssessmentWorkerAuthority, type CatalogProject, type DeployIntent, type LicenseEntitlement, type Listing, type ListingPublication, type ProjectRelease, type ProjectShare, type ReadyQualification, type ReadyQualificationStatus, type SellerApplication, type SellerAssessmentRequest, type SellerGitHubAdmission, type SellerQuarantineItem, type SellerReleasePromotion, type SellerReviewDecision, type SellerSubmission, type SellerZipAdmission, type WorkspaceProject, type WorkspaceProjectExport } from "./productDomain"
 import { pgTransaction } from "./postgresTransaction"
 import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresStores"
 import { readSafeZip, safeArchivePath, stripSingleArchiveRoot, ZIP_LIMITS } from "./projectRegistry"
 import { GitHubSourceProvider, sourceReference, type ExternalSourceProvider } from "./externalSource"
+import { exportProjectFiles } from "./projectExport"
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex")
 const identifier = (value: string) => { requireOpaqueId(value); return value }
@@ -67,6 +70,17 @@ const filesFrom = (value: unknown) => {
     seen.add(entry[0].toLowerCase()); files.set(entry[0], bytes)
   }
   return files
+}
+const releaseCompatibility = (files: Map<string, Buffer>, history: RevisionLedger): CompatibilitySummary => {
+  const sourceDirectory = history.sourceDirectory ?? "src", text = new Map<string, string>()
+  for (const [file, bytes] of files) if (sourceMember(file, sourceDirectory, history.sourceScope) && /\.[cm]?[jt]sx?$/.test(file)) text.set(file, new TextDecoder("utf-8", { fatal: true }).decode(bytes))
+  const targets = [...text].filter(([file]) => /\.[jt]sx$/.test(file)).flatMap(([file, code]) => analyzeReactSource(file, code, candidate => text.get(candidate)))
+  return summarizeCompatibility(targets)
+}
+const readiness = (compatibility: CompatibilitySummary): { status: ReadyQualificationStatus; reasons: string[] } => {
+  if (compatibility.total > 0 && compatibility.full === compatibility.total) return { status: "ready", reasons: [`All ${compatibility.total} inspected source targets support full Visual editing.`] }
+  if (compatibility.full + compatibility.partial > 0) return { status: "partial", reasons: [`${compatibility.full} full, ${compatibility.partial} partial, and ${compatibility.codeOnly} code-only source targets were inspected.`] }
+  return { status: "code_only", reasons: [compatibility.total ? `All ${compatibility.total} inspected source targets are code-only.` : "No statically inspectable React source targets were found."] }
 }
 
 type ReleaseRow = Record<string, unknown> & {
@@ -674,26 +688,94 @@ export class PostgresProductDomainStore {
     })
   }
 
+  async qualifyReleaseReady(operator: ServerSession, input: { releaseId: string; assessmentResultId: string; qualificationVersion: string; idempotencyKey: string }): Promise<ReadyQualification> {
+    identifier(input.releaseId); identifier(input.assessmentResultId)
+    const version = cleanText(input.qualificationVersion, "qualification version", 100), key = cleanKey(input.idempotencyKey)
+    return pgTransaction(this.pool, async client => {
+      await this.requireOperatorIn(client, operator)
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [input.releaseId])
+      const lineage = (await client.query(`SELECT r.*,p.promotion_id,p.result_id,p.catalog_project_id AS promotion_catalog_id,p.source_project_id AS promotion_project_id,p.source_revision_id AS promotion_revision_id,
+        p.source_content_hash AS promotion_content_hash,p.submission_snapshot_hash AS promotion_snapshot_hash,
+        ar.source_project_id AS result_project_id,ar.source_revision_id AS result_revision_id,ar.source_content_hash AS result_content_hash,
+        ar.submission_snapshot_hash AS result_snapshot_hash,ar.result_status,ar.result_digest
+        FROM wcb_project_releases r JOIN wcb_seller_release_promotions p ON p.release_id=r.release_id
+        JOIN wcb_seller_assessment_results ar ON ar.result_id=p.result_id
+        WHERE r.release_id=$1 AND ar.result_id=$2 FOR SHARE`, [input.releaseId, input.assessmentResultId])).rows[0] as ReleaseRow & Record<string, unknown> | undefined
+      if (!lineage || lineage.result_status !== "passed" || String(lineage.catalog_project_id) !== String(lineage.promotion_catalog_id)
+        || String(lineage.source_project_id) !== String(lineage.promotion_project_id) || String(lineage.source_revision_id) !== String(lineage.promotion_revision_id)
+        || String(lineage.source_content_hash) !== String(lineage.promotion_content_hash) || String(lineage.snapshot_hash) !== String(lineage.promotion_snapshot_hash)
+        || String(lineage.source_project_id) !== String(lineage.result_project_id) || String(lineage.source_revision_id) !== String(lineage.result_revision_id)
+        || String(lineage.source_content_hash) !== String(lineage.result_content_hash) || String(lineage.snapshot_hash) !== String(lineage.result_snapshot_hash)) throw new ProductConflict("Ready qualification does not match one promoted passed assessment snapshot.")
+      const existing = (await client.query("SELECT * FROM wcb_ready_qualifications WHERE release_id=$1 OR (qualified_by=$2 AND idempotency_key=$3) FOR SHARE", [input.releaseId, operator.userId, key])).rows
+      if (existing.length) {
+        const row = existing[0]
+        if (existing.some(item => String(item.qualification_id) !== String(row.qualification_id)) || String(row.release_id) !== input.releaseId || String(row.assessment_result_id) !== input.assessmentResultId || String(row.qualification_version) !== version || String(row.idempotency_key) !== key) throw new ProductConflict("Ready qualification already exists with different immutable evidence.")
+        await this.requireOperatorIn(client, operator); return this.readyQualificationFrom(row)
+      }
+      const snapshot = this.decodeRelease(lineage), compatibility = releaseCompatibility(snapshot.files, snapshot.history), derived = readiness(compatibility)
+      const row = (await client.query(`INSERT INTO wcb_ready_qualifications(qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,assessment_result_digest,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,idempotency_key,qualified_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,clock_timestamp()) RETURNING *`, [randomUUID(), input.releaseId, lineage.catalog_project_id, lineage.promotion_id, input.assessmentResultId, lineage.source_project_id, lineage.source_revision_id, lineage.source_content_hash, lineage.snapshot_hash, lineage.result_digest, derived.status, JSON.stringify(compatibility), JSON.stringify(derived.reasons), version, operator.userId, key])).rows[0]
+      await this.requireOperatorIn(client, operator)
+      return this.readyQualificationFrom(row)
+    })
+  }
+
+  async creatorStudio(session: ServerSession) {
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const application = (await client.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1 AND status='approved' FOR SHARE", [session.userId])).rows[0]
+      if (!application) throw new AuthorityDenied()
+      const submissions = (await client.query(`SELECT s.*,st.status,st.updated_at FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st ON st.submission_id=s.submission_id WHERE s.seller_user_id=$1 ORDER BY s.created_at DESC`, [session.userId])).rows.map(row => this.sellerSubmissionFrom(row))
+      const zipImports = (await client.query("SELECT * FROM wcb_seller_zip_admissions WHERE seller_user_id=$1 ORDER BY created_at DESC", [session.userId])).rows.map(row => this.sellerZipAdmissionFrom(row))
+      const githubImports = (await client.query("SELECT * FROM wcb_seller_github_admissions WHERE seller_user_id=$1 ORDER BY created_at DESC", [session.userId])).rows.map(row => this.sellerGitHubAdmissionFrom(row))
+      const reviews = (await client.query("SELECT decision_id,submission_id,decision,created_at FROM wcb_seller_review_decisions WHERE seller_user_id=$1 ORDER BY created_at DESC", [session.userId])).rows.map(row => Object.freeze({ decisionId: String(row.decision_id), submissionId: String(row.submission_id), decision: String(row.decision), createdAt: iso(row.created_at) }))
+      const assessments = (await client.query(`SELECT req.assessment_request_id,req.submission_id,req.status,req.created_at,ar.result_id,ar.result_status,ar.assessment_metadata,ar.completed_at
+        FROM wcb_seller_assessment_requests req LEFT JOIN wcb_seller_assessment_results ar ON ar.assessment_request_id=req.assessment_request_id WHERE req.seller_user_id=$1 ORDER BY req.created_at DESC`, [session.userId])).rows.map(row => Object.freeze({ assessmentRequestId: String(row.assessment_request_id), submissionId: String(row.submission_id), status: String(row.status), createdAt: iso(row.created_at), ...(row.result_id ? { result: Object.freeze({ resultId: String(row.result_id), status: String(row.result_status), metadata: structuredClone(row.assessment_metadata) as Record<string, unknown>, completedAt: iso(row.completed_at) }) } : {}) }))
+      const releases = (await client.query(`SELECT p.promotion_id,p.result_id,r.* FROM wcb_seller_release_promotions p JOIN wcb_project_releases r ON r.release_id=p.release_id WHERE p.seller_user_id=$1 ORDER BY p.created_at DESC`, [session.userId])).rows.map(row => Object.freeze({ promotionId: String(row.promotion_id), assessmentResultId: String(row.result_id), release: releaseFrom(row as ReleaseRow) }))
+      const listings = (await client.query(`SELECT l.* FROM wcb_listing_publications p JOIN wcb_listings l ON l.listing_id=p.listing_id WHERE p.seller_user_id=$1 ORDER BY l.updated_at DESC`, [session.userId])).rows.map(row => this.listingFrom(row))
+      const ready = (await client.query(`SELECT q.* FROM wcb_ready_qualifications q JOIN wcb_seller_release_promotions p ON p.promotion_id=q.promotion_id WHERE p.seller_user_id=$1 ORDER BY q.qualified_at DESC`, [session.userId])).rows.map(row => this.readyQualificationFrom(row))
+      await this.requireSessionIn(client, session)
+      return Object.freeze({ application: this.sellerApplicationFrom(application), submissions, imports: Object.freeze({ zip: zipImports, github: githubImports }), reviews, assessments, releases, listings, ready })
+    })
+  }
+
+  async updateCreatorListing(session: ServerSession, listingId: string, input: { title: string; summary: string; availability: Listing["availability"]; tags?: string[]; demoMetadata?: Record<string, unknown> }) {
+    identifier(listingId)
+    const metadata = { title: cleanText(input.title, "listing title", 200), summary: cleanText(input.summary, "listing summary", 2000), availability: input.availability, tags: cleanTags(input.tags), demoMetadata: jsonObject(input.demoMetadata, "demo metadata") }
+    if (!(["available", "unavailable"] as string[]).includes(metadata.availability)) throw new Error("Invalid Listing availability.")
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      if (!(await client.query("SELECT application_id FROM wcb_seller_applications WHERE user_id=$1 AND status='approved' FOR SHARE", [session.userId])).rowCount) throw new AuthorityDenied()
+      const owned = (await client.query(`SELECT l.* FROM wcb_listings l JOIN wcb_listing_publications p ON p.listing_id=l.listing_id WHERE l.listing_id=$1 AND p.seller_user_id=$2 AND l.status='published' FOR UPDATE`, [listingId, session.userId])).rows[0]
+      if (!owned) throw new AuthorityDenied()
+      const row = (await client.query("UPDATE wcb_listings SET title=$2,summary=$3,availability=$4,tags=$5,demo_metadata=$6,updated_at=clock_timestamp() WHERE listing_id=$1 RETURNING *", [listingId, metadata.title, metadata.summary, metadata.availability, JSON.stringify(metadata.tags), JSON.stringify(metadata.demoMetadata)])).rows[0]
+      await this.requireSessionIn(client, session)
+      return this.listingFrom(row)
+    })
+  }
+
   async browse(input: { query?: string; tags?: string[]; limit?: number } = {}) {
     const query = input.query?.trim().toLowerCase() ?? "", tags = cleanTags(input.tags), limit = Math.min(Math.max(input.limit ?? 24, 1), 100)
     if (query.length > 100) throw new Error("Search query is too long.")
-    const rows = (await this.pool.query(`SELECT l.*,r.version,r.source_revision_id,r.snapshot_hash,c.public_metadata FROM wcb_listings l
+    const rows = (await this.pool.query(`SELECT l.*,r.version,r.source_revision_id,r.snapshot_hash,c.public_metadata,q.qualification_status,q.qualification_version,q.compatibility_evidence,q.reasons FROM wcb_listings l
       JOIN wcb_project_releases r ON r.release_id=l.release_id JOIN wcb_catalog_projects c ON c.catalog_project_id=l.catalog_project_id
+      LEFT JOIN wcb_ready_qualifications q ON q.release_id=r.release_id
       WHERE l.status='published' AND l.availability='available' AND c.status='active' ORDER BY l.updated_at DESC`)).rows
     return rows.map(row => this.publicListing(row)).filter(item => (!query || `${item.title} ${item.summary} ${item.slug} ${item.tags.join(" ")}`.toLowerCase().includes(query)) && tags.every(tag => item.tags.includes(tag))).slice(0, limit)
   }
 
   async listingDetail(reference: string) {
     if (typeof reference !== "string" || !reference || reference.length > 100) throw new Error("Invalid listing reference.")
-    const row = (await this.pool.query(`SELECT l.*,r.version,r.status AS release_status,r.source_project_id,r.source_revision_id,r.source_content_hash,r.snapshot_hash,r.created_at AS release_created_at,c.public_metadata
+    const row = (await this.pool.query(`SELECT l.*,r.version,r.status AS release_status,r.source_project_id,r.source_revision_id,r.source_content_hash,r.snapshot_hash,r.created_at AS release_created_at,c.public_metadata,q.qualification_status,q.qualification_version,q.compatibility_evidence,q.reasons
       FROM wcb_listings l JOIN wcb_project_releases r ON r.release_id=l.release_id JOIN wcb_catalog_projects c ON c.catalog_project_id=l.catalog_project_id
+      LEFT JOIN wcb_ready_qualifications q ON q.release_id=r.release_id
       WHERE (l.listing_id::text=$1 OR l.slug=$1) AND l.status='published' AND c.status='active'`, [reference])).rows[0]
     if (!row) return undefined
     return Object.freeze({ ...this.publicListing(row), release: releaseFrom({ ...row, created_at: row.release_created_at } as ReleaseRow), publicMetadata: structuredClone(row.public_metadata) as Record<string, unknown> })
   }
 
   private publicListing(row: Record<string, unknown>): Listing & { releaseVersion: string; sourceRevisionId: string; snapshotHash: string } {
-    return Object.freeze({ listingId: String(row.listing_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), slug: String(row.slug), title: String(row.title), summary: String(row.summary), status: row.status as Listing["status"], availability: row.availability as Listing["availability"], tags: structuredClone(row.tags) as string[], demoMetadata: structuredClone(row.demo_metadata) as Record<string, unknown>, updatedAt: iso(row.updated_at), releaseVersion: String(row.version), sourceRevisionId: String(row.source_revision_id), snapshotHash: String(row.snapshot_hash) })
+    return Object.freeze({ listingId: String(row.listing_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), slug: String(row.slug), title: String(row.title), summary: String(row.summary), status: row.status as Listing["status"], availability: row.availability as Listing["availability"], tags: structuredClone(row.tags) as string[], demoMetadata: structuredClone(row.demo_metadata) as Record<string, unknown>, updatedAt: iso(row.updated_at), releaseVersion: String(row.version), sourceRevisionId: String(row.source_revision_id), snapshotHash: String(row.snapshot_hash), ...(row.qualification_status ? { ready: Object.freeze({ status: String(row.qualification_status), version: String(row.qualification_version), compatibility: structuredClone(row.compatibility_evidence), reasons: structuredClone(row.reasons) }) } : {}) })
   }
 
   private listingFrom(row: Record<string, unknown>): Listing {
@@ -844,6 +926,102 @@ export class PostgresProductDomainStore {
     return result
   }
 
+  async createProjectShare(session: ServerSession, projectId: string, recipientUserId: string, permission: ProjectShare["permission"], idempotencyKey: string): Promise<ProjectShare> {
+    identifier(projectId); identifier(recipientUserId); const key = cleanKey(idempotencyKey)
+    if (!(["view", "edit"] as string[]).includes(permission) || recipientUserId === session.userId) throw new Error("Invalid project share.")
+    const grant = await this.access.grant(session, projectId, "source")
+    if (grant.role !== "owner") throw new AuthorityDenied()
+    return pgTransaction(this.pool, async client => {
+      await this.access.authorize(client, grant, "source")
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,94))", [`${projectId}:${recipientUserId}`])
+      const known = await client.query("SELECT user_id FROM wcb_sessions WHERE user_id=$1 UNION SELECT user_id FROM wcb_identity_accounts WHERE user_id=$1", [recipientUserId])
+      if (!known.rowCount) throw new AuthorityDenied()
+      const byKey = (await client.query("SELECT * FROM wcb_project_shares WHERE owner_user_id=$1 AND idempotency_key=$2 FOR SHARE", [session.userId, key])).rows[0]
+      const existing = (await client.query("SELECT * FROM wcb_project_shares WHERE project_id=$1 AND recipient_user_id=$2 FOR SHARE", [projectId, recipientUserId])).rows[0]
+      if (byKey || existing) {
+        if (!byKey || !existing || String(byKey.share_id) !== String(existing.share_id) || String(existing.workspace_id) !== grant.workspaceId || String(existing.owner_user_id) !== session.userId || existing.permission !== permission || existing.revoked_at) throw new ProductConflict("Project share already exists with different authority.")
+        await this.access.authorize(client, grant, "source"); return this.projectShareFrom(existing)
+      }
+      const role = permission === "edit" ? "editor" : "viewer"
+      const workspaceMembership = (await client.query("SELECT role,epoch,active FROM wcb_workspace_members WHERE workspace_id=$1 AND user_id=$2 FOR UPDATE", [grant.workspaceId, recipientUserId])).rows[0]
+      if (workspaceMembership?.active) throw new ProductConflict("Recipient already has independent workspace authority.")
+      const workspaceEpoch = workspaceMembership ? Number(workspaceMembership.epoch) + 1 : 1
+      if (workspaceMembership) await client.query("UPDATE wcb_workspace_members SET role='viewer',epoch=$3,active=true WHERE workspace_id=$1 AND user_id=$2", [grant.workspaceId, recipientUserId, workspaceEpoch])
+      else await client.query("INSERT INTO wcb_workspace_members(workspace_id,user_id,role,epoch,active) VALUES($1,$2,'viewer',$3,true)", [grant.workspaceId, recipientUserId, workspaceEpoch])
+      const membership = (await client.query("SELECT role,epoch,active FROM wcb_project_members WHERE project_id=$1 AND user_id=$2 FOR UPDATE", [projectId, recipientUserId])).rows[0]
+      if (membership?.active) throw new ProductConflict("Recipient already has independent project authority.")
+      const epoch = membership ? Number(membership.epoch) + 1 : 1
+      if (membership) await client.query("UPDATE wcb_project_members SET role=$3,epoch=$4,active=true WHERE project_id=$1 AND user_id=$2", [projectId, recipientUserId, role, epoch])
+      else await client.query("INSERT INTO wcb_project_members(project_id,user_id,role,epoch,active) VALUES($1,$2,$3,$4,true)", [projectId, recipientUserId, role, epoch])
+      const row = (await client.query(`INSERT INTO wcb_project_shares(share_id,project_id,workspace_id,owner_user_id,recipient_user_id,permission,membership_epoch,workspace_membership_epoch,idempotency_key,created_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,clock_timestamp()) RETURNING *`, [randomUUID(), projectId, grant.workspaceId, session.userId, recipientUserId, permission, epoch, workspaceEpoch, key])).rows[0]
+      await this.access.authorize(client, grant, "source")
+      return this.projectShareFrom(row)
+    })
+  }
+
+  async revokeProjectShare(session: ServerSession, shareId: string): Promise<ProjectShare> {
+    identifier(shareId)
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const row = (await client.query("SELECT * FROM wcb_project_shares WHERE share_id=$1 AND owner_user_id=$2 FOR UPDATE", [shareId, session.userId])).rows[0]
+      if (!row) throw new AuthorityDenied()
+      const grant = await this.access.grant(session, String(row.project_id), "source")
+      if (grant.role !== "owner" || grant.workspaceId !== String(row.workspace_id)) throw new AuthorityDenied()
+      if (row.revoked_at) return this.projectShareFrom(row)
+      const role = row.permission === "edit" ? "editor" : "viewer"
+      await client.query("UPDATE wcb_project_members SET active=false,epoch=epoch+1 WHERE project_id=$1 AND user_id=$2 AND role=$3 AND epoch=$4 AND active", [row.project_id, row.recipient_user_id, role, row.membership_epoch])
+      await client.query("UPDATE wcb_workspace_members SET active=false,epoch=epoch+1 WHERE workspace_id=$1 AND user_id=$2 AND role='viewer' AND epoch=$3 AND active", [row.workspace_id, row.recipient_user_id, row.workspace_membership_epoch])
+      const revoked = (await client.query("UPDATE wcb_project_shares SET revoked_at=clock_timestamp() WHERE share_id=$1 AND revoked_at IS NULL RETURNING *", [shareId])).rows[0]
+      await this.access.authorize(client, grant, "source")
+      return this.projectShareFrom(revoked)
+    })
+  }
+
+  async projectShare(session: ServerSession, shareId: string): Promise<ProjectShare> {
+    identifier(shareId)
+    return pgTransaction(this.pool, async client => {
+      await this.requireSessionIn(client, session)
+      const row = (await client.query("SELECT * FROM wcb_project_shares WHERE share_id=$1 AND (owner_user_id=$2 OR (recipient_user_id=$2 AND revoked_at IS NULL)) FOR SHARE", [shareId, session.userId])).rows[0]
+      if (!row) throw new AuthorityDenied()
+      if (String(row.recipient_user_id) === session.userId) await this.access.authorize(client, await this.access.grant(session, String(row.project_id), "inspect"), "inspect")
+      await this.requireSessionIn(client, session)
+      return this.projectShareFrom(row)
+    })
+  }
+
+  async exportWorkspaceProject(session: ServerSession, projectId: string, expectedRevision: string): Promise<WorkspaceProjectExport> {
+    identifier(projectId); const revision = cleanText(expectedRevision, "source revision", 200)
+    const grant = await this.access.grant(session, projectId, "export"), state = await this.source.read(grant)
+    if (grant.projectId !== projectId || state.revision !== revision) throw new ProductConflict("Export source revision changed.")
+    const head = state.history.revisions.at(-1)
+    if (!head || head.revisionId !== revision) throw new Error("Export history does not match canonical source.")
+    const archive = await exportProjectFiles(state.files)
+    if (!await this.access.check(grant, "export")) throw new AuthorityDenied()
+    return Object.freeze({ projectId, workspaceId: grant.workspaceId, revisionId: revision, sourceContentHash: head.contentHash, archiveSha256: createHash("sha256").update(archive).digest("hex"), archiveBase64: archive.toString("base64"), ...(state.history.releaseOrigin ? { releaseProvenance: structuredClone(state.history.releaseOrigin) } : {}) })
+  }
+
+  async createDeployIntent(session: ServerSession, projectId: string, expectedRevision: string, idempotencyKey: string): Promise<DeployIntent> {
+    identifier(projectId); const revision = cleanText(expectedRevision, "source revision", 200), key = cleanKey(idempotencyKey)
+    const grant = await this.access.grant(session, projectId, "source"), state = await this.source.read(grant), head = state.history.revisions.at(-1)
+    if (state.revision !== revision || !head || head.revisionId !== revision) throw new ProductConflict("Deploy intent must pin the current exact source revision.")
+    return pgTransaction(this.pool, async client => {
+      await this.access.authorize(client, grant, "source")
+      const current = (await client.query("SELECT revision,history FROM wcb_projects WHERE project_id=$1 AND workspace_id=$2 AND NOT deleted FOR SHARE", [projectId, grant.workspaceId])).rows[0]
+      if (!current || String(current.revision) !== revision || String(current.history?.revisions?.at?.(-1)?.contentHash ?? "") !== head.contentHash) throw new ProductConflict("Deploy source revision changed.")
+      const prior = (await client.query("SELECT * FROM wcb_deploy_intents WHERE requested_by=$1 AND idempotency_key=$2 FOR SHARE", [session.userId, key])).rows[0]
+      if (prior) {
+        if (String(prior.project_id) !== projectId || String(prior.workspace_id) !== grant.workspaceId || String(prior.source_revision_id) !== revision || String(prior.source_content_hash) !== head.contentHash) throw new ProductConflict("Deploy idempotency key was used for another source revision.")
+        await this.access.authorize(client, grant, "source"); return this.deployIntentFrom(prior)
+      }
+      const createdAt = new Date().toISOString(), history = [{ status: "requested" as const, at: createdAt, actor: session.userId }]
+      const row = (await client.query(`INSERT INTO wcb_deploy_intents(deploy_intent_id,project_id,workspace_id,requested_by,source_revision_id,source_content_hash,status,history,idempotency_key,created_at,updated_at)
+        VALUES($1,$2,$3,$4,$5,$6,'requested',$7,$8,$9,$9) RETURNING *`, [randomUUID(), projectId, grant.workspaceId, session.userId, revision, head.contentHash, JSON.stringify(history), key, createdAt])).rows[0]
+      await this.access.authorize(client, grant, "source")
+      return this.deployIntentFrom(row)
+    })
+  }
+
   private decodeRelease(row: ReleaseRow) {
     const history = structuredClone(row.history) as RevisionLedger; boundedHistory(history)
     const files = filesFrom(row.files), projectId = String(row.source_project_id), revisionId = String(row.source_revision_id), contentHash = String(row.source_content_hash)
@@ -941,6 +1119,21 @@ export class PostgresProductDomainStore {
 
   private listingPublicationFrom(row: Record<string, unknown>): ListingPublication {
     return Object.freeze({ publicationId: String(row.publication_id), promotionId: String(row.promotion_id), resultId: String(row.result_id), sellerUserId: String(row.seller_user_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), listingId: String(row.listing_id), status: "published", publishedBy: String(row.published_by), publishedAt: iso(row.published_at) })
+  }
+
+  private readyQualificationFrom(row: Record<string, unknown>): ReadyQualification {
+    const compatibility = typeof row.compatibility_evidence === "string" ? JSON.parse(row.compatibility_evidence) : structuredClone(row.compatibility_evidence)
+    const reasons = typeof row.reasons === "string" ? JSON.parse(row.reasons) : structuredClone(row.reasons)
+    return Object.freeze({ qualificationId: String(row.qualification_id), releaseId: String(row.release_id), catalogProjectId: String(row.catalog_project_id), promotionId: String(row.promotion_id), assessmentResultId: String(row.assessment_result_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), assessmentResultDigest: String(row.assessment_result_digest), status: row.qualification_status as ReadyQualificationStatus, compatibility, reasons, qualificationVersion: String(row.qualification_version), qualifiedBy: String(row.qualified_by), qualifiedAt: iso(row.qualified_at) })
+  }
+
+  private projectShareFrom(row: Record<string, unknown>): ProjectShare {
+    return Object.freeze({ shareId: String(row.share_id), projectId: String(row.project_id), workspaceId: String(row.workspace_id), ownerUserId: String(row.owner_user_id), recipientUserId: String(row.recipient_user_id), permission: row.permission as ProjectShare["permission"], status: row.revoked_at ? "revoked" : "active", createdAt: iso(row.created_at), ...(row.revoked_at ? { revokedAt: iso(row.revoked_at) } : {}) })
+  }
+
+  private deployIntentFrom(row: Record<string, unknown>): DeployIntent {
+    const history = typeof row.history === "string" ? JSON.parse(row.history) : structuredClone(row.history)
+    return Object.freeze({ deployIntentId: String(row.deploy_intent_id), projectId: String(row.project_id), workspaceId: String(row.workspace_id), requestedBy: String(row.requested_by), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), status: "requested", history, createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) })
   }
 
   private sellerQuarantineItemFrom(row: Record<string, unknown>): SellerQuarantineItem {

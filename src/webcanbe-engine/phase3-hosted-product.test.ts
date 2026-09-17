@@ -9,7 +9,7 @@ import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Pool } from "pg"
 import { DataType, newDb } from "pg-mem"
 import { afterEach, describe, expect, it } from "vitest"
-import { contentHash, transactionEntry } from "./mutations/durableSource"
+import { contentHash, transactionEntry, treeHash } from "./mutations/durableSource"
 import { DurableSource } from "./mutations/durableSource"
 import { MutationHistory } from "./mutations/sourceMutations"
 import { AuthorityDenied } from "./runtime/hostedAuthority"
@@ -19,7 +19,7 @@ import { EntitlementUnavailable, ProductConflict } from "./runtime/productDomain
 import { PostgresProductDomainStore } from "./runtime/postgresProductDomain"
 import { IsolatedAssessmentWorker, type HostedAssessmentRunnerFactory } from "./runtime/isolatedAssessmentWorker"
 import type { ControlledJob } from "./runtime/controlledPreview"
-import { detectProject, type ProjectRecord } from "./runtime/projectRegistry"
+import { detectProject, readSafeZip, type ProjectRecord } from "./runtime/projectRegistry"
 import { withHostedSource } from "./runtime/postgresSourceCheckout"
 import { PostgresAccess, PostgresProjectStore } from "./runtime/postgresStores"
 import type { ExternalSourceProvider } from "./runtime/externalSource"
@@ -53,6 +53,9 @@ CREATE TABLE wcb_seller_assessment_leases(assessment_request_id uuid PRIMARY KEY
 CREATE TABLE wcb_seller_assessment_results(result_id uuid PRIMARY KEY,assessment_request_id uuid NOT NULL REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL,seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL REFERENCES wcb_seller_review_decisions(decision_id),admitted_by uuid NOT NULL,admission_created_at timestamptz NOT NULL,worker_id uuid NOT NULL REFERENCES wcb_assessment_workers(worker_id),lease_generation bigint NOT NULL,result_status text NOT NULL,assessment_metadata jsonb NOT NULL,artifact_refs jsonb NOT NULL,result_digest text NOT NULL,idempotency_key text NOT NULL,completed_at timestamptz NOT NULL,UNIQUE(assessment_request_id,lease_generation),UNIQUE(worker_id,idempotency_key));
 CREATE TABLE wcb_seller_release_promotions(promotion_id uuid PRIMARY KEY,result_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_assessment_results(result_id),assessment_request_id uuid NOT NULL REFERENCES wcb_seller_assessment_requests(assessment_request_id),submission_id uuid NOT NULL REFERENCES wcb_seller_submissions(submission_id),seller_user_id uuid NOT NULL,source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,submission_snapshot_hash text NOT NULL,review_decision_id uuid NOT NULL REFERENCES wcb_seller_review_decisions(decision_id),catalog_project_id uuid NOT NULL,release_id uuid NOT NULL UNIQUE REFERENCES wcb_project_releases(release_id),version text NOT NULL,promoted_by uuid NOT NULL REFERENCES wcb_product_operators(user_id),idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(promoted_by,idempotency_key));
 CREATE TABLE wcb_listing_publications(publication_id uuid PRIMARY KEY,promotion_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_release_promotions(promotion_id),result_id uuid NOT NULL REFERENCES wcb_seller_assessment_results(result_id),seller_user_id uuid NOT NULL,catalog_project_id uuid NOT NULL UNIQUE,release_id uuid NOT NULL UNIQUE REFERENCES wcb_project_releases(release_id),listing_id uuid NOT NULL UNIQUE REFERENCES wcb_listings(listing_id),status text NOT NULL,published_by uuid NOT NULL REFERENCES wcb_product_operators(user_id),idempotency_key text NOT NULL,published_at timestamptz NOT NULL DEFAULT now(),UNIQUE(published_by,idempotency_key));
+CREATE TABLE wcb_ready_qualifications(qualification_id uuid PRIMARY KEY,release_id uuid NOT NULL UNIQUE REFERENCES wcb_project_releases(release_id),catalog_project_id uuid NOT NULL,promotion_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_release_promotions(promotion_id),assessment_result_id uuid NOT NULL UNIQUE REFERENCES wcb_seller_assessment_results(result_id),source_project_id uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,snapshot_hash text NOT NULL,assessment_result_digest text NOT NULL,qualification_status text NOT NULL,compatibility_evidence jsonb NOT NULL,reasons jsonb NOT NULL,qualification_version text NOT NULL,qualified_by uuid NOT NULL REFERENCES wcb_product_operators(user_id),idempotency_key text NOT NULL,qualified_at timestamptz NOT NULL DEFAULT now(),UNIQUE(qualified_by,idempotency_key),FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id));
+CREATE TABLE wcb_project_shares(share_id uuid PRIMARY KEY,project_id uuid NOT NULL REFERENCES wcb_projects(project_id),workspace_id uuid NOT NULL,owner_user_id uuid NOT NULL,recipient_user_id uuid NOT NULL,permission text NOT NULL,membership_epoch bigint NOT NULL,workspace_membership_epoch bigint NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),revoked_at timestamptz,UNIQUE(owner_user_id,idempotency_key),UNIQUE(project_id,recipient_user_id));
+CREATE TABLE wcb_deploy_intents(deploy_intent_id uuid PRIMARY KEY,project_id uuid NOT NULL REFERENCES wcb_projects(project_id),workspace_id uuid NOT NULL,requested_by uuid NOT NULL,source_revision_id text NOT NULL,source_content_hash text NOT NULL,status text NOT NULL,history jsonb NOT NULL,idempotency_key text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now(),UNIQUE(requested_by,idempotency_key));
 `
 
 type User = { id: string; session: Readonly<{ sessionId: string; userId: string; expiresAt: number }>; token: string; csrf: string; cookie: string }
@@ -994,5 +997,104 @@ describe("Phase 3 non-executing seller GitHub admission", () => {
     expect((await f.pool.query("SELECT status FROM wcb_seller_submission_states WHERE submission_id=$1", [admission.submissionId])).rows[0].status).toBe("pending_review")
     const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async admitSellerGitHub", 2)[1].split("async sellerSubmissions", 1)[0]
     expect(implementation).not.toMatch(/child_process|\b(?:npm|pnpm|yarn|bun)\b|eval\(|Function\(|wcb_project_releases|wcb_listings|wcb_license_entitlements|wcb_seller_assessment_requests/)
+  })
+})
+
+describe("Phase 3 final sprint Pass 1 product residuals", () => {
+  const fixture = async () => {
+    const f = await setup(), application = await f.product.applySeller(f.a.session)
+    await f.product.transitionSellerApplication(f.operator.session, application.applicationId, "approved")
+    let sequence = 0
+    const lineage = async (kind: "ready" | "partial" | "code_only", publish = false) => {
+      const index = ++sequence, sourceProjectId = randomUUID(), revisionId = `rev_${randomUUID()}`
+      const file = kind === "code_only" ? "src/value.ts" : "src/App.tsx"
+      const code = kind === "ready"
+        ? `export default function App(){return <main style={{color:'#111'}}>Ready source</main>}`
+        : kind === "partial"
+          ? `const active=true;function Widget(){return <section className={active?'p-2':'p-4'}>Dynamic</section>}export default function App(){return <><main style={{color:'#111'}}>Static</main><Widget/></>}`
+          : `export const value: number = 42`
+      const files = new Map<string, Buffer>([[file, Buffer.from(code)]]), sourceContentHash = treeHash(new Map([[file, code]]))
+      const history = { schema: 1 as const, sourceScope: 2 as const, projectId: sourceProjectId, revisions: [{ revisionId, projectId: sourceProjectId, parentRevisionId: null, createdAt: new Date().toISOString(), actor: f.a.id, producer: "system" as const, contentHash: sourceContentHash }], transactions: [], past: [], future: [] }
+      await f.source.create(f.a.session, f.workspaceA, sourceProjectId, `${kind} project`, files, history)
+      const slug = `pass1-${kind.replace("_", "-")}-${index}`, catalog = await f.product.createCatalogProject(f.a.session, f.workspaceA, sourceProjectId, { slug, title: `${kind} project`, summary: "Pass 1 evidence." })
+      const submission = await f.product.createSellerSubmission(f.a.session, application.applicationId, f.workspaceA, sourceProjectId)
+      const decision = await f.product.createSellerReviewDecision(f.operator.session, submission.submissionId, submission.snapshotHash, "approved_for_next_stage", `pass1-review-${index}`)
+      const request = await f.product.admitSellerAssessment(f.operator.session, submission.submissionId, f.a.id, submission.snapshotHash, decision.decisionId, `pass1-assessment-${index}`)
+      const worker = await f.product.provisionAssessmentWorker(randomUUID()), lease = await f.product.claimAssessmentJob(worker, request.assessmentRequestId, submission.submissionId, f.a.id, submission.snapshotHash)
+      const result = await f.product.acceptAssessmentResult(worker, lease, { idempotencyKey: `pass1-result-${index}`, status: "passed", metadata: { schema: 1, assessment: "typescript-semantic-v1", bounded: true, passed: true } })
+      const promoted = await f.product.promoteAssessmentResult(f.operator.session, { resultId: result.resultId, assessmentJobId: request.assessmentRequestId, submissionId: submission.submissionId, sellerUserId: f.a.id, snapshotHash: submission.snapshotHash, catalogProjectId: catalog.catalogProjectId, version: "1.0.0", idempotencyKey: `pass1-promotion-${index}` })
+      const published = publish ? await f.product.publishPromotedListing(f.operator.session, { promotionId: promoted.promotion.promotionId, sellerUserId: f.a.id, catalogProjectId: catalog.catalogProjectId, releaseId: promoted.release.releaseId, idempotencyKey: `pass1-publication-${index}`, slug, title: `${kind} project`, summary: "Pass 1 published project.", tags: [kind], demoMetadata: { route: "/" } }) : undefined
+      return { sourceProjectId, revisionId, catalog, submission, decision, request, result, promoted, published }
+    }
+    return { ...f, application, lineage }
+  }
+
+  it("derives immutable Ready, partial, and code-only qualifications from exact promoted assessment snapshots", async () => {
+    const f = await fixture(), full = await f.lineage("ready"), partial = await f.lineage("partial"), codeOnly = await f.lineage("code_only")
+    const qualify = (item: typeof full, key: string) => f.product.qualifyReleaseReady(f.operator.session, { releaseId: item.promoted.release.releaseId, assessmentResultId: item.result.resultId, qualificationVersion: "ready-v1", idempotencyKey: key })
+    const fullReady = await qualify(full, "ready-full"), partialReady = await qualify(partial, "ready-partial"), codeReady = await qualify(codeOnly, "ready-code")
+    expect(fullReady).toMatchObject({ status: "ready", releaseId: full.promoted.release.releaseId, assessmentResultId: full.result.resultId, sourceRevisionId: full.submission.sourceRevisionId, snapshotHash: full.submission.snapshotHash })
+    expect(partialReady.status).toBe("partial"); expect(partialReady.compatibility.partial + partialReady.compatibility.codeOnly).toBeGreaterThan(0)
+    expect(codeReady).toMatchObject({ status: "code_only", compatibility: { total: 0 }, assessmentResultDigest: expect.stringMatching(/^[a-f0-9]{64}$/) })
+    await expect(f.product.qualifyReleaseReady(f.a.session, { releaseId: full.promoted.release.releaseId, assessmentResultId: full.result.resultId, qualificationVersion: "ready-v1", idempotencyKey: "seller-self-ready" })).rejects.toThrow(AuthorityDenied)
+    await expect(f.product.qualifyReleaseReady(f.operator.session, { releaseId: full.promoted.release.releaseId, assessmentResultId: partial.result.resultId, qualificationVersion: "ready-v1", idempotencyKey: "cross-release" })).rejects.toThrow(ProductConflict)
+    expect(await qualify(full, "ready-full")).toEqual(fullReady)
+    await expect(qualify(full, "different-key")).rejects.toThrow(ProductConflict)
+    expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_listings WHERE release_id IN ($1,$2,$3)", [full.promoted.release.releaseId, partial.promoted.release.releaseId, codeOnly.promoted.release.releaseId])).rows[0].n)).toBe(0)
+    expect(fs.readFileSync("deployment/hosted/postgres.sql", "utf8")).toContain("wcb_immutable_ready_qualification")
+  }, 20_000)
+
+  it("provides seller-scoped Creator Studio state and permits metadata-only Listing updates", async () => {
+    const f = await fixture(), item = await f.lineage("partial", true)
+    const qualification = await f.product.qualifyReleaseReady(f.operator.session, { releaseId: item.promoted.release.releaseId, assessmentResultId: item.result.resultId, qualificationVersion: "ready-v1", idempotencyKey: "studio-ready" })
+    const studio = await f.product.creatorStudio(f.a.session)
+    expect(studio).toMatchObject({ application: { applicationId: f.application.applicationId, status: "approved" }, submissions: [{ submissionId: item.submission.submissionId }], assessments: [{ result: { resultId: item.result.resultId, status: "passed" } }], releases: [{ release: { releaseId: item.promoted.release.releaseId } }], listings: [{ listingId: item.published!.listing.listingId }], ready: [{ qualificationId: qualification.qualificationId }] })
+    expect(JSON.stringify(studio.assessments)).not.toMatch(/credential|workerId|generation|fencing/i)
+    const otherApplication = await f.product.applySeller(f.b.session); await f.product.transitionSellerApplication(f.operator.session, otherApplication.applicationId, "approved")
+    const otherStudio = await f.product.creatorStudio(f.b.session); expect(otherStudio.submissions).toEqual([]); expect(otherStudio.listings).toEqual([])
+    await expect(f.product.updateCreatorListing(f.b.session, item.published!.listing.listingId, { title: "Stolen", summary: "No", availability: "available" })).rejects.toThrow(AuthorityDenied)
+    const before = item.published!.listing, updated = await f.product.updateCreatorListing(f.a.session, before.listingId, { title: "Updated seller title", summary: "Seller-managed metadata only.", availability: "unavailable", tags: ["Updated"], demoMetadata: { route: "/demo" } })
+    expect(updated).toMatchObject({ listingId: before.listingId, releaseId: before.releaseId, catalogProjectId: before.catalogProjectId, slug: before.slug, status: "published", title: "Updated seller title", availability: "unavailable" })
+    expect((await f.pool.query("SELECT release_id,status FROM wcb_listings WHERE listing_id=$1", [before.listingId])).rows[0]).toMatchObject({ release_id: before.releaseId, status: "published" })
+    expect((await f.pool.query("SELECT * FROM wcb_ready_qualifications WHERE qualification_id=$1", [qualification.qualificationId])).rows[0].snapshot_hash).toBe(item.submission.snapshotHash)
+  }, 15_000)
+
+  it("creates bounded project shares, enforces project scope, and revokes the granted authority", async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins))
+    const call = async (user: Partial<User>, action: string, body: Record<string, unknown>) => { const exchange = httpRequest(user, `/__webcanbe/api/product${action}`, body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    const created = await call(f.a, "/workspace-projects/shares/create", { projectId: f.sourceProjectId, recipientUserId: f.b.id, permission: "view", idempotencyKey: "share-project" })
+    expect(created).toMatchObject({ status: 201, body: { share: { projectId: f.sourceProjectId, workspaceId: f.workspaceA, ownerUserId: f.a.id, recipientUserId: f.b.id, permission: "view", status: "active" } } })
+    expect((await f.access.grant(f.b.session, f.sourceProjectId, "inspect")).role).toBe("viewer")
+    expect(await call(f.b, "/workspace-projects/shares/get", { shareId: created.body.share.shareId })).toMatchObject({ status: 200, body: { share: { status: "active" } } })
+    expect((await call(f.b, "/workspace-projects/shares/create", { projectId: f.sourceProjectId, recipientUserId: f.operator.id, permission: "edit", idempotencyKey: "cross-project" })).status).toBe(403)
+    expect(await call(f.a, "/workspace-projects/shares/revoke", { shareId: created.body.share.shareId })).toMatchObject({ status: 200, body: { share: { status: "revoked" } } })
+    expect((await call(f.a, "/workspace-projects/shares/revoke", { shareId: created.body.share.shareId })).body.share.status).toBe("revoked")
+    await expect(f.access.grant(f.b.session, f.sourceProjectId, "inspect")).rejects.toThrow(AuthorityDenied)
+    expect((await call(f.b, "/workspace-projects/shares/get", { shareId: created.body.share.shareId })).status).toBe(403)
+  })
+
+  it("exports only the authorized exact canonical revision through the retained Phase-2 exporter", async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins)), state = await f.source.read(await f.access.grant(f.a.session, f.sourceProjectId, "export"))
+    const call = async (user: Partial<User>, body: Record<string, unknown>) => { const exchange = httpRequest(user, "/__webcanbe/api/product/workspace-projects/export", body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    const response = await call(f.a, { projectId: f.sourceProjectId, expectedRevision: state.revision })
+    expect(response).toMatchObject({ status: 200, body: { export: { projectId: f.sourceProjectId, workspaceId: f.workspaceA, revisionId: state.revision, sourceContentHash: state.history.revisions.at(-1)!.contentHash, archiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/) } } })
+    const archive = Buffer.from(response.body.export.archiveBase64, "base64"), exported = await readSafeZip(archive)
+    expect(exported.get("src/App.tsx")).toEqual(state.files.get("src/App.tsx")); expect(createHash("sha256").update(archive).digest("hex")).toBe(response.body.export.archiveSha256)
+    expect((await call(f.a, { projectId: f.sourceProjectId, expectedRevision: `rev_${randomUUID()}` })).status).toBe(409)
+    expect((await call(f.b, { projectId: f.sourceProjectId, expectedRevision: state.revision })).status).toBe(403)
+  })
+
+  it("creates an idempotent exact-revision deploy intent without provider or product side effects", async () => {
+    const f = await setup(), controller = new HostedProductController(f.product, new PostgresSessionBoundary(f.identity, origins)), state = await f.source.read(await f.access.grant(f.a.session, f.sourceProjectId, "source"))
+    const call = async (user: Partial<User>, body: Record<string, unknown>) => { const exchange = httpRequest(user, "/__webcanbe/api/product/workspace-projects/deploy-intents/create", body); await controller.handle(exchange.request, exchange.response); return exchange.result() }
+    const input = { projectId: f.sourceProjectId, expectedRevision: state.revision, idempotencyKey: "deploy-exact-revision" }
+    const before = { releases: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_project_releases")).rows[0].n), listings: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_listings")).rows[0].n), entitlements: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_license_entitlements")).rows[0].n) }
+    const first = await call(f.a, input), replay = await call(f.a, input)
+    expect(first).toMatchObject({ status: 201, body: { deployIntent: { projectId: f.sourceProjectId, workspaceId: f.workspaceA, requestedBy: f.a.id, sourceRevisionId: state.revision, sourceContentHash: state.history.revisions.at(-1)!.contentHash, status: "requested", history: [{ status: "requested", actor: f.a.id }] } } })
+    expect(replay.body.deployIntent).toEqual(first.body.deployIntent); expect(Number((await f.pool.query("SELECT count(*) AS n FROM wcb_deploy_intents")).rows[0].n)).toBe(1)
+    expect((await call(f.b, input)).status).toBe(403); expect((await call(f.a, { ...input, expectedRevision: `rev_${randomUUID()}`, idempotencyKey: "deploy-stale" })).status).toBe(409)
+    expect({ releases: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_project_releases")).rows[0].n), listings: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_listings")).rows[0].n), entitlements: Number((await f.pool.query("SELECT count(*) AS n FROM wcb_license_entitlements")).rows[0].n) }).toEqual(before)
+    const implementation = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8").split("async createDeployIntent", 2)[1].split("private decodeRelease", 1)[0]
+    expect(implementation).not.toMatch(/fetch\(|https?:\/\/|child_process|vercel|netlify|stripe|paypal|wcb_project_releases|wcb_listings|wcb_license_entitlements/)
   })
 })
