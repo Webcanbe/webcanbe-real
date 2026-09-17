@@ -1,0 +1,15 @@
+name: Probe Launch UI frame policy
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect live Launch UI frame headers
+        run: |
+          set -euo pipefail
+          curl -sSIL --max-time 30 https://www.launchuicomponents.com/ | tee headers.txt
+          echo "--- frame policy ---"
+          grep -iE '^(x-frame-options|content-security-policy):' headers.txt || true
