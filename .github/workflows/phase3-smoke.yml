@@ -1,10 +1,37 @@
-name: Phase 3 smoke
+name: Phase 3 final recovery
 on:
   push:
     branches:
       - phase-3-hosted-product
+permissions:
+  contents: write
 jobs:
-  smoke:
+  recover:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
-      - run: echo phase3-runner-ok
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-3-hosted-product
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: python scripts/phase3-closure-recovery.py
+      - run: git diff --check
+      - name: Final default regression
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Verify main unchanged
+        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+      - name: Publish recovered fixes
+        run: |
+          git config user.name "WebCanBe Closure Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase3-smoke.yml .github/workflows/phase3-closure-recovery.yml scripts/phase3-closure-recovery.py
+          git add src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/phase3-hosted-product.test.ts
+          git commit -m "Recover Phase 3 closure compatibility fixes"
+          git push origin HEAD:phase-3-hosted-product
