@@ -6,8 +6,8 @@ const home = fs.readFileSync(new URL("./Home.tsx", import.meta.url), "utf8")
 const client = fs.readFileSync(new URL("./hostedProductClient.ts", import.meta.url), "utf8")
 
 describe("Phase 4 public/auth/purchase flow", () => {
-  it("keeps the landing template composition intact while adding only transition behavior", () => {
-    for (const marker of ["function Navbar()", "function EditorPreview()", "function Testimonials()", "function Pricing()", "function FAQ()", "function Footer()", "styles.topShell", "styles.resourceGrid"]) expect(home).toContain(marker)
+  it("keeps the Launch UI landing composition and bounded transition behavior", () => {
+    for (const marker of ["function Navbar()", "function EditorPreview()", "function Hero()", "function Items()", "function ProductStory()", "function Pricing()", "function FAQ()", "function CTA()", "function Footer()", "styles.mockupFrame", "styles.itemGrid"]) expect(home).toContain(marker)
     expect(home).toContain('}, 120)')
   })
   it("removes app navigation from the public top bar and moves authenticated navigation to a sidebar", () => {
