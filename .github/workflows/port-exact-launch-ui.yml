@@ -169,7 +169,7 @@ jobs:
               for (const productRoute of ["/browse", "/project/", "/login", "/signup", "/workspace/", "/projects", "/dashboard", "/settings", "/plans", "/seller"]) expect(app).toContain(productRoute)
             })
           })
-          '''.replace(/^          /gm, ""))
+          ''')
 
           p = Path("src/phase4-public-flow.test.ts")
           text = p.read_text()
