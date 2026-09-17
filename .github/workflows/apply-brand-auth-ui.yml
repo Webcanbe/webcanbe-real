@@ -64,7 +64,7 @@ jobs:
                     {error && <p className="auth-error" role="alert">{error}</p>}
                     <div className="auth-boundary-note">
                       <span>Secure sign-in</span>
-                      <p>Authentication continues through WebCanBe’s configured identity provider. No second password system is simulated here.</p>
+                      <p>Email/password is not enabled by the current hosted identity boundary. Authentication continues through WebCanBe’s configured identity provider, and no second password system is simulated here.</p>
                     </div>
                     {next !== "/dashboard" && <p className="auth-return">After sign-in, continue to <code>{next}</code>.</p>}
                     <p className="auth-switch">{signup ? "Already have an account?" : "New to WebCanBe?"} <Link to={`${signup ? "/login" : "/signup"}?next=${encodeURIComponent(next)}`}>{signup ? "Log in" : "Create an account"}</Link></p>
