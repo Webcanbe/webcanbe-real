@@ -17,16 +17,17 @@ function fixture(replies: Array<[string, Record<string, unknown>, number?]>) {
 }
 
 describe("hosted product route adapter", () => {
-  it("reads browse and listing detail only through the authenticated controller", async () => {
+  it("reads published browse and listing detail through the bounded public catalog path", async () => {
     const f = fixture([
-      ["/__webcanbe/auth/session", { csrf: "csrf-1" }],
       ["/__webcanbe/api/product/catalog/browse", { listings: [{ listingId: "listing-1", releaseId: "release-1", slug: "real-project", title: "Real Project" }] }],
       ["/__webcanbe/api/product/catalog/detail", { listing: { listingId: "listing-1", releaseId: "release-1", slug: "real-project", title: "Real Project" } }],
     ])
     expect(await f.client.browse({ query: "real", tags: ["React"], limit: 20 })).toMatchObject([{ releaseId: "release-1" }])
     expect(await f.client.detail("real-project")).toMatchObject({ listingId: "listing-1", releaseId: "release-1" })
-    expect(f.seen.slice(1).every(call => call.headers.get("X-WCB-CSRF") === "csrf-1")).toBe(true)
-    expect(f.seen[1].body).toEqual({ query: "real", tags: ["React"], limit: 20 })
+    expect(f.seen).toHaveLength(2)
+    expect(f.seen.every(call => call.headers.get("X-WCB-CSRF") === null)).toBe(true)
+    expect(f.seen[0].body).toEqual({ query: "real", tags: ["React"], limit: 20 })
+    expect(f.seen[1].body).toEqual({ reference: "real-project" })
     expect(f.remaining).toHaveLength(0)
   })
 
@@ -64,9 +65,10 @@ describe("hosted product route adapter", () => {
     expect(f.seen.map(call => call.path)).toContain("/__webcanbe/api/product/workspace-projects/list")
   })
 
-  it("refuses unauthenticated product access before issuing a product request", async () => {
+  it("still refuses unauthenticated private product access before issuing a private product request", async () => {
     const f = fixture([["/__webcanbe/auth/session", { error: "Sign in to continue." }, 403]])
-    await expect(f.client.browse()).rejects.toEqual(new HostedProductError(403, "Sign in to continue."))
+    await expect(f.client.purchases()).rejects.toEqual(new HostedProductError(403, "Sign in to continue."))
     expect(f.seen).toHaveLength(1)
+    expect(f.seen[0].path).toBe("/__webcanbe/auth/session")
   })
 })
