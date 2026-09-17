@@ -20,7 +20,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply production seam correction
-        run: python scripts/phase4-public-production-seams.py
+        run: |
+          python scripts/phase4-public-production-seams.py
+          python scripts/phase4-public-production-testfix.py
       - run: git diff --check
       - name: Phase 4 focused tests
         run: npx vitest run src/phase3-landing.test.ts src/phase4-ux-foundation.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts src/phase4-public-flow.test.ts src/phase4-public-production.test.ts
@@ -41,7 +43,7 @@ jobs:
         run: |
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
-          git rm .github/workflows/phase4-public-production-seams.yml scripts/phase4-public-production-seams.py
+          git rm .github/workflows/phase4-public-production-seams.yml scripts/phase4-public-production-seams.py scripts/phase4-public-production-testfix.py
           git add src/App.tsx src/hostedProductClient.ts src/phase4-public-flow.css src/phase4-public-production.test.ts src/webcanbe-engine/runtime/hostedProductController.ts src/webcanbe-engine/runtime/hostedIdentity.ts src/webcanbe-engine/runtime/hostedEditorServer.ts
           git commit -m "Finish Phase 4 public auth production seams"
           git push origin HEAD:phase-4-product-ux
