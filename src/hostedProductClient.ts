@@ -106,6 +106,11 @@ export class HostedProductClient {
     return this.materialize(workspaceId, entitlement.entitlementId, name)
   }
 
+  async authenticated() {
+    try { await this.session(); return true }
+    catch { return false }
+  }
+
   async authStart() {
     const response = await this.request("/__webcanbe/auth/start", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" })
     const value = await response.json().catch(() => ({})) as { authorizationUrl?: unknown; error?: unknown }

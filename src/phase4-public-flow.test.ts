@@ -1,0 +1,32 @@
+import { describe, expect, it } from "vitest"
+import fs from "node:fs"
+
+const app = fs.readFileSync(new URL("./App.tsx", import.meta.url), "utf8")
+const home = fs.readFileSync(new URL("./Home.tsx", import.meta.url), "utf8")
+const client = fs.readFileSync(new URL("./hostedProductClient.ts", import.meta.url), "utf8")
+
+describe("Phase 4 public/auth/purchase flow", () => {
+  it("keeps the landing template composition intact while adding only transition behavior", () => {
+    for (const marker of ["function Navbar()", "function EditorPreview()", "function Testimonials()", "function Pricing()", "function FAQ()", "function Footer()", "styles.topShell", "styles.resourceGrid"]) expect(home).toContain(marker)
+    expect(home).toContain('}, 120)')
+  })
+  it("removes app navigation from the public top bar and moves authenticated navigation to a sidebar", () => {
+    expect(app).toContain('const publicNav = [["Pricing", "/plans"]]')
+    expect(app).toContain('className={`app-sidebar ${menu ? "open" : ""}`}')
+    expect(app).toContain('["Marketplace", "/browse"]')
+  })
+  it("routes buying through authentication and checkout rather than a TEST entitlement", () => {
+    expect(app).toContain('go(signedIn ? checkoutTarget : `/login?next=${encodeURIComponent(checkoutTarget)}`)')
+    expect(app).toContain('function Checkout()')
+    expect(app).not.toContain('hostedProductClient.purchaseAndMaterialize(project.releaseId')
+  })
+  it("protects app routes with the real hosted session boundary", () => {
+    expect(app).toContain('return <Protected><Dashboard/></Protected>')
+    expect(app).toContain('return <Protected><Checkout/></Protected>')
+    expect(client).toContain('async authenticated()')
+  })
+  it("keeps real payment explicitly deferred instead of claiming success", () => {
+    expect(app).toContain('The real card-first provider connection belongs to Phase 5')
+    expect(app).toContain('Successful payment → entitlement → Dashboard')
+  })
+})

@@ -3,12 +3,19 @@ import styles from "./landing.module.css"
 
 const routes = { browse: "/browse", projects: "/projects", plans: "/plans", login: "/login", signup: "/signup" }
 
+let landingRouteTimer: number | undefined
 function route(event: MouseEvent<HTMLAnchorElement>, href: string) {
   if (!href.startsWith("/") || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
   event.preventDefault()
-  window.history.pushState({}, "", href)
-  window.dispatchEvent(new PopStateEvent("popstate"))
-  window.scrollTo({ top: 0, behavior: "auto" })
+  if (landingRouteTimer) window.clearTimeout(landingRouteTimer)
+  document.documentElement.classList.add("wcb-route-leaving")
+  landingRouteTimer = window.setTimeout(() => {
+    window.history.pushState({}, "", href)
+    window.dispatchEvent(new PopStateEvent("popstate"))
+    window.scrollTo({ top: 0, behavior: "auto" })
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.documentElement.classList.remove("wcb-route-leaving")))
+    landingRouteTimer = undefined
+  }, 120)
 }
 
 function AppLink({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
