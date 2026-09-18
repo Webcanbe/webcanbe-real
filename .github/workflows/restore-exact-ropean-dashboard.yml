@@ -61,37 +61,35 @@ jobs:
 
           # Landing iframe posts an auth-open message. Listen in the parent so the
           # actual landing stays rendered underneath and no route reload occurs.
-          marker='''            useEffect(() => {
-              const handler = (event: Event) => {
-                const detail = (event as CustomEvent<{ signup?: boolean }>).detail
-                setAuthIntent({ signup: Boolean(detail?.signup) })
-              }
-              window.addEventListener("wcb:open-auth", handler)
-              return () => window.removeEventListener("wcb:open-auth", handler)
-            }, [])
-          '''
-          replacement='''            useEffect(() => {
-              const handler = (event: Event) => {
-                const detail = (event as CustomEvent<{ signup?: boolean }>).detail
-                setAuthIntent({ signup: Boolean(detail?.signup) })
-              }
-              const messageHandler = (event: MessageEvent) => {
-                if (event.origin !== window.location.origin) return
-                const data = event.data as { type?: unknown; signup?: unknown } | null
-                if (!data || data.type !== "wcb:open-auth") return
-                setAuthIntent({ signup: Boolean(data.signup) })
-              }
-              window.addEventListener("wcb:open-auth", handler)
-              window.addEventListener("message", messageHandler)
-              return () => {
-                window.removeEventListener("wcb:open-auth", handler)
-                window.removeEventListener("message", messageHandler)
-              }
-            }, [])
-          '''
-          if marker not in text:
+          pattern=r'''  useEffect\(\(\) => \{
+    const handler = \(event: Event\) => \{
+      const detail = \(event as CustomEvent<\{ signup\?: boolean \}>\)\.detail
+      setAuthIntent\(\{ signup: Boolean\(detail\?\.signup\) \}\)
+    \}
+    window\.addEventListener\("wcb:open-auth", handler\)
+    return \(\) => window\.removeEventListener\("wcb:open-auth", handler\)
+  \}, \[\]\)'''
+          replacement='''  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ signup?: boolean }>).detail
+      setAuthIntent({ signup: Boolean(detail?.signup) })
+    }
+    const messageHandler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      const data = event.data as { type?: unknown; signup?: unknown } | null
+      if (!data || data.type !== "wcb:open-auth") return
+      setAuthIntent({ signup: Boolean(data.signup) })
+    }
+    window.addEventListener("wcb:open-auth", handler)
+    window.addEventListener("message", messageHandler)
+    return () => {
+      window.removeEventListener("wcb:open-auth", handler)
+      window.removeEventListener("message", messageHandler)
+    }
+  }, [])'''
+          text,count=re.subn(pattern,replacement,text,count=1)
+          if count != 1:
               raise SystemExit("auth event effect anchor missing")
-          text=text.replace(marker,replacement,1)
           p.write_text(text)
 
           # Inject same-origin bridge into the static landing. Get started/Create
