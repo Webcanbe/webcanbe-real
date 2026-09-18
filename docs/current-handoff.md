@@ -1,3 +1,51 @@
+# PHASE 4 LANDING ASSET LOCALIZATION + HIDDEN-VARIANT PRUNE — 2026-09-18 KST
+
+**PASS with rollback preserved.** The selected Launch UI-derived WebCanBe landing is now self-hosted for its runtime presentation assets, and the explicitly hidden unused variant subtrees have been removed without changing the selected visual composition beyond the retained parity threshold.
+
+- Pre-change rollback branch: `backup-phase4-before-landing-localize-2026-09-18` at `c80ce7d807e12b1611f5317f18f5d9e33c9945ca`.
+- Vendored result commit: `a6d6b8a4767b5f4b4ba08e34723f1f10613565ae` (`Vendor Launch UI landing assets and prune hidden variants [skip ci]`).
+- Post-change snapshot branch: `backup-phase4-after-landing-localize-2026-09-18`.
+- Guarded workflow run: GitHub Actions `35346964533` **PASS**.
+- Focused landing tests: **5/5 PASS** across 4 test files.
+- TypeScript + Vite production build: **PASS**.
+
+## What changed
+- 57 runtime presentation assets are now committed below `public/wcb-landing/vendor/`, including the exact optimized image responses used by the retained landing, CSS, Inter / IBM Plex Mono font files pulled by those stylesheets, and the OG image.
+- `public/wcb-landing/vendor/manifest.json` records original remote URL, local path, byte count, SHA-256 and content type.
+- The committed landing has **0 remaining Launch UI runtime asset references** and **0 root `/_next/` asset references** according to `public/wcb-landing/cleanup-report.json`.
+- The landing HTML decreased from **1,985,579 bytes** to **859,748 bytes**.
+- Removed **2,683 elements** belonging only to hidden, non-selected component variants.
+- Removed **36 dark-only nodes** because the retained landing is the light selected surface.
+- Removed the remaining unused Next bailout template.
+- The selected variants were preserved exactly from the prior CSS selection contract:
+  - Hero 1/5
+  - Logos 1/5
+  - Bento grid 1/4
+  - Items 1/4
+  - Feature 5/5
+  - Testimonials 1/3
+  - Stats 1/4
+  - Social proof 1/5
+  - FAQ 1/4
+  - CTA 1/4
+
+## Visual parity gate
+The workflow compared the exact pre-cleanup rollback version against the localized/pruned version using the same headless Chrome build and full-page screenshots.
+
+- Desktop 1440 px: **0.147648%** mismatched pixels.
+- Mobile 390 px: **0.247120%** mismatched pixels.
+- Retained acceptance threshold: **0.5%**.
+- Both full-page screenshot geometries remained identical:
+  - desktop: 1440 × 14,199
+  - mobile: 390 × 15,815
+- The localized page was also monitored during rendering and made **no requests to `launchuicomponents.com`**.
+- The workflow refuses to commit if asset localization, visual parity, focused tests or production build fails.
+
+## Recovery
+If the localization/pruning is later judged undesirable, restore from `backup-phase4-before-landing-localize-2026-09-18`; do not attempt to reconstruct the previous 1.98 MB landing by hand.
+
+---
+
 # PHASE 4 NATIVE UI SHELL / ROUTING CORRECTION — 2026-09-18 KST
 
 - Branch: `phase-4-product-ux`.
