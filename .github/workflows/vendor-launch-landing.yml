@@ -1,0 +1,53 @@
+name: Vendor landing assets safely
+on:
+  push:
+    branches: [phase-4-product-ux]
+    paths:
+      - scripts/vendor-launch-landing.mjs
+      - .github/workflows/vendor-launch-landing.yml
+permissions:
+  contents: write
+jobs:
+  vendor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Preserve exact pre-cleanup reference
+        run: |
+          mkdir -p .landing-reference
+          git show backup-phase4-before-landing-localize-2026-09-18:public/wcb-landing/index.html > .landing-reference/index.html
+      - name: Localize assets and prune hidden variants
+        run: node scripts/vendor-launch-landing.mjs
+      - name: Verify no runtime Launch UI asset dependency
+        run: |
+          if grep -RInE '(src|srcset|imagesrcset|stylesheet|preload).*(launchuicomponents\.com|/_next/)' public/wcb-landing/index.html public/wcb-landing/vendor --exclude=manifest.json; then
+            echo "External Launch UI runtime asset dependency remains"
+            exit 1
+          fi
+      - name: Focused tests and production build
+        run: |
+          npx vitest run src/phase4-landing-webcanbe.test.ts src/phase4-landing-retention.test.ts src/phase4-landing-hero.test.ts src/phase4-public-flow.test.ts
+          npm run build
+      - name: Save cleanup evidence
+        run: |
+          node -e "const r=require('./public/wcb-landing/cleanup-report.json'); if(!r.removedVariantSubtrees) process.exit(2); console.log(r)"
+          git diff --stat
+      - name: Commit vendored landing
+        run: |
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/wcb-landing/index.html public/wcb-landing/vendor public/wcb-landing/cleanup-report.json
+          if git diff --cached --quiet; then
+            echo "No vendoring changes."
+            exit 0
+          fi
+          git commit -m "Vendor Launch UI landing assets and prune hidden variants [skip ci]"
+          git push origin HEAD:phase-4-product-ux
