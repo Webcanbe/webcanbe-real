@@ -302,6 +302,14 @@ jobs:
           p.write_text(s)
           PY2
 
+          python3 <<'PY3'
+          from pathlib import Path
+          p=Path("src/phase4-brand-auth.test.ts")
+          s=p.read_text()
+          s=s.replace('expect(app).toContain(\'className="auth auth-demo"\')','expect(app).toContain(\'className="auth-demo-layer"\')')
+          p.write_text(s)
+          PY3
+
           cat > src/phase4-final-shell.test.ts <<'EOF'
           import fs from "node:fs"
           import { describe, expect, it } from "vitest"
@@ -344,6 +352,6 @@ jobs:
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/fix-auth-overlay-dashboard-shell.yml
-          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts
+          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts src/phase4-brand-auth.test.ts
           git commit -m "Fix auth overlay and dashboard shell"
           git push origin HEAD:phase-4-product-ux
