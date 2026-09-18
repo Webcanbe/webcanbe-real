@@ -40,7 +40,7 @@ jobs:
       - name: Install visual parity verifier
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0 pixelmatch@7.1.0 pngjs@7.0.0
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
       - name: Pixel-compare old and localized landing
         run: node scripts/verify-landing-parity.mjs
       - name: Focused tests and production build
