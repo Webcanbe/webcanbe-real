@@ -17,6 +17,9 @@
     "password": "LOAD_FROM_PRIVATE_OPERATOR_CONFIG",
     "ssl": { "rejectUnauthorized": true, "ca": "LOAD_PRIVATE_DATABASE_CA_PEM" }
   },
+  "identity": {
+    "allowSelfRegistration": false
+  },
   "oidc": {
     "issuer": "https://identity.example.org",
     "authorizationEndpoint": "https://identity.example.org/authorize",
@@ -24,6 +27,7 @@
     "jwksUri": "https://identity.example.org/jwks",
     "clientId": "REPLACE_WITH_REGISTERED_CLIENT_ID",
     "clientSecret": "LOAD_FROM_PRIVATE_OPERATOR_CONFIG",
+    "scopes": ["openid"],
     "redirectUri": "https://editor.example.com:9444/__webcanbe/auth/callback"
   },
   "hosts": [
