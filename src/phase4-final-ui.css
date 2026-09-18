@@ -1361,3 +1361,42 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .rd-nav-group .rd-nav-button em{min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;border-radius:999px;background:#f4f4f5;color:#52525b;font-size:10px;font-style:normal}
 .rd-collapsible-content .rd-nav-button{min-height:32px;font-size:12px}
 .rd-collapsible-content .rd-nav-button svg{width:14px;height:14px}
+
+
+/* Dashboard layer fixes + minimal motion */
+.rd-shell{position:relative;isolation:isolate}
+.rd-sidebar{z-index:80;overflow:visible}
+.rd-sidebar-header{position:relative;z-index:90}
+.rd-sidebar-content{position:relative;z-index:1;overflow-y:auto;overflow-x:visible}
+.rd-sidebar-footer{position:relative;z-index:100;overflow:visible}
+.rd-content{position:relative;z-index:1}
+.rd-header{z-index:40}
+
+@keyframes rdDropdownIn{
+  from{opacity:0;transform:translateY(5px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes rdSideDropdownIn{
+  from{opacity:0;transform:translateX(-5px) scale(.985)}
+  to{opacity:1;transform:translateX(0) scale(1)}
+}
+@keyframes rdCollapseIn{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes rdContentIn{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.rd-dropdown{animation:rdDropdownIn .15s cubic-bezier(.2,.8,.2,1) both;will-change:opacity,transform}
+.rd-account-dropdown{animation-name:rdSideDropdownIn}
+.rd-collapsible-content{animation:rdCollapseIn .16s ease-out both;transform-origin:top}
+.rd-main{animation:rdContentIn .2s ease-out both}
+.rd-dropdown-item,.rd-nav-button,.rd-header-icon,.rd-header-avatar,.rd-account-trigger,.rd-team-switcher{transition:background-color .14s ease,color .14s ease,border-color .14s ease,transform .14s ease}
+.rd-dropdown-item:active,.rd-nav-button:active{transform:scale(.985)}
+
+@media(prefers-reduced-motion:reduce){
+  .rd-dropdown,.rd-collapsible-content,.rd-main{animation:none!important}
+  .rd-dropdown-item,.rd-nav-button,.rd-header-icon,.rd-header-avatar,.rd-account-trigger,.rd-team-switcher,.rd-chevron{transition:none!important}
+}
