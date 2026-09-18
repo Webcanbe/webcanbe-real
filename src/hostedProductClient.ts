@@ -164,4 +164,5 @@ export class HostedProductClient {
 }
 
 export const hostedProductMode = () => typeof document !== "undefined" && document.querySelector('meta[name="wcb-editor-mode"]')?.getAttribute("content") === "hosted"
+export const productionAuthMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-auth-mode"]')?.getAttribute("content") === "google"
 export const hostedProductClient = new HostedProductClient()
