@@ -1,3 +1,2 @@
-Visual structure derived from the Launch UI public homepage.
-Source reference: https://www.launchuicomponents.com/
-WebCanBe copy, navigation, brand, and product claims are local.
+Visual structure retained from https://www.launchuicomponents.com/.
+Only WebCanBe copy, links, brand color, top GitHub/X removal, and configurator removal are intentional.
