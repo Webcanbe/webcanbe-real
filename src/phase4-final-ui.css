@@ -1247,3 +1247,11 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .top-account-popover a,.top-account-popover button{width:100%;display:flex;align-items:center;gap:8px;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:#45454d;text-decoration:none;font-size:11px;text-align:left}
 .top-account-popover a:hover,.top-account-popover button:hover{background:#f5f5f7}
 .top-account-popover button{cursor:pointer}
+
+.rd-team-brand-copy{min-width:0;flex:1;align-items:flex-start}
+.rd-team-brand-copy .wcb-logo-wrap{max-width:132px}
+.rd-team-brand-copy .wcb-logo-full{width:132px}
+.rd-team-brand-copy>small{margin-top:2px}
+.rd-sidebar-collapsed .rd-team-brand-copy>small{display:none}
+.rd-sidebar-collapsed .rd-team-brand-copy .wcb-logo-full{display:none}
+.rd-sidebar-collapsed .rd-team-brand-copy .wcb-logo-mark{display:block;width:30px;height:30px}
