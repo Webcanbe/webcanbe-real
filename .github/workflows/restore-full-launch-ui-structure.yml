@@ -1,0 +1,514 @@
+name: Restore full Launch UI structure for WebCanBe
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Rebuild full landing with WebCanBe copy only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip -q install beautifulsoup4 requests
+          rm -rf public/wcb-landing
+          mkdir -p public/wcb-landing
+          python3 <<'PY'
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup, NavigableString
+
+          ORIGIN = "https://www.launchuicomponents.com/"
+          raw = requests.get(
+              ORIGIN,
+              timeout=45,
+              headers={"User-Agent": "Mozilla/5.0"},
+          ).text
+          if "Give your big idea the design it deserves" not in raw:
+              raise SystemExit("Launch UI homepage signature changed")
+
+          soup = BeautifulSoup(raw, "html.parser")
+
+          # Keep every rendered section/card. Only remove the foreign JS runtime so
+          # WebCanBe copy cannot hydrate back to Launch UI copy.
+          for tag in list(soup.find_all("script")):
+              tag.decompose()
+          for tag in list(soup.find_all("link")):
+              rel = [str(x).lower() for x in (tag.get("rel") or [])]
+              if "modulepreload" in rel or ("preload" in rel and tag.get("as") == "script"):
+                  tag.decompose()
+
+          # Static copy uses Launch UI's visual CSS/assets directly.
+          for tag in soup.find_all(True):
+              for attr in ("src", "poster"):
+                  v = tag.get(attr)
+                  if isinstance(v, str) and v.startswith("/"):
+                      tag[attr] = urljoin(ORIGIN, v)
+              srcset = tag.get("srcset")
+              if isinstance(srcset, str):
+                  parts = []
+                  for part in srcset.split(","):
+                      p = part.strip().split(" ", 1)
+                      if p and p[0].startswith("/"):
+                          p[0] = urljoin(ORIGIN, p[0])
+                      parts.append(" ".join(p))
+                  tag["srcset"] = ", ".join(parts)
+              if tag.name == "link":
+                  href = tag.get("href")
+                  if isinstance(href, str) and href.startswith("/"):
+                      tag["href"] = urljoin(ORIGIN, href)
+
+          # Make all animation states visible without the removed Next runtime.
+          root = soup.find("html")
+          if root is not None:
+              classes = list(root.get("class") or [])
+              if "mounted" not in classes:
+                  classes.append("mounted")
+              root["class"] = classes
+
+          # User-requested removals only:
+          # 1) top GitHub/X social controls
+          # 2) Preview/Theme/Radius/Appearance/Lines/Shuffle configurator
+          # 3) footer theme dropdown
+          footer = soup.find("footer")
+          for a in list(soup.find_all("a", href=True)):
+              href = a.get("href", "").lower()
+              inside_footer = footer is not None and footer in a.parents
+              if not inside_footer and ("github.com/launch-ui" in href or "twitter.com/mikolajdobrucki" in href or "x.com/mikolajdobrucki" in href):
+                  classes = set(a.get("class") or [])
+                  label = " ".join(a.stripped_strings).strip().lower()
+                  if "size-9" in classes or label in {"twitter", "x"}:
+                      a.decompose()
+                  else:
+                      # Hero GitHub CTA becomes WebCanBe account CTA; layout stays.
+                      a["href"] = "/signup"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Create account")
+
+          for panel in list(soup.find_all("div")):
+              body = " ".join(panel.stripped_strings)
+              classes = set(panel.get("class") or [])
+              if {"flex", "grow", "justify-start", "gap-3"}.issubset(classes) and all(x in body for x in ("Color theme", "Border radius", "Appearance", "Shuffle")):
+                  panel.decompose()
+                  break
+
+          # Remove empty floating settings shell if left behind.
+          for nav in list(soup.find_all("nav")):
+              classes = set(nav.get("class") or [])
+              if {"fixed", "bottom-3", "left-1/2", "z-50"}.issubset(classes) and not " ".join(nav.stripped_strings):
+                  nav.decompose()
+
+          if footer:
+              for button in list(footer.find_all("button")):
+                  if "theme" in " ".join(button.stripped_strings).lower():
+                      button.decompose()
+
+          # WebCanBe copy system. We preserve every section; only text is rewritten.
+          exact = {
+              "Launch UI v2.10.1": "WebCanBe",
+              "Launch UI v2 is out!": "The source is the product.",
+              "New version of Launch UI is out!": "WebCanBe",
+              "Read more": "Explore projects",
+              "Start building top quality designs yourself": "Start from real projects, not a blank canvas.",
+              "Check out my free course designwithcode.dev": "Browse the WebCanBe marketplace",
+              "Give your big idea the design it deserves": "Edit visually. Leave with real code you own.",
+              "Professionally designed blocks and templates built with React, Shadcn/ui and Tailwind that will help your product stand out.": "Start from working web projects, edit the real source visually or in code, and keep the codebase.",
+              "Free and open source forever.": "Your working project stays real source code.",
+              "Last updated: 4 Sep 2026": "Source-first by design",
+              "Built with industry-standard tools and best practices": "Built around real source, not a proprietary canvas",
+              "Trusted by world's leading companies": "One source across the whole workflow",
+              "It's all about design quality": "The source is the product",
+              "In a world where everybody can vibe-code a new thing overnight, the key is to stand out. Generic-looking shadcn/ui blocks won't help you to get noticed. With Launch UI, you can make sure that your design is unique and memorable.": "Marketplace releases, visual editing, code editing, history, and export stay attached to the same real project source.",
+              "Design-first": "Visual when you want it",
+              "Each block and component is carfully crafted—not generated by AI—to give a unique look and feel AI would never come up with.": "Make interface changes visually when that is faster without creating a second source of truth.",
+              "Made for fast development": "Code when you need it",
+              "With lightweight code, modern tooling and best practice, Launch UI is as fast in the browser as it is to build with.": "Open the actual source whenever precision matters. Visual and Code operate on the same working project.",
+              "The code is yours": "Own the project",
+              "With Launch UI, the code is yours forever. Never bother about subscriptions and lock-ins.": "Your working copy remains normal source code you can export and continue using outside WebCanBe.",
+              "With Launch UI, the code is yours forever. You can use it as a starting point for your own projects and customize it to your needs.": "Your working copy remains normal source code. Edit it here, export it, and continue in your own development workflow.",
+              "Never bother about subscriptions and lock-ins.": "Keep the codebase portable outside WebCanBe.",
+              "Top-level performance": "Browser-native workflow",
+              "Data-agnostic": "One canonical source",
+              "Fits right into your stack": "Keep your stack",
+              "Integrate website and product": "Visual and code together",
+              "Made for search engines": "No proprietary canvas",
+              "Mobile-first": "Browser workspace",
+              "Everything you need. Nothing you don't.": "Everything edits the same source.",
+              "Everything you need at your fingertips": "Visual and code, side by side.",
+              "You can change anything. But you don't have to.": "Use the workflow that fits the change.",
+              "What's inside?": "Everything you need to keep building",
+              "Hundreds of components, blocks and templates, all created with React, Shadcn/ui and Tailwind that will help you make your product look special.": "Browse working projects, create your editable copy, edit visually or in code, keep history, and export the source.",
+              "Blocks": "Marketplace projects",
+              "Building blocks for creating beautiful user interfaces across various sections of your website.": "Versioned working projects you can inspect before creating your own copy.",
+              "Website Templates": "Working Projects",
+              "Templates": "Working Projects",
+              "Complete website templates ready to be customized for your business needs.": "Working project releases ready to become your editable copy.",
+              "Complete website templates and app interfaces ready to be customized for your business needs.": "Working project and app releases ready to become your editable copy.",
+              "Recently built with Launch UI": "Browse the marketplace",
+              "Dozens of designers and developers have already built their websites with Launch UI.": "Explore working releases and open the project that fits what you want to build.",
+              "Make the right impression": "Start with something real",
+              "Launch UI makes it easy to build an unforgetable website that resonates with professional design-centric audiences.": "WebCanBe starts from real projects you can inspect, edit, and export.",
+              "Choose your sections": "Choose a project",
+              "Choose among 100+ components to build a landing page suited to the needs of your product.": "Browse releases and choose a working project that fits what you want to build.",
+              "Add your content": "Edit visually or in code",
+              "Fill the blanks with screenshots, videos, and other content featuring your product.": "Make interface changes visually or open the real source for precise edits.",
+              "Customize": "Keep the source",
+              "Make design yours in no time by changing the variables that control colors, typography, and other styles.": "History, export, and ownership stay attached to the same project source.",
+              "Loved by designers and developers across the planet": "Built around the way real code should work",
+              "Here's what people are saying about Launch UI": "Three product principles behind WebCanBe",
+              "A proven solution for good design": "A source-first product model",
+              "Thousands of designers and developers have already used Launch UI to create beautiful and functional websites and products.": "The editor is designed so visual work never becomes a separate proprietary project format.",
+              "Level-up your design game, today": "Choose how you want to work",
+              "Get lifetime access to all templates and blocks. No recurring fees. Just simple, transparent pricing.": "Browse projects, create a working copy, and keep the source. Product billing will follow the same ownership model.",
+              "Free": "Explore",
+              "For everyone starting out on a website for their big idea": "Browse published project releases",
+              "$0": "Browse",
+              "Get started for free": "Browse marketplace",
+              "Free and open-source forever. Get started now.": "Inspect projects before deciding what to build from.",
+              "Pro": "Project",
+              "For early-stage founders, solopreneurs and indie devs": "For a source-owned working copy",
+              "$99": "Per project",
+              "one-time payment": "listing price",
+              "plus local taxes": "",
+              "Get all-access": "View projects",
+              "Lifetime access. Free updates. No recurring fees.": "Purchase terms stay bound to the immutable release you selected.",
+              "Pro Team": "Creator",
+              "For teams and agencies working on cool products together": "For publishing and managing project releases",
+              "$499": "Creator Studio",
+              "Get all-access for your team": "Open Creator Studio",
+              "All the templates, components and sections available for your entire team": "Submit, assess, publish, and manage versioned project releases.",
+              "Questions and Answers": "Questions about ownership",
+              "Why building a great landing page is critical for your business?": "Are these static templates?",
+              "Why good design is critical for your business?": "Are these static templates?",
+              "Why use Launch UI instead of a no-code tool?": "Do visual edits change the real source?",
+              "How Launch UI is different from other components libraries and templates?": "What happens after I start from a project?",
+              "Why exactly does it mean that \"The code is yours\"?": "Can I export the code?",
+              "Are Figma files included?": "Can a published release silently change?",
+              "Can I get a discount?": "Does WebCanBe need to stay in the runtime?",
+              "Start building": "Start from real code",
+              "Start building with Launch UI": "Start building with WebCanBe",
+              "Get started with Launch UI and build your landing page in no time": "Browse working projects and keep building from source you own.",
+              "Get started with Launch UI and build your landing page in no time.": "Browse working projects and keep building from source you own.",
+              "Ready to elevate your design?": "Ready to build without giving up the source?",
+              "View Pricing": "View plans",
+              "© 2026 Mikołaj Dobrucki. All rights reserved": "© 2026 WebCanBe. All rights reserved",
+              "© 2026 mikolajdobrucki. All rights reserved": "© 2026 WebCanBe. All rights reserved",
+          }
+
+          # Longer factual paragraphs.
+          contains_map = [
+              ("All the data is separate from components so you can edit it in seconds or make it dynamic.", "Visual, Code, and future AI edits resolve against the same working source and revision."),
+              ("Easily connect to a CMS of your choice.", "Keep using the tools and project stack you already use."),
+              ("Build your website and product with the same technologies and frameworks.", "Keep React, TypeScript, CSS, Tailwind, and the rest of your normal project workflow."),
+              ("No extra dependencies, no extra maintenance.", "No proprietary project format to maintain."),
+              ("Unlike the bloated no-code solutions", "WebCanBe edits real project source instead of converting it into a closed canvas format."),
+              ("Optimized to look and feel great on all devices", "Work from the browser workspace while the same project source remains authoritative."),
+              ("A comprehensive collection of components written in modern React", "Use Visual, Code, or Split depending on the change you need to make."),
+              ("You'll find here everything you need to build your next landing page.", "No conversion step and no second source of truth."),
+              ("Get the full control of the code of your website.", "Make visual changes when they are faster and open the source when precision matters."),
+              ("In today's AI-driven world", "No. Marketplace listings point to versioned working projects and immutable releases."),
+              ("Launch UI helps you ship faster", "You start from something that can become a real editable working copy."),
+              ("No-code tools lock you into their ecosystem", "Yes. Visual and Code modes operate on the same working project and revision history."),
+              ("You can't even change your hosting provider", "There is no separate proprietary canvas that becomes the source of truth."),
+              ("What might seem like a convenient solution today", "The project stays portable so you can continue in your own development workflow."),
+              ("Launch UI stands out with premium design quality", "A working copy is created from an immutable release so your edits do not mutate the published release."),
+              ("All components are carefully crafted", "Visual, Code, Split, history, and export operate around that copy."),
+              ("Unlike many libraries that rely on outdated CSS practices", "Compatibility stays explicit instead of being hidden behind a proprietary conversion step."),
+              ("The basic version of Launch UI is open-source", "Yes. Export is part of the product contract and the project remains portable."),
+              ("The pro version that contains more components", "Your exported project is meant to continue as a normal codebase outside WebCanBe."),
+              ("For complete details about licensing and usage rights", "Ownership should not depend on keeping WebCanBe in your runtime."),
+              ("Yes! The complete Launch UI template is available for free", "No. Changing the published source requires a new release identity."),
+              ("Yes! Join the feedback program", "No. The goal is a normal codebase that continues in your own development workflow."),
+          ]
+
+          # First exact substitution.
+          for node in list(soup.find_all(string=True)):
+              if not isinstance(node, NavigableString):
+                  continue
+              if node.parent and node.parent.name in {"style", "script"}:
+                  continue
+              original = str(node)
+              stripped = original.strip()
+              if not stripped:
+                  continue
+              if stripped in exact:
+                  prefix = original[:len(original)-len(original.lstrip())]
+                  suffix = original[len(original.rstrip()):]
+                  node.replace_with(prefix + exact[stripped] + suffix)
+
+          # Longer / repeated copy substitutions.
+          for node in list(soup.find_all(string=True)):
+              if not isinstance(node, NavigableString):
+                  continue
+              if node.parent and node.parent.name in {"style", "script"}:
+                  continue
+              original = str(node)
+              new = original
+              for needle, replacement in contains_map:
+                  if needle in new:
+                      new = replacement
+                      break
+              new = new.replace("Launch UI", "WebCanBe").replace("@launchui", "@webcanbe").replace("mikolajdobrucki", "WebCanBe")
+              if new != original:
+                  node.replace_with(new)
+
+          # Remove fake testimonial identities but keep every testimonial card/section.
+          principle_cards = [
+              ("Visual", "@visual", "Make interface changes visually while the same real project source remains authoritative."),
+              ("Code", "@code", "Open the actual source whenever precision matters. There is no conversion step."),
+              ("Ownership", "@source", "Export the project and continue in your own development workflow."),
+          ]
+          testimonial_selectors = soup.find_all(attrs={"data-slot": "social-proof-item"})
+          for idx, card in enumerate(testimonial_selectors):
+              name, handle, quote = principle_cards[idx % len(principle_cards)]
+              texts = list(card.find_all(string=True))
+              visible_texts = [t for t in texts if t.strip()]
+              # Preserve card markup; replace text nodes sequentially with product-principle copy.
+              replacements = [name[:1], name, handle, quote]
+              for j, t in enumerate(visible_texts[:4]):
+                  t.replace_with(replacements[j] if j < len(replacements) else "")
+
+          # Carousel testimonial cards that do not use data-slot.
+          for card in soup.find_all(["article", "blockquote"]):
+              body = " ".join(card.stripped_strings)
+              if any(n in body for n in ("Marcin Zaremski", "Marcus Rodriguez", "Darius Flynn")):
+                  idx = 0
+                  name, handle, quote = principle_cards[idx]
+                  for t in list(card.find_all(string=True)):
+                      s=t.strip()
+                      if not s: continue
+                      if s.startswith("“") or len(s) > 60:
+                          t.replace_with("“" + quote + "”")
+                      elif "Marcin" in s or "Marcus" in s or "Darius" in s:
+                          t.replace_with(name)
+                      elif s in {"Indie Hacker","Tech Lead","Web Developer"}:
+                          t.replace_with("WebCanBe principle")
+
+          # Convert stats to truthful product facts while retaining all stat cards.
+          stat_map = {
+              "54.4": "1",
+              "54.4k": "1",
+              "23.5": "3",
+              "23.5k": "3",
+              "28.2": "0",
+              "28.2k": "0",
+              "74": "Exact",
+              "designers and developers": "canonical source",
+              "designers on Figma Community": "edit modes",
+              "installations with shadcn/ui CLI": "proprietary canvases",
+              "blocks and sections": "export",
+          }
+          for node in list(soup.find_all(string=True)):
+              if not isinstance(node, NavigableString) or (node.parent and node.parent.name in {"style","script"}):
+                  continue
+              s=node.strip()
+              if s in stat_map:
+                  node.replace_with(stat_map[s])
+
+          # Header/navigation: preserve its number of entries, point product discovery entries to Marketplace.
+          nav_region = soup.find("nav")
+          if nav_region:
+              nav_labels = {
+                  "Docs": ("Documentation", "https://github.com/Webcanbe/webcanbe-real#readme"),
+                  "Documentation": ("Documentation", "https://github.com/Webcanbe/webcanbe-real#readme"),
+                  "Components": ("Components", "/browse"),
+                  "Blocks": ("Blocks", "/browse"),
+                  "Marketplace projects": ("Marketplace", "/browse"),
+                  "Illustrations": ("Projects", "/browse"),
+                  "Working Projects": ("Templates", "/browse"),
+                  "Pricing": ("Plans", "/plans"),
+              }
+              for a in nav_region.find_all("a"):
+                  label = " ".join(a.stripped_strings).strip()
+                  if label in nav_labels:
+                      new_label, href = nav_labels[label]
+                      a.clear(); a.append(new_label)
+                      a["href"] = href
+                      if href.startswith("/"): a["target"] = "_top"
+                      else:
+                          a["target"] = "_blank"; a["rel"] = "noreferrer"
+
+          # All gallery/project/component/template cards should open WebCanBe Marketplace.
+          marketplace_terms = {
+              "Hero","Bento Grid","Feature","FAQ","Navbar","Logos","Items","Carousel","Stats","Testimonials",
+              "Northstar Studio","Relay","Fieldnotes","Morrow","Suite","Brief",
+              "Saturn","Jupiter","Neptune","Luna","Pluto","Calendar","Chat",
+              "View Template","View project","Browse marketplace","Browse marketplace projects",
+          }
+          for a in soup.find_all("a"):
+              label = " ".join(a.stripped_strings).strip()
+              href = a.get("href", "")
+              if label in marketplace_terms or any(x in href for x in ("/templates/", "/docs/sections/", "/blocks", "/illustrations")):
+                  a["href"] = "/browse"
+                  a["target"] = "_top"
+              elif label.lower() in {"get started", "get started for free", "view projects", "browse marketplace"}:
+                  a["href"] = "/browse"
+                  a["target"] = "_top"
+              elif label.lower() in {"create account"}:
+                  a["href"] = "/signup"
+                  a["target"] = "_top"
+              elif label.lower() in {"view plans"}:
+                  a["href"] = "/plans"
+                  a["target"] = "_top"
+              elif label.lower() in {"open creator studio"}:
+                  a["href"] = "/seller"
+                  a["target"] = "_top"
+
+          # Footer: keep all columns/links; only rewrite destinations/text to WebCanBe equivalents.
+          footer = soup.find("footer")
+          if footer:
+              footer_map = {
+                  "Documentation": ("Documentation", "https://github.com/Webcanbe/webcanbe-real#readme"),
+                  "Getting started": ("Getting started", "/browse"),
+                  "Customization": ("Visual editor", "/workspace/northstar"),
+                  "Figma files": ("Code editor", "/workspace/northstar"),
+                  "Product": ("Product", "/browse"),
+                  "Changelog": ("Changelog", "https://github.com/Webcanbe/webcanbe-real/commits/phase-4-product-ux/"),
+                  "About": ("About", "#about"),
+                  "Careers": ("Creator Studio", "/seller"),
+                  "Blog": ("Updates", "https://github.com/Webcanbe/webcanbe-real/commits/phase-4-product-ux/"),
+                  "Contact": ("Contact", "mailto:hello@webcanbe.com"),
+                  "Discord": ("Email", "mailto:hello@webcanbe.com"),
+                  "Twitter": ("Marketplace", "/browse"),
+                  "Github": ("GitHub", "https://github.com/Webcanbe/webcanbe-real"),
+                  "GitHub": ("GitHub", "https://github.com/Webcanbe/webcanbe-real"),
+                  "Calendar app template": ("Marketplace projects", "/browse"),
+                  "AI chat app template": ("Working projects", "/browse"),
+                  "Website templates": ("Templates", "/browse"),
+                  "Privacy Policy": ("Privacy", "#"),
+                  "Terms of Service": ("Terms", "#"),
+              }
+              for a in footer.find_all("a"):
+                  label = " ".join(a.stripped_strings).strip()
+                  if label in footer_map:
+                      new_label, href = footer_map[label]
+                      a.clear(); a.append(new_label); a["href"] = href
+                      if href.startswith("/"):
+                          a["target"] = "_top"
+                      elif href.startswith("http"):
+                          a["target"] = "_blank"; a["rel"] = "noreferrer"
+
+          # Announcement/hero actions.
+          for a in soup.find_all("a"):
+              label = " ".join(a.stripped_strings).strip().lower()
+              if label in {"explore projects", "browse the webcanbe marketplace"}:
+                  a["href"]="/browse"; a["target"]="_top"
+
+          # IDs for intra-page links.
+          for section in soup.find_all("section"):
+              body = " ".join(section.stripped_strings)
+              if "The source is the product" in body and not section.get("id"):
+                  section["id"]="about"; break
+
+          # Brand theme only; structure unchanged.
+          style = soup.new_tag("style", id="wcb-brand-overrides")
+          style.string = """
+          :root,.dark {
+            --brand:#5b5cf0 !important;
+            --brand-foreground:#8f90ff !important;
+            --primary:#5b5cf0 !important;
+            --ring:#5b5cf0 !important;
+            --light:#5b5cf0 !important;
+            --light-foreground:#a9aaff !important;
+          }
+          ::selection { background:#7778ff; color:#fff; }
+          """
+          soup.head.append(style)
+
+          # Metadata.
+          if soup.title: soup.title.string="WebCanBe"
+          for meta in soup.find_all("meta"):
+              key=meta.get("name") or meta.get("property")
+              if key in {"description","og:description","twitter:description"}:
+                  meta["content"]="Edit visually. Leave with real code you own."
+              elif key in {"og:title","og:site_name","twitter:title"}:
+                  meta["content"]="WebCanBe"
+
+          # Internal WebCanBe routes escape the iframe.
+          for a in soup.find_all("a", href=True):
+              h=a["href"]
+              if h.startswith("/") and not h.startswith("//"):
+                  a["target"]="_top"
+
+          visible=" ".join(soup.stripped_strings)
+          forbidden=("Color theme","Border radius","Lines On","Lines Off","Shuffle")
+          if any(x in visible for x in forbidden):
+              raise SystemExit("configurator still visible")
+          if "Edit visually. Leave with real code you own." not in visible:
+              raise SystemExit("hero missing")
+          if "Documentation" not in visible or "Working Projects" not in visible:
+              raise SystemExit("required retained structures missing")
+
+          out=Path("public/wcb-landing")
+          out.mkdir(parents=True, exist_ok=True)
+          (out/"index.html").write_text(str(soup), encoding="utf-8")
+          (out/"copy.txt").write_text(visible, encoding="utf-8")
+          (out/"SOURCE.txt").write_text(
+              "Visual structure retained from https://www.launchuicomponents.com/.\n"
+              "Only WebCanBe copy, links, brand color, top GitHub/X removal, and configurator removal are intentional.\n",
+              encoding="utf-8"
+          )
+          PY
+
+          cat > src/phase4-landing-retention.test.ts <<'EOF'
+          import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          describe("Phase 4 landing retention contract", () => {
+            it("retains Launch UI sections while using WebCanBe copy and marketplace routing", () => {
+              const html = fs.readFileSync("public/wcb-landing/index.html", "utf8")
+              const copy = fs.readFileSync("public/wcb-landing/copy.txt", "utf8")
+              for (const kept of [
+                "Documentation",
+                "Getting started",
+                "Visual editor",
+                "Code editor",
+                "Working Projects",
+                "Questions about ownership",
+                "Choose how you want to work",
+                "Everything edits the same source.",
+              ]) expect(copy).toContain(kept)
+
+              expect(copy).toContain("Edit visually. Leave with real code you own.")
+              expect(copy).not.toContain("Color theme")
+              expect(copy).not.toContain("Border radius")
+              expect(copy).not.toContain("Shuffle")
+              expect(html).toContain('href="/browse"')
+              expect(html).toContain("mounted")
+            })
+          })
+          EOF
+
+      - name: Verify retained landing
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npx vitest run             src/phase4-landing-retention.test.ts             src/phase4-landing-hero.test.ts             src/phase4-landing-webcanbe.test.ts             src/phase4-public-flow.test.ts             src/phase4-brand-auth.test.ts
+          npm run build
+
+      - name: Commit retained landing
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/restore-full-launch-ui-structure.yml
+          git add public/wcb-landing src/phase4-landing-retention.test.ts
+          git commit -m "Restore full Launch UI landing structure"
+          git push origin HEAD:phase-4-product-ux
