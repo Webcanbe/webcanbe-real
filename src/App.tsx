@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Sun, SlidersHorizontal, Download, CreditCard, BadgeCheck } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, RotateCcw } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -336,8 +336,14 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
   const [teamMenu, setTeamMenu] = useState(false)
   const [accountMenu, setAccountMenu] = useState(false)
   const [profileMenu, setProfileMenu] = useState(false)
+  const [configOpen, setConfigOpen] = useState(false)
   const [workspaceOpen, setWorkspaceOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [theme, setTheme] = useState<"system"|"light"|"dark">(() => { try { const value = localStorage.getItem("wcb-dashboard-theme"); return value === "system" || value === "dark" ? value : "light" } catch { return "light" } })
+  const [sidebarVariant, setSidebarVariant] = useState<"inset"|"floating"|"sidebar">(() => { try { const value = localStorage.getItem("wcb-dashboard-sidebar"); return value === "inset" || value === "floating" ? value : "sidebar" } catch { return "sidebar" } })
+  const [layoutMode, setLayoutMode] = useState<"default"|"compact"|"full">(() => { try { const value = localStorage.getItem("wcb-dashboard-layout"); return value === "compact" || value === "full" ? value : "default" } catch { return "default" } })
+  const [direction, setDirection] = useState<"ltr"|"rtl">(() => { try { return localStorage.getItem("wcb-dashboard-direction") === "rtl" ? "rtl" : "ltr" } catch { return "ltr" } })
+  const [systemDark, setSystemDark] = useState(() => typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches === true)
 
   const choose = (next: DashboardView) => {
     onView(next)
@@ -357,15 +363,41 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSearchOpen(false); setTeamMenu(false); setAccountMenu(false); setProfileMenu(false)
+        setSearchOpen(false); setTeamMenu(false); setAccountMenu(false); setProfileMenu(false); setConfigOpen(false)
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true) }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [])
+  useEffect(() => {
+    const media = window.matchMedia?.("(prefers-color-scheme: dark)")
+    if (!media) return
+    const update = () => setSystemDark(media.matches)
+    update()
+    media.addEventListener?.("change", update)
+    return () => media.removeEventListener?.("change", update)
+  }, [])
+  useEffect(() => { try { localStorage.setItem("wcb-dashboard-theme", theme) } catch {} }, [theme])
+  useEffect(() => { try { localStorage.setItem("wcb-dashboard-sidebar", sidebarVariant) } catch {} }, [sidebarVariant])
+  useEffect(() => { try { localStorage.setItem("wcb-dashboard-layout", layoutMode) } catch {} }, [layoutMode])
+  useEffect(() => { try { localStorage.setItem("wcb-dashboard-direction", direction) } catch {} }, [direction])
 
-  return <div className={"rd-shell" + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
+  const effectiveTheme = theme === "system" ? (systemDark ? "dark" : "light") : theme
+  const setLayout = (next: "default"|"compact"|"full") => {
+    setLayoutMode(next)
+    if (next === "default") setSidebarOpen(true)
+    if (next === "compact") setSidebarOpen(false)
+    if (next === "full") setSidebarOpen(false)
+  }
+  const resetConfig = () => {
+    setTheme("light")
+    setSidebarVariant("sidebar")
+    setLayout("default")
+    setDirection("ltr")
+  }
+
+  return <div dir={direction} className={"rd-shell rd-theme-" + effectiveTheme + " rd-variant-" + sidebarVariant + " rd-layout-" + layoutMode + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
     <aside className="rd-sidebar">
       <div className="rd-sidebar-header">
         <div className="rd-menu-anchor">
@@ -456,8 +488,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
         </nav>
         <div className="rd-header-actions">
           <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
-          <button className="rd-header-icon" type="button" aria-label="Theme"><Sun/></button>
-          <button className="rd-header-icon" type="button" aria-label="Display settings"><SlidersHorizontal/></button>
+          <button className={"rd-header-icon" + (configOpen ? " is-open" : "")} type="button" aria-label="Open theme settings" aria-expanded={configOpen} onClick={() => { setConfigOpen(true); setProfileMenu(false); setAccountMenu(false); setTeamMenu(false) }}><SettingsIcon/></button>
           <button className="rd-header-icon" type="button" aria-label="Notifications" onClick={() => choose("notifications")}><Bell/></button>
           <div className="rd-menu-anchor">
             <button className={"rd-header-avatar" + (profileMenu ? " is-open" : "")} type="button" aria-label="Profile" aria-expanded={profileMenu} onClick={() => { setProfileMenu(v => !v); setAccountMenu(false); setTeamMenu(false) }}>WC</button>
@@ -477,6 +508,27 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
       {children}
     </div>
 
+    {configOpen && <>
+      <button className="rd-config-backdrop" type="button" aria-label="Close theme settings" onClick={() => setConfigOpen(false)}/>
+      <aside className="rd-config-drawer" role="dialog" aria-modal="true" aria-label="Theme Settings">
+        <header className="rd-config-head"><div><h2>Theme Settings</h2><p>Adjust the appearance and layout to suit your preferences.</p></div><button type="button" aria-label="Close theme settings" onClick={() => setConfigOpen(false)}><X/></button></header>
+        <div className="rd-config-scroll">
+          <section className="rd-config-section"><b>Theme</b><div className="rd-config-grid three">
+            {(["system","light","dark"] as const).map(value => <button type="button" key={value} className={"rd-config-choice theme-" + value + (theme === value ? " selected" : "")} onClick={() => setTheme(value)}><span className="rd-config-preview"><i/><i/><i/></span><small>{value === "system" ? "System" : value === "light" ? "Light" : "Dark"}</small></button>)}
+          </div></section>
+          <section className="rd-config-section"><b>Sidebar</b><div className="rd-config-grid three">
+            {(["inset","floating","sidebar"] as const).map(value => <button type="button" key={value} className={"rd-config-choice" + (sidebarVariant === value ? " selected" : "")} onClick={() => setSidebarVariant(value)}><span className={"rd-config-preview sidebar-" + value}><i/><i/></span><small>{value === "inset" ? "Inset" : value === "floating" ? "Floating" : "Sidebar"}</small></button>)}
+          </div></section>
+          <section className="rd-config-section"><b>Layout</b><div className="rd-config-grid three">
+            {(["default","compact","full"] as const).map(value => <button type="button" key={value} className={"rd-config-choice" + (layoutMode === value ? " selected" : "")} onClick={() => setLayout(value)}><span className={"rd-config-preview layout-" + value}><i/><i/></span><small>{value === "default" ? "Default" : value === "compact" ? "Compact" : "Full layout"}</small></button>)}
+          </div></section>
+          <section className="rd-config-section"><b>Direction</b><div className="rd-config-grid two">
+            {(["ltr","rtl"] as const).map(value => <button type="button" key={value} className={"rd-config-choice" + (direction === value ? " selected" : "")} onClick={() => setDirection(value)}><span className={"rd-config-preview direction-" + value}><i>←</i><i>→</i></span><small>{value === "ltr" ? "Left to Right" : "Right to Left"}</small></button>)}
+          </div></section>
+        </div>
+        <footer className="rd-config-footer"><button type="button" onClick={resetConfig}><RotateCcw/>Reset</button></footer>
+      </aside>
+    </>}
     {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><div className="rd-search-dialog" onMouseDown={event => event.stopPropagation()}><Search/><input autoFocus placeholder="Search Webcanbe"/><kbd>ESC</kbd></div></div>}
   </div>
 }

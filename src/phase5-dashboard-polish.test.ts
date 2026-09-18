@@ -58,6 +58,26 @@ describe("Phase 5 Ropean dashboard interactions", () => {
     expect(css).toContain("@media(prefers-reduced-motion:reduce)")
   })
 
+  it("removes the standalone brightness button and restores the original config drawer trigger", () => {
+    expect(dashboard).not.toContain('aria-label="Theme"')
+    expect(dashboard).not.toContain("<Sun/>")
+    expect(dashboard).not.toContain("SlidersHorizontal")
+    expect(dashboard).toContain('aria-label="Open theme settings"')
+    expect(dashboard).toContain("<SettingsIcon/>")
+    expect(dashboard).toContain("rd-config-drawer")
+    expect(dashboard).toContain("Theme Settings")
+    expect(dashboard).toContain("setConfigOpen(true)")
+  })
+
+  it("keeps config drawer appearance and layout controls functional", () => {
+    expect(dashboard).toContain('setTheme(value)')
+    expect(dashboard).toContain('setSidebarVariant(value)')
+    expect(dashboard).toContain('setLayout(value)')
+    expect(dashboard).toContain('setDirection(value)')
+    expect(dashboard).toContain("resetConfig")
+    expect(dashboard).toContain('localStorage.setItem("wcb-dashboard-theme"')
+  })
+
   it("keeps the compact search dialog and live purchase badge", () => {
     expect(dashboard).toContain('className="rd-search-dialog"')
     expect(dashboard).toContain('placeholder="Search Webcanbe"')
