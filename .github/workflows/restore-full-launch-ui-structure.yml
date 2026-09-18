@@ -84,17 +84,28 @@ jobs:
           # 1) top GitHub/X social controls
           # 2) Preview/Theme/Radius/Appearance/Lines/Shuffle configurator
           # 3) footer theme dropdown
-          footer = soup.find("footer")
-          for a in list(soup.find_all("a", href=True)):
-              href = a.get("href", "").lower()
-              inside_footer = footer is not None and footer in a.parents
-              if not inside_footer and ("github.com/launch-ui" in href or "twitter.com/mikolajdobrucki" in href or "x.com/mikolajdobrucki" in href):
-                  classes = set(a.get("class") or [])
-                  label = " ".join(a.stripped_strings).strip().lower()
-                  if "size-9" in classes or label in {"twitter", "x"}:
+          footer = soup.find(attrs={"data-slot": "footer"}) or soup.find("footer")
+          top_nav = None
+          for nav in soup.find_all("nav"):
+              classes = set(nav.get("class") or [])
+              if "sticky" in classes and ("top-0" in classes or "sm:top-10" in classes):
+                  top_nav = nav
+                  break
+
+          # Remove only GitHub/X controls from the top navigation.
+          if top_nav is not None:
+              for a in list(top_nav.find_all("a", href=True)):
+                  href = a.get("href", "").lower()
+                  if "github.com/launch-ui" in href or "twitter.com/mikolajdobrucki" in href or "x.com/mikolajdobrucki" in href:
                       a.decompose()
-                  else:
-                      # Hero GitHub CTA becomes WebCanBe account CTA; layout stays.
+
+          # Keep the hero secondary CTA slot, but point it at WebCanBe signup.
+          hero = soup.find("div", class_="hero-variants")
+          if hero is not None:
+              for a in hero.find_all("a", href=True):
+                  href = a.get("href", "").lower()
+                  label = " ".join(a.stripped_strings).strip().lower()
+                  if "github.com/launch-ui" in href or label == "github":
                       a["href"] = "/signup"
                       a["target"] = "_top"
                       a.clear()
@@ -132,6 +143,21 @@ jobs:
               "Last updated: 4 Sep 2026": "Source-first by design",
               "Built with industry-standard tools and best practices": "Built around real source, not a proprietary canvas",
               "Trusted by world's leading companies": "One source across the whole workflow",
+              "Used by 54.4k+ companies and builders": "Built around one canonical source",
+              "AxionLabs": "Marketplace",
+              "Synthetikai": "Releases",
+              "Driftbase": "Visual",
+              "Flowrate": "Code",
+              "Quantify": "History",
+              "Orbitra": "Export",
+              "Figma": "Visual editor",
+              "React": "React source",
+              "TypeScript": "TypeScript source",
+              "Shadcn/ui": "Compatible UI",
+              "Tailwind": "Tailwind projects",
+              "Check out my": "Explore the",
+              "free course": "marketplace",
+              "designwithcode.dev": "webcanbe.com",
               "It's all about design quality": "The source is the product",
               "In a world where everybody can vibe-code a new thing overnight, the key is to stand out. Generic-looking shadcn/ui blocks won't help you to get noticed. With Launch UI, you can make sure that your design is unique and memorable.": "Marketplace releases, visual editing, code editing, history, and export stay attached to the same real project source.",
               "Design-first": "Visual when you want it",
@@ -205,6 +231,15 @@ jobs:
               "Get started with Launch UI and build your landing page in no time": "Browse working projects and keep building from source you own.",
               "Get started with Launch UI and build your landing page in no time.": "Browse working projects and keep building from source you own.",
               "Ready to elevate your design?": "Ready to build without giving up the source?",
+              "Marcin Zaremski": "Visual mode",
+              "Marcus Rodriguez": "Code mode",
+              "Darius Flynn": "Source ownership",
+              "Indie Hacker": "WebCanBe principle",
+              "Tech Lead": "WebCanBe principle",
+              "Web Developer": "WebCanBe principle",
+              "“I love that I don't need to think about the design because Launch UI perfectly solves it for me. If you value flexibility over written-in-stone components, I can highly recommend it.”": "“Make interface changes visually while the real project source remains authoritative.”",
+              "“What stands out about Launch UI is its flexibility. We've built everything from dashboards to marketing sites using these components, and they adapt beautifully to every context.”": "“Open the actual source whenever precision matters. Visual and Code stay attached to the same project.”",
+              "“I've used many UI libraries over the years, but Launch UI strikes the perfect balance between flexibility and structure. It's become an essential part of my toolkit.”": "“Export the project and continue in your own development workflow. The source stays yours.”",
               "View Pricing": "View plans",
               "© 2026 Mikołaj Dobrucki. All rights reserved": "© 2026 WebCanBe. All rights reserved",
               "© 2026 mikolajdobrucki. All rights reserved": "© 2026 WebCanBe. All rights reserved",
@@ -299,6 +334,25 @@ jobs:
                       elif s in {"Indie Hacker","Tech Lead","Web Developer"}:
                           t.replace_with("WebCanBe principle")
 
+          # Rewrite the pricing cards in place without deleting them or inventing fixed WebCanBe prices.
+          pricing_section = None
+          for section in soup.find_all("section"):
+              if "Choose how you want to work" in " ".join(section.stripped_strings):
+                  pricing_section = section
+                  break
+          if pricing_section is not None:
+              price_nodes = [n for n in pricing_section.find_all(string=True) if n.strip()]
+              for node in price_nodes:
+                  s = node.strip()
+                  if s == "$":
+                      node.replace_with("")
+                  elif s == "0":
+                      node.replace_with("Browse")
+                  elif s == "99":
+                      node.replace_with("Project")
+                  elif s == "499":
+                      node.replace_with("Creator")
+
           # Convert stats to truthful product facts while retaining all stat cards.
           stat_map = {
               "54.4": "1",
@@ -370,13 +424,13 @@ jobs:
                   a["target"] = "_top"
 
           # Footer: keep all columns/links; only rewrite destinations/text to WebCanBe equivalents.
-          footer = soup.find("footer")
+          footer = soup.find(attrs={"data-slot": "footer"}) or soup.find("footer")
           if footer:
               footer_map = {
                   "Documentation": ("Documentation", "https://github.com/Webcanbe/webcanbe-real#readme"),
                   "Getting started": ("Getting started", "/browse"),
-                  "Customization": ("Visual editor", "/workspace/northstar"),
-                  "Figma files": ("Code editor", "/workspace/northstar"),
+                  "Customization": ("Customization", "/workspace/northstar"),
+                  "Figma files": ("Visual editor", "/workspace/northstar"),
                   "Product": ("Product", "/browse"),
                   "Changelog": ("Changelog", "https://github.com/Webcanbe/webcanbe-real/commits/phase-4-product-ux/"),
                   "About": ("About", "#about"),
