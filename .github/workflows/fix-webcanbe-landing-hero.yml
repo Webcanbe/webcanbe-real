@@ -1,0 +1,117 @@
+name: Fix WebCanBe landing hero visibility
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Restore mounted visual state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+
+          p = Path("public/wcb-landing/index.html")
+          html = p.read_text(encoding="utf-8")
+          soup = BeautifulSoup(html, "html.parser")
+
+          root = soup.find("html")
+          if root is None:
+              raise SystemExit("missing html root")
+          classes = list(root.get("class") or [])
+          if "mounted" not in classes:
+              classes.append("mounted")
+          root["class"] = classes
+
+          # The configurator is gone, so its now-empty floating shell should be gone too.
+          for nav in list(soup.find_all("nav")):
+              classes = set(nav.get("class") or [])
+              if {"fixed", "bottom-3", "left-1/2", "z-50"}.issubset(classes) and not " ".join(nav.stripped_strings):
+                  nav.decompose()
+
+          # Fix remaining hero CTAs/announcement links to WebCanBe routes.
+          hero = soup.find("div", class_="hero-variants")
+          if hero:
+              for a in hero.find_all("a"):
+                  label = " ".join(a.stripped_strings).strip().lower()
+                  if label in {"get started", "explore projects"}:
+                      a["href"] = "/browse"
+                      a["target"] = "_top"
+                  elif label in {"github", "create account"}:
+                      a["href"] = "/signup"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Create account")
+
+          # Remove the stale external course wording left in the slim announcement bar.
+          for node in list(soup.find_all(string=True)):
+              s = str(node)
+              if "Check out my" in s or "free course" in s or "designwithcode.dev" in s:
+                  parent = node.parent
+                  if parent:
+                      if "designwithcode.dev" in " ".join(parent.stripped_strings):
+                          parent.decompose()
+
+          out = str(soup)
+          if 'class="mounted"' not in out and "mounted" not in str(root.get("class")):
+              raise SystemExit("mounted state not applied")
+          if "Edit visually. Leave with real code you own." not in out:
+              raise SystemExit("hero copy missing")
+          p.write_text(out, encoding="utf-8")
+
+          copy = Path("public/wcb-landing/copy.txt")
+          if copy.exists():
+              text = copy.read_text(encoding="utf-8")
+              text = text.replace("Check out my free course designwithcode.dev", "")
+              copy.write_text(text, encoding="utf-8")
+          PY
+
+          cat > src/phase4-landing-hero.test.ts <<'EOF'
+          import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          describe("Phase 4 landing hero visibility", () => {
+            it("renders the Launch UI animation shell in its mounted state", () => {
+              const html = fs.readFileSync("public/wcb-landing/index.html", "utf8")
+              expect(html).toContain("mounted")
+              expect(html).toContain("Edit visually. Leave with real code you own.")
+              expect(html).toContain('class="hero-variants"')
+              expect(html).not.toContain("designwithcode.dev")
+            })
+          })
+          EOF
+
+      - name: Verify hero and app build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npx vitest run src/phase4-landing-hero.test.ts src/phase4-landing-webcanbe.test.ts src/phase4-public-flow.test.ts
+          npm run build
+
+      - name: Commit hero visibility fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/fix-webcanbe-landing-hero.yml
+          git add public/wcb-landing/index.html public/wcb-landing/copy.txt src/phase4-landing-hero.test.ts
+          git commit -m "Fix WebCanBe landing hero visibility"
+          git push origin HEAD:phase-4-product-ux
