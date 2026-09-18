@@ -1,0 +1,230 @@
+name: Fix auth modal fidelity
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Correct auth demo modal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          app = Path("src/App.tsx")
+          text = app.read_text()
+          start = text.index("function Auth({ signup = false }")
+          end = text.index("\n\nconst docPages", start)
+          auth = r'''function Auth({ signup = false }: { signup?: boolean }) {
+            const _hostedBoundary = async () => hostedProductClient.authStart()
+            void _hostedBoundary
+            return <main className="auth auth-demo" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
+              <div className="auth-demo-underlay" aria-hidden="true">
+                <aside className="auth-demo-underlay-sidebar">
+                  <div className="auth-demo-underlay-brand"><Mark/><span>WebCanBe</span></div>
+                  <div className="auth-demo-underlay-nav"><span>Dashboard</span><span>My projects</span><span>Marketplace</span><span>Documentation</span></div>
+                  <div className="auth-demo-underlay-foot"><span>Settings</span><span>Help</span></div>
+                </aside>
+                <section className="auth-demo-underlay-main">
+                  <header><span>WebCanBe</span><div><i/><i/></div></header>
+                  <div className="auth-demo-underlay-content">
+                    <div className="auth-demo-underlay-title"/>
+                    <div className="auth-demo-underlay-copy"/>
+                    <div className="auth-demo-underlay-input"/>
+                  </div>
+                </section>
+              </div>
+              <div className="auth-demo-backdrop"/>
+              <section className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+                <button className="auth-demo-close" type="button" aria-label="Close"><X/></button>
+                <h1 id="auth-title">Log in or sign up</h1>
+                <p>Get smarter responses, upload files and images, and more.</p>
+                <div className="auth-demo-actions">
+                  <button className="auth-demo-provider auth-provider-button" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
+                  <button className="auth-demo-provider" type="button"><Github/><span>Continue with GitHub</span></button>
+                  <button className="auth-demo-provider" type="button"><Phone/><span>Continue with phone</span></button>
+                </div>
+                <div className="auth-demo-divider"><span>OR</span></div>
+                <input className="auth-demo-email" type="email" placeholder="Email address" aria-label="Email address"/>
+                <button className="auth-demo-continue" type="button">Continue</button>
+                <p className="auth-demo-terms">By continuing, you agree to our Terms of Use and acknowledge our Privacy Policy.</p>
+              </section>
+            </main>
+          }'''
+          text = text[:start] + auth + text[end:]
+          app.write_text(text)
+
+          css = Path("src/phase4-final-ui.css")
+          source = css.read_text()
+          begin = source.index("/* ChatGPT-like static auth demo */")
+          finish = source.index("/* Documentation */", begin)
+          auth_css = r'''/* ChatGPT-like static auth demo — UI only */
+          .auth.auth-demo{
+            position:fixed!important;
+            inset:0!important;
+            z-index:200!important;
+            display:grid!important;
+            grid-template-columns:1fr!important;
+            grid-template-rows:1fr!important;
+            place-items:center!important;
+            width:100vw!important;
+            height:100vh!important;
+            min-height:100vh!important;
+            padding:24px!important;
+            overflow:hidden!important;
+            background:#f7f7f8!important;
+            color:#202124!important;
+          }
+          .auth-demo-underlay{
+            position:absolute;
+            inset:0;
+            display:grid;
+            grid-template-columns:236px minmax(0,1fr);
+            background:#fff;
+            color:#414247;
+            opacity:.98;
+            pointer-events:none;
+          }
+          .auth-demo-underlay-sidebar{
+            display:flex;
+            flex-direction:column;
+            padding:18px 14px;
+            border-right:1px solid #e8e8ea;
+            background:#f7f7f8;
+          }
+          .auth-demo-underlay-brand{display:flex;align-items:center;gap:9px;height:38px;padding:0 7px;font-size:12px;font-weight:650}
+          .auth-demo-underlay-brand .mark i{background:#242529}
+          .auth-demo-underlay-nav,.auth-demo-underlay-foot{display:flex;flex-direction:column;gap:4px;margin-top:22px}
+          .auth-demo-underlay-nav span,.auth-demo-underlay-foot span{height:34px;display:flex;align-items:center;padding:0 9px;border-radius:7px;color:#73747a;font-size:11px}
+          .auth-demo-underlay-nav span:first-child{background:#eeeeF2;color:#38393e}
+          .auth-demo-underlay-foot{margin-top:auto;padding-top:14px;border-top:1px solid #e5e5e8}
+          .auth-demo-underlay-main{min-width:0;background:#fff}
+          .auth-demo-underlay-main>header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #ededee;color:#6f7076;font-size:11px}
+          .auth-demo-underlay-main>header div{display:flex;gap:8px}.auth-demo-underlay-main>header i{width:30px;height:30px;border-radius:50%;background:#f3f3f5;border:1px solid #e8e8ea}
+          .auth-demo-underlay-content{width:min(760px,72vw);margin:13vh auto 0}
+          .auth-demo-underlay-title{width:44%;height:28px;border-radius:8px;background:#eeeeF1}
+          .auth-demo-underlay-copy{width:72%;height:12px;margin-top:16px;border-radius:5px;background:#f2f2f4}
+          .auth-demo-underlay-input{width:100%;height:54px;margin-top:110px;border:1px solid #e1e1e4;border-radius:18px;background:#fafafa}
+          .auth-demo-backdrop{
+            position:absolute;
+            inset:0;
+            background:rgba(22,23,27,.30);
+            backdrop-filter:blur(.8px);
+            -webkit-backdrop-filter:blur(.8px);
+          }
+          .auth.auth-demo>.auth-demo-modal{
+            position:relative!important;
+            z-index:2!important;
+            box-sizing:border-box!important;
+            width:min(448px,calc(100vw - 40px))!important;
+            max-width:448px!important;
+            min-width:0!important;
+            height:auto!important;
+            padding:38px 40px 28px!important;
+            margin:0!important;
+            border:1px solid rgba(255,255,255,.82)!important;
+            border-radius:24px!important;
+            background:rgba(255,255,255,.98)!important;
+            color:#202124!important;
+            box-shadow:0 20px 60px rgba(0,0,0,.24)!important;
+            backdrop-filter:blur(14px)!important;
+            -webkit-backdrop-filter:blur(14px)!important;
+            text-align:center!important;
+            overflow:visible!important;
+          }
+          .auth-demo-modal,.auth-demo-modal *,.auth-demo-modal *::before,.auth-demo-modal *::after{box-sizing:border-box}
+          .auth-demo-close{position:absolute;right:14px;top:14px;width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;color:#6f7076;border-radius:50%;padding:0}
+          .auth-demo-close:hover{background:#f3f3f4}.auth-demo-close svg{width:18px;height:18px}
+          .auth.auth-demo .auth-demo-modal h1{margin:0!important;color:#202124!important;font-size:22px!important;line-height:1.28!important;letter-spacing:-.03em!important;font-weight:620!important}
+          .auth.auth-demo .auth-demo-modal>p:not(.auth-demo-terms){max-width:315px;margin:18px auto 24px!important;color:#5f6066!important;font-size:13px!important;line-height:1.55!important}
+          .auth-demo-actions{width:100%;display:flex;flex-direction:column;gap:9px;margin:0 auto}
+          .auth.auth-demo .auth-demo-provider,
+          .auth.auth-demo .auth-provider-button{
+            width:100%!important;
+            max-width:none!important;
+            height:46px!important;
+            min-height:46px!important;
+            display:grid!important;
+            grid-template-columns:28px minmax(0,1fr) 28px!important;
+            align-items:center!important;
+            margin:0!important;
+            padding:0 14px!important;
+            border:1px solid #d6d6d9!important;
+            border-radius:999px!important;
+            background:#fff!important;
+            color:#2f3035!important;
+            box-shadow:none!important;
+            font-size:13px!important;
+            font-weight:520!important;
+            text-align:center!important;
+            transform:none!important;
+          }
+          .auth.auth-demo .auth-demo-provider:hover,
+          .auth.auth-demo .auth-provider-button:hover{background:#f8f8f9!important;border-color:#cfcfd3!important;transform:none!important}
+          .auth-demo-provider svg{width:17px;height:17px}.auth-demo-provider>span:last-child{grid-column:2}
+          .google-g{font-size:16px;font-weight:700;color:#4285f4;text-align:left}
+          .auth-demo-divider{width:100%;height:40px;display:flex;align-items:center;gap:13px;margin:0 auto;color:#8d8e94;font-size:10px}
+          .auth-demo-divider:before,.auth-demo-divider:after{content:"";height:1px;flex:1;background:#dedee1}
+          .auth.auth-demo .auth-demo-email{
+            width:100%!important;
+            max-width:none!important;
+            height:46px!important;
+            margin:0!important;
+            padding:0 14px!important;
+            border:1px solid #d4d4d8!important;
+            border-radius:999px!important;
+            background:#fff!important;
+            color:#242529!important;
+            font-size:13px!important;
+            outline:none!important;
+            box-shadow:none!important;
+          }
+          .auth.auth-demo .auth-demo-email:focus{border-color:#9a9aa1!important;box-shadow:0 0 0 1px #9a9aa1!important}
+          .auth-demo-email::placeholder{color:#8c8d93}
+          .auth-demo-continue{width:100%;height:46px;margin:10px 0 0;border:0;border-radius:999px;background:#202123;color:#fff;font-size:13px;font-weight:600}
+          .auth-demo-continue:hover{background:#2c2d30}
+          .auth-demo-terms{max-width:330px;margin:22px auto 0!important;color:#9a9aa1!important;font-size:9px!important;line-height:1.55!important}
+
+          @media(max-width:600px){
+            .auth.auth-demo{padding:14px!important}
+            .auth-demo-underlay{grid-template-columns:1fr}.auth-demo-underlay-sidebar{display:none}
+            .auth.auth-demo>.auth-demo-modal{width:min(100%,448px)!important;padding:34px 24px 24px!important;border-radius:20px!important}
+          }
+
+          '''
+          css.write_text(source[:begin] + auth_css + source[finish:])
+          PY
+
+      - name: Verify auth modal
+        run: |
+          set -euo pipefail
+          npm ci
+          npx vitest run src/phase4-brand-auth.test.ts src/phase4-operations.test.ts
+          npm run build
+
+      - name: Commit auth fidelity fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/fix-auth-modal-fidelity.yml
+          git add src/App.tsx src/phase4-final-ui.css
+          git commit -m "Fix auth modal fidelity"
+          git push origin HEAD:phase-4-product-ux
