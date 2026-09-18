@@ -3,30 +3,32 @@ import { describe, expect, it } from "vitest"
 
 const app = fs.readFileSync("src/App.tsx", "utf8")
 
-describe("Phase 5 dashboard polish", () => {
-  it("keeps dashboard navigation inside the real protected dashboard route", () => {
-    expect(app).not.toContain('["Dashboard", "/dashboard-preview"')
-    expect(app).not.toContain('<Link to="/dashboard-preview"')
-    expect(app).toContain('["Dashboard", "/dashboard"')
+describe("Phase 5 dashboard restore", () => {
+  const dashboard = app.slice(app.indexOf("function RopeanDashboardShell"), app.indexOf("function Settings()"))
+
+  it("keeps sidebar navigation inside the Ropean dashboard shell", () => {
+    expect(dashboard).toContain("onView(target)")
+    expect(dashboard).toContain('onClick={() => onView("projects")}')
+    expect(dashboard).toContain('onClick={() => onView("marketplace")}')
+    expect(dashboard).not.toContain('<Link key={label} to={to}')
   })
 
-  it("removes the hardcoded purchases badge", () => {
-    expect(app).not.toContain('MessagesSquare, "3"')
-    expect(app).toContain("purchaseBadge > 0 ? String(purchaseBadge)")
+  it("restores the original dashboard profile and header controls without custom popovers", () => {
+    expect(dashboard).toContain('aria-label="Notifications"><Bell/>')
+    expect(dashboard).toContain('aria-label="Profile">WC</button>')
+    expect(dashboard).toContain('<b>Webcanbe account</b><small>Signed in</small>')
+    expect(dashboard).not.toContain("rd-header-popover")
+    expect(dashboard).not.toContain("rd-account-popover")
   })
 
-  it("makes search, notifications, profile and activity controls functional", () => {
-    expect(app).toContain("rd-search-results")
-    expect(app).toContain("setNoticesOpen")
-    expect(app).toContain("setHeaderAccountOpen")
-    expect(app).toContain('setTab("activity")')
-    expect(app).toContain('onKeyDown={event => { if (event.key === "Enter"')
+  it("restores the compact original search dialog instead of the custom result panel", () => {
+    expect(dashboard).toContain('className="rd-search-dialog"')
+    expect(dashboard).toContain('placeholder="Search Webcanbe"')
+    expect(dashboard).not.toContain("rd-search-results")
   })
 
-  it("marks unavailable appearance controls as disabled instead of pretending they work", () => {
-    expect(app).toContain('aria-label="Light theme"')
-    expect(app).toContain('aria-label="Display settings unavailable"')
-    expect(app).toContain("disabled><Sun/>")
-    expect(app).toContain("disabled><SlidersHorizontal/>")
+  it("uses a live purchases badge without the old hardcoded value", () => {
+    expect(dashboard).toContain("purchaseBadge > 0 ? String(purchaseBadge)")
+    expect(dashboard).not.toContain('MessagesSquare, "3"')
   })
 })

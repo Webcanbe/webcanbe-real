@@ -51,7 +51,7 @@ function go(to: string) {
   }, 120)
 }
 function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
-function Mark() { return <span className="wcb-logo-wrap"><img className="wcb-logo wcb-logo-full" src="/brand/webcanbe-logo.svg" alt="Webcanbe"/><img className="wcb-logo wcb-logo-mark" src="/brand/webcanbe-mark.svg" alt="" aria-hidden="true"/></span> }
+function Mark() { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src="/favicon.png" alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
 function Arrow() { return <span className="arrow">↗</span> }
 
 function Landing() { return <Home onNavigate={go} /> }
@@ -327,48 +327,35 @@ function Purchases() {
   return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active"} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
 }
 
-function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React.ReactNode; purchaseBadge?: number }) {
-  const auth = productionAuthMode()
+type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "workspace" | "docs" | "settings" | "help"
+
+function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView: (view: DashboardView) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [noticesOpen, setNoticesOpen] = useState(false)
-  const [sidebarAccountOpen, setSidebarAccountOpen] = useState(false)
-  const [headerAccountOpen, setHeaderAccountOpen] = useState(false)
-  const general: Array<[string,string,typeof LayoutDashboard,string]> = [
-    ["Dashboard", "/dashboard", LayoutDashboard, ""],
-    ["My projects", "/projects", ListTodo, ""],
-    ["Marketplace", "/browse", PackageCheck, ""],
-    ["Purchases", "/purchases", MessagesSquare, purchaseBadge > 0 ? String(purchaseBadge) : ""],
-    ["Creator Studio", "/seller", Users, ""],
+  const general: Array<[string,DashboardView,typeof LayoutDashboard,string]> = [
+    ["Dashboard", "overview", LayoutDashboard, ""],
+    ["My projects", "projects", ListTodo, ""],
+    ["Marketplace", "marketplace", PackageCheck, ""],
+    ["Purchases", "purchases", MessagesSquare, purchaseBadge > 0 ? String(purchaseBadge) : ""],
+    ["Creator Studio", "creator", Users, ""],
   ]
-  const searchItems = [
-    ...general.map(([label,to,Icon]) => [label,to,Icon] as const),
-    ["Workspace","/workspace/phase1-fixture",ShieldCheck] as const,
-    ["Documentation","/docs",Bug] as const,
-    ["Settings","/settings",Settings2] as const,
-    ["Help Center","/docs",HelpCircle] as const,
-  ]
-  const searchResults = searchItems.filter(([label]) => label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+  const navButton = (label: string, target: DashboardView, Icon: typeof LayoutDashboard, badge = "") =>
+    <button key={label} type="button" className={"rd-nav-button" + (view === target ? " active" : "")} onClick={() => onView(target)}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</button>
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { setSearchOpen(false); setNoticesOpen(false); setSidebarAccountOpen(false); setHeaderAccountOpen(false); return }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true); setSearchQuery("") }
+      if (event.key === "Escape") setSearchOpen(false)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true) }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [])
-  const signOut = async () => {
-    if (auth) { try { await hostedProductClient.logout() } catch {} }
-    else { try { sessionStorage.removeItem("wcb-demo-auth") } catch {} }
-    window.dispatchEvent(new Event("wcb:auth-changed"))
-    go("/")
-  }
+
   return <div className={"rd-shell" + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
     <aside className="rd-sidebar">
       <div className="rd-sidebar-header">
-        <button className="rd-team-switcher" type="button" onClick={() => go("/projects")} aria-label="Open Webcanbe projects">
-          <span className="rd-team-copy rd-team-brand-copy"><Mark/><small>Source-first workspace</small></span>
+        <button className="rd-team-switcher" type="button">
+          <span className="rd-team-logo rd-team-official-logo"><img src="/favicon.png" alt="" aria-hidden="true"/></span>
+          <span className="rd-team-copy"><b>Webcanbe</b><small>Source-first workspace</small></span>
           <ChevronsUpDown/>
         </button>
         <div className="rd-app-title">
@@ -379,63 +366,87 @@ function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React
       <div className="rd-sidebar-content">
         <section className="rd-nav-group">
           <span className="rd-nav-label">General</span>
-          {general.map(([label,to,Icon,badge]) => <Link key={label} to={to} className={label === "Dashboard" ? "active" : ""}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</Link>)}
-          <Link className="rd-nav-expand" to="/workspace/phase1-fixture"><ShieldCheck/><span>Source-backed editing</span><ChevronDown/></Link>
+          {general.map(([label,target,Icon,badge]) => navButton(label,target,Icon,badge))}
+          <button className={"rd-nav-expand" + (view === "workspace" ? " active" : "")} type="button" onClick={() => onView("workspace")}><ShieldCheck/><span>Source-backed editing</span><ChevronDown/></button>
         </section>
         <section className="rd-nav-group">
           <span className="rd-nav-label">Pages</span>
-          <Link to="/workspace/phase1-fixture"><ShieldCheck/><span>Workspace</span><ChevronDown/></Link>
-          <Link to="/docs"><Bug/><span>Documentation</span><ChevronDown/></Link>
+          {navButton("Workspace","workspace",ShieldCheck)}
+          {navButton("Documentation","docs",Bug)}
         </section>
         <section className="rd-nav-group">
           <span className="rd-nav-label">Other</span>
-          <Link to="/settings"><Settings2/><span>Settings</span><ChevronDown/></Link>
-          <Link to="/docs"><HelpCircle/><span>Help Center</span></Link>
+          {navButton("Settings","settings",Settings2)}
+          {navButton("Help Center","help",HelpCircle)}
         </section>
       </div>
       <div className="rd-sidebar-footer">
-        <button type="button" onClick={() => { setSidebarAccountOpen(v => !v); setHeaderAccountOpen(false); setNoticesOpen(false) }} aria-expanded={sidebarAccountOpen}><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Account menu</small></span><ChevronsUpDown/></button>
-        {sidebarAccountOpen && <div className="rd-account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}
+        <button type="button"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span><ChevronsUpDown/></button>
       </div>
     </aside>
     <div className="rd-content">
       <header className="rd-header">
         <button className="rd-sidebar-trigger" type="button" aria-label="Sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
         <span className="rd-separator"/>
-        <nav className="rd-topnav"><Link to="/dashboard" className="active">Overview</Link><Link to="/projects">Projects</Link><Link to="/browse">Marketplace</Link><Link to="/settings">Settings</Link></nav>
+        <nav className="rd-topnav">
+          <button type="button" className={view === "overview" ? "active" : ""} onClick={() => onView("overview")}>Overview</button>
+          <button type="button" className={view === "projects" ? "active" : ""} onClick={() => onView("projects")}>Projects</button>
+          <button type="button" className={view === "marketplace" ? "active" : ""} onClick={() => onView("marketplace")}>Marketplace</button>
+          <button type="button" className={view === "settings" ? "active" : ""} onClick={() => onView("settings")}>Settings</button>
+        </nav>
         <div className="rd-header-actions">
-          <button className="rd-search" type="button" onClick={() => { setSearchOpen(true); setSearchQuery("") }}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
-          <button className="rd-header-icon" type="button" aria-label="Light theme" title="Webcanbe is light-only right now" disabled><Sun/></button>
-          <button className="rd-header-icon" type="button" aria-label="Display settings unavailable" title="Display settings are not enabled yet" disabled><SlidersHorizontal/></button>
-          <div className="rd-header-popover-wrap"><button className="rd-header-icon" type="button" aria-label="Notifications" aria-expanded={noticesOpen} onClick={() => { setNoticesOpen(v => !v); setHeaderAccountOpen(false); setSidebarAccountOpen(false) }}><Bell/></button>{noticesOpen && <div className="rd-header-popover"><b>No new notifications</b><p>Project and account alerts will appear here when available.</p></div>}</div>
-          <div className="rd-header-popover-wrap"><button className="rd-header-avatar" type="button" aria-label="Account menu" aria-expanded={headerAccountOpen} onClick={() => { setHeaderAccountOpen(v => !v); setSidebarAccountOpen(false); setNoticesOpen(false) }}>WC</button>{headerAccountOpen && <div className="rd-header-popover rd-profile-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}</div>
+          <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
+          <button className="rd-header-icon" type="button" aria-label="Theme"><Sun/></button>
+          <button className="rd-header-icon" type="button" aria-label="Display settings"><SlidersHorizontal/></button>
+          <button className="rd-header-icon" type="button" aria-label="Notifications"><Bell/></button>
+          <button className="rd-header-avatar" type="button" aria-label="Profile">WC</button>
         </div>
       </header>
       {children}
     </div>
-    {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><section className="rd-search-panel" role="dialog" aria-modal="true" aria-label="Search Webcanbe" onMouseDown={event => event.stopPropagation()}><div className="rd-search-dialog"><Search/><input autoFocus value={searchQuery} onChange={event => setSearchQuery(event.target.value)} onKeyDown={event => { if (event.key === "Enter" && searchResults[0]) { setSearchOpen(false); go(searchResults[0][1]) } }} placeholder="Search Webcanbe"/><kbd>ESC</kbd></div><div className="rd-search-results">{searchResults.map(([label,to,Icon]) => <button type="button" key={label+to} onClick={() => { setSearchOpen(false); go(to) }}><span><Icon/>{label}</span><small>{to}</small></button>)}</div></section></div>}
+    {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><div className="rd-search-dialog" onMouseDown={event => event.stopPropagation()}><Search/><input autoFocus placeholder="Search Webcanbe"/><kbd>ESC</kbd></div></div>}
   </div>
 }
 
 function Dashboard() {
   const lib = useProductLibrary()
-  const [tab, setTab] = useState<"overview"|"activity">("overview")
+  const [view, setView] = useState<DashboardView>("overview")
   const working = lib.hosted
     ? lib.copies.map(copy => ({ project: releaseProject(lib.catalog, copy.releaseId, copy.workspaceProjectId), href: "/workspace/" + copy.workspaceProjectId }))
     : projects.slice(0,3).map(project => ({ project, href: "/workspace/" + project.id }))
   const purchaseCount = lib.hosted ? lib.entitlements.length : projects.slice(3).length
   const activePurchases = lib.hosted ? lib.entitlements.filter(item => item.status === "active").length : purchaseCount
   const attention = lib.hosted ? lib.entitlements.filter(item => item.status !== "active").length : 0
+  const catalog = lib.catalog.length ? lib.catalog : projects
 
-  return <RopeanDashboardShell purchaseBadge={purchaseCount}>
+  const projectRows = (items: Array<{ project: Project; href: string }>) => <div className="rd-project-list">
+    {items.length ? items.slice(0,8).map(({project,href}) => <Link to={href} key={href} className="rd-project-row">
+      <span className={"rd-project-thumb " + project.color}/>
+      <span className="rd-project-copy"><b>{project.title}</b><small>{project.stack.slice(0,2).join(" · ")}</small></span>
+      <span className="rd-project-meta">{project.updated}</span>
+    </Link>) : <div className="rd-empty"><b>No projects yet.</b><p>Start from Marketplace when you are ready.</p></div>}
+  </div>
+
+  const secondaryView = () => {
+    if (view === "projects") return <><div className="rd-main-heading"><h1>My projects</h1></div><section className="rd-panel"><header><h2>Working copies</h2><p>Your source-backed projects stay here.</p></header>{projectRows(working)}</section></>
+    if (view === "marketplace") return <><div className="rd-main-heading"><h1>Marketplace</h1></div><section className="rd-panel"><header><h2>Working projects</h2><p>Open a release without leaving the dashboard shell.</p></header><div className="rd-project-list">{catalog.slice(0,8).map(project => <Link to={"/project/" + project.slug} key={project.id} className="rd-project-row"><span className={"rd-project-thumb " + project.color}/><span className="rd-project-copy"><b>{project.title}</b><small>{project.category} · {project.stack.slice(0,2).join(" · ")}</small></span><span className="rd-project-meta">{"$" + project.price}</span></Link>)}</div></section></>
+    if (view === "purchases") return <><div className="rd-main-heading"><h1>Purchases</h1></div><section className="rd-stat-grid"><article><div><span>Purchased releases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active entitlements</p></article><article><div><span>Needs attention</span><Bell/></div><strong>{attention}</strong><p>{attention ? "Review blocked product state" : "No blocking product state"}</p></article></section><section className="rd-panel rd-dashboard-section"><header><h2>Your library</h2><p>Purchased releases stay associated with your account.</p></header>{projectRows(projects.slice(3).map(project => ({project,href:"/project/"+project.slug})))}</section></>
+    if (view === "creator") return <><div className="rd-main-heading"><h1>Creator Studio</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Creator pipeline</h2><p>Submission, review, release, and listing tools remain available from the dedicated creator surface.</p></header><div className="rd-dashboard-callout"><span>Creator tools</span><b>Keep the dashboard shell stable while creator workflows remain separate.</b><Link className="rd-primary-action" to="/seller">Open Creator Studio</Link></div></section></>
+    if (view === "workspace") return <><div className="rd-main-heading"><h1>Workspace</h1></div><section className="rd-panel"><header><h2>Continue editing</h2><p>Open one of your current working copies.</p></header>{projectRows(working)}</section></>
+    if (view === "docs") return <><div className="rd-main-heading"><h1>Documentation</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Product documentation</h2><p>Reference pages for editing, compatibility, export, and security.</p></header><div className="rd-dashboard-links"><Link to="/docs">Introduction</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/security">Security</Link></div></section></>
+    if (view === "settings") return <><div className="rd-main-heading"><h1>Settings</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Account and workspace settings</h2><p>The dashboard navigation stays in place while you choose where to continue.</p></header><div className="rd-dashboard-callout"><span>Account</span><b>Webcanbe account</b><Link className="rd-primary-action" to="/settings">Open full settings</Link></div></section></>
+    return <><div className="rd-main-heading"><h1>Help Center</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Help and reference</h2><p>Use the product documentation or contact Webcanbe.</p></header><div className="rd-dashboard-links"><Link to="/docs/getting-started">Getting started</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/contact">Contact</Link></div></section></>
+  }
+
+  return <RopeanDashboardShell purchaseBadge={purchaseCount} view={view} onView={setView}>
     <main className="rd-main">
-      <div className="rd-main-heading">
-        <h1>Dashboard</h1>
-        <Link className="rd-primary-action" to="/projects"><Download/> Open projects</Link>
-      </div>
-      <div className="rd-tabs"><button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>Overview</button><button className={tab === "activity" ? "active" : ""} onClick={() => setTab("activity")}>Activity</button><button disabled title="Reports are not available yet">Reports</button><button disabled title="Notification history is not available yet">Notifications</button></div>
+      {view === "overview" ? <>
+        <div className="rd-main-heading">
+          <h1>Dashboard</h1>
+          <button className="rd-primary-action" type="button" onClick={() => setView("projects")}><Download/> Open projects</button>
+        </div>
+        <div className="rd-tabs"><button className="active">Overview</button><button>Activity</button><button disabled>Reports</button><button disabled>Notifications</button></div>
 
-      {tab === "overview" ? <>
         <section className="rd-stat-grid">
           <article><div><span>Working copies</span><FolderKanban/></div><strong>{working.length}</strong><p>Projects ready to continue editing</p></article>
           <article><div><span>Purchases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active release entitlements</p></article>
@@ -446,13 +457,7 @@ function Dashboard() {
         <section className="rd-dashboard-grid">
           <article className="rd-panel rd-continue-panel">
             <header><h2>Continue building</h2><p>Your source-backed working copies.</p></header>
-            <div className="rd-project-list">
-              {working.length ? working.slice(0,5).map(({project,href}) => <Link to={href} key={href} className="rd-project-row">
-                <span className={"rd-project-thumb " + project.color}/>
-                <span className="rd-project-copy"><b>{project.title}</b><small>{project.stack.slice(0,2).join(" · ")}</small></span>
-                <span className="rd-project-meta">{project.updated}</span>
-              </Link>) : <div className="rd-empty"><b>No working copies yet.</b><p>Start from Marketplace when you are ready.</p></div>}
-            </div>
+            {projectRows(working)}
           </article>
 
           <article className="rd-panel rd-recent-panel">
@@ -463,14 +468,7 @@ function Dashboard() {
             </div>
           </article>
         </section>
-      </> : <section className="rd-panel rd-activity-view">
-        <header><h2>Activity</h2><p>Current project and purchase state, without invented traffic or revenue analytics.</p></header>
-        <div className="rd-recent-list">
-          {working.map(({project}) => <div key={project.id}><span className="rd-avatar small">{project.title.slice(0,2).toUpperCase()}</span><span><b>{project.title}</b><small>Working copy ready</small></span><em>{project.updated}</em></div>)}
-          <div><span className="rd-avatar small"><ShoppingBag/></span><span><b>{purchaseCount} purchased {purchaseCount === 1 ? "release" : "releases"}</b><small>{activePurchases} active entitlement{activePurchases === 1 ? "" : "s"}</small></span><em>Library</em></div>
-          {!working.length && purchaseCount === 0 && <div className="rd-empty"><p>No product activity yet.</p></div>}
-        </div>
-      </section>}
+      </> : secondaryView()}
     </main>
   </RopeanDashboardShell>
 }
