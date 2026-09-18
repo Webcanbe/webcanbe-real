@@ -71,8 +71,18 @@ tree; packaging does not install dependencies or create a standalone container.
 Keep it under the application tree, for example `applicationRoot/.webcanbe/hosted-package`,
 or arrange equivalent trusted Node resolution. Run Node 26 with
 `node /opt/webcanbe-editor/.webcanbe/hosted-package/editor.cjs /etc/webcanbe/editor.json`.
-Apply the schema and provision issuer/subject identities and memberships through trusted
-operator code before accepting users. No public registration or grant-write endpoint exists.
+Apply the schema before accepting users. By default, issuer/subject identities and
+memberships are still provisioned through trusted operator code. Phase 5 may explicitly set
+`identity.allowSelfRegistration=true`: only after a state/nonce/PKCE-bound OIDC identity is
+verified does the server atomically mint a new internal user UUID plus one owner workspace.
+The browser cannot choose either ID, and there is still no public grant-write endpoint.
+`identity.sessionLifetimeMs` is server-owned and bounded to 5 minutes through 7 days.
+
+For Google sign-in, use the values in `google-oidc.example.json` as the endpoint/scopes
+shape and keep the real OAuth client ID/secret in private operator configuration. The OAuth
+redirect URI must exactly match the final HTTPS WebCanBe app origin plus
+`/__webcanbe/auth/callback`. GitHub, phone, and email sign-in remain disabled on the
+hosted UI until their separate verified provider boundaries are implemented.
 
 The TLS listener dispatches exact editor/viewer Host values to separate configured sites;
 only built platform assets are served on the editor site. Preserve the real TLS socket
