@@ -175,7 +175,6 @@ async function localizeUrl(raw) {
     let parsed
     try { parsed = new URL(raw) } catch { return raw }
     if (!/^(www\.)?launchuicomponents\.com$/.test(parsed.hostname)) return raw
-    if (!parsed.pathname.startsWith("/_next/")) return raw
     remote = parsed.href
   }
 
@@ -190,7 +189,10 @@ async function localizeUrl(raw) {
   if (url.pathname.startsWith("/_next/static/")) {
     return fetchRemote(remote, "wcb-landing/vendor" + url.pathname)
   }
-  return raw
+  const baseName = sanitize(path.basename(url.pathname) || "asset")
+  const stem = baseName.replace(/\.[^.]+$/, "") || "asset"
+  const fallbackExt = path.extname(url.pathname)
+  return fetchRemote(remote, `wcb-landing/vendor/external/${stem}-${sha(remote).slice(0,12)}${fallbackExt}`)
 }
 
 async function localizeSrcset(value) {
@@ -224,6 +226,14 @@ async function localizeNode(node) {
     for (const name of ["srcset", "imagesrcset"]) {
       const value = getAttr(node, name)
       if (value) setAttr(node, name, await localizeSrcset(value))
+    }
+    if (node.tagName === "meta") {
+      const property = (getAttr(node, "property") || "").toLowerCase()
+      const metaName = (getAttr(node, "name") || "").toLowerCase()
+      if (property === "og:image" || metaName === "twitter:image") {
+        const value = getAttr(node, "content")
+        if (value) setAttr(node, "content", await localizeUrl(value))
+      }
     }
     removeAttr(node, "data-dpl-id")
     removeAttr(node, "data-nimg")
