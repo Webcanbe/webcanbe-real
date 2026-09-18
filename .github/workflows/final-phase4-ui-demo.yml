@@ -169,7 +169,7 @@ jobs:
                   {continueItem ? <div className="rope-continue-body"><div className="rope-continue-copy"><span className="rope-soft-badge">Working copy</span><h3>{continueItem.project.title}</h3><p>{continueItem.project.tagline}</p><div className="rope-stack-row">{continueItem.project.stack.map(item => <span key={item}>{item}</span>)}</div><Link className="rope-primary-action compact" to={continueItem.href}>Open workspace <Arrow/></Link></div><Preview project={continueItem.project}/></div> : <HubState kind="empty" title="No working copies yet" body="Your purchases stay available until you create one." action={<Link className="rope-primary-action compact" to="/purchases">View purchases</Link>}/>}
                 </article>
                 <article className="rope-card rope-activity-card">
-                  <header><div><h2>Recent activity</h2><p>Project and purchase state only.</p></div></header>
+                  <header><div><h2>Recent product activity</h2><p>Only project and purchase state — no invented analytics.</p></div></header>
                   <div className="rope-activity-list">
                     {activity.length ? activity.map((item,index) => <div className="rope-activity-row" key={`${item.label}-${item.title}-${index}`}><span className="rope-activity-icon">{item.label === "Purchase" ? <ShoppingBag/> : <FileCode2/>}</span><div><b>{item.title}</b><small>{item.label}</small></div><time>{item.date ? new Date(item.date).toLocaleDateString() : "Demo"}</time></div>) : <p className="rope-empty-copy">Activity appears after you purchase or create a working copy.</p>}
                   </div>
