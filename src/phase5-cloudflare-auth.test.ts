@@ -6,6 +6,8 @@ const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const index = fs.readFileSync("index.html", "utf8")
 const worker = fs.readFileSync("worker/index.js", "utf8")
 const wrangler = fs.readFileSync("wrangler.jsonc", "utf8")
+const pagesFunction = fs.readFileSync("functions/__webcanbe/auth/[[route]].js", "utf8")
+const routes = fs.readFileSync("public/_routes.json", "utf8")
 
 describe("Phase 5 Cloudflare Google auth", () => {
   it("routes the auth boundary through the Worker before SPA assets", () => {
@@ -13,6 +15,12 @@ describe("Phase 5 Cloudflare Google auth", () => {
     expect(wrangler).toContain('"binding": "ASSETS"')
     expect(wrangler).toContain('"/__webcanbe/auth/*"')
     expect(wrangler).toContain('"single-page-application"')
+  })
+
+  it("also exposes the same auth boundary when Cloudflare deploys the repo as Pages", () => {
+    expect(pagesFunction).toContain('../../../worker/index.js')
+    expect(pagesFunction).toContain("worker.fetch(context.request, context.env)")
+    expect(routes).toContain('"/__webcanbe/auth/*"')
   })
 
   it("implements Google authorization-code PKCE and verifies the ID token", () => {
