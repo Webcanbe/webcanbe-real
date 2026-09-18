@@ -21,11 +21,12 @@ describe("Phase 5 brand pass", () => {
     expect(app).toContain("<b>Webcanbe</b><small>Source-first workspace</small>")
   })
 
-  it("does not inject custom dashboard profile popovers", () => {
+  it("restores Ropean-style dashboard account dropdown structures instead of removing them", () => {
     const dashboard = app.slice(app.indexOf("function RopeanDashboardShell"), app.indexOf("function Settings()"))
-    expect(dashboard).not.toContain("rd-account-popover")
-    expect(dashboard).not.toContain("rd-profile-popover")
-    expect(dashboard).not.toContain("setHeaderAccountOpen")
-    expect(dashboard).not.toContain("setSidebarAccountOpen")
+    expect(dashboard).toContain("rd-account-dropdown")
+    expect(dashboard).toContain("rd-profile-dropdown")
+    expect(dashboard).toContain("rd-team-dropdown")
+    expect(dashboard).toContain("Upgrade to Pro")
+    expect(dashboard).toContain("Sign out")
   })
 })
