@@ -1,2 +1,2 @@
 Visual structure retained from https://www.launchuicomponents.com/.
-Only WebCanBe copy, links, brand color, top GitHub/X removal, and configurator removal are intentional.
+Only Webcanbe copy, links, brand color, top GitHub/X removal, and configurator removal are intentional.
