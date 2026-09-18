@@ -1280,3 +1280,5 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .rd-sidebar-collapsed .rd-team-brand-copy>small{display:none}
 .rd-sidebar-collapsed .rd-team-brand-copy .wcb-logo-full{display:none}
 .rd-sidebar-collapsed .rd-team-brand-copy .wcb-logo-mark{display:block;width:28px;height:28px}
+
+.auth-demo-provider-note{margin:10px 0 0;color:#8a8a92;font-size:10px;text-align:center}
