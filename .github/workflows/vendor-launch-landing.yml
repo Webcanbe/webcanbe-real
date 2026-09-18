@@ -4,6 +4,7 @@ on:
     branches: [phase-4-product-ux]
     paths:
       - scripts/vendor-launch-landing.mjs
+      - scripts/verify-landing-parity.mjs
       - .github/workflows/vendor-launch-landing.yml
 permissions:
   contents: write
@@ -23,7 +24,7 @@ jobs:
       - name: Preserve exact pre-cleanup reference
         run: |
           mkdir -p .landing-reference
-          git show backup-phase4-before-landing-localize-2026-09-18:public/wcb-landing/index.html > .landing-reference/index.html
+          git show origin/backup-phase4-before-landing-localize-2026-09-18:public/wcb-landing/index.html > .landing-reference/index.html
       - name: Localize assets and prune hidden variants
         run: node scripts/vendor-launch-landing.mjs
       - name: Verify no runtime Launch UI asset dependency
@@ -32,6 +33,12 @@ jobs:
             echo "External Launch UI runtime asset dependency remains"
             exit 1
           fi
+      - name: Install visual parity verifier
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0 pixelmatch@7.1.0 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Pixel-compare old and localized landing
+        run: node scripts/verify-landing-parity.mjs
       - name: Focused tests and production build
         run: |
           npx vitest run src/phase4-landing-webcanbe.test.ts src/phase4-landing-retention.test.ts src/phase4-landing-hero.test.ts src/phase4-public-flow.test.ts
@@ -39,7 +46,16 @@ jobs:
       - name: Save cleanup evidence
         run: |
           node -e "const r=require('./public/wcb-landing/cleanup-report.json'); if(!r.removedVariantSubtrees) process.exit(2); console.log(r)"
+          cat .landing-parity/report.json
           git diff --stat
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: landing-localization-parity
+          path: |
+            .landing-parity
+            public/wcb-landing/cleanup-report.json
+          if-no-files-found: ignore
       - name: Commit vendored landing
         run: |
           git config user.name "WebCanBe Phase 4 Automation"
