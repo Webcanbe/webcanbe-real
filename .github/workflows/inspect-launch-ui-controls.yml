@@ -1,6 +1,8 @@
 name: Inspect Launch UI controls
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - phase-4-product-ux
 permissions:
   contents: read
 jobs:
