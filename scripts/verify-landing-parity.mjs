@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs"
 import http from "node:http"
 import path from "node:path"
 import * as parse5 from "parse5"
-import { chromium } from "playwright"
+import puppeteer from "puppeteer-core"
 import pixelmatch from "pixelmatch"
 import { PNG } from "pngjs"
 
@@ -60,7 +60,13 @@ const server = http.createServer(async (req, res) => {
 })
 await new Promise(resolve => server.listen(4179, "127.0.0.1", resolve))
 
-const browser = await chromium.launch({ headless: true })
+const chrome = process.env.CHROME_BIN
+if (!chrome) throw new Error("CHROME_BIN is required for landing parity verification.")
+const browser = await puppeteer.launch({
+  headless: true,
+  executablePath: chrome,
+  args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+})
 const viewports = [
   { name: "desktop", width: 1440, height: 1000 },
   { name: "mobile", width: 390, height: 844 },
@@ -69,13 +75,12 @@ const results = []
 
 try {
   for (const viewport of viewports) {
-    const context = await browser.newContext({
-      viewport: { width: viewport.width, height: viewport.height },
-      colorScheme: "light",
-      deviceScaleFactor: 1,
-    })
-    const page = await context.newPage()
-    await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" })
+    const page = await browser.newPage()
+    await page.setViewport({ width: viewport.width, height: viewport.height, deviceScaleFactor: 1 })
+    await page.emulateMediaFeatures([
+      { name: "prefers-color-scheme", value: "light" },
+      { name: "prefers-reduced-motion", value: "no-preference" },
+    ])
 
     const load = async (url, name, forbidLaunch) => {
       const launchRequests = []
@@ -83,9 +88,9 @@ try {
         if (/launchuicomponents\.com/.test(request.url())) launchRequests.push(request.url())
       }
       page.on("request", onRequest)
-      await page.goto(url, { waitUntil: "networkidle", timeout: 90000 })
-      await page.waitForTimeout(3000)
-      const image = await page.screenshot({ fullPage: true, animations: "disabled" })
+      await page.goto(url, { waitUntil: "networkidle0", timeout: 90000 })
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      const image = await page.screenshot({ fullPage: true })
       await fs.writeFile(path.join(evidenceDir, name + ".png"), image)
       page.off("request", onRequest)
       if (forbidLaunch && launchRequests.length) {
@@ -112,7 +117,7 @@ try {
     if (ratio > 0.005) {
       throw new Error(`${viewport.name}: visual parity exceeded 0.5% threshold (${(ratio * 100).toFixed(4)}%)`)
     }
-    await context.close()
+    await page.close()
   }
 } finally {
   await browser.close()
