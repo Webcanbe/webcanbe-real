@@ -3,29 +3,29 @@ import { describe, expect, it } from "vitest"
 
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const landing = fs.readFileSync("public/wcb-landing/index.html", "utf8")
-const icon = fs.readFileSync("public/webcanbe-icon.svg", "utf8")
+const index = fs.readFileSync("index.html", "utf8")
 
 describe("Phase 5 brand pass", () => {
-  it("uses the shared Webcanbe primary logo asset in app chrome", () => {
-    expect(app).toContain('/brand/webcanbe-logo.svg')
-    expect(app).toContain('/brand/webcanbe-mark.svg')
-    expect(app).toContain('rd-team-brand-copy')
-    expect(app).not.toContain('className="mark" aria-label="Webcanbe"')
+  it("uses the official transparent three-stroke favicon with Webcanbe casing in app chrome", () => {
+    expect(app).toContain('src="/favicon.png"')
+    expect(app).toContain('<span className="wcb-wordmark">Webcanbe</span>')
+    expect(index).toContain('href="/favicon.png"')
   })
 
-  it("uses the primary logo in the retained landing header/footer brand anchors", () => {
+  it("does not rewrite the retained landing brand implementation", () => {
     expect(landing.split("/brand/webcanbe-logo.svg").length - 1).toBeGreaterThanOrEqual(3)
   })
 
-  it("keeps the favicon aligned with the new three-stroke mark", () => {
-    expect(icon).toContain("#514BFF")
-    expect(icon).toContain("#4B65FF")
-    expect(icon).toContain("#347CFF")
+  it("keeps the dashboard brand as the official mark plus Webcanbe text", () => {
+    expect(app).toContain("rd-team-official-logo")
+    expect(app).toContain("<b>Webcanbe</b><small>Source-first workspace</small>")
   })
 
-  it("renders a real account popover from the top-right avatar", () => {
-    expect(app).toContain("top-account-popover")
-    expect(app).toContain("setTopAccount")
-    expect(app).toContain("Sign out")
+  it("does not inject custom dashboard profile popovers", () => {
+    const dashboard = app.slice(app.indexOf("function RopeanDashboardShell"), app.indexOf("function Settings()"))
+    expect(dashboard).not.toContain("rd-account-popover")
+    expect(dashboard).not.toContain("rd-profile-popover")
+    expect(dashboard).not.toContain("setHeaderAccountOpen")
+    expect(dashboard).not.toContain("setSidebarAccountOpen")
   })
 })
