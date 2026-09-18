@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -416,7 +416,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
             <button className={"rd-nav-button rd-collapsible-trigger" + (["settings","account","billing","notifications"].includes(view) ? " active" : "")} type="button" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(v => !v)}><Settings2/><span>Settings</span><ChevronRight className="rd-chevron"/></button>
             {settingsOpen && <div className="rd-collapsible-content">
               {navButton("Profile","settings",BadgeCheck)}
-              {navButton("Account","account",Settings2)}
+              {navButton("Account","account",UserCircle2)}
               {navButton("Billing","billing",CreditCard)}
               {navButton("Notifications","notifications",Bell)}
             </div>}
