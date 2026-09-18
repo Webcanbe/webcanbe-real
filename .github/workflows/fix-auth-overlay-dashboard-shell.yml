@@ -1,0 +1,335 @@
+name: Fix auth overlay and dashboard shell
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Apply real-background auth overlay and single-shell dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path("src/App.tsx")
+          text=p.read_text()
+
+          # Any auth request from an existing page opens a modal instead of navigating away.
+          old = '''function go(to: string) {
+            const current = window.location.pathname + window.location.search
+            if (to === current) return
+            if (routeTimer) window.clearTimeout(routeTimer)
+            document.documentElement.classList.add("wcb-route-leaving")
+            routeTimer = window.setTimeout(() => {
+              window.history.pushState({}, "", to)
+              window.dispatchEvent(new PopStateEvent("popstate"))
+              window.scrollTo(0, 0)
+              window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.documentElement.classList.remove("wcb-route-leaving")))
+              routeTimer = undefined
+            }, 120)
+          }'''
+          new = '''function go(to: string) {
+            if (to.startsWith("/login") || to.startsWith("/signup")) {
+              window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup") } }))
+              return
+            }
+            const current = window.location.pathname + window.location.search
+            if (to === current) return
+            if (routeTimer) window.clearTimeout(routeTimer)
+            document.documentElement.classList.add("wcb-route-leaving")
+            routeTimer = window.setTimeout(() => {
+              window.history.pushState({}, "", to)
+              window.dispatchEvent(new PopStateEvent("popstate"))
+              window.scrollTo(0, 0)
+              window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.documentElement.classList.remove("wcb-route-leaving")))
+              routeTimer = undefined
+            }, 120)
+          }'''
+          if old not in text:
+              raise SystemExit("go() anchor not found")
+          text=text.replace(old,new,1)
+
+          # Auth is now only an overlay. There is no fabricated background.
+          start=text.index("function Auth({ signup = false }")
+          end=text.index("\n\nconst docPages", start)
+          auth=r'''function Auth({ signup = false, onClose }: { signup?: boolean; onClose?: () => void }) {
+            const _hostedBoundary = async () => hostedProductClient.authStart()
+            void _hostedBoundary
+            return <div className="auth-demo-layer" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
+              <div className="auth-demo-backdrop"/>
+              <section className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+                <button className="auth-demo-close" type="button" aria-label="Close" onClick={onClose}><X/></button>
+                <h1 id="auth-title">Log in or sign up</h1>
+                <p>Get smarter responses, upload files and images, and more.</p>
+                <div className="auth-demo-actions">
+                  <button className="auth-demo-provider" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
+                  <button className="auth-demo-provider" type="button"><Github/><span>Continue with GitHub</span></button>
+                  <button className="auth-demo-provider" type="button"><Phone/><span>Continue with phone</span></button>
+                </div>
+                <div className="auth-demo-divider"><span>OR</span></div>
+                <input className="auth-demo-email" type="email" placeholder="Email address" aria-label="Email address"/>
+                <button className="auth-demo-continue" type="button">Continue</button>
+                <p className="auth-demo-terms">By continuing, you agree to our Terms of Use and acknowledge our Privacy Policy.</p>
+              </section>
+            </div>
+          }'''
+          text=text[:start]+auth+text[end:]
+
+          # AppShell can operate either as route navigation or as a dashboard-local controller.
+          start=text.index("function AppShell(")
+          end=text.index("\n\nfunction Protected(",start)
+          shell=r'''function AppShell({ children, active, onSectionChange }: { children: React.ReactNode; active?: string; onSectionChange?: (section: string) => void }) {
+            const [menu, setMenu] = useState(false)
+            const action = (id: string, to: string, label: string, Icon: typeof LayoutDashboard) => onSectionChange
+              ? <button type="button" className={active === id ? "active" : ""} onClick={() => onSectionChange(id)}><Icon/><span>{label}</span></button>
+              : <Link to={to} className={active === to ? "active" : ""}><Icon/><span>{label}</span></Link>
+            return <div className="product app-frame rope-app">
+              <aside className={`app-sidebar rope-sidebar ${menu ? "open" : ""}`}>
+                <div className="rope-sidebar-head"><Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span><b>WebCanBe</b><small>Source-first workspace</small></span></Link></div>
+                <div className="rope-sidebar-scroll">
+                  <div className="rope-nav-group"><span className="rope-nav-label">General</span><nav className="rope-nav-list">
+                    {action("overview","/dashboard","Dashboard",LayoutDashboard)}
+                    {action("marketplace","/browse","Marketplace",Store)}
+                  </nav></div>
+                  <details open className="rope-nav-group rope-nav-collapsible"><summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary><div className="rope-subnav">
+                    {action("projects","/projects","My projects",FolderKanban)}
+                    {action("purchases","/purchases","Purchases",ShoppingBag)}
+                  </div></details>
+                  <details open className="rope-nav-group rope-nav-collapsible"><summary><PackageCheck/><span>Creator</span><ChevronDown/></summary><div className="rope-subnav">
+                    {action("creator","/seller","Creator Studio",Sparkles)}
+                    {action("listings","/seller/projects","Listings",FolderKanban)}
+                    {action("submission","/seller/projects/new","New submission",Plus)}
+                  </div></details>
+                  <details open className="rope-nav-group rope-nav-collapsible"><summary><CircleHelp/><span>Other</span><ChevronDown/></summary><div className="rope-subnav">
+                    {action("docs","/docs","Documentation",BookOpen)}
+                    {action("plans","/plans","Plans",ScrollText)}
+                    {action("settings","/settings","Settings",Settings2)}
+                    {action("control","/control","Control",ShieldCheck)}
+                  </div></details>
+                </div>
+                <div className="app-sidebar-account rope-account">{onSectionChange ? <button type="button" onClick={() => onSectionChange("settings")}><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></button> : <Link to="/settings"><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></Link>}</div>
+              </aside>
+              <div className="app-main rope-main">
+                <header className="rope-topbar">
+                  <button className="rope-mobile-trigger" onClick={() => setMenu(value => !value)} aria-expanded={menu}>Menu</button>
+                  <button className="rope-sidebar-toggle" type="button" aria-label="Sidebar"><PanelsTopLeft/></button>
+                  <div className="rope-top-tabs">
+                    {onSectionChange ? <>
+                      <button className={active === "overview" ? "active" : ""} onClick={() => onSectionChange("overview")}>Overview</button>
+                      <button className={active === "projects" ? "active" : ""} onClick={() => onSectionChange("projects")}>Projects</button>
+                      <button className={active === "marketplace" ? "active" : ""} onClick={() => onSectionChange("marketplace")}>Marketplace</button>
+                      <button className={active === "settings" ? "active" : ""} onClick={() => onSectionChange("settings")}>Settings</button>
+                    </> : <span className="active">WebCanBe</span>}
+                  </div>
+                  <div className="rope-topbar-actions"><button className="rope-search" type="button"><Search/><span>Search</span><kbd>⌘K</kbd></button><button className="rope-icon-button" type="button" aria-label="Notifications"><Bell/></button><button className="rope-user-button" type="button"><span className="avatar">WC</span></button></div>
+                </header>
+                {children}
+              </div>
+              {menu && <button className="app-sidebar-scrim" aria-label="Close navigation" onClick={() => setMenu(false)}/>}
+            </div>
+          }'''
+          text=text[:start]+shell+text[end:]
+
+          # Dashboard is a single-shell UI demo: sidebar changes only the right panel.
+          start=text.index("function Dashboard()")
+          end=text.index("\n\nfunction Settings()",start)
+          dashboard=r'''function Dashboard() {
+            const library = useProductLibrary()
+            const [pane, setPane] = useState("overview")
+            if (library.loading) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="loading" title="Loading your workspace" body=""/></main></AppShell>
+            if (library.error) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="error" title="Workspace overview unavailable" body={library.error}/></main></AppShell>
+
+            const local = !library.hosted
+            const copyItems = local ? projects.slice(0, 3).map(project => ({ project, href: `/workspace/${project.id}`, createdAt: "" })) : library.copies.map(copy => ({ project: releaseProject(library.catalog, copy.releaseId, copy.workspaceProjectId), href: `/workspace/${copy.workspaceProjectId}`, createdAt: copy.createdAt }))
+            const entitlementItems = local ? projects.slice(3, 6).map(project => ({ project, createdAt: "", needsCopy: true })) : library.entitlements.filter(item => item.status === "active").map(entitlement => ({ project: releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), createdAt: entitlement.grantedAt, needsCopy: !library.copies.some(copy => copy.entitlementId === entitlement.entitlementId) }))
+            const needsAttention = entitlementItems.filter(item => item.needsCopy)
+            const continueItem = copyItems[0]
+            const activity = [...copyItems.map(item => ({ label:"Working copy",title:item.project.title,date:item.createdAt })), ...entitlementItems.map(item => ({ label:"Purchase",title:item.project.title,date:item.createdAt }))].slice(0,5)
+            const catalogProjects = local ? projects : library.catalog.map((item,index) => hostedProject(item,index))
+
+            const header = (title:string,description:string,action?:React.ReactNode) => <header className="rope-dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{action}</header>
+
+            let content: React.ReactNode
+            if (pane === "projects") {
+              content = <main className="rope-dashboard">{header("My projects","Editable working copies in the same dashboard shell.")}<div className="rope-list-card"><div className="rope-table-head"><span>Project</span><span>Stack</span><span>Status</span><span>Updated</span></div>{copyItems.map(item => <div className="rope-table-row" key={item.project.id}><div><b>{item.project.title}</b><small>{item.project.tagline}</small></div><span>{item.project.stack.slice(0,2).join(" · ")}</span><span className="rope-status">Editable</span><span>{item.project.updated || "Working copy"}</span></div>)}</div></main>
+            } else if (pane === "purchases") {
+              content = <main className="rope-dashboard">{header("Purchases","Release-bound purchases, without leaving the dashboard.")}<div className="rope-card-grid">{entitlementItems.map(item => <article className="rope-project-card" key={item.project.id}><Preview project={item.project}/><div><span className="rope-soft-badge">Purchased release</span><h3>{item.project.title}</h3><p>{item.project.tagline}</p><small>{item.needsCopy ? "Ready to create working copy" : "Working copy exists"}</small></div></article>)}</div></main>
+            } else if (pane === "marketplace") {
+              content = <main className="rope-dashboard">{header("Marketplace","Browse working project releases inside the dashboard.",<button className="rope-primary-action" type="button">Explore</button>)}<div className="rope-card-grid">{catalogProjects.slice(0,6).map(project => <article className="rope-project-card" key={project.id}><Preview project={project}/><div><span>{project.category}</span><h3>{project.title}</h3><p>{project.tagline}</p><small>{project.stack.join(" · ")}</small></div></article>)}</div></main>
+            } else if (pane === "creator" || pane === "listings" || pane === "submission") {
+              content = <main className="rope-dashboard">{header(pane === "creator" ? "Creator Studio" : pane === "listings" ? "Listings" : "New submission","Creator tools stay inside the same app shell.")}<div className="rope-creator-grid"><article><Sparkles/><h3>Source-backed publishing</h3><p>Submit working projects instead of flattened files.</p></article><article><PackageCheck/><h3>Immutable releases</h3><p>Published releases remain bound to a source revision.</p></article><article><History/><h3>Review history</h3><p>Assessment and review state stays attached to the submission.</p></article></div></main>
+            } else if (pane === "docs") {
+              content = <main className="rope-dashboard">{header("Documentation","WebCanBe product documentation, shown without leaving Dashboard.")}<div className="rope-doc-grid">{docsNav.flatMap(([,items]) => items).map(([label,href]) => <article key={href}><BookOpen/><h3>{label}</h3><p>{href.includes("visual") ? "Source-backed visual editing." : href.includes("code") ? "Edit the actual project source." : "WebCanBe workflow and reference."}</p></article>)}</div></main>
+            } else if (pane === "plans") {
+              content = <main className="rope-dashboard">{header("Plans","UI preview only. Commercial pricing is finalized separately.")}<div className="rope-plan-row"><article><span>Free</span><h3>Explore</h3><p>Open the marketplace and work with a project.</p></article><article className="featured"><span>Pro</span><h3>Build more</h3><p>More workspaces and production features.</p></article><article><span>Studio</span><h3>Publish</h3><p>Creator and team workflows.</p></article></div></main>
+            } else if (pane === "settings" || pane === "control") {
+              content = <main className="rope-dashboard">{header(pane === "settings" ? "Settings" : "Control",pane === "settings" ? "Account and workspace preferences." : "Operator UI preview.")}<div className="rope-settings-card"><div className="rope-settings-nav"><button className="active">Profile</button><button>Account</button><button>Appearance</button><button>Notifications</button></div><div className="rope-settings-form"><label>Display name<input defaultValue="WebCanBe user"/></label><label>Email<input defaultValue="user@webcanbe.com"/></label><button className="rope-primary-action" type="button">Save changes</button></div></div></main>
+            } else {
+              const metrics=[["Working copies",copyItems.length,"Editable source-backed projects"],["Purchases",entitlementItems.length,"Release-bound entitlements"],["Ready to open",needsAttention.length,"Need a working copy"],["Edit modes",3,"Visual · Code · Split"]]
+              content = <main className="rope-dashboard">
+                {header("Dashboard","Continue your projects, review purchases, or start from the marketplace.",<button className="rope-primary-action" type="button" onClick={() => setPane("marketplace")}>Browse marketplace <Arrow/></button>)}
+                <nav className="rope-page-tabs"><button className="active" onClick={() => setPane("overview")}>Overview</button><button onClick={() => setPane("projects")}>Projects</button><button onClick={() => setPane("purchases")}>Purchases</button><button onClick={() => setPane("docs")}>Documentation</button></nav>
+                <section className="rope-metric-grid">{metrics.map(([label,value,note]) => <article className="rope-metric-card" key={String(label)}><div className="rope-metric-title"><span>{label}</span><i><PanelsTopLeft/></i></div><strong>{value}</strong><p>{note}</p></article>)}</section>
+                <section className="rope-dashboard-grid">
+                  <article className="rope-card rope-overview-card"><header><div><h2>Overview</h2><p>Current project state, not invented revenue analytics.</p></div></header><div className="rope-mini-chart"><div><span>Working copies</span><i style={{height:`${42 + copyItems.length*12}px`}}/></div><div><span>Purchases</span><i style={{height:`${42 + entitlementItems.length*12}px`}}/></div><div><span>Ready</span><i style={{height:`${42 + needsAttention.length*12}px`}}/></div><div><span>Edit modes</span><i style={{height:"78px"}}/></div></div>{continueItem && <div className="rope-current-project"><Preview project={continueItem.project}/><div><span className="rope-soft-badge">Continue building</span><h3>{continueItem.project.title}</h3><p>{continueItem.project.tagline}</p><button className="rope-primary-action compact" type="button">Open workspace</button></div></div>}</article>
+                  <article className="rope-card rope-activity-card"><header><div><h2>Recent product activity</h2><p>Only project and purchase state — no invented analytics.</p></div></header><div className="rope-activity-list">{activity.map((item,index) => <div className="rope-activity-row" key={index}><span className="rope-activity-icon">{item.label==="Purchase"?<ShoppingBag/>:<FileCode2/>}</span><div><b>{item.title}</b><small>{item.label}</small></div><time>{item.date ? new Date(item.date).toLocaleDateString() : "Demo"}</time></div>)}</div></article>
+                </section>
+              </main>
+            }
+            return <AppShell active={pane} onSectionChange={setPane}>{content}</AppShell>
+          }'''
+          text=text[:start]+dashboard+text[end:]
+
+          # App renders the original page and layers auth over it. Direct /login falls back to the real landing page.
+          old_app=re.search(r'export default function App\(\) \{.*\}\s*$',text,flags=re.S)
+          if not old_app:
+              raise SystemExit("App router not found")
+          router=r'''export default function App() {
+            const path = usePath()
+            const directAuth = path === "/login" || path === "/signup"
+            const [authIntent, setAuthIntent] = useState<{ signup: boolean } | null>(directAuth ? { signup: path === "/signup" } : null)
+
+            useEffect(() => {
+              const handler = (event: Event) => {
+                const detail = (event as CustomEvent<{ signup?: boolean }>).detail
+                setAuthIntent({ signup: Boolean(detail?.signup) })
+              }
+              window.addEventListener("wcb:open-auth", handler)
+              return () => window.removeEventListener("wcb:open-auth", handler)
+            }, [])
+
+            useEffect(() => {
+              if (directAuth) setAuthIntent({ signup: path === "/signup" })
+            }, [directAuth, path])
+
+            const basePath = directAuth ? "/" : path
+            let page: React.ReactNode
+            if (basePath === "/") page = <Landing/>
+            else if (basePath === "/browse") page = <Browse/>
+            else if (basePath.startsWith("/project/")) page = <Detail reference={basePath.split("/").pop() ?? ""}/>
+            else if (basePath.startsWith("/docs")) page = <Documentation path={basePath}/>
+            else if (["/changelog","/about","/contact","/updates","/licenses","/terms","/privacy"].includes(basePath)) page = <InfoPage path={basePath}/>
+            else if (basePath === "/auth/complete") page = <AuthComplete/>
+            else if (basePath.startsWith("/checkout/")) page = <Protected><Checkout/></Protected>
+            else if (basePath.startsWith("/workspace/")) page = <Protected><CompatibleWorkspace/></Protected>
+            else if (basePath === "/projects") page = <Protected><Projects/></Protected>
+            else if (basePath === "/purchases") page = <Protected><Purchases/></Protected>
+            else if (basePath === "/dashboard") page = <Protected><Dashboard/></Protected>
+            else if (basePath === "/settings") page = <Protected><Settings/></Protected>
+            else if (basePath === "/plans") page = <Plans/>
+            else if (basePath === "/seller/projects/new") page = <Protected><Seller page="new"/></Protected>
+            else if (basePath === "/seller/projects") page = <Protected><Seller page="projects"/></Protected>
+            else if (basePath === "/seller") page = <Protected><Seller/></Protected>
+            else if (basePath === "/control") page = <Protected><Control/></Protected>
+            else page = <Browse/>
+
+            const closeAuth = () => {
+              setAuthIntent(null)
+              if (directAuth) {
+                window.history.replaceState({}, "", "/")
+                window.dispatchEvent(new PopStateEvent("popstate"))
+              }
+            }
+
+            return <>{page}{authIntent && <Auth signup={authIntent.signup} onClose={closeAuth}/>}</>
+          }
+          '''
+          text=text[:old_app.start()]+router
+          p.write_text(text)
+          PY
+
+          cat >> src/phase4-final-ui.css <<'EOF'
+
+          /* Final auth overlay uses the actual page underneath. */
+          .auth-demo-layer{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:24px;pointer-events:auto}
+          .auth-demo-layer .auth-demo-backdrop{position:absolute;inset:0;background:rgba(20,20,23,.30);backdrop-filter:blur(.5px);-webkit-backdrop-filter:blur(.5px)}
+          .auth-demo-layer .auth-demo-modal{position:relative;z-index:2;box-sizing:border-box;width:min(448px,calc(100vw - 40px));max-width:448px;padding:38px 40px 28px;border:1px solid rgba(255,255,255,.82);border-radius:24px;background:rgba(255,255,255,.98);box-shadow:0 20px 64px rgba(0,0,0,.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center;color:#202124}
+          .auth-demo-layer .auth-demo-modal>*{box-sizing:border-box}
+          .auth-demo-layer .auth-demo-modal h1{margin:0;font-size:22px;line-height:1.28;letter-spacing:-.03em;font-weight:620}
+          .auth-demo-layer .auth-demo-modal>p:not(.auth-demo-terms){max-width:315px;margin:18px auto 24px;color:#5f6066;font-size:13px;line-height:1.55}
+          .auth-demo-layer .auth-demo-provider{width:100%;height:46px;display:grid;grid-template-columns:28px minmax(0,1fr) 28px;align-items:center;padding:0 14px;border:1px solid #d6d6d9;border-radius:999px;background:#fff;color:#2f3035;font-size:13px;font-weight:520}
+          .auth-demo-layer .auth-demo-provider:hover{background:#f8f8f9;border-color:#cfcfd3}.auth-demo-layer .auth-demo-provider>span:last-child{grid-column:2}
+          .auth-demo-layer .auth-demo-email{width:100%;height:46px;padding:0 14px;border:1px solid #d4d4d8;border-radius:999px;background:#fff;font-size:13px;outline:none}
+          .auth-demo-layer .auth-demo-continue{width:100%;height:46px;margin-top:10px;border:0;border-radius:999px;background:#202123;color:#fff;font-size:13px;font-weight:600}
+
+          /* Ropean fidelity refinements: one shell, panel switching, restrained indigo. */
+          .rope-sidebar .rope-nav-list button,.rope-sidebar .rope-subnav button,.rope-account>button{width:100%;border:0;background:transparent;text-align:left;font:inherit}
+          .rope-nav-list button,.rope-subnav button{min-height:38px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px;color:#62626b;font-size:13px;font-weight:520;cursor:pointer}
+          .rope-nav-list button svg,.rope-subnav button svg{width:16px;height:16px;stroke-width:1.8}
+          .rope-nav-list button:hover,.rope-subnav button:hover{background:#f6f6fa;color:#27272c}
+          .rope-nav-list button.active,.rope-subnav button.active{background:var(--final-accent-soft);color:var(--final-accent-strong);font-weight:650}
+          .rope-nav-list button.active svg,.rope-subnav button.active svg{color:var(--final-accent)}
+          .rope-account>button{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;color:#222;cursor:pointer}.rope-account>button:hover{background:#f5f5f7}
+          .rope-sidebar-toggle{width:34px;height:34px;display:grid;place-items:center;margin-right:10px;border:1px solid var(--final-border);border-radius:7px;background:#fff;color:#74747d}.rope-sidebar-toggle svg{width:15px}
+          .rope-top-tabs{display:flex;align-self:stretch;gap:2px}.rope-top-tabs button,.rope-top-tabs span{position:relative;display:flex;align-items:center;padding:0 10px;border:0;background:transparent;color:#8a8a93;font-size:11px;cursor:pointer}.rope-top-tabs .active{color:#2d2d33;font-weight:650}.rope-top-tabs .active:after{content:"";position:absolute;left:9px;right:9px;bottom:0;height:2px;background:var(--final-accent);border-radius:2px}
+          .rope-list-card{overflow:hidden;border:1px solid var(--final-border);border-radius:12px;background:#fff}.rope-table-head,.rope-table-row{display:grid;grid-template-columns:minmax(220px,1.5fr) 1fr .65fr .8fr;gap:18px;align-items:center;padding:13px 16px}.rope-table-head{background:#fafafa;color:#94949c;font-size:9px;text-transform:uppercase;letter-spacing:.05em}.rope-table-row{border-top:1px solid #eeeeF1;color:#67676f;font-size:10px}.rope-table-row>div{display:flex;flex-direction:column;gap:4px}.rope-table-row b{color:#2d2d33;font-size:11px}.rope-table-row small{color:#9a9aa2;font-size:9px}.rope-status{width:max-content;padding:4px 7px;border-radius:999px;background:var(--final-accent-soft);color:var(--final-accent-strong);font-weight:650}
+          .rope-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.rope-project-card{overflow:hidden;border:1px solid var(--final-border);border-radius:12px;background:#fff}.rope-project-card>.project-preview{border-radius:0;min-height:170px}.rope-project-card>div:last-child{padding:15px}.rope-project-card h3{margin:8px 0 5px;font-size:14px}.rope-project-card p{margin:0;color:#797981;font-size:10px;line-height:1.5}.rope-project-card small,.rope-project-card>div>span{display:block;margin-top:9px;color:#9a9aa2;font-size:9px}
+          .rope-creator-grid,.rope-doc-grid,.rope-plan-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.rope-creator-grid article,.rope-doc-grid article,.rope-plan-row article{padding:20px;border:1px solid var(--final-border);border-radius:12px;background:#fff}.rope-creator-grid svg,.rope-doc-grid svg{width:18px;color:var(--final-accent)}.rope-creator-grid h3,.rope-doc-grid h3,.rope-plan-row h3{margin:16px 0 7px;font-size:13px}.rope-creator-grid p,.rope-doc-grid p,.rope-plan-row p{margin:0;color:#7c7c85;font-size:10px;line-height:1.55}.rope-plan-row .featured{border-color:#d7d7fb;background:#fafaff}.rope-plan-row span{color:var(--final-accent-strong);font-size:9px;font-weight:700;text-transform:uppercase}
+          .rope-settings-card{display:grid;grid-template-columns:210px minmax(0,1fr);overflow:hidden;border:1px solid var(--final-border);border-radius:12px;background:#fff}.rope-settings-nav{display:flex;flex-direction:column;gap:2px;padding:14px;border-right:1px solid var(--final-border);background:#fafafa}.rope-settings-nav button{min-height:34px;padding:0 9px;border:0;border-radius:7px;background:transparent;color:#777780;text-align:left;font-size:10px}.rope-settings-nav button.active{background:var(--final-accent-soft);color:var(--final-accent-strong);font-weight:650}.rope-settings-form{display:flex;flex-direction:column;gap:16px;padding:26px}.rope-settings-form label{display:flex;flex-direction:column;gap:7px;color:#66666f;font-size:10px}.rope-settings-form input{height:38px;padding:0 10px;border:1px solid #ddddE2;border-radius:7px;background:#fff;color:#33343a}
+          .rope-overview-card{min-height:430px}.rope-mini-chart{height:180px;display:flex;align-items:end;gap:26px;padding:18px 12px 24px;border-bottom:1px solid #eeeeF2}.rope-mini-chart>div{height:100%;flex:1;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;gap:8px}.rope-mini-chart i{width:min(44px,70%);display:block;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#7374f5,#5657d9)}.rope-mini-chart span{color:#9999a1;font-size:8px}.rope-current-project{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;align-items:center;padding-top:18px}.rope-current-project .project-preview{min-height:110px;border-radius:8px}.rope-current-project h3{margin:10px 0 4px}.rope-current-project p{margin:0 0 12px;color:#7d7d85;font-size:10px}
+          @media(max-width:1050px){.rope-card-grid,.rope-creator-grid,.rope-doc-grid,.rope-plan-row{grid-template-columns:repeat(2,1fr)}}
+          @media(max-width:700px){.rope-card-grid,.rope-creator-grid,.rope-doc-grid,.rope-plan-row{grid-template-columns:1fr}.rope-settings-card{grid-template-columns:1fr}.rope-settings-nav{border-right:0;border-bottom:1px solid var(--final-border)}.rope-table-head{display:none}.rope-table-row{grid-template-columns:1fr}.rope-current-project{grid-template-columns:1fr}}
+          EOF
+
+          # New contract tests.
+          cat > src/phase4-final-shell.test.ts <<'EOF'
+          import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          const app=fs.readFileSync("src/App.tsx","utf8")
+          const css=fs.readFileSync("src/phase4-final-ui.css","utf8")
+
+          describe("final Phase 4 shell behavior",()=>{
+            it("layers auth over the existing page instead of fabricating a background",()=>{
+              expect(app).toContain('window.addEventListener("wcb:open-auth"')
+              expect(app).toContain('const basePath = directAuth ? "/" : path')
+              expect(app).toContain('authIntent && <Auth')
+              expect(app).not.toContain("auth-demo-underlay")
+              expect(css).toContain(".auth-demo-layer .auth-demo-backdrop")
+              expect(css).toContain("rgba(255,255,255,.98)")
+            })
+
+            it("keeps dashboard menu interactions in one shell",()=>{
+              expect(app).toContain('const [pane, setPane] = useState("overview")')
+              expect(app).toContain("onSectionChange={setPane}")
+              expect(app).toContain('pane === "projects"')
+              expect(app).toContain('pane === "marketplace"')
+              expect(app).toContain('pane === "docs"')
+              expect(app).toContain("<details open")
+            })
+          })
+          EOF
+
+      - name: Verify final shell
+        run: |
+          set -euo pipefail
+          npm ci
+          npx vitest run src/phase4-final-shell.test.ts src/phase4-brand-auth.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-operations.test.ts
+          npm run build
+
+      - name: Commit final shell fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/fix-auth-overlay-dashboard-shell.yml
+          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts
+          git commit -m "Fix auth overlay and dashboard shell"
+          git push origin HEAD:phase-4-product-ux
