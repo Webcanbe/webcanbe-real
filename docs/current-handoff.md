@@ -2,7 +2,7 @@
 
 - Branch: `phase-5-product-launch`.
 - Implementation HEAD before this checkpoint: `bd5256d12c57dce7097c9342692262673e8c9ccd`.
-- New primary WebCanBe lockup applied across landing, public shell, dashboard chrome, app sidebar, workspace, checkout, and auth-complete surfaces.
+- New primary Webcanbe lockup applied across landing, public shell, dashboard chrome, app sidebar, workspace, checkout, and auth-complete surfaces.
 - Added matching standalone mark and updated favicon.
 - Sidebar collapsed state now uses the mark-only asset.
 - Top-right account control now opens its own account popover instead of sharing the sidebar account state.
@@ -13,7 +13,7 @@
 
 # PHASE 4 LANDING ASSET LOCALIZATION + HIDDEN-VARIANT PRUNE — 2026-09-18 KST
 
-**PASS with rollback preserved.** The selected Launch UI-derived WebCanBe landing is now self-hosted for its runtime presentation assets, and the explicitly hidden unused variant subtrees have been removed without changing the selected visual composition beyond the retained parity threshold.
+**PASS with rollback preserved.** The selected Launch UI-derived Webcanbe landing is now self-hosted for its runtime presentation assets, and the explicitly hidden unused variant subtrees have been removed without changing the selected visual composition beyond the retained parity threshold.
 
 - Pre-change rollback branch: `backup-phase4-before-landing-localize-2026-09-18` at `c80ce7d807e12b1611f5317f18f5d9e33c9945ca`.
 - Vendored result commit: `a6d6b8a4767b5f4b4ba08e34723f1f10613565ae` (`Vendor Launch UI landing assets and prune hidden variants [skip ci]`).
@@ -67,16 +67,16 @@ If the localization/pruning is later judged undesirable, restore from `backup-ph
 - No backend/Phase-5 implementation was started in this pass.
 
 ## UI architecture corrections
-- Removed the external Ropean dashboard iframe. `/dashboard` is now a native WebCanBe route using the existing product state and AppShell/sidebar.
-- Removed the landing iframe. The retained Launch UI-derived static landing is loaded into the React route, with same-origin navigation handled by the WebCanBe router rather than a separate iframe/postMessage navigation system.
+- Removed the external Ropean dashboard iframe. `/dashboard` is now a native Webcanbe route using the existing product state and AppShell/sidebar.
+- Removed the landing iframe. The retained Launch UI-derived static landing is loaded into the React route, with same-origin navigation handled by the Webcanbe router rather than a separate iframe/postMessage navigation system.
 - Dashboard remains white/light only; theme switching is not exposed.
-- Sidebar retains the Ropean-inspired grouped structure, now has a real collapse control, and its top selector represents WebCanBe workspaces rather than a template project selector.
+- Sidebar retains the Ropean-inspired grouped structure, now has a real collapse control, and its top selector represents Webcanbe workspaces rather than a template project selector.
 - Dashboard top search opens a real command palette. Keyboard shortcuts include `Cmd/Ctrl+K` search, `Cmd/Ctrl+P` Settings, `Cmd/Ctrl+1` Dashboard, and `Cmd/Ctrl+2` Marketplace.
 - Notifications and account/avatar controls no longer present inert buttons. Sign out returns directly to the landing page.
 - Dashboard is protected and not rendered before the auth gate allows it.
 
 ## Public shell / route corrections
-- Public navigation is now WebCanBe-owned: Product, Marketplace, Learn, Resources, each mapped to a distinct real route.
+- Public navigation is now Webcanbe-owned: Product, Marketplace, Learn, Resources, each mapped to a distinct real route.
 - The old `Open app` public-header action was removed. Signed-in public surfaces use Account instead.
 - Footer is retained on public/product pages and AppShell pages except Dashboard.
 - Marketplace gets a restrained entry fade and a working sort control.
@@ -95,9 +95,9 @@ If the localization/pruning is later judged undesirable, restore from `backup-ph
 ## Landing correctness fixes
 - Removed the old auth bridge script after iframe removal.
 - Removed/fixed stale original-template destinations including `designwithcode.dev`, the original creator email/GitHub, `/pricing`, `/feedback-program`, Figma Community, fake Twitter/GitHub footer destinations, and `href="#"` sign-in/logo targets.
-- Corrected the FAQ contradiction: WebCanBe does **not** need to remain in the exported runtime.
-- Top landing navigation now points to the distinct WebCanBe Product / Marketplace / Learn / Resources destinations.
-- Root document favicon, Apple touch icon, OG/Twitter title/description/image are WebCanBe-owned.
+- Corrected the FAQ contradiction: Webcanbe does **not** need to remain in the exported runtime.
+- Top landing navigation now points to the distinct Webcanbe Product / Marketplace / Learn / Resources destinations.
+- Root document favicon, Apple touch icon, OG/Twitter title/description/image are Webcanbe-owned.
 
 ## Deferred from this UI pass
 - The retained Launch UI visual document still references upstream Launch UI-hosted presentation assets in places. Full asset vendoring/deduplication and removal of unused hidden imported variants remain a separate bounded cleanup because changing those assets can alter the selected landing visual baseline.
