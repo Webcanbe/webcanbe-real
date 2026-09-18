@@ -125,6 +125,13 @@ export class HostedProductClient {
     return value.authorizationUrl
   }
 
+  async logout() {
+    this.csrf = undefined
+    const response = await this.request("/__webcanbe/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" })
+    if (!response.ok && response.status !== 204) throw new HostedProductError(response.status, "Sign out was refused.")
+    this.csrf = undefined
+  }
+
   async sellerApplication() {
     try { return (await this.post<{ application: SellerApplication }>("/__webcanbe/api/product/seller/applications/get", {})).application }
     catch (error) { if (error instanceof HostedProductError && error.status === 404) return undefined; throw error }
