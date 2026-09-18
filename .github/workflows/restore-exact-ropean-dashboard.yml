@@ -147,7 +147,7 @@ jobs:
               expect(css).toContain("rgba(255,255,255,.98)")
             })
           })
-          '''.replace(/^          /gm,""))
+          ''')
           PY
 
           cat >> src/phase4-final-ui.css <<'EOF'
