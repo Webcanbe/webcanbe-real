@@ -1,0 +1,3 @@
+Visual structure derived from the Launch UI public homepage.
+Source reference: https://www.launchuicomponents.com/
+WebCanBe copy, navigation, brand, and product claims are local.

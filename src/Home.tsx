@@ -1,8 +1,8 @@
 export default function Home() {
   return (
     <iframe
-      title="Launch UI"
-      src="https://www.launchuicomponents.com/"
+      title="WebCanBe"
+      src="/wcb-landing/index.html"
       style={{
         position: "fixed",
         inset: 0,
@@ -12,7 +12,7 @@ export default function Home() {
         margin: 0,
         padding: 0,
         display: "block",
-        background: "#000",
+        background: "#0b0b0d",
       }}
     />
   )
