@@ -49,8 +49,23 @@ jobs:
           }'''
           text = text[:start] + dashboard + text[end:]
 
-          insert_anchor = "  useEffect(() => {\\n    if (directAuth) setAuthIntent({ signup: path === \\"/signup\\" })\\n  }, [directAuth, path])"
-          message_effect = "  useEffect(() => {\\n    const messageHandler = (event: MessageEvent) => {\\n      if (event.origin !== window.location.origin) return\\n      const data = event.data as { type?: unknown; signup?: unknown } | null\\n      if (!data || data.type !== \\"wcb:open-auth\\") return\\n      setAuthIntent({ signup: Boolean(data.signup) })\\n    }\\n    window.addEventListener(\\"message\\", messageHandler)\\n    return () => window.removeEventListener(\\"message\\", messageHandler)\\n  }, [])\\n\\n"
+          insert_anchor = (
+              '  useEffect(() => {\\n'
+              '    if (directAuth) setAuthIntent({ signup: path === "/signup" })\\n'
+              '  }, [directAuth, path])'
+          )
+          message_effect = (
+              '  useEffect(() => {\\n'
+              '    const messageHandler = (event: MessageEvent) => {\\n'
+              '      if (event.origin !== window.location.origin) return\\n'
+              '      const data = event.data as { type?: unknown; signup?: unknown } | null\\n'
+              '      if (!data || data.type !== "wcb:open-auth") return\\n'
+              '      setAuthIntent({ signup: Boolean(data.signup) })\\n'
+              '    }\\n'
+              '    window.addEventListener("message", messageHandler)\\n'
+              '    return () => window.removeEventListener("message", messageHandler)\\n'
+              '  }, [])\\n\\n'
+          )
           if 'window.addEventListener("message", messageHandler)' not in text:
               if insert_anchor not in text:
                   raise SystemExit("direct auth effect anchor missing")
