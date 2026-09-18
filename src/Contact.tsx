@@ -124,7 +124,7 @@ export default function Contact({ slots = [] }: { slots?: string[] }) {
                     </div>
                     <div className={styles["text-24"]}>
                       <div className={styles["title-23"]}>
-                        <h5 className={styles["h5-6"]}>{slots[20] ?? "Sell on WebCanBe"}</h5>
+                        <h5 className={styles["h5-6"]}>{slots[20] ?? "Sell on Webcanbe"}</h5>
                       </div>
                       <div className={styles["description-25"]}>
                         <p className={styles["p-69"]}>{slots[21] ?? "Have projects worth starting from? Tell us what you       build at sellers@webcanbe.com"}</p>
