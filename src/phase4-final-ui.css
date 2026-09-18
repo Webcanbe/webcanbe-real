@@ -1220,3 +1220,17 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .rd-sidebar-collapsed{grid-template-columns:48px minmax(0,1fr)}.rd-sidebar-collapsed .rd-sidebar{width:48px}.rd-sidebar-collapsed .rd-team-copy,.rd-sidebar-collapsed .rd-team-switcher>svg,.rd-sidebar-collapsed .rd-app-title>div,.rd-sidebar-collapsed .rd-nav-label,.rd-sidebar-collapsed .rd-nav-group a span,.rd-sidebar-collapsed .rd-nav-group a em,.rd-sidebar-collapsed .rd-nav-expand span,.rd-sidebar-collapsed .rd-nav-expand>svg:last-child,.rd-sidebar-collapsed .rd-sidebar-footer>button>span:nth-child(2),.rd-sidebar-collapsed .rd-sidebar-footer>button>svg{display:none}.rd-sidebar-collapsed .rd-sidebar-header,.rd-sidebar-collapsed .rd-sidebar-content,.rd-sidebar-collapsed .rd-sidebar-footer{padding-left:6px;padding-right:6px}.rd-sidebar-collapsed .rd-team-switcher,.rd-sidebar-collapsed .rd-app-title,.rd-sidebar-collapsed .rd-nav-group>a,.rd-sidebar-collapsed .rd-nav-expand,.rd-sidebar-collapsed .rd-sidebar-footer>button{justify-content:center;padding-left:0;padding-right:0}
 @media(max-width:1050px){.rd-topnav{display:none}.rd-search{width:220px}.rd-stat-grid{grid-template-columns:repeat(2,1fr)}.rd-dashboard-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.rd-shell{grid-template-columns:1fr}.rd-sidebar{display:none}.rd-header{padding:0 12px}.rd-search{width:170px}.rd-header-icon:nth-of-type(2),.rd-header-icon:nth-of-type(3){display:none}.rd-main{padding:20px 16px 36px}.rd-stat-grid{grid-template-columns:1fr}.rd-main-heading{align-items:flex-start;flex-direction:column}.rd-dashboard-grid{grid-template-columns:1fr}}
+
+
+/* Phase 5 primary WebCanBe brand lockup */
+.wcb-logo{display:block;width:132px;height:auto;max-width:100%;object-fit:contain;flex:0 0 auto}
+.product-header .wcb-logo{width:132px}
+.site-footer-brand .wcb-logo{width:126px}
+.checkout-header .wcb-logo{width:126px}
+.workspace-top .wcb-logo{width:112px}
+.rope-sidebar .app-sidebar-brand .wcb-logo{width:118px}
+.rope-sidebar .app-sidebar-brand .brand-context{display:flex;min-width:0;flex-direction:column;line-height:1.1}
+.rope-sidebar .app-sidebar-brand .brand-context small{margin-top:4px;color:#92929b;font-size:10px;font-weight:500}
+.auth-complete .wcb-logo{width:164px;margin-bottom:12px}
+.rope-collapsed .rope-sidebar .app-sidebar-brand .wcb-logo{width:42px;object-fit:cover;object-position:left}
+@media(max-width:700px){.product-header .wcb-logo{width:118px}.site-footer-brand .wcb-logo{width:120px}}
