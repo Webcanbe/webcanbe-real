@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Sun, SlidersHorizontal, Download } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Sun, SlidersHorizontal, Download, CreditCard, BadgeCheck } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -327,23 +327,38 @@ function Purchases() {
   return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active"} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
 }
 
-type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "workspace" | "docs" | "settings" | "help"
+type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "workspace" | "docs" | "settings" | "account" | "billing" | "notifications" | "help"
 
 function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView: (view: DashboardView) => void }) {
+  const auth = productionAuthMode()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [searchOpen, setSearchOpen] = useState(false)
-  const general: Array<[string,DashboardView,typeof LayoutDashboard,string]> = [
-    ["Dashboard", "overview", LayoutDashboard, ""],
-    ["My projects", "projects", ListTodo, ""],
-    ["Marketplace", "marketplace", PackageCheck, ""],
-    ["Purchases", "purchases", MessagesSquare, purchaseBadge > 0 ? String(purchaseBadge) : ""],
-    ["Creator Studio", "creator", Users, ""],
-  ]
+  const [teamMenu, setTeamMenu] = useState(false)
+  const [accountMenu, setAccountMenu] = useState(false)
+  const [profileMenu, setProfileMenu] = useState(false)
+  const [workspaceOpen, setWorkspaceOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const choose = (next: DashboardView) => {
+    onView(next)
+    setAccountMenu(false)
+    setProfileMenu(false)
+    setTeamMenu(false)
+  }
+  const signOut = async () => {
+    if (auth) { try { await hostedProductClient.logout() } catch {} }
+    else { try { sessionStorage.removeItem("wcb-demo-auth") } catch {} }
+    window.dispatchEvent(new Event("wcb:auth-changed"))
+    go("/")
+  }
   const navButton = (label: string, target: DashboardView, Icon: typeof LayoutDashboard, badge = "") =>
-    <button key={label} type="button" className={"rd-nav-button" + (view === target ? " active" : "")} onClick={() => onView(target)}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</button>
+    <button key={label} type="button" className={"rd-nav-button" + (view === target ? " active" : "")} onClick={() => choose(target)}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</button>
+
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSearchOpen(false)
+      if (event.key === "Escape") {
+        setSearchOpen(false); setTeamMenu(false); setAccountMenu(false); setProfileMenu(false)
+      }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true) }
     }
     window.addEventListener("keydown", handler)
@@ -353,57 +368,112 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
   return <div className={"rd-shell" + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
     <aside className="rd-sidebar">
       <div className="rd-sidebar-header">
-        <button className="rd-team-switcher" type="button">
-          <span className="rd-team-logo rd-team-official-logo"><img src="/favicon.png" alt="" aria-hidden="true"/></span>
-          <span className="rd-team-copy"><b>Webcanbe</b><small>Source-first workspace</small></span>
-          <ChevronsUpDown/>
-        </button>
+        <div className="rd-menu-anchor">
+          <button className={"rd-team-switcher" + (teamMenu ? " is-open" : "")} type="button" aria-expanded={teamMenu} onClick={() => { setTeamMenu(v => !v); setAccountMenu(false); setProfileMenu(false) }}>
+            <span className="rd-team-logo rd-team-official-logo"><img src="/favicon.png" alt="" aria-hidden="true"/></span>
+            <span className="rd-team-copy"><b>Webcanbe</b><small>Source-first workspace</small></span>
+            <ChevronsUpDown/>
+          </button>
+          {teamMenu && <div className="rd-dropdown rd-team-dropdown">
+            <span className="rd-dropdown-label">Workspaces</span>
+            <button type="button" className="rd-dropdown-item selected" onClick={() => choose("overview")}><span className="rd-mini-logo"><img src="/favicon.png" alt=""/></span><span>Personal workspace</span><kbd>⌘1</kbd></button>
+            <div className="rd-dropdown-separator"/>
+            <button type="button" className="rd-dropdown-item" onClick={() => choose("workspace")}><Plus/><span>Add workspace</span></button>
+          </div>}
+        </div>
         <div className="rd-app-title">
           <div><b>Personal workspace</b><small>Current workspace</small></div>
           <button type="button" aria-label="Toggle sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
         </div>
       </div>
+
       <div className="rd-sidebar-content">
         <section className="rd-nav-group">
           <span className="rd-nav-label">General</span>
-          {general.map(([label,target,Icon,badge]) => navButton(label,target,Icon,badge))}
-          <button className={"rd-nav-expand" + (view === "workspace" ? " active" : "")} type="button" onClick={() => onView("workspace")}><ShieldCheck/><span>Source-backed editing</span><ChevronDown/></button>
+          {navButton("Dashboard","overview",LayoutDashboard)}
+          {navButton("Marketplace","marketplace",PackageCheck)}
+          {navButton("Creator Studio","creator",Users)}
+          <div className={"rd-collapsible" + (workspaceOpen ? " open" : "")}>
+            <button className={"rd-nav-button rd-collapsible-trigger" + (["workspace","projects","purchases"].includes(view) ? " active" : "")} type="button" aria-expanded={workspaceOpen} onClick={() => setWorkspaceOpen(v => !v)}><PanelsTopLeft/><span>Workspace</span><ChevronRight className="rd-chevron"/></button>
+            {workspaceOpen && <div className="rd-collapsible-content">
+              {navButton("Editor","workspace",ShieldCheck)}
+              {navButton("My projects","projects",FolderKanban)}
+              {navButton("Purchases","purchases",ShoppingBag,purchaseBadge > 0 ? String(purchaseBadge) : "")}
+            </div>}
+          </div>
         </section>
+
         <section className="rd-nav-group">
           <span className="rd-nav-label">Pages</span>
-          {navButton("Workspace","workspace",ShieldCheck)}
           {navButton("Documentation","docs",Bug)}
         </section>
+
         <section className="rd-nav-group">
           <span className="rd-nav-label">Other</span>
-          {navButton("Settings","settings",Settings2)}
+          <div className={"rd-collapsible" + (settingsOpen ? " open" : "")}>
+            <button className={"rd-nav-button rd-collapsible-trigger" + (["settings","account","billing","notifications"].includes(view) ? " active" : "")} type="button" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(v => !v)}><Settings2/><span>Settings</span><ChevronRight className="rd-chevron"/></button>
+            {settingsOpen && <div className="rd-collapsible-content">
+              {navButton("Profile","settings",BadgeCheck)}
+              {navButton("Account","account",Settings2)}
+              {navButton("Billing","billing",CreditCard)}
+              {navButton("Notifications","notifications",Bell)}
+            </div>}
+          </div>
           {navButton("Help Center","help",HelpCircle)}
         </section>
       </div>
-      <div className="rd-sidebar-footer">
-        <button type="button"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span><ChevronsUpDown/></button>
+
+      <div className="rd-sidebar-footer rd-menu-anchor">
+        <button className={"rd-account-trigger" + (accountMenu ? " is-open" : "")} type="button" aria-expanded={accountMenu} onClick={() => { setAccountMenu(v => !v); setTeamMenu(false); setProfileMenu(false) }}>
+          <span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span><ChevronsUpDown/>
+        </button>
+        {accountMenu && <div className="rd-dropdown rd-account-dropdown">
+          <div className="rd-dropdown-user"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in with Google</small></span></div>
+          <div className="rd-dropdown-separator"/>
+          <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><Sparkles/><span>Upgrade to Pro</span></button>
+          <div className="rd-dropdown-separator"/>
+          <button type="button" className="rd-dropdown-item" onClick={() => choose("account")}><BadgeCheck/><span>Account</span></button>
+          <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><CreditCard/><span>Billing</span></button>
+          <button type="button" className="rd-dropdown-item" onClick={() => choose("notifications")}><Bell/><span>Notifications</span></button>
+          <div className="rd-dropdown-separator"/>
+          <button type="button" className="rd-dropdown-item destructive" onClick={() => void signOut()}><LogOut/><span>Sign out</span></button>
+        </div>}
       </div>
     </aside>
+
     <div className="rd-content">
       <header className="rd-header">
         <button className="rd-sidebar-trigger" type="button" aria-label="Sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
         <span className="rd-separator"/>
         <nav className="rd-topnav">
-          <button type="button" className={view === "overview" ? "active" : ""} onClick={() => onView("overview")}>Overview</button>
-          <button type="button" className={view === "projects" ? "active" : ""} onClick={() => onView("projects")}>Projects</button>
-          <button type="button" className={view === "marketplace" ? "active" : ""} onClick={() => onView("marketplace")}>Marketplace</button>
-          <button type="button" className={view === "settings" ? "active" : ""} onClick={() => onView("settings")}>Settings</button>
+          <button type="button" className={view === "overview" ? "active" : ""} onClick={() => choose("overview")}>Overview</button>
+          <button type="button" className={view === "projects" ? "active" : ""} onClick={() => choose("projects")}>Projects</button>
+          <button type="button" className={view === "marketplace" ? "active" : ""} onClick={() => choose("marketplace")}>Marketplace</button>
+          <button type="button" className={["settings","account","billing","notifications"].includes(view) ? "active" : ""} onClick={() => choose("settings")}>Settings</button>
         </nav>
         <div className="rd-header-actions">
           <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
           <button className="rd-header-icon" type="button" aria-label="Theme"><Sun/></button>
           <button className="rd-header-icon" type="button" aria-label="Display settings"><SlidersHorizontal/></button>
-          <button className="rd-header-icon" type="button" aria-label="Notifications"><Bell/></button>
-          <button className="rd-header-avatar" type="button" aria-label="Profile">WC</button>
+          <button className="rd-header-icon" type="button" aria-label="Notifications" onClick={() => choose("notifications")}><Bell/></button>
+          <div className="rd-menu-anchor">
+            <button className={"rd-header-avatar" + (profileMenu ? " is-open" : "")} type="button" aria-label="Profile" aria-expanded={profileMenu} onClick={() => { setProfileMenu(v => !v); setAccountMenu(false); setTeamMenu(false) }}>WC</button>
+            {profileMenu && <div className="rd-dropdown rd-profile-dropdown">
+              <div className="rd-dropdown-user compact"><span><b>Webcanbe account</b><small>Signed in with Google</small></span></div>
+              <div className="rd-dropdown-separator"/>
+              <button type="button" className="rd-dropdown-item" onClick={() => choose("settings")}><span>Profile</span><kbd>⇧⌘P</kbd></button>
+              <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><span>Billing</span><kbd>⌘B</kbd></button>
+              <button type="button" className="rd-dropdown-item" onClick={() => choose("settings")}><span>Settings</span><kbd>⌘S</kbd></button>
+              <button type="button" className="rd-dropdown-item" onClick={() => choose("workspace")}><span>New workspace</span></button>
+              <div className="rd-dropdown-separator"/>
+              <button type="button" className="rd-dropdown-item destructive" onClick={() => void signOut()}><span>Sign out</span><kbd>⇧⌘Q</kbd></button>
+            </div>}
+          </div>
         </div>
       </header>
       {children}
     </div>
+
     {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><div className="rd-search-dialog" onMouseDown={event => event.stopPropagation()}><Search/><input autoFocus placeholder="Search Webcanbe"/><kbd>ESC</kbd></div></div>}
   </div>
 }
