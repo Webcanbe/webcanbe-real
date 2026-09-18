@@ -5,7 +5,7 @@ const home = fs.readFileSync("src/Home.tsx","utf8")
 describe("Phase 4 brand and auth shell", () => {
   it("uses native WebCanBe dashboard and landing routes without external iframes", () => {
     expect(app).toContain("function Dashboard()")
-    expect(app).toContain('className="dashboard-native"')
+    expect(app).toContain("function RopeanDashboardShell")
     expect(app).not.toContain("shadcn-admin-template.ropean.org")
     expect(home).toContain('fetch("/wcb-landing/index.html"')
     expect(home).not.toContain("<iframe")
