@@ -1,3 +1,50 @@
+# PHASE 4 NATIVE UI SHELL / ROUTING CORRECTION — 2026-09-18 KST
+
+- Branch: `phase-4-product-ux`.
+- Verified implementation HEAD: `203ccf2909c550b4139b9398e61cb4b07e209532` (`Fix native shell composition syntax`).
+- GitHub Actions run `35343300208`: focused Phase-4 tests **10/10 PASS** and production TypeScript/Vite build **PASS**.
+- No backend/Phase-5 implementation was started in this pass.
+
+## UI architecture corrections
+- Removed the external Ropean dashboard iframe. `/dashboard` is now a native WebCanBe route using the existing product state and AppShell/sidebar.
+- Removed the landing iframe. The retained Launch UI-derived static landing is loaded into the React route, with same-origin navigation handled by the WebCanBe router rather than a separate iframe/postMessage navigation system.
+- Dashboard remains white/light only; theme switching is not exposed.
+- Sidebar retains the Ropean-inspired grouped structure, now has a real collapse control, and its top selector represents WebCanBe workspaces rather than a template project selector.
+- Dashboard top search opens a real command palette. Keyboard shortcuts include `Cmd/Ctrl+K` search, `Cmd/Ctrl+P` Settings, `Cmd/Ctrl+1` Dashboard, and `Cmd/Ctrl+2` Marketplace.
+- Notifications and account/avatar controls no longer present inert buttons. Sign out returns directly to the landing page.
+- Dashboard is protected and not rendered before the auth gate allows it.
+
+## Public shell / route corrections
+- Public navigation is now WebCanBe-owned: Product, Marketplace, Learn, Resources, each mapped to a distinct real route.
+- The old `Open app` public-header action was removed. Signed-in public surfaces use Account instead.
+- Footer is retained on public/product pages and AppShell pages except Dashboard.
+- Marketplace gets a restrained entry fade and a working sort control.
+- Project `Preview project` now opens a real public preview route.
+- Project-structure display now differentiates Next-style and React/Vite-style projects instead of always showing a Next.js tree.
+- Unknown paths now render a real 404 rather than silently falling through to Marketplace.
+- `/templates` resolves to Marketplace and legacy `/pricing` resolves to Plans.
+
+## Settings / truthful interaction corrections
+- Settings tabs now have distinct content instead of repeating the same form.
+- Save changes persists the current UI-preview profile/account values in-browser.
+- GitHub connection is visibly disabled with truthful copy until the backend connection is wired; it is no longer a fake active button.
+- Billing and Domains similarly avoid pretending Phase-5 integrations exist.
+- Sign out clears the UI-preview session or calls the hosted logout endpoint and returns to `/`.
+
+## Landing correctness fixes
+- Removed the old auth bridge script after iframe removal.
+- Removed/fixed stale original-template destinations including `designwithcode.dev`, the original creator email/GitHub, `/pricing`, `/feedback-program`, Figma Community, fake Twitter/GitHub footer destinations, and `href="#"` sign-in/logo targets.
+- Corrected the FAQ contradiction: WebCanBe does **not** need to remain in the exported runtime.
+- Top landing navigation now points to the distinct WebCanBe Product / Marketplace / Learn / Resources destinations.
+- Root document favicon, Apple touch icon, OG/Twitter title/description/image are WebCanBe-owned.
+
+## Deferred from this UI pass
+- The retained Launch UI visual document still references upstream Launch UI-hosted presentation assets in places. Full asset vendoring/deduplication and removal of unused hidden imported variants remain a separate bounded cleanup because changing those assets can alter the selected landing visual baseline.
+- Real GitHub account linking, real hosted authentication provider configuration, persistent account settings, payments, seller payout/KYC, AI metering, and production deploy-provider integration remain backend/Phase-5 work.
+- The existing source-first editor engine and `CompatibleWorkspace` were preserved; this pass did not redesign or weaken Visual / Code / Split source authority.
+
+---
+
 # Phase 3 Admin/Control backend checkpoint — 2026-09-17
 
 **PASS. The smallest operator-only Control backend now reads existing seller,
