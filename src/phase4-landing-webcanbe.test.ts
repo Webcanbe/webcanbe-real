@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import { describe, expect, it } from "vitest"
 
-describe("Phase 4 WebCanBe landing copy", () => {
+describe("Phase 4 Webcanbe landing copy", () => {
   it("keeps the Launch UI visual shell but owns the visible product copy", () => {
     const home = fs.readFileSync("src/Home.tsx", "utf8")
     const html = fs.readFileSync("public/wcb-landing/index.html", "utf8")
