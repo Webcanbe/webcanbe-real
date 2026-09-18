@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, Search, Bell, UserRound, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -32,11 +32,13 @@ function usePath() {
 
 let routeTimer: number | undefined
 function go(to: string) {
+  const current = window.location.pathname + window.location.search
   if (to.startsWith("/login") || to.startsWith("/signup")) {
-    window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup") } }))
+    const nextUrl = new URL(to, window.location.origin)
+    const next = nextUrl.searchParams.get("next") || (current.startsWith("/login") || current.startsWith("/signup") ? "/dashboard" : current)
+    window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup"), next } }))
     return
   }
-  const current = window.location.pathname + window.location.search
   if (to === current) return
   if (routeTimer) window.clearTimeout(routeTimer)
   document.documentElement.classList.add("wcb-route-leaving")
@@ -48,165 +50,88 @@ function go(to: string) {
     routeTimer = undefined
   }, 120)
 }
-function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
+function Link(function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
 function Mark() { return <span className="mark" aria-label="WebCanBe"><i/><i/><i/></span> }
 function Arrow() { return <span className="arrow">↗</span> }
 
-function Landing() { return <Home /> }
+function Landing() { return <Home onNavigate={go} /> }
 
-const publicNav: string[][] = []
-const appNav = [["Dashboard", "/dashboard"], ["My projects", "/projects"], ["Purchases", "/purchases"], ["Marketplace", "/browse"]]
+const publicNav = [["Product", "/docs/visual-editor"], ["Marketplace", "/browse"], ["Learn", "/docs"], ["Resources", "/changelog"]] as const
 
-function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
-  const hosted = hostedProductMode(), [menu, setMenu] = useState(false), [signedIn, setSignedIn] = useState(!hosted)
-  useEffect(() => {
-    if (!hosted) return
-    let current = true
-    void hostedProductClient.authenticated().then(value => { if (current) setSignedIn(value) })
-    return () => { current = false }
-  }, [hosted])
-  return <div className="product public-product"><header className="product-header public-header"><Link to="/" className="brand"><Mark/> <span>WebCanBe</span></Link><nav>{publicNav.map(([n,p]) => <Link key={p} to={p} className={active === p ? "active" : ""}>{n}</Link>)}</nav><div className="header-actions">{signedIn ? <Link to="/dashboard" className="button compact public-open-app">Open app</Link> : <><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" onClick={() => setMenu(!menu)}>Menu</button></div>{menu && <div className="mobile-nav">{publicNav.map(([n,p]) => <Link key={p} to={p}>{n}</Link>)}{signedIn ? <Link to="/dashboard">Open app</Link> : <><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}</div>
+
+function SiteFooter() {
+  return <footer className="site-footer"><div className="site-footer-grid"><div className="site-footer-brand"><Link to="/" className="brand"><Mark/><span>WebCanBe</span></Link><p>Edit visually. Leave with real code you own.</p><a href="mailto:hello@webcanbe.com">hello@webcanbe.com</a></div><div><b>Product</b><Link to="/browse">Marketplace</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/export">Export</Link></div><div><b>Learn</b><Link to="/docs">Documentation</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/docs/security">Security</Link><Link to="/changelog">Changelog</Link></div><div><b>Company</b><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/updates">Updates</Link><a href="https://github.com/Webcanbe/webcanbe-real" target="_blank" rel="noreferrer">GitHub</a></div><div><b>Legal</b><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/licenses">Licenses</Link></div></div><div className="site-footer-bottom"><span>© 2026 WebCanBe</span><span>The source is the product.</span></div></footer>
 }
-
-function AppShell({ children, active, onSectionChange }: { children: React.ReactNode; active?: string; onSectionChange?: (section: string) => void }) {
-  const [menu, setMenu] = useState(false)
-  const action = (id: string, to: string, label: string, Icon: typeof LayoutDashboard) => onSectionChange
-    ? <button type="button" className={active === id ? "active" : ""} onClick={() => onSectionChange(id)}><Icon/><span>{label}</span></button>
-    : <Link to={to} className={active === to ? "active" : ""}><Icon/><span>{label}</span></Link>
-  return <div className="product app-frame rope-app">
-    <aside className={`app-sidebar rope-sidebar ${menu ? "open" : ""}`}>
-      <div className="rope-sidebar-head"><Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span><b>WebCanBe</b><small>Source-first workspace</small></span></Link></div>
-      <div className="rope-sidebar-scroll">
-        <div className="rope-nav-group"><span className="rope-nav-label">General</span><nav className="rope-nav-list">
-          {action("overview","/dashboard","Dashboard",LayoutDashboard)}
-          {action("marketplace","/browse","Marketplace",Store)}
-        </nav></div>
-        <details open className="rope-nav-group rope-nav-collapsible"><summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary><div className="rope-subnav">
-          {action("projects","/projects","My projects",FolderKanban)}
-          {action("purchases","/purchases","Purchases",ShoppingBag)}
-        </div></details>
-        <details open className="rope-nav-group rope-nav-collapsible"><summary><PackageCheck/><span>Creator</span><ChevronDown/></summary><div className="rope-subnav">
-          {action("creator","/seller","Creator Studio",Sparkles)}
-          {action("listings","/seller/projects","Listings",FolderKanban)}
-          {action("submission","/seller/projects/new","New submission",Plus)}
-        </div></details>
-        <details open className="rope-nav-group rope-nav-collapsible"><summary><CircleHelp/><span>Other</span><ChevronDown/></summary><div className="rope-subnav">
-          {action("docs","/docs","Documentation",BookOpen)}
-          {action("plans","/plans","Plans",ScrollText)}
-          {action("settings","/settings","Settings",Settings2)}
-          {action("control","/control","Control",ShieldCheck)}
-        </div></details>
-      </div>
-      <div className="app-sidebar-account rope-account">{onSectionChange ? <button type="button" onClick={() => onSectionChange("settings")}><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></button> : <Link to="/settings"><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></Link>}</div>
+function localSignedIn(){try{return sessionStorage.getItem("wcb-demo-auth")==="1"}catch{return false}}
+function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
+  const hosted=hostedProductMode(), [menu,setMenu]=useState(false), [signedIn,setSignedIn]=useState(hosted?false:localSignedIn())
+  useEffect(()=>{let current=true;const refresh=()=>{if(!hosted&&current)setSignedIn(localSignedIn())};if(hosted)void hostedProductClient.authenticated().then(v=>{if(current)setSignedIn(v)});window.addEventListener("wcb:auth-changed",refresh);return()=>{current=false;window.removeEventListener("wcb:auth-changed",refresh)}},[hosted])
+  return <div className="product public-product"><header className="product-header public-header"><Link to="/" className="brand"><Mark/> <span>WebCanBe</span></Link><nav>{publicNav.map(([n,p])=><Link key={p} to={p} className={active===p?"active":""}>{n}</Link>)}</nav><div className="header-actions">{signedIn?<Link to="/settings" className="quiet-link">Account</Link>:<><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" onClick={()=>setMenu(!menu)}>Menu</button></div>{menu&&<div className="mobile-nav">{publicNav.map(([n,p])=><Link key={p} to={p}>{n}</Link>)}{signedIn?<Link to="/settings">Account</Link>:<><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}<SiteFooter/></div>
+}
+function AppShell({ children, active, footer=true }:{children:React.ReactNode;active?:string;footer?:boolean}) {
+  const hosted=hostedProductMode(), [menu,setMenu]=useState(false), [collapsed,setCollapsed]=useState(false), [palette,setPalette]=useState(false), [q,setQ]=useState(""), [notices,setNotices]=useState(false), [account,setAccount]=useState(false)
+  const [workspaces,setWorkspaces]=useState<string[]>(hosted?[]:["Personal workspace"]), [workspace,setWorkspace]=useState("Personal workspace")
+  const activePath=active||window.location.pathname
+  const commands=[["Dashboard","/dashboard","⌘1"],["Marketplace","/browse","⌘2"],["My projects","/projects",""],["Purchases","/purchases",""],["Creator Studio","/seller",""],["Documentation","/docs",""],["Plans","/plans",""],["Settings","/settings","⌘P"]] as const
+  const shown=commands.filter(([label])=>label.toLowerCase().includes(q.toLowerCase()))
+  useEffect(()=>{if(!hosted)return;let current=true;void hostedProductClient.workspaces().then(v=>{if(current){setWorkspaces(v);if(v.length)setWorkspace(w=>v.includes(w)?w:v[0])}}).catch(()=>{if(current)setWorkspaces([])});return()=>{current=false}},[hosted])
+  useEffect(()=>{const h=(e:KeyboardEvent)=>{if(!(e.metaKey||e.ctrlKey)){if(e.key==="Escape"){setPalette(false);setNotices(false);setAccount(false)}return}const k=e.key.toLowerCase();if(k==="k"){e.preventDefault();setPalette(v=>!v);setQ("")}if(k==="p"){e.preventDefault();go("/settings")}if(k==="1"){e.preventDefault();go("/dashboard")}if(k==="2"){e.preventDefault();go("/browse")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[])
+  const item=(to:string,label:string,Icon:typeof LayoutDashboard)=><Link to={to} className={activePath===to?"active":""}><Icon/><span>{label}</span></Link>
+  const signOut=async()=>{if(hosted){try{await hostedProductClient.logout()}catch{}}else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
+  return <div className={"product app-frame rope-app"+(collapsed?" rope-collapsed":"")+(activePath==="/dashboard"?" dashboard-shell":"")}>
+    <aside className={"app-sidebar rope-sidebar"+(menu?" open":"")}><div className="rope-sidebar-head"><Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span><b>WebCanBe</b><small>Source-first workspace</small></span></Link><button className="rope-collapse" onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expand sidebar":"Collapse sidebar"}><PanelsTopLeft/></button></div>
+      <label className="workspace-switcher"><span>Workspace</span><select value={workspaces.includes(workspace)?workspace:workspaces[0]||""} disabled={!workspaces.length} onChange={e=>setWorkspace(e.target.value)}>{workspaces.length?workspaces.map(v=><option key={v}>{v}</option>):<option>No workspace yet</option>}</select></label>
+      <div className="rope-sidebar-scroll"><div className="rope-nav-group"><span className="rope-nav-label">General</span><nav className="rope-nav-list">{item("/dashboard","Dashboard",LayoutDashboard)}{item("/browse","Marketplace",Store)}</nav></div><details open className="rope-nav-group rope-nav-collapsible"><summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary><div className="rope-subnav">{item("/projects","My projects",FolderKanban)}{item("/purchases","Purchases",ShoppingBag)}</div></details><details open className="rope-nav-group rope-nav-collapsible"><summary><PackageCheck/><span>Creator</span><ChevronDown/></summary><div className="rope-subnav">{item("/seller","Creator Studio",Sparkles)}{item("/seller/projects","Listings",FolderKanban)}{item("/seller/projects/new","New submission",Plus)}</div></details><details open className="rope-nav-group rope-nav-collapsible"><summary><CircleHelp/><span>Other</span><ChevronDown/></summary><div className="rope-subnav">{item("/docs","Documentation",BookOpen)}{item("/plans","Plans",ScrollText)}{item("/settings","Settings",Settings2)}{item("/control","Control",ShieldCheck)}</div></details></div>
+      <div className="app-sidebar-account rope-account"><button onClick={()=>setAccount(v=>!v)}><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Account menu</small></span></button>{account&&<div className="account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button onClick={()=>void signOut()}><LogOut/>Sign out</button></div>}</div>
     </aside>
-    <div className="app-main rope-main">
-      <header className="rope-topbar">
-        <button className="rope-mobile-trigger" onClick={() => setMenu(value => !value)} aria-expanded={menu}>Menu</button>
-        <button className="rope-sidebar-toggle" type="button" aria-label="Sidebar"><PanelsTopLeft/></button>
-        <div className="rope-top-tabs">
-          {onSectionChange ? <>
-            <button className={active === "overview" ? "active" : ""} onClick={() => onSectionChange("overview")}>Overview</button>
-            <button className={active === "projects" ? "active" : ""} onClick={() => onSectionChange("projects")}>Projects</button>
-            <button className={active === "marketplace" ? "active" : ""} onClick={() => onSectionChange("marketplace")}>Marketplace</button>
-            <button className={active === "settings" ? "active" : ""} onClick={() => onSectionChange("settings")}>Settings</button>
-          </> : <span className="active">WebCanBe</span>}
-        </div>
-        <div className="rope-topbar-actions"><button className="rope-search" type="button"><Search/><span>Search</span><kbd>⌘K</kbd></button><button className="rope-icon-button" type="button" aria-label="Notifications"><Bell/></button><button className="rope-user-button" type="button"><span className="avatar">WC</span></button></div>
-      </header>
-      {children}
-    </div>
-    {menu && <button className="app-sidebar-scrim" aria-label="Close navigation" onClick={() => setMenu(false)}/>}
+    <div className="app-main rope-main"><header className="rope-topbar"><button className="rope-mobile-trigger" onClick={()=>setMenu(v=>!v)} aria-expanded={menu}>Menu</button><div className="rope-topbar-title"><span>WebCanBe</span><b>{commands.find(([,to])=>to===activePath)?.[0]||"Workspace"}</b></div><div className="rope-topbar-actions"><button className="rope-search" onClick={()=>setPalette(true)}><Search/><span>Search and navigate</span><kbd>⌘K</kbd></button><div className="topbar-popover-wrap"><button className="rope-icon-button" aria-label="Notifications" onClick={()=>setNotices(v=>!v)}><Bell/></button>{notices&&<div className="notification-popover"><b>No new notifications</b><p>Account and project alerts will appear here when the hosted backend reports them.</p></div>}</div><button className="rope-user-button" aria-label="Account menu" onClick={()=>setAccount(v=>!v)}><span className="avatar">WC</span></button></div></header>{children}{footer&&<SiteFooter/>}</div>
+    {menu&&<button className="app-sidebar-scrim" aria-label="Close navigation" onClick={()=>setMenu(false)}/>}
+    {palette&&<div className="command-backdrop" onMouseDown={()=>setPalette(false)}><section className="command-palette" role="dialog" aria-modal="true" onMouseDown={e=>e.stopPropagation()}><div className="command-input"><Search/><input autoFocus value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&shown[0]){setPalette(false);go(shown[0][1])}}} placeholder="Search pages and actions"/><kbd>esc</kbd></div><div className="command-results">{shown.map(([label,to,hint])=><button key={to} onClick={()=>{setPalette(false);go(to)}}><span><Command/>{label}</span>{hint&&<kbd>{hint}</kbd>}</button>)}</div></section></div>}
   </div>
 }
-
 function Protected({ children }: { children: React.ReactNode }) {
-  const hosted = hostedProductMode(), [state, setState] = useState<"checking" | "allowed">(hosted ? "checking" : "allowed")
-  useEffect(() => {
-    if (!hosted) return
-    let current = true
-    void hostedProductClient.authenticated().then(ok => {
-      if (!current) return
-      if (ok) setState("allowed")
-      else go(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`)
-    })
-    return () => { current = false }
-  }, [hosted])
-  if (state !== "allowed") return <main className="route-gate"><span className="signal">Account</span><p>Checking your session…</p></main>
+  const hosted=hostedProductMode(), [state,setState]=useState<"checking"|"allowed">(()=>hosted?"checking":localSignedIn()?"allowed":"checking")
+  useEffect(()=>{let current=true;if(hosted){void hostedProductClient.authenticated().then(ok=>{if(!current)return;if(ok)setState("allowed");else go("/login?next="+encodeURIComponent(window.location.pathname+window.location.search))});return()=>{current=false}}const refresh=()=>{if(!current)return;if(localSignedIn())setState("allowed");else go("/login?next="+encodeURIComponent(window.location.pathname+window.location.search))};refresh();window.addEventListener("wcb:auth-changed",refresh);return()=>{current=false;window.removeEventListener("wcb:auth-changed",refresh)}},[hosted])
+  if(state!=="allowed")return <main className="route-gate"><span className="signal">Account</span><p>Checking your session…</p></main>
   return <>{children}</>
 }
-
-function Preview({ project, large = false }: { project: Project; large?: boolean }) {
+function Preview(function Preview({ project, large = false }: { project: Project; large?: boolean }) {
   return <div className={`project-preview ${project.color} ${large ? "large" : ""}`}><div className="preview-nav"><span>{project.title}</span><span>Index&nbsp;&nbsp; About&nbsp;&nbsp; Contact</span></div><div className="preview-body"><p>{project.category}</p><h3>{project.title}<br/>made to be <em>used.</em></h3><div className="preview-orb"/></div><div className="preview-foot"><span>Scroll to explore</span><span>01 — 04</span></div></div>
 }
 function ProjectCard({ project }: { project: Project }) { return <article className="project-card"><Link to={`/project/${project.slug}`}><Preview project={project}/></Link><div className="card-meta"><div><Link className="project-title" to={`/project/${project.slug}`}>{project.title}</Link><p>{project.tagline}</p></div><strong>${project.price}</strong></div><div className="stacks">{project.stack.map(x => <span key={x}>{x}</span>)}</div></article> }
 
 function Browse() {
-  const [query, setQuery] = useState(""); const [category, setCategory] = useState("All projects")
-  const hosted = hostedProductMode(), [catalog, setCatalog] = useState<Project[]>([]), [catalogMessage, setCatalogMessage] = useState(hosted ? "Loading projects…" : "")
-  const categories = ["All projects", "Marketing", "Commerce", "SaaS", "Editorial", "Directory"]
-  const local = useMemo(() => projects.filter(p => (category === "All projects" || p.category === category) && `${p.title} ${p.tagline} ${p.stack.join(" ")}`.toLowerCase().includes(query.toLowerCase())), [query, category])
-  useEffect(() => {
-    if (!hosted) return
-    let current = true
-    setCatalogMessage("Loading projects…")
-    void hostedProductClient.browse({ ...(query.trim() ? { query } : {}), ...(category === "All projects" ? {} : { tags: [category] }), limit: 100 }).then(listings => {
-      if (current) { setCatalog(listings.map(hostedProject)); setCatalogMessage("") }
-    }, error => { if (current) { setCatalog([]); setCatalogMessage(error instanceof Error ? error.message : "Catalog unavailable.") } })
-    return () => { current = false }
-  }, [hosted, query, category])
-  const filtered = hosted ? catalog : local
-  return <PublicShell><main className="browse"><section className="browse-hero"><div><span className="signal">Marketplace</span><h1>Start from<br/><em>something real.</em></h1></div><p>Working web projects, ready to open, change, and make your own. The source code is always yours.</p></section><section className="browse-controls"><label className="search"><span>⌕</span><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search projects, stacks, or styles"/></label><div className="filters">{categories.map(c => <button onClick={() => setCategory(c)} className={category === c ? "selected" : ""} key={c}>{c}</button>)}</div></section><section className="browse-heading"><p>{catalogMessage || `${filtered.length} working projects`}</p><button className="sort">Recently updated <span>↓</span></button></section><section className="project-grid">{filtered.map(p => <ProjectCard project={p} key={p.id}/>)}</section></main></PublicShell>
+  const [query,setQuery]=useState(""), [category,setCategory]=useState("All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
+  const hosted=hostedProductMode(), [catalog,setCatalog]=useState<Project[]>([]), [catalogMessage,setCatalogMessage]=useState(hosted?"Loading projects…":"")
+  const categories=["All projects","Marketing","Commerce","SaaS","Editorial","Directory"]
+  const local=useMemo(()=>projects.filter(p=>(category==="All projects"||p.category===category)&&(`${p.title} ${p.tagline} ${p.stack.join(" ")}`).toLowerCase().includes(query.toLowerCase())),[query,category])
+  useEffect(()=>{if(!hosted)return;let current=true;setCatalogMessage("Loading projects…");void hostedProductClient.browse({...(query.trim()?{query}:{}),...(category==="All projects"?{}:{tags:[category]}),limit:100}).then(v=>{if(current){setCatalog(v.map(hostedProject));setCatalogMessage("")}},e=>{if(current){setCatalog([]);setCatalogMessage(e instanceof Error?e.message:"Catalog unavailable.")}});return()=>{current=false}},[hosted,query,category])
+  const filtered=hosted?catalog:local
+  const visible=useMemo(()=>{const n=[...filtered];if(sort==="price-low")n.sort((a,b)=>a.price-b.price);else if(sort==="price-high")n.sort((a,b)=>b.price-a.price);else if(sort==="name")n.sort((a,b)=>a.title.localeCompare(b.title));return n},[filtered,sort])
+  return <PublicShell active="/browse"><main className="browse browse-enter"><section className="browse-hero"><div><span className="signal">Marketplace</span><h1>Start from<br/><em>something real.</em></h1></div><p>Working web projects, ready to open, change, and make your own. The source code is always yours.</p></section><section className="browse-controls"><label className="search"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search projects, stacks, or styles"/></label><div className="filters">{categories.map(c=><button onClick={()=>setCategory(c)} className={category===c?"selected":""} key={c}>{c}</button>)}</div></section><section className="browse-heading"><p>{catalogMessage||`${visible.length} working projects`}</p><label className="sort">Sort<select value={sort} onChange={e=>setSort(e.target.value as typeof sort)}><option value="recent">Recently updated</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></label></section><section className="project-grid">{visible.map(p=><ProjectCard project={p} key={p.id}/>)}</section></main></PublicShell>
 }
-
+function projectStructure(project:Project){const next=project.stack.some(v=>v.toLowerCase().includes("next"));return next?["app/","  page.tsx","  layout.tsx","components/","  Hero.tsx","styles/","  globals.css"]:["src/","  main.tsx","  App.tsx","  components/","    Hero.tsx","  styles.css","public/"]}
 function Detail({ reference }: { reference: string }) {
-  const hosted = hostedProductMode(), fallback = projects.find(project => project.slug === reference) ?? projects[0]
-  const [project, setProject] = useState<Project | undefined>(hosted ? undefined : fallback), [tab, setTab] = useState("Overview"), [message, setMessage] = useState(hosted ? "Loading project…" : ""), [buying, setBuying] = useState(false)
-  useEffect(() => {
-    if (!hosted) { setProject(fallback); return }
-    let current = true
-    void hostedProductClient.detail(reference).then(listing => { if (current) { setProject(hostedProject(listing)); setMessage("") } }, error => { if (current) setMessage(error instanceof Error ? error.message : "Project unavailable.") })
-    return () => { current = false }
-  }, [hosted, reference])
-  if (!project) return <PublicShell><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{message}</span></div></main></PublicShell>
-  const checkoutTarget = `/checkout/${encodeURIComponent(project.releaseId ?? project.id)}?project=${encodeURIComponent(project.slug)}`
-  const buy = async () => {
-    if (buying) return
-    setBuying(true)
-    if (!hosted) { go(`/login?next=${encodeURIComponent(checkoutTarget)}`); return }
-    const signedIn = await hostedProductClient.authenticated()
-    go(signedIn ? checkoutTarget : `/login?next=${encodeURIComponent(checkoutTarget)}`)
-  }
-  return <PublicShell><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{project.title}</span></div><section className="detail-top"><div><div className="project-eyebrow">{project.category} project <span>•</span> by {project.creator}</div><h1>{project.title}</h1><p>{project.tagline} Built as a working project, not a static download.</p><div className="detail-actions"><button className="button primary" disabled={buying} onClick={() => void buy()}>{buying ? "Continuing…" : `Buy project — $${project.price}`} <Arrow/></button><button className="button">Preview project</button></div>{message && <p role="status">{message}</p>}</div><aside className="price-box"><span>One-time project price</span><strong>${project.price}</strong><p>Includes the entire codebase. Export is yours on every plan.</p></aside></section><Preview project={project} large/><div className="detail-content"><section><div className="tabs">{["Overview", "What’s included", "Project structure"].map(t => <button className={tab === t ? "active" : ""} onClick={() => setTab(t)} key={t}>{t}</button>)}</div>{tab === "Overview" && <div className="copy-block"><h2>A project you can keep building.</h2><p>{project.title} comes with actual routes, components, styles, and content structure. Open it in the visual workspace, edit the source, or do both — changes flow through the same files.</p><div className="two-col"><div><span>Made for</span><p>Founders and small teams who want a considered starting point without giving up the code.</p></div><div><span>Compatibility</span><p>Visual editor enabled. Standard file structure. Works in any normal local development flow.</p></div></div></div>}{tab === "What’s included" && <ul className="included"><li>Complete source code and project configuration</li><li>Responsive pages and reusable components</li><li>Visual editing compatibility</li><li>Clear README and local setup notes</li></ul>}{tab === "Project structure" && <div className="file-tree"><span>▾ app</span><span className="indent">▾ (marketing)</span><span className="indent-2">page.tsx</span><span className="indent">layout.tsx</span><span>▾ components</span><span className="indent">Hero.tsx</span><span className="indent">Navigation.tsx</span><span>styles.css</span></div>}</section><aside className="specs"><h3>Project details</h3><dl><div><dt>Stack</dt><dd>{project.stack.join(", ")}</dd></div><div><dt>Last updated</dt><dd>{project.updated}</dd></div><div><dt>Editing</dt><dd>Visual + code + AI</dd></div><div><dt>License</dt><dd>Commercial use</dd></div></dl></aside></div></main></PublicShell>
+  const hosted=hostedProductMode(), fallback=projects.find(p=>p.slug===reference)??projects[0]
+  const [project,setProject]=useState<Project|undefined>(hosted?undefined:fallback),[tab,setTab]=useState("Overview"),[message,setMessage]=useState(hosted?"Loading project…":""),[buying,setBuying]=useState(false)
+  useEffect(()=>{if(!hosted){setProject(fallback);return}let current=true;void hostedProductClient.detail(reference).then(l=>{if(current){setProject(hostedProject(l));setMessage("")}},e=>{if(current)setMessage(e instanceof Error?e.message:"Project unavailable.")});return()=>{current=false}},[hosted,reference])
+  if(!project)return <PublicShell active="/browse"><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{message}</span></div></main></PublicShell>
+  const target=`/checkout/${encodeURIComponent(project.releaseId??project.id)}?project=${encodeURIComponent(project.slug)}`
+  const buy=async()=>{if(buying)return;setBuying(true);if(!hosted){go("/login?next="+encodeURIComponent(target));return}go(await hostedProductClient.authenticated()?target:"/login?next="+encodeURIComponent(target))}
+  return <PublicShell active="/browse"><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{project.title}</span></div><section className="detail-top"><div><div className="project-eyebrow">{project.category} project <span>•</span> by {project.creator}</div><h1>{project.title}</h1><p>{project.tagline} Built as a working project, not a static download.</p><div className="detail-actions"><button className="button primary" disabled={buying} onClick={()=>void buy()}>{buying?"Continuing…":`Buy project — $${project.price}`} <Arrow/></button><Link className="button" to={`/project/${project.slug}/preview`}>Preview project <ExternalLink/></Link></div></div><aside className="price-box"><span>One-time project price</span><strong>{`$${project.price}`}</strong><p>Includes the entire codebase. Export is yours on every plan.</p></aside></section><Preview project={project} large/><div className="detail-content"><section><div className="tabs">{["Overview","What’s included","Project structure"].map(t=><button className={tab===t?"active":""} onClick={()=>setTab(t)} key={t}>{t}</button>)}</div>{tab==="Overview"&&<div className="copy-block"><h2>A project you can keep building.</h2><p>{project.title} comes with actual routes, components, styles, and content structure. Open it in the visual workspace or edit the source directly.</p></div>}{tab==="What’s included"&&<ul className="included"><li>Complete source code and project configuration</li><li>Responsive pages and reusable components</li><li>Visual editing compatibility</li><li>Clear README and local setup notes</li></ul>}{tab==="Project structure"&&<div className="file-tree">{projectStructure(project).map((x,i)=><span className={x.startsWith("    ")?"indent-2":x.startsWith("  ")?"indent":""} key={i}>{x.trim()}</span>)}</div>}</section><aside className="specs"><h3>Project details</h3><dl><div><dt>Stack</dt><dd>{project.stack.join(", ")}</dd></div><div><dt>Last updated</dt><dd>{project.updated}</dd></div><div><dt>Editing</dt><dd>Visual + code</dd></div></dl></aside></div></main></PublicShell>
 }
-
-function authNext() {
+function ProjectPreviewPage({reference}:{reference:string}){const p=projects.find(x=>x.slug===reference)??projects[0];return <PublicShell active="/browse"><main className="project-preview-page"><div className="project-preview-toolbar"><Link to={`/project/${reference}`}>← Back to project</Link><span>Public preview</span></div><Preview project={p} large/><section className="project-preview-meta"><div><span>{p.category}</span><h1>{p.title}</h1><p>{p.tagline}</p></div><div><b>{p.stack.join(" · ")}</b><small>Editing stays inside an authenticated working copy.</small></div></section></main></PublicShell>}
+function authNext()function authNext() {
   const value = new URLSearchParams(window.location.search).get("next")
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard"
 }
 
-function Auth({ signup = false, onClose }: { signup?: boolean; onClose?: () => void }) {
-  const _hostedBoundary = async () => hostedProductClient.authStart()
-  void _hostedBoundary
-  return <div className="auth-demo-layer" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
-    <div className="auth-demo-backdrop"/>
-    <section className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-      <button className="auth-demo-close" type="button" aria-label="Close" onClick={onClose}><X/></button>
-      <h1 id="auth-title">Log in or sign up</h1>
-      <p>Get smarter responses, upload files and images, and more.</p>
-      <div className="auth-demo-actions">
-        <button className="auth-demo-provider" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
-        <button className="auth-demo-provider" type="button"><Github/><span>Continue with GitHub</span></button>
-        <button className="auth-demo-provider" type="button"><Phone/><span>Continue with phone</span></button>
-      </div>
-      <div className="auth-demo-divider"><span>OR</span></div>
-      <input className="auth-demo-email" type="email" placeholder="Email address" aria-label="Email address"/>
-      <button className="auth-demo-continue" type="button">Continue</button>
-      <p className="auth-demo-terms">By continuing, you agree to our Terms of Use and acknowledge our Privacy Policy.</p>
-    </section>
-  </div>
+function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:string;onClose?:()=>void}) {
+  const hosted=hostedProductMode(),[busy,setBusy]=useState(false),[error,setError]=useState("")
+  const run=async()=>{if(busy)return;setBusy(true);setError("");try{if(hosted){try{sessionStorage.setItem("wcb-auth-next",next)}catch{}window.location.assign(await hostedProductClient.authStart());return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(next)}catch(e){setError(e instanceof Error?e.message:"Sign-in is unavailable.");setBusy(false)}}
+  return <div className="auth-demo-layer"><div className="auth-demo-backdrop"/><section className="auth-demo-modal" role="dialog" aria-modal="true"><button className="auth-demo-close" onClick={onClose}><X/></button><h1>{signup?"Create your WebCanBe account":"Log in to WebCanBe"}</h1><p>Open projects, keep source history, and continue from any workspace.</p><div className="auth-demo-actions"><button className="auth-demo-provider" disabled={busy} onClick={()=>void run()}><span className="google-g">G</span><span>Continue with Google</span></button><button className="auth-demo-provider" disabled={busy} onClick={()=>void run()}><Github/><span>Continue with GitHub</span></button><button className="auth-demo-provider" disabled={busy} onClick={()=>void run()}><Phone/><span>Continue with phone</span></button></div><div className="auth-demo-divider"><span>OR</span></div><input className="auth-demo-email" type="email" placeholder="Email address"/><button className="auth-demo-continue" disabled={busy} onClick={()=>void run()}>{busy?"Continuing…":"Continue"}</button>{error&&<p className="auth-demo-error">{error}</p>}</section></div>
 }
-
-const docPages: Record<string, { title: string; eyebrow: string; intro: string; sections: { title: string; body: string }[] }> = {
+const docPagesconst docPages: Record<string, { title: string; eyebrow: string; intro: string; sections: { title: string; body: string }[] }> = {
   "/docs": { title: "Introduction", eyebrow: "Getting Started", intro: "WebCanBe is a source-first marketplace and browser workspace for real web projects.", sections: [
     { title: "The source is the product", body: "Visual, Code, Split, history, export, and future AI edits stay attached to the same working project source and revision." },
     { title: "Start from something real", body: "Marketplace listings point to versioned project releases. A purchase can become your own editable working copy without mutating the published release." },
@@ -253,19 +178,8 @@ const docsNav = [
   ["Reference", [["Compatibility","/docs/compatibility"],["Security","/docs/security"],["Changelog","/changelog"]]],
 ] as const
 
-function Documentation({ path }: { path: string }) {
-  const page = docPages[path] ?? docPages["/docs"]
-  return <main className="docs-page">
-    <header className="docs-topbar"><Link to="/" className="brand"><Mark/><span>WebCanBe</span></Link><nav><Link to="/docs">Docs</Link><Link to="/browse">Marketplace</Link><Link to="/dashboard">Dashboard</Link></nav></header>
-    <div className="docs-layout">
-      <aside className="docs-sidebar">{docsNav.map(([group,items]) => <section key={group}><h3>{group}</h3>{items.map(([label,href]) => <Link key={href} to={href} className={path === href ? "active" : ""}>{label}</Link>)}</section>)}</aside>
-      <article className="docs-content"><div className="docs-breadcrumb">Docs <span>/</span> {page.eyebrow}</div><h1>{page.title}</h1><p className="docs-lead">{page.intro}</p>{page.sections.map(section => <section key={section.title}><h2>{section.title}</h2><p>{section.body}</p></section>)}<div className="docs-help"><b>Need help?</b><p>Use the project repository or contact WebCanBe.</p><div><a href="mailto:hello@webcanbe.com">Email</a><a href="https://github.com/Webcanbe/webcanbe-real" target="_blank" rel="noreferrer">GitHub</a></div></div></article>
-      <aside className="docs-toc"><span>On this page</span>{page.sections.map(section => <a key={section.title} href="#">{section.title}</a>)}</aside>
-    </div>
-  </main>
-}
-
-const infoPages: Record<string, { eyebrow: string; title: string; intro: string; items: { title: string; body: string }[] }> = {
+function Documentation({path}:{path:string}){const page=docPages[path]??docPages["/docs"];return <PublicShell active="/docs"><main className="docs-page"><div className="docs-layout"><aside className="docs-sidebar">{docsNav.map(([g,items])=><section key={g}><h3>{g}</h3>{items.map(([l,h])=><Link key={h} to={h} className={path===h?"active":""}>{l}</Link>)}</section>)}</aside><article className="docs-content"><div className="docs-breadcrumb">Docs <span>/</span> {page.eyebrow}</div><h1>{page.title}</h1><p className="docs-lead">{page.intro}</p>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <section id={id} key={sec.title}><h2>{sec.title}</h2><p>{sec.body}</p></section>})}</article><aside className="docs-toc"><span>On this page</span>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <a key={sec.title} href={"#"+id}>{sec.title}</a>})}</aside></div></main></PublicShell>}
+const infoPagesconst infoPages: Record<string, { eyebrow: string; title: string; intro: string; items: { title: string; body: string }[] }> = {
   "/changelog": { eyebrow:"Resources", title:"Changelog", intro:"Product UI and platform changes for WebCanBe.", items:[{title:"Phase 4",body:"Final product UX, landing, auth demo, dashboard shell, documentation, and app-wide UI polish."},{title:"Phase 3",body:"Hosted product domain, marketplace, purchases, Creator Studio, releases, and control surfaces."}] },
   "/about": { eyebrow:"Company", title:"About WebCanBe", intro:"A source-first way to start from working web projects and keep the code.", items:[{title:"Principle",body:"Do not hide the code. Edit the code visually."},{title:"Ownership",body:"The source remains the product, not a proprietary canvas."}] },
   "/contact": { eyebrow:"Company", title:"Contact", intro:"Questions about WebCanBe, creator publishing, or the product.", items:[{title:"Email",body:"hello@webcanbe.com"},{title:"Repository",body:"github.com/Webcanbe/webcanbe-real"}] },
@@ -391,18 +305,19 @@ function Purchases() {
 }
 
 function Dashboard() {
-  return <main className="ropean-original-dashboard" aria-label="Ropean dashboard template">
-    <iframe
-      title="Ropean shadcn admin dashboard"
-      src="https://shadcn-admin-template.ropean.org/"
-      referrerPolicy="no-referrer"
-    />
-  </main>
+  const lib=useProductLibrary()
+  const working=lib.hosted?lib.copies.map(c=>({project:releaseProject(lib.catalog,c.releaseId,c.workspaceProjectId),href:"/workspace/"+c.workspaceProjectId})):projects.slice(0,3).map(p=>({project:p,href:"/workspace/"+p.id}))
+  const attention=lib.hosted?lib.entitlements.filter(e=>e.status!=="active"):[]
+  return <AppShell active="/dashboard" footer={false}><main className="dashboard-native"><header className="dashboard-native-head"><div><span className="signal">Workspace overview</span><h1>Continue where you left off.</h1><p>Your working copies, purchases, and product state without filler analytics.</p></div><Link to="/browse" className="button">Browse marketplace <Arrow/></Link></header><div className="dashboard-summary-line"><span><b>{working.length}</b> working copies</span><span><b>{lib.hosted?lib.entitlements.length:3}</b> purchases</span><span><b>{attention.length}</b> need attention</span><span><b>Visual · Code · Split</b> edit modes</span></div><section className="dashboard-native-grid"><div className="dashboard-native-section"><div className="dashboard-section-title"><div><h2>Continue building</h2><p>Open a source-backed working copy.</p></div><Link to="/projects">All projects</Link></div><div className="dashboard-project-list">{working.map(({project,href})=><Link className="dashboard-project-row" to={href} key={href}><div className={"dashboard-project-swatch "+project.color}/><div><b>{project.title}</b><span>{project.stack.slice(0,2).join(" · ")}</span></div><small>{project.updated}</small><Arrow/></Link>)}</div></div><aside className="dashboard-native-section dashboard-attention"><div className="dashboard-section-title"><div><h2>Needs attention</h2><p>Only real blocking state appears here.</p></div></div>{attention.length?attention.map(x=><p key={x.entitlementId}>{x.status}</p>):<div className="all-clear"><CheckCircle2/><div><b>All clear</b><p>No blocked purchase or workspace state is reported.</p></div></div>}</aside></section><section className="dashboard-native-section dashboard-activity"><div className="dashboard-section-title"><div><h2>Recent product activity</h2><p>Actual working-copy and purchase state belongs here.</p></div></div><div className="activity-timeline">{working.map(({project},i)=><div key={project.id}><span className="activity-marker"/><div><b>{project.title}</b><p>{i===0?"Continue building":"Working copy ready"}</p></div><small>{project.updated}</small></div>)}</div></section></main></AppShell>
 }
-
-function Settings() { const [section, setSection] = useState("Profile"); const sections = ["Profile", "Account", "GitHub", "Domains", "Billing", "Preferences"]; return <AppShell><main className="settings"><aside><h1>Settings</h1>{sections.map(x => <button key={x} onClick={() => setSection(x)} className={section === x ? "active" : ""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section === "Profile" ? "Your profile" : `${section} settings`}</h2>{section === "Profile" && <><div className="profile-avatar">OT</div><label>Name<input defaultValue="Oliver Taylor"/></label><label>Public creator name<input defaultValue="Oliver"/></label></>}{section === "GitHub" && <div className="integration"><b>GitHub</b><p>Connect GitHub when you’re ready to push project code to your own repositories.</p><button className="button">Connect GitHub <Arrow/></button></div>}{section === "Domains" && <div className="empty-state"><h3>Connect a domain when you’re ready.</h3><p>Domains are available on Pro and Studio.</p><Link className="button" to="/plans">See plans <Arrow/></Link></div>}{!["Profile", "GitHub", "Domains"].includes(section) && <div className="form-rows"><label>Email<input defaultValue="oliver@example.com"/></label><label>Notifications<select defaultValue="Product updates"><option>Product updates</option><option>Only account notices</option></select></label></div>}<button className="button primary save">Save changes</button></section></main></AppShell> }
-
-function Plans() { const [annual, setAnnual] = useState(false); const plans = [{name:"Free", price:"$0", desc:"For opening a project, changing it, and taking it with you.", items:["Unlimited editing", "Code export", "1 workspace"]},{name:"Pro",price:annual?"$15.83":"$19",desc:"For one person building more than one real thing.",items:["Unlimited workspaces", "AI allowance", "Domains, deployment, GitHub"]},{name:"Studio",price:annual?"$40.83":"$49",desc:"For people building with clients and collaborators.",items:["5 seats", "Larger AI allowance", "Client handoff and selling"]}]; return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan.</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Yearly <span>2 months free</span></button></div></div><section className="plan-grid">{plans.map((p,i) => <article className={i === 1 ? "featured" : ""} key={p.name}>{i === 1 && <span className="popular">Most chosen</span>}<h2>{p.name}</h2><p>{p.desc}</p><strong>{p.price}<small>{p.price !== "$0" && "/ month"}</small></strong><ul>{p.items.map(x => <li key={x}>✓ {x}</li>)}</ul><button className={i === 1 ? "button primary" : "button"} onClick={() => go(i ? "/signup" : "/browse")}>{i === 0 ? "Start for free" : `Choose ${p.name}`} <Arrow/></button></article>)}</section></main></PublicShell> }
+function Settings() {
+  const hosted=hostedProductMode(),[section,setSection]=useState("Profile"),[name,setName]=useState("WebCanBe user"),[email,setEmail]=useState(""),[message,setMessage]=useState("")
+  const sections=["Profile","Account","GitHub","Domains","Billing","Preferences"]
+  const save=()=>{try{localStorage.setItem("wcb-ui-settings",JSON.stringify({name,email}))}catch{}setMessage("Saved for this browser.")}
+  const signOut=async()=>{if(hosted){try{await hostedProductClient.logout()}catch{}}else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
+  return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} onChange={e=>setEmail(e.target.value)}/></label><div className="settings-action-row"><div><b>Session</b><p>Sign out returns directly to the landing page.</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Account connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<div className="settings-billing"><b>Plan and billing</b><p>Real billing is not simulated before the payment backend exists.</p><Link className="button" to="/plans">Review plans</Link></div>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={save}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
+}
+function Plans()function Plans() { const [annual, setAnnual] = useState(false); const plans = [{name:"Free", price:"$0", desc:"For opening a project, changing it, and taking it with you.", items:["Unlimited editing", "Code export", "1 workspace"]},{name:"Pro",price:annual?"$15.83":"$19",desc:"For one person building more than one real thing.",items:["Unlimited workspaces", "AI allowance", "Domains, deployment, GitHub"]},{name:"Studio",price:annual?"$40.83":"$49",desc:"For people building with clients and collaborators.",items:["5 seats", "Larger AI allowance", "Client handoff and selling"]}]; return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan.</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Yearly <span>2 months free</span></button></div></div><section className="plan-grid">{plans.map((p,i) => <article className={i === 1 ? "featured" : ""} key={p.name}>{i === 1 && <span className="popular">Most chosen</span>}<h2>{p.name}</h2><p>{p.desc}</p><strong>{p.price}<small>{p.price !== "$0" && "/ month"}</small></strong><ul>{p.items.map(x => <li key={x}>✓ {x}</li>)}</ul><button className={i === 1 ? "button primary" : "button"} onClick={() => go(i ? "/signup" : "/browse")}>{i === 0 ? "Start for free" : `Choose ${p.name}`} <Arrow/></button></article>)}</section></main></PublicShell> }
 
 function CreatorListingEditor({ listing, onSaved }: { listing: CreatorStudioData["listings"][number]; onSaved: (listing: CreatorStudioData["listings"][number]) => void }) {
   const [title, setTitle] = useState(listing.title), [summary, setSummary] = useState(listing.summary), [availability, setAvailability] = useState(listing.availability), [tags, setTags] = useState(listing.tags.join(", "))
@@ -486,63 +401,32 @@ function Control() {
   return <AppShell><main className="control"><header className="control-head"><span className="signal">Control</span><h1>Operational product state.</h1><p>Read-only Phase 4 view over existing authoritative records. IDs remain references; this screen does not mint authority.</p></header><section className="control-metrics">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</section><aside className="control-stepup"><b>High-risk changes require fresh step-up.</b><p>The backend already enforces server-minted, session-bound, expiring step-up evidence. Phase 4 does not fake a passkey ceremony or expose a client-side bypass.</p></aside><section className="control-section"><div className="hub-section-head"><div><h2>Seller applications</h2><p>Application state across tenants for authorized operators.</p></div></div><ControlRows rows={control.sellerApplications} columns={[{label:"Application",keys:["application_id"]},{label:"User",keys:["user_id"]},{label:"Status",keys:["status"]},{label:"Updated",keys:["updated_at","created_at"]}]}/></section><section className="control-section"><div className="hub-section-head"><div><h2>Submission pipeline</h2><p>Quarantine/review state without source bodies or worker credentials.</p></div></div><ControlRows rows={control.submissions} columns={[{label:"Submission",keys:["submission_id"]},{label:"Seller",keys:["seller_user_id"]},{label:"Status",keys:["status"]},{label:"Revision",keys:["source_revision_id"]}]}/></section><section className="control-split"><div><div className="hub-section-head"><div><h2>Listings</h2><p>Published product records.</p></div></div><ControlRows rows={control.listings} columns={[{label:"Listing",keys:["listing_id"]},{label:"Title",keys:["title"]},{label:"Status",keys:["status"]},{label:"Availability",keys:["availability"]}]}/></div><div><div className="hub-section-head"><div><h2>Ready</h2><p>Server-authoritative qualification.</p></div></div><ControlRows rows={control.ready} columns={[{label:"Release",keys:["release_id"]},{label:"Status",keys:["qualification_status"]},{label:"Version",keys:["qualification_version"]}]}/></div></section><section className="control-section"><div className="hub-section-head"><div><h2>Privileged audit</h2><p>Append-only evidence for Control mutations.</p></div></div><ControlRows rows={control.audit} columns={[{label:"Actor",keys:["actor_user_id"]},{label:"Action",keys:["action"]},{label:"Target",keys:["target_id"]},{label:"Created",keys:["created_at"]}]}/></section></main></AppShell>
 }
 
+function NotFound({path}:{path:string}){return <PublicShell><main className="not-found"><span className="signal">404</span><h1>This page does not exist.</h1><p><code>{path}</code> is not a WebCanBe route.</p><div><Link className="button primary" to="/">Back home</Link><Link className="button" to="/browse">Marketplace</Link></div></main></PublicShell>}
 export default function App() {
-  const path = usePath()
-  const directAuth = path === "/login" || path === "/signup"
-  const [authIntent, setAuthIntent] = useState<{ signup: boolean } | null>(directAuth ? { signup: path === "/signup" } : null)
-
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ signup?: boolean }>).detail
-      setAuthIntent({ signup: Boolean(detail?.signup) })
-    }
-    window.addEventListener("wcb:open-auth", handler)
-    return () => window.removeEventListener("wcb:open-auth", handler)
-  }, [])
-
-  useEffect(() => {
-    const messageHandler = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return
-      const data = event.data as { type?: unknown; signup?: unknown } | null
-      if (!data || data.type !== "wcb:open-auth") return
-      setAuthIntent({ signup: Boolean(data.signup) })
-    }
-    window.addEventListener("message", messageHandler)
-    return () => window.removeEventListener("message", messageHandler)
-  }, [])
-
-  useEffect(() => {
-    if (directAuth) setAuthIntent({ signup: path === "/signup" })
-  }, [directAuth, path])
-
-  const basePath = directAuth ? "/" : path
-  let page: React.ReactNode
-  if (basePath === "/") page = <Landing/>
-  else if (basePath === "/browse") page = <Browse/>
-  else if (basePath.startsWith("/project/")) page = <Detail reference={basePath.split("/").pop() ?? ""}/>
-  else if (basePath.startsWith("/docs")) page = <Documentation path={basePath}/>
-  else if (["/changelog","/about","/contact","/updates","/licenses","/terms","/privacy"].includes(basePath)) page = <InfoPage path={basePath}/>
-  else if (basePath === "/auth/complete") page = <AuthComplete/>
-  else if (basePath.startsWith("/checkout/")) page = <Protected><Checkout/></Protected>
-  else if (basePath.startsWith("/workspace/")) page = <Protected><CompatibleWorkspace/></Protected>
-  else if (basePath === "/projects") page = <Protected><Projects/></Protected>
-  else if (basePath === "/purchases") page = <Protected><Purchases/></Protected>
-  else if (basePath === "/dashboard") page = <Protected><Dashboard/></Protected>
-  else if (basePath === "/settings") page = <Protected><Settings/></Protected>
-  else if (basePath === "/plans") page = <Plans/>
-  else if (basePath === "/seller/projects/new") page = <Protected><Seller page="new"/></Protected>
-  else if (basePath === "/seller/projects") page = <Protected><Seller page="projects"/></Protected>
-  else if (basePath === "/seller") page = <Protected><Seller/></Protected>
-  else if (basePath === "/control") page = <Protected><Control/></Protected>
-  else page = <Browse/>
-
-  const closeAuth = () => {
-    setAuthIntent(null)
-    if (directAuth) {
-      window.history.replaceState({}, "", "/")
-      window.dispatchEvent(new PopStateEvent("popstate"))
-    }
-  }
-
-  return <>{page}{authIntent && <Auth signup={authIntent.signup} onClose={closeAuth}/>}</>
+  const path=usePath(),directAuth=path==="/login"||path==="/signup",directNext=new URLSearchParams(window.location.search).get("next")||"/dashboard"
+  const [authIntent,setAuthIntent]=useState<{signup:boolean;next:string}|null>(directAuth?{signup:path==="/signup",next:directNext}:null)
+  useEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:string}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:d?.next?.startsWith("/")&&!d.next.startsWith("//")?d.next:"/dashboard"})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
+  useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
+  const basePath=directAuth?"/":path;let page:React.ReactNode
+  if(basePath==="/")page=<Landing/>
+  else if(basePath==="/browse"||basePath==="/templates")page=<Browse/>
+  else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage reference={basePath.split("/")[2]||""}/>
+  else if(basePath.startsWith("/project/"))page=<Detail reference={basePath.split("/").pop()??""}/>
+  else if(basePath.startsWith("/docs"))page=<Documentation path={basePath}/>
+  else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
+  else if(basePath==="/auth/complete")page=<AuthComplete/>
+  else if(basePath.startsWith("/checkout/"))page=<Protected><Checkout/></Protected>
+  else if(basePath.startsWith("/workspace/"))page=<Protected><CompatibleWorkspace/></Protected>
+  else if(basePath==="/projects")page=<Protected><Projects/></Protected>
+  else if(basePath==="/purchases")page=<Protected><Purchases/></Protected>
+  else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
+  else if(basePath==="/settings")page=<Protected><Settings/></Protected>
+  else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
+  else if(basePath==="/seller/projects/new")page=<Protected><Seller page="new"/></Protected>
+  else if(basePath==="/seller/projects")page=<Protected><Seller page="projects"/></Protected>
+  else if(basePath==="/seller")page=<Protected><Seller/></Protected>
+  else if(basePath==="/control")page=<Protected><Control/></Protected>
+  else page=<NotFound path={basePath}/>
+  const closeAuth=()=>{setAuthIntent(null);if(directAuth){window.history.replaceState({},"","/");window.dispatchEvent(new PopStateEvent("popstate"))}}
+  return <>{page}{authIntent&&<Auth signup={authIntent.signup} next={authIntent.next} onClose={closeAuth}/>}</>
 }
