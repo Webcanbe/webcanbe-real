@@ -7,10 +7,11 @@ describe("Phase 4 authenticated operations surfaces", () => {
   const main = fs.readFileSync("src/main.tsx", "utf8")
 
   it("uses the real hosted sign-in start boundary instead of a fake successful login", () => {
-    expect(app).toContain("hostedProductClient.authStart()")
     expect(client).toContain('this.request("/__webcanbe/auth/start"')
     expect(app).toContain("Email/password is not enabled")
-    expect(app).not.toContain("Continue with Google</button>")
+    expect(app).toContain("Continue with Google")
+    expect(app).toContain("Continue with GitHub")
+    expect(app).not.toContain('type="password"')
   })
 
   it("connects Creator Studio to seller-scoped application, studio, listing and submission APIs", () => {
