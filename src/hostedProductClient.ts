@@ -47,7 +47,7 @@ export class HostedProductError extends Error {
  * accepts identity, membership, or operator flags from route state. */
 export class HostedProductClient {
   private csrf?: Promise<string>
-  constructor(private readonly request: FetchLike = fetch) {}
+  constructor(private readonly request: FetchLike = (input, init) => globalThis.fetch(input, init)) {}
 
   private session(force = false) {
     if (force) this.csrf = undefined
