@@ -37,10 +37,13 @@ jobs:
             echo "Root /_next dependency remains"
             exit 1
           fi
-      - name: Install visual parity verifier
+      - name: Prepare visual parity verifier
         run: |
-          npm install --no-save --package-lock=false playwright@1.55.0 pixelmatch@7.1.0 pngjs@7.0.0
-          npx playwright install chromium
+          npm install --no-save --package-lock=false puppeteer-core@24.16.0 pixelmatch@7.1.0 pngjs@7.0.0
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
       - name: Pixel-compare old and localized landing
         run: node scripts/verify-landing-parity.mjs
       - name: Focused tests and production build
