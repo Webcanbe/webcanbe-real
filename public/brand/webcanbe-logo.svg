@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1202 203" role="img" aria-labelledby="title desc">
-  <title id="title">WebCanBe</title>
-  <desc id="desc">WebCanBe logo with three diagonal blue bars and black wordmark.</desc>
+  <title id="title">Webcanbe</title>
+  <desc id="desc">Webcanbe logo with three diagonal blue bars and black wordmark.</desc>
   <g>
     <rect x="-1" y="37" width="191" height="37.5" rx="18.75" fill="#534cfd" transform="rotate(-27.4 94.5 55.75)"/>
     <rect x="63.4" y="89.8" width="157.5" height="36.8" rx="18.4" fill="#4d65fd" transform="rotate(-27.4 142.15 108.2)"/>
     <rect x="127.4" y="142.8" width="124.4" height="36.7" rx="18.35" fill="#387cfe" transform="rotate(-27.6 189.6 161.15)"/>
   </g>
-  <text x="357" y="174" fill="#0f1217" font-family="Arial, Helvetica, sans-serif" font-size="174" font-weight="700" letter-spacing="-11">WebCanBe</text>
+  <text x="357" y="174" fill="#0f1217" font-family="Arial, Helvetica, sans-serif" font-size="174" font-weight="700" letter-spacing="-11">Webcanbe</text>
 </svg>
