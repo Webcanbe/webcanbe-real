@@ -194,12 +194,26 @@ function Auth({ signup = false }: { signup?: boolean }) {
   const _hostedBoundary = async () => hostedProductClient.authStart()
   void _hostedBoundary
   return <main className="auth auth-demo" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
+    <div className="auth-demo-underlay" aria-hidden="true">
+      <aside className="auth-demo-underlay-sidebar">
+        <div className="auth-demo-underlay-brand"><Mark/><span>WebCanBe</span></div>
+        <div className="auth-demo-underlay-nav"><span>Dashboard</span><span>My projects</span><span>Marketplace</span><span>Documentation</span></div>
+        <div className="auth-demo-underlay-foot"><span>Settings</span><span>Help</span></div>
+      </aside>
+      <section className="auth-demo-underlay-main">
+        <header><span>WebCanBe</span><div><i/><i/></div></header>
+        <div className="auth-demo-underlay-content">
+          <div className="auth-demo-underlay-title"/>
+          <div className="auth-demo-underlay-copy"/>
+          <div className="auth-demo-underlay-input"/>
+        </div>
+      </section>
+    </div>
     <div className="auth-demo-backdrop"/>
     <section className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <button className="auth-demo-close" type="button" aria-label="Close"><X/></button>
-      <div className="auth-demo-logo"><Mark/></div>
       <h1 id="auth-title">Log in or sign up</h1>
-      <p>Log in to get smarter responses, upload files and images, and more.</p>
+      <p>Get smarter responses, upload files and images, and more.</p>
       <div className="auth-demo-actions">
         <button className="auth-demo-provider auth-provider-button" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
         <button className="auth-demo-provider" type="button"><Github/><span>Continue with GitHub</span></button>
@@ -208,7 +222,7 @@ function Auth({ signup = false }: { signup?: boolean }) {
       <div className="auth-demo-divider"><span>OR</span></div>
       <input className="auth-demo-email" type="email" placeholder="Email address" aria-label="Email address"/>
       <button className="auth-demo-continue" type="button">Continue</button>
-      <p className="auth-demo-terms">By continuing, you agree to our <Link to="/terms">Terms of Use</Link> and acknowledge our <Link to="/privacy">Privacy Policy</Link>.</p>
+      <p className="auth-demo-terms">By continuing, you agree to our Terms of Use and acknowledge our Privacy Policy.</p>
     </section>
   </main>
 }
