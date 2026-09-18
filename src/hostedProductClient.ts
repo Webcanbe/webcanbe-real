@@ -126,8 +126,8 @@ export class HostedProductClient {
   }
 
   async logout() {
-    this.csrf = undefined
-    const response = await this.request("/__webcanbe/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: "{}" })
+    const csrf = await this.session()
+    const response = await this.request("/__webcanbe/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-WCB-CSRF": csrf }, body: "{}" })
     if (!response.ok && response.status !== 204) throw new HostedProductError(response.status, "Sign out was refused.")
     this.csrf = undefined
   }
