@@ -14,7 +14,7 @@ describe("Phase 5 brand pass", () => {
   })
 
   it("uses the primary logo in the retained landing header/footer brand anchors", () => {
-    expect((landing.match(/\\/brand\\/webcanbe-logo\\.svg/g) || []).length).toBeGreaterThanOrEqual(3)
+    expect(landing.split("/brand/webcanbe-logo.svg").length - 1).toBeGreaterThanOrEqual(3)
   })
 
   it("keeps the favicon aligned with the new three-stroke mark", () => {
