@@ -1,6 +1,7 @@
 {
   "identity": {
-    "allowSelfRegistration": true
+    "allowSelfRegistration": true,
+    "sessionLifetimeMs": 604800000
   },
   "oidc": {
     "issuer": "https://accounts.google.com",
