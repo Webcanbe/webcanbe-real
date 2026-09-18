@@ -63,7 +63,7 @@ describe("Phase 5 Ropean dashboard interactions", () => {
     expect(dashboard).not.toContain("<Sun/>")
     expect(dashboard).not.toContain("SlidersHorizontal")
     expect(dashboard).toContain('aria-label="Open theme settings"')
-    expect(dashboard).toContain("<Settings/>")
+    expect(dashboard).toContain("<SettingsIcon/>")
     expect(dashboard).toContain("rd-config-drawer")
     expect(dashboard).toContain("Theme Settings")
     expect(dashboard).toContain("setConfigOpen(true)")
