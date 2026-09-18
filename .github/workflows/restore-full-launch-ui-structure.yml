@@ -484,6 +484,34 @@ jobs:
           """
           soup.head.append(style)
 
+          # Replace any remaining original social/source destinations while retaining their cards/slots.
+          for a in soup.find_all("a", href=True):
+              href = a.get("href", "").lower()
+              if "github.com/launch-ui/launch-ui" in href:
+                  if footer is not None and footer in a.parents:
+                      a["href"] = "https://github.com/Webcanbe/webcanbe-real"
+                      a["target"] = "_blank"
+                      a["rel"] = "noreferrer"
+                  elif hero is not None and hero in a.parents:
+                      a["href"] = "/signup"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Create account")
+                  else:
+                      a["href"] = "/browse"
+                      a["target"] = "_top"
+              elif "twitter.com/mikolajdobrucki" in href or "x.com/mikolajdobrucki" in href:
+                  if top_nav is not None and top_nav in a.parents:
+                      a.decompose()
+                  elif footer is not None and footer in a.parents:
+                      a["href"] = "/browse"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Marketplace")
+                  else:
+                      a["href"] = "/browse"
+                      a["target"] = "_top"
+
           # Metadata.
           if soup.title: soup.title.string="WebCanBe"
           for meta in soup.find_all("meta"):
@@ -492,6 +520,13 @@ jobs:
                   meta["content"]="Edit visually. Leave with real code you own."
               elif key in {"og:title","og:site_name","twitter:title"}:
                   meta["content"]="WebCanBe"
+              elif key in {"author","creator","twitter:creator"}:
+                  meta["content"]="WebCanBe"
+              elif key == "og:url":
+                  meta["content"]="https://webcanbe.com"
+          for link in soup.find_all("link"):
+              if link.get("rel") == ["author"] or "author" in (link.get("rel") or []):
+                  link["href"] = "https://webcanbe.com"
 
           # Internal WebCanBe routes escape the iframe.
           for a in soup.find_all("a", href=True):
@@ -530,8 +565,8 @@ jobs:
               for (const kept of [
                 "Documentation",
                 "Getting started",
+                "Customization",
                 "Visual editor",
-                "Code editor",
                 "Working Projects",
                 "Questions about ownership",
                 "Choose how you want to work",
