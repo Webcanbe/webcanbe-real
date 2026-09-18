@@ -62,5 +62,5 @@ export default function Home({ onNavigate }: { onNavigate: (to: string) => void 
     }
   }, [onNavigate])
 
-  return <main className="landing-react-host" ref={host}>{error && <div className="landing-load-error"><b>WebCanBe</b><p>{error}</p><button onClick={() => window.location.reload()}>Reload</button></div>}</main>
+  return <main className="landing-react-host" ref={host}>{error && <div className="landing-load-error"><b>Webcanbe</b><p>{error}</p><button onClick={() => window.location.reload()}>Reload</button></div>}</main>
 }
