@@ -161,7 +161,7 @@ jobs:
             const needsAttention = entitlementItems.filter(item => item.needsCopy)
             const continueItem = copyItems[0]
             const activity = [...copyItems.map(item => ({ label:"Working copy",title:item.project.title,date:item.createdAt })), ...entitlementItems.map(item => ({ label:"Purchase",title:item.project.title,date:item.createdAt }))].slice(0,5)
-            const catalogProjects = local ? projects : library.catalog.map((item,index) => hostedProject(item,index))
+            const catalogProjects = local ? projects : library.catalog
 
             const header = (title:string,description:string,action?:React.ReactNode) => <header className="rope-dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{action}</header>
 
@@ -175,7 +175,7 @@ jobs:
             } else if (pane === "creator" || pane === "listings" || pane === "submission") {
               content = <main className="rope-dashboard">{header(pane === "creator" ? "Creator Studio" : pane === "listings" ? "Listings" : "New submission","Creator tools stay inside the same app shell.")}<div className="rope-creator-grid"><article><Sparkles/><h3>Source-backed publishing</h3><p>Submit working projects instead of flattened files.</p></article><article><PackageCheck/><h3>Immutable releases</h3><p>Published releases remain bound to a source revision.</p></article><article><History/><h3>Review history</h3><p>Assessment and review state stays attached to the submission.</p></article></div></main>
             } else if (pane === "docs") {
-              content = <main className="rope-dashboard">{header("Documentation","WebCanBe product documentation, shown without leaving Dashboard.")}<div className="rope-doc-grid">{docsNav.flatMap(([,items]) => items).map(([label,href]) => <article key={href}><BookOpen/><h3>{label}</h3><p>{href.includes("visual") ? "Source-backed visual editing." : href.includes("code") ? "Edit the actual project source." : "WebCanBe workflow and reference."}</p></article>)}</div></main>
+              content = <main className="rope-dashboard">{header("Documentation","WebCanBe product documentation, shown without leaving Dashboard.")}<div className="rope-doc-grid">{(docsNav.flatMap(([,items]) => Array.from(items)) as readonly (readonly [string,string])[]).map(([label,href]) => <article key={href}><BookOpen/><h3>{label}</h3><p>{href.includes("visual") ? "Source-backed visual editing." : href.includes("code") ? "Edit the actual project source." : "WebCanBe workflow and reference."}</p></article>)}</div></main>
             } else if (pane === "plans") {
               content = <main className="rope-dashboard">{header("Plans","UI preview only. Commercial pricing is finalized separately.")}<div className="rope-plan-row"><article><span>Free</span><h3>Explore</h3><p>Open the marketplace and work with a project.</p></article><article className="featured"><span>Pro</span><h3>Build more</h3><p>More workspaces and production features.</p></article><article><span>Studio</span><h3>Publish</h3><p>Creator and team workflows.</p></article></div></main>
             } else if (pane === "settings" || pane === "control") {
