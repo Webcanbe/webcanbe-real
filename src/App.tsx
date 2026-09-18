@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, ChevronDown, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Sun, SlidersHorizontal, Download } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -304,12 +304,117 @@ function Purchases() {
   return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active"} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
 }
 
-function Dashboard() {
-  const lib=useProductLibrary()
-  const working=lib.hosted?lib.copies.map(c=>({project:releaseProject(lib.catalog,c.releaseId,c.workspaceProjectId),href:"/workspace/"+c.workspaceProjectId})):projects.slice(0,3).map(p=>({project:p,href:"/workspace/"+p.id}))
-  const attention=lib.hosted?lib.entitlements.filter(e=>e.status!=="active"):[]
-  return <AppShell active="/dashboard" footer={false}><main className="dashboard-native"><header className="dashboard-native-head"><div><span className="signal">Workspace overview</span><h1>Continue where you left off.</h1><p>Your working copies, purchases, and product state without filler analytics.</p></div><Link to="/browse" className="button">Browse marketplace <Arrow/></Link></header><div className="dashboard-summary-line"><span><b>{working.length}</b> working copies</span><span><b>{lib.hosted?lib.entitlements.length:3}</b> purchases</span><span><b>{attention.length}</b> need attention</span><span><b>Visual · Code · Split</b> edit modes</span></div><section className="dashboard-native-grid"><div className="dashboard-native-section"><div className="dashboard-section-title"><div><h2>Continue building</h2><p>Open a source-backed working copy.</p></div><Link to="/projects">All projects</Link></div><div className="dashboard-project-list">{working.map(({project,href})=><Link className="dashboard-project-row" to={href} key={href}><div className={"dashboard-project-swatch "+project.color}/><div><b>{project.title}</b><span>{project.stack.slice(0,2).join(" · ")}</span></div><small>{project.updated}</small><Arrow/></Link>)}</div></div><aside className="dashboard-native-section dashboard-attention"><div className="dashboard-section-title"><div><h2>Needs attention</h2><p>Only real blocking state appears here.</p></div></div>{attention.length?attention.map(x=><p key={x.entitlementId}>{x.status}</p>):<div className="all-clear"><CheckCircle2/><div><b>All clear</b><p>No blocked purchase or workspace state is reported.</p></div></div>}</aside></section><section className="dashboard-native-section dashboard-activity"><div className="dashboard-section-title"><div><h2>Recent product activity</h2><p>Actual working-copy and purchase state belongs here.</p></div></div><div className="activity-timeline">{working.map(({project},i)=><div key={project.id}><span className="activity-marker"/><div><b>{project.title}</b><p>{i===0?"Continue building":"Working copy ready"}</p></div><small>{project.updated}</small></div>)}</div></section></main></AppShell>
+function RopeanDashboardShell({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const general = [
+    ["Dashboard", "/dashboard-preview", LayoutDashboard, ""],
+    ["My projects", "/projects", ListTodo, ""],
+    ["Marketplace", "/browse", PackageCheck, ""],
+    ["Purchases", "/purchases", MessagesSquare, "3"],
+    ["Creator Studio", "/seller", Users, ""],
+  ] as const
+  return <div className={"rd-shell" + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
+    <aside className="rd-sidebar">
+      <div className="rd-sidebar-header">
+        <button className="rd-team-switcher" type="button">
+          <span className="rd-team-logo"><Command/></span>
+          <span className="rd-team-copy"><b>WebCanBe</b><small>Source-first workspace</small></span>
+          <ChevronsUpDown/>
+        </button>
+        <div className="rd-app-title">
+          <div><b>Personal workspace</b><small>Current workspace</small></div>
+          <button type="button" aria-label="Toggle sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
+        </div>
+      </div>
+      <div className="rd-sidebar-content">
+        <section className="rd-nav-group">
+          <span className="rd-nav-label">General</span>
+          {general.map(([label,to,Icon,badge]) => <Link key={label} to={to} className={label === "Dashboard" ? "active" : ""}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</Link>)}
+          <button className="rd-nav-expand" type="button"><ShieldCheck/><span>Source-backed editing</span><ChevronDown/></button>
+        </section>
+        <section className="rd-nav-group">
+          <span className="rd-nav-label">Pages</span>
+          <Link to="/workspace/phase1-fixture"><ShieldCheck/><span>Workspace</span><ChevronDown/></Link>
+          <Link to="/docs"><Bug/><span>Documentation</span><ChevronDown/></Link>
+        </section>
+        <section className="rd-nav-group">
+          <span className="rd-nav-label">Other</span>
+          <Link to="/settings"><Settings2/><span>Settings</span><ChevronDown/></Link>
+          <Link to="/docs"><HelpCircle/><span>Help Center</span></Link>
+        </section>
+      </div>
+      <div className="rd-sidebar-footer">
+        <button type="button"><span className="rd-avatar">WC</span><span><b>WebCanBe account</b><small>Preview session</small></span><ChevronsUpDown/></button>
+      </div>
+    </aside>
+    <div className="rd-content">
+      <header className="rd-header">
+        <button className="rd-sidebar-trigger" type="button" aria-label="Sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
+        <span className="rd-separator"/>
+        <nav className="rd-topnav"><Link to="/dashboard-preview" className="active">Overview</Link><Link to="/projects">Projects</Link><Link to="/browse">Marketplace</Link><Link to="/settings">Settings</Link></nav>
+        <div className="rd-header-actions">
+          <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search WebCanBe</span><kbd>⌘K</kbd></button>
+          <button className="rd-header-icon" type="button" aria-label="Theme"><Sun/></button>
+          <button className="rd-header-icon" type="button" aria-label="Display settings"><SlidersHorizontal/></button>
+          <button className="rd-header-icon" type="button" aria-label="Notifications"><Bell/></button>
+          <button className="rd-header-avatar" type="button" aria-label="Profile">WC</button>
+        </div>
+      </header>
+      {children}
+    </div>
+    {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><div className="rd-search-dialog" onMouseDown={event => event.stopPropagation()}><Search/><input autoFocus placeholder="Search WebCanBe"/><kbd>ESC</kbd></div></div>}
+  </div>
 }
+
+function Dashboard() {
+  const lib = useProductLibrary()
+  const working = lib.hosted
+    ? lib.copies.map(copy => ({ project: releaseProject(lib.catalog, copy.releaseId, copy.workspaceProjectId), href: "/workspace/" + copy.workspaceProjectId }))
+    : projects.slice(0,3).map(project => ({ project, href: "/workspace/" + project.id }))
+  const purchaseCount = lib.hosted ? lib.entitlements.length : projects.slice(3).length
+  const activePurchases = lib.hosted ? lib.entitlements.filter(item => item.status === "active").length : purchaseCount
+  const attention = lib.hosted ? lib.entitlements.filter(item => item.status !== "active").length : 0
+
+  return <RopeanDashboardShell>
+    <main className="rd-main">
+      <div className="rd-main-heading">
+        <h1>Dashboard</h1>
+        <Link className="rd-primary-action" to="/projects"><Download/> Open projects</Link>
+      </div>
+      <div className="rd-tabs"><button className="active">Overview</button><button>Activity</button><button disabled>Reports</button><button disabled>Notifications</button></div>
+
+      <section className="rd-stat-grid">
+        <article><div><span>Working copies</span><FolderKanban/></div><strong>{working.length}</strong><p>Projects ready to continue editing</p></article>
+        <article><div><span>Purchases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active release entitlements</p></article>
+        <article><div><span>Editing modes</span><FileCode2/></div><strong>3</strong><p>Visual, Code, and Split share one source</p></article>
+        <article><div><span>Needs attention</span><Bell/></div><strong>{attention}</strong><p>{attention ? "Review blocked product state" : "No blocking product state"}</p></article>
+      </section>
+
+      <section className="rd-dashboard-grid">
+        <article className="rd-panel rd-continue-panel">
+          <header><h2>Continue building</h2><p>Your source-backed working copies.</p></header>
+          <div className="rd-project-list">
+            {working.length ? working.slice(0,5).map(({project,href}) => <Link to={href} key={href} className="rd-project-row">
+              <span className={"rd-project-thumb " + project.color}/>
+              <span className="rd-project-copy"><b>{project.title}</b><small>{project.stack.slice(0,2).join(" · ")}</small></span>
+              <span className="rd-project-meta">{project.updated}</span>
+            </Link>) : <div className="rd-empty"><b>No working copies yet.</b><p>Start from Marketplace when you are ready.</p></div>}
+          </div>
+        </article>
+
+        <article className="rd-panel rd-recent-panel">
+          <header><h2>Recent activity</h2><p>Product state that matters to your next action.</p></header>
+          <div className="rd-recent-list">
+            {working.slice(0,5).map(({project},index) => <div key={project.id}><span className="rd-avatar small">{project.title.slice(0,2).toUpperCase()}</span><span><b>{project.title}</b><small>{index === 0 ? "Continue editing" : "Working copy ready"}</small></span><em>{project.updated}</em></div>)}
+            {!working.length && <div className="rd-empty"><p>No recent activity.</p></div>}
+          </div>
+        </article>
+      </section>
+    </main>
+  </RopeanDashboardShell>
+}
+
 function Settings() {
   const hosted=hostedProductMode(),[section,setSection]=useState("Profile"),[name,setName]=useState("WebCanBe user"),[email,setEmail]=useState(""),[message,setMessage]=useState("")
   const sections=["Profile","Account","GitHub","Domains","Billing","Preferences"]
