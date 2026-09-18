@@ -75,4 +75,13 @@ describe("Phase 5 Ropean dashboard interactions", () => {
     expect(dashboard).toContain("purchaseBadge > 0 ? String(purchaseBadge)")
     expect(dashboard).not.toContain('MessagesSquare, "3"')
   })
+  it("keeps collapsed sidebar icon-only while allowing flyout menus", () => {
+    expect(css).toContain(".rd-sidebar-collapsed .rd-nav-group>.rd-nav-button>span")
+    expect(css).toContain("display:none!important")
+    expect(css).toContain(".rd-sidebar-collapsed .rd-collapsible>.rd-collapsible-trigger>span")
+    expect(css).toContain(".rd-sidebar-collapsed .rd-account-trigger>span:nth-child(2)")
+    expect(css).toContain(".rd-sidebar-collapsed .rd-collapsible-content")
+    expect(css).toContain("left:42px")
+  })
+
 })
