@@ -18,7 +18,8 @@
     "ssl": { "rejectUnauthorized": true, "ca": "LOAD_PRIVATE_DATABASE_CA_PEM" }
   },
   "identity": {
-    "allowSelfRegistration": false
+    "allowSelfRegistration": false,
+    "sessionLifetimeMs": 600000
   },
   "oidc": {
     "issuer": "https://identity.example.org",
