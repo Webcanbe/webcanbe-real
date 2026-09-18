@@ -12,7 +12,7 @@ describe("Phase 4 final UI", () => {
   })
 
   it("uses a static ChatGPT-style English auth modal", () => {
-    expect(app).toContain('className="auth auth-demo"')
+    expect(app).toContain('className="auth-demo-layer"')
     expect(app).toContain("Log in or sign up")
     expect(app).toContain("Continue with Google")
     expect(app).toContain("Continue with GitHub")

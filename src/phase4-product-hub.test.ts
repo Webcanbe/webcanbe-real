@@ -6,7 +6,7 @@ describe("Phase 4 product-library information architecture", () => {
   it("keeps My Projects and Purchases as separate product destinations with explicit states", () => {
     expect(app).toContain('["My projects", "/projects"]')
     expect(app).toContain('["Purchases", "/purchases"]')
-    expect(app).toContain('if (path === "/purchases") return <Protected><Purchases/></Protected>')
+    expect(app).toContain('else if (basePath === "/purchases") page = <Protected><Purchases/></Protected>')
     expect(app).toContain('Purchases stay separate until you create a copy.')
     expect(app).toContain('Nothing here yet')
     expect(app).toContain('Something needs attention')

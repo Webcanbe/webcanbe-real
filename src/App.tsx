@@ -32,6 +32,10 @@ function usePath() {
 
 let routeTimer: number | undefined
 function go(to: string) {
+  if (to.startsWith("/login") || to.startsWith("/signup")) {
+    window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup") } }))
+    return
+  }
   const current = window.location.pathname + window.location.search
   if (to === current) return
   if (routeTimer) window.clearTimeout(routeTimer)
@@ -64,60 +68,50 @@ function PublicShell({ children, active }: { children: React.ReactNode; active?:
   return <div className="product public-product"><header className="product-header public-header"><Link to="/" className="brand"><Mark/> <span>WebCanBe</span></Link><nav>{publicNav.map(([n,p]) => <Link key={p} to={p} className={active === p ? "active" : ""}>{n}</Link>)}</nav><div className="header-actions">{signedIn ? <Link to="/dashboard" className="button compact public-open-app">Open app</Link> : <><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" onClick={() => setMenu(!menu)}>Menu</button></div>{menu && <div className="mobile-nav">{publicNav.map(([n,p]) => <Link key={p} to={p}>{n}</Link>)}{signedIn ? <Link to="/dashboard">Open app</Link> : <><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}</div>
 }
 
-function AppShell({ children, active }: { children: React.ReactNode; active?: string }) {
+function AppShell({ children, active, onSectionChange }: { children: React.ReactNode; active?: string; onSectionChange?: (section: string) => void }) {
   const [menu, setMenu] = useState(false)
-  const sectionClass = (paths: string[]) => paths.some(path => active === path) ? "active-group" : ""
+  const action = (id: string, to: string, label: string, Icon: typeof LayoutDashboard) => onSectionChange
+    ? <button type="button" className={active === id ? "active" : ""} onClick={() => onSectionChange(id)}><Icon/><span>{label}</span></button>
+    : <Link to={to} className={active === to ? "active" : ""}><Icon/><span>{label}</span></Link>
   return <div className="product app-frame rope-app">
     <aside className={`app-sidebar rope-sidebar ${menu ? "open" : ""}`}>
-      <div className="rope-sidebar-head">
-        <Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span><b>WebCanBe</b><small>Source-first workspace</small></span></Link>
-      </div>
+      <div className="rope-sidebar-head"><Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span><b>WebCanBe</b><small>Source-first workspace</small></span></Link></div>
       <div className="rope-sidebar-scroll">
-        <div className="rope-nav-group">
-          <span className="rope-nav-label">General</span>
-          <nav className="rope-nav-list">
-            <Link to="/dashboard" className={active === "/dashboard" ? "active" : ""}><LayoutDashboard/><span>Dashboard</span></Link>
-            <Link to="/browse" className={active === "/browse" ? "active" : ""}><Store/><span>Marketplace</span></Link>
-          </nav>
-        </div>
-        <details open className={`rope-nav-group rope-nav-collapsible ${sectionClass(["/projects","/purchases"])}`}>
-          <summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary>
-          <div className="rope-subnav">
-            <Link to="/projects" className={active === "/projects" ? "active" : ""}><FolderKanban/><span>My projects</span></Link>
-            <Link to="/purchases" className={active === "/purchases" ? "active" : ""}><ShoppingBag/><span>Purchases</span></Link>
-          </div>
-        </details>
-        <details open className={`rope-nav-group rope-nav-collapsible ${sectionClass(["/seller","/seller/projects","/seller/projects/new"])}`}>
-          <summary><PackageCheck/><span>Creator</span><ChevronDown/></summary>
-          <div className="rope-subnav">
-            <Link to="/seller" className={active === "/seller" ? "active" : ""}><Sparkles/><span>Creator Studio</span></Link>
-            <Link to="/seller/projects" className={active === "/seller/projects" ? "active" : ""}><FolderKanban/><span>Listings</span></Link>
-            <Link to="/seller/projects/new" className={active === "/seller/projects/new" ? "active" : ""}><Plus/><span>New submission</span></Link>
-          </div>
-        </details>
-        <details open className={`rope-nav-group rope-nav-collapsible ${sectionClass(["/docs","/plans","/settings","/control"])}`}>
-          <summary><CircleHelp/><span>Other</span><ChevronDown/></summary>
-          <div className="rope-subnav">
-            <Link to="/docs" className={active === "/docs" ? "active" : ""}><BookOpen/><span>Documentation</span></Link>
-            <Link to="/plans" className={active === "/plans" ? "active" : ""}><ScrollText/><span>Plans</span></Link>
-            <Link to="/settings" className={active === "/settings" ? "active" : ""}><Settings2/><span>Settings</span></Link>
-            <Link to="/control" className={active === "/control" ? "active" : ""}><ShieldCheck/><span>Control</span></Link>
-          </div>
-        </details>
+        <div className="rope-nav-group"><span className="rope-nav-label">General</span><nav className="rope-nav-list">
+          {action("overview","/dashboard","Dashboard",LayoutDashboard)}
+          {action("marketplace","/browse","Marketplace",Store)}
+        </nav></div>
+        <details open className="rope-nav-group rope-nav-collapsible"><summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary><div className="rope-subnav">
+          {action("projects","/projects","My projects",FolderKanban)}
+          {action("purchases","/purchases","Purchases",ShoppingBag)}
+        </div></details>
+        <details open className="rope-nav-group rope-nav-collapsible"><summary><PackageCheck/><span>Creator</span><ChevronDown/></summary><div className="rope-subnav">
+          {action("creator","/seller","Creator Studio",Sparkles)}
+          {action("listings","/seller/projects","Listings",FolderKanban)}
+          {action("submission","/seller/projects/new","New submission",Plus)}
+        </div></details>
+        <details open className="rope-nav-group rope-nav-collapsible"><summary><CircleHelp/><span>Other</span><ChevronDown/></summary><div className="rope-subnav">
+          {action("docs","/docs","Documentation",BookOpen)}
+          {action("plans","/plans","Plans",ScrollText)}
+          {action("settings","/settings","Settings",Settings2)}
+          {action("control","/control","Control",ShieldCheck)}
+        </div></details>
       </div>
-      <div className="app-sidebar-account rope-account">
-        <Link to="/settings"><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></Link>
-      </div>
+      <div className="app-sidebar-account rope-account">{onSectionChange ? <button type="button" onClick={() => onSectionChange("settings")}><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></button> : <Link to="/settings"><span className="avatar">WC</span><span><b>WebCanBe account</b><small>Settings</small></span></Link>}</div>
     </aside>
     <div className="app-main rope-main">
       <header className="rope-topbar">
         <button className="rope-mobile-trigger" onClick={() => setMenu(value => !value)} aria-expanded={menu}>Menu</button>
-        <div className="rope-topbar-title"><span>Workspace</span><b>{active === "/dashboard" ? "Dashboard" : active?.replace("/", "").replace(/-/g, " ") || "WebCanBe"}</b></div>
-        <div className="rope-topbar-actions">
-          <button className="rope-search" type="button"><Search/><span>Search</span><kbd>⌘ K</kbd></button>
-          <button className="rope-icon-button" type="button" aria-label="Notifications"><Bell/></button>
-          <button className="rope-user-button" type="button"><span className="avatar">WC</span></button>
+        <button className="rope-sidebar-toggle" type="button" aria-label="Sidebar"><PanelsTopLeft/></button>
+        <div className="rope-top-tabs">
+          {onSectionChange ? <>
+            <button className={active === "overview" ? "active" : ""} onClick={() => onSectionChange("overview")}>Overview</button>
+            <button className={active === "projects" ? "active" : ""} onClick={() => onSectionChange("projects")}>Projects</button>
+            <button className={active === "marketplace" ? "active" : ""} onClick={() => onSectionChange("marketplace")}>Marketplace</button>
+            <button className={active === "settings" ? "active" : ""} onClick={() => onSectionChange("settings")}>Settings</button>
+          </> : <span className="active">WebCanBe</span>}
         </div>
+        <div className="rope-topbar-actions"><button className="rope-search" type="button"><Search/><span>Search</span><kbd>⌘K</kbd></button><button className="rope-icon-button" type="button" aria-label="Notifications"><Bell/></button><button className="rope-user-button" type="button"><span className="avatar">WC</span></button></div>
       </header>
       {children}
     </div>
@@ -190,32 +184,17 @@ function authNext() {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard"
 }
 
-function Auth({ signup = false }: { signup?: boolean }) {
+function Auth({ signup = false, onClose }: { signup?: boolean; onClose?: () => void }) {
   const _hostedBoundary = async () => hostedProductClient.authStart()
   void _hostedBoundary
-  return <main className="auth auth-demo" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
-    <div className="auth-demo-underlay" aria-hidden="true">
-      <aside className="auth-demo-underlay-sidebar">
-        <div className="auth-demo-underlay-brand"><Mark/><span>WebCanBe</span></div>
-        <div className="auth-demo-underlay-nav"><span>Dashboard</span><span>My projects</span><span>Marketplace</span><span>Documentation</span></div>
-        <div className="auth-demo-underlay-foot"><span>Settings</span><span>Help</span></div>
-      </aside>
-      <section className="auth-demo-underlay-main">
-        <header><span>WebCanBe</span><div><i/><i/></div></header>
-        <div className="auth-demo-underlay-content">
-          <div className="auth-demo-underlay-title"/>
-          <div className="auth-demo-underlay-copy"/>
-          <div className="auth-demo-underlay-input"/>
-        </div>
-      </section>
-    </div>
+  return <div className="auth-demo-layer" data-auth-note="Email/password is not enabled by the current hosted identity boundary.">
     <div className="auth-demo-backdrop"/>
     <section className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-      <button className="auth-demo-close" type="button" aria-label="Close"><X/></button>
+      <button className="auth-demo-close" type="button" aria-label="Close" onClick={onClose}><X/></button>
       <h1 id="auth-title">Log in or sign up</h1>
       <p>Get smarter responses, upload files and images, and more.</p>
       <div className="auth-demo-actions">
-        <button className="auth-demo-provider auth-provider-button" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
+        <button className="auth-demo-provider" type="button"><span className="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
         <button className="auth-demo-provider" type="button"><Github/><span>Continue with GitHub</span></button>
         <button className="auth-demo-provider" type="button"><Phone/><span>Continue with phone</span></button>
       </div>
@@ -224,7 +203,7 @@ function Auth({ signup = false }: { signup?: boolean }) {
       <button className="auth-demo-continue" type="button">Continue</button>
       <p className="auth-demo-terms">By continuing, you agree to our Terms of Use and acknowledge our Privacy Policy.</p>
     </section>
-  </main>
+  </div>
 }
 
 const docPages: Record<string, { title: string; eyebrow: string; intro: string; sections: { title: string; body: string }[] }> = {
@@ -413,52 +392,60 @@ function Purchases() {
 
 function Dashboard() {
   const library = useProductLibrary()
-  if (library.loading) return <AppShell active="/dashboard"><main className="rope-dashboard"><HubState kind="loading" title="Loading your workspace" body=""/></main></AppShell>
-  if (library.error) return <AppShell active="/dashboard"><main className="rope-dashboard"><HubState kind="error" title="Workspace overview unavailable" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/></main></AppShell>
+  const [pane, setPane] = useState("overview")
+  if (library.loading) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="loading" title="Loading your workspace" body=""/></main></AppShell>
+  if (library.error) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="error" title="Workspace overview unavailable" body={library.error}/></main></AppShell>
+
   const local = !library.hosted
-  const copyItems = local ? projects.slice(0, 2).map(project => ({ project, href: `/workspace/${project.id}`, createdAt: "" })) : library.copies.map(copy => ({ project: releaseProject(library.catalog, copy.releaseId, copy.workspaceProjectId), href: `/workspace/${copy.workspaceProjectId}`, createdAt: copy.createdAt }))
-  const entitlementItems = local ? projects.slice(3, 5).map(project => ({ project, createdAt: "", needsCopy: true })) : library.entitlements.filter(item => item.status === "active").map(entitlement => ({ project: releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), createdAt: entitlement.grantedAt, needsCopy: !library.copies.some(copy => copy.entitlementId === entitlement.entitlementId) }))
+  const copyItems = local ? projects.slice(0, 3).map(project => ({ project, href: `/workspace/${project.id}`, createdAt: "" })) : library.copies.map(copy => ({ project: releaseProject(library.catalog, copy.releaseId, copy.workspaceProjectId), href: `/workspace/${copy.workspaceProjectId}`, createdAt: copy.createdAt }))
+  const entitlementItems = local ? projects.slice(3, 6).map(project => ({ project, createdAt: "", needsCopy: true })) : library.entitlements.filter(item => item.status === "active").map(entitlement => ({ project: releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), createdAt: entitlement.grantedAt, needsCopy: !library.copies.some(copy => copy.entitlementId === entitlement.entitlementId) }))
   const needsAttention = entitlementItems.filter(item => item.needsCopy)
   const continueItem = copyItems[0]
-  const activity = [...copyItems.map(item => ({ label: "Working copy", title: item.project.title, date: item.createdAt })), ...entitlementItems.map(item => ({ label: "Purchase", title: item.project.title, date: item.createdAt }))].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5)
-  const metricCards = [
-    { label: "Working copies", value: String(copyItems.length), note: "Editable source-backed projects", icon: <FolderKanban/> },
-    { label: "Purchases", value: String(entitlementItems.length), note: "Release-bound entitlements", icon: <ShoppingBag/> },
-    { label: "Ready to open", value: String(needsAttention.length), note: "Need a working copy", icon: <PackageCheck/> },
-    { label: "Edit modes", value: "3", note: "Visual · Code · Split", icon: <PanelsTopLeft/> },
+  const activity = [...copyItems.map(item => ({ label:"Working copy",title:item.project.title,date:item.createdAt })), ...entitlementItems.map(item => ({ label:"Purchase",title:item.project.title,date:item.createdAt }))].slice(0,5)
+  const catalogProjects = local ? projects : library.catalog
+  const dashboardDocs: [string, string][] = [
+    ["Introduction","/docs"],
+    ["Getting started","/docs/getting-started"],
+    ["Customization","/docs/customization"],
+    ["Marketplace","/docs/marketplace"],
+    ["Visual editor","/docs/visual-editor"],
+    ["Code editor","/docs/code-editor"],
+    ["Export","/docs/export"],
+    ["Compatibility","/docs/compatibility"],
+    ["Security","/docs/security"],
+    ["Changelog","/changelog"],
   ]
-  return <AppShell active="/dashboard"><main className="rope-dashboard">
-    <header className="rope-dashboard-head">
-      <div><h1>Dashboard</h1><p>Continue your projects, review purchases, or start from the marketplace.</p></div>
-      <Link className="rope-primary-action" to="/browse">Browse marketplace <Arrow/></Link>
-    </header>
-    <nav className="rope-page-tabs" aria-label="Dashboard sections">
-      <span className="active">Overview</span>
-      <Link to="/projects">Projects</Link>
-      <Link to="/purchases">Purchases</Link>
-      <Link to="/docs">Documentation</Link>
-    </nav>
-    <section className="rope-metric-grid" aria-label="Workspace summary">
-      {metricCards.map(card => <article className="rope-metric-card" key={card.label}><div className="rope-metric-title"><span>{card.label}</span><i>{card.icon}</i></div><strong>{card.value}</strong><p>{card.note}</p></article>)}
-    </section>
-    <section className="rope-dashboard-grid">
-      <article className="rope-card rope-continue-card">
-        <header><div><h2>Continue building</h2><p>Your latest source-backed working copy.</p></div>{continueItem && <Link to="/projects">View all</Link>}</header>
-        {continueItem ? <div className="rope-continue-body"><div className="rope-continue-copy"><span className="rope-soft-badge">Working copy</span><h3>{continueItem.project.title}</h3><p>{continueItem.project.tagline}</p><div className="rope-stack-row">{continueItem.project.stack.map(item => <span key={item}>{item}</span>)}</div><Link className="rope-primary-action compact" to={continueItem.href}>Open workspace <Arrow/></Link></div><Preview project={continueItem.project}/></div> : <HubState kind="empty" title="No working copies yet" body="Your purchases stay available until you create one." action={<Link className="rope-primary-action compact" to="/purchases">View purchases</Link>}/>}
-      </article>
-      <article className="rope-card rope-activity-card">
-        <header><div><h2>Recent product activity</h2><p>Only project and purchase state — no invented analytics.</p></div></header>
-        <div className="rope-activity-list">
-          {activity.length ? activity.map((item,index) => <div className="rope-activity-row" key={`${item.label}-${item.title}-${index}`}><span className="rope-activity-icon">{item.label === "Purchase" ? <ShoppingBag/> : <FileCode2/>}</span><div><b>{item.title}</b><small>{item.label}</small></div><time>{item.date ? new Date(item.date).toLocaleDateString() : "Demo"}</time></div>) : <p className="rope-empty-copy">Activity appears after you purchase or create a working copy.</p>}
-        </div>
-      </article>
-    </section>
-    <section className="rope-quick-grid">
-      <Link to="/projects" className="rope-quick-card"><FolderKanban/><div><b>My projects</b><span>Open editable working copies</span></div><Arrow/></Link>
-      <Link to="/browse" className="rope-quick-card"><Store/><div><b>Marketplace</b><span>Browse working releases</span></div><Arrow/></Link>
-      <Link to="/docs" className="rope-quick-card"><BookOpen/><div><b>Documentation</b><span>Learn the WebCanBe workflow</span></div><Arrow/></Link>
-    </section>
-  </main></AppShell>
+
+  const header = (title:string,description:string,action?:React.ReactNode) => <header className="rope-dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{action}</header>
+
+  let content: React.ReactNode
+  if (pane === "projects") {
+    content = <main className="rope-dashboard">{header("My projects","Editable working copies in the same dashboard shell.")}<div className="rope-list-card"><div className="rope-table-head"><span>Project</span><span>Stack</span><span>Status</span><span>Updated</span></div>{copyItems.map(item => <div className="rope-table-row" key={item.project.id}><div><b>{item.project.title}</b><small>{item.project.tagline}</small></div><span>{item.project.stack.slice(0,2).join(" · ")}</span><span className="rope-status">Editable</span><span>{item.project.updated || "Working copy"}</span></div>)}</div></main>
+  } else if (pane === "purchases") {
+    content = <main className="rope-dashboard">{header("Purchases","Release-bound purchases, without leaving the dashboard.")}<div className="rope-card-grid">{entitlementItems.map(item => <article className="rope-project-card" key={item.project.id}><Preview project={item.project}/><div><span className="rope-soft-badge">Purchased release</span><h3>{item.project.title}</h3><p>{item.project.tagline}</p><small>{item.needsCopy ? "Ready to create working copy" : "Working copy exists"}</small></div></article>)}</div></main>
+  } else if (pane === "marketplace") {
+    content = <main className="rope-dashboard">{header("Marketplace","Browse working project releases inside the dashboard.",<button className="rope-primary-action" type="button">Explore</button>)}<div className="rope-card-grid">{catalogProjects.slice(0,6).map(project => <article className="rope-project-card" key={project.id}><Preview project={project}/><div><span>{project.category}</span><h3>{project.title}</h3><p>{project.tagline}</p><small>{project.stack.join(" · ")}</small></div></article>)}</div></main>
+  } else if (pane === "creator" || pane === "listings" || pane === "submission") {
+    content = <main className="rope-dashboard">{header(pane === "creator" ? "Creator Studio" : pane === "listings" ? "Listings" : "New submission","Creator tools stay inside the same app shell.")}<div className="rope-creator-grid"><article><Sparkles/><h3>Source-backed publishing</h3><p>Submit working projects instead of flattened files.</p></article><article><PackageCheck/><h3>Immutable releases</h3><p>Published releases remain bound to a source revision.</p></article><article><History/><h3>Review history</h3><p>Assessment and review state stays attached to the submission.</p></article></div></main>
+  } else if (pane === "docs") {
+    content = <main className="rope-dashboard">{header("Documentation","WebCanBe product documentation, shown without leaving Dashboard.")}<div className="rope-doc-grid">{dashboardDocs.map(([label,href]) => <article key={href}><BookOpen/><h3>{label}</h3><p>{href.includes("visual") ? "Source-backed visual editing." : href.includes("code") ? "Edit the actual project source." : "WebCanBe workflow and reference."}</p></article>)}</div></main>
+  } else if (pane === "plans") {
+    content = <main className="rope-dashboard">{header("Plans","UI preview only. Commercial pricing is finalized separately.")}<div className="rope-plan-row"><article><span>Free</span><h3>Explore</h3><p>Open the marketplace and work with a project.</p></article><article className="featured"><span>Pro</span><h3>Build more</h3><p>More workspaces and production features.</p></article><article><span>Studio</span><h3>Publish</h3><p>Creator and team workflows.</p></article></div></main>
+  } else if (pane === "settings" || pane === "control") {
+    content = <main className="rope-dashboard">{header(pane === "settings" ? "Settings" : "Control",pane === "settings" ? "Account and workspace preferences." : "Operator UI preview.")}<div className="rope-settings-card"><div className="rope-settings-nav"><button className="active">Profile</button><button>Account</button><button>Appearance</button><button>Notifications</button></div><div className="rope-settings-form"><label>Display name<input defaultValue="WebCanBe user"/></label><label>Email<input defaultValue="user@webcanbe.com"/></label><button className="rope-primary-action" type="button">Save changes</button></div></div></main>
+  } else {
+    const metrics=[["Working copies",copyItems.length,"Editable source-backed projects"],["Purchases",entitlementItems.length,"Release-bound entitlements"],["Ready to open",needsAttention.length,"Need a working copy"],["Edit modes",3,"Visual · Code · Split"]]
+    content = <main className="rope-dashboard">
+      {header("Dashboard","Continue your projects, review purchases, or start from the marketplace.",<button className="rope-primary-action" type="button" onClick={() => setPane("marketplace")}>Browse marketplace <Arrow/></button>)}
+      <nav className="rope-page-tabs"><button className="active" onClick={() => setPane("overview")}>Overview</button><button onClick={() => setPane("projects")}>Projects</button><button onClick={() => setPane("purchases")}>Purchases</button><button onClick={() => setPane("docs")}>Documentation</button></nav>
+      <section className="rope-metric-grid">{metrics.map(([label,value,note]) => <article className="rope-metric-card" key={String(label)}><div className="rope-metric-title"><span>{label}</span><i><PanelsTopLeft/></i></div><strong>{value}</strong><p>{note}</p></article>)}</section>
+      <section className="rope-dashboard-grid">
+        <article className="rope-card rope-overview-card"><header><div><h2>Overview</h2><p>Current project state, not invented revenue analytics.</p></div></header><div className="rope-mini-chart"><div><span>Working copies</span><i style={{height:`${42 + copyItems.length*12}px`}}/></div><div><span>Purchases</span><i style={{height:`${42 + entitlementItems.length*12}px`}}/></div><div><span>Ready</span><i style={{height:`${42 + needsAttention.length*12}px`}}/></div><div><span>Edit modes</span><i style={{height:"78px"}}/></div></div>{continueItem && <div className="rope-current-project"><Preview project={continueItem.project}/><div><span className="rope-soft-badge">Continue building</span><h3>{continueItem.project.title}</h3><p>{continueItem.project.tagline}</p><button className="rope-primary-action compact" type="button">Open workspace</button></div></div>}</article>
+        <article className="rope-card rope-activity-card"><header><div><h2>Recent product activity</h2><p>Only project and purchase state — no invented analytics.</p></div></header><div className="rope-activity-list">{activity.map((item,index) => <div className="rope-activity-row" key={index}><span className="rope-activity-icon">{item.label==="Purchase"?<ShoppingBag/>:<FileCode2/>}</span><div><b>{item.title}</b><small>{item.label}</small></div><time>{item.date ? new Date(item.date).toLocaleDateString() : "Demo"}</time></div>)}</div></article>
+      </section>
+    </main>
+  }
+  return <AppShell active={pane} onSectionChange={setPane}>{content}</AppShell>
 }
 
 function Settings() { const [section, setSection] = useState("Profile"); const sections = ["Profile", "Account", "GitHub", "Domains", "Billing", "Preferences"]; return <AppShell><main className="settings"><aside><h1>Settings</h1>{sections.map(x => <button key={x} onClick={() => setSection(x)} className={section === x ? "active" : ""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section === "Profile" ? "Your profile" : `${section} settings`}</h2>{section === "Profile" && <><div className="profile-avatar">OT</div><label>Name<input defaultValue="Oliver Taylor"/></label><label>Public creator name<input defaultValue="Oliver"/></label></>}{section === "GitHub" && <div className="integration"><b>GitHub</b><p>Connect GitHub when you’re ready to push project code to your own repositories.</p><button className="button">Connect GitHub <Arrow/></button></div>}{section === "Domains" && <div className="empty-state"><h3>Connect a domain when you’re ready.</h3><p>Domains are available on Pro and Studio.</p><Link className="button" to="/plans">See plans <Arrow/></Link></div>}{!["Profile", "GitHub", "Domains"].includes(section) && <div className="form-rows"><label>Email<input defaultValue="oliver@example.com"/></label><label>Notifications<select defaultValue="Product updates"><option>Product updates</option><option>Only account notices</option></select></label></div>}<button className="button primary save">Save changes</button></section></main></AppShell> }
@@ -549,24 +536,50 @@ function Control() {
 
 export default function App() {
   const path = usePath()
-  if (path === "/") return <Landing/>
-  if (path === "/login") return <Auth/>
-  if (path === "/signup") return <Auth signup/>
-  if (path === "/browse") return <Browse/>
-  if (path.startsWith("/project/")) return <Detail reference={path.split("/").pop() ?? ""}/>
-  if (path.startsWith("/docs")) return <Documentation path={path}/>
-  if (["/changelog","/about","/contact","/updates","/licenses","/terms","/privacy"].includes(path)) return <InfoPage path={path}/>
-  if (path === "/auth/complete") return <AuthComplete/>
-  if (path.startsWith("/checkout/")) return <Protected><Checkout/></Protected>
-  if (path.startsWith("/workspace/")) return <Protected><CompatibleWorkspace/></Protected>
-  if (path === "/projects") return <Protected><Projects/></Protected>
-  if (path === "/purchases") return <Protected><Purchases/></Protected>
-  if (path === "/dashboard") return <Protected><Dashboard/></Protected>
-  if (path === "/settings") return <Protected><Settings/></Protected>
-  if (path === "/plans") return <Plans/>
-  if (path === "/seller/projects/new") return <Protected><Seller page="new"/></Protected>
-  if (path === "/seller/projects") return <Protected><Seller page="projects"/></Protected>
-  if (path === "/seller") return <Protected><Seller/></Protected>
-  if (path === "/control") return <Protected><Control/></Protected>
-  return <Browse/>
+  const directAuth = path === "/login" || path === "/signup"
+  const [authIntent, setAuthIntent] = useState<{ signup: boolean } | null>(directAuth ? { signup: path === "/signup" } : null)
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ signup?: boolean }>).detail
+      setAuthIntent({ signup: Boolean(detail?.signup) })
+    }
+    window.addEventListener("wcb:open-auth", handler)
+    return () => window.removeEventListener("wcb:open-auth", handler)
+  }, [])
+
+  useEffect(() => {
+    if (directAuth) setAuthIntent({ signup: path === "/signup" })
+  }, [directAuth, path])
+
+  const basePath = directAuth ? "/" : path
+  let page: React.ReactNode
+  if (basePath === "/") page = <Landing/>
+  else if (basePath === "/browse") page = <Browse/>
+  else if (basePath.startsWith("/project/")) page = <Detail reference={basePath.split("/").pop() ?? ""}/>
+  else if (basePath.startsWith("/docs")) page = <Documentation path={basePath}/>
+  else if (["/changelog","/about","/contact","/updates","/licenses","/terms","/privacy"].includes(basePath)) page = <InfoPage path={basePath}/>
+  else if (basePath === "/auth/complete") page = <AuthComplete/>
+  else if (basePath.startsWith("/checkout/")) page = <Protected><Checkout/></Protected>
+  else if (basePath.startsWith("/workspace/")) page = <Protected><CompatibleWorkspace/></Protected>
+  else if (basePath === "/projects") page = <Protected><Projects/></Protected>
+  else if (basePath === "/purchases") page = <Protected><Purchases/></Protected>
+  else if (basePath === "/dashboard") page = <Protected><Dashboard/></Protected>
+  else if (basePath === "/settings") page = <Protected><Settings/></Protected>
+  else if (basePath === "/plans") page = <Plans/>
+  else if (basePath === "/seller/projects/new") page = <Protected><Seller page="new"/></Protected>
+  else if (basePath === "/seller/projects") page = <Protected><Seller page="projects"/></Protected>
+  else if (basePath === "/seller") page = <Protected><Seller/></Protected>
+  else if (basePath === "/control") page = <Protected><Control/></Protected>
+  else page = <Browse/>
+
+  const closeAuth = () => {
+    setAuthIntent(null)
+    if (directAuth) {
+      window.history.replaceState({}, "", "/")
+      window.dispatchEvent(new PopStateEvent("popstate"))
+    }
+  }
+
+  return <>{page}{authIntent && <Auth signup={authIntent.signup} onClose={closeAuth}/>}</>
 }

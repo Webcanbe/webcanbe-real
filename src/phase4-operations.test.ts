@@ -24,7 +24,7 @@ describe("Phase 4 authenticated operations surfaces", () => {
 
   it("adds an operator-only read surface without inventing client-side authority", () => {
     expect(client).toContain('"/__webcanbe/api/product/control/read"')
-    expect(app).toContain('if (path === "/control") return <Protected><Control/></Protected>')
+    expect(app).toContain('else if (basePath === "/control") page = <Protected><Control/></Protected>')
     expect(app).toContain("High-risk changes require fresh step-up")
     expect(app).toContain("does not fake a passkey ceremony")
   })
