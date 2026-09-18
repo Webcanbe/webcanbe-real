@@ -56,8 +56,8 @@ export class HostedEditor {
   private recoveryTimer: ReturnType<typeof setInterval>
   private recovery?: Promise<void>
   private productRecovery?: Promise<void>
-  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; fastRefresh?: boolean; publicRuntimeValueProvider?: PublicRuntimeValueProvider; staticAssets?: TrustedStaticAssets; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
-    this.identity = new PostgresIdentityStore(options.pool)
+  constructor(readonly applicationRoot: string, readonly options: { pool: Pool; origins: HostedOriginPolicy; hosts: readonly HostedRunnerHost[]; identityProvider: IdentityProvider; allowSelfRegistration?: boolean; fastRefresh?: boolean; publicRuntimeValueProvider?: PublicRuntimeValueProvider; staticAssets?: TrustedStaticAssets; externalSourceProvider?: ExternalSourceProvider; managedSecrets?: ManagedPreviewSecrets; onError?: (error: unknown) => void }) {
+    this.identity = new PostgresIdentityStore(options.pool, { allowSelfRegistration: options.allowSelfRegistration === true })
     this.access = new PostgresAccess(options.pool)
     this.source = new PostgresProjectStore(this.access)
     this.drafts = new PostgresDraftStore(this.access)
