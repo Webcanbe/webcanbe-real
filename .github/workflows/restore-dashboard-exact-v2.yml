@@ -49,35 +49,25 @@ jobs:
           }'''
           text = text[:start] + dashboard + text[end:]
 
-          old_effect = '''  useEffect(() => {
-            const handler = (event: Event) => {
-              const detail = (event as CustomEvent<{ signup?: boolean }>).detail
-              setAuthIntent({ signup: Boolean(detail?.signup) })
-            }
-            window.addEventListener("wcb:open-auth", handler)
-            return () => window.removeEventListener("wcb:open-auth", handler)
-          }, [])'''
-          new_effect = '''  useEffect(() => {
-            const handler = (event: Event) => {
-              const detail = (event as CustomEvent<{ signup?: boolean }>).detail
-              setAuthIntent({ signup: Boolean(detail?.signup) })
-            }
-            const messageHandler = (event: MessageEvent) => {
-              if (event.origin !== window.location.origin) return
-              const data = event.data as { type?: unknown; signup?: unknown } | null
-              if (!data || data.type !== "wcb:open-auth") return
-              setAuthIntent({ signup: Boolean(data.signup) })
-            }
-            window.addEventListener("wcb:open-auth", handler)
-            window.addEventListener("message", messageHandler)
-            return () => {
-              window.removeEventListener("wcb:open-auth", handler)
-              window.removeEventListener("message", messageHandler)
-            }
-          }, [])'''
-          if old_effect not in text:
-              raise SystemExit("current auth effect not found")
-          text = text.replace(old_effect, new_effect, 1)
+          insert_anchor = '''  useEffect(() => {
+    if (directAuth) setAuthIntent({ signup: path === "/signup" })
+  }, [directAuth, path])'''
+          message_effect = '''  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      const data = event.data as { type?: unknown; signup?: unknown } | null
+      if (!data || data.type !== "wcb:open-auth") return
+      setAuthIntent({ signup: Boolean(data.signup) })
+    }
+    window.addEventListener("message", messageHandler)
+    return () => window.removeEventListener("message", messageHandler)
+  }, [])
+
+'''
+          if 'window.addEventListener("message", messageHandler)' not in text:
+              if insert_anchor not in text:
+                  raise SystemExit("direct auth effect anchor missing")
+              text = text.replace(insert_anchor, message_effect + insert_anchor, 1)
           app.write_text(text)
 
           landing = Path("public/wcb-landing/index.html")
