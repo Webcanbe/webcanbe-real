@@ -6,11 +6,11 @@ const landing = fs.readFileSync("public/wcb-landing/index.html", "utf8")
 const icon = fs.readFileSync("public/webcanbe-icon.svg", "utf8")
 
 describe("Phase 5 brand pass", () => {
-  it("uses the shared WebCanBe primary logo asset in app chrome", () => {
+  it("uses the shared Webcanbe primary logo asset in app chrome", () => {
     expect(app).toContain('/brand/webcanbe-logo.svg')
     expect(app).toContain('/brand/webcanbe-mark.svg')
     expect(app).toContain('rd-team-brand-copy')
-    expect(app).not.toContain('className="mark" aria-label="WebCanBe"')
+    expect(app).not.toContain('className="mark" aria-label="Webcanbe"')
   })
 
   it("uses the primary logo in the retained landing header/footer brand anchors", () => {
