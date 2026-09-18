@@ -1234,3 +1234,16 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .auth-complete .wcb-logo{width:164px;margin-bottom:12px}
 .rope-collapsed .rope-sidebar .app-sidebar-brand .wcb-logo{width:42px;object-fit:cover;object-position:left}
 @media(max-width:700px){.product-header .wcb-logo{width:118px}.site-footer-brand .wcb-logo{width:120px}}
+
+
+/* Phase 5 brand + account-menu polish */
+.wcb-logo-wrap{display:inline-flex;align-items:center;flex:0 0 auto;line-height:0}
+.wcb-logo-wrap .wcb-logo-full{display:block}
+.wcb-logo-wrap .wcb-logo-mark{display:none}
+.rope-collapsed .rope-sidebar .app-sidebar-brand .wcb-logo-full{display:none}
+.rope-collapsed .rope-sidebar .app-sidebar-brand .wcb-logo-mark{display:block;width:30px;height:30px;object-fit:contain}
+.rope-collapsed .rope-sidebar .app-sidebar-brand .wcb-logo-wrap{width:30px;justify-content:center}
+.top-account-popover{position:absolute;right:0;top:44px;z-index:80;width:210px;padding:8px;border:1px solid #e7e7ec;border-radius:11px;background:#fff;box-shadow:0 18px 44px rgba(0,0,0,.12)}
+.top-account-popover a,.top-account-popover button{width:100%;display:flex;align-items:center;gap:8px;padding:9px 10px;border:0;border-radius:7px;background:transparent;color:#45454d;text-decoration:none;font-size:11px;text-align:left}
+.top-account-popover a:hover,.top-account-popover button:hover{background:#f5f5f7}
+.top-account-popover button{cursor:pointer}
