@@ -1,7 +1,7 @@
 name: Phase 5 UI verify
 on:
   push:
-    branches: [main, phase-5-product-launch, phase5-cloudflare-auth, phase5-dashboard-restore, phase5-ropean-dropdown-restore, phase5-dashboard-layer-animation, phase5-config-drawer]
+    branches: [main, phase-5-product-launch, phase5-cloudflare-auth, phase5-dashboard-restore, phase5-ropean-dropdown-restore, phase5-dashboard-layer-animation, phase5-config-drawer, phase5-dashboard-final-ui]
 jobs:
   verify:
     runs-on: ubuntu-latest
