@@ -89,7 +89,7 @@ jobs:
               <div className="app-main rope-main">
                 <header className="rope-topbar">
                   <button className="rope-mobile-trigger" onClick={() => setMenu(value => !value)} aria-expanded={menu}>Menu</button>
-                  <div className="rope-topbar-title"><span>Workspace</span><b>{active === "/dashboard" ? "Dashboard" : active?.replace("/", "").replaceAll("-", " ") || "WebCanBe"}</b></div>
+                  <div className="rope-topbar-title"><span>Workspace</span><b>{active === "/dashboard" ? "Dashboard" : active?.replace("/", "").replace(/-/g, " ") || "WebCanBe"}</b></div>
                   <div className="rope-topbar-actions">
                     <button className="rope-search" type="button"><Search/><span>Search</span><kbd>⌘ K</kbd></button>
                     <button className="rope-icon-button" type="button" aria-label="Notifications"><Bell/></button>
@@ -491,6 +491,6 @@ jobs:
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/final-phase4-ui-demo.yml
-          git add src/App.tsx src/main.tsx src/phase4-final-ui.css src/phase4-brand-auth.test.ts src/phase4-operations.test.ts public/wcb-landing/index.html
+          git add src/App.tsx src/main.tsx src/phase4-final-ui.css src/phase4-brand-auth.test.ts src/phase4-operations.test.ts public/wcb-landing/index.html package.json package-lock.json
           git commit -m "Build final Phase 4 UI demo"
           git push origin HEAD:phase-4-product-ux
