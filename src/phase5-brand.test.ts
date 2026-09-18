@@ -8,12 +8,13 @@ const icon = fs.readFileSync("public/webcanbe-icon.svg", "utf8")
 describe("Phase 5 brand pass", () => {
   it("uses the shared WebCanBe primary logo asset in app chrome", () => {
     expect(app).toContain('/brand/webcanbe-logo.svg')
-    expect(app).toContain('/brand/webcanbe-mark.svg')\n    expect(app).toContain('rd-team-brand-copy')
+    expect(app).toContain('/brand/webcanbe-mark.svg')
+    expect(app).toContain('rd-team-brand-copy')
     expect(app).not.toContain('className="mark" aria-label="WebCanBe"')
   })
 
   it("uses the primary logo in the retained landing header/footer brand anchors", () => {
-    expect((landing.match(/\/brand\/webcanbe-logo\.svg/g) || []).length).toBeGreaterThanOrEqual(3)
+    expect((landing.match(/\\/brand\\/webcanbe-logo\\.svg/g) || []).length).toBeGreaterThanOrEqual(3)
   })
 
   it("keeps the favicon aligned with the new three-stroke mark", () => {
