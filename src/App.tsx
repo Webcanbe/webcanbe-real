@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, RotateCcw } from "lucide-react"
+import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, RotateCcw } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -488,7 +488,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
         </nav>
         <div className="rd-header-actions">
           <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
-          <button className={"rd-header-icon" + (configOpen ? " is-open" : "")} type="button" aria-label="Open theme settings" aria-expanded={configOpen} onClick={() => { setConfigOpen(true); setProfileMenu(false); setAccountMenu(false); setTeamMenu(false) }}><Settings/></button>
+          <button className={"rd-header-icon" + (configOpen ? " is-open" : "")} type="button" aria-label="Open theme settings" aria-expanded={configOpen} onClick={() => { setConfigOpen(true); setProfileMenu(false); setAccountMenu(false); setTeamMenu(false) }}><SettingsIcon/></button>
           <button className="rd-header-icon" type="button" aria-label="Notifications" onClick={() => choose("notifications")}><Bell/></button>
           <div className="rd-menu-anchor">
             <button className={"rd-header-avatar" + (profileMenu ? " is-open" : "")} type="button" aria-label="Profile" aria-expanded={profileMenu} onClick={() => { setProfileMenu(v => !v); setAccountMenu(false); setTeamMenu(false) }}>WC</button>
