@@ -1,4 +1,5 @@
 name: Phase 4 UI pass verify
+# UI-native shell verification after iframe removal
 on:
   push:
     branches: [phase-4-product-ux]
