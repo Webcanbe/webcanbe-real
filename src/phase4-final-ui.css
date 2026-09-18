@@ -1282,3 +1282,32 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .rd-sidebar-collapsed .rd-team-brand-copy .wcb-logo-mark{display:block;width:28px;height:28px}
 
 .auth-demo-provider-note{margin:10px 0 0;color:#8a8a92;font-size:10px;text-align:center}
+
+
+/* Phase 5 dashboard restore: keep the approved Ropean chrome stable */
+.wcb-logo-wrap{display:inline-flex;align-items:center;gap:8px;line-height:1}
+.wcb-logo-symbol{width:26px;height:26px;display:block;object-fit:contain;flex:0 0 auto}
+.wcb-wordmark{color:#111318;font-size:17px;font-weight:700;letter-spacing:-.035em;white-space:nowrap}
+.product-header .wcb-logo-wrap{gap:8px}.product-header .wcb-logo-symbol{width:27px;height:27px}.product-header .wcb-wordmark{font-size:18px}
+.site-footer-brand .wcb-logo-symbol,.checkout-header .wcb-logo-symbol{width:25px;height:25px}
+.workspace-top .wcb-logo-symbol{width:24px;height:24px}
+.auth-complete .wcb-logo-symbol{width:30px;height:30px}
+.rope-collapsed .rope-sidebar .wcb-wordmark{display:none}
+
+.rd-team-official-logo{background:transparent}
+.rd-team-official-logo img{display:block;width:30px;height:30px;object-fit:contain}
+.rd-nav-group>.rd-nav-button{position:relative;min-height:36px;display:flex;align-items:center;gap:10px;padding:0 9px;border:0;border-radius:7px;background:transparent;color:#3f3f46;text-decoration:none;font-size:13px;font-weight:500;text-align:left;width:100%}
+.rd-nav-group>.rd-nav-button:hover,.rd-nav-expand:hover{background:#f4f4f5}
+.rd-nav-group>.rd-nav-button.active,.rd-nav-expand.active{background:#f4f4f5;color:#18181b}
+.rd-nav-group>.rd-nav-button svg{width:16px;height:16px;stroke-width:1.8}
+.rd-nav-group>.rd-nav-button>span{flex:1}
+.rd-nav-group>.rd-nav-button em{min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;border-radius:999px;background:#f4f4f5;color:#52525b;font-size:10px;font-style:normal}
+.rd-topnav button{padding:0;border:0;background:transparent;color:#71717a;font-size:13px;font-weight:500}
+.rd-topnav button.active,.rd-topnav button:hover{color:#18181b}
+.rd-sidebar-collapsed .rd-nav-group .rd-nav-button span,.rd-sidebar-collapsed .rd-nav-group .rd-nav-button em{display:none}
+.rd-sidebar-collapsed .rd-nav-group>.rd-nav-button{justify-content:center;padding-left:0;padding-right:0}
+.rd-sidebar-collapsed .rd-team-official-logo img{width:28px;height:28px}
+.rd-dashboard-section{margin-top:16px}
+.rd-dashboard-callout{display:grid;gap:10px;padding:4px 20px 20px}.rd-dashboard-callout>span{color:#71717a;font-size:11px}.rd-dashboard-callout>b{font-size:14px}
+.rd-dashboard-callout .rd-primary-action{width:max-content}
+.rd-dashboard-links{display:flex;flex-wrap:wrap;gap:8px;padding:4px 20px 20px}.rd-dashboard-links a{padding:8px 10px;border:1px solid #e4e4e7;border-radius:7px;color:#3f3f46;text-decoration:none;font-size:12px}.rd-dashboard-links a:hover{background:#f4f4f5}
