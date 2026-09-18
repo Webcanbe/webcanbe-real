@@ -65,6 +65,21 @@ describe("hosted product route adapter", () => {
     expect(f.seen.map(call => call.path)).toContain("/__webcanbe/api/product/workspace-projects/list")
   })
 
+
+  it("sends the session CSRF token when signing out", async () => {
+    const seen: Seen[] = []
+    const client = new HostedProductClient(async (input, init) => {
+      const path = String(input), headers = new Headers(init?.headers), body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>
+      seen.push({ path, body, headers })
+      if (path === "/__webcanbe/auth/session") return response(200, { csrf: "csrf-logout" })
+      if (path === "/__webcanbe/auth/logout") return new Response(null, { status: 204 })
+      throw new Error("Unexpected request: " + path)
+    })
+    await client.logout()
+    expect(seen.map(call => call.path)).toEqual(["/__webcanbe/auth/session", "/__webcanbe/auth/logout"])
+    expect(seen[1].headers.get("X-WCB-CSRF")).toBe("csrf-logout")
+  })
+
   it("still refuses unauthenticated private product access before issuing a private product request", async () => {
     const f = fixture([["/__webcanbe/auth/session", { error: "Sign in to continue." }, 403]])
     await expect(f.client.purchases()).rejects.toEqual(new HostedProductError(403, "Sign in to continue."))
