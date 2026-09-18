@@ -1400,3 +1400,64 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
   .rd-dropdown,.rd-collapsible-content,.rd-main{animation:none!important}
   .rd-dropdown-item,.rd-nav-button,.rd-header-icon,.rd-header-avatar,.rd-account-trigger,.rd-team-switcher,.rd-chevron{transition:none!important}
 }
+
+
+/* Final collapsed-sidebar guard: icon-only chrome without text leaking under content */
+.rd-sidebar-collapsed .rd-team-copy,
+.rd-sidebar-collapsed .rd-team-switcher>svg,
+.rd-sidebar-collapsed .rd-app-title>div,
+.rd-sidebar-collapsed .rd-nav-label,
+.rd-sidebar-collapsed .rd-nav-group>.rd-nav-button>span,
+.rd-sidebar-collapsed .rd-nav-group>.rd-nav-button>em,
+.rd-sidebar-collapsed .rd-collapsible>.rd-collapsible-trigger>span,
+.rd-sidebar-collapsed .rd-collapsible>.rd-collapsible-trigger>.rd-chevron,
+.rd-sidebar-collapsed .rd-account-trigger>span:nth-child(2),
+.rd-sidebar-collapsed .rd-account-trigger>svg{
+  display:none!important
+}
+.rd-sidebar-collapsed .rd-sidebar-header,
+.rd-sidebar-collapsed .rd-sidebar-content,
+.rd-sidebar-collapsed .rd-sidebar-footer{
+  padding-left:6px!important;
+  padding-right:6px!important
+}
+.rd-sidebar-collapsed .rd-team-switcher,
+.rd-sidebar-collapsed .rd-app-title,
+.rd-sidebar-collapsed .rd-nav-group>.rd-nav-button,
+.rd-sidebar-collapsed .rd-collapsible>.rd-collapsible-trigger,
+.rd-sidebar-collapsed .rd-account-trigger{
+  width:36px;
+  min-width:36px;
+  max-width:36px;
+  margin-left:auto;
+  margin-right:auto;
+  justify-content:center!important;
+  gap:0!important;
+  padding-left:0!important;
+  padding-right:0!important;
+  overflow:hidden
+}
+.rd-sidebar-collapsed .rd-nav-group>.rd-nav-button>svg,
+.rd-sidebar-collapsed .rd-collapsible>.rd-collapsible-trigger>svg:first-child{
+  margin:0!important;
+  flex:0 0 auto
+}
+.rd-sidebar-collapsed .rd-sidebar-content{
+  overflow-y:auto;
+  overflow-x:visible
+}
+.rd-sidebar-collapsed .rd-collapsible{
+  position:relative
+}
+.rd-sidebar-collapsed .rd-collapsible-content{
+  left:42px;
+  z-index:150
+}
+.rd-sidebar-collapsed .rd-account-dropdown{
+  left:42px;
+  z-index:160
+}
+.rd-sidebar-collapsed .rd-team-dropdown{
+  left:42px;
+  z-index:160
+}
