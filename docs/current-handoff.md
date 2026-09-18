@@ -1,3 +1,13 @@
+# PHASE 5 CLOUDFLARE AUTH DEPLOY CHECKPOINT — 2026-09-19 KST
+
+- Production branch: `main`.
+- Cloudflare build command: `npm run build`.
+- Cloudflare deploy command was changed to `npm run deploy:cloudflare`.
+- `scripts/cloudflare-deploy.mjs` forwards the existing Workers Build secrets `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` to Wrangler as runtime secrets during deploy.
+- This documentation-only commit intentionally retriggers the production Cloudflare build after the deploy-command setting was changed.
+
+---
+
 # PHASE 5 BRAND + INITIAL UI POLISH CHECKPOINT — 2026-09-18 KST
 
 - Branch: `phase-5-product-launch`.
