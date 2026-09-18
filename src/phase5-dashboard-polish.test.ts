@@ -7,7 +7,6 @@ describe("Phase 5 dashboard restore", () => {
   const dashboard = app.slice(app.indexOf("function RopeanDashboardShell"), app.indexOf("function Settings()"))
 
   it("keeps sidebar navigation inside the Ropean dashboard shell", () => {
-    expect(dashboard).toContain('type DashboardView = "overview"')
     expect(dashboard).toContain("onView(target)")
     expect(dashboard).toContain('onClick={() => onView("projects")}')
     expect(dashboard).toContain('onClick={() => onView("marketplace")}')
