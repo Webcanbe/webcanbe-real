@@ -318,8 +318,7 @@ function RopeanDashboardShell({ children }: { children: React.ReactNode }) {
     <aside className="rd-sidebar">
       <div className="rd-sidebar-header">
         <button className="rd-team-switcher" type="button">
-          <span className="rd-team-logo"><Command/></span>
-          <span className="rd-team-copy"><b>WebCanBe</b><small>Source-first workspace</small></span>
+          <span className="rd-team-copy rd-team-brand-copy"><Mark/><small>Source-first workspace</small></span>
           <ChevronsUpDown/>
         </button>
         <div className="rd-app-title">
