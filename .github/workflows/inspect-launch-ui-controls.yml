@@ -1,0 +1,35 @@
+name: Inspect Launch UI controls
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect live DOM
+        shell: bash
+        run: |
+          python3 -m pip -q install beautifulsoup4 requests
+          python3 <<'PY'
+          import requests
+          from bs4 import BeautifulSoup
+          html = requests.get("https://www.launchuicomponents.com/", timeout=30, headers={"User-Agent":"Mozilla/5.0"}).text
+          soup = BeautifulSoup(html, "html.parser")
+          print("=== SOCIAL LINKS ===")
+          for a in soup.find_all("a", href=True):
+              h=a["href"].lower()
+              if "github.com" in h or "twitter.com" in h or "x.com" in h:
+                  print("A", a.get("class"), a.get("aria-label"), a["href"], "TEXT=", " ".join(a.stripped_strings)[:180])
+          print("=== SETTINGS/THEME CANDIDATES ===")
+          seen=set()
+          for tag in soup.find_all(["button","div","section","aside"]):
+              text=" ".join(tag.stripped_strings)
+              low=text.lower()
+              attrs={k:v for k,v in tag.attrs.items() if k in {"class","aria-label","data-slot","role","id","title"}}
+              if any(k in low for k in ["theme","radius","customize","colour","color scheme","dark mode","light mode"]) or any(k in str(attrs).lower() for k in ["theme","settings","customiz"]):
+                  key=(tag.name,str(attrs),text[:180])
+                  if key not in seen:
+                      seen.add(key)
+                      print(tag.name, attrs, "TEXT=", text[:300])
+          PY
