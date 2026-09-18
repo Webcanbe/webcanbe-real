@@ -327,7 +327,7 @@ function Purchases() {
   return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active"} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
 }
 
-type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "workspace" | "docs" | "settings" | "account" | "billing" | "notifications" | "help"
+type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "source-visual" | "source-code" | "source-split" | "workspace" | "docs" | "settings" | "account" | "billing" | "notifications" | "help"
 
 function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView: (view: DashboardView) => void }) {
   const auth = productionAuthMode()
@@ -391,20 +391,23 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
         <section className="rd-nav-group">
           <span className="rd-nav-label">General</span>
           {navButton("Dashboard","overview",LayoutDashboard)}
+          {navButton("My projects","projects",ListTodo)}
           {navButton("Marketplace","marketplace",PackageCheck)}
+          {navButton("Purchases","purchases",MessagesSquare,purchaseBadge > 0 ? String(purchaseBadge) : "")}
           {navButton("Creator Studio","creator",Users)}
           <div className={"rd-collapsible" + (workspaceOpen ? " open" : "")}>
-            <button className={"rd-nav-button rd-collapsible-trigger" + (["workspace","projects","purchases"].includes(view) ? " active" : "")} type="button" aria-expanded={workspaceOpen} onClick={() => setWorkspaceOpen(v => !v)}><PanelsTopLeft/><span>Workspace</span><ChevronRight className="rd-chevron"/></button>
+            <button className={"rd-nav-button rd-collapsible-trigger" + (["source-visual","source-code","source-split"].includes(view) ? " active" : "")} type="button" aria-expanded={workspaceOpen} onClick={() => setWorkspaceOpen(v => !v)}><ShieldCheck/><span>Source-backed editing</span><ChevronRight className="rd-chevron"/></button>
             {workspaceOpen && <div className="rd-collapsible-content">
-              {navButton("Editor","workspace",ShieldCheck)}
-              {navButton("My projects","projects",FolderKanban)}
-              {navButton("Purchases","purchases",ShoppingBag,purchaseBadge > 0 ? String(purchaseBadge) : "")}
+              {navButton("Visual editor","source-visual",PanelsTopLeft)}
+              {navButton("Code editor","source-code",FileCode2)}
+              {navButton("Split view","source-split",LayoutDashboard)}
             </div>}
           </div>
         </section>
 
         <section className="rd-nav-group">
           <span className="rd-nav-label">Pages</span>
+          {navButton("Workspace","workspace",ShieldCheck)}
           {navButton("Documentation","docs",Bug)}
         </section>
 
@@ -502,6 +505,9 @@ function Dashboard() {
     if (view === "marketplace") return <><div className="rd-main-heading"><h1>Marketplace</h1></div><section className="rd-panel"><header><h2>Working projects</h2><p>Open a release without leaving the dashboard shell.</p></header><div className="rd-project-list">{catalog.slice(0,8).map(project => <Link to={"/project/" + project.slug} key={project.id} className="rd-project-row"><span className={"rd-project-thumb " + project.color}/><span className="rd-project-copy"><b>{project.title}</b><small>{project.category} · {project.stack.slice(0,2).join(" · ")}</small></span><span className="rd-project-meta">{"$" + project.price}</span></Link>)}</div></section></>
     if (view === "purchases") return <><div className="rd-main-heading"><h1>Purchases</h1></div><section className="rd-stat-grid"><article><div><span>Purchased releases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active entitlements</p></article><article><div><span>Needs attention</span><Bell/></div><strong>{attention}</strong><p>{attention ? "Review blocked product state" : "No blocking product state"}</p></article></section><section className="rd-panel rd-dashboard-section"><header><h2>Your library</h2><p>Purchased releases stay associated with your account.</p></header>{projectRows(projects.slice(3).map(project => ({project,href:"/project/"+project.slug})))}</section></>
     if (view === "creator") return <><div className="rd-main-heading"><h1>Creator Studio</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Creator pipeline</h2><p>Submission, review, release, and listing tools remain available from the dedicated creator surface.</p></header><div className="rd-dashboard-callout"><span>Creator tools</span><b>Keep the dashboard shell stable while creator workflows remain separate.</b><Link className="rd-primary-action" to="/seller">Open Creator Studio</Link></div></section></>
+    if (view === "source-visual") return <><div className="rd-main-heading"><h1>Visual editor</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Edit visually, keep the real source.</h2><p>Visual changes and code changes stay attached to the same project source.</p></header>{projectRows(working)}</section></>
+    if (view === "source-code") return <><div className="rd-main-heading"><h1>Code editor</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Open the actual source.</h2><p>Use the code workspace when precision matters, without converting the project into another format.</p></header>{projectRows(working)}</section></>
+    if (view === "source-split") return <><div className="rd-main-heading"><h1>Split view</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Visual and code together.</h2><p>Use both editing surfaces against the same source-backed working copy.</p></header>{projectRows(working)}</section></>
     if (view === "workspace") return <><div className="rd-main-heading"><h1>Workspace</h1></div><section className="rd-panel"><header><h2>Continue editing</h2><p>Open one of your current working copies.</p></header>{projectRows(working)}</section></>
     if (view === "docs") return <><div className="rd-main-heading"><h1>Documentation</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Product documentation</h2><p>Reference pages for editing, compatibility, export, and security.</p></header><div className="rd-dashboard-links"><Link to="/docs">Introduction</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/security">Security</Link></div></section></>
     if (view === "settings") return <><div className="rd-main-heading"><h1>Profile</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Webcanbe profile</h2><p>Your account profile stays inside the same dashboard shell.</p></header><div className="rd-dashboard-callout"><span>Profile</span><b>Webcanbe account</b><p className="muted-copy">Signed in with Google. Full editable profile fields will use the account backend when that phase is connected.</p></div></section></>
@@ -512,7 +518,7 @@ function Dashboard() {
   }
 
   return <RopeanDashboardShell purchaseBadge={purchaseCount} view={view} onView={setView}>
-    <main className="rd-main">
+    <main key={view} className="rd-main">
       {view === "overview" ? <>
         <div className="rd-main-heading">
           <h1>Dashboard</h1>
