@@ -1,0 +1,71 @@
+{
+  "revision": "223a604",
+  "files": [
+    {
+      "path": "package.json",
+      "sha256": "58b6eee051fc42963c778b84b8ada3f1e847f09c2e09651eaf484e654365a7e0",
+      "result": "reviewed"
+    },
+    {
+      "path": "runtime-profiles/README.md",
+      "sha256": "f0a60c203b5f72724af935930bf85d710c90265535a14dfcce786efc40d18b7d",
+      "result": "reviewed"
+    },
+    {
+      "path": "runtime-profiles/react18-vite6-common-v1/package-lock.json",
+      "sha256": "d66fffa9f96f6e0c3bfeb04eb1edfd31d13e69cc58629a8a3bf089003c7f6a2c",
+      "result": "reviewed",
+      "records": 274,
+      "bundledRecords": [
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/core",
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/runtime",
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/wasi-threads",
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@napi-rs/wasm-runtime",
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@tybys/wasm-util",
+        "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/tslib"
+      ],
+      "checks": [
+        "registry-only sha512 archive records; bundled records inherit parent archive integrity",
+        "no workspace/file/git links",
+        "confined package locations"
+      ]
+    },
+    {
+      "path": "runtime-profiles/react18-vite6-common-v1/package.json",
+      "sha256": "84d4479ed1bd239500c0601c4a5717e408517901a639fbcbe3fe5ab4886ff278",
+      "result": "reviewed",
+      "checks": [
+        "exact direct pins",
+        "no lifecycle scripts"
+      ]
+    },
+    {
+      "path": "runtime-profiles/react19-vite7-common-v1/package-lock.json",
+      "sha256": "404cd66c2f3531ec937f383f31ecb8b85bd27b7bc07c1379a9d192e4222f04ba",
+      "result": "reviewed",
+      "records": 245,
+      "bundledRecords": [],
+      "checks": [
+        "registry-only sha512 archive records; bundled records inherit parent archive integrity",
+        "no workspace/file/git links",
+        "confined package locations"
+      ]
+    },
+    {
+      "path": "runtime-profiles/react19-vite7-common-v1/package.json",
+      "sha256": "1d65be3afe1702e8435d6fd7af8f19b762661e1e749b8e95a7d922aa84156c70",
+      "result": "reviewed",
+      "checks": [
+        "exact direct pins",
+        "no lifecycle scripts"
+      ]
+    }
+  ],
+  "findings": [],
+  "notes": [
+    "Operator npm ci uses repository-owned locks with ignore-scripts; uploaded source cannot write these graphs.",
+    "Installed package code is trusted supply chain, not exhaustively audited here.",
+    "README finite dotfile/secret wording corrected separately.",
+    "Exact recipe registry graph verified against frozen upstream lock."
+  ]
+}

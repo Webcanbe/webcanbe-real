@@ -1,0 +1,81 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "bc706bef07a704d325688752a1d372b5056feec50fc8e104cc8aca71673e9e9a"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "057eab0e319407c61a2b7a6f1810eec9e71266fc14b96b6952d43afe6370a8d4"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/final-regression.json",
+        "sha256": "fff357b8b9fc767ae99a99cc6be644beb6aa9ed6a700098b82975a23f18490dd"
+      },
+      {
+        "mediaType": "application/octet-stream",
+        "path": "artifacts/manual-review.json",
+        "sha256": "9f53ce2a783abec5f83de2c7df0794d23ac294559d97817d45028387e97aa2b0"
+      }
+    ],
+    "completedAt": "2026-09-16T09:19:20Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "scan_phase2_p05_regression_cleanup_20260916",
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.24"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "in_scope_files.txt",
+        "threat-model.md",
+        "artifacts/manual-review.json",
+        "artifacts/final-regression.json"
+      ],
+      "context": "Final Phase-2 regression cleanup only; not a penetration test or production deployment proof.",
+      "excludePaths": [],
+      "includePaths": [
+        "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts"
+      ],
+      "limitations": [
+        "No production code changed.",
+        "This is a bounded diff review, not a professional penetration test or production deployment proof."
+      ],
+      "runtimeStatus": "Targeted Berry/Bun set passed 42/42; the corrected serialized all-identity regression passed 730/730; TypeScript and the production build pass.",
+      "summary": "One test-only file changing two stale accepted-input expectations; all adjacent negative lock-security tests reviewed.",
+      "validationMode": "bounded source/diff review and targeted tests"
+    },
+    "sealedAt": "2026-09-16T09:19:20Z",
+    "startedAt": "2026-09-16T08:45:56Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797",
+      "displayName": "WebCanBe final P05 regression expectation cleanup",
+      "headRevision": "WORKTREE",
+      "kind": "git_diff",
+      "remote": "https://github.com/Webcanbe/webcanbe-real.git",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:45fa9225e34663e56cbd95d6cad4bbadeb49daabf448716dd95c7c1e689c3321",
+      "targetId": "phase2-p05-regression-cleanup"
+    },
+    "threatModel": {
+      "assets": [
+        "operator-owned dependency profile integrity",
+        "immutable imported source and lock bytes",
+        "non-execution policy"
+      ],
+      "summary": "Accept exact frozen Berry/Bun inputs without weakening rejection of malformed, tampered, substituted, untrusted, unsupported, or manifest-mismatched lock data.",
+      "trustBoundaries": [
+        "uploaded lock data to finite parser",
+        "parsed graph to operator-owned profile",
+        "test contract to Phase-2 acceptance claim"
+      ]
+    }
+  },
+  "schemaVersion": "1.0"
+}

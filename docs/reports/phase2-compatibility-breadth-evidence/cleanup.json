@@ -1,0 +1,14 @@
+{
+  "boundary": "Owned local TEST infrastructure only",
+  "stoppedGatewayLeasesBeforeCleanup": 31,
+  "activeNativePreviewOrProfileUnits": 0,
+  "gatewayStopped": true,
+  "tunnelsStopped": true,
+  "hostAndGuestGeneratedTestPkiConfigRemoved": true,
+  "ownedGuestBreadthHelperFilesRemoved": 2,
+  "testSchemaRemoved": true,
+  "testRolePasswordCleared": true,
+  "vmStopped": true,
+  "sourceQaTempPolicy": "Corpus materialization moved outside repository into a unique OS temporary directory with finally cleanup, preventing broad test discovery of upstream modules. Syntax checked; original hash/stage validation logic unchanged.",
+  "ignoredNoncredentialReceiptsRetained": true
+}

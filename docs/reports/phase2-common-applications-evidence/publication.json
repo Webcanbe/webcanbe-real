@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/Webcanbe/webcanbe-real.git",
+  "worktree": "Existing Developer/WebCanBe-recovery only; no new worktree/reset",
+  "branch": "phase-2-compatible-editor",
+  "startingDocumentationCheckpoint": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+  "implementationParent": "4d3b8ed9bf74759e6666d2c6458265dd9fe1f0b4",
+  "earlierCheckpoint": "65005b3822418594dd95ca826e8ff90b912c8df3",
+  "implementation": "223a604500912fed5c00ed2050cb535d57d5dd00",
+  "reviewedCorrection": "a0899cab6f4a4387116d58ae547230109be52774",
+  "normalImplementationPushVerified": true,
+  "unchangedMainAndRemoteHead": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "documentationCommit": "The feature-branch commit containing this receipt. Its exact remote equality is checked after normal push and reported in the final response.",
+  "cleanup": {
+    "boundary": "Owned local TEST infrastructure only",
+    "stoppedGatewayLeasesBeforeCleanup": 66,
+    "activePreviewOrProfileUnits": 0,
+    "gatewayStopped": true,
+    "tunnelsStopped": true,
+    "hostAndGuestGeneratedPkiConfigRemoved": true,
+    "ownedGuestExportProfilesRemoved": 6,
+    "ownedGuestHelperFilesRemoved": 5,
+    "testSchemaRemoved": true,
+    "testRolePasswordCleared": true,
+    "remainingPrivateTestConfigs": 0,
+    "vmStopped": true,
+    "ignoredNoncredentialReceiptsRetained": true
+  },
+  "publicImportedExecutionDeployed": false,
+  "mainMerged": false,
+  "forcePush": false,
+  "productionCredentialsRequested": false,
+  "scope": "Continued Phase2 only; original DoD and Phase3/4/5 scope retained."
+}

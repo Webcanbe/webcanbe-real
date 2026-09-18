@@ -1,0 +1,57 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "Unchanged repository paths beyond direct dependencies",
+      "reason": "Narrow diff; no P39/P61, later-phase or production security claim."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "branch_diff",
+  "openQuestions": [],
+  "scanId": "d5962344-0b45-4600-98c7-972dce940e1a",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "locks",
+      "label": "alternateLockfiles.ts",
+      "notes": "Reviewed exact descriptor versus package identity, trusted version/SRI and full dependency/peer normalization, alias/path confusion, fail-closed unsupported Berry/workspace/binary formats. Record-name Set prevents redundant list scans in final reread.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "css",
+      "label": "staticCss.ts, cssWorkerSource.ts, isolatedPreview.ts",
+      "notes": "Independent complete source/diff review of AST token provenance, finite options, pinned worker resolution, nonexecution, bounds and original-source instrumentation. Three nonsecurity compatibility defects corrected at 775f9b6; independent final-path reread found no residual defect.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "config",
+      "label": "runtimeCompatibility.ts, htmlConfiguration.ts, finiteBuild.ts",
+      "notes": "Independent complete review of admission callers, Vite/static path confinement and HTML active content rejection, fixed immutable Rollup graph worker, external fs/promises never admitted to preview. Final transformed HTML caller reread.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "profile",
+      "label": "Uno65/forms1 profile manifest and package-lock.json",
+      "notes": "Reviewed 13 exact root pins, 220 lock records; no links/nonregistry sources/invalid SRI. npm ci --ignore-scripts and npm ls --all passed; forms1 declared Uno65 peers complete. Old profiles unchanged.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "tests-doc",
+      "label": "phase2-breadth-css.test.ts, phase2-compatibility-edge.test.ts, threat-model.md",
+      "notes": "All changed tests and supplied model reviewed. Old test identity retained; valid directives refusal replaced by executable-options refusal, positive semantics and reviewed corrections explicitly asserted. No private material or production operations.",
+      "receiptRefs": []
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "boundary": "Actual packaged TLS editor, TEST OIDC, PostgreSQL artifact authority, mTLS native runner; original frozen Recipe source unchanged",
+  "stages": {
+    "intake": "PASS",
+    "dependencies": "PASS",
+    "configuration": "PASS",
+    "compilation": "PASS",
+    "runtime": "PASS"
+  },
+  "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+  "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+  "unchangedFiles": 67,
+  "startStatus": 200,
+  "startMs": 8391,
+  "status": "FAIL",
+  "failure": "The expression evaluated to a falsy value:\n\n  assert(audit.assets.some(x=>x.mime.startsWith('image/')))\n"
+}

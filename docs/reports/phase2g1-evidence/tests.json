@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "originalTestsUnchanged": 196,
+  "newTests": 67,
+  "passed": 263,
+  "failed": 0,
+  "testFiles": 11,
+  "files": [
+    {
+      "file": "engine.test.ts",
+      "passed": 10
+    },
+    {
+      "file": "phase2.test.ts",
+      "passed": 39
+    },
+    {
+      "file": "phase2b.test.ts",
+      "passed": 20
+    },
+    {
+      "file": "phase2c.test.ts",
+      "passed": 26
+    },
+    {
+      "file": "phase2c1.test.ts",
+      "passed": 13
+    },
+    {
+      "file": "phase2c2.test.ts",
+      "passed": 8
+    },
+    {
+      "file": "phase2de.test.ts",
+      "passed": 29
+    },
+    {
+      "file": "phase2f.test.ts",
+      "passed": 51
+    },
+    {
+      "file": "phase2g-authority.test.ts",
+      "passed": 41
+    },
+    {
+      "file": "phase2g-failure.test.ts",
+      "passed": 5
+    },
+    {
+      "file": "phase2g-runtime.test.ts",
+      "passed": 21
+    }
+  ]
+}

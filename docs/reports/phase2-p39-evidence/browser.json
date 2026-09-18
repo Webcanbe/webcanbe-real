@@ -1,0 +1,2098 @@
+{
+  "diagnosticBuild": false,
+  "boundary": "Packaged hosted editor / isolated Linux project / native Chromium input events",
+  "browserPath": "Browser plugin not available; retained Playwright",
+  "checks": [
+    {
+      "name": "real focused native control has bounded accessible role/name",
+      "status": "PASS"
+    },
+    {
+      "name": "real Chromium composition pipeline commits Korean text exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "native clipboard paste preserves accents, emoji and RTL Unicode",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit copy returns selected plain text through the current fenced generation",
+      "status": "PASS"
+    },
+    {
+      "name": "F6 leaves the raster keyboard focus trap",
+      "status": "PASS"
+    },
+    {
+      "name": "input and clipboard do not change accepted source/history",
+      "status": "PASS"
+    },
+    {
+      "name": "hard bounded expiry and fresh reconnect preserve canonical source/history",
+      "status": "PASS"
+    },
+    {
+      "name": "expired generation text is never replayed into a new runtime",
+      "status": "PASS"
+    },
+    {
+      "name": "native key pressure reaches bounded queue and reconnect discards all queued old-generation events",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh generation receives no stale queued text or canonical mutation",
+      "status": "PASS"
+    },
+    {
+      "name": "actual Chromium AX editor roles and live status",
+      "status": "PASS"
+    },
+    {
+      "name": "real viewer Chromium accessibility tree exposes the bounded project snapshot as text",
+      "status": "PASS"
+    },
+    {
+      "name": "keyboard Code/Canvas selection and logical editor focus progression",
+      "status": "PASS"
+    },
+    {
+      "name": "actual viewer reconnects retain bounded listener and heap counts after removing DevTools console roots and collecting garbage",
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "events": [
+    {
+      "type": "compositionstart",
+      "trusted": true,
+      "data": null,
+      "inputType": null,
+      "isComposing": null
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "ㅎ",
+      "inputType": null,
+      "isComposing": null
+    },
+    {
+      "type": "beforeinput",
+      "trusted": true,
+      "data": "ㅎ",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "ㅎ",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "한글",
+      "inputType": null,
+      "isComposing": null
+    },
+    {
+      "type": "beforeinput",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "한글",
+      "inputType": null,
+      "isComposing": null
+    },
+    {
+      "type": "beforeinput",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText",
+      "isComposing": true
+    },
+    {
+      "type": "compositionend",
+      "trusted": false,
+      "data": "한글",
+      "inputType": null,
+      "isComposing": null
+    },
+    {
+      "type": "paste",
+      "trusted": true,
+      "data": null,
+      "inputType": null,
+      "isComposing": null
+    }
+  ],
+  "compositionLimit": "Chromium CDP uses trusted composition start/update/input events but its commit compositionend is untrusted; OS input-method validation is not claimed.",
+  "expiryEvidence": "input-1789464928670/receipt.json: unchanged 60-second hard expiry passed in this P39 run; reused here for reconnect/resource checks",
+  "queue": {
+    "bound": 64,
+    "nativeKeyEvents": 81,
+    "submittedBeforeReconnect": 1
+  },
+  "editorAX": [
+    {
+      "role": "RootWebArea",
+      "name": "WebCanBe",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "url",
+          "value": {
+            "type": "string",
+            "value": "https://app.wcb-app.test:53529/workspace/36d619c9-531b-499f-ae5b-2976f4d29261"
+          }
+        }
+      ]
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "main",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "sectionheader",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "complementary",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "complementary",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "link",
+      "name": "WebCanBe / Compatible",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "url",
+          "value": {
+            "type": "string",
+            "value": "https://app.wcb-app.test:53529/projects"
+          }
+        }
+      ]
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "button",
+      "name": "Canvas",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "pressed",
+          "value": {
+            "type": "tristate",
+            "value": "true"
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Code",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "pressed",
+          "value": {
+            "type": "tristate",
+            "value": "false"
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "History",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "pressed",
+          "value": {
+            "type": "tristate",
+            "value": "false"
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Undo",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Redo",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Export code",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Reconnect session",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "LabelText",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "LabelText",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "LabelText",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "strong",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "⌘ JSX / TSX source",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "# CSS / Modules",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "group",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "button",
+      "name": "main · code-only",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "label · full",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "input · code-only",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "button · full",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "p · code-only",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "App · code-only",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " Sandboxed source preview ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "ready",
+      "properties": []
+    },
+    {
+      "role": "form",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "button",
+      "name": "Back",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Forward",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Refresh preview",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Stop preview",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Select elements",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "pressed",
+          "value": {
+            "type": "tristate",
+            "value": "true"
+          }
+        }
+      ]
+    },
+    {
+      "role": "LabelText",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "preview",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Visual editing changes the same files.",
+      "properties": []
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "status",
+      "name": "",
+      "properties": [
+        {
+          "name": "live",
+          "value": {
+            "type": "token",
+            "value": "polite"
+          }
+        },
+        {
+          "name": "atomic",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "name": "relevant",
+          "value": {
+            "type": "tokenList",
+            "value": "additions text"
+          }
+        }
+      ]
+    },
+    {
+      "role": "paragraph",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "WebCanBe ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "/ Compatible",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "AUTHORED source gesture constraints",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Tailwind detected",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Canvas",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Code",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "History",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Undo",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Redo",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Export code",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Reconnect session",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Project",
+      "properties": []
+    },
+    {
+      "role": "combobox",
+      "name": "Hosted project",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "hasPopup",
+          "value": {
+            "type": "token",
+            "value": "menu"
+          }
+        },
+        {
+          "name": "expanded",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "Import workspace",
+      "properties": []
+    },
+    {
+      "role": "combobox",
+      "name": "Import workspace",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "hasPopup",
+          "value": {
+            "type": "token",
+            "value": "menu"
+          }
+        },
+        {
+          "name": "expanded",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "Import React/Vite ZIP",
+      "properties": []
+    },
+    {
+      "role": "button",
+      "name": "Import React/Vite ZIP",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "labelledby",
+          "value": {
+            "type": "nodeList",
+            "relatedNodes": [
+              {
+                "backendDOMNodeId": 6,
+                "text": "Import React/Vite ZIP"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "PROJECT RUNTIME",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "▾ src",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "⌘ JSX / TSX source",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "# CSS / Modules",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Visual compatibility",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "33%",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "2 full · 0 partial · 4 code only",
+      "properties": []
+    },
+    {
+      "role": "DisclosureTriangle",
+      "name": "Runtime: react19-vite6",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "expanded",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "SOURCE TARGETS",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "main",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "label",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "full",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "input",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "button",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "full",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "p",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "App",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " Sandboxed source preview ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "ready",
+      "properties": []
+    },
+    {
+      "role": "textbox",
+      "name": "Preview path",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "editable",
+          "value": {
+            "type": "token",
+            "value": "plaintext"
+          }
+        },
+        {
+          "name": "settable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "multiline",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "name": "readonly",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "name": "required",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "button",
+      "name": "Open route",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "Back",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Forward",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Refresh preview",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Stop preview",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Select elements",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Viewport ",
+      "properties": []
+    },
+    {
+      "role": "combobox",
+      "name": "Viewport",
+      "properties": [
+        {
+          "name": "invalid",
+          "value": {
+            "type": "token",
+            "value": "false"
+          }
+        },
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "hasPopup",
+          "value": {
+            "type": "token",
+            "value": "menu"
+          }
+        },
+        {
+          "name": "expanded",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "ELEMENT INSPECTOR",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "preview",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Visual editing changes the same files.",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Hover and select an element in the actual running project to inspect its real source.",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Controlled preview is ready.",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Controlled preview: project JavaScript runs in an isolated Linux browser. This viewer receives pixels and validated selection data. External project networking is disabled. Sessions last up to 60 seconds; reconnect to renew.",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "WebCanBe ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "/ Compatible",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "AUTHORED source gesture constraints",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Tailwind detected",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Canvas",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Code",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "History",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Undo",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Redo",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Export code",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Reconnect session",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Project",
+      "properties": []
+    },
+    {
+      "role": "MenuListPopup",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Import workspace",
+      "properties": []
+    },
+    {
+      "role": "MenuListPopup",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Import React/Vite ZIP",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "PROJECT RUNTIME",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "▾ src",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Visual compatibility",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "33%",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "2 full · 0 partial · 4 code only",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "Runtime: ",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "react19-vite6",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "SOURCE TARGETS",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "main",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "label",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "full",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "input",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "button",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "full",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "p",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "App",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": " · ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "code-only",
+      "properties": []
+    },
+    {
+      "role": "generic",
+      "name": "",
+      "properties": [
+        {
+          "name": "editable",
+          "value": {
+            "type": "token",
+            "value": "plaintext"
+          }
+        }
+      ]
+    },
+    {
+      "role": "StaticText",
+      "name": "Open route",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Back",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Forward",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Refresh preview",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Stop preview",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Select elements",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Viewport ",
+      "properties": []
+    },
+    {
+      "role": "MenuListPopup",
+      "name": "",
+      "properties": []
+    },
+    {
+      "role": "Iframe",
+      "name": "Running imported React/Vite project",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "ELEMENT INSPECTOR",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Hover and select an element in the actual ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "running project to inspect its real source.",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Controlled preview is ready.",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Controlled preview: project JavaScript runs in an ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "isolated Linux browser. This viewer receives ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "pixels and validated selection data. External ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "project networking is disabled. Sessions last up ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "to 60 seconds; reconnect to renew.",
+      "properties": []
+    },
+    {
+      "role": "option",
+      "name": "AUTHORED source gesture constraints",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "selected",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "option",
+      "name": "5c2e3c1e-ce33-4b2d-ae0a-969e3bdffb41",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "selected",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Runtime: ",
+      "properties": []
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "react19-vite6",
+      "properties": []
+    },
+    {
+      "role": "StaticText",
+      "name": "/",
+      "properties": [
+        {
+          "name": "editable",
+          "value": {
+            "type": "token",
+            "value": "plaintext"
+          }
+        }
+      ]
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Open route",
+      "properties": []
+    },
+    {
+      "role": "option",
+      "name": "Mobile",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "selected",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "option",
+      "name": "Tablet",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "selected",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "role": "option",
+      "name": "Desktop",
+      "properties": [
+        {
+          "name": "focusable",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        },
+        {
+          "name": "selected",
+          "value": {
+            "type": "booleanOrUndefined",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "/",
+      "properties": [
+        {
+          "name": "editable",
+          "value": {
+            "type": "token",
+            "value": "plaintext"
+          }
+        }
+      ]
+    }
+  ],
+  "viewerAX": [
+    {
+      "role": "RootWebArea",
+      "name": "Controlled preview viewer"
+    },
+    {
+      "role": "image",
+      "name": "Rendered project. Interact to use its keyboard controls. F6 returns to the editor."
+    },
+    {
+      "role": "textbox",
+      "name": "Project unknown: No focused control. Type here; F6 returns to the editor."
+    },
+    {
+      "role": "region",
+      "name": "Project accessibility snapshot"
+    },
+    {
+      "role": "status",
+      "name": ""
+    },
+    {
+      "role": "generic",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "StaticText",
+      "name": "Project unknown: No focused control"
+    },
+    {
+      "role": "StaticText",
+      "name": "main"
+    },
+    {
+      "role": "StaticText",
+      "name": "button. Save input. invalid: false"
+    },
+    {
+      "role": "StaticText",
+      "name": "StaticText. Name"
+    },
+    {
+      "role": "StaticText",
+      "name": "textbox. Name. invalid: false. multiline: false. readonly: false. required: false"
+    },
+    {
+      "role": "StaticText",
+      "name": "StaticText. Save input"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Project "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "unknown: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "No "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "focused "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "control"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "main"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "button. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Save "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "input. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "invalid: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "false"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "StaticText. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Name"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "textbox. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Name. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "invalid: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "false. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "multiline: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "false. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "readonly: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "false. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "required: "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "false"
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "StaticText. "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "Save "
+    },
+    {
+      "role": "InlineTextBox",
+      "name": "input"
+    }
+  ],
+  "keyboardFocus": [
+    {
+      "tag": "BUTTON",
+      "name": "Reconnect session"
+    },
+    {
+      "tag": "SELECT",
+      "name": "Hosted project"
+    },
+    {
+      "tag": "SELECT",
+      "name": "Import workspace"
+    },
+    {
+      "tag": "INPUT",
+      "name": ""
+    },
+    {
+      "tag": "SUMMARY",
+      "name": "Runtime: react19-vite6"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "main · code-only"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "label · full"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "input · code-only"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "button · full"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "p · code-only"
+    },
+    {
+      "tag": "BUTTON",
+      "name": "App · code-only"
+    },
+    {
+      "tag": "INPUT",
+      "name": "Preview path"
+    }
+  ],
+  "browserEndurance": {
+    "iterations": 12,
+    "samples": [
+      {
+        "documents": 3,
+        "nodes": 342,
+        "jsEventListeners": 241,
+        "usedSize": 6536280,
+        "totalSize": 6815744,
+        "embedderHeapUsedSize": 1494880,
+        "backingStorageSize": 1110857
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5693572,
+        "totalSize": 6160384,
+        "embedderHeapUsedSize": 1370688,
+        "backingStorageSize": 1110914
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5739292,
+        "totalSize": 6160384,
+        "embedderHeapUsedSize": 1391296,
+        "backingStorageSize": 1110952
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5755064,
+        "totalSize": 6422528,
+        "embedderHeapUsedSize": 1411256,
+        "backingStorageSize": 1110952
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5788320,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1619512,
+        "backingStorageSize": 1110956
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5810684,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1620344,
+        "backingStorageSize": 1110956
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5847856,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1589472,
+        "backingStorageSize": 1110999
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5866716,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1754264,
+        "backingStorageSize": 1110956
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5886044,
+        "totalSize": 6422528,
+        "embedderHeapUsedSize": 1519912,
+        "backingStorageSize": 1110952
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5901800,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1816184,
+        "backingStorageSize": 1110956
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5904100,
+        "totalSize": 6422528,
+        "embedderHeapUsedSize": 1563120,
+        "backingStorageSize": 1110937
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5912656,
+        "totalSize": 6684672,
+        "embedderHeapUsedSize": 1694032,
+        "backingStorageSize": 1110956
+      },
+      {
+        "documents": 3,
+        "nodes": 333,
+        "jsEventListeners": 217,
+        "usedSize": 5913564,
+        "totalSize": 6422528,
+        "embedderHeapUsedSize": 1607104,
+        "backingStorageSize": 1110995
+      }
+    ],
+    "unexpectedErrors": [],
+    "afterGC": {
+      "documents": 3,
+      "nodes": 333,
+      "jsEventListeners": 217,
+      "usedSize": 5913564,
+      "totalSize": 6422528,
+      "embedderHeapUsedSize": 1607104,
+      "backingStorageSize": 1110995
+    },
+    "listenerRange": [
+      217,
+      217
+    ]
+  },
+  "status": "PASS"
+}

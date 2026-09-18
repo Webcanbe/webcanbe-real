@@ -1,0 +1,29 @@
+{"p61":"source-read-request","at":358.643959}
+{"p61":"source-read-result","at":369.461209}
+{"p61":"materialized","at":374.816417}
+{"p61":"source-read-request","at":500.266334}
+{"p61":"source-read-result","at":506.067542}
+{"p61":"materialized","at":510.558459}
+{"p61":"compile-request","at":546.999292}
+RuntimeCompatibilityError: Unsupported HTML link semantics.
+    at compilePreview (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:4874:33)
+    at buildIsolatedHttpPreview (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:5061:34)
+    at ControlledPreviewTransport.compileWithRuntime (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:5224:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async /Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:5267:32
+    at async withHostedSource (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:4386:120)
+    at async HostedProjectRegistry.withPreviewSource (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:4532:20)
+    at async ControlledPreviewTransport.start (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:5265:22)
+    at async HostedEditor.handle (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:6116:201)
+    at async /Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/hosted-package/editor.cjs:6241:11 {
+  issues: [
+    {
+      code: 'html-entry',
+      message: 'Unsupported HTML link semantics.',
+      requiredCapability: 'A separately approved dependency/runtime profile or isolated build runner',
+      file: 'package.json / package-lock.json',
+      classification: 'unsupported'
+    }
+  ]
+}
+{"boundary":"ordinary packaged HTTPS/PG/mTLS, unchanged application","stages":[{"name":"import","ms":102.61087499999996,"status":201},{"name":"start","ms":97.80162500000006,"status":422,"error":"The hosted operation failed. Accepted source and history remain authoritative."}],"commit":"b57db4f86ef179285da216eeb291266da82c361c","archiveSha256":"bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a","project":"db6cb585-c4cd-4e87-aa7f-f0a97edfeda1","sourceExact":true,"failure":"Expected values to be strictly equal:\n\n422 !== 200\n"}

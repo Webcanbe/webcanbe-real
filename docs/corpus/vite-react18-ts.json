@@ -1,0 +1,76 @@
+{
+  "id": "vite-react18-ts",
+  "commit": "73cd3c1de63d6f511b7a6003d0cb8079dd491176",
+  "ref": "create-vite@5.5.2",
+  "profile": "react18-vite5-v1",
+  "classification": "INDEPENDENT PROJECT (official starter template, not a full product)",
+  "repository": "https://github.com/vitejs/vite",
+  "directory": "packages/create-vite/template-react-ts/",
+  "modifications": [],
+  "files": {
+    "README.md": {
+      "gitBlob": "74872fd4af60fb8d6cdb7d27e6c587ee0b6e1df7",
+      "sha256": "f83e8201f2934fb634577123959d9f332edfc9cb45438c764c9f6fc7ac6d71c3"
+    },
+    "_gitignore": {
+      "gitBlob": "a547bf36d8d11a4f89c59c144f24795749086dd1",
+      "sha256": "fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8"
+    },
+    "eslint.config.js": {
+      "gitBlob": "092408a9f09eae19150818b4f0db5d1b70744828",
+      "sha256": "dc00c7db700d03834d04a172ea709593ae5ef1bc750eb55dfc521a60d9e1baa0"
+    },
+    "index.html": {
+      "gitBlob": "e4b78eae12304a075fa19675c4047061d6ab920d",
+      "sha256": "db908a36f7f8ea1b2697b54f5d792edeb9a525ff5b8df5785470641abe531753"
+    },
+    "package.json": {
+      "gitBlob": "a3a9d2f64774f0fb82f1f5d1ca0c0bdaa7a3312e",
+      "sha256": "2b5feb0cd3fedd9f326b4915c35e35c7ec27988f1d6a0dcee30038313639267d"
+    },
+    "public/vite.svg": {
+      "gitBlob": "e7b8dfb1b2a60bd50538bec9f876511b9cac21e3",
+      "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+    },
+    "src/App.css": {
+      "gitBlob": "b9d355df2a5956b526c004531b7b0ffe412461e0",
+      "sha256": "a0715e0a09edbd0fbde65816a75e0fa0fc8b314c5260c0768c19bf3aac22621a"
+    },
+    "src/App.tsx": {
+      "gitBlob": "afe48ac750194a747f5665300d14049f72011a33",
+      "sha256": "58a12e41994ea8bc9d40e1ef0afa0523e214992e4c2ad7ba363b7daf1bd152f3"
+    },
+    "src/assets/react.svg": {
+      "gitBlob": "6c87de9bb3358469122cc991d5cf578927246184",
+      "sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5"
+    },
+    "src/index.css": {
+      "gitBlob": "6119ad9a8faaa5073a454f67b50fb98a25972fd2",
+      "sha256": "a7938196d3e52b21ea3e2af74bd60b2012ad662ed8eb905b86f9842e5f94bdc4"
+    },
+    "src/main.tsx": {
+      "gitBlob": "6f4ac9bcca823100838b88e0b570a28d2fbde6b1",
+      "sha256": "1d3e00f9b31a65004df9cd8e5bab600499137dc4dcd4413e3bbc05e4ae60c822"
+    },
+    "src/vite-env.d.ts": {
+      "gitBlob": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    "tsconfig.app.json": {
+      "gitBlob": "f0a235055d24607ba5e0bedc494ffc35b5956fbb",
+      "sha256": "5dea726e0460f4b1c4c8cd0dab11544af8ae8f89445d8618f0d643762e2c5a0a"
+    },
+    "tsconfig.json": {
+      "gitBlob": "1ffef600d959ec9e396d5a260bd3f5b927b2cef8",
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+    },
+    "tsconfig.node.json": {
+      "gitBlob": "0d3d71446a455c5f997e3cffb25099dab0f74a9b",
+      "sha256": "1a270cb8020d1fa879262423b9c222fa38d94b830ec61164a46b558ea9d2a526"
+    },
+    "vite.config.ts": {
+      "gitBlob": "5a33944a9b41b59a9cf06ee4bb5586c77510f06b",
+      "sha256": "2d8b8a9c0291a6635f5efef200ae0fae8bfd0f5d57b3e456125e71aea661be6a"
+    }
+  }
+}

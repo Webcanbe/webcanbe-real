@@ -1,0 +1,382 @@
+{
+  "selectedAtUtc": "2026-09-14T10:20:08.891014+00:00",
+  "implementationBase": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+  "criteria": [
+    "Independent authors; actual task/recipe state and interaction, not a framework starter",
+    "Verified permissive license at immutable root commit",
+    "Conventional React/Vite DOM applications with browser-local core workflows",
+    "Entire root admitted unchanged; no filtering or upstream rewrites; original four retained"
+  ],
+  "knownRisks": {
+    "kanban-board": "No lockfile; requires disclosed deterministic React18/Vite6/Tailwind4/Lucide profile. Desktop four-column layout is upstream behavior; no mobile quality claim.",
+    "GroqRecipeBook": "npm v3 lock; React19/Vite7/Tailwind4/Immer/Tippy graph; imported transitive tippy.js CSS; external font and image requests; .vite metadata retained."
+  },
+  "subjects": [
+    {
+      "id": "kanban-board",
+      "repository": "https://github.com/9bzero/kanban-board.git",
+      "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+      "scope": "root",
+      "license": "MIT",
+      "licenseEvidence": {
+        "bytes": 1063,
+        "sha256": "4e7eef80a630666270be5ab7fffe4cc9697d644001cb03f86a6b53dfa85fd534"
+      },
+      "archiveMtime": "2026-07-01T04:52:36+03:00",
+      "archiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+      "archiveBytes": 9337,
+      "files": {
+        ".github/ISSUE_TEMPLATE/bug_report.md": {
+          "bytes": 504,
+          "sha256": "f952a6b4964d3c9cf55647da302451a0f8a0f4066ecc3f8ecc79d7383b9d26b5"
+        },
+        ".github/ISSUE_TEMPLATE/feature_request.md": {
+          "bytes": 422,
+          "sha256": "784cad0583e952d4413aeceb82c3d2f432cde39c79c916d7044f9f0ee37897dc"
+        },
+        ".github/pull_request_template.md": {
+          "bytes": 533,
+          "sha256": "606b40ee30edaa2da79d4b19d083b29a3b372ed25901631aac0f51117ce1cb3d"
+        },
+        ".gitignore": {
+          "bytes": 46,
+          "sha256": "d6638be47569826278b217ac71ef36aa4936067ecdccefbb8beb8dc1727c5cd0"
+        },
+        "CODE_OF_CONDUCT.md": {
+          "bytes": 1746,
+          "sha256": "7cd0958d14137cf5c8655beea094962a11c0440fd448d0ed22cee84ef8995cd8"
+        },
+        "CONTRIBUTING.md": {
+          "bytes": 305,
+          "sha256": "57b2dc900a696aa946180c87b37c5c0f5c0d715fd7d7ad00660e98f4ef8f2623"
+        },
+        "LICENSE": {
+          "bytes": 1063,
+          "sha256": "4e7eef80a630666270be5ab7fffe4cc9697d644001cb03f86a6b53dfa85fd534"
+        },
+        "README.md": {
+          "bytes": 526,
+          "sha256": "7f6744027b3d3d1f08c08570f956b4f42dca4f526f25221833af80a6aead5a43"
+        },
+        "SECURITY.md": {
+          "bytes": 982,
+          "sha256": "0450d060d287d169f36b05b434ea904a63262fb36d56ea52761c348ab153cc7a"
+        },
+        "index.html": {
+          "bytes": 263,
+          "sha256": "f6eb93a279c1c7ff02b436ea75faf6d987dfba1714e12890d1afb6f3947a00de"
+        },
+        "package.json": {
+          "bytes": 473,
+          "sha256": "30a7e62821c643cdc622709e39b1ff2903919b55bc787d79153bd99c76abf447"
+        },
+        "src/App.tsx": {
+          "bytes": 7508,
+          "sha256": "bdc491861c86b26c0ae252a4c53a9e9365680ba48c71d93efb2d486ab5ea98e5"
+        },
+        "src/index.css": {
+          "bytes": 109,
+          "sha256": "3ae1bf9801d66c07fe14d10eaf5ecfe71728e11dcb3ac0f9ec7954a586096ed2"
+        },
+        "src/main.tsx": {
+          "bytes": 218,
+          "sha256": "cb73c931dedfdcd28280a7390f132fb07f94e47aed1a611f1bdd97bd0d9bf641"
+        },
+        "tsconfig.json": {
+          "bytes": 375,
+          "sha256": "b5de0140fd85b3fee19f0edce6e334d05931d8d1a7c8d4c1ca13961b9bd1208a"
+        },
+        "vite.config.ts": {
+          "bytes": 188,
+          "sha256": "7eb2ed9fc3f51a07d57caf7f516cd0c8385a75b0e341f8796d68f1eed6281052"
+        }
+      },
+      "expectedWorkflow": "Create a card with title, description and priority, then delete it; inspect persisted board state."
+    },
+    {
+      "id": "GroqRecipeBook",
+      "repository": "https://github.com/aymansoliman-dev/GroqRecipeBook.git",
+      "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+      "scope": "root",
+      "license": "MIT",
+      "licenseEvidence": {
+        "bytes": 1074,
+        "sha256": "e9ac49e25f353448de7f4a3dd37114a8df5f39bd69d3c905e3090d03f4fa2c2e"
+      },
+      "archiveMtime": "2026-05-17T00:26:04+03:00",
+      "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+      "archiveBytes": 2301527,
+      "files": {
+        ".gitignore": {
+          "bytes": 262,
+          "sha256": "0a7095d4744304f685dd0478f927c5153ba1b54cfc806f616e63d1671b845794"
+        },
+        ".vite/deps/_metadata.json": {
+          "bytes": 146,
+          "sha256": "264bd98e8e07acbba0c8a0eaf282f898f31b5f2a7f4832b9749fe41d0d9eeec6"
+        },
+        ".vite/deps/package.json": {
+          "bytes": 23,
+          "sha256": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+        },
+        "LICENSE": {
+          "bytes": 1074,
+          "sha256": "e9ac49e25f353448de7f4a3dd37114a8df5f39bd69d3c905e3090d03f4fa2c2e"
+        },
+        "README.md": {
+          "bytes": 13682,
+          "sha256": "18e1188bdf622b708bd503c6d6d8a858940fadecfdab7d1a21cf3ec4f8d90739"
+        },
+        "eslint.config.js": {
+          "bytes": 758,
+          "sha256": "da0cbf3213f2994741024e2aa5165d017e0345f389dcd2f8a0db97fee7289d1b"
+        },
+        "index.html": {
+          "bytes": 3063,
+          "sha256": "d56f5ab506f9363deea149c418c65e2531b39413048d69e652ab4c8c0ae8ef70"
+        },
+        "package-lock.json": {
+          "bytes": 119828,
+          "sha256": "41ea068599c08a4b7931ccb288cc7dfc4cfcdd1fdd65d5436797afa23ea6de61"
+        },
+        "package.json": {
+          "bytes": 767,
+          "sha256": "c729d875161f894a41753cbfc30371b065c3fce9c4f66660895217ad8f977388"
+        },
+        "public/coffee-love.svg": {
+          "bytes": 4476,
+          "sha256": "d1b2563fba5fefe472195f250bad2274f6aa7fbb8e16ec65cb8b8b17b061595a"
+        },
+        "public/googlea8e27d32355734fd.html": {
+          "bytes": 53,
+          "sha256": "96d05f99e881faac0454cb189faa91d316156b1145ec7207fee7c72052e73cdb"
+        },
+        "public/home.png": {
+          "bytes": 1190061,
+          "sha256": "f7ec3f5b73de86d1f059e8cb93ac3e7296dfbb878f0857151f0310f4ce4604ac"
+        },
+        "public/logo.svg": {
+          "bytes": 45437,
+          "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+        },
+        "public/mobile.png": {
+          "bytes": 491411,
+          "sha256": "9493d72ef1b9cd0dec0010454e4c77c97144e51e4704422b9af6605305e2a8d5"
+        },
+        "public/recipe.png": {
+          "bytes": 435993,
+          "sha256": "f062d8328bff31fd6e0ec54100c0f2833dd9bf5ae275bd3da7a8c62dd5534e44"
+        },
+        "public/robots.txt": {
+          "bytes": 22,
+          "sha256": "44f3f8eafdf064cf69acb05f23ee4dfc9ab5b3d67d81c64246bc29f7e438789a"
+        },
+        "src/App.css": {
+          "bytes": 5145,
+          "sha256": "5eb1d45217eeee3af5858db7a097f4b63c51137d8a77fc54ef95b7596debb4d3"
+        },
+        "src/App.jsx": {
+          "bytes": 771,
+          "sha256": "d6093ade984d7b7531e95c7b3417ad72d553839260e76563a75560bebc899b22"
+        },
+        "src/assets/ad-icon.svg": {
+          "bytes": 861,
+          "sha256": "d540a6733c034c3b693b5be2d7699aadfb8f12f9b70faca2f18174d7034892a8"
+        },
+        "src/assets/ayman.svg": {
+          "bytes": 9412,
+          "sha256": "78f0dc730148faa315d7d426eea59214a5baf049b4fdcc4ac13ed4cac034a2ea"
+        },
+        "src/assets/burger.svg": {
+          "bytes": 5263,
+          "sha256": "1375a75a24dc238eb7161d67d0dbf402b846326a983e4a2e833cfd44e6d7e94b"
+        },
+        "src/assets/chef-groq-app.png": {
+          "bytes": 87933,
+          "sha256": "ef409a6ff7c7252290730765c50158cadbde5621390488be070356622eeea799"
+        },
+        "src/assets/chef.svg": {
+          "bytes": 9481,
+          "sha256": "51741af47d85d69e24960c27d2625d089e86cf845b082ca89be07753459373e0"
+        },
+        "src/assets/close.svg": {
+          "bytes": 7603,
+          "sha256": "a98a7fb86ffdfb73d987cd82416b1c3b3572e0f5603b1714492e17cab1926a58"
+        },
+        "src/assets/cook-time.svg": {
+          "bytes": 475,
+          "sha256": "68a4d9ba660ff9af6da775584de7b49d36a43f991fc32d5adb7252357262c2ff"
+        },
+        "src/assets/empty-star.svg": {
+          "bytes": 726,
+          "sha256": "fccd486a9defdfc64dc19b8308ddd4d90bee9a8a36703804573d7faa2e4fac71"
+        },
+        "src/assets/favorite.svg": {
+          "bytes": 526,
+          "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+        },
+        "src/assets/flame.svg": {
+          "bytes": 545,
+          "sha256": "af076512d6605664dd87013b8dae6b86fffd81c5fb3f6d6d5a5fa25182b814c6"
+        },
+        "src/assets/github.svg": {
+          "bytes": 12455,
+          "sha256": "dfdd7d0d5a641f7c0d1ea16c66f37626970c74c8b99a43ff3c55710e759bae4b"
+        },
+        "src/assets/lamp.svg": {
+          "bytes": 633,
+          "sha256": "c09ff49a41b62f2107b85d8764b7ca091d5ceaf7f211ec3c956a9e8c998e4903"
+        },
+        "src/assets/like-accent.svg": {
+          "bytes": 1099,
+          "sha256": "4d51151c014ef5409bfd77e0358af80e0b7492080170731330c79b69649152aa"
+        },
+        "src/assets/like.svg": {
+          "bytes": 526,
+          "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+        },
+        "src/assets/liked-fff.svg": {
+          "bytes": 511,
+          "sha256": "d962a602fa29aa999cd4bad6dcef4d9026bd2b40af0c1ce96b4b9fe10ea28b7f"
+        },
+        "src/assets/liked.svg": {
+          "bytes": 492,
+          "sha256": "c0b1daec8fbc00ae3b002285fdff9dd3064380db7df43f15082412ca5a796b65"
+        },
+        "src/assets/link.svg": {
+          "bytes": 571,
+          "sha256": "49a4e53b5cee9d23dbe7897972cde467a2e83ab3a8d4703e15a71ba602618992"
+        },
+        "src/assets/linkedin.svg": {
+          "bytes": 18403,
+          "sha256": "e77b29ce50d00ec05710ca17c7905edbf0c7d0e80652b06f8dadf6136881cbb2"
+        },
+        "src/assets/logo.svg": {
+          "bytes": 45437,
+          "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+        },
+        "src/assets/preparation-time.svg": {
+          "bytes": 450,
+          "sha256": "ee78fe0d03cb393299fa6306067a0cf578a58a3cd5d05aca8cb04390c8227f21"
+        },
+        "src/assets/rate.svg": {
+          "bytes": 581,
+          "sha256": "ab9d2f65c43ff713bb4178e78165a26bb77a294738fc8c9b1f0e4b6079207a8f"
+        },
+        "src/assets/recipe.svg": {
+          "bytes": 6119,
+          "sha256": "16e1c0e82d16d0d95255d9cdae882391b594e14c5b1d10dedcab921aea8074fb"
+        },
+        "src/assets/save-000.svg": {
+          "bytes": 430,
+          "sha256": "fffd1a96cfbf2c9ad915fa8918dc35691cf454fdd685d0dbe9ac80dd83af49bb"
+        },
+        "src/assets/save-fff.svg": {
+          "bytes": 418,
+          "sha256": "e56adad73d8e46567e9762845eedd06c826682b786dc24e7249a5e91c887c120"
+        },
+        "src/assets/save.svg": {
+          "bytes": 405,
+          "sha256": "8d21d745c6178d2044a9953d63edda76a0b1aef7dcf7387bf016af0d27c6fc44"
+        },
+        "src/assets/saved.svg": {
+          "bytes": 383,
+          "sha256": "10b02ad225b8a6d0a24637f4a9cbce6f8762bfbfc521fc13e1fd310f03530b71"
+        },
+        "src/assets/search.svg": {
+          "bytes": 498,
+          "sha256": "2f021219785bfd634447f0377918e0587cf4ed86e29b7cde897bff3ffe67855f"
+        },
+        "src/assets/servings.svg": {
+          "bytes": 687,
+          "sha256": "35184fac7beea65688681ea8354a6332419b978928f6ad640b24bbf350808467"
+        },
+        "src/assets/star.svg": {
+          "bytes": 741,
+          "sha256": "867a65301bef15d18f5b1c304e4a903bc8dd720b644aedae0b872aa7a60ec276"
+        },
+        "src/assets/time.svg": {
+          "bytes": 476,
+          "sha256": "54a5ead2dde6524101e716e1a26f508e435be496b092e6a72698ae1b083987b1"
+        },
+        "src/assets/twitter.svg": {
+          "bytes": 4340,
+          "sha256": "5b4853cec749561b2eb852d8394709d7092dc1f62110d2f6af5af322cc035697"
+        },
+        "src/components/AIChefAssistant.jsx": {
+          "bytes": 1205,
+          "sha256": "9f76b14fd090e258e7e749e09dd963a56901a092f1c7ba310258b79b915961d6"
+        },
+        "src/components/Advertisement.jsx": {
+          "bytes": 3079,
+          "sha256": "31a23932f94a81efd62b8eb640b2392a3d65837a275cf75d6e582b9332045571"
+        },
+        "src/components/CategoryBrowser.jsx": {
+          "bytes": 2140,
+          "sha256": "791e043e1b01ee70a9e08a69ac502e169ac0a07c8ef353d533ccd7d97929f194"
+        },
+        "src/components/Footer.jsx": {
+          "bytes": 2245,
+          "sha256": "8314080cb48c7a688689e58ab4a47337c2760fd5b32eac91b7d426c2ae14252a"
+        },
+        "src/components/Header.jsx": {
+          "bytes": 1508,
+          "sha256": "c1afe1b89d5abf234ab53d414f58a52d577410c824a289ac0603fb7632aa48b7"
+        },
+        "src/components/Logo.jsx": {
+          "bytes": 366,
+          "sha256": "14f5ea8aac6fe1203fe2610a7c358e03e6504d2eb5d4860092e449ffd4ff061c"
+        },
+        "src/components/MainContent.jsx": {
+          "bytes": 804,
+          "sha256": "3494173a1dfd8c57a0bd4f3a6d46bd522c10804852de6e9f9b12fc867f4aaa39"
+        },
+        "src/components/NavigationBar.jsx": {
+          "bytes": 1003,
+          "sha256": "6b5186a0ffc0693001c2b6b3fd58410fe1c25af2bda004e5b72c2ffac095321d"
+        },
+        "src/components/RecipeCard.jsx": {
+          "bytes": 4786,
+          "sha256": "9fa563430244874ed83c070b27f13fc943501c599c15f217300bc398aaffe204"
+        },
+        "src/components/RecipePage.jsx": {
+          "bytes": 14126,
+          "sha256": "8a64aca64dc8d188ee98b3c68388202a5a30a00af7e68f485a61f04f0904d91d"
+        },
+        "src/components/RecipesGrid.jsx": {
+          "bytes": 1006,
+          "sha256": "24628add527b6b952d392ebc1a5a2d0b65aa2c8a7e74a33936162c02af401fdc"
+        },
+        "src/components/SearchBar.jsx": {
+          "bytes": 980,
+          "sha256": "d16f7b2f40766767dbd193759d383ca800bfc4f2f77ef14fb95ab0b691620d7f"
+        },
+        "src/components/Stat.jsx": {
+          "bytes": 541,
+          "sha256": "d80e1ac32dac429c644e175f2159cfbde84f3934d09205d5d58d3e78bbeac645"
+        },
+        "src/components/Stats.jsx": {
+          "bytes": 1169,
+          "sha256": "569a46bec9c73d8bc546ab2ab5fb8f09e6e1a8d6c567a848df2d85377dac3e25"
+        },
+        "src/context/RecipesProvider.jsx": {
+          "bytes": 3146,
+          "sha256": "551537ee0c95ee2b58c614d4e7964df59a9d2b73b4701d410d5859f201029904"
+        },
+        "src/data/state.js": {
+          "bytes": 36110,
+          "sha256": "34a1dbf4509772fd943121f3876d8caa9b2c23b2d083e44c221db49c137343a1"
+        },
+        "src/main.jsx": {
+          "bytes": 317,
+          "sha256": "d6f1a901d452a964ac25be8887d180542f5ebefd60036e9897db46f23c52b518"
+        },
+        "vite.config.js": {
+          "bytes": 220,
+          "sha256": "0c03207436c9eb3f2f35ec9ff13d17c6ae7e4c8d46ad394a556578cf12c80d74"
+        }
+      },
+      "expectedWorkflow": "Search recipes, open detail, adjust servings and toggle favorites."
+    }
+  ]
+}

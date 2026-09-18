@@ -1,0 +1,4 @@
+import {Link, useNavigate, useParams, useLocation, useSearchParams} from 'react-router-dom'
+import banner from '../assets/coast.svg'
+import styles from './Place.module.css'
+export function Place(){const {placeId}=useParams();const [query]=useSearchParams();const location=useLocation();const navigate=useNavigate();return <main className={styles.place}><p>PLACE {placeId}</p><h1>A closer look at the coast.</h1><p>Mode: {query.get('mode') || 'default'}</p><p>Anchor: {location.hash || 'none'}</p><img src={banner} alt="Imported coast"/><img src="../../compass.svg" alt="Nested public compass"/><div className={styles.controls}><button onClick={()=>navigate('/places/7?mode=busy#details')}>Next place</button><button onClick={()=>navigate(-1)}>Go back</button><Link to="/">Coast overview</Link><a href="#details">Jump to details</a></div><section id="details" className={styles.details}><h2>Details from the path.</h2><p>Salt air and open water.</p></section></main>}

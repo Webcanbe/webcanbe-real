@@ -1,0 +1,126 @@
+{
+  "checkpoint": "Phase 2C.1 architectural foundation; security acceptance NOT YET",
+  "auditedBase": "fbd95b46e9ac0ac02ae7e422501f0a7395d45ce4",
+  "auditedImplementation": "4a6520f795e52bff2ccebabd1ea13274dfe85466",
+  "verifiedRemoteBase": "fbd95b46e9ac0ac02ae7e422501f0a7395d45ce4",
+  "mainAtAudit": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "baseline": {
+    "tests": 95,
+    "suites": 4,
+    "passed": true
+  },
+  "final": {
+    "tests": 108,
+    "suites": 5,
+    "originalTestsRetained": 95,
+    "newFoundationTests": 13,
+    "passed": true,
+    "durationSeconds": 3.86,
+    "typeScript": true,
+    "productionBuild": true,
+    "viteModules": 59,
+    "buildSeconds": 1.87,
+    "httpEnabled": false
+  },
+  "commands": [
+    {
+      "command": "npm test",
+      "exit": 0,
+      "result": "108/108; includes all original 95"
+    },
+    {
+      "command": "npx tsc -b",
+      "exit": 0,
+      "result": "after review fixes"
+    },
+    {
+      "command": "npm run build",
+      "exit": 0,
+      "result": "includes TypeScript and production Vite build"
+    },
+    {
+      "command": "node scripts/verify-phase2c-editor-regressions.cjs \"$QA/editor\"",
+      "exit": 0,
+      "result": "HashRouter Trail Atlas/Studio Ledger, Field Notes and bridge/stop regressions"
+    },
+    {
+      "command": "node scripts/verify-phase2c-policy.cjs \"$QA/policy\"",
+      "exit": 2,
+      "result": "3 received STUN packets; deliberately NOT YET"
+    },
+    {
+      "command": "node scripts/verify-phase2c1-network.cjs \"$QA/network\"",
+      "exit": 2,
+      "result": "Chromium 153.0.8010.12; all 5 cases complete; strict cases each 34 UDP packets"
+    },
+    {
+      "command": "WCB_BROWSER_CHANNEL=chrome node scripts/verify-phase2c1-network.cjs \"$QA/chrome\"",
+      "exit": 2,
+      "result": "Chrome 152.0.7977.83; all 5 cases complete; strict cases each 34 UDP packets"
+    }
+  ],
+  "review": {
+    "prePatch": "one independent read-only boundary investigation",
+    "candidate": "one fresh read-only bypass/regression review",
+    "confirmedAndFixed": [
+      "Apply reserved internal-route exclusion to the decoded pathname, including encoded names/query/fragment variants.",
+      "Validate snapshot keys as compiler artifact filenames, preserving valid public names containing spaces."
+    ],
+    "disprovedHypothesis": "SDP CRLF regex: inspected actual character bytes and executed extracted expression; correct single-backslash escapes preserve SDP fields. No speculative regex change applied.",
+    "followupTests": "Reserved-route input/start rejection and real compiler unused-space-filename positive control pass."
+  },
+  "failedIntermediateChecks": [
+    {
+      "check": "initial new test TypeScript",
+      "cause": "test double inferred Promise<unknown>",
+      "resolution": "explicit Promise<ControlledExecution>; focused and final typecheck pass"
+    },
+    {
+      "check": "initial installed Chrome network matrix",
+      "exit": 1,
+      "cause": "frame navigation event wait race on envelope case",
+      "resolution": "bounded current-frame polling; repeated full matrix exits 2 with blocker; original incomplete evidence retained"
+    }
+  ],
+  "browserQA": {
+    "browserPluginAvailable": false,
+    "method": "existing regular Playwright harnesses",
+    "nativeChromiumSandbox": true,
+    "renderedAssertions": true,
+    "applicationRuntimeErrors": 0,
+    "fieldNotesMobileScreenshotInspected": true,
+    "editorViewport": [
+      1440,
+      1000
+    ],
+    "previewWidths": [
+      1280,
+      768,
+      390
+    ],
+    "artifacts": "Only sanitized result JSON committed; private editor screenshots/archives/logs remain untracked outside repository."
+  },
+  "proofLimits": {
+    "concreteControlledRunnerInstalled": false,
+    "osNetworkIsolationProven": false,
+    "realProcessTreeCleanupProven": false,
+    "fullRTCPayloadDeliveryTested": false,
+    "fullBrowserRouterEditorWorkflowTested": false,
+    "authenticatedRasterViewerImplemented": false,
+    "otherBrowserEnginesCertified": false,
+    "runnerDoubleTestsProveOnlyBrokerLogic": true,
+    "legacyBlobNotStrict": true
+  },
+  "statuses": {
+    "phase2c1NetworkIsolation": "NOT YET",
+    "phase2cHttpBrowserRouter": "NOT YET",
+    "overallPhase2": "NOT YET",
+    "publicHostedImportReady": "NO"
+  },
+  "testedSourceSha256": {
+    "src/webcanbe-engine/runtime/controlledPreview.ts": "b1bb454b468c82fcee948f0c931ef0c960c2872b52dcca4cb0b4cb029ac35dc4",
+    "src/webcanbe-engine/phase2c1.test.ts": "5bf78bb7a6e90932effbafbf2631033347b87fc6c271a1d2faea2b0cd753b9d6",
+    "scripts/verify-phase2c1-network.cjs": "9f05e218753ee49709d4a499f8ee57f8898ad4ebc767932c62cd85401e9ad542",
+    "scripts/verify-phase2c-policy.cjs": "435ed50fa5b549d4c08531272f2be7753905fdb898ad51e95060ed5798dd184c"
+  }
+}

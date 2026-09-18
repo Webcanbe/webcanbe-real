@@ -1,0 +1,15 @@
+{
+  "priorTestFilesByteExact": 40,
+  "priorTestIdentitiesModifiedOrRemoved": false,
+  "productionPathsUnchanged": true,
+  "nonP61LedgerRowsUnchanged": true,
+  "full646Regression": "DEFERRED TO FINAL PHASE-2 CLOSURE",
+  "targetedPassing": 19,
+  "targetedFailed": 0,
+  "targetedSkipped": 0,
+  "syntaxChecks": [
+    "scripts/qa/p61-load.cjs",
+    "scripts/qa/p61-zustand.cjs"
+  ],
+  "noBroadSecurityScan": true
+}

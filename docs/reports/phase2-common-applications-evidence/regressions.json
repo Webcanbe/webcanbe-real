@@ -1,0 +1,2159 @@
+{
+  "distinctTests": 341,
+  "originalTestsUnchanged": 325,
+  "newFocusedTests": 16,
+  "allDistinctPassed": true,
+  "suites": [
+    {
+      "suite": "default-tests-peer-final",
+      "total": 341,
+      "passed": 306,
+      "failed": 0,
+      "skipped": 35,
+      "rawSha256": "bb9d587e5e5e6ff2d6175eda60d7bd581c62875d2e815ae65ce0025f75efaf2c"
+    },
+    {
+      "suite": "pg-mtls-refresh-peer-final",
+      "total": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "rawSha256": "c8ae9fae84eedd370195acd4331a1d664a8e90e4e57018cf35a2fa0a3d311c25"
+    },
+    {
+      "suite": "hosted-editor-peer-final",
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "rawSha256": "f7920db7b144af62842ccc2f9529219b19208968ce2f9dc767330c910c6fd062"
+    }
+  ],
+  "identityMethod": "File plus full title plus per-title occurrence, preserving three parameterized Phase2F cases with identical titles; overlapping opt-in invocation deduplicated.",
+  "identities": [
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: React source mapping maps normal native JSX elements and only instruments the runtime copy #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: React source mapping does not claim dynamic text is a safe visual text edit #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions patches static JSX text without touching the surrounding component #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions refuses JSX syntax in a text-only mutation #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions patches an external CSS declaration at its declaration range #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions patches a CSS Module declaration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions patches a safe inline style literal #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: minimal source mutation transactions replaces a static Tailwind utility instead of adding an inline style #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: compatibility and preview bridge validation derives a score from analyzed capabilities #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/engine.test.ts :: compatibility and preview bridge validation accepts only shaped preview messages #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: preserves admitted metadata bytes and refuses unknown package-manager controls #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: validates example environment contents, names, encoding and finite metadata limits #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: does not admit binary locks, arbitrary dotfiles or oversized Yarn releases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: statically interprets path.resolve('./src') without changing configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: statically interprets path.resolve(__dirname, './src') without changing configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: statically interprets resolve('./src') without changing configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: refuses executable, escaping, duplicate and server-proxy configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: selects a complete versioned profile and compiles declared Lucide in confinement #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: keeps unsupported lock diagnostics truthful #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: accepts only finite numeric color functions in literal themes #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: admits only lock-verified client transitives and rejects tampered transitive locks #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: preserves CSS resource URLs without fetching or admitting remote JavaScript #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: rejects credentials hidden in metadata comments and nonliteral formatter values #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: rebinds queued pointers only across pixel-identical captures of the same authority and geometry #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: verifies required peer locks even when the peer is not directly declared #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2-common-applications.test.ts :: skips absent optional peers but verifies present optional peer locks #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects ../bad.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects /bad.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects C:/bad.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects C:\\bad.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects folder/../bad.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects \\\\server\\x.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects a//b.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects ./x.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects a/CON.txt #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects node_modules/x.js #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects .env #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects a/.git/config #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects a/file.ts  #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects duplicate/conflicting paths a.ts / a.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects duplicate/conflicting paths a.ts / A.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects duplicate/conflicting paths a.ts / a.ts/b.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects duplicate/conflicting paths a.ts/b.ts / a.ts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake rejects symlinks and an existing destination #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake enforces upload, entry, file and ratio limits before writing #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake bounds cumulative inflation and rejects corrupt text/checksums #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: bounded ZIP intake imports normal source without running config or lifecycle scripts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: project capability boundary binds opaque authority to project, session, operation and expiry #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: project capability boundary denies unauthorized writes, paths, symlinks, hardlinks and unknown identities #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: project capability boundary rejects a source-root symlink into another project #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: project capability boundary enforces auth and stale revisions at the HTTP mutation boundary, including history #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: controlled preview compiler bundles React/CSS Modules without evaluating uploaded configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: controlled preview compiler refuses Node builtins and application-root imports without executing them #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: controlled preview compiler compiles the existing realistic Tailwind fixture with only installed defaults #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history keeps native children independent of custom and dynamic boundaries #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history supports proven clsx imports including cn aliases while rejecting dynamic branches #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history rejects destructured helper and CSS-module binding shadows #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history edits static string expressions without changing JSX structure #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history updates an existing Tailwind breakpoint without duplicating utilities #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history keeps directional gaps separate and writes valid static layout utilities #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history preserves declaration comments and ignores commented-out imports #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history rejects ambiguous CSS and inline spread overrides #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history undoes and redoes actual CSS responsive patches and refuses changed source #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history changes explicit layout declarations without guessing new placement #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2.test.ts :: safe mapping and real transaction history reverses unequal-length patches and fails closed for multi-file transactions #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles imports, resolves, maps, edits and exports trail-atlas without changing dependency declarations #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles imports, resolves, maps, edits and exports studio-ledger without changing dependency declarations #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unsupported dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects missing dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects conflicting dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects lock-mismatch dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects lock-integrity dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unsupported-lock dependency data explicitly #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects alias escape ../outside #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects alias escape /tmp #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects alias escape ./src/../../outside #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects missing locked transitive runtime packages and forged plugin data #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles reports a missing dedicated runtime without falling back to editor packages #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles refuses custom Tailwind directives instead of ignoring their semantics #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles never executes uploaded hooks or arbitrary config; reports the required runner #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unknown or escaped imports: unknown-package #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unknown or escaped imports: node:fs #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unknown or escaped imports: /etc/passwd #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles rejects unknown or escaped imports: ../../../../package.json #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2b.test.ts :: explicit runtime profiles does not silently substitute BrowserRouter or custom Tailwind configuration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: HTTP compiler transport and unchanged source compiles coast-paths, retaining its router/config and real text/style/history/export #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: HTTP compiler transport and unchanged source compiles harbor-desk, retaining its router/config and real text/style/history/export #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: HTTP compiler transport and unchanged source recognizes nested and aliased router imports without weakening the Blob guard #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: HTTP compiler transport and unchanged source never publishes source maps, config, private files or linked public assets #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: authorized HTTP artifacts, isolation and lifecycle requires a live server session; bootstrap is single-use, host-only and read-only #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: authorized HTTP artifacts, isolation and lifecycle serves permitted HTML navigation but returns typed 404s for missing resources and reserved paths #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: authorized HTTP artifacts, isolation and lifecycle denies preview A's credential at B and rejects forged hosts, methods and duplicate cookies #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: authorized HTTP artifacts, isolation and lifecycle expires, revokes, stops and rebuilds without retaining readable stale artifacts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: authorized HTTP artifacts, isolation and lifecycle cleans failed starts and limits active resources #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /../private #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /%2e%2e/private #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /%252e%252e/private #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /a/%2f../private #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /a\\b #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape //outside/x #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape http://outside/x #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /a/%00 #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /a/%5c #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs rejects raw or encoded escape /%2eenv #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: path, confinement envelope and bridge inputs does not accept upstream URLs or malformed bridge observations #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: fail-closed editor admission refuses HTTP even with client-supplied enable flags, while keeping revision-bound source inspection and export #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: fail-closed editor admission reserves compiler capacity before asynchronous startup and cannot restart a closed registry #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: fail-closed editor admission expires unused bootstrap tickets before the underlying source session #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: preserves safe Unicode source identities but rejects malformed computed payloads #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: verified preview security messaging qualifies CSP rather than claiming complete browser egress containment #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c.test.ts :: verified preview security messaging states the concrete disabled-HTTP blocker without suggesting a sandbox relaxation #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) fails closed without a provider; flags and URLs cannot grant execution or networking #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) binds all compiled bytes, MIME types and paths, including public assets; snapshots cannot be mutated #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) keeps capabilities and executable artifacts out of the display descriptor; input confers no source authority #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) denies wrong/inspect-only capabilities and cross-project or sibling-session generation access #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) invalidates revoke independently of browser cleanup and rejects subsequent reads #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) invalidates expire independently of browser cleanup and rejects subsequent reads #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) invalidates source independently of browser cleanup and rejects subsequent reads #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) retires old generations on replacement, stop and transport restart #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) closes a late startup after shutdown; an abort is never counted as a running preview #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) discards a revoked in-flight raster and serializes runner operations #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) quarantines after failed cleanup and rejects executable/malformed output #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) rejects stale source before launch and failed startup never returns an HTML fallback #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c1.test.ts :: controlled preview foundation (not a network isolation proof) copies validated routes before asynchronous boundaries and sweeps revocation without a browser callback #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: bounds and allowlists every controlled interaction; no evaluation, URL or source command #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: projects observations and binds input to the delivered frame sequence #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: rejects malformed geometry across the worker JSON boundary #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: rejects malformed logs across the worker JSON boundary #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: rejects malformed identity across the worker JSON boundary #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: rejects malformed route across the worker JSON boundary #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: requires observed source identity to resolve in the current authorized project #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2c2.test.ts :: quarantines startup when the provider cannot verify stop/reap, before reusing capacity #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions hydrates A/B, head and undo/redo across registry restarts without replacing unrelated files #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects selective revert when the same file contains later work #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions commits create/update/rename/delete together and inverses them after restart #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rolls back an injected partial multi-file write and keeps history/source consistent #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects all old hashes before the first write #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions includes immutable assets and configuration in the total project storage limit #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation ../App.tsx #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation src/../../App.tsx #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation src/../App.tsx #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation package.json #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation src/.env #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects unauthorized operation src/link.tsx #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions rejects symlink directories, hard links, case aliases and oversized source #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions invalidates source anchors after outside writes and rejects the ABA revision after undo #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions excludes overlapping local servers with a kernel-released SQLite project lock #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions recovers a real killed child process at journal #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions recovers a real killed child process at write #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions recovers a real killed child process at committed #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: durable source revisions quarantines recovery that encounters unrelated changes #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance keeps an invalid draft outside canonical source/history and records failed save validation #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance serializes concurrent requests and replays only identical idempotency keys #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance shares canonical changes and rejects stale SourceAnchors after structural code edits #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance rejects unresolved structural multi-file proposals without partial files #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance validates and commits a rename with its importing code, plus create/delete, as one revision #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance denies cross-project history and source-operation scopes #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance records a validated checkpoint without changing source or losing redo #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance diagnoses malformed src/a.tsx #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance diagnoses malformed src/a.css #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2de.test.ts :: shared code/visual HTTP acceptance diagnoses malformed src/a.json #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins mutates exactly one base token and preserves unknown utilities, whitespace and inverse #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins rejects unknown viewport phone instead of selecting a fallback breakpoint #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins rejects unknown viewport __proto__ instead of selecting a fallback breakpoint #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins changes only the explicit responsive token, with distinct effective viewport values #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins derives static theme breakpoints instead of inventing preset widths #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins fails closed for dynamic config and unsupported media conditions #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins patches an existing CSS media value without changing base or another query #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins reports shared CSS scope and rejects an instance-only request #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins patches CSS Modules at their real source declaration #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins recognizes a simple class outranks an ordinary tag selector #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins patches only a literal inline value and handles inline precedence conservatively #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins does not guess dynamic class runtimeClass #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins does not guess dynamic class flag ? \"gap-4\" : \"gap-8\" #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins does not guess dynamic class getClasses() #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overridden/ambiguous CSS: .card.active {padding:32px} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overridden/ambiguous CSS: .card {padding:32px!important} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overridden/ambiguous CSS: @supports (display:grid) {.card {padding:32px}} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overridden/ambiguous CSS: @supports (display:grid) {@media (min-width:1px) {.card {padding:32px}}} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overridden/ambiguous CSS: .card {padding-left:32px} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins traces local const object/array literals to exact tokens with shared scope #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins does not trace mutable, shadowed, cyclic or mutated object values #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses mutable object property origins: const spacing={gap:\"gap-4\"}; spacing.gap=\"gap-8\"; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses mutable object property origins: const spacing={gap:\"gap-4\"}; const alias=spacing; alias.gap=\"gap-8\"; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses mutable object property origins: const spacing={gap:\"gap-4\"}; delete spacing.gap; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses mutable object property origins: export const spacing={gap:\"gap-4\"}; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses mutable object property origins: const spacing={gap:\"gap-4\"}; mutate(spacing); #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins retains unknown/arbitrary/state tokens without claiming they can be directly edited #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses unsupported overlapping utilities gap-4 gap-x-8 #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses unsupported overlapping utilities p-4 pl-8 #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses unsupported overlapping utilities m-4 mx-8 #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overlapping CSS longhands gap:16px; column-gap:32px #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins refuses overlapping CSS longhands border:1px solid red; border-color:blue #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins keeps independent border radius editable beside border width/style #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins does not select a matching declaration in an unimported stylesheet #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins distinguishes root render calls from runtime repeating callbacks #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins exposes known inherited typography without mutating the child #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F responsive style origins invalidates dependency content and never returns mutable cached analysis #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations reorders literal Flex children in JSX, preserves separators, and inverses exact bytes #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations edits Flex flexDirection as a semantic utility #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations edits Flex alignItems as a semantic utility #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations edits Flex gap as a semantic utility #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations mutates supported display without rewriting other tokens #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations mutates supported minWidth without rewriting other tokens #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations mutates supported lineHeight without rewriting other tokens #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations mutates supported letterSpacing without rewriting other tokens #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations mutates supported border without rewriting other tokens #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations edits Grid tracks and placement and supports adjacent source order #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations refuses unsafe reorder without coordinates or guessed layout #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations refuses unsafe reorder without coordinates or guessed layout #2",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F semantic source operations refuses unsafe reorder without coordinates or guessed layout #3",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2f.test.ts :: Phase 2F authorized Code / Visual / durable revision integration reanalyzes Code responsive source, rejects stale anchors, and persists responsive history/undo across restart #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) uses opaque host-only short-lived cookies and survives a store reopen #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"cookie\":\"\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"cookie\":\"__Host-wcb-session=forged\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"cookie\":\"wcb-session=forged\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"x-wcb-csrf\":\"\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"x-wcb-csrf\":\"forged\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"origin\":\"https://viewer.webcanbe-view.example\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"origin\":\"null\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"origin\":\"https://app.webcanbe.example.attacker.invalid\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"host\":\"evil.invalid\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"x-wcb-editor-key\":\"local-key\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects cookie/CSRF/origin confusion {\"content-type\":\"text/plain\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects duplicated cookies, cross-session CSRF and preview credentials #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) rejects same-cookie-site origins and expires sessions without browser cooperation #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) requires project AND workspace membership, prevents regrant capability revival #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) viewer can read but cannot mutate or import, and platform roles are not project roles #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) artifact storage checks full ownership tuple, integrity, revoked grants and guessed keys #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted session and project authority (real SQLite, local HTTP QA) separates secret environments and redacts raw/encoded known values before logging #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's files across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's source across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's inspect across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's history across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's preview across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's export across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's code across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's mutate across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's undo across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's redo across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's revert across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's checkpoint across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary denies another user's session across both workspace cases #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary filters project listing, binds capabilities to accounts, rejects forged workspace and revoked active sessions #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary withholds rejected export diagnostics if membership is revoked during validation #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: hosted actual API source/history boundary enforces viewer writes through HTTP and records the authenticated actor on real source transactions #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) deduplicates identical allocations and rejects stolen or changed allocations #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) enforces tenant and global admission independently #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) rejects stale worker output when membership disappears during capture #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) tombstones cancelled startup and reaps a late worker result #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) quarantines stop failure and does not grant new authority #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) recovers a durable orphan before allocating and locks out a competing controller #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-authority.test.ts :: durable hosted scheduler semantics (provider doubles, not OS proof) expires idle and startup deadlines and refuses unapproved resource budgets #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-failure.test.ts :: recovers a real SIGKILL during durable scheduler allocation before releasing capacity #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-failure.test.ts :: rolls back actual source/ledger changes after a pending.json storage rename failure #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-failure.test.ts :: rolls back actual source/ledger changes after a history.json storage rename failure #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-failure.test.ts :: revocation during source commit rolls back writes and leaves no accepted revision #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-failure.test.ts :: hosted raster document accepts only the exact configured parent and has no runtime authority #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion compiles unchanged independent vite-react18-ts and verifies every upstream file hash #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion compiles unchanged independent vite-react19-ts and verifies every upstream file hash #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion preserves the original exact profile and rejects unknown or mismatching locks #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion statically translates local base, jsconfig aliases and standard environment constants #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion does not silently ignore an unknown/dynamic environment reference: import.meta.env.VITE_PRIVATE #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion does not silently ignore an unknown/dynamic environment reference: import.meta.env[name] #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion does not silently ignore an unknown/dynamic environment reference: import.meta['env'] #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion does not silently ignore an unknown/dynamic environment reference: const environment = import.meta.env #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion reports configuration file postcss.config.ts rather than silently ignoring it #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion reports configuration file postcss.config.json rather than silently ignoring it #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion reports configuration file .postcssrc.json rather than silently ignoring it #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion reports configuration file tailwind.config.mts rather than silently ignoring it #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion reports executable and unrecognized configuration without executing it #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion translates literal CSS theme only in an expanded versioned profile #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @theme { --color-brand: var(--secret) } #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @theme { --font-body: url(https://external.invalid/x) } #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @theme { @import \"private\"; } #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @config \"./evil.js\"; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @plugin \"evil\"; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion rejects unsupported Tailwind configuration @source \"../../private\"; #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g-runtime.test.ts :: versioned runtime/configuration profile expansion uses incremental contexts without stale transformed modules and distinguishes CSS from module reloads #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: acknowledged local drafts survive restart, isolate users/projects and reject conflicting backups #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: drafts reject secret paths, duplicate references, fabricated baselines and oversized or malformed text #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: constructs a missing responsive CSS declaration in canonical source with an exact inverse #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: constructs only safe known missing Tailwind variants without rebuilding unrelated classes #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: responsive construction fails closed for ambiguous source, unsafe media/value and unchosen shared scope #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: DOM instrumentation leaves custom renderer intrinsics untouched while mapping DOM and SVG #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: bounded text/navigation keys permit form input but no browser shortcuts, script, controls or extra authority #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-authoring.test.ts :: async hosted expiry cannot admit concurrent compiler work before reserving capacity #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-history.test.ts :: bounded source/history before canonical writes keeps accepted files and history exact when rejected receipt capacity is exhausted #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-history.test.ts :: bounded source/history before canonical writes rejects accepted edits at capacity before creating a journal or changing source #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-history.test.ts :: bounded source/history before canonical writes rejects oversized disk history before JSON parsing and preserves source for operator recovery #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) A and B each read, Code edit, select/Visual edit, history, preview, refresh and export their own project #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) rejects cross-tenant references, stolen capabilities, forged identity fields and origin/CSRF/session attacks #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) supports owner/editor/viewer and revokes project/workspace membership during live capabilities #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) accepts source/history coherently, rejects stale simultaneous edits and replays idempotency after restart #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) durable personal multi-file drafts survive editor restart without changing source and use CAS #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) hosted responsive construction writes real CSS and reload/restart fallbacks remain accurately classified #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) database transaction/history failures never report success or split durable source/history #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) SIGKILL during an HTTP source transaction rolls back and a new editor reconnects to exact accepted bytes #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) artifacts fail closed, runner references/fences/expiry are checked and admission remains PostgreSQL-owned #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) discards an actual delayed mTLS runner result after membership change and quarantines missing cleanup acknowledgement #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) the production-built editor uses cookie/CSRF HTTP for rendered Code/Canvas/history and separate-site viewer #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts :: composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) revoked login session denies source/history/preview and cannot use still-known project IDs #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts :: real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) executes native-sandbox Chromium, renders/input/updates and verifies explicit cleanup #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts :: real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) rejects missing mTLS credentials and a forged fencing token #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts :: real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) A owns a real runner, A is SIGKILLed, B retires it and A's late message cannot regain authority #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) returns a clean 403 when asynchronous CSRF rotation fails before response headers #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) exchanges code+PKCE, maps issuer+subject, sets host-only session and rotates CSRF #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"nonce\":\"wrong\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"iss\":\"https://other-issuer.invalid\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"aud\":\"another-client\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"azp\":\"another-client\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"aud\":[\"test-client\",\"other\"]} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"exp\":1} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"iat\":1} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"iat\":1789389747} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects a signed but invalid token {\"sub\":\"\"} #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) denies missing/wrong/duplicate browser cookies, forged state, callback replay and issuer mismatch #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) does not enroll unknown subjects, link by email or allow disabled users to log back in #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) persists one-use attempts across processes/stores and never remaps an identity #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-identity.test.ts :: OIDC integration with a signed local TEST issuer over verified TLS (not production identity) rejects browser-selected identity, cross-origin starts, HTTP endpoints and expired attempts #1",
+      "observations": [
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud uses one durable PostgreSQL login/session authority and cannot reissue a revoked user #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud denies an artifact put already queued behind a project-delete transaction #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=disable #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=no-verify #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslrootcert=untrusted #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud commits canonical source/history atomically and rejects stale CAS/digest/revision reuse #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud uses the existing source transaction/history/export interfaces through a private checkout #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud durably appends rejected history receipts without changing source, and refuses old-history rewrites #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud rolls back a storage error and permits an exact retry after a new client starts #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud rolls back an actual source transaction when its client is SIGKILLed #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud serializes concurrent acceptance from two clients without losing a revision #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud denies tenant prefix/project/session/epoch forgery, viewer writes and revoked grants #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud keeps digest-bound artifacts tenant-scoped and tombstones revoke/delete against late puts #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud requires TLS for a production pool configuration #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud uses epochs to reject late controller A after B takes over; uncertain cleanup retains capacity #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud enforces per-host capacity across project/session allocations #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud prevents concurrent duplicate starts and admission races, never resurrects stopped generations #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-postgres.test.ts :: real PostgreSQL integration \u2014 local VM, not managed cloud rejects a result whose lease expired during the operation #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-refresh.test.ts :: confined React refresh compiler classifies an existing component boundary, CSS and a non-component entry accurately #1",
+      "observations": [
+        "passed",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-refresh.test.ts :: real native-sandbox React Fast Refresh preserves React18 counter state through a changed component and CSS without document reload #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    },
+    {
+      "test": "src/webcanbe-engine/phase2g2-refresh.test.ts :: real native-sandbox React Fast Refresh preserves React19 counter state through a changed component and CSS without document reload #1",
+      "observations": [
+        "skipped",
+        "passed"
+      ]
+    }
+  ],
+  "typeScriptAndBuild": "PASS",
+  "buildLogSha256": "52c3019a5a964b882bb392c1dc1a38570cf61a0bca99629a65c0d04d66494ea3",
+  "browserRegressions": [
+    {
+      "script": "verify-phase2c-editor-regressions",
+      "exit": 0,
+      "elapsedMs": 19066
+    },
+    {
+      "script": "verify-phase2c2-controlled",
+      "exit": 0,
+      "elapsedMs": 36719
+    },
+    {
+      "script": "verify-phase2de",
+      "exit": 0,
+      "elapsedMs": 59617
+    },
+    {
+      "script": "verify-phase2f",
+      "exit": 0,
+      "elapsedMs": 76412
+    },
+    {
+      "script": "verify-phase2g",
+      "exit": 0,
+      "elapsedMs": 9327
+    }
+  ],
+  "nativeRunnerAndTls": [
+    {
+      "name": "runner-verify",
+      "exit": 0,
+      "elapsedMs": 75112
+    },
+    {
+      "name": "tls-browser",
+      "exit": 0,
+      "elapsedMs": 1302
+    }
+  ],
+  "nativeRunnerLogSha256": "843b136701d27612b4ba230135ee4bad32771ff5c9da5b50be6c7cdfe28206ac"
+}

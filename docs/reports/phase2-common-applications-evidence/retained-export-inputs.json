@@ -1,0 +1,56 @@
+[
+  {
+    "name": "zustand-export",
+    "profile": "react18-vite4-three-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/zustand-export.zip",
+    "sha256": "3917db86f376f99d36dc640790637dcb9a4f9683003233db0333e9ccff36b833"
+  },
+  {
+    "name": "legacy-de",
+    "profile": "react19-vite6",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-de.zip",
+    "sha256": "af39b5d30be77cc9f869ef4595c0f543a88245f9b3a5610559c01850d78d7315"
+  },
+  {
+    "name": "legacy-f-browser",
+    "profile": "react19-vite6",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-f-browser.zip",
+    "sha256": "ff28bd69cd302799060507f21cf7058a0c41fd4c0495e67f3bc923418193c0ff"
+  },
+  {
+    "name": "legacy-f-hash",
+    "profile": "react19-vite6",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-f-hash.zip",
+    "sha256": "cd621bd991ed82637e08ee2a6a1397c555103acc5048b9d8757b34d30b173d4c"
+  },
+  {
+    "name": "legacy-g-authored",
+    "profile": "react19-vite8-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-g-authored.zip",
+    "sha256": "f1fb79d9f3672c9b5976f13ed9c6f33f903b85073600520bf94340011089a9b6"
+  },
+  {
+    "name": "legacy-g-react18",
+    "profile": "react18-vite5-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-g-react18.zip",
+    "sha256": "f5fdcbf14f4c24ccc9dc4b92e1a16857857f9f519e4e7d94599d6823fcb984cb"
+  },
+  {
+    "name": "legacy-g-react19",
+    "profile": "react19-vite8-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-g-react19.zip",
+    "sha256": "70c6554b3fab0a4279fcd88c562d83a814924656a41d096f33fd9920795acb9c"
+  },
+  {
+    "name": "legacy-hosted-react18",
+    "profile": "react18-vite5-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-hosted-react18.zip",
+    "sha256": "4098da191f72f3bd7f9b20e7d3b956c9c3685a2a05ef5d59a4cc6e12f46766d7"
+  },
+  {
+    "name": "legacy-hosted-react19",
+    "profile": "react19-vite8-v1",
+    "archive": ".webcanbe/runner/qa-common-applications/retained-exports/legacy-hosted-react19.zip",
+    "sha256": "44cc954479e00b3487c29899995597802a03e637b87972c3fe8281ebd6dd67ed"
+  }
+]

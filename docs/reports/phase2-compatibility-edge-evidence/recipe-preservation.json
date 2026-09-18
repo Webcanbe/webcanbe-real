@@ -1,0 +1,195 @@
+{
+  "boundary": "Shared compiler regression: exact unchanged Recipe input -> identical uncached artifact. Prior native/cached P07 render evidence reused.",
+  "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+  "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+  "sourceFilesVerified": 67,
+  "intake": "PASS",
+  "dependencies": "PASS",
+  "configuration": "PASS",
+  "compilation": "PASS",
+  "htmlByteExact": true,
+  "oldFiles": 36,
+  "newFiles": 36,
+  "compared": [
+    {
+      "file": "/_wcb/bridge.js",
+      "equal": true,
+      "sha256": "bd0bbee086aa07d8feecb9d21fbb877bc55c2c69a46d5e4baa529bf08df27d9d"
+    },
+    {
+      "file": "/_wcb/assets/close-VXPW43MQ.svg",
+      "equal": true,
+      "sha256": "a98a7fb86ffdfb73d987cd82416b1c3b3572e0f5603b1714492e17cab1926a58"
+    },
+    {
+      "file": "/_wcb/assets/star-5CVOOZBX.svg",
+      "equal": true,
+      "sha256": "867a65301bef15d18f5b1c304e4a903bc8dd720b644aedae0b872aa7a60ec276"
+    },
+    {
+      "file": "/_wcb/assets/empty-star-ODGHHIMI.svg",
+      "equal": true,
+      "sha256": "fccd486a9defdfc64dc19b8308ddd4d90bee9a8a36703804573d7faa2e4fac71"
+    },
+    {
+      "file": "/_wcb/assets/lamp-PUEOCKMB.svg",
+      "equal": true,
+      "sha256": "c09ff49a41b62f2107b85d8764b7ca091d5ceaf7f211ec3c956a9e8c998e4903"
+    },
+    {
+      "file": "/_wcb/assets/save-fff-KOOIEXNC.svg",
+      "equal": true,
+      "sha256": "e56adad73d8e46567e9762845eedd06c826682b786dc24e7249a5e91c887c120"
+    },
+    {
+      "file": "/_wcb/assets/save-000-SF7L35FW.svg",
+      "equal": true,
+      "sha256": "fffd1a96cfbf2c9ad915fa8918dc35691cf454fdd685d0dbe9ac80dd83af49bb"
+    },
+    {
+      "file": "/_wcb/assets/liked-fff-2PR3CY6R.svg",
+      "equal": true,
+      "sha256": "d962a602fa29aa999cd4bad6dcef4d9026bd2b40af0c1ce96b4b9fe10ea28b7f"
+    },
+    {
+      "file": "/_wcb/assets/like-accent-HNAIAG6O.svg",
+      "equal": true,
+      "sha256": "4d51151c014ef5409bfd77e0358af80e0b7492080170731330c79b69649152aa"
+    },
+    {
+      "file": "/_wcb/assets/cook-time-UKLNUBQQ.svg",
+      "equal": true,
+      "sha256": "68a4d9ba660ff9af6da775584de7b49d36a43f991fc32d5adb7252357262c2ff"
+    },
+    {
+      "file": "/_wcb/assets/flame-7AD55JK7.svg",
+      "equal": true,
+      "sha256": "af076512d6605664dd87013b8dae6b86fffd81c5fb3f6d6d5a5fa25182b814c6"
+    },
+    {
+      "file": "/_wcb/assets/servings-3TQCFXRX.svg",
+      "equal": true,
+      "sha256": "35184fac7beea65688681ea8354a6332419b978928f6ad640b24bbf350808467"
+    },
+    {
+      "file": "/_wcb/assets/logo-FPJFZCZS.svg",
+      "equal": true,
+      "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+    },
+    {
+      "file": "/_wcb/assets/search-ETCY4NVQ.svg",
+      "equal": true,
+      "sha256": "2f021219785bfd634447f0377918e0587cf4ed86e29b7cde897bff3ffe67855f"
+    },
+    {
+      "file": "/_wcb/assets/chef-X245L5A4.svg",
+      "equal": true,
+      "sha256": "51741af47d85d69e24960c27d2625d089e86cf845b082ca89be07753459373e0"
+    },
+    {
+      "file": "/_wcb/assets/burger-DIP4V4XR.svg",
+      "equal": true,
+      "sha256": "1375a75a24dc238eb7161d67d0dbf402b846326a983e4a2e833cfd44e6d7e94b"
+    },
+    {
+      "file": "/_wcb/assets/recipe-SEC5H6OK.svg",
+      "equal": true,
+      "sha256": "16e1c0e82d16d0d95255d9cdae882391b594e14c5b1d10dedcab921aea8074fb"
+    },
+    {
+      "file": "/_wcb/assets/favorite-RPSLNTRS.svg",
+      "equal": true,
+      "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+    },
+    {
+      "file": "/_wcb/assets/save-YG5JWFVP.svg",
+      "equal": true,
+      "sha256": "8d21d745c6178d2044a9953d63edda76a0b1aef7dcf7387bf016af0d27c6fc44"
+    },
+    {
+      "file": "/_wcb/assets/preparation-time-AVPSWXNI.svg",
+      "equal": true,
+      "sha256": "ee78fe0d03cb393299fa6306067a0cf578a58a3cd5d05aca8cb04390c8227f21"
+    },
+    {
+      "file": "/_wcb/assets/saved-ZIVUT4OQ.svg",
+      "equal": true,
+      "sha256": "10b02ad225b8a6d0a24637f4a9cbce6f8762bfbfc521fc13e1fd310f03530b71"
+    },
+    {
+      "file": "/_wcb/assets/like-RPSLNTRS.svg",
+      "equal": true,
+      "sha256": "5a9107b928cba68ddc3a3b74b5881aa8ad9ee37a02bfa08ae053c71020a98006"
+    },
+    {
+      "file": "/_wcb/assets/liked-MSUQJ2ES.svg",
+      "equal": true,
+      "sha256": "c0b1daec8fbc00ae3b002285fdff9dd3064380db7df43f15082412ca5a796b65"
+    },
+    {
+      "file": "/_wcb/assets/ad-icon-BQMT4GAV.svg",
+      "equal": true,
+      "sha256": "d540a6733c034c3b693b5be2d7699aadfb8f12f9b70faca2f18174d7034892a8"
+    },
+    {
+      "file": "/_wcb/assets/link-IOCWBLBI.svg",
+      "equal": true,
+      "sha256": "49a4e53b5cee9d23dbe7897972cde467a2e83ab3a8d4703e15a71ba602618992"
+    },
+    {
+      "file": "/_wcb/assets/github-UYRWFDTI.svg",
+      "equal": true,
+      "sha256": "dfdd7d0d5a641f7c0d1ea16c66f37626970c74c8b99a43ff3c55710e759bae4b"
+    },
+    {
+      "file": "/_wcb/assets/linkedin-IAHUXSWH.svg",
+      "equal": true,
+      "sha256": "e77b29ce50d00ec05710ca17c7905edbf0c7d0e80652b06f8dadf6136881cbb2"
+    },
+    {
+      "file": "/_wcb/assets/twitter-VR4TDH5B.svg",
+      "equal": true,
+      "sha256": "5b4853cec749561b2eb852d8394709d7092dc1f62110d2f6af5af322cc035697"
+    },
+    {
+      "file": "/_wcb/assets/ayman-2IFXSR2E.svg",
+      "equal": true,
+      "sha256": "78f0dc730148faa315d7d426eea59214a5baf049b4fdcc4ac13ed4cac034a2ea"
+    },
+    {
+      "file": "/_wcb/app.js",
+      "equal": true,
+      "sha256": "a4f439fc6de9306afeabb0886af010b26f0bc119d23d66cbd38ac22bc427b1d5"
+    },
+    {
+      "file": "/_wcb/app.css",
+      "equal": true,
+      "sha256": "67bb321d36f107e680ad5db9518d07ff5b555b80c8aad6ba6029d558336af079"
+    },
+    {
+      "file": "/coffee-love.svg",
+      "equal": true,
+      "sha256": "d1b2563fba5fefe472195f250bad2274f6aa7fbb8e16ec65cb8b8b17b061595a"
+    },
+    {
+      "file": "/home.png",
+      "equal": true,
+      "sha256": "f7ec3f5b73de86d1f059e8cb93ac3e7296dfbb878f0857151f0310f4ce4604ac"
+    },
+    {
+      "file": "/logo.svg",
+      "equal": true,
+      "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+    },
+    {
+      "file": "/mobile.png",
+      "equal": true,
+      "sha256": "9493d72ef1b9cd0dec0010454e4c77c97144e51e4704422b9af6605305e2a8d5"
+    },
+    {
+      "file": "/recipe.png",
+      "equal": true,
+      "sha256": "f062d8328bff31fd6e0ec54100c0f2833dd9bf5ae275bd3da7a8c62dd5534e44"
+    }
+  ]
+}

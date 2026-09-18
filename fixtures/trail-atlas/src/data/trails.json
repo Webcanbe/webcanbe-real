@@ -1,0 +1,14 @@
+[
+  {
+    "name": "The coastal loop",
+    "distance": "4 km",
+    "level": "Easy",
+    "description": "Salt air and a quiet place to watch the tide."
+  },
+  {
+    "name": "Ridge and reservoir",
+    "distance": "7 km",
+    "level": "Moderate",
+    "description": "A steady climb followed by a long view."
+  }
+]

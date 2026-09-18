@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "7335204d594a76ce75b4fda33b5357bd306d8021",
+  "status": "PASS",
+  "scope": {
+    "operatorAuthenticatedPromotion": true,
+    "passedAssessmentOnly": true,
+    "exactSubmissionAssessmentResultLineage": true,
+    "immutableProjectRelease": true,
+    "appendOnlyPromotionDecision": true,
+    "automaticListing": false,
+    "automaticPurchasability": false,
+    "paymentOrEntitlementSideEffect": false,
+    "sellerHeadMutation": false,
+    "submittedCodeExecution": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 6,
+      "total": 6,
+      "skippedUnrelated": 40,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 passed assessment release promotion\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "passedResultOnly": "PASS",
+    "operatorPromotionAuthority": "PASS",
+    "resultSnapshotBinding": "PASS",
+    "projectReleaseCreation": "PASS",
+    "releaseImmutability": "PASS",
+    "promotionIdempotency": "PASS",
+    "conflictingPromotionRejection": "PASS",
+    "crossSellerAuthority": "PASS",
+    "automaticListing": "REFUSED",
+    "paymentOrEntitlementSideEffect": "REFUSED"
+  },
+  "security": {
+    "scanId": "3d7da8e0-1128-492f-aefe-8bb238cc36e9",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0,
+    "daybreakAccess": "not_granted"
+  }
+}

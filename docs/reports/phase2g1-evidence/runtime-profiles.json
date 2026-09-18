@@ -1,0 +1,69 @@
+[
+  {
+    "profile": "react19-vite6",
+    "manifestSha256": "8693a43d3361d8b3efb6ad927286aee98da58e2be1dea3275577d508c970224f",
+    "lockSha256": "166d9ffda1e4f67ced3967e467b0148cc7bb5a525970df5762e8e5bc78fa059a",
+    "dependencies": {
+      "@tailwindcss/vite": "4.3.3",
+      "@vitejs/plugin-react": "4.3.4",
+      "classnames": "2.5.1",
+      "clsx": "2.1.1",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "react-router-dom": "7.18.3",
+      "tailwindcss": "4.3.3",
+      "typescript": "5.9.3",
+      "vite": "6.4.3"
+    }
+  },
+  {
+    "profile": "react18-vite5-v1",
+    "manifestSha256": "a85892d16f78b914dcc6a65058384758e36eba447e78de00d945c699e46b68d3",
+    "lockSha256": "176c93168f751be31c3e861800114bca891bade74c5366428c2a43f87f71c313",
+    "dependencies": {
+      "@eslint/js": "9.39.5",
+      "@tailwindcss/vite": "4.3.3",
+      "@types/react": "18.3.31",
+      "@types/react-dom": "18.3.7",
+      "@vitejs/plugin-react": "4.7.0",
+      "classnames": "2.5.1",
+      "clsx": "2.1.1",
+      "eslint": "9.39.5",
+      "eslint-plugin-react-hooks": "5.2.0",
+      "eslint-plugin-react-refresh": "0.4.26",
+      "globals": "15.15.0",
+      "nanoid": "5.1.16",
+      "react": "18.3.1",
+      "react-dom": "18.3.1",
+      "react-router-dom": "7.18.3",
+      "tailwindcss": "4.3.3",
+      "typescript": "5.9.3",
+      "typescript-eslint": "8.70.0",
+      "vite": "5.4.21",
+      "zustand": "5.0.8"
+    }
+  },
+  {
+    "profile": "react19-vite8-v1",
+    "manifestSha256": "88d1b516743375c3fa3e4f46df817d85d0812c5d41257c0ff36a7aff2f1a0070",
+    "lockSha256": "0db8e7133796550f2a95c216d20024ba0b9ef2f89d0a7a4ed3ce2799f233ab70",
+    "dependencies": {
+      "@tailwindcss/vite": "4.3.3",
+      "@types/node": "24.13.4",
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      "@vitejs/plugin-react": "6.1.1",
+      "classnames": "2.5.1",
+      "clsx": "2.1.1",
+      "nanoid": "5.1.16",
+      "oxlint": "1.82.0",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "react-router-dom": "7.18.3",
+      "tailwindcss": "4.3.3",
+      "typescript": "6.0.3",
+      "vite": "8.3.0",
+      "zustand": "5.0.8"
+    }
+  }
+]

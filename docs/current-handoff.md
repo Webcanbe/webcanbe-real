@@ -1,0 +1,133 @@
+# PHASE 5 BRAND + INITIAL UI POLISH CHECKPOINT — 2026-09-18 KST
+
+- Branch: `phase-5-product-launch`.
+- Implementation HEAD before this checkpoint: `bd5256d12c57dce7097c9342692262673e8c9ccd`.
+- New primary WebCanBe lockup applied across landing, public shell, dashboard chrome, app sidebar, workspace, checkout, and auth-complete surfaces.
+- Added matching standalone mark and updated favicon.
+- Sidebar collapsed state now uses the mark-only asset.
+- Top-right account control now opens its own account popover instead of sharing the sidebar account state.
+- Phase 5 focused verification + inherited Phase 4 tests + production build passed in GitHub Actions.
+- Vercel build itself also completed successfully; the observed deployment failure occurred after build during `Deploying outputs` with Vercel's transient-error message. This documentation commit intentionally retriggers deployment without changing application behavior.
+
+---
+
+# PHASE 4 LANDING ASSET LOCALIZATION + HIDDEN-VARIANT PRUNE — 2026-09-18 KST
+
+**PASS with rollback preserved.** The selected Launch UI-derived WebCanBe landing is now self-hosted for its runtime presentation assets, and the explicitly hidden unused variant subtrees have been removed without changing the selected visual composition beyond the retained parity threshold.
+
+- Pre-change rollback branch: `backup-phase4-before-landing-localize-2026-09-18` at `c80ce7d807e12b1611f5317f18f5d9e33c9945ca`.
+- Vendored result commit: `a6d6b8a4767b5f4b4ba08e34723f1f10613565ae` (`Vendor Launch UI landing assets and prune hidden variants [skip ci]`).
+- Post-change snapshot branch: `backup-phase4-after-landing-localize-2026-09-18`.
+- Guarded workflow run: GitHub Actions `35346964533` **PASS**.
+- Focused landing tests: **5/5 PASS** across 4 test files.
+- TypeScript + Vite production build: **PASS**.
+
+## What changed
+- 57 runtime presentation assets are now committed below `public/wcb-landing/vendor/`, including the exact optimized image responses used by the retained landing, CSS, Inter / IBM Plex Mono font files pulled by those stylesheets, and the OG image.
+- `public/wcb-landing/vendor/manifest.json` records original remote URL, local path, byte count, SHA-256 and content type.
+- The committed landing has **0 remaining Launch UI runtime asset references** and **0 root `/_next/` asset references** according to `public/wcb-landing/cleanup-report.json`.
+- The landing HTML decreased from **1,985,579 bytes** to **859,748 bytes**.
+- Removed **2,683 elements** belonging only to hidden, non-selected component variants.
+- Removed **36 dark-only nodes** because the retained landing is the light selected surface.
+- Removed the remaining unused Next bailout template.
+- The selected variants were preserved exactly from the prior CSS selection contract:
+  - Hero 1/5
+  - Logos 1/5
+  - Bento grid 1/4
+  - Items 1/4
+  - Feature 5/5
+  - Testimonials 1/3
+  - Stats 1/4
+  - Social proof 1/5
+  - FAQ 1/4
+  - CTA 1/4
+
+## Visual parity gate
+The workflow compared the exact pre-cleanup rollback version against the localized/pruned version using the same headless Chrome build and full-page screenshots.
+
+- Desktop 1440 px: **0.147648%** mismatched pixels.
+- Mobile 390 px: **0.247120%** mismatched pixels.
+- Retained acceptance threshold: **0.5%**.
+- Both full-page screenshot geometries remained identical:
+  - desktop: 1440 × 14,199
+  - mobile: 390 × 15,815
+- The localized page was also monitored during rendering and made **no requests to `launchuicomponents.com`**.
+- The workflow refuses to commit if asset localization, visual parity, focused tests or production build fails.
+
+## Recovery
+If the localization/pruning is later judged undesirable, restore from `backup-phase4-before-landing-localize-2026-09-18`; do not attempt to reconstruct the previous 1.98 MB landing by hand.
+
+---
+
+# PHASE 4 NATIVE UI SHELL / ROUTING CORRECTION — 2026-09-18 KST
+
+- Branch: `phase-4-product-ux`.
+- Verified implementation HEAD: `203ccf2909c550b4139b9398e61cb4b07e209532` (`Fix native shell composition syntax`).
+- GitHub Actions run `35343300208`: focused Phase-4 tests **10/10 PASS** and production TypeScript/Vite build **PASS**.
+- No backend/Phase-5 implementation was started in this pass.
+
+## UI architecture corrections
+- Removed the external Ropean dashboard iframe. `/dashboard` is now a native WebCanBe route using the existing product state and AppShell/sidebar.
+- Removed the landing iframe. The retained Launch UI-derived static landing is loaded into the React route, with same-origin navigation handled by the WebCanBe router rather than a separate iframe/postMessage navigation system.
+- Dashboard remains white/light only; theme switching is not exposed.
+- Sidebar retains the Ropean-inspired grouped structure, now has a real collapse control, and its top selector represents WebCanBe workspaces rather than a template project selector.
+- Dashboard top search opens a real command palette. Keyboard shortcuts include `Cmd/Ctrl+K` search, `Cmd/Ctrl+P` Settings, `Cmd/Ctrl+1` Dashboard, and `Cmd/Ctrl+2` Marketplace.
+- Notifications and account/avatar controls no longer present inert buttons. Sign out returns directly to the landing page.
+- Dashboard is protected and not rendered before the auth gate allows it.
+
+## Public shell / route corrections
+- Public navigation is now WebCanBe-owned: Product, Marketplace, Learn, Resources, each mapped to a distinct real route.
+- The old `Open app` public-header action was removed. Signed-in public surfaces use Account instead.
+- Footer is retained on public/product pages and AppShell pages except Dashboard.
+- Marketplace gets a restrained entry fade and a working sort control.
+- Project `Preview project` now opens a real public preview route.
+- Project-structure display now differentiates Next-style and React/Vite-style projects instead of always showing a Next.js tree.
+- Unknown paths now render a real 404 rather than silently falling through to Marketplace.
+- `/templates` resolves to Marketplace and legacy `/pricing` resolves to Plans.
+
+## Settings / truthful interaction corrections
+- Settings tabs now have distinct content instead of repeating the same form.
+- Save changes persists the current UI-preview profile/account values in-browser.
+- GitHub connection is visibly disabled with truthful copy until the backend connection is wired; it is no longer a fake active button.
+- Billing and Domains similarly avoid pretending Phase-5 integrations exist.
+- Sign out clears the UI-preview session or calls the hosted logout endpoint and returns to `/`.
+
+## Landing correctness fixes
+- Removed the old auth bridge script after iframe removal.
+- Removed/fixed stale original-template destinations including `designwithcode.dev`, the original creator email/GitHub, `/pricing`, `/feedback-program`, Figma Community, fake Twitter/GitHub footer destinations, and `href="#"` sign-in/logo targets.
+- Corrected the FAQ contradiction: WebCanBe does **not** need to remain in the exported runtime.
+- Top landing navigation now points to the distinct WebCanBe Product / Marketplace / Learn / Resources destinations.
+- Root document favicon, Apple touch icon, OG/Twitter title/description/image are WebCanBe-owned.
+
+## Deferred from this UI pass
+- The retained Launch UI visual document still references upstream Launch UI-hosted presentation assets in places. Full asset vendoring/deduplication and removal of unused hidden imported variants remain a separate bounded cleanup because changing those assets can alter the selected landing visual baseline.
+- Real GitHub account linking, real hosted authentication provider configuration, persistent account settings, payments, seller payout/KYC, AI metering, and production deploy-provider integration remain backend/Phase-5 work.
+- The existing source-first editor engine and `CompatibleWorkspace` were preserved; this pass did not redesign or weaken Visual / Code / Split source authority.
+
+---
+
+# Phase 3 Admin/Control backend checkpoint — 2026-09-17
+
+**PASS. The smallest operator-only Control backend now reads existing seller,
+review, assessment, release, Listing, Ready, deploy, and audit state; performs
+fresh-step-up operator authority and seller-application transitions; and records
+append-only audit evidence without adding lifecycle bypasses or product/money
+side effects.**
+
+This pass began at `b27a775ca014fadfd8fde3715be2c37d5fa54fff` on
+`phase-3-hosted-product`; main remains
+`dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b`. See the
+[Control report](reports/phase3-admin-control.md) and
+[machine evidence](reports/phase3-admin-control-evidence/index.json).
+
+- Durable active operator authority gates Control reads and mutations.
+  Ordinary users cannot self-promote; operator revocation takes effect on the
+  next authority check.
+- High-risk Control mutations require fresh server-minted evidence bound to the
+  exact operator session. Missing, guessed, cross-session, stale, and revoked
+  evidence refuses; no client route can mint evidence.
+- Seller approval/rejection preserves the retained terminal-rejection rule.
+  Operator grant/revoke and seller transitions atomically append actor,
+  authority, action, target, before/after, evidence, and timestamp audit rows.
+  Production triggers reject audit update/delete.
+- Control exposes bounded metadata only: no source bodies, worker credentials,

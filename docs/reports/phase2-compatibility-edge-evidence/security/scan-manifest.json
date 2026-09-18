@@ -1,0 +1,57 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "8c950cd21b78621daf5db9b8376594efaf2ffbe3bc225520bdbe6808a4e3a58e"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "38023a6dd52ab1a0098c65cc60789a4aec8cbb2737c685fd0b9c1dc917567d45"
+      }
+    ],
+    "completedAt": "2026-09-15T08:08:58.311780Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "d5962344-0b45-4600-98c7-972dce940e1a",
+    "preservedSources": {
+      "checkpoints/06da3df57c5213cc71b49c17d171693f8efcaa2ba674cc24e9203c679d696ee8.json": "903c5e7c725d0f80392197e09798f85e40a1874c3391d2370833b4a9d55fe46b",
+      "checkpoints/6a7e8ff84ef97393a7eccaf3deef36c2d0f2a2a7dccaf632b83271e8ab2c9ab7.json": "6a7e8ff84ef97393a7eccaf3deef36c2d0f2a2a7dccaf632b83271e8ab2c9ab7",
+      "checkpoints/6b0832fb18230522af7bdfc3eb9a6057ebca8419d8624bb3bfb2f33c8ec0526a.json": "e115c9a7c2622135699b8106bfdc68c811ce8ef1140e27f5c701f4336d4c9dac"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.24"
+    },
+    "scope": {
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "Not a professional penetration test.",
+        "Immutable candidate 9826259..fb861ac; final 775f9b6 compatibility corrections independently reread and identified separately."
+      ],
+      "summary": "Every one of the 12 changed candidate paths, including package lock and threat model; supporting boundary callers reviewed.",
+      "validationMode": "Static security review; retained and targeted regression evidence, no quantitative DoS claim."
+    },
+    "sealedAt": "2026-09-15T08:08:58.311780Z",
+    "startedAt": "2026-09-15T08:00:11.915852Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "982625986289baf8101a7d73c96fe47ce0602f0d",
+      "displayName": "WebCanBe-recovery",
+      "headRevision": "fb861acbb8e490ae65e71821e70ef3bce5765e95",
+      "kind": "git_diff",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:35ae7236ce0ae0797099db2cadaf9fde290431deea537f568a2358146727aeea",
+      "targetId": "target_sha256_42cde00d65c36327af49fc5a5303d4c9c61fe0885f27c22a108e77905fb8cf01"
+    },
+    "threatModel": {
+      "summary": "# Compatibility edge threat model (before implementation)\n\nScope: P05/P06/P08 only. Baseline 982625986289baf8101a7d73c96fe47ce0602f0d; ancestor bc19fac8d91d7360c409285e8613509c3c4e7404. Fetched feature and live main verified, clean initial tree; no local main.\n\n- Lock data cannot authorize execution by merely parsing. Descriptor spelling, real package identity, locator version, integrity and complete dependency/peer edges must independently match an operator graph. Exact descriptor lookup must not resolve an ambiguous range by convenience. Alias/workspace traversal, duplicate keys, integrity downgrade and virtual peer collisions refuse. No parse-error fallback.\n- Berry cache checksums are not npm tarball SRI. Support requires independently verified cache/locator mappings and virtual peer identities; copying a checksum into an integrity field is forbidden.\n- Bun binary input must use a verified versioned decoder or an isolated, pinned metadata-only executable. Magic-byte preservation is insufficient. No install/manager execution in editor, no project config/scripts/network or host resolution.\n- Inert oversized tools need a role enforced in every source store, snapshot, loader, semantic tool, config reader, preview transport and export consumer. A path classifier alone is insufficient: canonical .cjs bytes are currently ordinary importable source and export tooling can execute them. Keep the 2 MiB bound unless end-to-end nonexecution can be proved.\n- Vite root/alias paths are data, confined to canonical project with symlink refusal. Root, index, module source, public assets and config-relative aliases have distinct bases. Unsupported source layouts remain explicit, never guessed. Build settings must distinguish preview from independent production export build. No arbitrary externalization/stubbing of Node modules.\n- Uno presets/transformers are only named operator constructors with literal validated options. Never import uploaded configuration. Worker receives immutable data, remains pinned, dedicated-resolution, empty private environment, two-worker capacity, 128 MiB old/16 MiB young heap, 8 s deadline. Count and byte limits bound input/output. Transform source in derived compiler artifacts only; preserve canonical/export bytes and instrumentation offsets. Reject dynamic config/functions/custom transformers, unknown options and forged adapter objects.\n- Review changed trust paths after freeze and add focused adverse cases. Preserve all 549 prior identities, account gated skips separately. P07 and P39/P61 authority unchanged.\n"
+    }
+  },
+  "schemaVersion": "1.0"
+}

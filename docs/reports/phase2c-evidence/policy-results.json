@@ -1,0 +1,158 @@
+{
+  "browser": "153.0.8010.12",
+  "nativeChromiumSandbox": true,
+  "syntheticLoopbackOnly": true,
+  "results": [
+    {
+      "mode": "opaque-http",
+      "origin": "null",
+      "push": {
+        "allowed": true,
+        "value": "/nested/42?q=one#anchor"
+      },
+      "replace": {
+        "allowed": true,
+        "value": "/nested/43?q=two#anchor"
+      },
+      "parentDOM": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "storage": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "fetchBlocked": true,
+      "topNavigation": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "selfNavigationRequests": [
+        "/self?canary=synthetic-only"
+      ],
+      "editorRouteUnchanged": true
+    },
+    {
+      "mode": "origin-http",
+      "origin": "http://127.0.0.1:<ephemeral>",
+      "push": {
+        "allowed": true,
+        "value": "/nested/42?q=one#anchor"
+      },
+      "replace": {
+        "allowed": true,
+        "value": "/nested/43?q=two#anchor"
+      },
+      "parentDOM": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "storage": {
+        "allowed": true,
+        "value": true
+      },
+      "fetchBlocked": true,
+      "topNavigation": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "selfNavigationRequests": [
+        "/self?canary=synthetic-only"
+      ],
+      "editorRouteUnchanged": true
+    },
+    {
+      "mode": "parent-csp-http",
+      "origin": "null",
+      "push": {
+        "allowed": true,
+        "value": "/nested/42?q=one#anchor"
+      },
+      "replace": {
+        "allowed": true,
+        "value": "/nested/43?q=two#anchor"
+      },
+      "parentDOM": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "storage": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "fetchBlocked": true,
+      "topNavigation": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "selfNavigationRequests": [],
+      "editorRouteUnchanged": true
+    },
+    {
+      "mode": "opaque-envelope-http",
+      "origin": "null",
+      "push": {
+        "allowed": true,
+        "value": "/nested/42?q=one#anchor"
+      },
+      "replace": {
+        "allowed": true,
+        "value": "/nested/43?q=two#anchor"
+      },
+      "parentDOM": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "storage": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "fetchBlocked": true,
+      "topNavigation": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "selfNavigationRequests": [],
+      "editorRouteUnchanged": true
+    },
+    {
+      "mode": "blob-baseline",
+      "origin": "null",
+      "push": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "replace": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "parentDOM": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "storage": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "fetchBlocked": true,
+      "topNavigation": {
+        "allowed": false,
+        "error": "SecurityError"
+      },
+      "selfNavigationRequests": [
+        "/self?canary=synthetic-only"
+      ],
+      "editorRouteUnchanged": true
+    }
+  ],
+  "webrtc": {
+    "origin": "null",
+    "created": true,
+    "receivedUdpPackets": 3,
+    "warnings": [
+      "Unrecognized Content-Security-Policy directive 'webrtc'."
+    ]
+  },
+  "httpAdmissionSafe": false,
+  "redaction": "Ephemeral collector port removed; probes used synthetic loopback canaries only."
+}

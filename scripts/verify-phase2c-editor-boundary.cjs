@@ -1,0 +1,45 @@
+const fs=require('node:fs');const {chromium}=require(process.env.WCB_PLAYWRIGHT_MODULE||'playwright');
+const log=process.argv[2],origin=process.argv[3]||'http://127.0.0.1:5183';
+if(!log||!/^http:\/\/(127\.0\.0\.1|localhost):[0-9]+$/.test(origin))throw Error('Usage: node scripts/verify-phase2c-editor-boundary.cjs PRIVATE_DEV_LOG [EDITOR_ORIGIN]');
+const check=(value,message)=>{if(!value)throw Error(message)};
+(async()=>{const browser=await chromium.launch({headless:true,chromiumSandbox:true});try{
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});let session,generation;
+ page.on('response',async response=>{if(response.request().method()!=='POST')return;if(response.url().endsWith('/session')&&response.ok())session=(await response.json()).session;if(response.url().endsWith('/preview')&&response.ok()){const data=await response.json();if(data.generation)generation=data.generation}});
+ await page.goto(origin+'/workspace/northstar');const key=[...fs.readFileSync(log,'utf8').matchAll(/key \(this server run only\): (\S+)/g)].at(-1)[1];await page.getByLabel('Local editor access key').fill(key);await page.getByRole('button',{name:'Connect / renew session'}).click();await page.locator('[data-preview-state=ready]').waitFor();
+ const frame=page.frameLocator('iframe');await frame.locator('[data-wcb-id]').first().waitFor();
+ check(!await frame.locator('html').evaluate((element,secrets)=>secrets.some(secret=>element.outerHTML.includes(secret)),[key,session.capability]),'Privileged credential leaked into preview');
+ check(await frame.locator('body').evaluate(()=>{try{void parent.document.querySelector('input').value;return false}catch{return true}}),'Parent token access succeeded');
+ const payload={channel:'webcanbe-compatible-v1',type:'hover',session:session.previewId,generation,element:{tagName:'h1',identity:{file:'src/App.tsx',elementStart:1},rect:{top:10,left:10,width:100,height:100},computed:{},layoutContext:'block'}};
+ async function rejected(action,label){await action();await page.waitForTimeout(120);check(await page.locator('.canvas-outline').count()===0,label+' changed the editor overlay')}
+ await rejected(()=>page.evaluate(payload=>window.postMessage(payload,'*'),payload),'Wrong source/editor origin');
+ await rejected(()=>frame.locator('body').evaluate((_,payload)=>parent.postMessage({...payload,generation:'stale-generation'},'*'),payload),'Stale generation');
+ await rejected(()=>frame.locator('body').evaluate((_,payload)=>parent.postMessage({...payload,session:'forged-session'},'*'),payload),'Forged session');
+ await rejected(()=>frame.locator('body').evaluate((_,payload)=>parent.postMessage({...payload,element:{...payload.element,rect:{...payload.element.rect,width:Infinity}}},'*'),payload),'Malformed payload');
+ await rejected(()=>page.evaluate(payload=>{const sibling=document.createElement('iframe');sibling.id='forged-sibling';sibling.sandbox='allow-scripts';sibling.srcdoc='<script>parent.postMessage('+JSON.stringify(payload)+',"*")<\/script>';document.body.append(sibling)},payload),'Sibling opaque source');
+ await page.locator('#forged-sibling').evaluate(element=>element.remove());
+ await frame.locator('[data-wcb-id]').first().hover();await page.locator('.canvas-outline').waitFor();
+ // A native hash change must clear even a retained DOM node, including a late inspect response.
+ const notice=await page.locator('[data-preview-boundary]').innerText();
+ check(notice.includes('CSP does not block all browser egress, including WebRTC/RTC networking'),'Overbroad security notice');
+ check(notice.includes('HTTP previews remain disabled pending a tested defense-in-depth solution'),'HTTP admission status missing');
+ let releaseInspection,inspectionSeen;const held=new Promise(resolve=>releaseInspection=resolve),seen=new Promise(resolve=>inspectionSeen=resolve);
+ const inspectPattern='**/__webcanbe/api/projects/*/inspect';
+ await page.route(inspectPattern,async route=>{const response=await route.fetch();inspectionSeen();await held;await route.fulfill({response})});
+ const heading=frame.getByRole('heading',{name:'Build a real product.',exact:true});
+ await heading.click();await seen;await page.locator('.canvas-outline.selected').waitFor();
+ check(await frame.locator('body').evaluate(()=>{history.pushState(null,'','#/selection-regression');return location.hash})==='#/selection-regression','Native hash History navigation did not occur');
+ await page.locator('.source-location').waitFor({state:'detached'});
+ const delivered=page.waitForResponse(response=>response.url().endsWith('/inspect'));releaseInspection();await delivered;await page.unroute(inspectPattern);
+ await frame.locator('body').evaluate(()=>{dispatchEvent(new Event('scroll'));dispatchEvent(new Event('resize'))});await page.waitForTimeout(180);
+ check(await page.locator('.canvas-outline').count()===0,'Native hash change retained or resurrected stale geometry');
+ check(await page.locator('.inspector-control textarea').count()===0,'Late inspection restored stale source controls');
+ await heading.click();await page.locator('.inspector-control textarea').waitFor();check(await page.locator('.inspector-control textarea').inputValue()==='Build a real product.','Reselection failed after hash invalidation');
+ await frame.locator('body').evaluate((_,data)=>parent.postMessage({...data,type:'route',hash:location.hash},'*'),{channel:payload.channel,session:payload.session,generation:payload.generation});await page.waitForTimeout(120);
+ check(await page.locator('.inspector-control textarea').count()===1,'Duplicate route observation cleared a current selection');
+ check((await page.locator('[data-preview-boundary]').innerText())===notice,'Inspecting source hid or changed the security boundary');
+ const oldURL=await page.locator('iframe').getAttribute('src');await page.getByRole('button',{name:'Stop preview'}).click();await page.locator('[data-preview-state=stopped]').waitFor();
+ check(await page.evaluate(async url=>{try{await fetch(url);return false}catch{return true}},oldURL),'Stopped Blob URL remained readable');
+ await page.getByRole('button',{name:'Connect / renew session'}).click();await page.locator('[data-preview-state=ready]').waitFor();check(await page.locator('iframe').getAttribute('src')!==oldURL,'Restart reused old preview URL');
+ check(page.url()===origin+'/workspace/northstar','Preview changed editor route');
+ console.log('PASS native hash selection invalidation, late-inspection rejection, reselection, duplicate-route stability, persistent security notice; editor boundary: wrong origin/source/session/generation and malformed observations denied; genuine hover works; parent tokens denied; stop/restart revokes Blob URL.');
+}finally{await browser.close()}})().catch(error=>{console.error(error);process.exitCode=1});

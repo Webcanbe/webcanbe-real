@@ -1,0 +1,98 @@
+[
+  {
+    "name": "legacy-de",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1963
+  },
+  {
+    "name": "legacy-de",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1951
+  },
+  {
+    "name": "legacy-f-browser",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1976
+  },
+  {
+    "name": "legacy-f-browser",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1598
+  },
+  {
+    "name": "legacy-f-hash",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1958
+  },
+  {
+    "name": "legacy-f-hash",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1983
+  },
+  {
+    "name": "legacy-g-authored",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1456
+  },
+  {
+    "name": "legacy-g-authored",
+    "stage": "render",
+    "exit": 0,
+    "ms": 2230
+  },
+  {
+    "name": "legacy-g-react18",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1701
+  },
+  {
+    "name": "legacy-g-react18",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1790
+  },
+  {
+    "name": "legacy-g-react19",
+    "stage": "build",
+    "exit": 0,
+    "ms": 992
+  },
+  {
+    "name": "legacy-g-react19",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1651
+  },
+  {
+    "name": "legacy-hosted-react18",
+    "stage": "build",
+    "exit": 0,
+    "ms": 1489
+  },
+  {
+    "name": "legacy-hosted-react18",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1552
+  },
+  {
+    "name": "legacy-hosted-react19",
+    "stage": "build",
+    "exit": 0,
+    "ms": 936
+  },
+  {
+    "name": "legacy-hosted-react19",
+    "stage": "render",
+    "exit": 0,
+    "ms": 1676
+  }
+]

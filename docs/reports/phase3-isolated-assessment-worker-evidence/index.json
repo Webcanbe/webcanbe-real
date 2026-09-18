@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "15b8f4a2254d81cb11e0d502f47f6b1274145d73",
+  "status": "PASS",
+  "scope": {
+    "isolatedAssessmentWorker": true,
+    "productionHostedRunnerComposition": true,
+    "exactImmutableSnapshot": true,
+    "liveFenceAuthority": true,
+    "semanticAssessment": true,
+    "webServerSubmittedCodeExecution": false,
+    "hostExecutionFallback": false,
+    "projectExternalNetwork": false,
+    "uploadedPackageManagerOrScripts": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "purchasability": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 36,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 isolated seller assessment worker\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "outOfProcessExecution": "PASS",
+    "liveLeaseExecutionAuthority": "PASS",
+    "exactSnapshotExecuted": "PASS",
+    "isolationBoundary": "PASS",
+    "defaultNetworkDeny": "PASS",
+    "noHostFallback": "PASS",
+    "boundedExecution": "PASS",
+    "staleWorkerResultRejection": "PASS",
+    "immutableResultPath": "PASS",
+    "restartFailureSafety": "PASS",
+    "implicitPublication": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED"
+  },
+  "security": {
+    "scanId": "edfeaaac-c0a4-41ee-b7fa-64eb19a2f359",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0,
+    "liveCloudRunnerProbe": "NOT_RUN"
+  }
+}

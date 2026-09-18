@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "4ede26c09a7e197294a5a170309cfe4c82fb1c9f",
+  "status": "PASS",
+  "scope": {
+    "sellerIntake": true,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false,
+    "reviewBuildPipeline": false,
+    "releasePublishing": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 8,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller intake\" --maxWorkers=1"
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "sellerApplication": "PASS",
+    "operatorApprovalAuthority": "PASS",
+    "approvedSellerOnlySubmission": "PASS",
+    "crossSellerAuthority": "PASS",
+    "revokedSellerRefusal": "PASS",
+    "submissionProvenance": "PASS",
+    "submissionImmutability": "PASS",
+    "quarantineBoundary": "PASS",
+    "implicitPublicProductCreation": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "submissionCodeExecution": "ABSENT"
+  },
+  "security": {
+    "scanId": "cdc5d5d6-5b46-4a08-9d72-be1002bd3fb3",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

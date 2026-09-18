@@ -1,0 +1,14 @@
+{
+  "historicalFailuresRetained": true,
+  "notes": [
+    "Initial broad npx vitest run discovered14 upstream Bulletproof test files under an ignored temporary source directory and failed collection; these are not WebCanBe regression identities. Final owned suite explicitly targets src/webcanbe-engine; temporary source directories removed.",
+    "First hosted group:11 pass/1 unavailable Playwright module; all12 pass after selecting the existing bundled module, with no test change.",
+    "Original corpus failures and every applications-prior attempt retained, including Recipe HTML/asset deadline/data-URL issues corrected through general support.",
+    "Packaged Recipe initially cached fonts but missed URLs inside Fast Refresh module strings; corrected both generated bootstrap and update manifest.",
+    "One packaged Recipe startup returned422 during simultaneous default-suite execution. Exact cause was not exposed; later isolated startup succeeded around7seconds. This is retained, not claimed diagnosed or a load/capacity PASS.",
+    "New QA initially rejected expected upstream React19 ref console diagnostics and an optional favicon404. Native exact-artifact proof establishes no page errors, required-resource failures or external requests; console messages retained.",
+    "Recipe export QA used an existing extraction directory, then an invalid lease created_at column. These harness failures are retained. Only read-only export/check was repeated; same67 canonical files match byte-exactly.",
+    "A proposed lock-error profile-selection fallback was rejected by automatic approval review for possible fail-open dependency admission; it was omitted.",
+    "The attempted security stress reproduction was blocked by a cybersecurity safeguard. Static analysis and normal regression proof were used; no bypass/retry or quantitative stress claim."
+  ]
+}

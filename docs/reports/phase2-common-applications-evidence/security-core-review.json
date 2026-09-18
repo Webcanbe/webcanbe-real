@@ -1,0 +1,213 @@
+{
+  "scope": {
+    "repository": "WebCanBe-recovery",
+    "base": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+    "head": "223a604500912fed5c00ed2050cb535d57d5dd00",
+    "mode": "Independent six-file discovery within existing scan",
+    "sourceSnapshot": "Immutable git objects; later working-tree edits excluded"
+  },
+  "policy": {
+    "resolver": "resolve_security_md.py, offline",
+    "applicableSecurityMd": "None; empty results for each of the six source files.",
+    "instructions": "Read Codex Security finding-discovery SKILL.md and security-guidance.md. The parent owns candidate recording and scan assembly."
+  },
+  "candidates": [],
+  "conclusion": "No technically plausible new security candidate identified in the complete diff of the assigned six files. This is a bounded discovery result, not a whole-repository security attestation. Two non-vulnerability limitations are preserved below instead of being dropped.",
+  "coverage": [
+    {
+      "file": "src/webcanbe-engine/runtime/intakeMetadata.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "1-50",
+      "attackerInput": "Named metadata file bytes supplied in authenticated source archive intake, including comments, formatter JSON, npmrc entries and example environment names/values.",
+      "reviewedControls": [
+        "16 KiB length bound and fatal UTF-8 decoding before grammar parsing",
+        "Control character/known-secret pattern check before ignoring comments",
+        "Finite npmrc and formatter keys/value types",
+        "Example env VITE_ name restrictions, duplicate detection, public-placeholder grammar and credential/query/fragment-free URL constraints",
+        "No evaluator, child process, network operation or metadata application sink"
+      ],
+      "negativeResults": [
+        "The accepted .npmrc grammar contains only strict-peer-dependencies and shell-emulator boolean data. The preview compiler never runs npm or reads .npmrc as execution configuration.",
+        "Examples permit only fixed scalar placeholders or bounded loopback/reserved-domain URLs and do not populate runtime.environment. Unknown variables are refused by runtime analysis.",
+        "Secret-pattern detection is deliberately finite and can neither classify every credential nor make all source secret-free. Accepted comments/metadata are private project bytes; no newly reachable cross-tenant or external disclosure sink was established."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/runtime/intakeMetadata.ts:3-49",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:74-88",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:254,296-316",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:53-69"
+      ],
+      "validationPerformed": "Source inspection only; no tests or payload execution."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/projectRegistry.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "1,49,74,88",
+      "attackerInput": "ZIP member paths, ZIP attributes, compressed/expanded data, metadata basenames.",
+      "reviewedControls": [
+        "safeArchivePath remains the shared path guard; bounded .env.example[-suffix] is the only env-name expansion",
+        "Existing absolute/traversal/backslash/colon/NFC/reserved-name/depth/member-name guard preserved",
+        "ZIP member mode/link/encryption/case-conflict/size/ratio/CRC/UTF-8 checks preserved",
+        "All member validation finishes before private filesystem writes",
+        "Metadata validation now occurs before files.set and archive admission"
+      ],
+      "negativeResults": [
+        "The name expansion does not relax parent traversal, absolute path, symlink/hardlink or cross-project destination handling. Hosted caller allocates a fresh temporary tree, and export/shared source validation continue to use safeArchivePath.",
+        "The existing extension allowlist admits some dot-prefixed files independently of isInertMetadata; that behavior predates this diff. The README/test title is broader than actual coverage, but this is not a newly introduced arbitrary-file admission path.",
+        "Intake and hosted source copying preserve accepted metadata as bytes; source edits/history/export do not turn metadata into editor-host configuration."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/runtime/projectRegistry.ts:14,45-106",
+        "src/webcanbe-engine/runtime/hostedProjectRegistry.ts:20-41",
+        "src/webcanbe-engine/runtime/projectExport.ts:6-22",
+        "src/webcanbe-engine/runtime/postgresSourceCheckout.ts:24-36"
+      ],
+      "baseComparison": "The general file-extension allowlist and original .env.example admission are already present in base projectRegistry.ts:45-87. Only the finite name/grammar expansion is new."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "11-27,71,82-94,111-120,139,142-163,168,198-229,248,252,290-292",
+      "attackerInput": "Uploaded package manifest/lock, local Vite config AST, aliases, inert server/preview settings and CSS source.",
+      "reviewedControls": [
+        "Fixed repository profile IDs and full declared-set candidate preference",
+        "Versions/lock root declarations/integrity and installed version checks retained",
+        "New client closure derives from trusted profileLock; visited set bounds trusted graph traversal",
+        "Path.resolve is interpreted as a finite AST form and checked through confinedFile",
+        "Unknown statements/imports/plugins/computed object fields and dynamic expressions rejected",
+        "Null-prototype interpreted objects and aliases reject duplicate keys",
+        "Server open/port preferences validated as boolean/bounded integer and preserved only",
+        "Exception-to-issue handling keeps unsupported input out of compiler admission"
+      ],
+      "negativeResults": [
+        "Uploaded lock bytes never cause dependency installation; they are compared to a repository-owned profile. An altered lock record can fail admission but cannot select arbitrary package code.",
+        "Static path.resolve and no-argument arrow factories do not invoke imported functions. Paths pass safeArchivePath plus root/realpath confinement; aliases cannot select operator files.",
+        "New recursive AST cases do not add an evaluator; malformed or unsupported syntax/errors become runtime issues. Existing parser work runs editor-side; no new independently supported fatal-process or unbounded-resource exploit was established from these finite additions.",
+        "Peer dependencies are omitted by both the new and retained traversals; a new use-immer peer is a concrete exact-lock compatibility gap. It does not make uploaded package bytes executable because resolution still uses the installed trusted profile."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:15-22,34-45,70-163,171-249,251-254,286-294,317-324",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:55-61,84-105",
+        "runtime-profiles/react19-vite7-common-v1/package-lock.json:3321"
+      ],
+      "limitations": [
+        "See supplementalCorrections.peerDependencyLockVerification."
+      ]
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/configuration.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "5-10,21",
+      "attackerInput": "CSS @theme custom-property values and ordinary CSS declarations.",
+      "reviewedControls": [
+        "Added color-function recognizer is anchored and accepts only a fixed function name/finite channel count/numeric grammar",
+        "No var/url/calc/exponent/general function invocation accepted by literalColor",
+        "Root-only @theme, custom-property naming, no !important/nested nodes, known directive denials retained",
+        "PostCSS parses structure before pinned Tailwind consumes the bounded data subset"
+      ],
+      "negativeResults": [
+        "The new accepted literal color strings remain compiler data and contain no route to Node config/plugin execution.",
+        "Rejected function syntax or declaration separators cannot bypass the parsed node-level @theme checks through this helper.",
+        "No exponential or attacker-controlled recursive execution sink was identified in the added fixed-channel regexes. Existing input size bounds and compiler/parse behavior remain separate resource controls."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/runtime/configuration.ts:7-25",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:107-110,120-137",
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:286-294"
+      ]
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "9,74-82,96",
+      "attackerInput": "Source import strings, CSS resource URLs/data URLs, declarations requiring newly admitted browser closure packages.",
+      "reviewedControls": [
+        "External URL exception is limited to HTTP transport and CSS url/import-token resolution",
+        "HTTP(S) URL userinfo rejected; external:true preserves a reference without a compiler fetch",
+        "Data exception only for listed image/font MIME types and url-token, not arbitrary remote JavaScript imports",
+        "Application imports must match runtime.clientDependencies and dependency resolution must realpath into profile node_modules",
+        "Project-relative/alias/public paths retain permitted-root confinement",
+        "Trusted esbuild/Tailwind processing remains browser-targeted and writes no executable artifact to host disk"
+      ],
+      "negativeResults": [
+        "CSS preservation does not create editor-side SSRF: no fetch API exists in the added branch. The browser can attempt external requests, but the unchanged worker intentionally passes them to the private Linux network namespace; default external=deny is retained.",
+        "The closure admission expansion does not install or evaluate uploaded dependencies/config. Packages resolved through the profile are read as source; uploaded Node modules are not executed in the compiler.",
+        "Editor-side compilation precedes Linux runner allocation. The existing compiler gate reserves a transport entry after async authorization, while source/checkpoint validation uses the same confined compiler. New URL/profile behavior does not alter these admission controls.",
+        "The pre-existing non-strict local Blob branch is a separate execution mode. This added remote-CSS exception requires transport=http, and strict HostedEditor uses controlled raster with no Blob fallback."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:53-110,120-154,168-177",
+        "src/webcanbe-engine/runtime/controlledPreview.ts:97-100,152-184",
+        "src/webcanbe-engine/runtime/hostedEditor.ts:48-59",
+        "scripts/runner/worker.cjs:31-58",
+        "scripts/runner/launch.sh:8-24",
+        "src/webcanbe-engine/mutations/sourceValidation.ts:30-53"
+      ],
+      "supportingPathChecks": [
+        "Fast Refresh Babel invocation explicitly disables babelrc/configFile and emits generated browser code rather than executing imported source in Node (src/webcanbe-engine/runtime/fastRefreshCompiler.ts:32-86)."
+      ]
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "status": "reviewed-no-candidate",
+      "changedLines": "1-91",
+      "attackerInput": "Repository-authored synthetic metadata/config/CSS/lock examples; tests are developer-controlled, not product request handlers.",
+      "reviewedControls": [
+        "Temporary fixture copies and per-test cleanup",
+        "Metadata byte-preservation/rejection cases",
+        "Static aliases/factory/proxy rejection cases",
+        "Trusted profile selection and unresolved import rejection",
+        "Numeric CSS-function acceptance/rejection cases",
+        "One transitive tippy.js integrity-tampering assertion",
+        "Remote-CSS data preservation vs remote-JS refusal",
+        "Exact pointer-frame tuple comparisons"
+      ],
+      "negativeResults": [
+        "No new product endpoint, credential provisioning, uploaded config evaluation or shell execution exists in this test file.",
+        "The malicious-looking shell string in a test is a literal archive member value passed to validation, not executed.",
+        "The arbitrary-dotfiles test exercises .credentials only, so its title is not evidence of blanket dotfile rejection. The transitive-lock test exercises tippy.js dependencies, not peer dependencies.",
+        "The tests were inspected, not run, and do not prove OS sandbox/egress enforcement or all integration properties."
+      ],
+      "evidence": [
+        "src/webcanbe-engine/phase2-common-applications.test.ts:14-30,32-54,57-77,81-91"
+      ]
+    }
+  ],
+  "supplementalCorrections": [
+    {
+      "id": "peerDependencyLockVerification",
+      "classification": "Exact-lock compatibility correction; no security candidate emitted",
+      "control": "runtimeCompatibility.ts traverses dependencies only; newly allowed use-immer declares immer as a peer.",
+      "prerequisite": "An imported manifest declares react/react-dom/vite and use-immer but not direct immer; its uploaded lock records the expected direct roots and a missing/different immer peer record.",
+      "currentEffect": "The inspected traversal need not compare that peer's uploaded version/integrity, while the compiler still resolves trusted installed immer. This violates a complete reachable-lock equivalence claim without selecting attacker package bytes.",
+      "evidence": [
+        "src/webcanbe-engine/runtime/runtimeCompatibility.ts:198-247",
+        "src/webcanbe-engine/runtime/isolatedPreview.ts:95-99",
+        "runtime-profiles/react19-vite7-common-v1/package-lock.json:3321",
+        "runtime-profiles/README.md:14-17"
+      ],
+      "recommendation": "Visit the union of dependencies and peerDependencies through the existing path-aware resolver. Skip optional peers absent from the trusted graph; verify optional peers present in it; refuse missing required peers. Keep nested resolution rather than extending the old top-level-only DFS.",
+      "regression": "Use the React19/Vite7 common profile with direct use-immer but no direct immer: matching lock passes, changing only node_modules/immer integrity/version fails. For React18/Vite6 common with direct zustand, its optional immer/use-sync-external-store peers absent from the trusted graph remain allowed, while an altered present @types/react peer record fails.",
+      "validationStatus": "Source-backed recommendation only. Parent intends implementation/testing outside this immutable result."
+    },
+    {
+      "id": "metadataDocumentationScope",
+      "classification": "Documentation/test-scope correction; existing behavior, no security candidate emitted",
+      "claim": "README says arbitrary dotfiles and credentials remain refused; test title also refers to arbitrary dotfiles.",
+      "actualControl": "Finite named metadata validation plus a general file-extension allowlist. Non-example env names are refused, but other dot-prefixed extension-matching source filenames remain possible. Known credential patterns are not a universal classifier.",
+      "evidence": [
+        "runtime-profiles/README.md:39-44",
+        "src/webcanbe-engine/runtime/projectRegistry.ts:45-49,74-88",
+        "src/webcanbe-engine/runtime/intakeMetadata.ts:3-9",
+        "src/webcanbe-engine/phase2-common-applications.test.ts:29-30"
+      ],
+      "impactPrerequisiteMissing": "No newly gained access to another actor's secrets, source, environment or operator authority was identified; own uploaded bytes remain source data."
+    }
+  ],
+  "retainedLimits": [
+    "Installed runtime profile contents and privileged operator preparation are trusted configuration inputs; runtime checks are not a complete installed-file hash audit.",
+    "Linux cgroups constrain imported browser/config execution in separately authorized jobs, not the Mac/editor compiler. Existing process-local compiler admission and parser bounds should not be represented as fleet-wide compiler isolation.",
+    "Ordinary source/history/export authorization, mTLS fencing and Linux sandbox implementations were used as supporting controls rather than reviewed as unrelated full subsystems.",
+    "No external advisories, web URLs, package downloads, tests, imported code, vulnerability-triggering inputs or PoCs were executed. Candidate recording is left to the parent."
+  ]
+}

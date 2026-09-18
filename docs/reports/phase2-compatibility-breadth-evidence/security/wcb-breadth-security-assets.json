@@ -1,0 +1,62 @@
+{
+  "base": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+  "head": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "reviewedFiles": [
+    "src/webcanbe-engine/runtime/staticAssets.ts",
+    "src/webcanbe-engine/runtime/publicRuntimeValues.ts",
+    "src/webcanbe-engine/runtime/controlledPreview.ts",
+    "src/webcanbe-engine/runtime/hostedEditor.ts",
+    "scripts/hosted/editor-main.ts",
+    "src/webcanbe-engine/phase2-breadth-assets.test.ts",
+    "src/webcanbe-engine/phase2-breadth-values.test.ts"
+  ],
+  "policy": "Read security-guidance.md and supplied immutable threat model. SECURITY.md resolver returned no inherited policy for assigned runtime, test, hosted-script, or supporting runner directories.",
+  "candidates": [
+    {
+      "id": "breadth-assets-quadratic-js-rewrite",
+      "title": "Repeated asset URL literals cause quadratic synchronous work in the shared editor",
+      "instance_key": "resource-exhaustion:src/webcanbe-engine/runtime/staticAssets.ts:138",
+      "locations": [
+        {"path":"src/webcanbe-engine/runtime/staticAssets.ts","start":135,"end":138,"label":"root_control"},
+        {"path":"src/webcanbe-engine/runtime/staticAssets.ts","start":138,"end":139,"label":"sink"},
+        {"path":"src/webcanbe-engine/runtime/staticAssets.ts","start":66,"end":68,"label":"ineffective_async_deadline"},
+        {"path":"src/webcanbe-engine/runtime/controlledPreview.ts","start":165,"end":167,"label":"entrypoint/wrapper"},
+        {"path":"src/webcanbe-engine/runtime/isolatedPreview.ts","start":114,"end":117,"label":"supporting_input_limit"}
+      ],
+      "attacker_controlled_source": "An authenticated project author controls admitted JavaScript modules. A retained array or other used expression can contain many copies of one HTTPS .png URL; multiple allowed modules contribute to the compiled JavaScript artifact.",
+      "broken_control": "The AST walk adds an edit per literal without an edit-count budget. The Set on line 136 deduplicates only outbound fetches; repeated literals therefore consume one request/cache entry rather than the 48-resource budget. Line 138 rebuilds the growing full artifact for every edit using slices and concatenation. There is no yield, work budget, or killable worker around this loop.",
+      "sink_and_impact": "compileWithRuntime invokes materialize in the shared hosted editor process. O(edit count * artifact size) synchronous string rewriting can monopolize its event loop and cause large transient allocation pressure, delaying authorization, session handling and preview work for other tenants. The 10-second setTimeout abort cannot interrupt synchronous rewriting.",
+      "plausibility": "The compiler admits up to 2 MiB per source file and 40 MiB aggregate and returns in-memory browser bundles. Tens of thousands of duplicate string literals fit inside one accepted file. The attacker needs only one public server serving a small valid image; no SSRF bypass or runner execution is needed for this host-side computation.",
+      "closest_controls_and_counterevidence": [
+        "Static resources have a 48-fetch limit, 2 MiB response limit, 8 MiB aggregate transfer limit, 4 materializations/connections and a 10-second asynchronous deadline; these bound network work but not the number of edits for a cached URL.",
+        "Source/compiler and final snapshot byte limits exist. These provide finite input sizes but still allow many repeated literals; the final snapshot limit is checked after rewriting.",
+        "The entry is retired on error and runner egress remains denied. These controls do not isolate synchronous editor CPU work.",
+        "No runtime reproduction was performed. Validation should confirm that an ordinarily compiled, live array preserves enough duplicate literals after minification and quantify shared-event-loop delay at admitted sizes. Avoid claiming process termination without measurement."
+      ],
+      "relevant_lines": [135,136,138],
+      "taxonomy": {"cwe_ids":["CWE-400","CWE-407"]},
+      "validation_recommended": true
+    }
+  ],
+  "negativeReasoning": [
+    {"family":"SSRF, reserved IPs, DNS rebinding, redirects","evidence":"staticAssets.ts:15-21 normalizes HTTPS URLs and rejects credentials, nonstandard ports, IPv6/literal private IPs and sensitive query names. Lines 80-90 resolve and validate every redirect hop, and line 28 pins the validated IPv4 answers in the TLS request lookup without replacing the hostname. externalSource.ts:18-21 denies loopback/private/link-local/CGNAT/documentation/benchmark/multicast/reserved IPv4 ranges. No reachable private-address bypass identified."},
+    {"family":"headers, compression and transfer limits","evidence":"staticAssets.ts:28 uses fixed GET/header values, agent:false, no cookie/auth/proxy forwarding, and identity encoding. Lines 30-37 bound headers, response bytes and request time; lines 76-89 bound request count, recursion, redirects and aggregate bytes. Lines 80/84 use abort races and recheck before later requests. Slow/unsettled DNS underlying OS work is not cancelled, but no distinct reportable exhaustion tuple was established beyond the concrete synchronous-rewrite candidate."},
+    {"family":"active content and CSS resources","evidence":"staticAssets.ts:40-55 permits only UTF-8 CSS or finite image/font MIME/signature pairs; remote HTML, script and SVG MIME are refused. Remote CSS resources re-enter the URL/DNS checks and recursive fetch limits (103-128), including rejection of remote SVG data images. Finite CSS matching may miss escaped/protocol-relative or other browser resource syntax, but those remaining URLs do not reach the trusted fetcher and the runner's OS no-egress boundary remains intact."},
+    {"family":"cache, artifact identity, tenant separation","evidence":"staticAssets.ts:69-70 makes each cache snapshot-local; keys include expected kind and URL, resource filenames hash transformed bytes, and audit includes project/revision (95-100,153). snapshotPreview at controlledPreview.ts:28-38 checks filenames/size and hashes the complete artifact. PostgresArtifactStore at postgresStores.ts:199-231 binds workspace/project/revision/generation/digest, checks preview authority around retrieval and verifies immutable content. No cross-tenant URL cache or mutable shared artifact entry was introduced."},
+    {"family":"authorization, revocation, stale source","evidence":"controlledPreview.ts:158-167 checks live project/capability/revision around runtime-value acquisition and compilation; staticAssets.ts:63,68,74,80,85,151 checks before cache/fetch and after async work. Entry retirement aborts the signal (:123-124). hostedProjectRegistry.ts:119-125 and postgresSourceCheckout.ts:39-41 verify fresh capability and exact durable epoch/revision after the callback. Start/update also recheck before returning and after runner work. No distinct reachable stale-grant or stale-source fetch bypass was identified."},
+    {"family":"public runtime values","evidence":"publicRuntimeValues.ts:5-18 accepts finite secret-screened plain values with bounded VITE names/count/length; :20-29 checks authority and signal before/after a timed provider call. ConfiguredPublicRuntimeValues at :33-42 is operator-installed and keyed by exact workspace/project; editor-main.ts:14-17 obtains it only from operator config. Hosted session inspection uses grant-derived scope at hostedEditor.ts:125-133 and runtime compilation uses PG-derived sessionOwner at controlledPreview.ts:163. No client/example/host-env fallback or cross-project lookup was found."},
+    {"family":"malicious artifacts and runner egress","evidence":"The static pass parses JavaScript with the TypeScript AST and CSS with PostCSS; it does not evaluate uploaded modules. Malicious browser source remains inside the existing raster runner. controlledPreview.ts:201 retains external:'deny'; worker.cjs:36-38 verifies the flag and artifact digest and :63-73 serves only job-local artifacts. launch.sh:16 uses bwrap --unshare-all with no network-sharing override. Native browser sandbox checks remain at worker.cjs:51-56."},
+    {"family":"tests inspected","evidence":"phase2-breadth-assets.test.ts covers unsafe URLs/DNS, pins, redirects, MIME/signature/compression/size, DNS deadline, revocation, cycles, concurrency and remote SVG. phase2-breadth-values.test.ts covers finite values, secret rejection, post-provider reauthorization, exact tenant pair and canonical/example-source preservation. No test bounds repeated compiled URL edit count or synchronous rewrite time."}
+  ],
+  "supportingFilesRead": [
+    "src/webcanbe-engine/runtime/externalSource.ts",
+    "src/webcanbe-engine/runtime/hostedProjectRegistry.ts",
+    "src/webcanbe-engine/runtime/postgresSourceCheckout.ts",
+    "src/webcanbe-engine/runtime/postgresStores.ts",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts",
+    "src/webcanbe-engine/runtime/projectRegistry.ts",
+    "scripts/runner/launch.sh",
+    "scripts/runner/worker.cjs"
+  ],
+  "execution": "Read-only frozen git-object inspection; no source application, uploaded code, runner, VM, tests, network or scan tools executed. Only this discovery JSON was written."
+}

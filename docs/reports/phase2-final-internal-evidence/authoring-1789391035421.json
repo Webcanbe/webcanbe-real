@@ -1,0 +1,40 @@
+{
+  "boundary": "Packaged HTTPS / TEST OIDC / PostgreSQL / mTLS native semantic worker",
+  "checks": [
+    {
+      "name": "isolated pinned semantic PASS is read-only",
+      "status": "PASS"
+    },
+    {
+      "name": "semantic error distinct from accepted source and history",
+      "status": "PASS"
+    },
+    {
+      "name": "semantic wrong capability and stale revision refused",
+      "status": "PASS"
+    },
+    {
+      "name": "broader source extension accepted atomically in PostgreSQL",
+      "status": "PASS"
+    },
+    {
+      "name": "AST import rewrite and move share one accepted source history transaction",
+      "status": "PASS"
+    },
+    {
+      "name": "exact multi-file move undo and redo",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted move and broader-source history survive packaged process loss",
+      "status": "PASS"
+    },
+    {
+      "name": "export preserves every accepted byte including rewritten import and renamed .mts",
+      "status": "PASS"
+    }
+  ],
+  "timings": {
+    "semanticMs": 2596.145666
+  }
+}

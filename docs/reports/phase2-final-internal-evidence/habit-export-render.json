@@ -1,0 +1,226 @@
+{
+  "events": [
+    {
+      "ms": 608,
+      "type": "missing-optional-icon",
+      "text": "/vite.svg"
+    },
+    {
+      "ms": 672,
+      "type": "console-error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 54.96093399999995,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "🌟 Daily Habits\n\n🌱 Every journey begins with a single step!\n\n🎯Habits\n📅Calendar\n📊Statistics\n💾Data\n✨\nAdd New Habit\nHabit Name\nDescription (optional)\n➕ Add Habit\n📊\nToday's Progress\n0%\n\n0 of 0 habits completed\n\n📋\nYour Habits\n🎯\nNo habits yet\n\nAdd your first habit above to get started!\n\n🎯\nBuild habits that last\n\nStart by adding your first habit above!",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 62.77172799999994,
+  "ordinaryPng": {
+    "sha256": "980c10f4295176d4f06dff76cc1e0ee5d7f268c9fa82944cffd6616f010a1b26"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 146.03615600000012,
+  "rawPng": {
+    "sha256": "a2926174ffda64aa50936060f65712f00f1d7c7b0b1f48a7e2eec3e39b22a7bb"
+  },
+  "rawCaptureMs": 112.4899539999999,
+  "exportInteraction": "PASS",
+  "exportViewports": [
+    {
+      "width": 390,
+      "fontSize": "36px",
+      "png": {
+        "sha256": "89cfaa02be1a5826dd437e3eed08a0ea914274532168ac562ed4df1b89747917"
+      }
+    },
+    {
+      "width": 768,
+      "fontSize": "48px",
+      "png": {
+        "sha256": "35325fd8af1bab281427ca978e5efcf6be7088bb2b0323b135952e6005badacb"
+      }
+    },
+    {
+      "width": 1280,
+      "fontSize": "48px",
+      "png": {
+        "sha256": "b8faa72c377dc56730be799cb8368e9e54af011b2e911dcf7dbcd6d41aa580b5"
+      }
+    }
+  ],
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "🌟 Daily Habits\n\n🎉 Amazing! All habits completed today!\n\n🎯Habits\n📅Calendar\n📊Statistics\n💾Data\n✨\nAdd New Habit\nHabit Name\nDescription (optional)\n➕ Add Habit\n📊\nToday's Progress\n100%\n\n1 of 1 habits completed\n\n🎉\n📋\nYour Habits\nTotal Streaks\n1 🔥\nLongest: 1 days\n✓\nIndependent export habit\n🔥\n1 day streak\n✏️ Edit\n🗑️ Delete",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 3276.678634
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 4
+    },
+    {
+      "name": "Frames",
+      "value": 4
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 189
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 194
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 178
+    },
+    {
+      "name": "Resources",
+      "value": 3
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 12
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 4
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 26
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 93
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.074733
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.032822
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.187761
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.041895
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.444051
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.10684
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.222818
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 4303480
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 6676480
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 3275.456031
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 3275.270225
+    },
+    {
+      "name": "NavigationStart",
+      "value": 3275.218293
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=173944832\nMemoryPeak=174166016\nCPUUsageNSec=662560000\nTasksCurrent=67\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=292241408\nMemoryPeak=292339712\nCPUUsageNSec=1350423000\nTasksCurrent=109\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=449097728\nMemoryPeak=449544192\nCPUUsageNSec=2091362000\nTasksCurrent=110\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=460259328\nMemoryPeak=461910016\nCPUUsageNSec=2478530000\nTasksCurrent=110\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

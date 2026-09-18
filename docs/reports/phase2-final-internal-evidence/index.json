@@ -1,0 +1,460 @@
+{
+  "schema": 1,
+  "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+  "report": "../phase2-final-internal-closure.md",
+  "selfHashExcluded": true,
+  "evidenceFiles": 75,
+  "files": [
+    {
+      "path": "authoring-1789390915418.json",
+      "bytes": 355,
+      "sha256": "0fc8524d02e7a1ec4058655c6f967b59d27f7ce22ff6ed9564ca534486462e2d",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "authoring-1789390973247.json",
+      "bytes": 999,
+      "sha256": "6d9dde35546cb1277a7d2a34257ff4feb6ed973f7383729bcc540da962b5c695",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "authoring-1789391035421.json",
+      "bytes": 1056,
+      "sha256": "c2dc63fb11ca46326342b668b9cb17309b5eb83f77f4c9fc1a48ca7cddf9e2f0",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "baseline-test-hashes.json",
+      "bytes": 2344,
+      "sha256": "c308b39fc5f1eeaac38dcfcbf4f44e752925908374b1decccac638ce05a0058c",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "browser-controlled-final.json",
+      "bytes": 1110,
+      "sha256": "8a56434d3c07080c3403d590f10ecb17e6102e53ae8d441d904b5d1aa9d17818",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "browser-editor-final.json",
+      "bytes": 405,
+      "sha256": "9cd3143f615da2c10fd3ebf64c0a6b8fcb07394f34fb0c3d5a7fb9a0d627bf00",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "browser-responsive-final.json",
+      "bytes": 1010,
+      "sha256": "0e90bf33864b3c95fc255694b67466697e5feefd4ee869f9b9a98325092d19cb",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "browser-runtime-final.json",
+      "bytes": 988,
+      "sha256": "a392e514a31a495a8ecaa294baf190cdf90079647880370825eed9fb65a6eea7",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "browser-source-final.json",
+      "bytes": 1627,
+      "sha256": "c5de0b45205109492ff1fb4051029260ccfc80fce1b0998135a5fa40ea877bd8",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "capture-design.md",
+      "bytes": 2365,
+      "sha256": "c898f52320115a3e367455bd7fcfdaf3ca86e903ee865a5fabce6e0c0b530a24",
+      "purpose": "Pre-implementation trust boundary, threats, controls and residual limits."
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 447,
+      "sha256": "a004c4172a1f3bdee614567794a57f3fe80dfe98bb19a20bc3713776c1137fb9",
+      "purpose": "Publication/cleanup/provenance audit metadata; scope is explicit in the receipt."
+    },
+    {
+      "path": "collection.json",
+      "bytes": 11980,
+      "sha256": "722ef566925b14f780958d8b28341be525f6251c70ef9928bd142e73950ee18e",
+      "purpose": "Publication/cleanup/provenance audit metadata; scope is explicit in the receipt."
+    },
+    {
+      "path": "current-compatibility.json",
+      "bytes": 51194,
+      "sha256": "f8b0d4fd39b0047fdcfe09940eb9826f256a982359924a2c8fc3e7cd96c04d5c",
+      "purpose": "Frozen-byte static corpus diagnosis; not an admission/runtime PASS."
+    },
+    {
+      "path": "final-ledger.json",
+      "bytes": 90034,
+      "sha256": "725e76ff31e4536db304c2185eb2d8cc6f4f0e2c2812de31f70ad8b224454920",
+      "purpose": "Current authoritative 64-row ledger with P05 PASS, P61 bounded PASS, P39 PARTIAL/deferred, exact counts, and final 730/730 regression closure."
+    },
+    {
+      "path": "final-validation-stages.json",
+      "bytes": 5484,
+      "sha256": "2e8f65d4c25e8ecc56b9787437f3656665ca33290b978b4408099d56801a8d5e",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "full-application-acceptance.json",
+      "bytes": 2192,
+      "sha256": "bca48eaba739a275640ac2814d5e76873f9caea83e935b2bb247e53cb135fffe",
+      "purpose": "Reviewed interaction and exact-hash joined final build/render adjudication for both applications."
+    },
+    {
+      "path": "gestures-1789392638479.json",
+      "bytes": 849,
+      "sha256": "d78f344e88b278b484243194983d9242c9404876742ae006766d28bc8f085d86",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-LICENSE.txt",
+      "bytes": 1069,
+      "sha256": "8da439868f8124a6cf2c1c6eeb3c5cfdceaa379c61de24cb74e96249f27d5115",
+      "purpose": "Upstream MIT license notice for retained licensed evidence."
+    },
+    {
+      "path": "habit-acceptance.json",
+      "bytes": 2085,
+      "sha256": "48e0f73c4d4e0697acb7f12f749e7a8f5da6f2aebf8d0d3ece5a7d329daea26e",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-calendar-final.png",
+      "bytes": 268334,
+      "sha256": "8d925b713bc48e868285fa2f9f0cb615af84c01f11ac192f291915177f692003",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-edited-final.png",
+      "bytes": 361565,
+      "sha256": "e08ce0eef304b35618c2e3687791db8966d4d7794483efe3a44d77d49ac3f38b",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-edited.png",
+      "bytes": 361260,
+      "sha256": "56236649796cfe83fd8c95cb78e05cc4ebc405f35dbd6925f872a3cc9c727d45",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-export-1280.png",
+      "bytes": 186140,
+      "sha256": "3ca9863d6820226150cbfe3a6f607bfb709c864ca71905bd00341abfe2769f5c",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-export-390.png",
+      "bytes": 101431,
+      "sha256": "7e335ad4ca6a52a0106be56224e44d9bc50490a0740ad1a8dc1115ba7e200d43",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-export-build-final.json",
+      "bytes": 1229,
+      "sha256": "c8561bfbfa8d29eb0a71b1dcac92ba26de2b5594ed83ac81efb9ec4850af0e24",
+      "purpose": "Independent isolated final source-exact export build with matching archive hash."
+    },
+    {
+      "path": "habit-export-build.json",
+      "bytes": 1229,
+      "sha256": "9fbe2a5c76e1eb8e488116041714e4557bb8a78788bf5431475324ca39cd347e",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-export-render-final.json",
+      "bytes": 5992,
+      "sha256": "5b31bb981c48682a8a6e1e7429215d8b1a39f7dd657889142256d2a724a96306",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "habit-export-render.json",
+      "bytes": 5990,
+      "sha256": "9f054a9e485112d25cc785b598edc9ceb7e91917029e39f81891168438f9a9a1",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-initial-compatibility.json",
+      "bytes": 13566,
+      "sha256": "a56cf9cfdad9a074e7720652522d30b18929dda76ef992e0d655f6629198f528",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-initial-harness-path-error.json",
+      "bytes": 549,
+      "sha256": "d0146f90ac9eb44b0e78b724d2146ede1eba98f0207b423671e24cec02038e2a",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "habit-statistics-final.png",
+      "bytes": 377787,
+      "sha256": "05f543397eceaa1b517a61d94c2fd5db6b144232510a5c11d0b519395e6d2fd8",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-statistics.png",
+      "bytes": 377665,
+      "sha256": "d1b84b3877c75be3911f3019ac8e64b9b8625a99527bc9dce2359802dd6d07de",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "habit-workflow-final.json",
+      "bytes": 25048,
+      "sha256": "6ec223665bb32313c561e3fecb47ebc33474ff704cb2309693a41ef8a1a4a998",
+      "purpose": "Raw final hosted workflow; interaction/downstream statuses joined separately in full-application-acceptance.json."
+    },
+    {
+      "path": "habit-workflow.json",
+      "bytes": 25063,
+      "sha256": "9db600fb0c74a6b38a52128f2574221ecbea186b749e25f3d3b241307479022a",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "harness-and-failure-notes.json",
+      "bytes": 2788,
+      "sha256": "1e900589aceb3be68b3e6b2bb989d108faae4c40430ee4235134a5bf5957e046",
+      "purpose": "Unresolved product failures distinguished from resolved defects and invalid harness/setup attempts."
+    },
+    {
+      "path": "history-design.md",
+      "bytes": 1865,
+      "sha256": "c8eb44dbd0ff5d4fc65f9a3995cfb51d42ed7de942d291d713c68c56b7d2c193",
+      "purpose": "Pre-implementation trust boundary, threats, controls and residual limits."
+    },
+    {
+      "path": "history-origins-1789395351589.json",
+      "bytes": 1430,
+      "sha256": "6ee2b00542bf39f531ba01780041a423e897d3f79261c8044ac463bb0d525002",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "history-restore.png",
+      "bytes": 249857,
+      "sha256": "fee1c4948d78e05ce86987f328f8ab930ed30ae6591a759f550e126cc05a9bc6",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "ingestion-1789393019582.json",
+      "bytes": 787,
+      "sha256": "48f0b875bd045b58981614a96a2d5b4e839583c428283a1e2d2f1d255c338730",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "ingestion-design.md",
+      "bytes": 1465,
+      "sha256": "5a5d36394d1c4d8d00d087c213a07aba8eddee6c611782ab26571d27283641d3",
+      "purpose": "Pre-implementation trust boundary, threats, controls and residual limits."
+    },
+    {
+      "path": "initial-ledger.json",
+      "bytes": 44299,
+      "sha256": "94323afcb558d07393060a17ee24330aad57cb4011020da34c41ba05fd1968fc",
+      "purpose": "Verbatim pre-implementation 64-row requirements, initial evidence and gaps."
+    },
+    {
+      "path": "input-1789394581835.json",
+      "bytes": 2304,
+      "sha256": "8d8d4c3e022de1b4a894b5c2c17263ba90b5e2d4f90c53d37225bd352aba16e8",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "input-1789396617261.json",
+      "bytes": 3001,
+      "sha256": "2aa6bad0b42833fcbb559826c61229b1ffbfb38b1e38e3467ed5b6ee2ab4a529",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "input-final.json",
+      "bytes": 2965,
+      "sha256": "1896710704f993cc512153698711ef9903ea96da9fb71270755ba01f13e72532",
+      "purpose": "Final 10-check actual input/clipboard/Unicode/queue/reconnect receipt, explicit OS IME limit."
+    },
+    {
+      "path": "kanban-card-created-final.png",
+      "bytes": 72804,
+      "sha256": "e31ccffda12b254ebce222e4b23a9ade0547793f2ae4025620a89530f76502ee",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "kanban-export-1280.png",
+      "bytes": 51463,
+      "sha256": "d376587899041e8f6869e80dd0024ee31c613e935b93942dcf81ed9bce4862b5",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "kanban-export-390.png",
+      "bytes": 52183,
+      "sha256": "9c504e1f1609685cdf04b9db5b1c7c087be82c26b68a609d64608b6ef880d06f",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "kanban-export-build-final.json",
+      "bytes": 1213,
+      "sha256": "81cc01a810d6a087cd06c91576d31b2c8648d7d1aae5bee4296ecb0311585a0c",
+      "purpose": "Independent isolated final source-exact export build with matching archive hash."
+    },
+    {
+      "path": "kanban-export-render-final.json",
+      "bytes": 5553,
+      "sha256": "143e530899aabe41af1d88a6e1334d8b1fd585bd8a63c0459bc98897894a292f",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "kanban-workflow-final.json",
+      "bytes": 25391,
+      "sha256": "d923c3dbcca370cc59e812d0c982d4d1053e77a724fb503ef6e890ef6095a19f",
+      "purpose": "Raw final hosted workflow; interaction/downstream statuses joined separately in full-application-acceptance.json."
+    },
+    {
+      "path": "legacy-de-render-final.json",
+      "bytes": 5383,
+      "sha256": "d560c92cc50892dc0ada51a1bf3ddc88839e30456cfc0ece5d0751c8f8984ed9",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-f-browser-render-final.json",
+      "bytes": 5169,
+      "sha256": "ea248944975f3abfe8610aabc29d50012b7b7b07449bdc1b7eeda810a9534ad0",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-f-hash-render-final.json",
+      "bytes": 5170,
+      "sha256": "ceff2e1752c1469bf23e88fe36424da6e2e797ee15a96ffb4c86b6088b288938",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-g-authored-render-final.json",
+      "bytes": 4860,
+      "sha256": "f3c41b42f2226f4c0f26f9ea7a63a608ca121e13bbc803d7cd76343ddee64e0f",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-g-react18-render-final.json",
+      "bytes": 4892,
+      "sha256": "c9e8e47537d9b2ea7fdf5a8c24c1881f3c2b8dfe076a89713fe16873a610cada",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-g-react19-render-final.json",
+      "bytes": 5090,
+      "sha256": "0bf721929ee1362933ceb1db215831007c1ec72f6359ed3532cea4d755cfd65f",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-hosted-react18-render-final.json",
+      "bytes": 4992,
+      "sha256": "bf63ba1fd51147343ce41519d0dfbc1dbee3122b3afbad271920ca0f794ac4fe",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "legacy-hosted-react19-render-final.json",
+      "bytes": 4993,
+      "sha256": "4d0cdc2ff7aef497ffab10f2412a485efbb60e0a6b356909372e5847504aaaee",
+      "purpose": "Actual native isolated ordinary capture and preserved interaction/export assertions."
+    },
+    {
+      "path": "managed-secrets-design.md",
+      "bytes": 1923,
+      "sha256": "a775a574f394117584ad2036a07d267d28b7a754b6e936ea9c0f759a07d8d996",
+      "purpose": "Pre-implementation trust boundary, threats, controls and residual limits."
+    },
+    {
+      "path": "native-os-final.json",
+      "bytes": 10874,
+      "sha256": "1064993eed2c3d515fb6e32ae00f04f729de94c3fd80748dbf9035d27083db54",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "outgoing-audit.json",
+      "bytes": 748,
+      "sha256": "3bd09ad4628f90185756c0de654f1cd20dd9248726b3fda960467d3602b77426",
+      "purpose": "Publication/cleanup/provenance audit metadata; scope is explicit in the receipt."
+    },
+    {
+      "path": "preselection.json",
+      "bytes": 5497,
+      "sha256": "5a47b43428e27ae467b3edc61da46ef9ffb33ae808c1b06834ebff0222fabe3d",
+      "purpose": "Pre-adaptation immutable Habit provenance, full manifest and meaningful workflow."
+    },
+    {
+      "path": "progress.md",
+      "bytes": 5851,
+      "sha256": "ad8b927afeb5c7ed86d75f7eda2709a3334872af1ada879e923184dc83b6887e",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "publication.json",
+      "bytes": 1546,
+      "sha256": "d518bc18ea6dca9605ac15b915c182203a3a97bebd41cb3b28f48ac306b13889",
+      "purpose": "Publication/cleanup/provenance audit metadata; scope is explicit in the receipt."
+    },
+    {
+      "path": "regressions.json",
+      "bytes": 106654,
+      "sha256": "e99fab2281e92d437312b066397ce58379f87e6fbc3c71f990b1cb4835f6faa7",
+      "purpose": "All 429 exact test identities, original file hashes and skip/overlap accounting."
+    },
+    {
+      "path": "resources-1789396020314.json",
+      "bytes": 9404,
+      "sha256": "f6d2da35e7fb853fc1d5ec609935cb3ed29ca6cfe3c2de36eac2b22a7ba7387a",
+      "purpose": "Retained FAIL: unexplained second-application warm-update 422 after four valid checks."
+    },
+    {
+      "path": "resources-1789396118017.json",
+      "bytes": 10096,
+      "sha256": "a1bdcde08f883d120f57b3a8b02bd7cbd72199e7da350cb706af67283b132953",
+      "purpose": "Subsequent seven-check local representative resource PASS; does not erase prior FAIL."
+    },
+    {
+      "path": "runtime-attempts.json",
+      "bytes": 3160,
+      "sha256": "47102ebcea8cf989e8edfa7dfa7c4e20df8cfa306ce235fd0995930650ecaf22",
+      "purpose": "Success/failure/diagnostic status for every recorded focused runtime attempt."
+    },
+    {
+      "path": "security-review.json",
+      "bytes": 5650,
+      "sha256": "e1b0b16b0acade6663ac9c7daaafcab217ef9574a267ccd63557056d6b35ee35",
+      "purpose": "Sealed immutable 74-path security coverage, no findings and measured usage."
+    },
+    {
+      "path": "semantic-gesture-mobile.png",
+      "bytes": 164127,
+      "sha256": "6a60e07c079cc9122e29f42479e703f36cd6016c33ebd471c4758f82a5928c40",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "static-diagnostic-path-error.json",
+      "bytes": 3650,
+      "sha256": "30a9c8188192581e521e4f496cf087e463b2f9df8249a4cca8e938c7bd600280",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    },
+    {
+      "path": "tls-final.json",
+      "bytes": 587,
+      "sha256": "2bab35d3f57db5ef7aa71e4b443d151001869dca6fb240985fe3972845d66259",
+      "purpose": "Retained final browser/TLS/native/stage acceptance at the stated local TEST boundary."
+    },
+    {
+      "path": "typecheck-design.md",
+      "bytes": 2165,
+      "sha256": "1b1664da6929e084eba68e4c620a67d5201e5b55fcff2e7a4b88c68be5e4b33d",
+      "purpose": "Pre-implementation trust boundary, threats, controls and residual limits."
+    },
+    {
+      "path": "unicode-input-final.png",
+      "bytes": 30714,
+      "sha256": "90bc63d16364bf1640867492458a5437f09dfb32fe801972a0e3df920385b711",
+      "purpose": "Reviewed raster evidence from licensed application or authored TEST workflow; source is not canonicalized from pixels."
+    },
+    {
+      "path": "zustand-direct-capture.json",
+      "bytes": 236,
+      "sha256": "26f40eb7ee2f89f34f1430b36afede58811ddf38bd6e3df011cb25294807a7e6",
+      "purpose": "Retained focused implementation or historical attempt evidence; consult status/limits and final report before use."
+    }
+  ],
+  "currentLedgerUpdate": "P05–P08 updated by ../phase2-compatibility-breadth-evidence/index.json; all other historical evidence is unchanged."
+}

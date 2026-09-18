@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "boundary": "Linux namespaces + systemd cgroup inside no-mount Lima VM",
+  "resourceProperties": "RuntimeMaxUSec=1min 5s\nCPUQuotaPerSecUSec=1.500000s\nMemoryMax=1610612736\nMemorySwapMax=0\nTasksMax=192\nNoNewPrivileges=yes\nRestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX\nKillMode=control-group\n",
+  "frozenWorkerKilledAfterMs": 65091,
+  "memoryExhaustionKilled": true,
+  "revokedGenerationDenied": true,
+  "isolatedDenials": {
+    "procRootEscapeDenied": true,
+    "traversalDenied": true,
+    "secretAbsent": true,
+    "filesystemEscapeDenied": true,
+    "shellDenied": true,
+    "outsideProcessDenied": true,
+    "systemWriteDenied": true,
+    "hostHomeAbsent": true,
+    "noNewPrivs": true
+  },
+  "isolatedInterfaces": [
+    "lo"
+  ],
+  "vsockDenied": true,
+  "childVsockDenied": true,
+  "nativeChromiumSandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "separateNetAndPidNamespaces": true,
+  "childSharesPrivateNamespaces": true,
+  "collectorPositiveProtocols": [
+    "beacon",
+    "dns",
+    "eventsource",
+    "fetch",
+    "ice",
+    "image",
+    "raw-udp",
+    "stun",
+    "tcp",
+    "turn",
+    "websocket"
+  ],
+  "isolatedCollectorRecords": 0
+}

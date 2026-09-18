@@ -1,0 +1,14 @@
+{
+  "ownedLeaseStatesBeforeCleanup": {
+    "stopped": 8
+  },
+  "activeArtifactsBeforeCleanup": 0,
+  "dedicatedTestSchemaDropped": true,
+  "testRolePasswordCleared": true,
+  "testGatewayStopped": true,
+  "postgresTunnelStopped": true,
+  "gatewayTunnelStopped": true,
+  "guestGatewayConfigAndSudoPolicyRemoved": true,
+  "localOneDayTestPkiRemoved": true,
+  "testVmStopped": true
+}

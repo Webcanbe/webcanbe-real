@@ -1,0 +1,16 @@
+{
+  "identity": {
+    "allowSelfRegistration": true,
+    "sessionLifetimeMs": 604800000
+  },
+  "oidc": {
+    "issuer": "https://accounts.google.com",
+    "authorizationEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenEndpoint": "https://oauth2.googleapis.com/token",
+    "jwksUri": "https://www.googleapis.com/oauth2/v3/certs",
+    "clientId": "LOAD_GOOGLE_OAUTH_CLIENT_ID_FROM_PRIVATE_CONFIG",
+    "clientSecret": "LOAD_GOOGLE_OAUTH_CLIENT_SECRET_FROM_PRIVATE_CONFIG",
+    "scopes": ["openid", "email", "profile"],
+    "redirectUri": "https://YOUR_FINAL_WEBCANBE_APP_ORIGIN/__webcanbe/auth/callback"
+  }
+}

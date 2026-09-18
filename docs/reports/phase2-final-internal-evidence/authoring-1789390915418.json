@@ -1,0 +1,13 @@
+{
+  "boundary": "Packaged HTTPS / TEST OIDC / PostgreSQL / mTLS native semantic worker",
+  "checks": [
+    {
+      "name": "isolated pinned semantic PASS is read-only",
+      "status": "PASS"
+    }
+  ],
+  "timings": {
+    "semanticMs": 2627.9801669999997
+  },
+  "failure": "{\"error\":\"Source or preview changed; reload and retry.\"}\n\n409 !== 200\n"
+}

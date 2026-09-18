@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 1054.255773,
+  "output": "vite v7.1.9 building for production...\ntransforming...\n✓ 37 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.51 kB │ gzip:  0.32 kB\ndist/assets/index-WrC4u-NV.css   31.40 kB │ gzip:  5.60 kB\ndist/assets/index-BVDX7pdx.js   216.51 kB │ gzip: 66.47 kB\n✓ built in 787ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1183.1379579999998,
+  "archiveSha256": "5636d24c10feb976de07fdd2aa49311442e041e30ba9f9daf514f7d6d1c62994",
+  "profile": "react19-vite7.1-v1",
+  "mountBase": "/Habit-Tracker-Web-App/",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "b3ff33b3613bce5372129c02d7635779bfa22c42efa4a2aa1e1642f4b13f2214"
+    },
+    {
+      "path": "/assets/index-BVDX7pdx.js",
+      "sha256": "86fe66e5d3c720d0bcd76f5390f8f0489fc00270ced96a033548518376008421"
+    },
+    {
+      "path": "/assets/index-WrC4u-NV.css",
+      "sha256": "2d3fd97c040231dc78648dcf076c4bc42fc422d62177145dc71d5cb59b8de671"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

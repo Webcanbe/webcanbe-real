@@ -1,0 +1,107 @@
+[
+  {
+    "id": "redux-essentials",
+    "refused": [
+      {
+        "file": ".yarn/releases/yarn-4.2.2.cjs",
+        "reason": "Existing 2MiB member limit",
+        "bytes": 2742928
+      }
+    ],
+    "preservedMetadata": [],
+    "archive": "FAIL",
+    "firstError": "Unsafe ZIP path, type, or archive limit."
+  },
+  {
+    "id": "bulletproof-react",
+    "refused": [
+      {
+        "file": ".env.example",
+        "reason": "Credential-bearing or unsupported example URL."
+      },
+      {
+        "file": "generators/component/component.stories.tsx.hbs",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      },
+      {
+        "file": "generators/component/component.tsx.hbs",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      },
+      {
+        "file": "generators/component/index.ts.hbs",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      },
+      {
+        "file": "public/_redirects",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      }
+    ],
+    "preservedMetadata": [
+      {
+        "file": ".env.example-e2e",
+        "bytes": 139,
+        "sha256": "20f89d6c4f537decd5f1786e0748779ed6f0f04d226cb4b2a4aea6f7cb18b1df",
+        "applied": false
+      },
+      {
+        "file": ".prettierignore",
+        "bytes": 5,
+        "sha256": "fb043091b4d180d96a53feb9f97050962477aa63f0fe7ff0e2060cdfbeb366bb",
+        "applied": false
+      },
+      {
+        "file": ".prettierrc",
+        "bytes": 109,
+        "sha256": "16b37a36e2dd13b1f4f976b62dc46cb9ce714d79feca7498572f9741cd288b5a",
+        "applied": false
+      }
+    ],
+    "archive": "FAIL",
+    "firstError": "Credential-bearing or unsupported example URL."
+  },
+  {
+    "id": "todo-list-react",
+    "refused": [
+      {
+        "file": ".node-version",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      },
+      {
+        "file": ".whitesource",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      },
+      {
+        "file": "bun.lockb",
+        "reason": "Existing archive file-type allowlist (projectRegistry.ts:74)"
+      }
+    ],
+    "preservedMetadata": [
+      {
+        "file": ".editorconfig",
+        "bytes": 40,
+        "sha256": "560e96208a3af8dda846fb277dd59f5a063f5aea5bfb1913613aa017fd477a5a",
+        "applied": false
+      },
+      {
+        "file": ".env.example",
+        "bytes": 13,
+        "sha256": "f1938cc1659589feadd3c111995025c714411a25d5f3a4733fa821e0eb98ee05",
+        "applied": false
+      },
+      {
+        "file": ".npmrc",
+        "bytes": 50,
+        "sha256": "e8db3ef9636e2686d4fe95c2ed4c1de1393724eb1ad1fd35d537694a5c39bb83",
+        "applied": false
+      }
+    ],
+    "archive": "FAIL",
+    "firstError": "Unsupported archive file type."
+  },
+  {
+    "id": "zustand",
+    "refused": [],
+    "preservedMetadata": [],
+    "archive": "PASS"
+  }
+]

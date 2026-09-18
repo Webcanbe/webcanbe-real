@@ -1,0 +1,453 @@
+{
+  "schema": 1,
+  "baseFeature": "9a5c7579ec831d047df19cf5efbba676a6853279",
+  "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "parallelHead": "862575adbc617465db1d74d5ec343c8f691edc97",
+  "p05": "PARTIAL",
+  "passed": 76,
+  "failed": 0,
+  "p05TestsSkipped": 0,
+  "unrelatedTestsExcludedByNameFilter": 35,
+  "typescript": "PASS: tsc --noEmit --pretty false",
+  "fullRegression": "DEFERRED TO FINAL PHASE-2 CLOSURE",
+  "priorTestFilesVerified": 40,
+  "priorTestFilesChanged": [],
+  "tests": [
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "proves a complete pinned dependency and required-peer graph for yarn data",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "proves a complete pinned dependency and required-peer graph for bun data",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses integrity mismatches without substituting a host package",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses version mismatches without substituting a host package",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses missing-peer mismatches without substituting a host package",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses edge mismatches without substituting a host package",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "requires optional-peer declarations to agree and never drops required peers",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses unknown/Berry/protocol/duplicate Yarn semantics: # upstream data",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses unknown/Berry/protocol/duplicate Yarn semantics: __metadata:\n  version: 8\n",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses unknown/Berry/protocol/duplicate Yarn semantics: # yarn lockfile v1\n\"a@file:../private\":\n  version \"1.0.0\"",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "refuses unknown/Berry/protocol/duplicate Yarn semantics: # yarn lockfile v1\n\"a@1\":\n  version \"1.0.0\"\n  version \"1.0.0\"",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "rejects duplicate JSONC keys, extra workspaces, non-npm tuples and credential registries",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "selects the existing dedicated profile and compiles an authored project from a complete yarn graph",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "selects the existing dedicated profile and compiles an authored project from a complete bun graph",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .yarn/releases/yarn-4.2.2.cjs in Blob, HTTP and independent export compilation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .yarn/plugins/uploaded.cjs in Blob, HTTP and independent export compilation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .pnp.cjs in Blob, HTTP and independent export compilation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .pnp.loader.mjs in Blob, HTTP and independent export compilation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling src/.yarn/plugins/uploaded.cjs in Blob, HTTP and independent export compilation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses tooling as a static Vite plugin and through a source symlink",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "keeps the 4 MiB inert limit and 100:1 compression-ratio protection",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "keeps aggregate inflated, upload and entry-count limits for inert tooling",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "keeps archive path and Unix symlink confinement for the larger inert role",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "test": "round-trips every exact frozen Redux file, including its 2742928-byte Yarn release, and retains missing-graph refusal",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "test": "preserves the retained Todo binary Bun lock as opaque bytes and refuses graph admission",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-inert-tooling.test.ts",
+      "test": "gives only exact bundled Yarn release paths a larger inert preservation bound",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-inert-tooling.test.ts",
+      "test": "round-trips an oversized inert Yarn release while the ordinary 2 MiB member boundary remains",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-inert-tooling.test.ts",
+      "test": "preserves inert tooling as source-owned bytes but refuses importing it into the controlled browser graph",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-redux-real.test.ts",
+      "test": "parses the exact frozen reduxjs Yarn 4.2.2 lock without executing package-manager code",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "normalizes exact Yarn npm identities without executing a manager: alias@npm:real@^1.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "normalizes exact Yarn npm identities without executing a manager: @scope/alias@npm:@scope/real@^1.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "normalizes exact Yarn npm identities without executing a manager: real@npm:^1.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: npm:../private@1",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: npm:@scope/../../private@1",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: workspace:../private",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: file:../private",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: patch:real@1",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses unproved or escaping package descriptors: npm:real@https://evil.test/x",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "checks Yarn alias transitive and required peer edges at the aliased location",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "parses Berry v8 as finite data and preserves exact virtual peer identity",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "keeps Berry cache identity distinct from operator-owned npm package integrity",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "maps only the exact Yarn builtin compatibility patch to its underlying npm descriptor",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "keeps npm tags exact and permits checksum omission only for unvisited conditional records",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "refuses malformed checksum, virtual, patch, workspace and unknown Berry forms",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "refuses malformed checksum, virtual, patch, workspace and unknown Berry forms",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "refuses malformed checksum, virtual, patch, workspace and unknown Berry forms",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "refuses malformed checksum, virtual, patch, workspace and unknown Berry forms",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-berry.test.ts",
+      "test": "refuses malformed checksum, virtual, patch, workspace and unknown Berry forms",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "treats a changed well-formed cache hash only as unverified cache metadata, never npm SRI",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "rejects mismatch with an operator-owned berryChecksum attestation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "rejects mismatch with an operator-owned berryLocator attestation",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum 10c0/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum 9999/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum sha512-forged",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum 10c0/../../private",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum 10c0/gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum &uploaded",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum true",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses malicious or unsupported cache checksum 10C0/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses locator identity substitution pkg@npm:1.0.0 to other@npm:1.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses locator identity substitution pkg@npm:1.0.0 to pkg@npm:2.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses locator identity substitution pkg@npm:1.0.0 to pkg@virtual:abcdef12#npm:1.0.0",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "requires npm aliases to retain the real package identity through descriptor, locator and trusted location",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "preserves a 128-digit virtual identity and refuses a different virtual locator",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses two virtual peer instances mapped onto one trusted package location",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "checks peer constraints against the selected graph provider without inventing a peer descriptor",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "requires explicit trusted patched identity before normalizing builtin patch bytes",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol file:../secret",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol link:./local",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol portal:./local",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol git:https://example.com/repo",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol workspace:*",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses unsupported dependency protocol patch:pkg@npm%3A1.0.0#./uploaded.patch",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "refuses conflicting cache hashes for a repeated locator and duplicate metadata",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "omits only an optional package absent from the trusted graph, preserving its inert condition record",
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-trust.test.ts",
+      "test": "does not drop a required peer when the same name is an omitted optional dependency",
+      "status": "passed"
+    }
+  ],
+  "frozenRedux": {
+    "commit": "b4414e1504c914ece3253dd8a21adfb2278464d9",
+    "lockParse": "PASS",
+    "allDeclaredRootLocators": "PASS",
+    "allSourceAndExportBytes": "PASS",
+    "neededExecutableGraph": "FAIL: missing operator-owned package graph, including @reduxjs/toolkit and react-redux"
+  },
+  "inertYarn": {
+    "releaseBytes": 2742928,
+    "inertMemberLimit": 4194304,
+    "ordinaryMemberLimit": 2097152,
+    "archiveLimit": 26214400,
+    "aggregateLimit": 41943040,
+    "entries": 2000,
+    "maxCompressionRatio": 100,
+    "exactReleaseSha256": "1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef",
+    "executionRefusal": [
+      "Blob preview",
+      "HTTP preview",
+      "independent export compilation",
+      "Vite plugin",
+      "source symlink"
+    ],
+    "roundTrip": "PASS"
+  },
+  "bunBinary": {
+    "commit": "f48aef130c31452341450adfb6c3fc2234b79389",
+    "bytes": 262443,
+    "sha256": "4a6802815bb395350e14d4bd5d2162157bc2a21de755ca72c82a09dc8808c143",
+    "required": true,
+    "decoder": "NOT IMPLEMENTED",
+    "opaquePreservationAndAdmissionRefusal": "PASS"
+  },
+  "remainingP05Blockers": [
+    "Verified Bun binary decoder or trusted isolated metadata-only boundary",
+    "Exact retained Redux/Bulletproof/Todo operator-owned version/integrity/package graphs; graph-specific compatibility remains unproven"
+  ],
+  "internalBlockers": [
+    "P05",
+    "P39",
+    "P61"
+  ],
+  "phase2InternalClosure": false,
+  "security": {
+    "kind": "manual changed-path review; no broad scan",
+    "confirmedUnresolved": 0,
+    "corrected": [
+      "descriptor/locator virtual mismatch",
+      "same-location virtual or checksum substitution",
+      "unpatched-byte substitution for builtin patch",
+      "optional dependency erasing required peer",
+      "small uploaded Yarn plugins/PnP loader import",
+      "case-normalized virtual/cache identity"
+    ]
+  },
+  "failedIntermediateProbe": "Parallel inert preview fixture used noncanonical macOS temp path; corrected using realpath before testing the import guard."
+}

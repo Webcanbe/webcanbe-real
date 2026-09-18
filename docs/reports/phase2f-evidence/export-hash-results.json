@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "browser": "151.0.7922.34",
+  "nativeChromiumSandbox": true,
+  "independentViteBuild": true,
+  "noEditorServer": true,
+  "instrumentationAbsent": true,
+  "responsiveTailwind": true,
+  "CSSMedia": true,
+  "CSSModule": true,
+  "inline": true,
+  "flexDirectionGap": true,
+  "gridTracks": true,
+  "sourceOrder": true,
+  "nestedRouteHistoryRefresh": true,
+  "widths": [
+    1280,
+    768,
+    390
+  ],
+  "runtimeErrors": [],
+  "buildIsolation": {
+    "read": true,
+    "write": true,
+    "exec": true,
+    "network": true
+  },
+  "packageScriptsExecuted": false
+}

@@ -1,0 +1,36 @@
+{
+  "result": "PASS",
+  "command": "npm run runner:verify",
+  "boundary": "Linux namespaces and systemd cgroup inside the existing no-host-mount Lima VM",
+  "nativeChromiumSandbox": true,
+  "positiveControls": [
+    "fetch",
+    "WebSocket",
+    "EventSource",
+    "beacon",
+    "image",
+    "STUN",
+    "UDP TURN",
+    "supplied ICE",
+    "raw TCP",
+    "raw UDP",
+    "DNS",
+    "IPv4 loopback and guest network",
+    "IPv6 loopback"
+  ],
+  "isolatedExternalCollectorPackets": 0,
+  "outsideFilesystemAndProcessDenied": true,
+  "hostControlVsockDenied": true,
+  "secretCanaryAbsent": true,
+  "memoryExhaustionKilled": true,
+  "frozenWorkerKilledAfterMs": 65088,
+  "revokedGenerationDenied": true,
+  "resourceLimits": {
+    "memoryBytes": 1610612736,
+    "swapBytes": 0,
+    "tasks": 192,
+    "cpuPercent": 150,
+    "deadlineSeconds": 65
+  },
+  "scope": "Existing runner probe rerun; no new full DTLS/SCTP payload or cross-browser isolation claim."
+}

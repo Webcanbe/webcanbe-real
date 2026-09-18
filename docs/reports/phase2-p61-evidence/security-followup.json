@@ -1,0 +1,32 @@
+{
+  "scope": [
+    "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+    "scripts/runner/worker.cjs",
+    "src/webcanbe-engine/runtime/hostedRunnerGateway.ts",
+    "scripts/hosted/editor-main.ts",
+    "scripts/hosted/gateway-main.ts"
+  ],
+  "directConsumersReviewed": [
+    "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts",
+    "src/webcanbe-engine/runtime/linuxHostRunner.ts",
+    "src/webcanbe-engine/runtime/hostedLinuxRunner.ts",
+    "src/webcanbe-engine/runtime/controlledPreview.ts",
+    "scripts/runner/raster-capture.cjs",
+    "scripts/qa/common-hosted.cjs"
+  ],
+  "checks": {
+    "manifestTraversal": "safeArchivePath plus confinedFile and realpath confinement",
+    "manifestSymlinkEscape": "confinedFile rejects a realpath outside root",
+    "manifestSchemes": "HTTPS explicitly rejected; existing URL guard rejects arbitrary schemes and protocol-relative URLs",
+    "manifestExtensions": "only .json and .webmanifest",
+    "manifestAttributes": "crossorigin, media and sizes rejected; unknown attributes rejected by the finite link grammar",
+    "manifestExecution": "contents are never read, parsed or executed",
+    "networkSurface": "manifest link is removed from generated controlled-preview HTML",
+    "canonicalSource": "index.html is read-only and exact imported/exported source remains unchanged",
+    "selectionAuthority": "hasSelection is supervisor-only state set by validated input and cleared on navigation, route changes, updates and non-select pointer actions; disconnected elements clear on observation",
+    "errorExposure": "new callbacks are enabled only by operator-owned localTest configuration; public editor and mTLS gateway error bodies remain generic"
+  },
+  "broadScanRun": false,
+  "confirmedUnresolvedVulnerabilities": 0
+}

@@ -1,0 +1,1 @@
+export default function Archive(){return <main className='p-6 md:p-8'><h1 className='text-2xl font-bold'>Good work, carefully kept.</h1><p className='text-base'>A record of completed projects and the lessons they left.</p><article className='p-6 rounded-lg bg-white'><h2 className='text-lg'>Autumn publication</h2><p>Editorial design · Completed in October</p></article></main>}

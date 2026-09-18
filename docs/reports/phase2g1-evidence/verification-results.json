@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-14",
+  "implementationCommit": "401450f88162d46c1291544d4b8f101e5702d993",
+  "startingCommit": "52ada8d8a4a6d618d2b7202ec5780166fe35733a",
+  "branch": "phase-2-compatible-editor",
+  "unchangedMain": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "phase2g1": "PASS (bounded local foundation)",
+  "overallPhase2": "NOT YET",
+  "publicHostedImportReady": false,
+  "unitIntegrationSecurity": {
+    "passed": 263,
+    "originalUnchanged": 196,
+    "new": 67,
+    "testFiles": 11
+  },
+  "typescript": "PASS",
+  "productionBuild": "PASS",
+  "productionBuildNote": "Existing lazy Code chunk advisory: 543.01 kB / 184.66 kB gzip",
+  "realIsolationAndResourceProbes": "PASS (local Lima)",
+  "retainedBrowserRegressions": "PASS",
+  "codeCanvasRevisionRestartCrash": "PASS",
+  "responsiveSemanticBothRouters": "PASS",
+  "hostedStyleRealSqliteHttpLima": "PASS (not production)",
+  "independentExportBuildRender": {
+    "cases": 6,
+    "status": "PASS"
+  },
+  "trueReactModuleHmr": false,
+  "cssHotUpdate": true,
+  "moduleIncrementalRebuildReload": true,
+  "structuralControlledGenerationRestart": true,
+  "cleanup": {
+    "activeOrPendingJobUnits": 0,
+    "localVmStopped": true
+  },
+  "outgoingReview": {
+    "credentialsPrivateKeysCookiesTokens": "No real credentials included",
+    "privateSource": "None; authored fixtures and licensed public templates only",
+    "qaArtifactsVmStatePersonalPaths": "Excluded",
+    "independentTemplatesUnchanged": true
+  },
+  "unproven": [
+    "Verified deployed identity provider",
+    "Production HTTPS/DNS/editor-viewer cookie and CSP behavior",
+    "Real hosted RunnerProvider isolation and capacity",
+    "Hosted durable source/history/object storage",
+    "Multi-host scheduler fencing and revocation races",
+    "Production secret-manager delivery",
+    "Substantial unchanged independent full-project corpus",
+    "Final external security/compatibility audit"
+  ],
+  "runtimeSourceSha256": {
+    "scripts/runner/worker.cjs": "cfef76b0b00805fe7da6d02425313a0e33dde3ff63753d394c3d61cdbe32bc9e",
+    "scripts/runner/stop.sh": "2ed3b3e0ed6e561fabdcf1a5d21fb2aa6e1bf5a3b3c8685a0f91b9e6fdc4adc2"
+  }
+}

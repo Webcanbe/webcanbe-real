@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {},
+  "schema": 2,
+  "configuration": [],
+  "base": "/",
+  "environment": {},
+  "profile": "react19-vite6",
+  "supported": false,
+  "aliases": {},
+  "clientDependencies": [],
+  "dependencies": [],
+  "issues": [
+    {
+      "code": "runtime-inspection",
+      "message": "Registered project root changed.",
+      "requiredCapability": "A separately approved dependency/runtime profile or isolated build runner",
+      "file": "package.json / package-lock.json",
+      "classification": "unsupported"
+    }
+  ],
+  "notes": []
+}

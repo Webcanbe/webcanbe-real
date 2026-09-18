@@ -1,0 +1,1187 @@
+{
+  "schema": 1,
+  "candidate": "containing phase-2-compatible-editor publication commit",
+  "candidateBase": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797",
+  "base": "13871b0311c09ae07d9a8bb3e8598f46a9d38f6c",
+  "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "counts": {
+    "PASS": 50,
+    "PARTIAL": 1,
+    "EXTERNAL-EVIDENCE": 12,
+    "FAIL": 1
+  },
+  "practicalPhase2": "CLOSED",
+  "internalClosure": "NOT YET under the original strict DoD because P39 native acceptance is deferred",
+  "commonApplicationCheckpoint": "PASS",
+  "completeApplications": 2,
+  "internalRemaining": [
+    "P39"
+  ],
+  "externalRemaining": [
+    "P29",
+    "P41",
+    "P43",
+    "P45",
+    "P46",
+    "P48",
+    "P49",
+    "P50",
+    "P51",
+    "P52",
+    "P55",
+    "P56"
+  ],
+  "deferredLaterPhase": [
+    "P64"
+  ],
+  "rows": [
+    {
+      "id": "P01",
+      "requirement": "Source files canonical; adapter/bridge/runtime/transaction boundaries; Phase 1 preserved (all)",
+      "status": "PASS",
+      "evidence": "Real source remains canonical; hosted PostgreSQL contains source and ledger together. Local mode retains its explicit file authority. Shared source operations preserve adapter/bridge/runtime/transaction boundaries. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Real source remains canonical; hosted PostgreSQL contains source and ledger together. Local mode retains its explicit file authority. Shared source operations preserve adapter/bridge/runtime/transaction boundaries.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P02",
+      "requirement": "ZIP nonexecution, bounded bytes/files/ratios, encoding/path/link/secret rejection (2/recovery)",
+      "status": "PASS",
+      "evidence": "Original archive/path/link/CRC/encoding/resource tests unchanged. Finite16KiB metadata grammar added with secret/comment/URL rejection; refused original corpus members remain visible. No blanket limit increase or silent filtering. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Original archive/path/link/CRC/encoding/resource tests unchanged. Finite16KiB metadata grammar added with secret/comment/URL rejection; refused original corpus members remain visible. No blanket limit increase or silent filtering.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P03",
+      "requirement": "Intake, runtime, visual compatibility, security admission and export reported independently (2/B/G.1)",
+      "status": "PASS",
+      "evidence": "Six-case stage receipts distinguish intake, dependency/config, compile, startup, assets, render, mapped selection, Visual/Code/responsive/history/restart/export/build/render. One full PASS; degraded Recipe and timed-out Zustand remain failures. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Six-case stage receipts distinguish intake, dependency/config, compile, startup, assets, render, mapped selection, Visual/Code/responsive/history/restart/export/build/render. One full PASS; degraded Recipe and timed-out Zustand remain failures.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P04",
+      "requirement": "Deterministic dedicated dependency pins, manifest/lock/integrity, no host fallback (B)",
+      "status": "PASS",
+      "evidence": "All four existing locks unchanged; two new explicit profiles with exact pins. Trusted path-aware dependency/peer closure and npm lock integrity verified; no editor fallback or uploaded installs. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "All four existing locks unchanged; two new explicit profiles with exact pins. Trusted path-aware dependency/peer closure and npm lock integrity verified; no editor fallback or uploaded installs.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P05",
+      "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
+      "status": "PASS",
+      "evidence": "Finite Berry v8 and bounded Bun v1.1.42 binary decoding remain proven. Exact operator-owned reachable profiles admit frozen Redux and Bulletproof. The exact @julr/unocss-preset-forms@1.0.0 zero-argument behavior is statically translated to fixed operator-owned rules and preflight under pinned UnoCSS 66.0.0; the incompatible third-party package is an exact lock-attested configuration marker and is never executed. Exact unchanged Todo passes graph admission, CSS/browser/export compilation and byte preservation without running preinstall. The final stale-expectation cleanup retains missing-profile and malformed/tampered/substituted/untrusted lock refusal coverage; targeted diagnostics pass 97/97 and the final preserved regression passes 730/730. TypeScript and build pass.",
+      "evidenceSource": "docs/reports/phase2-p05-closure.md",
+      "missingProof": "None for the retained finite P05 software requirement.",
+      "internallyClosable": "Closed at the retained bounded runtime/dependency/lockfile requirement.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
+      "evidenceFiles": [
+        "../phase2-compatibility-edge-evidence/regressions.json",
+        "../phase2-compatibility-edge-evidence/application-stage-results.json",
+        "../phase2-compatibility-edge-evidence/profile-audit.json",
+        "../phase2-compatibility-edge-evidence/uno-native.json",
+        "../phase2-compatibility-edge-evidence/security/final-reread.json",
+        "../phase2-p05-evidence/targeted-tests.json"
+      ],
+      "disposition": "P05 PASS. The exact forms package identity remains validated as source metadata while fixed operator-owned behavior runs inside the strict locked UnoCSS 66 compiler closure. Executed packages retain normal dependency and peer validation. No uploaded manager/plugin/script execution, package installation, online resolution, host fallback, or source/export mutation. P39/P61 and every other row are untouched.",
+      "priorCheckpoint": {
+        "id": "P05",
+        "requirement": "React 18/19 and wider runtime/dependency/version/lockfile profiles (B/G.1)",
+        "status": "PARTIAL",
+        "evidence": "Added react19-vite7.1-v1 (React 19.2, Vite 7.1.9, Tailwind 4.1.14) without altering the old profiles; Habit’s exact immutable npm graph passes. Static frozen-corpus diagnosis retains all unsupported graphs.",
+        "evidenceSource": "docs/reports/phase2-common-applications.md",
+        "missingProof": "Yarn/Bun lock and pinned dependency/version graphs remain unsupported. The exact Redux archive contains .yarn/releases/yarn-4.2.2.cjs at 2,742,928 bytes, above the retained 2 MiB member limit.",
+        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+        "priorStatus": "PARTIAL",
+        "priorEvidence": "React18/Vite6/Lucide and React19/Vite7/Tippy/Immer profiles now run conventional applications. Broader packages/version/Yarn/Bun/profile coverage remains internal work.",
+        "evidenceFiles": [
+          "current-compatibility.json",
+          "habit-initial-compatibility.json",
+          "full-application-acceptance.json"
+        ],
+        "disposition": "General lock adapters need complete immutable version/integrity/peer-graph verification and operator-owned package profiles. Supporting the unchanged oversized Redux member would violate this run’s explicit fixed-limit/no-dropped-file constraint. Other graph gaps remain internal engineering, not external credentials."
+      }
+    },
+    {
+      "id": "P06",
+      "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
+      "status": "PASS",
+      "evidence": "Static Vite/HTML relationships now register actual confined source directories, shared by Visual/Code/local and PG history/semantic checks/export. The actual ZIP is independently rebuilt through trusted esbuild and fixed pinned Rollup; finite external/minimum chunk options reach the production gate. Source/config bytes stay unchanged.",
+      "evidenceSource": "docs/reports/phase2-p06-closure.md",
+      "missingProof": "NONE for the retained finite P06 requirement. Unknown/dynamic executable effects remain unsupported; Todo missing runtime alias is an upstream incompatibility.",
+      "internallyClosable": "Closed at the retained bounded static-configuration requirement.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
+      "evidenceFiles": [
+        "../phase2-p06-evidence/regressions.json",
+        "../phase2-p06-evidence/standalone-export.json",
+        "../phase2-p06-evidence/security-review.json",
+        "../phase2-p06-evidence/threat-model.md"
+      ],
+      "disposition": "PASS: canonical nested roots and independent complete application export-build integration proven. Preview and production-build semantics remain distinct; no uploaded configuration/plugins/scripts, source rewriting or host fallback.",
+      "priorCheckpoint": {
+        "id": "P06",
+        "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
+        "status": "PARTIAL",
+        "evidence": "Literal confined non-root Vite relationships derive HTML/public/entry paths when source remains in canonical src; matching aliases retain their explicit base. Finite Rollup external fs/promises/minChunkSize3500 production-build plan and isolated immutable-graph helper tested. Todo missing runtime alias mechanism correctly refused.",
+        "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
+        "missingProof": "Separate nested source trees outside canonical top-level src; full independent canonical application export-to-resolved-graph composition and finite Rollup helper integration. Direct helper tests do not prove full application export parity.",
+        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+        "priorStatus": "PARTIAL",
+        "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
+        "evidenceFiles": [
+          "../phase2-compatibility-edge-evidence/regressions.json",
+          "../phase2-compatibility-edge-evidence/application-stage-results.json",
+          "../phase2-compatibility-edge-evidence/profile-audit.json",
+          "../phase2-compatibility-edge-evidence/uno-native.json",
+          "../phase2-compatibility-edge-evidence/security/final-reread.json"
+        ],
+        "disposition": "Two internal integration blockers remain. Production chunk settings do not affect preview; reachable Node imports are still refused. Todo undeclared runtime alias is an upstream incompatibility, not an invented mapping. Unknown dynamic config/plugins remain unsupported.",
+        "priorCheckpoint": {
+          "id": "P06",
+          "requirement": "Static Vite/TS/JS aliases/config, no arbitrary Node/lifecycle/config in editor (B/G.1)",
+          "status": "PARTIAL",
+          "evidence": "Finite default Tailwind no-op configuration and inert .gitattributes grammar added; no uploaded executable config is evaluated. Broader retained plugin/config cases remain unsupported.",
+          "evidenceSource": "docs/reports/phase2-common-applications.md",
+          "missingProof": "Custom HTML mount semantics, vite-tsconfig-paths, unocss/vite and the retained @ alias/config combinations remain unsupported.",
+          "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+          "priorStatus": "PARTIAL",
+          "priorEvidence": "Literal imported path aliases and noarg literal config factories safely interpreted. Server open/port hints preserved-not-applied. Dynamic config, proxies and arbitrary plugins remain unsupported.",
+          "evidenceFiles": [
+            "current-compatibility.json",
+            "regressions.json"
+          ],
+          "disposition": "Each requires a finite static adapter with exact resolution and adversarial refusal tests. Executing uploaded plugins/config or guessing their behavior would break the retained trust boundary. No DoD waiver is claimed."
+        }
+      }
+    },
+    {
+      "id": "P07",
+      "requirement": "Common dependencies, CSS/Modules, assets/public base, static env (B/G.1)",
+      "status": "PASS",
+      "evidence": "Explicit server-owned public VITE value provider plus project/workspace/session/revision checks; expanded finite metadata/example-env and opaque binary preservation; separate bounded HTTPS DNS-pinned static image/font/CSS cache. Exact67-file Recipe passes packaged PG/mTLS rendering and byte-exact export; exact artifact decodes required images/fonts with no direct runner egress.",
+      "evidenceSource": "docs/reports/phase2-compatibility-breadth-closure.md",
+      "missingProof": "None for retained finite public-env/file/static-resource requirements. Dynamic/authenticated resources, remote active content, arbitrary file types and general runner egress remain deliberately outside the supported boundary.",
+      "internallyClosable": "Closed for the retained bounded software requirement.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Common browser transitive/peer dependencies and preserved CSS resource references work. Required external recipe images/fonts remain unavailable under default egress denial; broader assets/public-env/config support remains.",
+      "evidenceFiles": [
+        "../phase2-compatibility-breadth-evidence/regressions.json",
+        "../phase2-compatibility-breadth-evidence/application-stage-results.json",
+        "../phase2-compatibility-breadth-evidence/security/final-remediation.json"
+      ],
+      "disposition": "P07 software capability closes with48-resource/2MiB-response/8MiB-total/10second/four-concurrent bounds and current authority before/after asynchronous work. A single generic422 during simultaneous regression load remains documented; no capacity/endurance or guaranteed external-service availability claim. P39/P61 remain unchanged.",
+      "priorCheckpoint": {
+        "id": "P07",
+        "requirement": "Common dependencies, CSS/Modules, assets/public base, static env (B/G.1)",
+        "status": "PARTIAL",
+        "evidence": "All required local Habit/Kanban resources render unchanged, and exports build/render independently. Optional upstream missing favicon is disclosed. Recipe\u2019s required remote assets are still unavailable.",
+        "evidenceSource": "docs/reports/phase2-common-applications.md",
+        "missingProof": "A broader explicit public-env grant model and example-env/file breadth remain unfinished; Recipe Book\u2019s required remote Cloudinary images/Google fonts remain unavailable.",
+        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+        "priorStatus": "PARTIAL",
+        "priorEvidence": "Common browser transitive/peer dependencies and preserved CSS resource references work. Required external recipe images/fonts remain unavailable under default egress denial; broader assets/public-env/config support remains.",
+        "evidenceFiles": [
+          "current-compatibility.json",
+          "full-application-acceptance.json"
+        ],
+        "disposition": "Credential-pattern example files cannot become preview secrets. A required-asset fetch/cache service would introduce a separate trusted SSRF/cache boundary; it was not added merely for Recipe. Runner egress stays denied. Bulletproof .hbs/_redirects and Todo .node-version/.whitesource/bun.lockb remain exact admission gaps."
+      }
+    },
+    {
+      "id": "P08",
+      "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
+      "status": "PASS",
+      "evidence": "Retains Tailwind3/4/PostCSS and Uno66 finite adapters; adds pinned Uno65.5.0/forms1.0.0, directives and variant-group transformers, literal presetUno dark media/class options, responsive interaction, immutable transformed JS/HTML/CSS sources and export preservation. Positive compiler/native-render and malformed/dynamic refusal tests pass.",
+      "evidenceSource": "docs/reports/phase2-compatibility-edge-closure.md",
+      "missingProof": "NONE for the requested retained finite compiler semantics. Todo exact dependency graph and forms1/Uno66 peer conflict remain P05/application issues.",
+      "internallyClosable": "Retained finite internal requirement closed; no external evidence substitution.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Finite literal numeric @theme colors added on pinned Tailwind4. Tailwind3/PostCSS/UnoCSS and broader configuration/vocabulary remain unsupported.",
+      "evidenceFiles": [
+        "../phase2-compatibility-edge-evidence/regressions.json",
+        "../phase2-compatibility-edge-evidence/application-stage-results.json",
+        "../phase2-compatibility-edge-evidence/profile-audit.json",
+        "../phase2-compatibility-edge-evidence/uno-native.json",
+        "../phase2-compatibility-edge-evidence/security/final-reread.json"
+      ],
+      "disposition": "Operator-owned normalized literal config only; uploaded configuration/plugins never execute. Unknown executable adapters and compiler versions remain explicitly unsupported. PASS does not imply universal plugin support or force every retained application to full PASS.",
+      "priorCheckpoint": {
+        "id": "P08",
+        "requirement": "Tailwind/config/themes/utility vocabulary (2/B/F/G.1)",
+        "status": "PARTIAL",
+        "evidence": "Pinned Tailwind 4 profile/default no-op config passes; finite adapter does not claim Tailwind 3/PostCSS/UnoCSS support.",
+        "evidenceSource": "docs/reports/phase2-common-applications.md",
+        "missingProof": "Finite Tailwind 3/PostCSS/UnoCSS configuration and utility adapters remain unsupported; the new exact profile and default no-op Tailwind config cover Tailwind 4 only.",
+        "internallyClosable": "Internal work remains; not reclassified as production evidence.",
+        "priorStatus": "PARTIAL",
+        "priorEvidence": "Finite literal numeric @theme colors added on pinned Tailwind4. Tailwind3/PostCSS/UnoCSS and broader configuration/vocabulary remain unsupported.",
+        "evidenceFiles": [
+          "current-compatibility.json",
+          "regressions.json"
+        ],
+        "disposition": "These need pinned compiler graphs plus safe static semantics. Running uploaded configuration, silently removing it, or treating a no-op Tailwind 4 case as general support is not allowed."
+      }
+    },
+    {
+      "id": "P09",
+      "requirement": "HashRouter, BrowserRouter, basename, deep links/query/hash, native history/refresh/assets/404 (B/C/C.2)",
+      "status": "PASS",
+      "evidence": "All retained HashRouter/BrowserRouter/basename/deep-link/query/hash/history/refresh/asset browser regressions pass. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "All retained HashRouter/BrowserRouter/basename/deep-link/query/hash/history/refresh/asset browser regressions pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P10",
+      "requirement": "Native DOM/component/fragment/repeated-child source mapping and exact ranges (2/F)",
+      "status": "PASS",
+      "evidence": "Finite immutable literal and component-definition tracing handles relative imports, aliases, named/default/namespace bindings and re-export chains with exact file/ranges. Repeated instances disclose shared scope; unprovable origins stay Code-only.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Actual Kanban/Recipe viewer headings map to exact source ranges and visible edits. Retained DOM-only custom-renderer instrumentation unchanged. General component/prop/repeated/cross-file mapping still incomplete.",
+      "evidenceFiles": [
+        "history-origins-1789395351589.json",
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P11",
+      "requirement": "Text/CSS/Modules/inline/Tailwind/clsx/cn source patches (2/B/F)",
+      "status": "PASS",
+      "evidence": "Retained bounded text/CSS/Modules/inline/Tailwind/clsx/cn source patches, inverses and browser round trips pass. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Retained bounded text/CSS/Modules/inline/Tailwind/clsx/cn source patches, inverses and browser round trips pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P12",
+      "requirement": "Broader CSS cascade, inherited/effective values, dynamic/shared-source disclosure (2/F)",
+      "status": "PASS",
+      "evidence": "Selector analysis rules out only provable nonmatches. Unknown selectors remain possible overrides, and ambiguous/dynamic cascade no longer receives an unproven effective-value label. Existing CSS Module/state/media/shared-class safety retained.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Safe static source origins and explicit shared scope remain enforced. Ambiguous dynamic cascade, container/shared runtime values and broader effective-value reconciliation remain Code-only.",
+      "evidenceFiles": [
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P13",
+      "requirement": "Real 390/768/1280 viewports, separate authoring breakpoints (2/F)",
+      "status": "PASS",
+      "evidence": "Real390/768/1280 before/after on two unchanged applications; exact measured responsive heading values. Kanban upstream mobile overlap preserved, not redesigned. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Real390/768/1280 before/after on two unchanged applications; exact measured responsive heading values. Kanban upstream mobile overlap preserved, not redesigned.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P14",
+      "requirement": "Existing responsive CSS/Tailwind exact declaration edits and inverse (2/F)",
+      "status": "PASS",
+      "evidence": "Existing responsive declarations/tokens and source inverses survive retained browser/history/restart/export checks. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Existing responsive declarations/tokens and source inverses survive retained browser/history/restart/export checks.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P15",
+      "requirement": "New responsive construct authoring, missing media/variant creation (B/F)",
+      "status": "PASS",
+      "evidence": "Actual mapped full-app Visual override creates md:text-4xl, inverse/removal/redo/export verified. Recipe retains its larger lg rule. Dynamic origin breadth remains P12/P18. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Actual mapped full-app Visual override creates md:text-4xl, inverse/removal/redo/export verified. Recipe retains its larger lg rule. Dynamic origin breadth remains P12/P18.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P16",
+      "requirement": "Semantic Flex/Grid alignment/gap/order/sizing with real source (2/F)",
+      "status": "PASS",
+      "evidence": "Existing semantic Flex/Grid/gap/alignment/sizing/source-order controls and exact source inverses pass. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Existing semantic Flex/Grid/gap/alignment/sizing/source-order controls and exact source inverses pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P17",
+      "requirement": "Semantic pointer drag/resize breadth without coordinate document model (C/F)",
+      "status": "PASS",
+      "evidence": "Real pointer and keyboard operations resize exact authored literal dimensions/gap and reorder adjacent Flex/Grid source siblings. Explicit breakpoint/shared scope and stale gesture cancellation preserve ordinary source transactions.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "General semantic pointer drag/resize remains unimplemented; explicit adjacent reorder/layout controls do not claim gesture breadth.",
+      "evidenceFiles": [
+        "gestures-1789392638479.json",
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P18",
+      "requirement": "General prop/cross-file value origins and precise instance effects (F)",
+      "status": "PASS",
+      "evidence": "Cross-file .mts literal origin edits patch only the exact defining source range. Component aliases/re-exports and prop aliases disclose exact callers and shared effect. Instance-only requests against shared origins are refused, without hidden overrides.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Local literal/data tracing remains; general prop and cross-file origin tracing and precise per-instance effects need further software work.",
+      "evidenceFiles": [
+        "history-origins-1789395351589.json",
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P19",
+      "requirement": "Functional editable Code tree/drafts/diagnostics/save/diff/dirty markers (D/E)",
+      "status": "PASS",
+      "evidence": "Functional Code tree, dirty tabs, diagnostics/save/diff preserved. Save-all and acknowledged draft recovery added; actual built hosted browser flow passes. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Functional Code tree, dirty tabs, diagnostics/save/diff preserved. Save-all and acknowledged draft recovery added; actual built hosted browser flow passes.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P20",
+      "requirement": "Code\u2194Canvas reanalysis, stale selection/SourceAnchor invalidation (D/E/F)",
+      "status": "PASS",
+      "evidence": "Full-app Code/Canvas revisions and mapped identity checks pass. Raster capture mode/callback stability fixed; sequence rebinding only for identical pixels and authority/geometry. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Full-app Code/Canvas revisions and mapped identity checks pass. Raster capture mode/callback stability fixed; sequence rebinding only for identical pixels and authority/geometry.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P21",
+      "requirement": "Invalid draft preserves canonical source and last-good preview (D/E)",
+      "status": "PASS",
+      "evidence": "Invalid drafts and failed source/history writes preserve accepted state; all original parse/compile/last-good preview cases remain unchanged and pass. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Invalid drafts and failed source/history writes preserve accepted state; all original parse/compile/last-good preview cases remain unchanged and pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P22",
+      "requirement": "Multi-file create/update/rename/delete acceptance and compile validation (D/E)",
+      "status": "PASS",
+      "evidence": "Original create/update/rename/delete and crash tests preserved. Actual hosted two-file update accepts one coherent PostgreSQL revision/history transaction. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Original create/update/rename/delete and crash tests preserved. Actual hosted two-file update accepts one coherent PostgreSQL revision/history transaction.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P23",
+      "requirement": "Multi-file save UI, import rewrite, supported broader source scope (D/E)",
+      "status": "PASS",
+      "evidence": "AST-aware file moves rewrite static relative import/export/import-equals/dynamic-import/require/new URL and CSS references with extension/index/alias resolution. .mts/.cts/.mjs/.cjs join explicit source-scope v2; ambiguous/dynamic references refuse atomically.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Save all dirty files now uses one current-base transaction with per-file hashes, stable retry identity and accepted hashes. Automatic import rewrites and broader editable source scope remain open.",
+      "evidenceFiles": [
+        "authoring-1789391035421.json",
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P24",
+      "requirement": "Durable unsaved drafts and recovery UX (D/E)",
+      "status": "PASS",
+      "evidence": "Acknowledged personal drafts persist in PostgreSQL or explicit local private storage with CAS; they remain proposals separate from accepted source/history. Real process restart and full browser reload recover them. Pre-acknowledgement edits may be lost; backup errors are visible. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Acknowledged personal drafts persist in PostgreSQL or explicit local private storage with CAS; they remain proposals separate from accepted source/history. Real process restart and full browser reload recover them. Pre-acknowledgement edits may be lost; backup errors are visible.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P25",
+      "requirement": "Semantic uploaded TypeScript checking, external Git/source ingestion (D/E)",
+      "status": "PASS",
+      "evidence": "Isolated pinned TypeScript semantic diagnostics are distinct from parse/build/runtime, with no emit or accepted-source mutation. Fixed-host immutable GitHub intake validates DNS/IP, bounded bytes/deadlines and fresh tenant authority, preserving all source bytes/provenance in PG.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "FAIL",
+      "priorEvidence": "Semantic checking of uploaded TypeScript and external Git/source ingestion product path remain unimplemented. QA fetching is not product ingestion.",
+      "evidenceFiles": [
+        "authoring-1789391035421.json",
+        "ingestion-1789393019582.json",
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P26",
+      "requirement": "Unique revision/parent/hash/idempotency/stale CAS; no ABA (D/E)",
+      "status": "PASS",
+      "evidence": "Actual concurrent HTTP edits yield one acceptance/one stale conflict; exact retry survives restart, changed payload conflicts, immutable history and source epoch prevent ABA. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Actual concurrent HTTP edits yield one acceptance/one stale conflict; exact retry survives restart, changed payload conflicts, immutable history and source epoch prevent ABA.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P27",
+      "requirement": "Durable atomic source/history and crash recovery, actual SIGKILL (D/E/G.1)",
+      "status": "PASS",
+      "evidence": "Both full-app accepted source and ledger persist byte-exact across actual packaged CLI SIGKILL/reconnect; retained adversarial PG crash/fault regressions pass. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Both full-app accepted source and ledger persist byte-exact across actual packaged CLI SIGKILL/reconnect; retained adversarial PG crash/fault regressions pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P28",
+      "requirement": "Undo/redo/selective inverse retains unrelated changes; same-file conflicts (D/E)",
+      "status": "PASS",
+      "evidence": "Original selective inverse/redo/same-file conflict/unrelated-file survival and restart checks pass through shared source semantics. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Original selective inverse/redo/same-file conflict/unrelated-file survival and restart checks pass through shared source semantics.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P29",
+      "requirement": "History retention/quotas/compaction/backups/migration/recovery (D/E/G.1)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Internal software PASS: lossless bounded same-ledger archives, explicit source-scope migration, archived audit/retry/revert, previewed restore as a new transaction, fault recovery and PG CAS/ancestry checks. Actual UI compaction/restore/undo-redo/SIGKILL/export passes. Deployed backup/PITR/retention remains external.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Deployed backup/PITR, isolated restore, retention and durable storage operation proof.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Existing 64MiB/1000-transaction ledger and journal/load caps remain. History compaction/archival/migration/recovery UX needs software; deployed backup/PITR/restore evidence remains external.",
+      "evidenceFiles": [
+        "history-origins-1789395351589.json",
+        "history-design.md",
+        "regressions.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P30",
+      "requirement": "Independent source export exactness/build/render, no instrumentation/platform runtime (2/B/D/E/G.1)",
+      "status": "PASS",
+      "evidence": "Eight retained export build/render/interaction regressions repeat inside Linux. Kanban exact16file accepted export builds and renders/interacts independently; corpus-specific failures remain P59. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Eight retained export build/render/interaction regressions repeat inside Linux. Kanban exact16file accepted export builds and renders/interacts independently; corpus-specific failures remain P59.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P31",
+      "requirement": "Genuine imported HMR / component-state-preserving React updates (2/B/F/G.1)",
+      "status": "PASS",
+      "evidence": "Safe immutable helper/barrel graph propagation reaches stable React boundaries with genuine state preservation on React 18 and 19. Unsupported side effects, changed/cyclic graph boundaries and mutable constructs fall back to accurately labelled reload/restart.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Kanban Visual/Code component updates preserve created card with actual Fast Refresh. Recipe component changes fall back to generation startup. CSS/reload/restart classification stays truthful; broader graph support open.",
+      "evidenceFiles": [
+        "regressions.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P32",
+      "requirement": "CSS incremental update, generation restart and stale digest/frame rejection (G.1)",
+      "status": "PASS",
+      "evidence": "Real hosted CSS hot update, component Fast Refresh, incremental rebuild/document reload with state reset and generation restart are separately asserted. Async sweep and UI response guards reject older revision observations; a real delayed old-revision capture receives409 after acceptance and cannot expire the refreshed preview. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Real hosted CSS hot update, component Fast Refresh, incremental rebuild/document reload with state reset and generation restart are separately asserted. Async sweep and UI response guards reject older revision observations; a real delayed old-revision capture receives409 after acceptance and cannot expire the refreshed preview.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P33",
+      "requirement": "Strict uploaded JS outside ordinary browser, raster-only mediated input/observations (C.1/C.2)",
+      "status": "PASS",
+      "evidence": "Strict project JavaScript remains in isolated Linux Chromium. Ordinary browser receives fixed raster/viewer code and bounded observations/input only. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Strict project JavaScript remains in isolated Linux Chromium. Ordinary browser receives fixed raster/viewer code and bounded observations/input only.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P34",
+      "requirement": "Browser-only CSP strict zero-egress claim (recovery/B/C)",
+      "status": "PASS",
+      "evidence": "Historical browser-only CSP zero-egress claim stays disproved. Actual positive/negative OS collector evidence supplies the stronger strict boundary; CSP is not credited as OS isolation. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Historical browser-only CSP zero-egress claim stays disproved. Actual positive/negative OS collector evidence supplies the stronger strict boundary; CSP is not credited as OS isolation.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P35",
+      "requirement": "Isolated job, native Chromium sandbox, no source mount/platform secrets (C.1/C.2)",
+      "status": "PASS",
+      "evidence": "Actual native Chromium sandbox, no source mount and cleared platform-secret environment preserved in Lima and mTLS gateway. External cloud-host proof remains P48/P56. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Actual native Chromium sandbox, no source mount and cleared platform-secret environment preserved in Lima and mTLS gateway. External cloud-host proof remains P48/P56.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P36",
+      "requirement": "External DNS/TCP/UDP/HTTP/WS/RTC/STUN/TURN/IPv4/IPv6 denial (C.1/C.2)",
+      "status": "PASS",
+      "evidence": "All original positive and isolated DNS/TCP/UDP/HTTP/WS/RTC/STUN/TURN/ICE/IPv4/IPv6 probes pass with zero isolated collector records. Full DTLS/SCTP payload corpus is not separately claimed. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "All original positive and isolated DNS/TCP/UDP/HTTP/WS/RTC/STUN/TURN/ICE/IPv4/IPv6 probes pass with zero isolated collector records. Full DTLS/SCTP payload corpus is not separately claimed.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P37",
+      "requirement": "Process/filesystem/control socket escape and resource/fork/task exhaustion (C.2)",
+      "status": "PASS",
+      "evidence": "Actual process/filesystem/shell/VSOCK/memory/CPU-property checks pass. New finite fork probe reaches TasksMax: 182 children, next fork denied, every child reaped. This closes the local deliberate task-exhaustion gap; arbitrary kernel escapes/cloud hosts are not claimed. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Actual process/filesystem/shell/VSOCK/memory/CPU-property checks pass. New finite fork probe reaches TasksMax: 182 children, next fork denied, every child reaped. This closes the local deliberate task-exhaustion gap; arbitrary kernel escapes/cloud hosts are not claimed.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P38",
+      "requirement": "Timeouts/frozen worker/stop races/cleanup verification/quarantine (C.2/G.1)",
+      "status": "PASS",
+      "evidence": "Final native watchdog65069ms, memory kill and verified cleanup/revocation pass; quarantined leases remain counted until verified stop. Zustand ordinary4000ms capture failure retained. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Final native watchdog65069ms, memory kill and verified cleanup/revocation pass; quarantined leases remain counted until verified stop. Zustand ordinary4000ms capture failure retained.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P39",
+      "requirement": "Viewer keyboard/text input/accessibility/streaming/reconnect ergonomics (C.2/D/E)",
+      "status": "PARTIAL",
+      "evidence": "Prior browser/endurance/AX evidence remains preserved. The parallel native macOS harness produced 28/30 targeted passes with production code unchanged. Korean 2-Set was observed as the native input source, but the driver did not traverse the OS IME and emitted no native composition lifecycle. VoiceOver was running, but the attempted chord reached the application and did not prove VoiceOver cursor movement or trusted activation. The user explicitly deferred the remaining physical native acceptance; the harness and runner VM were stopped and receipts preserved.",
+      "evidenceSource": "docs/reports/phase2-p39-native-macos.md",
+      "missingProof": "Physical native macOS IME composition completion/lifecycle and real interactive VoiceOver cursor, activation, focus, and screen-reader semantics remain unproven. Synthetic/CDP/Playwright input and AX snapshots are not substitutes.",
+      "internallyClosable": "Native acceptance is explicitly DEFERRED, so P39 remains PARTIAL under the original strict DoD.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Exact-pixel queued pointer rebinding and current mode callbacks fix actual viewer selection workflow. Remaining IME/clipboard/accessibility/streaming/long-session/reconnect breadth unchanged.",
+      "evidenceFiles": [
+        "docs/reports/phase2-p39-evidence/browser.json",
+        "docs/reports/phase2-p39-evidence/endurance.json",
+        "docs/reports/phase2-p39-evidence/native-probe.json",
+        "docs/reports/phase2-p39-evidence/regressions.json",
+        "docs/reports/phase2-p39-native-macos.md",
+        "docs/reports/phase2-p39-native-macos-evidence.json"
+      ],
+      "disposition": "PARTIAL / native acceptance DEFERRED. NATIVE_IME=FAIL, VOICEOVER=FAIL, TARGETED_TESTS=28/30, PRODUCTION_CODE_CHANGED=NO. The residual is explicit and is not reclassified as external evidence or PASS."
+    },
+    {
+      "id": "P40",
+      "requirement": "Opaque accounts/workspaces/projects/sessions and owner/editor/viewer roles (G.1)",
+      "status": "PASS",
+      "evidence": "Owner/editor/viewer and separate account/workspace/project authority exercised through real PG and HTTPS. Viewers cannot mutate source or drafts. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Owner/editor/viewer and separate account/workspace/project authority exercised through real PG and HTTPS. Viewers cannot mutate source or drafts.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P41",
+      "requirement": "Verified real identity adapter, server-owned account mapping (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Actual signed local TEST OIDC code/PKCE/nonce flow and provisioned server identity mapping feed the composed app. Real production IdP registration/credentials/policy proof still required. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Production OIDC client/provider registration, callbacks/origins and account policy.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Actual signed local TEST OIDC code/PKCE/nonce flow and provisioned server identity mapping feed the composed app. Real production IdP registration/credentials/policy proof still required.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P42",
+      "requirement": "Revocable short-lived session, revoked user/membership, no localStorage bearer (G.1/2G.2)",
+      "status": "PASS",
+      "evidence": "Real PG sessions, expiry/revocation, fresh workspace/project grants and cookie/CSRF compose end to end. Revoked login/membership blocks subsequent source/history/preview; regrant cannot revive old capabilities. No localStorage bearer or local operator fallback. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Real PG sessions, expiry/revocation, fresh workspace/project grants and cookie/CSRF compose end to end. Revoked login/membership blocks subsequent source/history/preview; regrant cannot revive old capabilities. No localStorage bearer or local operator fallback.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P43",
+      "requirement": "Secure/HttpOnly/SameSite/Domain/Path, exact Origin, CSRF, CORS not auth (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Real HTTPS built-editor browser proves host-only Secure/HttpOnly/Strict cookies, CSRF and exact origin. Deployed certificate/proxy/cookie policy evidence remains external. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Real registrable editor HTTPS, verified certificates, Secure/HttpOnly/SameSite/Domain/Path/Origin/CSRF and proxy/CDN cookie behavior.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Real HTTPS built-editor browser proves host-only Secure/HttpOnly/Strict cookies, CSRF and exact origin. Deployed certificate/proxy/cookie policy evidence remains external.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P44",
+      "requirement": "Fresh authorization for source/history/revision/diagnostics/export/artifact; cross-account/session/project denial (G.1)",
+      "status": "PASS",
+      "evidence": "A cannot read B source/history/artifact/diagnostics/logs, preview/export or mutate B; stolen B capability and forged IDs fail. Fresh same-login capability plus membership checks remain server-side before returned async results. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "A cannot read B source/history/artifact/diagnostics/logs, preview/export or mutate B; stolen B capability and forged IDs fail. Fresh same-login capability plus membership checks remain server-side before returned async results.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P45",
+      "requirement": "Durable hosted ProjectSourceStore + RevisionHistoryStore, canonical real source bytes, atomic acceptance/recovery (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Real PG source/history adapter now runs through packaged editor HTTP Code/Visual/history/export, CAS, process restart and fault tests. No second canonical source or SQLite authority. Deployed PG TLS/storage/PITR/restore proof remains external. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Private deployed PostgreSQL with verified CA/TLS, atomic durable source/history, backup/PITR and isolated restore.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Real PG source/history adapter now runs through packaged editor HTTP Code/Visual/history/export, CAS, process restart and fault tests. No second canonical source or SQLite authority. Deployed PG TLS/storage/PITR/restore proof remains external.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P46",
+      "requirement": "Hosted immutable digest-bound ArtifactStore, scoped reads/delete/revoke and key guessing (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Actual composed broker puts/gets immutable PG artifacts before runner allocation/update, checks full owner/revision/generation/digest and fails on actual artifact-write fault. Deployed durability/retention/operations remain external. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Deployed immutable artifact durability, scoped access, revocation/deletion, retention and storage-failure recovery.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Actual composed broker puts/gets immutable PG artifacts before runner allocation/update, checks full owner/revision/generation/digest and fails on actual artifact-write fault. Deployed durability/retention/operations remain external.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P47",
+      "requirement": "Hosted Session/LeaseStore, distributed ownership authority outside process memory (G.1/2G.2)",
+      "status": "PASS",
+      "evidence": "Actual hosted session and lease authority is PostgreSQL; the async registry is composed directly. No local SQLite scheduler fronts the hosted provider; memory handles are caches only. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Actual hosted session and lease authority is PostgreSQL; the async registry is composed directly. No local SQLite scheduler fronts the hosted provider; memory handles are caches only.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P48",
+      "requirement": "Real hosted isolated provider and reproducible deployment/config (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Exact packaged editor CLI and mTLS fixed-command Linux gateway pass local acceptance, with documented config/runtime resources. Actual isolated cloud hosts and root-owned installation/network policies remain unproven. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Two actual isolated Linux hosts, root-owned packaged installation, management mTLS and firewall/egress policies.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Exact packaged editor CLI and mTLS fixed-command Linux gateway pass local acceptance, with documented config/runtime resources. Actual isolated cloud hosts and root-owned installation/network policies remain unproven.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P49",
+      "requirement": "Multi-host fencing/epochs, duplicate prevention, stale controller/worker/result rejection (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Retained two-controller PG fencing/SIGKILL/takeover and composed stale/cross-project/late-result checks pass. Two real separate hosted nodes and partitions remain external proof. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Competing controllers on two real hosts; partition, stale generation/epoch/controller/worker/result rejection and duplicate prevention.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Retained two-controller PG fencing/SIGKILL/takeover and composed stale/cross-project/late-result checks pass. Two real separate hosted nodes and partitions remain external proof.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P50",
+      "requirement": "Heartbeat/expiry/crash takeover/orphans/idempotent stop/capacity recovery (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Five-second independent recovery now handles idle orphans without a new allocation. Actual lost mTLS revoke acknowledgement quarantines capacity; fresh controller verifies cleanup. Real hosted node loss/restart/outage drills remain external. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Real host loss/restart, lease expiry/takeover, orphan cleanup, quarantine and verified capacity recovery.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Five-second independent recovery now handles idle orphans without a new allocation. Actual lost mTLS revoke acknowledgement quarantines capacity; fresh controller verifies cleanup. Real hosted node loss/restart/outage drills remain external.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P51",
+      "requirement": "Tenant/project/global admission quotas/resource accounting/cleanup quarantine (G.1)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Internal bounded controls PASS: concurrent exact Kanban/Habit jobs, third-job denial, fixed CPU/memory/task limits, one-operation burst admission, verified stop/reuse and retained native exhaustion/watchdog probes. The warm-update reliability failure remains P61; deployed capacity remains external.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Deployed tenant/project/global sizing and sustained load/capacity measurements.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "PG global4/workspace2/project2/host2 accounting/quarantine passes. Compiler admission race fixed and eight-way regression permits one pending materialization. Wider operational source/job quotas, sizing, representative load and scalability remain open; deployment evidence is external.",
+      "evidenceFiles": [
+        "resources-1789396118017.json",
+        "native-os-final.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P52",
+      "requirement": "Separate deployed HTTPS editor/viewer cookie sites, CSP/frame policy/DNS/proxy/CDN (C.1/G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Local distinct .test TLS sites prove configured separation only. Real public DNS, TLS/proxy/CDN/CSP/frame/cookie deployment remains unproven. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Separate real registrable deployed editor/viewer sites and DNS/TLS/proxy/CDN/CSP/frame/cookie proof.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Local distinct .test TLS sites prove configured separation only. Real public DNS, TLS/proxy/CDN/CSP/frame/cookie deployment remains unproven.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P53",
+      "requirement": "No viewer/project cookie/storage/parent/source authority or cross-project state (C.2/G.1)",
+      "status": "PASS",
+      "evidence": "Built hosted UI and retained TLS tests prove opaque viewer, denied parent/cookie/storage authority and separated frame state. No project code or platform credentials enter the editor browser. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Built hosted UI and retained TLS tests prove opaque viewer, denied parent/cookie/storage authority and separated frame state. No project code or platform credentials enter the editor browser.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P54",
+      "requirement": "Preview session/generation replay, stale capabilities/cross-project frame/input (C/G.1)",
+      "status": "PASS",
+      "evidence": "Stale generations, cross-project input, expired leases, old controller epochs and revoked sessions are rejected through composed HTTP and actual mTLS; late sample after grant change returns no image/logs. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Stale generations, cross-project input, expired leases, old controller epochs and revoked sessions are rejected through composed HTTP and actual mTLS; late sample after grant change returns no image/logs.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P55",
+      "requirement": "Secret environment isolation, no default delivery, grants/redaction/export exclusion (G.1)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Internal seam PASS: server-owned references, fresh tenant/project grants, version pinning, rotation/revocation and bounded provider deadlines; delivery via fenced mTLS/private worker stdin only. Values intentionally granted to isolated-browser runtime can be read/rendered by that project; confidential server credentials are excluded. Logs withheld for these jobs. Production provider remains unconfigured.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Production secret-manager provider configuration, scoped policies, version/rotation/revocation and operational cleanup.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Default imported environment contains no platform credentials; grants/redaction/export exclusion preserved. Managed secret delivery and rotation software plus deployed secret-manager policy remain unfinished.",
+      "evidenceFiles": [
+        "managed-secrets-design.md",
+        "regressions.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P56",
+      "requirement": "Real hosted tenant/resource/security/crash/storage failure adversarial matrix (G.1/2G.2)",
+      "status": "EXTERNAL-EVIDENCE",
+      "evidence": "Real local HTTP/PG/mTLS/VM adversarial matrix is complete at its stated boundary. Actual hosted multi-node/resource/storage/DNS/proxy outage and production security evidence remain external. Retained relevant regression/browser/isolation evidence passes at the final candidate.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Production multi-host adversarial network/storage/resource/isolation/outage validation and independent professional penetration testing.",
+      "internallyClosable": "No additional implementation claimed at this bounded gate; external deployment evidence required.",
+      "priorStatus": "EXTERNAL-EVIDENCE",
+      "priorEvidence": "Real local HTTP/PG/mTLS/VM adversarial matrix is complete at its stated boundary. Actual hosted multi-node/resource/storage/DNS/proxy outage and production security evidence remain external.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Internal tested software boundary retained; production evidence unavailable in this authorized local TEST run."
+    },
+    {
+      "id": "P57",
+      "requirement": "Multiple unchanged independently authored licensed full applications (B/C/F/G.1)",
+      "status": "PASS",
+      "evidence": "Two independently authored MIT applications complete the full unchanged-import workflow: 9bzero/kanban-board and preselected TheUnknown550/Habit-Tracker-Web-App. All prior application failures remain retained.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "All four originals retained. Exactly two additional MIT full apps frozen before implementation. One complete unchanged workflow: Kanban. Recipe required assets fail; original three intake refusals and Zustand capture failure persist.",
+      "evidenceFiles": [
+        "preselection.json",
+        "full-application-acceptance.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P58",
+      "requirement": "Corpus provenance/license/hash receipts, failures retained, no compatibility rewrites (G.1/2G.2)",
+      "status": "PASS",
+      "evidence": "Original corpus provenance is preserved; Habit\u2019s repository/commit/root scope/license/archive/full manifest/workflow were frozen before package/config/source compatibility inspection. No upstream source/config/dependency mutation or admission filtering.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "All six immutable commits/scopes/archive/source hashes retained. Initial PG source exact; normal edits occur only after verified import. Licensed screenshots/notices only; no source archives or unverified Redux redistribution.",
+      "evidenceFiles": [
+        "preselection.json",
+        "current-compatibility.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P59",
+      "requirement": "Corpus import/runtime/visual/Code/responsive/history/restart/export/build/render matrix (2G.2)",
+      "status": "PASS",
+      "evidence": "Both applications pass packaged HTTPS/PG/mTLS import/render/meaningful interaction/viewer selection/source mapping/Visual/Code/CSS/390-768-1280/history/undo-redo/SIGKILL reconnect/exact export plus independent isolated build/render/interaction. Joined final acceptance verifies exact export SHA.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Kanban full import/render/interaction/mappedVisual/Code/responsive/history/undo-redo/restart/exactexport/independentrender PASS. Recipe editing stages pass but required images/fonts fail. Full PASS count1; target2 NOT YET.",
+      "evidenceFiles": [
+        "full-application-acceptance.json",
+        "kanban-workflow-final.json",
+        "habit-workflow-final.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P60",
+      "requirement": "Final fresh independent security/compatibility review and remediation (C/G.1/2G.2)",
+      "status": "PASS",
+      "evidence": "Fresh Codex Security scan sealed over immutable base 13871b0..2d0087a: all 74 changed paths covered (including supplemental scripts/profile lock inventory), zero candidates and zero confirmed unresolved vulnerabilities. Later changes are documentation/evidence only. Not a professional penetration test.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Fresh Codex Security immutable23file diff review sealed with0 confirmed findings; peer-lock completeness/QA/documentation corrections separately tested and independently reread by digest. No production or professional audit claim.",
+      "evidenceFiles": [
+        "security-review.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P61",
+      "requirement": "Representative cold import/start, warm CSS/React/refresh/reload/restart/export and resource measurements (G.1/2G.2)",
+      "status": "PASS",
+      "evidence": "PASS at the retained internal local-TEST measurement/evidence boundary. Exact unchanged Zustand recorded cold start 4216.40ms, first raster 2992.70ms, and warm raster 2116.48ms under the unchanged 4000ms raster bound. A→B→A passed 16/16 stages with three artifact/owner/fence checks. The retained load ran 58.01s with 2 users, 3 projects, concurrency 2, 167 operations, 145 successes, 22 expected refusals, zero unexpected failures, and zero final jobs/leases.",
+      "evidenceSource": "docs/reports/phase2-p61-final-adjudication.md",
+      "missingProof": "The historical second-app warm-update HTTP 422 remains a real retained unresolved historical anomaly. Its exact stage and root cause are UNPROVEN. This PASS does not claim production sizing/SLO, multihour soak, deployed reliability, or an explanation/fix for that receipt.",
+      "internallyClosable": "Closed only at the retained internal local-TEST measurement/evidence DoD.",
+      "priorStatus": "PARTIAL",
+      "priorEvidence": "Final real-app import/start/update/responsive/restart/export/build/render timings and bounded independent cgroup samples recorded. Broader full-app, concurrent/load/long-session/production capacity evidence remains incomplete.",
+      "evidenceFiles": [
+        "resources-1789396020314.json",
+        "resources-1789396118017.json",
+        "zustand-direct-capture.json",
+        "harness-and-failure-notes.json",
+        "../phase2-p61-evidence/zustand-attempts.json",
+        "../phase2-p61-evidence/retained-scenario.json",
+        "../phase2-p61-evidence/load.json",
+        "../phase2-p61-evidence/targeted-tests.json",
+        "../phase2-p61-evidence/security-review.json",
+        "../phase2-p61-evidence/followup.json",
+        "../phase2-p61-evidence/security-followup.json",
+        "../phase2-p61-evidence/assistant-adjudication.json",
+        "../phase2-p61-evidence/assistant-progress.md",
+        "../phase2-p61-final-adjudication.md"
+      ],
+      "disposition": "PASS at the retained internal local-TEST boundary only. The historical second-app warm-update HTTP 422 is preserved as unresolved; exact stage/root cause remain UNPROVEN and it is not described as fixed, harmless, explained, or nonexistent."
+    },
+    {
+      "id": "P62",
+      "requirement": "Preserve all 305 tests (including the original 263), browser/router/source/history/isolation/export passes (2G.2)",
+      "status": "PASS",
+      "evidence": "All original 341 test identities/assertions preserved: original 19 files byte-exact. Default 384 PASS/45 SKIP, native 69 PASS, hosted 12 PASS yield 429 distinct PASS; all 45 skipped identities run later. Five retained browser suites, TLS/native probes and eight retained export renders pass.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "All325existing tests/assertions and four old profile locks unchanged. Final306default+23additional PG/mTLS/refresh+12hosted=341 distinctPASS;16new focused cases. Browsers/TLS/native and retained eight independent exports pass.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P63",
+      "requirement": "Main untouched; feature-only normal commits/push; no public launch/secrets/private source/state (all)",
+      "status": "PASS",
+      "evidence": "Feature-only implementation 2d0087a; only documentation/evidence follows the security freeze. Owned TEST infrastructure cleaned (68 stopped leases, zero active jobs, credentials/tunnels removed, VM stopped). Normal feature publication and live main verification are recorded in the final publication receipt.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "None at the retained bounded software gate. Unsupported/unprovable operations still refuse or become Code-only.",
+      "internallyClosable": "Closed at the stated boundary.",
+      "priorStatus": "PASS",
+      "priorEvidence": "Expected clean starting branch/live HEAD/ancestry/main verified. Outgoing file audit, coherent normal feature-only publication and final cleanup recorded separately; no main merge, force push, public deployment or external account action.",
+      "evidenceFiles": [
+        "cleanup.json",
+        "publication.json"
+      ],
+      "disposition": "PASS at the stated retained boundary."
+    },
+    {
+      "id": "P64",
+      "requirement": "Later product Landing/Dashboard/Auth/Workspace/Creator Studio/final UI, Marketplace/seller/reviewer/admin/bigperson/payments/AI/collaboration/navigation/footer/Docs (all)",
+      "status": "FAIL",
+      "evidence": "Original later product scope retained in full: Phase 3 product/Marketplace/Seller/Ready/GitHub/Admin backend; Phase 4 agreed final UX/UI plus separate Control UI; Phase 5 AI/payments/production hardening. No Phase 3 start or DoD waiver.",
+      "evidenceSource": "docs/reports/phase2-common-applications.md",
+      "missingProof": "Deferred original Phase 3/4/5 product scope remains unfinished and prohibited in this Phase 2 run; retain row without falsely marking it PASS.",
+      "internallyClosable": "No: retained deferred later-phase scope",
+      "priorStatus": "FAIL",
+      "priorEvidence": "Original later product scope retained in full: Phase 3 product/Marketplace/Seller/Ready/GitHub/Admin backend; Phase 4 agreed final UX/UI plus separate Control UI; Phase 5 AI/payments/production hardening. No Phase 3 start or DoD waiver.",
+      "evidenceFiles": [
+        "regressions.json",
+        "final-validation-stages.json"
+      ],
+      "disposition": "Retained FAIL/deferred later-phase scope; excluded from the six current internal Phase-2 rows without deleting or waiving the original requirement."
+    }
+  ],
+  "compatibilityBreadthBase": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+  "compatibilityBreadthReport": "docs/reports/phase2-compatibility-breadth-closure.md",
+  "compatibilityEdgeBase": "982625986289baf8101a7d73c96fe47ce0602f0d",
+  "compatibilityEdgeReport": "docs/reports/phase2-compatibility-edge-closure.md",
+  "compatibilityEdgeRegressions": "docs/reports/phase2-compatibility-edge-evidence/regressions.json",
+  "distinctPassingTests": 730,
+  "distinctDiscoveredTests": 730,
+  "finalFullRegression": "730/730",
+  "finalRegressionResidual": "None. The prior 725/730 and diagnostic 720/730 receipts remain preserved as historical failures. The single final corrected run passed all 730 prior identities with serialized shared infrastructure and explicit trusted Playwright resolution.",
+  "allPrior549Preserved": true,
+  "allPrior621Preserved": true,
+  "p39ClosureBase": "705e03f73d2079d021efc14a39aec28569a7dbd9",
+  "p39ClosureCandidate": "a531b323f8160eeed80e3b67077512f76d165bff",
+  "p39ClosureReport": "docs/reports/phase2-p39-closure.md"
+}

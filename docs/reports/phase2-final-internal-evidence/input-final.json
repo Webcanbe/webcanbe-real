@@ -1,0 +1,112 @@
+{
+  "diagnosticBuild": false,
+  "boundary": "Packaged hosted editor / isolated Linux project / native Chromium input events",
+  "browserPath": "Browser plugin not available; retained Playwright",
+  "checks": [
+    {
+      "name": "real focused native control has bounded accessible role/name",
+      "status": "PASS"
+    },
+    {
+      "name": "real Chromium composition pipeline commits Korean text exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "native clipboard paste preserves accents, emoji and RTL Unicode",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit copy returns selected plain text through the current fenced generation",
+      "status": "PASS"
+    },
+    {
+      "name": "F6 leaves the raster keyboard focus trap",
+      "status": "PASS"
+    },
+    {
+      "name": "input and clipboard do not change accepted source/history",
+      "status": "PASS"
+    },
+    {
+      "name": "hard bounded expiry and fresh reconnect preserve canonical source/history",
+      "status": "PASS"
+    },
+    {
+      "name": "expired generation text is never replayed into a new runtime",
+      "status": "PASS"
+    },
+    {
+      "name": "native key pressure reaches bounded queue and reconnect discards all queued old-generation events",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh generation receives no stale queued text or canonical mutation",
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "events": [
+    {
+      "type": "compositionstart",
+      "trusted": true,
+      "data": null,
+      "inputType": null
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "ㅎ",
+      "inputType": null
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "ㅎ",
+      "inputType": "insertCompositionText"
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "한글",
+      "inputType": null
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText"
+    },
+    {
+      "type": "compositionupdate",
+      "trusted": true,
+      "data": "한글",
+      "inputType": null
+    },
+    {
+      "type": "input",
+      "trusted": true,
+      "data": "한글",
+      "inputType": "insertCompositionText"
+    },
+    {
+      "type": "compositionend",
+      "trusted": false,
+      "data": "한글",
+      "inputType": null
+    },
+    {
+      "type": "paste",
+      "trusted": true,
+      "data": null,
+      "inputType": null
+    }
+  ],
+  "compositionLimit": "Chromium CDP uses trusted composition start/update/input events but its commit compositionend is untrusted; OS input-method validation is not claimed.",
+  "expiryEvidence": "input-1789394581835/receipt.json: hard expiry already passed; this follow-up validates the corrected reconnect route assertion",
+  "queue": {
+    "bound": 64,
+    "nativeKeyEvents": 81,
+    "submittedBeforeReconnect": 1
+  },
+  "status": "PASS"
+}

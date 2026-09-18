@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 1316.538477,
+  "output": "vite v7.3.1 building client environment for production...\ntransforming...\n\u2713 137 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                      3.18 kB \u2502 gzip:  1.06 kB\ndist/assets/twitter-BV8dInFe.svg     4.34 kB \u2502 gzip:  2.18 kB\ndist/assets/burger-BSDMczdq.svg      5.26 kB \u2502 gzip:  2.72 kB\ndist/assets/recipe-DEHJmnVE.svg      6.12 kB \u2502 gzip:  2.89 kB\ndist/assets/close-CFWo6dCQ.svg       7.60 kB \u2502 gzip:  3.56 kB\ndist/assets/ayman-BqzoXkHy.svg       9.41 kB \u2502 gzip:  4.38 kB\ndist/assets/chef-C79wKOQk.svg        9.48 kB \u2502 gzip:  4.41 kB\ndist/assets/github-rMUkx_C8.svg     12.46 kB \u2502 gzip:  5.73 kB\ndist/assets/linkedin-dVWk9Wsq.svg   18.40 kB \u2502 gzip:  8.83 kB\ndist/assets/logo-Bk82qQdQ.svg       45.44 kB \u2502 gzip: 15.56 kB\ndist/assets/index-CgLW-zyx.css      26.19 kB \u2502 gzip:  6.27 kB\ndist/assets/index-prOtQGKp.js      310.37 kB \u2502 gzip: 95.69 kB\n\u2713 built in 1.04s\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1482.669791,
+  "archiveSha256": "4f491e9f8e228d122e5d29e820c137e8f65ee12a2ab857b608504e9ac8fc3279",
+  "profile": "react19-vite7-common-v1",
+  "artifactFiles": [
+    {
+      "path": "/coffee-love.svg",
+      "sha256": "d1b2563fba5fefe472195f250bad2274f6aa7fbb8e16ec65cb8b8b17b061595a"
+    },
+    {
+      "path": "/googlea8e27d32355734fd.html",
+      "sha256": "96d05f99e881faac0454cb189faa91d316156b1145ec7207fee7c72052e73cdb"
+    },
+    {
+      "path": "/home.png",
+      "sha256": "f7ec3f5b73de86d1f059e8cb93ac3e7296dfbb878f0857151f0310f4ce4604ac"
+    },
+    {
+      "path": "/index.html",
+      "sha256": "cc6619a3954eb96cd071404729c43baa0533d8ab2e7526bb72463991d49c6b24"
+    },
+    {
+      "path": "/logo.svg",
+      "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+    },
+    {
+      "path": "/mobile.png",
+      "sha256": "9493d72ef1b9cd0dec0010454e4c77c97144e51e4704422b9af6605305e2a8d5"
+    },
+    {
+      "path": "/recipe.png",
+      "sha256": "f062d8328bff31fd6e0ec54100c0f2833dd9bf5ae275bd3da7a8c62dd5534e44"
+    },
+    {
+      "path": "/robots.txt",
+      "sha256": "44f3f8eafdf064cf69acb05f23ee4dfc9ab5b3d67d81c64246bc29f7e438789a"
+    },
+    {
+      "path": "/assets/ayman-BqzoXkHy.svg",
+      "sha256": "78f0dc730148faa315d7d426eea59214a5baf049b4fdcc4ac13ed4cac034a2ea"
+    },
+    {
+      "path": "/assets/burger-BSDMczdq.svg",
+      "sha256": "1375a75a24dc238eb7161d67d0dbf402b846326a983e4a2e833cfd44e6d7e94b"
+    },
+    {
+      "path": "/assets/chef-C79wKOQk.svg",
+      "sha256": "51741af47d85d69e24960c27d2625d089e86cf845b082ca89be07753459373e0"
+    },
+    {
+      "path": "/assets/close-CFWo6dCQ.svg",
+      "sha256": "a98a7fb86ffdfb73d987cd82416b1c3b3572e0f5603b1714492e17cab1926a58"
+    },
+    {
+      "path": "/assets/github-rMUkx_C8.svg",
+      "sha256": "dfdd7d0d5a641f7c0d1ea16c66f37626970c74c8b99a43ff3c55710e759bae4b"
+    },
+    {
+      "path": "/assets/index-CgLW-zyx.css",
+      "sha256": "73181c35307e01e7badabc19cbf8a1a7eaab234b32c15f46ac5e6e347b60b73c"
+    },
+    {
+      "path": "/assets/index-prOtQGKp.js",
+      "sha256": "dd04c0ad713770b55b67ebe22426ccad04a85453ffe76e92934fa70d486e2fb2"
+    },
+    {
+      "path": "/assets/linkedin-dVWk9Wsq.svg",
+      "sha256": "e77b29ce50d00ec05710ca17c7905edbf0c7d0e80652b06f8dadf6136881cbb2"
+    },
+    {
+      "path": "/assets/logo-Bk82qQdQ.svg",
+      "sha256": "ca29ebcc00de39c3b4352333d1c857bc04ca8f7c60ec8a02f7270ca3e3e0376a"
+    },
+    {
+      "path": "/assets/recipe-DEHJmnVE.svg",
+      "sha256": "16e1c0e82d16d0d95255d9cdae882391b594e14c5b1d10dedcab921aea8074fb"
+    },
+    {
+      "path": "/assets/twitter-BV8dInFe.svg",
+      "sha256": "5b4853cec749561b2eb852d8394709d7092dc1f62110d2f6af5af322cc035697"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

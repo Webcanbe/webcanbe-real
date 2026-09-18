@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 1183.5116560000001,
+  "output": "vite v6.4.3 building for production...\ntransforming...\n\u2713 44 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.34 kB \u2502 gzip:  0.25 kB\ndist/assets/index-D_RSy8CA.css    0.68 kB \u2502 gzip:  0.39 kB\ndist/assets/index-C3uiVtLZ.js   266.59 kB \u2502 gzip: 84.74 kB\n\u2713 built in 986ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1347.169417,
+  "archiveSha256": "af39b5d30be77cc9f869ef4595c0f543a88245f9b3a5610559c01850d78d7315",
+  "profile": "react19-vite6",
+  "artifactFiles": [
+    {
+      "path": "/compass.svg",
+      "sha256": "47cf96769a920085e99e438bad9d99dc38006b20de1a09cd2d09b70a7511f633"
+    },
+    {
+      "path": "/index.html",
+      "sha256": "99ef075a02cd9a2ea7fbded94346ee8bb200fb41332a9b9fb21acc5afeb0a5c6"
+    },
+    {
+      "path": "/assets/index-C3uiVtLZ.js",
+      "sha256": "a27d1ed04478eca721225c7fb9d5c04a2687f3d526eace04c86ac1fcf20c87f0"
+    },
+    {
+      "path": "/assets/index-D_RSy8CA.css",
+      "sha256": "a8ac26fbbcb0fa642855e7ea18f477eeb2b773cf05617b1c6a43cd1e2ae2c406"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

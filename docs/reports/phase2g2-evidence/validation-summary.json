@@ -1,0 +1,44 @@
+{
+  "baseline": {
+    "tests": 263,
+    "testFiles": 11,
+    "status": "PASS",
+    "durationSeconds": 7.87,
+    "existingTestsModified": 0
+  },
+  "finalDefault": {
+    "command": "npm test",
+    "testsPassed": 282,
+    "explicitlyGatedSkipped": 23,
+    "testFilesPassed": 14,
+    "testFilesSkipped": 2,
+    "durationSeconds": 10.03,
+    "status": "PASS"
+  },
+  "realIntegration": {
+    "command": "WCB_PG_TEST=1 WCB_HOSTED_RUNNER_TEST=1 WCB_REFRESH_TEST=1 npx vitest run src/webcanbe-engine/phase2g2-postgres.test.ts src/webcanbe-engine/phase2g2-hosted-runner.test.ts src/webcanbe-engine/phase2g2-refresh.test.ts",
+    "testsPassed": 24,
+    "previouslySkippedNowExecuted": 23,
+    "sharedCompilerTest": 1,
+    "durationSeconds": 11.95,
+    "status": "PASS"
+  },
+  "distinctTotalTestsPassed": 305,
+  "typecheck": "npx tsc --noEmit: PASS",
+  "build": {
+    "command": "npm run build",
+    "status": "PASS",
+    "viteSeconds": 2.4,
+    "warning": "Existing CodeWorkspace chunk exceeds 500 kB minified; final UI/performance product work remains out of scope."
+  },
+  "earlierFailure": {
+    "status": "recorded and investigated",
+    "detail": "First full suite under concurrent browser work: phase2de test cleanup ENOTEMPTY from Vite cache/deps_temp output created after server.close. Assertions were not changed; the unchanged full suite rerun passed. No original test was removed/replaced."
+  },
+  "browserScripts": 5,
+  "independentExportBuildRenders": 6,
+  "productionIdentity": "UNPROVEN",
+  "cloudStorage": "UNPROVEN",
+  "realHostedIsolation": "UNPROVEN",
+  "deployedCookieDns": "UNPROVEN"
+}

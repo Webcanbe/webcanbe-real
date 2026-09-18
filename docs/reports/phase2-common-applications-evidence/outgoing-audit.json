@@ -1,0 +1,446 @@
+{
+  "scope": "Final new documentation/evidence plus reviewed implementation path list",
+  "findings": [],
+  "matrixRows": 64,
+  "reportRelativeLinksExist": true,
+  "sourceArchivesPrivateKeysRuntimeStateIncluded": false,
+  "textArtifactsParsed": 52,
+  "fileDigests": [
+    {
+      "path": "docs/reports/phase2-common-applications.md",
+      "sha256": "957f7e19839355f2199b10331de58ef5f1c715e463f8a93ced7cb0c6417b23b1",
+      "bytes": 52365
+    },
+    {
+      "path": "docs/current-handoff.md",
+      "sha256": "52596be97bc8300fdd528b43ca1ee3e7866a0de0da5d9bec038c0e71a4b95729",
+      "bytes": 42193
+    },
+    {
+      "path": "docs/project-record.md",
+      "sha256": "346caeac328f9578bbaefb9fdb0f0a59e5a616c1ae94801da3a92d133e491739",
+      "bytes": 21995
+    },
+    {
+      "path": "deployment/hosted/README.md",
+      "sha256": "1ed2d0b4d0f9e0a2bdae29f29725762ae9296d7f59889405f03c34eac67e11ac",
+      "bytes": 7581
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/applications.json",
+      "sha256": "8f2dc39ea6b9aa80757e72f9804b4eec55eb08d033f61f61544dc504bc5b7bec",
+      "bytes": 83417
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/attempt-history.json",
+      "sha256": "dfb6a101a2c27b77090470e9a8449ec66a25d8b5e744a68b94f9d1fd8f68831b",
+      "bytes": 95083
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/boundary-final-results.json",
+      "sha256": "994d2d91766bdb908525c701234126b2ab6bde470a0057f33e0ae758326a8d4f",
+      "bytes": 152
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/browser-regressions.json",
+      "sha256": "0d48ab25dc3a93d13995deb79e783ab5d6d4ccdbbf1277d98e0554aca87eda56",
+      "bytes": 429
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/environment.json",
+      "sha256": "4d0b235cf96bda36d3029df09de1016fcfdfd35a0319b1b5658e2293773dd74d",
+      "bytes": 668
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/intake-blockers.json",
+      "sha256": "ddacb10816d9f7a7214af2636495d1ac476545697ab944a0441f8d34cfde2c23",
+      "bytes": 2969
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-card-created.png",
+      "sha256": "5f71cf94d1bcaae9bd062adf884e9126b3727cfdf19cdafe8143c1a1f188902a",
+      "bytes": 50439
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-card-form.png",
+      "sha256": "70580daa86378b9a45e39efdd20262509b200dd3522ed86066e182c8e874dcba",
+      "bytes": 55056
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-code.png",
+      "sha256": "f3520558e23e267557916008b52e72f1a1898bc6e899693fcb113aa1149d46bf",
+      "bytes": 50550
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-css.png",
+      "sha256": "b4bd0eb17197f7bed03dc829293c886aaa5e53b1bb870d4ab2dc1e937284666c",
+      "bytes": 50522
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-desktop-after.png",
+      "sha256": "e8e1e8731529208c42014d55079d695e72a1f3571330ec46cb0ba562bec963da",
+      "bytes": 51176
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-desktop-before.png",
+      "sha256": "ba7e4f299c98c0047cf056a13768b19ad2276ee7a9cd4bfb4cb7a8f6ffef439a",
+      "bytes": 50530
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-1280.png",
+      "sha256": "6b282d40765edbbb8a3082809352ff3e49da7fa8467249f960b6d7a39d545f3e",
+      "bytes": 51457
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-390.png",
+      "sha256": "ac45b8fd2e94e4e732b8cbde42e78802b3f7108a3c97462ee169430efc3faec5",
+      "bytes": 52183
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-768.png",
+      "sha256": "62693147427b34a9db28145ed8c019d880d1433d3d55a3508b4be41ef5bab062",
+      "bytes": 54003
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-build.json",
+      "sha256": "03fad781bc7a23b75d3e813a78d2440a18c45f73897f2f7411db3555f6871d87",
+      "bytes": 1202
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-diagnostic.json",
+      "sha256": "348805c6674a1693c7844dbddd1fd9e0b7744236b823bc3a761262cff31872fe",
+      "bytes": 5551
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-export-ordinaryPng.png",
+      "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56",
+      "bytes": 44629
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-initial.png",
+      "sha256": "fc641b08158745c72d122c1239474316d9843c1420b5bb36b63f873356bd31d9",
+      "bytes": 43745
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-mobile-after.png",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "bytes": 51403
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-mobile-before.png",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "bytes": 51403
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-platform-final.png",
+      "sha256": "a248d1c2b5e0f429a55c7d54591496a6ed1f1f6421719807f2e900ef85855105",
+      "bytes": 157766
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-platform-history.png",
+      "sha256": "24ca5b36dd12e9f70b4ff9cd5d99121bda5d6eb2abd5a36fe26531aaf71fbd21",
+      "bytes": 319489
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-restart.png",
+      "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56",
+      "bytes": 44629
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-tablet-after.png",
+      "sha256": "82551f733adfbcae53137f0826277b4b2037020d13dc69908cf224c23d429afe",
+      "bytes": 53282
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-tablet-before.png",
+      "sha256": "1ea300e4f496f96730a790f4b216978487cb242b9f25bb3ed3714af0e5721ce9",
+      "bytes": 52470
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-visual.png",
+      "sha256": "4bcf38deebb819ef7df611cfcc41e8fb32a4511c2d50cb7871b5844bfea00bca",
+      "bytes": 51438
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/kanban-workflow.json",
+      "sha256": "470bc0e182d512ba88afb58a0b348aff4b41f4e8fd0f8ba6b7c3590312ea8458",
+      "bytes": 10604
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-de-build.json",
+      "sha256": "037dbdc02f5d060ea2ef9ed181ce254c474f4e5543965bfe465a13fcee555527",
+      "bytes": 1323
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-de-diagnostic.json",
+      "sha256": "9e793c0145d76b3dc05e1b1c17d592b64c638fcb6413623acd9f5f7b2c03452c",
+      "bytes": 5523
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-f-browser-build.json",
+      "sha256": "54f72e9d5e421314cb6520a573e2770e20aad3c551b98c3beedae56558b8c7fd",
+      "bytes": 1190
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-f-browser-diagnostic.json",
+      "sha256": "c57da5139b688676997c7ef280bd179904ca71fdbe403f033a84d7736a4122c3",
+      "bytes": 5169
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-f-hash-build.json",
+      "sha256": "a5a5648f64fea9e495bf1ab06c3a1487702761773b283888a9fd1d8ad45b9fd3",
+      "bytes": 1197
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-f-hash-diagnostic.json",
+      "sha256": "3bd2f49bb57f7d6065d2472c3de77554e9e2453c935d5cc35d8914d90504e6db",
+      "bytes": 5315
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-authored-build.json",
+      "sha256": "c07007068b1ff2fb75123eb473139ed7ccb2f6e55cc33ebfea2bfd6055546392",
+      "bytes": 1343
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-authored-diagnostic.json",
+      "sha256": "77c330e93c822df45d89ec128a509fa0a003362c5db591447a8aed28c41c1c6e",
+      "bytes": 5005
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-react18-build.json",
+      "sha256": "fb246104595cb07406578ded57e1ee3f704f9cce1b9fd658595f435e5cfdaba1",
+      "bytes": 1520
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-react18-diagnostic.json",
+      "sha256": "644f9dcc18e3d74e0568dcb86a37ebef8e865cbf1259109e13e764060940ada3",
+      "bytes": 4892
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-react19-build.json",
+      "sha256": "a142eb6bb7eaefcf4520b31f2a3bded7f387ffce63aa88455539d527a4604d18",
+      "bytes": 2067
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-g-react19-diagnostic.json",
+      "sha256": "f4c29acb4b66f994914e1a33ce3aa62deb41168931c2bc5d9d29b76c230bea24",
+      "bytes": 5094
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-hosted-react18-build.json",
+      "sha256": "ba9c5f84b65446565dc5d6e217cd59825a97ffebc0a1ae2af970ae3a1fd81c56",
+      "bytes": 1321
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-hosted-react18-diagnostic.json",
+      "sha256": "93e1e72d06f4c656dd190e83b15cd8dd3eb2b20d67b87e6ae817b7498d967aaa",
+      "bytes": 4995
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-hosted-react19-build.json",
+      "sha256": "9b4c3c9b3d5b58f8340de09762cc403988395e39942e1745480014746ecd4230",
+      "bytes": 1461
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/legacy-hosted-react19-diagnostic.json",
+      "sha256": "abea0b60904cdd9fa1dab2b2ce2935d2d932d0e2fae14962bf482522a58f729f",
+      "bytes": 5001
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/native-runner-proof.json",
+      "sha256": "7a506f929b35f4b38c755f1fd164988736520e600d3485d7246492823e44a5bf",
+      "bytes": 10874
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/original-tests-preserved.json",
+      "sha256": "99382d81b5c0776d5a5898c9b6cd5dd08154e39ae9b6afdf6696f0f1755b39d4",
+      "bytes": 2968
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/peer-final-results.json",
+      "sha256": "4b41012e39ac2e80428f8146a028999f981b213706c560cd65c680b51c4b2bbf",
+      "bytes": 769
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/preselection.json",
+      "sha256": "d80a8d3dc6ee082a1134c625cc206e3cc7ef0bd18793e4bf1d3db03ad058ad71",
+      "bytes": 15256
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/preservation-final.json",
+      "sha256": "b62ca73b6ee01060c7cc7bd8509bedcd0cc9aa94884b58736fd35f7a3488c655",
+      "bytes": 4092
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/publication.json",
+      "sha256": "97ef4531b20700ff12ad6c30c7123666d445015d74a3f1292990ecfda2dd26d0",
+      "bytes": 1569
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-category-filter.png",
+      "sha256": "57ceddab9971d68cf2f872e218468c70a20400532d926b9d7c659df9e1ef8b91",
+      "bytes": 98672
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-code.png",
+      "sha256": "4216acb28229de4a9d71ba58139e76bfc1fb3efae5b7c4139102f42eeb5a6adf",
+      "bytes": 107357
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-css.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "bytes": 107389
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-desktop-after.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "bytes": 107389
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-desktop-before.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "bytes": 107389
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-export-build.json",
+      "sha256": "694e7b1259fe7ed1f2716e31c231f729727482efb10ce7bfab8264ff668f2006",
+      "bytes": 4000
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-export-diagnostic.json",
+      "sha256": "d3e03d4337c2f9358d2ddc1dc0c62e9f35738d47dedef24a0b008d2b142e194b",
+      "bytes": 14261
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-export-ordinaryPng.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "bytes": 107389
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-favorite.png",
+      "sha256": "ef028aaf5e056b2431e6ce91c9cca430b6f50b3ce568939dffbd57554639bb7c",
+      "bytes": 104371
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-initial.png",
+      "sha256": "5e2f69e4aa05d47c47983faa37471f8b03b3aa7a3e962489e1278bfaa21f0dd8",
+      "bytes": 101202
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-mobile-after.png",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "bytes": 72703
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-mobile-before.png",
+      "sha256": "632ea424285c01bf7e7338b830c96f90046f3e196fa001ab5d2b75ad74da34f4",
+      "bytes": 72703
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-platform-final.png",
+      "sha256": "efc020da270a5fbebcd6f8fa10bfedb919995ae4f44910563f9f915800c85551",
+      "bytes": 224827
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-platform-history.png",
+      "sha256": "3a02395d0caf73c5da6977c38d8f3908b7d7d4fe8a992d7d14321b6fecb9341b",
+      "bytes": 327342
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-restart.png",
+      "sha256": "4046e3725fe1e80824f576f662cd3a9ecc57723dab690d6d1f182b371020a36d",
+      "bytes": 107389
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-tablet-after.png",
+      "sha256": "e52500fb9f01c1240b3c82d6db85746a8decb99d4a2c6d22478afd34a1bfe5fc",
+      "bytes": 82264
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-tablet-before.png",
+      "sha256": "f47932574c052f631b6e205c13df1a618418d647d6adef304d785b32e84c9ea1",
+      "bytes": 82177
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-visual.png",
+      "sha256": "bb93db68d1f427442af5e964828181004d1d8bcc3d417af952763db828c372ff",
+      "bytes": 108675
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/recipe-workflow.json",
+      "sha256": "c397ebf90f707feacd4568a44f40e5630653c99348c586d3489d57405c286c4f",
+      "bytes": 21048
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/regressions.json",
+      "sha256": "88560acddee4ab4b64550be685e603528b428399818e4d0330a29f15cf06f025",
+      "bytes": 83246
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/rendered-evidence-index.json",
+      "sha256": "c8170a4778e1edb3250b0933bf10baa9dbb0fc3690f0986ac8baf0d5b869d1d8",
+      "bytes": 6150
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/retained-export-inputs.json",
+      "sha256": "c2cd97d1506e2501ac40c79c858b3ce4da3e84d005f636d9b37df4f7cd282f6f",
+      "bytes": 2275
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/retained-exports-peer-final.json",
+      "sha256": "74b43efe251c1cf9cc02a36fc78e4a4609183f5f07dc2e9e1a2cb3d56f28f168",
+      "bytes": 1499
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/security-core-review.json",
+      "sha256": "d734dc62f0d299f12486022e012a1ecd945942c3ad54edcdf7d4ebce4bcf4bfb",
+      "bytes": 16689
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/security-peer-reread.json",
+      "sha256": "c346d411b99f4b49e7e632ffd4931051ac2ffe3ad9b2831cd89d23c611796c03",
+      "bytes": 5114
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/security-profiles-review.json",
+      "sha256": "3f5462594b300fd36b10848b236a9c4a7eacf89ffef0ae64ffa88705c8562289",
+      "bytes": 2718
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/security-qa-viewer-review.json",
+      "sha256": "8680600afd93d942bf99d8b947730a0e57c176e4fd93c9b49dfd80bbb79bdc8f",
+      "bytes": 16474
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/security-review.json",
+      "sha256": "8fa71b1ae5c77e064bc72f9711237b45dfeeb25df3d83b1c6b9f1f1987facdc3",
+      "bytes": 2266
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/third-party-notices.txt",
+      "sha256": "495d930d0684ae010b637891223a714ffb9867e2a4b42efbd7e429b6d1542c21",
+      "bytes": 2323
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/tls-browser.json",
+      "sha256": "9c85d203ed4ae09ff79f8e475e351a63be0b21738736773a6520ffd6889fa862",
+      "bytes": 870
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/zustand-diagnostic.json",
+      "sha256": "36ae047a27d31d8634da0e6b10b72ae0a1238fa6b5d04d72a52f49e015a3a61b",
+      "bytes": 7338
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/zustand-export-build.json",
+      "sha256": "0a901db263faec61f1a5cc8fadef0ce941d21c4deedf78ab272a5880ca1bfa04",
+      "bytes": 3942
+    },
+    {
+      "path": "docs/reports/phase2-common-applications-evidence/zustand-export-diagnostic.json",
+      "sha256": "616a0f50135b10016eb56b8756cd999bbc1699aac610a9cfcac5c582f9db541d",
+      "bytes": 10425
+    }
+  ],
+  "inspection": "Text/path/secret-pattern checks and manual scope review; image content reviewed separately. Known synthetic negative-test strings are not credentials."
+}

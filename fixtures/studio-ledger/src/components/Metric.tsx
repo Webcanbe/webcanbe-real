@@ -1,0 +1,1 @@
+export default function Metric({label,value}:{label:string,value:string}){return <article className='p-4 rounded-md bg-gray-100'><p className='text-sm'>{label}</p><strong className='text-2xl'>{value}</strong></article>}

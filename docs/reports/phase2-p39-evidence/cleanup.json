@@ -1,0 +1,15 @@
+{
+  "states": [
+    {
+      "state": "stopped",
+      "count": 150
+    }
+  ],
+  "ownedTestSchemaRemoved": true,
+  "runningWorkerUnits": 0,
+  "gatewayStopped": true,
+  "tunnelsStopped": true,
+  "qaDatabasePasswordCleared": true,
+  "testPKIRemoved": true,
+  "vmStopped": true
+}

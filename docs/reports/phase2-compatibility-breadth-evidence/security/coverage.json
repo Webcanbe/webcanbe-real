@@ -1,0 +1,77 @@
+{
+  "completeness": "partial",
+  "deferred": [
+    {
+      "id": "deferred-1fcb4b653b3733d1",
+      "reason": "Final asset-manifest integration and remediated-path reread still underway."
+    }
+  ],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [
+    {
+      "pattern": "Unchanged P39/P61 and Phase3/4/5 paths",
+      "reason": "Unchanged P39/P61 implementation and Phase3/4/5 scope; unrelated repository paths."
+    },
+    {
+      "pattern": "External production environments",
+      "reason": "Production evidence and professional penetration testing."
+    }
+  ],
+  "includePaths": [
+    "."
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "branch_diff",
+  "openQuestions": [
+    {
+      "question": "Quantitative peak delay of the original quadratic loop was not measured because the stress exercise was blocked; no corresponding timing claim is made."
+    }
+  ],
+  "scanId": "28b26b91-59c0-412e-ba34-1ba51d8d55bb",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_admission-locks-html/config-and-preservation-9-paths",
+      "label": "Admission, locks, HTML/config and preservation (9 paths)",
+      "notes": "Exact graph/integrity/peer gates, no manager execution, archive limits, confined source and static semantics. HTML whitespace observation closed in final path.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_public-values-assets-and-hosted-authority-7-paths",
+      "label": "Public values, assets and hosted authority (7 paths)",
+      "notes": "One quadratic rewriting finding validated statically and fixed. SSRF/DNS/redirect/MIME/limits/revocation scope reviewed. Final manifest rewrite independently reread.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_css-workers-and-dedicated-profile-locks-8-paths",
+      "label": "CSS workers and dedicated profile locks (8 paths)",
+      "notes": "Fixed worker code, bounded heap/deadline/capacity, empty env and dedicated resolver; 521 exact package records inspected. Unneeded host preload eliminated for finite CSS.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_qa-and-threat/baseline-evidence-8-paths",
+      "label": "QA and threat/baseline evidence (8 paths)",
+      "notes": "Fixed native sandbox probe, exact upstream hashes, unchanged acceptance limits. Imported temporary source caused an initial broad-test collection failure, retained and excluded from owned-test runs. Final optional snapshot argument is data-only and stays in unchanged sandbox.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_post-freeze-affected-security-paths-and-tests",
+      "label": "Post-freeze affected security paths and tests",
+      "notes": "htmlConfiguration.ts, isolatedPreview.ts, staticAssets.ts and associated regressions reviewed at final hashes; one known fixed finding, zero confirmed unresolved vulnerabilities.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "reported",
+      "id": "surface_frozen32-changed-paths",
+      "label": "Frozen32 changed paths",
+      "notes": "9 admission,7assets/authority,8CSS/profiles,8QA/evidence reviewed; one source-validated finding.",
+      "receiptRefs": []
+    }
+  ]
+}

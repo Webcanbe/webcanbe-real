@@ -1,0 +1,7 @@
+Error: Unknown command
+    at Socket.<anonymous> (/Users/olivertaylor/Developer/WebCanBe-recovery/.webcanbe/compatibility-edge/native-api.cjs:116:40)
+    at Socket.emit (node:events:509:20)
+    at addChunk (node:internal/streams/readable:568:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:519:3)
+    at Readable.push (node:internal/streams/readable:399:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)

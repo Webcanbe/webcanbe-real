@@ -1,0 +1,111 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "28b26b91-59c0-412e-ba34-1ba51d8d55bb"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "warning",
+              "message": {
+                "text": "Final asset-manifest integration and remediated-path reread still underway."
+              }
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "codexSecurityCoverageCompleteness": "partial",
+        "codexSecuritySchemaVersion": "1.0",
+        "codexSecurityTargetKind": "git_diff"
+      },
+      "results": [
+        {
+          "level": "note",
+          "locations": [
+            {
+              "message": {
+                "text": "root_control"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/webcanbe-engine/runtime/staticAssets.ts"
+                },
+                "region": {
+                  "endLine": 139,
+                  "startLine": 134
+                }
+              }
+            },
+            {
+              "message": {
+                "text": "entrypoint"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/webcanbe-engine/runtime/controlledPreview.ts"
+                },
+                "region": {
+                  "endLine": 167,
+                  "startLine": 158
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Repeated resource literals trigger quadratic work in the shared editor\n\nFrozen implementation aedbc024 copies the complete JavaScript artifact for each repeated static-resource literal. The network URL limit counts distinct downloads and does not limit these synchronous copies. An authorized project author can therefore increase shared-editor work disproportionately. The final working tree replaces the loop with one linear chunks/join construction; the original finding is retained here for the immutable reviewed candidate.\n\nSeverity: low\n\nCategory: Algorithmic resource exhaustion\n\nWeaknesses: CWE-400, CWE-407\n\nRemediation:\nCorrected in final implementation bc19fac8d91d7360c409285e8613509c3c4e7404. Source-order non-overlapping slices and one join remove repeated whole-artifact copies. All download and authority limits remain. Final asset path was independently re-reviewed after the generated Fast Refresh manifest integration, with no new plausible trust-boundary issue. Original immutable aedbc024 finding remains visible.\n\nRemediation tests:\n- Ordinary 128 repeated literals: exactly one fetch, every replacement and surrounding source preserved; original artifact unchanged.\n- Stress reproduction blocked by cybersecurity safeguard; no measured latency or crash claim."
+          },
+          "partialFingerprints": {
+            "codexSecurity/v1": "codex-security/v1:sha256:d3498e5978e749cd2ce13619d110c0548a07f4287f8211b98e86e3da423e4fdd"
+          },
+          "properties": {
+            "candidateId": "candidate-325c6d129de43235",
+            "category": "Algorithmic resource exhaustion",
+            "confidence": "high",
+            "findingId": "csf_97185a485b683d6a243a540f",
+            "occurrenceId": "occ_9bfc6fe9b7fcad54e516ea98",
+            "severity": "low"
+          },
+          "ruleId": "quadratic-static-asset-rewrite",
+          "ruleIndex": 0
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Codex Security",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Quadratic static asset rewrite. Categories: Algorithmic resource exhaustion. Weaknesses: CWE-400, CWE-407."
+              },
+              "help": {
+                "markdown": "Quadratic static asset rewrite. Categories: Algorithmic resource exhaustion. Weaknesses: CWE-400, CWE-407.\n\n## Remediation\n\nCorrected in final implementation bc19fac8d91d7360c409285e8613509c3c4e7404. Source-order non-overlapping slices and one join remove repeated whole-artifact copies. All download and authority limits remain. Final asset path was independently re-reviewed after the generated Fast Refresh manifest integration, with no new plausible trust-boundary issue. Original immutable aedbc024 finding remains visible.",
+                "text": "Quadratic static asset rewrite. Categories: Algorithmic resource exhaustion. Weaknesses: CWE-400, CWE-407.\n\nRemediation:\n\nCorrected in final implementation bc19fac8d91d7360c409285e8613509c3c4e7404. Source-order non-overlapping slices and one join remove repeated whole-artifact copies. All download and authority limits remain. Final asset path was independently re-reviewed after the generated Fast Refresh manifest integration, with no new plausible trust-boundary issue. Original immutable aedbc024 finding remains visible."
+              },
+              "id": "quadratic-static-asset-rewrite",
+              "name": "Quadratic static asset rewrite",
+              "properties": {
+                "security-severity": "2.0",
+                "tags": [
+                  "Algorithmic resource exhaustion",
+                  "external/cwe/cwe-400",
+                  "external/cwe/cwe-407",
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Quadratic static asset rewrite"
+              }
+            }
+          ],
+          "version": "0.1.24"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

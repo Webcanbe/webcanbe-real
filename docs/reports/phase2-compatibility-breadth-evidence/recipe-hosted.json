@@ -1,0 +1,311 @@
+{
+  "boundary": "Actual packaged TLS editor, TEST OIDC, PostgreSQL artifact authority, mTLS native runner; original frozen Recipe source unchanged",
+  "stages": {
+    "intake": "PASS",
+    "dependencies": "PASS",
+    "configuration": "PASS",
+    "compilation": "PASS",
+    "runtime": "PASS",
+    "assets": "PASS",
+    "render": "PASS"
+  },
+  "commit": "bdffa12b1e2f5a0ae46257ed41762044619b7773",
+  "archiveSha256": "046a9e510c63081eec62a443133ee172c89a89e040e795d21f8f5336b1c0827f",
+  "unchangedFiles": 67,
+  "startStatus": 200,
+  "startMs": 7843,
+  "assets": [
+    {
+      "urlSha256": "007f0a525767e8ec2e867ef39ab0dcaa5504f35b66071de12543112a14f5a884",
+      "contentSha256": "654f50ae0fc998c43792e2dcb412ee5ba5b75c821359fdd56dc73837acf8eabe",
+      "bytes": 26808,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "023e48b7d0c422a1859d4cca1fb2536f1bdeb2c62f408bedd36a0ac196ff9449",
+      "contentSha256": "58fbf15e1104dc4c3a7e11820743a14330bcb82c9b6e2e56af7162c9f3d5fcd3",
+      "bytes": 196412,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "06a4c140c93580886d3a852022d2d1f60a1a24a8f7e15d6c1ee85b17ab506ab8",
+      "contentSha256": "c4bcabfda5d916a587c0cf7680592f8d07c3778d8468abde439809ae59a0f593",
+      "bytes": 16670,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "0857caf2f746ac10bf450aa6b9cee040f2e863dd7df13c098438dec22e6c6336",
+      "contentSha256": "37bd0151d9a9f37e38a34e34e9bf8439e0c243d4b03139be1fb51281832be67f",
+      "bytes": 245316,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "126fb9cc29978b3e439bd5f4f74516e4f3019b88a8c37ea36fdd023fd77aa124",
+      "contentSha256": "016ea353f103f7d2ae89e7d4cc0e82a1cec7fb4e549c268acdb04fcd76f87563",
+      "bytes": 51338,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "1c570cee821109058ac9c4c0ef3e20de00cb8c91bb74d718c678d168f35c4f96",
+      "contentSha256": "bee44a696c80daac5d65e298fb6028f678eec9b9ebf7856f7e2326d186273b0a",
+      "bytes": 11444,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "22e437f20212bb0ef255768507e9cc41bc4745c2ed7f9a1675aa217839654135",
+      "contentSha256": "2e10db844fda3aa651974e9b8ed564e84a1a2a3d72fd2d9a75e25b053f269513",
+      "bytes": 27762,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "2a8b249e8659376acffc96dcd87aeb5bb9d8e20d37b134186d849da939c1fac3",
+      "contentSha256": "8317b060133a40f4a5949de5bfea438696c9cbdf6f2b0e2e7e08821ad8173c73",
+      "bytes": 37846,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "35dfbf9f85920a29c723e46458def889c55dbb219e31b6f7b50c0cb54ba8526c",
+      "contentSha256": "6693395b9c28bdd255b35047143f8590892220f5dd6ab2aada7498ff2bfaedb9",
+      "bytes": 11144,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "448835b7b36e2a200bdaa5e346ae2b65c862775409ae7554e3db4cbc04501d28",
+      "contentSha256": "1662a666555ffa9d79d22df67551ad3629b4936755f6f25c275a944d4267e306",
+      "bytes": 196872,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "46e245753c6b29bedb6c93f6101dc4b8942c6fe95e16660c3c64e9c9996e958e",
+      "contentSha256": "2c08c27074912a585e71aca75e42daa0fb2847105fe727025e41d35b9cfcefe1",
+      "bytes": 36794,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "4b2e4db0e45eaafe9becf2d856749437283d071d582a6bb901cbf963098782c1",
+      "contentSha256": "ab3740c048ad5fe33614495a82a43428ec49349bed7237d8ab5fc1a73a76c11e",
+      "bytes": 36728,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "54fcb4a0452e44b4fddf17f807306307681e56a7066e54ba1f9ad0786ee56716",
+      "contentSha256": "e446b9211ce2ef757b618156784a465ed30b91ca8b47dd776af909972e9b9326",
+      "bytes": 57140,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "642181808791f6563b084f252d372240ffc0d64c3821774c93dd95dee4587ce2",
+      "contentSha256": "68dbc508fcaebaeada3e94296ea07781e7be679f8feaea3c98e8b68c94f1b869",
+      "bytes": 26144,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "672c7e56432083c3dbad986c86b96a1c4663e9a23ad212e3bd7e6307cb15a342",
+      "contentSha256": "b5bffb511cb2fa56731483161d6e54fbe404fb473224b46f143187dde074da9d",
+      "bytes": 28948,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "6c06de6b5d496ddb08c021b4950a9720f474209cf7e36e7f7441716e7c32f467",
+      "contentSha256": "b6557dd0432694cb37c48ee4a8447cd4d1e92439127b6edcf8f4d0128f186cfc",
+      "bytes": 141454,
+      "mime": "image/png",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "7297ffa85b3d144b4962050094a7e5cda841493778476045485a79265ded59a6",
+      "contentSha256": "7719690eb7f737f324666c4624954a2122c355dda336254b442a6734b9073dd8",
+      "bytes": 85620,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "798ecf3599b3656bf77a083c823a3bba658c344084fe3352ee42af4f1ae72462",
+      "contentSha256": "a00e53f685b7758fbebdcf86cbd9a85fe17724ac15621734299e3330c9601944",
+      "bytes": 49648,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "7c1e981be51ddecc027cb112b8ca0829571618b5182664a34d84a362bc96cd51",
+      "contentSha256": "115eb1070b172b38aad79455362e54124f7495aba91e031998813c4d781d8b93",
+      "bytes": 6740,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "8018f1d82725d843c6687412035a989f53886ad610878fcfc03427c0141323f7",
+      "contentSha256": "3a7c34329a8f580b4039bf5bd9546d6dac0e5230d3339cf3681fb5da14a2a14a",
+      "bytes": 37162,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "829f168b11f7949f54e7bfa39cdf8fedc8cf9cd59a5f98c625145cfba6552177",
+      "contentSha256": "36addc02021f361bf214296e3c82922bdda9e2e9e5e8fac05d24194e8c6a4c15",
+      "bytes": 18892,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "853c417da749196a92ca2b6abc5136a8c62f5f94e5aa92b01049e09a105c57a6",
+      "contentSha256": "d3807ea30015f5082c0a3e2b7803885310db888be091dbc86fecb1ca67f3c622",
+      "bytes": 16148,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "858951868f9e6af0b704fdb5fc43f802a322fd70562028dcdd083d15075c41ef",
+      "contentSha256": "f7cd1cc8c44b14f32f4b8a5e66903a6604d02c93d1282080ec7b4d8f41a34f5e",
+      "bytes": 41768,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "879f8dbc88d947a7bad4d7ad9b506faba2f967e6db53f0a2c6d36b79ebb83bef",
+      "contentSha256": "a4d2084826f3902bd2ae93a52eb1bd60dcee7dc9c87a452cc098422bbebbf0f6",
+      "bytes": 6348,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "8a8e25f81ebb24939b7be5c58aabe1a8f475df5953dbc0743f4a230208a80aa0",
+      "contentSha256": "8c035eee654c81a182251f0878fb6643a861dda9ae2af8b0ed373351c3888bd7",
+      "bytes": 264548,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "947ed15831ba3bb24cda6d50f7539c1b0f4df2acf4045987acd591a6ed3950d8",
+      "contentSha256": "891951df5e8b5b0f0bc760d31375405e795c666b5add70437de12d4a6482b33f",
+      "bytes": 74932,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "9518b278916e3b85ddaf18561f066b1590c43f9c8d440074daf719bb7da72e4e",
+      "contentSha256": "6276a2f5a5554c16b422f00f114773a8d4013a81df18a338f7c216d80103c9af",
+      "bytes": 77216,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "b40d0af66b187d3f45a0fdad276b4c61fa8828dff266d8dc89fbc6549e18cde6",
+      "contentSha256": "eba785874b3243a442268c4c0ee6f20c2b47cae8d090b4787e91083c0bcb6255",
+      "bytes": 5540,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "be7f9cabf4375a6be408a04c2f3ab8fd6c54219668e1cf681d9416d99eb3aafd",
+      "contentSha256": "f626b95c1efa95cf6b7c9b043d3bbe8862b6abbe5f55a082102f33f7de2fd4f9",
+      "bytes": 29472,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "c2c5c7a2ec5653be2a421dcff43d356fd00fe199a82c52605aee621b0d65aad0",
+      "contentSha256": "8d2822297f75fdc44bbce13889335950beb31d0415668b14e76ee4ac00612f28",
+      "bytes": 37972,
+      "mime": "image/webp",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "c348e8ebfd47e1ac551fd5aba6ecd908242ec3fc0325e93805f9b7002098ef09",
+      "contentSha256": "5a2f4d7bce3157878ca3b0e0a3fe3bb2ca91d0477673b769fef530a8b2427496",
+      "bytes": 15200,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "c4e611d7095cc212767de7e1b9be1ac91d74a638cc958f42ee583b57407831cd",
+      "contentSha256": "f5508668a096dbb937499333bd6345d8e260d8f7f280b5791dda5767501f6015",
+      "bytes": 30992,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "cd487a25742fbdaa3ceff0f4ba4ea89f8b2d378ee550f9ca38b671c635886cd1",
+      "contentSha256": "4956ec7b19798cb8418f2e44349e90c0ab7310594350c4b9c2998dc092122d5a",
+      "bytes": 42856,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "d7813eded460c8c8e341abcb827cc3521fad8772e01564abd81fccd6b8373a51",
+      "contentSha256": "a9dec2ce62dce40d05bbf23d6daa254a73366cf58fa8123bf7c75d9d0a1dde08",
+      "bytes": 12700,
+      "mime": "text/css",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "dfd9718b6cfb6a2a7465fa4380803be888e1360f7bbb309c3186c3a7d5a3e54c",
+      "contentSha256": "2a1e45a84ac217d86855437a5bbdefeb0edfb6ab3e8b98d7567e4f96c9c5a2f3",
+      "bytes": 5480,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "e83466fccf706804a2f0c192765be5360d69ab06224104cbf6941e8cc601301c",
+      "contentSha256": "2f93e2023365b4f9c77d98b38bcbe1d536722a7c176dd1d6de1ed8f33b6803fb",
+      "bytes": 7932,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "f51109fee8342a70f556b4c8944e2d914018b7a89f7672de5b7b835f46a7c373",
+      "contentSha256": "59c4027dd1c0faef3b6923207a79637bd6f58fe7f702bf24a6a2fb8909780231",
+      "bytes": 115232,
+      "mime": "font/woff2",
+      "redirects": 0
+    },
+    {
+      "urlSha256": "fcdd62416dde05846305f78946c6d1e503f0fea06a2ea7349404ea931389b624",
+      "contentSha256": "ef82e1dc3eb83f882112285eb1ccec88c1a0ea46a3d2c70f29ca050913147fae",
+      "bytes": 60452,
+      "mime": "image/webp",
+      "redirects": 0
+    }
+  ],
+  "artifactDigest": "24bcfca944e3e8bc5fe9775a2c4451689f9544e759c1ad0b1f47d03ce753b9a0",
+  "capture": {
+    "logs": [
+      "info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+      "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+      "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+      "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    }
+  },
+  "retainedUpstreamDiagnostics": [
+    "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+    "error: Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.",
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "diagnosticQualification": "React19 development/Tippy ref warning retained; required-resource and page-error check occurs separately in the native snapshot probe, including exact optional favicon path.",
+  "pngSha256": "623932ae07fe18355bf192771666a5e2c8a0f8c4bf748e3a71dec781e804693e",
+  "status": "PASS",
+  "sourceAndExportByteExact": true,
+  "exportArchiveSha256": "217256c861fac597763af995234a339080f54ee1353d524f11cd7e57d85560b6",
+  "exportQualification": "Read-only packaged export rerun under an explicitly provisioned TEST owner on the same project/revision after the first harness used an already-existing extraction directory. No preview/resource workflow repeated.",
+  "runnerCleanup": "stopped",
+  "historicalFailure": "EEXIST: file already exists, mkdir '/var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-breadth-export-vx9iSC'"
+}

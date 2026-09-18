@@ -1,0 +1,34 @@
+{
+  "boundary": "LOCAL TEST TLS, distinct .test sites, test certificate key pin; no deployed DNS/IdP/cloud evidence",
+  "browser": "151.0.7922.34",
+  "cookie": [
+    {
+      "name": "__Host-wcb-session",
+      "domain": "app.wcb-app.test",
+      "path": "/",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ],
+  "checks": {
+    "nodeVerifiedTlsHostname": true,
+    "httpOnlyAndNoBrowserStorage": true,
+    "opaqueViewerCookieStorageParentDenied": true,
+    "crossProjectViewerStateSeparated": true,
+    "csrfRequired": true,
+    "crossProjectSourceDenied": true,
+    "viewerConnectCspDenied": true,
+    "sameSiteBlockedCrossSiteNavigation": true,
+    "separateSiteCookieDenied": true,
+    "revokedUserDenied": true
+  },
+  "observedCookies": {
+    "viewer": 0,
+    "attacker": 0
+  },
+  "api": {
+    "accepted": 1,
+    "rejected": 3
+  }
+}

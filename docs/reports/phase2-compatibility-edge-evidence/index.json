@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "base": "982625986289baf8101a7d73c96fe47ce0602f0d",
+  "productImplementation": "775f9b67ed3aa9e0465fed446029ee5502192b2a",
+  "statuses": {
+    "P05": "PARTIAL",
+    "P06": "PARTIAL",
+    "P08": "PASS",
+    "P07Regression": "PASS"
+  },
+  "prior549Preserved": true,
+  "distinctPassing": 594,
+  "outstandingSkips": 0,
+  "internalRemaining": [
+    "P05",
+    "P06",
+    "P39",
+    "P61"
+  ],
+  "internalClosure": "NOT YET",
+  "overallPhase2": "NOT YET",
+  "phase3MayBegin": false,
+  "artifacts": [
+    {
+      "path": "application-stage-results.json",
+      "sha256": "98e1f5fdc8afceecf899457ab6b360bed063d8f867e33d2f6c0e219715b2507e",
+      "bytes": 57319
+    },
+    {
+      "path": "cleanup.json",
+      "sha256": "677dc1758d571871bcae0f2864133a008816465a7a6d3dea46c376116afdc27b",
+      "bytes": 687
+    },
+    {
+      "path": "default-final.json",
+      "sha256": "6ad84a44b1c5d7c2d05f20699f4e8fe5c961558121089d4bee35eb83c2c31aaf",
+      "bytes": 142630
+    },
+    {
+      "path": "hosted-final.json",
+      "sha256": "73b41e9db3c8c8e8017bb1f660a8befeba386e25133e683aa8bc5d842bec292b",
+      "bytes": 4292
+    },
+    {
+      "path": "logs/apps-final.log",
+      "sha256": "10d769eea9450ce24a4e59aee53ff6dac23705c4b02f5e670b815095d4b963de",
+      "bytes": 906
+    },
+    {
+      "path": "logs/build-final.log",
+      "sha256": "ee2da8695a84e4cc0b479eebaedd9e1890b23bdcd283c4b53f9f00cc860453f1",
+      "bytes": 798
+    },
+    {
+      "path": "logs/package-final.log",
+      "sha256": "39b026acae93355dc0c2d00aad7b6dfcd53aab260ec99b4c5cb08c88735f989a",
+      "bytes": 96
+    },
+    {
+      "path": "logs/recipe-preservation.log",
+      "sha256": "6f20aadb322cb30add6bdad5a986d1c719fe7d73cedbaac079b0d2a4d22e0007",
+      "bytes": 112
+    },
+    {
+      "path": "logs/uno-native-final.log",
+      "sha256": "1d6d6f800d04896bd779d2f6853ea824b90ac55979359355bdd2606979f1dd1a",
+      "bytes": 68
+    },
+    {
+      "path": "logs/uno-native.log",
+      "sha256": "6f076f81380cce2d212865ae22536a34271adfce7671b34bf411ae50d1adfef1",
+      "bytes": 449
+    },
+    {
+      "path": "native-final.json",
+      "sha256": "c05312d971b4309403750e4e56440cf466d6bd0ddd4e0d2f463264635a771065",
+      "bytes": 17268
+    },
+    {
+      "path": "prior-ledger.json",
+      "sha256": "24019c608996a83dd14f4e427f94c9deac18130887c2e418a941cf1f2e7f8b1c",
+      "bytes": 85180
+    },
+    {
+      "path": "prior-profile-preservation.json",
+      "sha256": "91f705f815a19c54c474fbe34bd33308fe5d87ca161f6df53fb0b8fa2c3a4334",
+      "bytes": 3503
+    },
+    {
+      "path": "profile-audit.json",
+      "sha256": "e1d3e4cc3cf99dc0ff6a08967b6aed8b2def62cd00e887010a9e9948264b3bf5",
+      "bytes": 377
+    },
+    {
+      "path": "recipe-preservation.json",
+      "sha256": "88c12019feaee647d7357d9157f68b7ff75dd0764344f0c3ed1d75965575dec7",
+      "bytes": 6378
+    },
+    {
+      "path": "regressions.json",
+      "sha256": "5aa90c0955e98c0ac91bed0700c3c3f07337f84c9e0aae64385cec1577447986",
+      "bytes": 146164
+    },
+    {
+      "path": "security/coverage.json",
+      "sha256": "38023a6dd52ab1a0098c65cc60789a4aec8cbb2737c685fd0b9c1dc917567d45",
+      "bytes": 2691
+    },
+    {
+      "path": "security/final-reread.json",
+      "sha256": "6dfb1e3627d2d3fae4b87be6e6f35035abc7f21a0e58e6b41c42a7a50f82bd2a",
+      "bytes": 3509
+    },
+    {
+      "path": "security/findings.json",
+      "sha256": "8c950cd21b78621daf5db9b8376594efaf2ffbe3bc225520bdbe6808a4e3a58e",
+      "bytes": 144
+    },
+    {
+      "path": "security/report.md",
+      "sha256": "cd074c61495d84c086c27f1e3108c28a97566c4f549222094deb09c1fd16acd7",
+      "bytes": 5899
+    },
+    {
+      "path": "security/scan-manifest.json",
+      "sha256": "4133fa5a24925e9b9a8c7aeb2a84f2c67e4dce2fce9e085c3d0d21c87c7fcecf",
+      "bytes": 5015
+    },
+    {
+      "path": "threat-model.md",
+      "sha256": "c8f2cd1da8f122626f67c8074b040c728162975229cbba6b379b053e6c6a310c",
+      "bytes": 2570
+    },
+    {
+      "path": "uno-native.json",
+      "sha256": "94765b963089a5cdfaaa0f2a1e7ed05ae22351bd737bb1dd05a4a3f123447ae2",
+      "bytes": 405
+    },
+    {
+      "path": "uno-native.png",
+      "sha256": "44795b324b9b2c1b0bef07e1e28e18580673700cf8e90e882690b70790ec56da",
+      "bytes": 29076
+    }
+  ]
+}

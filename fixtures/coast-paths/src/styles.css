@@ -1,0 +1,9 @@
+body { margin: 0; color: #203d35; background: #f8f5eb; font-family: Georgia, serif; }
+header { padding: 24px 32px; display: flex; justify-content: space-between; gap: 24px; border-bottom: 1px solid #9eb3a2; }
+nav { display: flex; gap: 20px; flex-wrap: wrap; }
+a { color: #236a53; }
+h1 { font-size: 48px; max-width: 700px; }
+.home { padding: 32px; max-width: 1080px; margin: auto; }
+img { display: inline-block; width: 200px; height: 100px; object-fit: contain; margin: 20px; }
+footer { padding: 32px; }
+button { padding: 10px; }

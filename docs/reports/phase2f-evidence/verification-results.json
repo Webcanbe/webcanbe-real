@@ -1,0 +1,59 @@
+{
+  "result": "PASS",
+  "checkpoint": "Phase 2F local responsive and semantic authoring",
+  "overallPhase2": "NOT YET",
+  "publicHostedImportReady": false,
+  "baseline": "fac8339e86ca2e0a6395f73b922917fdc1a41de6",
+  "implementationCommits": [
+    "1a825e9b9107840a0faf00c24b9754f6c5fd3527",
+    "247d8ec83af3a83b766228f6325b2dd5983ec5e1"
+  ],
+  "tests": {
+    "suites": 8,
+    "passed": 196,
+    "failed": 0,
+    "originalTestsPreserved": 145,
+    "newTests": 51,
+    "originalTestFilesUnchanged": true
+  },
+  "typescript": "PASS",
+  "productionBuild": "PASS",
+  "buildModules": 82,
+  "buildSeconds": 2.42,
+  "buildAdvisory": "Existing lazy CodeWorkspace chunk exceeds Vite 500 kB advisory (543.01 kB, gzip 184.66 kB).",
+  "browserSuites": [
+    "legacy HashRouter/Field Notes/editor boundary",
+    "controlled BrowserRouter/viewer/authority/expiry",
+    "Code Canvas/invalid drafts/restart/file operations",
+    "responsive BrowserRouter and HashRouter/nested route/restart/undo/export"
+  ],
+  "finalResponsiveExportSourcesMatchIndependentlyBuiltExports": true,
+  "independentThirdPartyProjectEvidence": false,
+  "networkSecurity": "Existing real Linux namespace/cgroup probes passed; mocks are not runtime proof.",
+  "sourceSHA256": {
+    "fixtures/responsive-authoring/README.md": "e8de879eee3087b5393b161dbdf4ebe939ec9ea93ae52f34f24497a43e18ed11",
+    "fixtures/responsive-authoring/index.html": "84bfd9682f76e5bab58b6fc986f1e45796d5d98f1ab31717009587fa7e64d443",
+    "fixtures/responsive-authoring/package-lock.json": "2fe2240592c679daa2f748da3e6506895bc1918d6d29e471898ac7bd923374e3",
+    "fixtures/responsive-authoring/package.json": "507f6ac2f04adce8da291594324fa3737ed6530d14e3121c4aca07787d0ad13c",
+    "fixtures/responsive-authoring/src/App.tsx": "ce6b3ced5e643f22607f694d6f14501c740c65ef9ab556becd50456e194d4eb9",
+    "fixtures/responsive-authoring/src/app.css": "dc36157dbba3081f1c6076198d56f9a7803b5ded891455b24ea0c6fe552659c0",
+    "fixtures/responsive-authoring/src/card.module.css": "b7a84d34b1c13ad6c1dae6041b011c14cb67c0e6a8ea7d20d05b6e2d846f17a6",
+    "fixtures/responsive-authoring/src/main.tsx": "fcc2b15aaf4b673529d5e68cb878aa68a6dd0f5cb086663cec6af71472525ba5",
+    "fixtures/responsive-authoring/src/tailwind.css": "42070e0b45bb201b2b838a52aaaa6e965f964e0b542d97f1fe517fe59c4b75a8",
+    "fixtures/responsive-authoring/tsconfig.json": "a18ce0892d2f6c37bab2c895b5751ebaa0c06b62ff6866c500570501671d2606",
+    "fixtures/responsive-authoring/vite.config.ts": "4e42d6fe464e5635a622d6c91f288cae94777ed11cdee93ba45617959c11a6cf",
+    "scripts/verify-phase2f-export.cjs": "905cfa79e2c6ea519735d04106ae5ef7e52399ea47f265659c770db10638236a",
+    "scripts/verify-phase2f.cjs": "95a89f6f117306da929f40bd7084b5c5bc541581102e21808915e69cb62f8c6a",
+    "src/webcanbe-engine/adapters/react/projectStyles.ts": "77b0b0797fb147c445212d49dcc9296da9bfbea109deb574e84c85c0bdb92a66",
+    "src/webcanbe-engine/adapters/react/reactSourceAdapter.ts": "1d7b87855073799a8b56bbda156caee7ca5064555e7c4bae0d4000bbb78d2b25",
+    "src/webcanbe-engine/core/types.ts": "f42f0416f01ff1cb4947203fcf98c09a262aaf1da5c83b107d3b77c6958d8d8e",
+    "src/webcanbe-engine/mutations/sourceMutations.ts": "41bb76c68614851eb6ff96dc290962bf3574281c27b3158c9dffbbeb9121348e",
+    "src/webcanbe-engine/phase2f.test.ts": "2ae9b66c533099a02849ed79e0ae1290f491fa295697f305726616976c593177",
+    "src/webcanbe-engine/runtime/viteFixturePlugin.ts": "dd41ab37392f51a3197bced484f282526b46a4e132e68f3b32772b4694955032",
+    "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx": "711877a94e0a4f1e58cf6bc4ceb67a8a4938d980265c29b0a78c774072bf6839"
+  },
+  "cleanup": {
+    "activeRunnerUnits": 0,
+    "localVMStopped": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "reviewedRevisionRange": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797..WORKTREE",
+  "inventoryCount": 1,
+  "changedSurfaces": [
+    "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts"
+  ],
+  "productionCodeChanged": false,
+  "candidateLedger": [],
+  "confirmedUnresolved": 0,
+  "fullRegression": "730/730 PASS",
+  "typescript": "PASS",
+  "build": "PASS",
+  "negativeCoverage": {
+    "targetedResult": "42/42 PASS",
+    "berry": "Malformed checksum, virtual identity, patch, workspace, unknown fields, missing SRI, operator attestation mismatch, locator substitution, unsupported protocols, conflicting locators and peer-provider failures remain tested.",
+    "bun": "Malformed ranges, lengths, record counts, indices, protocols, integrity, extension data, tiny/oversized input and substituted root-manifest lock conflict remain tested."
+  },
+  "reviewBoundary": "One-file test-only diff review; no penetration-test or production-deployment claim."
+}

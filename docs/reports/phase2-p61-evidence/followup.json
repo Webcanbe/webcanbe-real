@@ -1,0 +1,83 @@
+{
+  "status": "PARTIAL",
+  "base": "0f2b971c2205a1e5ba1d84f83b62dccf69dc8220",
+  "probeCommit": "b7c8f8bcaa9116e7dd34ffe111e464cd9dd8c202",
+  "probeDisposition": "reviewed and cherry-picked as 901ba83; focused tests added separately",
+  "zustand": {
+    "repository": "pmndrs/zustand",
+    "commit": "b57db4f86ef179285da216eeb291266da82c361c",
+    "subdirectory": "examples/demo",
+    "archiveSha256": "bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a",
+    "canonicalSourceHashesExact": true,
+    "manifestBlockerResolved": true,
+    "timeoutMs": 4000,
+    "beforeOptimization": {
+      "coldStartMs": 3827.590833,
+      "captureHttpMs": 4206.111749999999,
+      "captureStatus": 422,
+      "selectionObservationMs": 2846.7856509999997,
+      "accessibilityReadyMs": 3575.535337,
+      "rasterRequestMs": 3575.971261,
+      "timeoutObservedMs": 4004.136115
+    },
+    "optimization": "Track supervisor selection presence and skip the isolated-world selection query when no selection exists; preserve invalidation on navigation, route changes, updates and ordinary pointer actions.",
+    "accepted": {
+      "importMs": 87.76316699999995,
+      "sourceReadMs": 5.676834000000042,
+      "materializedByMs": 8.51829200000003,
+      "compileBuildMs": 1858.9115420000003,
+      "artifactPutGetMs": 2032.59875,
+      "chromiumMs": 290.237533,
+      "contextMs": 300.855999,
+      "navigationLoadMs": 1285.213663,
+      "runnerLeaseOpenMs": 4177.696583999999,
+      "coldStartHttpMs": 4216.401583,
+      "firstReadinessMs": 1313.2918619999998,
+      "firstRasterRequestMs": 1313.6484119999998,
+      "firstRasterResultMs": 2800.757926,
+      "firstRasterHttpMs": 2992.7046250000003,
+      "firstRasterBytes": 925852,
+      "warmReadinessMs": 473.2157529999995,
+      "warmRasterResultMs": 1913.1872089999997,
+      "warmRasterHttpMs": 2116.4805000000015,
+      "warmRasterBytes": 919180,
+      "renderedAccessibilityTextContains": ["ZUSTAND", "one up", "import", "zustand"],
+      "status": "PASS"
+    }
+  },
+  "historical422": {
+    "reproduced": false,
+    "exactFailureStage": "UNPROVEN",
+    "rootCause": "UNPROVEN",
+    "fix": "NONE",
+    "diagnosticSequence": "A start/capture -> B start/capture -> A code/update/capture -> B code/update/capture -> A code/update/capture",
+    "operations": 16,
+    "operationFailures": 0,
+    "independentArtifactOwnerFenceChecks": 3,
+    "observedStages": [
+      "source/code commit completed",
+      "preview hold established",
+      "compile/materialization",
+      "artifact put/get",
+      "runner lease/fence update RPC",
+      "post-update authorization/revision validation",
+      "post-update capture"
+    ],
+    "publicHttpErrorsRemainGeneric": true,
+    "serverSideLocalTestOnErrorAdded": true
+  },
+  "targetedTests": {
+    "total": 43,
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "files": {
+      "phase2-breadth-html.test.ts": 27,
+      "phase2-final-capture.test.ts": 13,
+      "phase2g2-hosted-runner.test.ts": 3
+    }
+  },
+  "priorBoundedLoad": "REUSED, NOT RERUN",
+  "full646Regression": "DEFERRED TO FINAL PHASE-2 CLOSURE",
+  "priorTestIdentitiesRemovedOrModified": false
+}

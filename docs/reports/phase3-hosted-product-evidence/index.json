@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "foundationBase": "5cdd40cd5e9ff08d3e1c3aeb3f670e0bf7ed5fdf",
+  "stageACommit": "f8e03a6cf464a586d15f8fdf598f7c83bc374cc5",
+  "stageBProductStatus": "PASS",
+  "targeted": {
+    "passed": 18,
+    "total": 18,
+    "typescript": "PASS",
+    "build": "PASS",
+    "securityUnresolved": 0
+  },
+  "preservedFullDefaultRegression": {
+    "passed": 686,
+    "total": 687,
+    "skipped": 61,
+    "rerun": false,
+    "exception": "Untouched Phase-2 afterEach cleanup raced Vite temporary dependency-cache population and raised ENOTEMPTY at src/webcanbe-engine/phase2de.test.ts:16; no Stage-A or Stage-B assertion failed."
+  },
+  "phase2deTargeted": {
+    "passed": 1,
+    "total": 1,
+    "otherTestsUnselected": 28,
+    "serialized": true,
+    "environment": "node",
+    "pool": "forks",
+    "maxWorkers": 1,
+    "phase2CleanupCodeChanged": false
+  },
+  "security": {
+    "scanId": "175ca328-6074-43f1-bb77-8c102aa34027",
+    "findingCount": 0,
+    "coverage": "complete-focused-diff",
+    "daybreakAccess": "not_granted"
+  },
+  "unchanged": {
+    "phase2CompatibleEditor": "545eb5b388c9062fc46361cd62e74a78466bd095",
+    "phase3ProductFoundation": "5cdd40cd5e9ff08d3e1c3aeb3f670e0bf7ed5fdf",
+    "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+  }
+}

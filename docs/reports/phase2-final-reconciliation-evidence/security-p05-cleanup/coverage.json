@@ -1,0 +1,38 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts"
+  ],
+  "inventoryStrategy": "diff",
+  "mode": "diff",
+  "scanId": "scan_phase2_p05_regression_cleanup_20260916",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "accepted_exact_inputs",
+      "label": "Accepted exact Berry/Bun identities",
+      "notes": "The exact Redux reachable graph now asserts the operator profile and no issues; the exact Bun format is recognized while a substituted root manifest remains a lock conflict.",
+      "receiptRefs": [
+        "artifacts/manual-review.json",
+        "artifacts/final-regression.json"
+      ],
+      "riskArea": "test-contract accuracy"
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "negative_lock_security",
+      "label": "Malformed, tampered, substituted and untrusted lock refusal coverage",
+      "notes": "The surrounding Berry trust/parser and Bun binary negative suites are unchanged and passed in the 42/42 targeted run.",
+      "receiptRefs": [
+        "artifacts/manual-review.json",
+        "artifacts/final-regression.json"
+      ],
+      "riskArea": "dependency identity and untrusted lock parsing"
+    }
+  ]
+}

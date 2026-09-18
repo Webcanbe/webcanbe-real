@@ -1,0 +1,64 @@
+{
+  "inputBytes": 1985579,
+  "outputBytes": 859748,
+  "removedScripts": 0,
+  "removedTemplates": 1,
+  "removedDarkOnlyNodes": 36,
+  "removedVariantSubtrees": 2683,
+  "variantContainers": {
+    "hero-variants": {
+      "before": 5,
+      "kept": 1,
+      "removedElements": 79
+    },
+    "logos-variants": {
+      "before": 5,
+      "kept": 1,
+      "removedElements": 691
+    },
+    "bento-grid-variants": {
+      "before": 4,
+      "kept": 1,
+      "removedElements": 905
+    },
+    "items-variants": {
+      "before": 4,
+      "kept": 1,
+      "removedElements": 195
+    },
+    "feature-variants": {
+      "before": 5,
+      "kept": 5,
+      "removedElements": 74
+    },
+    "testimonials-variants": {
+      "before": 3,
+      "kept": 1,
+      "removedElements": 51
+    },
+    "stats-variants": {
+      "before": 4,
+      "kept": 1,
+      "removedElements": 79
+    },
+    "social-proof-variants": {
+      "before": 5,
+      "kept": 1,
+      "removedElements": 463
+    },
+    "faq-variants": {
+      "before": 4,
+      "kept": 1,
+      "removedElements": 118
+    },
+    "cta-variants": {
+      "before": 4,
+      "kept": 1,
+      "removedElements": 28
+    }
+  },
+  "downloadedAssets": 57,
+  "downloadedBytes": 5752789,
+  "externalAssetReferencesAfter": [],
+  "nextAssetReferencesAfter": []
+}

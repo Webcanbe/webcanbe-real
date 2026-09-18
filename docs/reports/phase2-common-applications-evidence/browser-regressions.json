@@ -1,0 +1,27 @@
+[
+  {
+    "script": "verify-phase2c-editor-regressions",
+    "exit": 0,
+    "elapsedMs": 19066
+  },
+  {
+    "script": "verify-phase2c2-controlled",
+    "exit": 0,
+    "elapsedMs": 36719
+  },
+  {
+    "script": "verify-phase2de",
+    "exit": 0,
+    "elapsedMs": 59617
+  },
+  {
+    "script": "verify-phase2f",
+    "exit": 0,
+    "elapsedMs": 76412
+  },
+  {
+    "script": "verify-phase2g",
+    "exit": 0,
+    "elapsedMs": 9327
+  }
+]

@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "scope": "compact-diff-discovery/admission",
+  "repository": "/Users/olivertaylor/Developer/WebCanBe-recovery",
+  "base": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+  "head": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "policy": {
+    "guidanceRead": true,
+    "applicableSecurityMd": [],
+    "resolvedScopes": [
+      "src/webcanbe-engine",
+      "src/webcanbe-engine/runtime/alternateLockfiles.ts"
+    ],
+    "threatModel": "docs/reports/phase2-compatibility-breadth-evidence/threat-model.md"
+  },
+  "reviewedFiles": [
+    {
+      "path": "src/webcanbe-engine/runtime/alternateLockfiles.ts",
+      "status": "reviewed",
+      "reason": "Entire added file. Text/record bounds at 6,18,48-52; duplicate and protocol controls at 22,27-38,50,62-66; exact operator version/SRI and graph/peer comparison at 85-103. No package-manager/network execution."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/runtimeCompatibility.ts",
+      "status": "reviewed",
+      "reason": "Entire resulting file and all changed hunks. Profile fallback is followed by mandatory admission at 205-227 and supported=false for any issue at 367-373. Config AST binds only fixed imports and interprets finite data at 58-187. Local realpath confinement at 40-44 and 153-154,183-184,294-318. Failures are retained as issues, including HTML, CSS and public value failures."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+      "status": "reviewed",
+      "reason": "Entire added file. HTML size/nodes limited at 16,20; namespace/tag/active-attribute checks at 23-38; exactly one confined source module at 39-41,58; local stylesheet confinement at 45-50; preview-only serialization at 55-62. One nonreportable raw-URL normalization observation below."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/intakeMetadata.ts",
+      "status": "reviewed",
+      "reason": "Entire file and changed hunks. New metadata remains bounded text data at 4-24 and 42-54; opaque Bun recognizer at 75-77 has fixed magic/version and 2 MiB bound. Neither parser executes or installs metadata."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/projectRegistry.ts",
+      "status": "reviewed",
+      "reason": "Entire resulting file and changed intake hunks. New hbs/Bun extensions at 74 and 87-88 do not bypass path/type/member/total/ratio/duplicate checks at 45-50,69-72 or size/CRC at 79-86. All archive members are validated before exclusive writes into fresh private destination at 99-107; imported metadata remains raw bytes."
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "status": "reviewed",
+      "reason": "All 44 lines. Covers graph/SRI/version/required peer and optional peer mismatches, protocol/duplicate parser rejection and actual profile compilation. Tests use constructed data and trusted profile files; no new production sink."
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-intake.test.ts",
+      "status": "reviewed",
+      "reason": "All 20 lines. Covers byte preservation, secret/executable metadata refusal and fixed opaque Bun framing bounds; scratch output is per-test and cleaned."
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-html.test.ts",
+      "status": "reviewed",
+      "reason": "All 43 lines. Covers shell preservation, local stylesheet compilation, canonical HTML unchanged and rejection of active/extra/remote scripts/foreign markup. Missing obfuscated javascript URL case is recorded separately."
+    },
+    {
+      "path": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "status": "reviewed",
+      "reason": "All 45 lines. Covers finite constants, same-directory inheritance, publicDir, recognized binding identity and canonical config preservation; rejects executable statements, getter/cycle/escaping path semantics."
+    }
+  ],
+  "supportingFiles": [
+    {
+      "path": "src/webcanbe-engine/runtime/isolatedPreview.ts",
+      "lines": "56-174,177-213",
+      "purpose": "Admission consumer, operator-only dependency resolution, confined alias/public paths, ephemeral HTML/artifacts and Blob CSP."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/previewBridge.ts",
+      "lines": "1-136",
+      "purpose": "Checked whether new HTML clobbering/URL acceptance exposes a distinct bridge authority; none established."
+    },
+    {
+      "path": "src/webcanbe-engine/runtime/hostedProjectRegistry.ts",
+      "lines": "25-62,119-125",
+      "purpose": "Changed archive helper's hosted caller retains Buffer bytes, fresh workspace access and bounded intake reservation."
+    }
+  ],
+  "candidates": [],
+  "negativeEvidence": [
+    {
+      "family": "dependency substitution / unsupported lock bypass",
+      "evidence": "alternateLockfiles.ts:86-100 compares every reachable record to trusted version/SRI, exact dependency/optional edges, and Bun peer declarations; Yarn peers come from the integrity-matched operator graph. runtimeCompatibility.ts:207,215-216 records unsupported/failed locks even when selectProfile falls back, :373 requires no issues. isolatedPreview.ts:57-58 rejects unsupported runtime and :101-110 confines installed packages to the dedicated profile."
+    },
+    {
+      "family": "config execution / filesystem escape",
+      "evidence": "runtimeCompatibility.ts:64-143 uses AST data interpretation, verifies import/constant collisions, evaluates unused constants, limits complexity and requires plugin object identity. Allowed path operations reach confinedFile at :122,134,154,184,294,317, which checks safeArchivePath plus realpath containment at :40-44. Compiler aliases are confined again at isolatedPreview.ts:107-110. No eval/import of uploaded configuration exists on these paths."
+    },
+    {
+      "family": "archive traversal / binary execution / canonical alteration",
+      "evidence": "projectRegistry.ts:69-72,79-89 validates all entries before materialization; only framed bun.lockb bypasses UTF-8 decoding, never CRC/path/member/type limits. Exclusive private writes preserve buffers at :99-107. runtimeCompatibility.ts:205-207 refuses binary lock runtime. hostedProjectRegistry.ts:55-60 passes raw Buffers into canonical storage. hbs/bun.lockb are excluded from compiler loaders at isolatedPreview.ts:118-121 and from static public artifact types at :200-203."
+    },
+    {
+      "family": "HTML active code / source trust",
+      "evidence": "htmlConfiguration.ts:23-25,37-41,58 rejects extra/remote/inline scripts, foreign markup, event attributes and active embeds. Local stylesheet inputs are confined at :48-50. Serialization returns a generated shell at :59-62; isolatedPreview.ts uses write:false at :71 and does not modify index.html/config. The one raw URL scheme observation does not establish greater authority than existing authored application JavaScript."
+    },
+    {
+      "family": "metadata URL network authority",
+      "evidence": "intakeMetadata.ts:42-54 parses and validates public example URL strings only. runtimeCompatibility.ts:286 populates runtime values from publicRuntimeValues(runtimeValues), not .env.example bytes. Broadened example host acceptance does not itself fetch a destination or grant it to runtime."
+    }
+  ],
+  "nonReportableObservations": [
+    {
+      "id": "admission-html-url-ascii-whitespace",
+      "path": "src/webcanbe-engine/runtime/htmlConfiguration.ts",
+      "lines": [
+        27,
+        30,
+        59,
+        62
+      ],
+      "description": "Decoded attribute values permit TAB/LF/CR, while the URL scheme deny check matches raw text. An anchor href java&#x09;script:... is not caught by the javascript-scheme expression and remains in serialized preview HTML. Browser URL parsing strips internal ASCII tabs/newlines from a scheme.",
+      "source": "Attacker-authored index.html anchor href",
+      "brokenControl": "Raw attribute regex lacks browser-equivalent ASCII whitespace normalization/rejection",
+      "sink": "Serialized anchor navigation inside the application's preview document",
+      "taxonomy": [
+        "CWE-184"
+      ],
+      "reportable": false,
+      "counterevidence": "The attacker already controls the selected source module and executes arbitrary application JavaScript in the same preview authority. Blob policy allows inline application script but denies external resources/connects; HTTP runs within the existing isolated runner. No host, cross-tenant, canonical-source or greater network authority was established. This violates finite HTML acceptance rather than establishing a distinct security impact.",
+      "validation": "Not executed by discovery worker. Parent acknowledged the observation and plans a focused control/test follow-up after discovery; no imported application, VM or external URL was executed."
+    }
+  ],
+  "limitations": [
+    "Static review only; parent owns candidate validation and final reportability.",
+    "CSS compiler internals and server resource-fetch/runtime-value authority are assigned to other workers; this review covered admission call sites.",
+    "No repository code edits, report/scan tool calls, network reads, application execution or VM execution performed."
+  ]
+}

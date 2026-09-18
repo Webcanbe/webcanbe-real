@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "commandClass": "single final repository-derived full preserved Phase-2 Vitest identity run with every required gate and frozen corpus enabled",
+  "configuration": {
+    "fileParallelism": false,
+    "maxWorkers": 1,
+    "playwrightModuleResolved": true,
+    "sharedRunnerGatewaySerialized": true
+  },
+  "fullRun": {
+    "testSuites": {
+      "total": 88,
+      "passed": 88,
+      "failed": 0,
+      "pending": 0
+    },
+    "tests": {
+      "total": 730,
+      "passed": 730,
+      "failed": 0,
+      "pending": 0
+    },
+    "priorTestIdentitiesPreserved": true,
+    "normalizedIdentityDelta": {
+      "missing": 0,
+      "added": 0
+    },
+    "receipt": "full-regression.json",
+    "receiptBytes": 263990,
+    "receiptSha256": "fff357b8b9fc767ae99a99cc6be644beb6aa9ed6a700098b82975a23f18490dd"
+  },
+  "diagnosticBeforeFinalRun": {
+    "targetedTests": "97/97 PASS",
+    "realRegressions": 0,
+    "harnessReportDefectsResolved": true,
+    "negativeSecurityCoveragePreserved": true
+  },
+  "historicalReceiptsPreserved": {
+    "priorCompleteRun": "725/730",
+    "diagnosticMisconfiguredRun": "720/730",
+    "disposition": "Preserved as historical evidence; neither is relabeled or substituted for the final corrected run."
+  },
+  "validation": {
+    "typeScript": "PASS",
+    "build": "PASS",
+    "securityFinalization": "PASS"
+  },
+  "authoritativeResult": "730/730",
+  "closure": "GREEN"
+}

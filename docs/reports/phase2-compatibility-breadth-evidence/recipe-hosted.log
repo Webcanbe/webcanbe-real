@@ -1,0 +1,1 @@
+{"status":"FAIL","stages":{"intake":"PASS","dependencies":"PASS","configuration":"PASS","compilation":"PASS","runtime":"PASS","assets":"PASS","render":"PASS"},"assets":38,"unchangedFiles":67,"failure":"EEXIST: file already exists, mkdir '/var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-breadth-export-vx9iSC'"}

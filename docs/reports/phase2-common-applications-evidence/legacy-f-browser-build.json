@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 1305.232522,
+  "output": "vite v6.4.3 building for production...\ntransforming...\n\u2713 43 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.36 kB \u2502 gzip:  0.26 kB\ndist/assets/index-Dt7bMhRZ.css    5.01 kB \u2502 gzip:  1.72 kB\ndist/assets/index-pVrdc9RX.js   263.31 kB \u2502 gzip: 83.53 kB\n\u2713 built in 1.04s\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 1479.456333,
+  "archiveSha256": "ff28bd69cd302799060507f21cf7058a0c41fd4c0495e67f3bc923418193c0ff",
+  "profile": "react19-vite6",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "d86a9f1d4f53668106636c2be6af1466fca47a7ca393de57b15c8f17fd897900"
+    },
+    {
+      "path": "/assets/index-Dt7bMhRZ.css",
+      "sha256": "cce365cc2849bd75ac3ecd69bca292112933ac8e811108a549dc0dc630578639"
+    },
+    {
+      "path": "/assets/index-pVrdc9RX.js",
+      "sha256": "4bdce8c2c81e1963ad06cac3e20fc2022a6a3393faa983bdbc0fd5794e1cefb1"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

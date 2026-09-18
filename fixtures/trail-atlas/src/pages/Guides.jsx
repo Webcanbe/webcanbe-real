@@ -1,0 +1,1 @@
+export default function Guides(){return <main><h1>Pack light. Notice more.</h1><p>Bring water, check the forecast, and leave room for the unexpected.</p><ul><li>Choose a route that fits your day.</li><li>Share your plan with a friend.</li><li>Leave every place as you found it.</li></ul></main>}

@@ -1,0 +1,464 @@
+{
+  "result": "PASS",
+  "taskExhaustion": {
+    "spawned": 182,
+    "limitDenied": true,
+    "childrenReaped": true
+  },
+  "resourceProperties": "RuntimeMaxUSec=1min 5s\nCPUQuotaPerSecUSec=1.500000s\nMemoryMax=1610612736\nMemorySwapMax=0\nTasksMax=192\nNoNewPrivileges=yes\nRestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX\nKillMode=control-group\n",
+  "frozenWorkerKilledAfterMs": 65111,
+  "memoryExhaustionKilled": true,
+  "boundary": "Linux namespaces + systemd cgroup inside no-mount Lima VM",
+  "control": {
+    "raw": {
+      "procRootEscapeDenied": true,
+      "traversalDenied": false,
+      "secretAbsent": false,
+      "filesystemEscapeDenied": false,
+      "shellDenied": false,
+      "outsideProcessDenied": false,
+      "systemWriteDenied": true,
+      "hostHomeAbsent": true,
+      "vsock": "VSOCK_ALLOWED",
+      "net": "net:[4026531840]",
+      "pid": "pid:[4026531836]",
+      "interfaces": [
+        "lo",
+        "eth0"
+      ],
+      "noNewPrivs": false,
+      "child": {
+        "net": "net:[4026531840]",
+        "pid": "pid:[4026531836]",
+        "vsock": "VSOCK_ALLOWED"
+      },
+      "failures": [
+        {
+          "console": "WebSocket connection to 'ws://192.168.5.15:34041/control/websocket' failed: Connection closed before receiving a handshake response"
+        },
+        {
+          "console": "EventSource's response has a MIME type (\"text/plain\") that is not \"text/event-stream\". Aborting the connection."
+        }
+      ],
+      "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed."
+    },
+    "observations": {
+      "fetch": "resolved",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "turnTcp": "offer-created",
+      "ice": "accepted"
+    }
+  },
+  "isolated": {
+    "raw": {
+      "procRootEscapeDenied": true,
+      "traversalDenied": true,
+      "secretAbsent": true,
+      "filesystemEscapeDenied": true,
+      "shellDenied": true,
+      "outsideProcessDenied": true,
+      "systemWriteDenied": true,
+      "hostHomeAbsent": true,
+      "vsock": "VSOCK_DENIED:97",
+      "net": "net:[4026532289]",
+      "pid": "pid:[4026532287]",
+      "interfaces": [
+        "lo"
+      ],
+      "noNewPrivs": true,
+      "child": {
+        "net": "net:[4026532289]",
+        "pid": "pid:[4026532287]",
+        "vsock": "VSOCK_DENIED:97"
+      },
+      "failures": [
+        {
+          "console": "WebSocket connection to 'ws://192.168.5.15:34041/isolated/websocket' failed: Error in connection establishment: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "url": "http://192.168.5.15:34041/isolated/fetch",
+          "error": {
+            "errorText": "net::ERR_INTERNET_DISCONNECTED"
+          }
+        },
+        {
+          "console": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "url": "http://192.168.5.15:34041/isolated/eventsource",
+          "error": {
+            "errorText": "net::ERR_INTERNET_DISCONNECTED"
+          }
+        },
+        {
+          "console": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "url": "http://192.168.5.15:34041/isolated/beacon",
+          "error": {
+            "errorText": "net::ERR_INTERNET_DISCONNECTED"
+          }
+        },
+        {
+          "console": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        },
+        {
+          "url": "http://192.168.5.15:34041/isolated/image",
+          "error": {
+            "errorText": "net::ERR_INTERNET_DISCONNECTED"
+          }
+        },
+        {
+          "console": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+        }
+      ],
+      "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed."
+    },
+    "observations": {
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "turnTcp": "offer-created",
+      "ice": "accepted"
+    }
+  },
+  "records": [
+    {
+      "mode": "control",
+      "name": "tcp",
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "tcp",
+      "address": "::ffff:127.0.0.1"
+    },
+    {
+      "mode": "control",
+      "name": "tcp",
+      "address": "::1"
+    },
+    {
+      "mode": "control",
+      "name": "raw-udp",
+      "bytes": 11,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "raw-udp",
+      "bytes": 11,
+      "address": "::ffff:127.0.0.1"
+    },
+    {
+      "mode": "control",
+      "name": "raw-udp",
+      "bytes": 11,
+      "address": "::1"
+    },
+    {
+      "mode": "control",
+      "name": "dns",
+      "bytes": 35,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "websocket"
+    },
+    {
+      "mode": "control",
+      "name": "fetch"
+    },
+    {
+      "mode": "control",
+      "name": "eventsource"
+    },
+    {
+      "mode": "control",
+      "name": "beacon"
+    },
+    {
+      "mode": "control",
+      "name": "image"
+    },
+    {
+      "mode": "control",
+      "name": "stun",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 28,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "tcp",
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "stun",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 28,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "stun",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 28,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "stun",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 20,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "turn",
+      "bytes": 28,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    },
+    {
+      "mode": "control",
+      "name": "ice",
+      "bytes": 104,
+      "address": "::ffff:192.168.5.15"
+    }
+  ],
+  "revokedGenerationDenied": true,
+  "taskProofFollowup": "Final probe checks each waitpid reaped its exact child; complete original isolation matrix ran immediately before this proof-only assertion strengthening."
+}

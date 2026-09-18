@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "date": "2026-09-17",
+  "branch": "phase-3-hosted-product",
+  "base": "ecd0fe1e96e13beb8008dc78d8ea36f445ade8d0",
+  "status": "PASS",
+  "scope": {
+    "webCanBeReady": true,
+    "creatorStudioBackend": true,
+    "shareContract": true,
+    "exportProductFlow": true,
+    "deployContract": true,
+    "realDeployProviderCall": false,
+    "paymentSideEffect": false,
+    "publicationOrEntitlementSideEffect": false,
+    "codeExecutionAdded": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 5,
+      "total": 5,
+      "skippedUnrelated": 58,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 final sprint Pass 1 product residuals\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "readyReleaseBinding": "PASS",
+    "readyEvidenceProvenance": "PASS",
+    "sellerReadySelfAssertionRefused": "PASS",
+    "creatorStudioAuthority": "PASS",
+    "crossSellerStudioDenial": "PASS",
+    "shareAuthorityAndRevocation": "PASS",
+    "exportExactRevisionAndAuthority": "PASS",
+    "deployExactRevisionAndIdempotency": "PASS",
+    "releaseImmutability": "PASS",
+    "crossTenantAuthority": "PASS",
+    "noPaymentSideEffect": "PASS"
+  },
+  "security": {
+    "scanId": "3b883b7f-aef1-483c-b14a-1784346ba7c8",
+    "snapshotCoverage": "complete",
+    "changedFilesReviewed": 6,
+    "threatSurfacesClosed": 5,
+    "findings": 0,
+    "unresolved": 0,
+    "daybreakAccess": "not_granted"
+  }
+}

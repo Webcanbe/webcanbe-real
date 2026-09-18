@@ -1,0 +1,329 @@
+{
+  "boundary": "Packaged TLS editor / TEST OIDC / PostgreSQL / mTLS native Linux, platform browser receives raster only",
+  "browserPath": "Browser plugin not available; retained Playwright approach",
+  "stages": {
+    "unchangedImport": {
+      "status": "PASS",
+      "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+      "archiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+      "fileHashes": {
+        ".github/ISSUE_TEMPLATE/bug_report.md": {
+          "bytes": 504,
+          "sha256": "f952a6b4964d3c9cf55647da302451a0f8a0f4066ecc3f8ecc79d7383b9d26b5"
+        },
+        ".github/ISSUE_TEMPLATE/feature_request.md": {
+          "bytes": 422,
+          "sha256": "784cad0583e952d4413aeceb82c3d2f432cde39c79c916d7044f9f0ee37897dc"
+        },
+        ".github/pull_request_template.md": {
+          "bytes": 533,
+          "sha256": "606b40ee30edaa2da79d4b19d083b29a3b372ed25901631aac0f51117ce1cb3d"
+        },
+        ".gitignore": {
+          "bytes": 46,
+          "sha256": "d6638be47569826278b217ac71ef36aa4936067ecdccefbb8beb8dc1727c5cd0"
+        },
+        "CODE_OF_CONDUCT.md": {
+          "bytes": 1746,
+          "sha256": "7cd0958d14137cf5c8655beea094962a11c0440fd448d0ed22cee84ef8995cd8"
+        },
+        "CONTRIBUTING.md": {
+          "bytes": 305,
+          "sha256": "57b2dc900a696aa946180c87b37c5c0f5c0d715fd7d7ad00660e98f4ef8f2623"
+        },
+        "LICENSE": {
+          "bytes": 1063,
+          "sha256": "4e7eef80a630666270be5ab7fffe4cc9697d644001cb03f86a6b53dfa85fd534"
+        },
+        "README.md": {
+          "bytes": 526,
+          "sha256": "7f6744027b3d3d1f08c08570f956b4f42dca4f526f25221833af80a6aead5a43"
+        },
+        "SECURITY.md": {
+          "bytes": 982,
+          "sha256": "0450d060d287d169f36b05b434ea904a63262fb36d56ea52761c348ab153cc7a"
+        },
+        "index.html": {
+          "bytes": 263,
+          "sha256": "f6eb93a279c1c7ff02b436ea75faf6d987dfba1714e12890d1afb6f3947a00de"
+        },
+        "package.json": {
+          "bytes": 473,
+          "sha256": "30a7e62821c643cdc622709e39b1ff2903919b55bc787d79153bd99c76abf447"
+        },
+        "src/App.tsx": {
+          "bytes": 7508,
+          "sha256": "bdc491861c86b26c0ae252a4c53a9e9365680ba48c71d93efb2d486ab5ea98e5"
+        },
+        "src/index.css": {
+          "bytes": 109,
+          "sha256": "3ae1bf9801d66c07fe14d10eaf5ecfe71728e11dcb3ac0f9ec7954a586096ed2"
+        },
+        "src/main.tsx": {
+          "bytes": 218,
+          "sha256": "cb73c931dedfdcd28280a7390f132fb07f94e47aed1a611f1bdd97bd0d9bf641"
+        },
+        "tsconfig.json": {
+          "bytes": 375,
+          "sha256": "b5de0140fd85b3fee19f0edce6e334d05931d8d1a7c8d4c1ca13961b9bd1208a"
+        },
+        "vite.config.ts": {
+          "bytes": 188,
+          "sha256": "7eb2ed9fc3f51a07d57caf7f516cd0c8385a75b0e341f8796d68f1eed6281052"
+        }
+      }
+    },
+    "render": {
+      "status": "PASS",
+      "profile": "react18-vite6-common-v1",
+      "runtimeErrors": []
+    },
+    "interaction": {
+      "status": "REVIEW_REQUIRED",
+      "action": "Viewer plus → title/description → Add Card",
+      "evidence": "kanban-card-created.png"
+    },
+    "viewerSelection": {
+      "status": "PASS",
+      "identity": {
+        "file": "src/App.tsx",
+        "elementStart": 3295
+      },
+      "computed": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontSize": "30px",
+        "fontWeight": "700",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "width": "1232px",
+        "height": "36px",
+        "border": "0px solid rgb(255, 255, 255)",
+        "borderRadius": "0px"
+      }
+    },
+    "visualEdit": {
+      "status": "PASS",
+      "revision": "rev_84a4ffbe-6a60-4def-b48e-4e4bb79b53e7",
+      "diff": "Transaction wcb_fe891920-3b0a-4ce7-968b-7887fc21abbe\nsrc/App.tsx\n@@ offset 3341 @@\n-Kanban Board\n+Delivery Board"
+    },
+    "codeEdit": {
+      "status": "PASS",
+      "revision": "rev_3bdf080d-8385-4c1d-abad-18040be68d68",
+      "diff": "Transaction wcb_86e57510-ea0d-43bc-8065-d19e7248cfa7\nsrc/App.tsx\n@@ offset 0 @@\n-import { useState, useEffect, useRef } from 'react'\n-import { Plus, X, GripVertical } from 'lucide-react'\n-\n-type Priority = 'low' | 'medium' | 'high'\n-type Card = { id: string; title: string; description: string; priority: Priority }\n-type Column = { id: string; title: string; cards: Card[] }\n-\n-const PRIORITY_COLORS: Record<Priority, string> = {\n-  low: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',\n-  medium: 'bg-amber-500/20 text-amber-300 border-amber-500/30',\n-  high: 'bg-rose-500/20 text-rose-300 border-rose-500/30',\n-}\n-\n-const DEFAULT_COLUMNS: Column[] = [\n-  { id: 'backlog', title: 'Backlog', cards: [\n-    { id: '1', title: 'Design system setup', description: 'Create color tokens and typography scale', priority: 'medium' },\n-    { id: '2', title: 'Write unit tests', description: 'Cover core business logic', priority: 'low' },\n-  ]},\n-  { id: 'todo', title: 'To Do', cards: [\n-    { id: '3', title: 'API integration', description: 'Connect frontend to REST endpoints', priority: 'high' },\n-  ]},\n-  { id: 'in-progress', title: 'In Progress', cards: [\n-    { id: '4', title: 'Authentication', description: 'JWT login and refresh token flow', priority: 'high' },\n-  ]},\n-  { id: 'done', title: 'Done', cards: [\n-    { id: '5', title: 'Project setup', description: 'Init repo, CI/CD pipeline', priority: 'low' },\n-  ]},\n-]\n-\n-function genId() { return Math.random().toString(36).slice(2) }\n-\n-export default function App() {\n-  const [columns, setColumns] = useState<Column[]>(() => {\n-    try { const s = localStorage.getItem('kanban'); return s ? JSON.parse(s) : DEFAULT_COLUMNS } catch { return DEFAULT_COLUMNS }\n-  })\n-  const [adding, setAdding] = useState<string | null>(null)\n-  const [form, setForm] = useState({ title: '', description: '', priority: 'medium' as Priority })\n-  const dragging = useRef<{ cardId: string; fromCol: string } | null>(null)\n-\n-  useEffect(() => { localStorage.setItem('kanban', JSON.stringify(columns)) }, [columns])\n-\n-  function addCard(colId: string) {\n-    if (!form.title.trim()) return\n-    setColumns(cols => cols.map(c => c.id === colId\n-      ? { ...c, cards: [...c.cards, { id: genId(), title: form.title, description: form.description, priority: form.priority }] }\n-      : c))\n-    setForm({ title: '', description: '', priority: 'medium' })\n-    setAdding(null)\n-  }\n-\n-  function deleteCard(colId: string, cardId: string) {\n-    setColumns(cols => cols.map(c => c.id === colId ? { ...c, cards: c.cards.filter(card => card.id !== cardId) } : c))\n-  }\n-\n-  function onDragStart(cardId: string, fromCol: string) { dragging.current = { cardId, fromCol } }\n-  function onDrop(toColId: string) {\n-    if (!dragging.current) return\n-    const { cardId, fromCol } = dragging.current\n-    if (fromCol === toColId) return\n-    setColumns(cols => {\n-      const card = cols.find(c => c.id === fromCol)?.cards.find(c => c.id === cardId)\n-      if (!card) return cols\n-      return cols.map(c => {\n-        if (c.id === fromCol) return { ...c, cards: c.cards.filter(x => x.id !== cardId) }\n-        if (c.id === toColId) return { ...c, cards: [...c.cards, card] }\n-        return c\n-      })\n-    })\n-    dragging.current = null\n-  }\n-\n-  return (\n-    <div className=\"min-h-screen bg-slate-950 text-slate-100 p-6\">\n-      <div className=\"max-w-7xl mx-auto\">\n-        <div className=\"mb-8\">\n-          <h1 className=\"text-3xl font-bold text-white\">Delivery Board</h1>\n-          <p className=\"text-slate-400 mt-1\">Drag cards between columns to update status</p>\n-        </div>\n-        <div className=\"grid grid-cols-4 gap-4\">\n-          {columns.map(col => (\n-            <div key={col.id} className=\"flex flex-col\"\n-              onDragOver={e => e.preventDefault()} onDrop={() => onDrop(col.id)}>\n-              <div className=\"flex items-center justify-between mb-3 px-1\">\n-                <div className=\"flex items-center gap-2\">\n-                  <span className=\"font-semibold text-slate-200\">{col.title}</span>\n-                  <span className=\"text-xs bg-slate-800 text-slate-400 rounded-full px-2 py-0.5\">{col.cards.length}</span>\n-                </div>\n-                <button onClick={() => setAdding(col.id)} className=\"w-6 h-6 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors\">\n-                  <Plus size={14}/>\n-                </button>\n-              </div>\n-              <div className=\"flex flex-col gap-2 min-h-32 bg-slate-900/50 rounded-xl p-2 border border-slate-800\">\n-                {col.cards.map(card => (\n-                  <div key={card.id} draggable onDragStart={() => onDragStart(card.id, col.id)}\n-                    className=\"bg-slate-800 rounded-lg p-3 cursor-grab active:cursor-grabbing border border-slate-700 hover:border-slate-600 transition-colors group\">\n-                    <div className=\"flex items-start justify-between gap-2\">\n-                      <GripVertical size={14} className=\"text-slate-600 mt-0.5 shrink-0\"/>\n-                      <div className=\"flex-1 min-w-0\">\n-                        <p className=\"font-medium text-sm text-slate-100 leading-snug\">{card.title}</p>\n-                        {card.description && <p className=\"text-xs text-slate-400 mt-1 leading-relaxed\">{card.description}</p>}\n-                        <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded border ${PRIORITY_COLORS[card.priority]} capitalize`}>{card.priority}</span>\n-                      </div>\n-                      <button onClick={() => deleteCard(col.id, card.id)} className=\"opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 transition-all shrink-0\">\n-                        <X size={14}/>\n-                      </button>\n-                    </div>\n-                  </div>\n-                ))}\n-                {adding === col.id && (\n-                  <div className=\"bg-slate-800 rounded-lg p-3 border border-blue-500/50\">\n-                    <input autoFocus value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))}\n-                      placeholder=\"Card title...\" className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-sm text-slate-100 outline-none border border-slate-700 mb-2\"/>\n-                    <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}\n-                      placeholder=\"Description (optional)\" className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-xs text-slate-300 outline-none border border-slate-700 mb-2\"/>\n-                    <select value={form.priority} onChange={e => setForm(f => ({...f, priority: e.target.value as Priority}))}\n-                      className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-xs text-slate-300 border border-slate-700 mb-3\">\n-                      <option value=\"low\">Low priority</option>\n-                      <option value=\"medium\">Medium priority</option>\n-                      <option value=\"high\">High priority</option>\n-                    </select>\n-                    <div className=\"flex gap-2\">\n-                      <button onClick={() => addCard(col.id)} className=\"flex-1 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors\">Add Card</button>\n-                      <button onClick={() => setAdding(null)} className=\"px-3 py-1.5 rounded bg-slate-700 text-slate-300 text-xs hover:bg-slate-600 transition-colors\">Cancel</button>\n-                    </div>\n-                  </div>\n-                )}\n-              </div>\n-            </div>\n-          ))}\n-        </div>\n-      </div>\n-    </div>\n-  )\n-}\n-\n+import { useState, useEffect, useRef } from 'react'\n+import { Plus, X, GripVertical } from 'lucide-react'\n+\n+type Priority = 'low' | 'medium' | 'high'\n+type Card = { id: string; title: string; description: string; priority: Priority }\n+type Column = { id: string; title: string; cards: Card[] }\n+\n+const PRIORITY_COLORS: Record<Priority, string> = {\n+  low: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',\n+  medium: 'bg-amber-500/20 text-amber-300 border-amber-500/30',\n+  high: 'bg-rose-500/20 text-rose-300 border-rose-500/30',\n+}\n+\n+const DEFAULT_COLUMNS: Column[] = [\n+  { id: 'backlog', title: 'Backlog', cards: [\n+    { id: '1', title: 'Design system setup', description: 'Create color tokens and typography scale', priority: 'medium' },\n+    { id: '2', title: 'Write unit tests', description: 'Cover core business logic', priority: 'low' },\n+  ]},\n+  { id: 'todo', title: 'To Do', cards: [\n+    { id: '3', title: 'API integration', description: 'Connect frontend to REST endpoints', priority: 'high' },\n+  ]},\n+  { id: 'in-progress', title: 'In Progress', cards: [\n+    { id: '4', title: 'Authentication', description: 'JWT login and refresh token flow', priority: 'high' },\n+  ]},\n+  { id: 'done', title: 'Done', cards: [\n+    { id: '5', title: 'Project setup', description: 'Init repo, CI/CD pipeline', priority: 'low' },\n+  ]},\n+]\n+\n+function genId() { return Math.random().toString(36).slice(2) }\n+\n+export default function App() {\n+  const [columns, setColumns] = useState<Column[]>(() => {\n+    try { const s = localStorage.getItem('kanban'); return s ? JSON.parse(s) : DEFAULT_COLUMNS } catch { return DEFAULT_COLUMNS }\n+  })\n+  const [adding, setAdding] = useState<string | null>(null)\n+  const [form, setForm] = useState({ title: '', description: '', priority: 'medium' as Priority })\n+  const dragging = useRef<{ cardId: string; fromCol: string } | null>(null)\n+\n+  useEffect(() => { localStorage.setItem('kanban', JSON.stringify(columns)) }, [columns])\n+\n+  function addCard(colId: string) {\n+    if (!form.title.trim()) return\n+    setColumns(cols => cols.map(c => c.id === colId\n+      ? { ...c, cards: [...c.cards, { id: genId(), title: form.title, description: form.description, priority: form.priority }] }\n+      : c))\n+    setForm({ title: '', description: '', priority: 'medium' })\n+    setAdding(null)\n+  }\n+\n+  function deleteCard(colId: string, cardId: string) {\n+    setColumns(cols => cols.map(c => c.id === colId ? { ...c, cards: c.cards.filter(card => card.id !== cardId) } : c))\n+  }\n+\n+  function onDragStart(cardId: string, fromCol: string) { dragging.current = { cardId, fromCol } }\n+  function onDrop(toColId: string) {\n+    if (!dragging.current) return\n+    const { cardId, fromCol } = dragging.current\n+    if (fromCol === toColId) return\n+    setColumns(cols => {\n+      const card = cols.find(c => c.id === fromCol)?.cards.find(c => c.id === cardId)\n+      if (!card) return cols\n+      return cols.map(c => {\n+        if (c.id === fromCol) return { ...c, cards: c.cards.filter(x => x.id !== cardId) }\n+        if (c.id === toColId) return { ...c, cards: [...c.cards, card] }\n+        return c\n+      })\n+    })\n+    dragging.current = null\n+  }\n+\n+  return (\n+    <div className=\"min-h-screen bg-slate-950 text-slate-100 p-6\">\n+      <div className=\"max-w-7xl mx-auto\">\n+        <div className=\"mb-8\">\n+          <h1 className=\"text-3xl font-bold text-white\">Delivery Board</h1>\n+          <p className=\"text-slate-400 mt-1\">Track delivery work across the board</p>\n+        </div>\n+        <div className=\"grid grid-cols-4 gap-4\">\n+          {columns.map(col => (\n+            <div key={col.id} className=\"flex flex-col\"\n+              onDragOver={e => e.preventDefault()} onDrop={() => onDrop(col.id)}>\n+              <div className=\"flex items-center justify-between mb-3 px-1\">\n+                <div className=\"flex items-center gap-2\">\n+                  <span className=\"font-semibold text-slate-200\">{col.title}</span>\n+                  <span className=\"text-xs bg-slate-800 text-slate-400 rounded-full px-2 py-0.5\">{col.cards.length}</span>\n+                </div>\n+                <button onClick={() => setAdding(col.id)} className=\"w-6 h-6 flex items-center justify-center rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors\">\n+                  <Plus size={14}/>\n+                </button>\n+              </div>\n+              <div className=\"flex flex-col gap-2 min-h-32 bg-slate-900/50 rounded-xl p-2 border border-slate-800\">\n+                {col.cards.map(card => (\n+                  <div key={card.id} draggable onDragStart={() => onDragStart(card.id, col.id)}\n+                    className=\"bg-slate-800 rounded-lg p-3 cursor-grab active:cursor-grabbing border border-slate-700 hover:border-slate-600 transition-colors group\">\n+                    <div className=\"flex items-start justify-between gap-2\">\n+                      <GripVertical size={14} className=\"text-slate-600 mt-0.5 shrink-0\"/>\n+                      <div className=\"flex-1 min-w-0\">\n+                        <p className=\"font-medium text-sm text-slate-100 leading-snug\">{card.title}</p>\n+                        {card.description && <p className=\"text-xs text-slate-400 mt-1 leading-relaxed\">{card.description}</p>}\n+                        <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded border ${PRIORITY_COLORS[card.priority]} capitalize`}>{card.priority}</span>\n+                      </div>\n+                      <button onClick={() => deleteCard(col.id, card.id)} className=\"opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 transition-all shrink-0\">\n+                        <X size={14}/>\n+                      </button>\n+                    </div>\n+                  </div>\n+                ))}\n+                {adding === col.id && (\n+                  <div className=\"bg-slate-800 rounded-lg p-3 border border-blue-500/50\">\n+                    <input autoFocus value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))}\n+                      placeholder=\"Card title...\" className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-sm text-slate-100 outline-none border border-slate-700 mb-2\"/>\n+                    <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}\n+                      placeholder=\"Description (optional)\" className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-xs text-slate-300 outline-none border border-slate-700 mb-2\"/>\n+                    <select value={form.priority} onChange={e => setForm(f => ({...f, priority: e.target.value as Priority}))}\n+                      className=\"w-full bg-slate-900 rounded px-2 py-1.5 text-xs text-slate-300 border border-slate-700 mb-3\">\n+                      <option value=\"low\">Low priority</option>\n+                      <option value=\"medium\">Medium priority</option>\n+                      <option value=\"high\">High priority</option>\n+                    </select>\n+                    <div className=\"flex gap-2\">\n+                      <button onClick={() => addCard(col.id)} className=\"flex-1 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors\">Add Card</button>\n+                      <button onClick={() => setAdding(null)} className=\"px-3 py-1.5 rounded bg-slate-700 text-slate-300 text-xs hover:bg-slate-600 transition-colors\">Cancel</button>\n+                    </div>\n+                  </div>\n+                )}\n+              </div>\n+            </div>\n+          ))}\n+        </div>\n+      </div>\n+    </div>\n+  )\n+}\n+"
+    },
+    "viewports": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 768,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 1280,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 390,
+        "after": true,
+        "fontSize": "30px"
+      },
+      {
+        "width": 768,
+        "after": true,
+        "fontSize": "36px"
+      },
+      {
+        "width": 1280,
+        "after": true,
+        "fontSize": "36px"
+      }
+    ],
+    "responsive": {
+      "status": "PASS",
+      "diff": "Transaction wcb_cc63e672-dcd1-402e-a931-6c1ea751367f\nsrc/App.tsx\n@@ offset 3310 @@\n-text-3xl\n+text-3xl md:text-4xl",
+      "revision": "rev_f031d331-60f7-4a94-87e7-e369fb1f0d6d"
+    },
+    "history": {
+      "status": "PASS",
+      "transactions": 4,
+      "revision": "rev_f031d331-60f7-4a94-87e7-e369fb1f0d6d"
+    },
+    "undoRedo": {
+      "status": "PASS",
+      "undo": "rev_af5005cf-b499-44eb-9a0e-bb4c1c684bbf",
+      "redo": "rev_029f5c2f-61a3-4302-b85b-add5ba4a8e3b"
+    },
+    "restart": {
+      "status": "PASS",
+      "sourceAndHistoryByteExact": true,
+      "process": "SIGKILL then exact packaged CLI reconnect"
+    },
+    "export": {
+      "status": "PASS",
+      "files": 16,
+      "archiveSha256": "4950e0586d91683f06048c84654682a67be82f86f85613d1eaa383da4c9bb51f",
+      "exactAcceptedBytes": true
+    },
+    "exportBuild": {
+      "status": "PENDING"
+    },
+    "exportRender": {
+      "status": "PENDING"
+    }
+  },
+  "performance": {
+    "importMs": 54.55983400000014,
+    "coldStartRenderMs": 4358.189958,
+    "visualReactUpdateMs": 2939.8520419999986,
+    "codeReactUpdateMs": 4014.143417000001,
+    "warmCssUpdateMs": 2601.4139170000017,
+    "responsiveUpdateMs": 2907.7723750000005,
+    "restartRenderMs": 4274.7302500000005,
+    "exportMs": 426.9328749999986
+  },
+  "updates": [
+    {
+      "kind": "react-fast-refresh",
+      "generation": "a556ef24-a3b3-48a6-a03d-ada921d40bd5",
+      "ms": 12202.730917
+    },
+    {
+      "kind": "css-hot-update",
+      "generation": "4228aaff-a880-44b4-9d51-07795d31802b",
+      "ms": 20038.767917
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "4228aaff-a880-44b4-9d51-07795d31802b",
+      "ms": 24268.893042
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "4228aaff-a880-44b4-9d51-07795d31802b",
+      "ms": 29252.423834
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "4228aaff-a880-44b4-9d51-07795d31802b",
+      "ms": 31954.895084
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "initial",
+      "sha256": "c8a385c865d1a5e42f1efb59906a9e04e361faf3f44b2d6deddf11a108f49a4e",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "card-form",
+      "sha256": "e6ddf8de4635d84f6fe960bcd66152f1c7253e8649f3e73ef490fe9f70b298cd",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "card-created",
+      "sha256": "e31ccffda12b254ebce222e4b23a9ade0547793f2ae4025620a89530f76502ee",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "visual",
+      "sha256": "53dbe384509772983c020fa0fb97c75436deeb2cf187288da5af033fd6f8ce7c",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "code",
+      "sha256": "eb96c2dd59dd6c6bcb39a36883e9aee073b4633619258f77fc5f598e5adafe7e",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "css",
+      "sha256": "2e780e7d81f416e7372a73907840d2bbf324339b0d09c7cfe857e37dba1f84dc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-before",
+      "sha256": "8dd8d5fe29d53dc091658a73dd3d8ec1596579c8e346f1f5e91cb0f467260968",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-before",
+      "sha256": "1cdee763ceafec0ca1b96e29c6eb5cd5ffc840dc364fc697a7222e938d41250d",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-before",
+      "sha256": "2e780e7d81f416e7372a73907840d2bbf324339b0d09c7cfe857e37dba1f84dc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-after",
+      "sha256": "8dd8d5fe29d53dc091658a73dd3d8ec1596579c8e346f1f5e91cb0f467260968",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-after",
+      "sha256": "db017d339bf617a139ca18b98c96f4bd563eefa50182f92356fda54f624e585c",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-after",
+      "sha256": "c8023a9319707904220b8ea5e032976c8832bf7a3a0fbaa5269278e232cec93e",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "restart",
+      "sha256": "c8023a9319707904220b8ea5e032976c8832bf7a3a0fbaa5269278e232cec93e",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    }
+  ],
+  "fullWorkflow": "NOT YET",
+  "platformBrowser": "151.0.7922.34",
+  "platformErrors": []
+}

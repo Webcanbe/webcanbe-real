@@ -1,0 +1,18 @@
+import {expect,it} from 'vitest'
+import {publicRuntimeValues,readPublicRuntimeValues} from './runtime/publicRuntimeValues'
+it('accepts only explicitly public finite values without example/host environment fallback',()=>{
+ expect(publicRuntimeValues({VITE_API_URL:'https://api.publicdomain.com/v1',VITE_FEATURE:'true',VITE_TITLE:'Recipe Book'})).toEqual({VITE_API_URL:'https://api.publicdomain.com/v1',VITE_FEATURE:'true',VITE_TITLE:'Recipe Book'});expect(publicRuntimeValues({})).toEqual({})
+})
+it.each([{DATABASE_URL:'https://api.publicdomain.com'},{VITE_SECRET:'hello'},{VITE_API_KEY:'123'},{VITE_PUBLIC:'ghp_abcdefghijklmn'},{VITE_PUBLIC:'https://user:pass@publicdomain.com'},{VITE_PUBLIC:'https://publicdomain.com/?key=hi'},{VITE_PUBLIC:'https://publicdomain.com/opaque-credential'},{VITE_PUBLIC:'aB2CaB2CaB2CaB2CaB2CaB2CaB2CaB2C'},{VITE_PUBLIC:'eyJabcdeabcdeabcdeabcdeabcde.eyJabcde.signature'}])('rejects secret-like runtime data %j',data=>expect(()=>publicRuntimeValues(data)).toThrow())
+it('rechecks project authority after the provider awaits',async()=>{
+ let authorized=true;const scope={userId:'u',workspaceId:'w',projectId:'p',sessionId:'s',revision:'r'};await expect(readPublicRuntimeValues({read:async received=>{expect(received).toEqual(scope);authorized=false;return {VITE_TITLE:'Public'}}},scope,new AbortController().signal,async()=>{if(!authorized)throw Error('revoked')})).rejects.toThrow('revoked')
+})
+it('keeps operator values scoped to an exact workspace/project pair',async()=>{
+ const {ConfiguredPublicRuntimeValues}=await import('./runtime/publicRuntimeValues'),workspaceId='11111111-1111-1111-1111-111111111111',projectId='22222222-2222-2222-2222-222222222222',provider=new ConfiguredPublicRuntimeValues([{workspaceId,projectId,values:{VITE_TITLE:'Public title'}}]),scope={workspaceId,projectId,userId:'u',sessionId:'s',revision:'r'},signal=new AbortController().signal
+ expect(await provider.read(scope,signal)).toEqual({VITE_TITLE:'Public title'});expect(await provider.read({...scope,workspaceId:projectId},signal)).toEqual({});expect(await provider.read({...scope,projectId:workspaceId},signal)).toEqual({})
+})
+it('compiles granted public values without editing canonical source or reading example values',async()=>{
+ const fs=await import('node:fs'),path=await import('node:path'),os=await import('node:os'),{randomUUID}=await import('node:crypto'),{inspectRuntime}=await import('./runtime/runtimeCompatibility'),{buildIsolatedHttpPreview}=await import('./runtime/isolatedPreview'),{detectProject}=await import('./runtime/projectRegistry'),{MutationHistory}=await import('./mutations/sourceMutations'),root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'wcb-public-values-')))
+ try{fs.cpSync('fixtures/compatible-react-vite',root,{recursive:true});const code='export function App(){return <h1>{import.meta.env.VITE_TITLE}</h1>}';fs.writeFileSync(path.join(root,'src/App.tsx'),code);fs.writeFileSync(path.join(root,'.env.example'),'VITE_TITLE=YOUR_TITLE');const p={id:randomUUID(),name:'public-values',root,sourceRoot:path.join(root,'src'),imported:true,detection:detectProject(root,process.cwd()),history:new MutationHistory()};expect(inspectRuntime(p,process.cwd()).supported).toBe(false);const artifact=await buildIsolatedHttpPreview(p,process.cwd(),undefined,{VITE_TITLE:'Authorized public title'});expect(artifact.files.get('/_wcb/app.js')!.body.toString()).toContain('Authorized public title');expect(fs.readFileSync(path.join(root,'src/App.tsx'),'utf8')).toBe(code);expect(fs.readFileSync(path.join(root,'.env.example'),'utf8')).toBe('VITE_TITLE=YOUR_TITLE')}
+ finally{fs.rmSync(root,{recursive:true,force:true})}
+})

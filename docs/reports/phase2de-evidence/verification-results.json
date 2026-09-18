@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-13",
+  "branch": "phase-2-compatible-editor",
+  "startingHead": "66403284303f12cfdc38139c4d81780ef63b131a",
+  "implementationCommit": "390d1f09a1bd50b062a80483c80bbffb96e7a10a",
+  "mainUnchanged": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b",
+  "baselineTests": 116,
+  "finalTests": 145,
+  "testSuites": 7,
+  "testResult": "PASS",
+  "typeScript": "PASS",
+  "productionBuild": "PASS",
+  "productionBuildSeconds": 2.29,
+  "productionBuildWarnings": [
+    "Lazy-loaded CodeWorkspace chunk 543.01 kB (184.66 kB gzip) exceeds Vite 500 kB advisory; build exits 0."
+  ],
+  "securityAndBrowsers": {
+    "controlledRunner": "PASS",
+    "legacyHashRouterFieldNotes": "PASS",
+    "controlledBrowserRouter": "PASS",
+    "codeCanvasServerRestart": "PASS",
+    "strictHashRouterCodeTailwindProps": "PASS",
+    "fileOperationUI": "PASS",
+    "independentExportBuildRender": "PASS"
+  },
+  "exportSandbox": {
+    "outsideReadDenied": true,
+    "outsideWriteDenied": true,
+    "shellExecutionDenied": true,
+    "networkDenied": true,
+    "uploadedPackageScriptsExecuted": false
+  },
+  "review": {
+    "stagedImplementationFiles": 14,
+    "credentialAndPrivateRuntimeScan": "PASS",
+    "sourceArtifactScan": "PASS",
+    "whitespace": "PASS",
+    "runnerCompilerAndProfileFilesUnchanged": true,
+    "externalSecurityAudit": false
+  },
+  "validatedFilesSha256": {
+    "package-lock.json": "a2a06bb9857c88ebf9a9114a13db632b391d687194672608907897df20eef37a",
+    "package.json": "0cd906a5b170133c66b22ed2eb1e3fbf3240b7df783970f4c6e4a44323821ebf",
+    "scripts/verify-phase2de-export.cjs": "513a8194d1965388716e88a223317f2abf83573791f110298697d533bc2493e1",
+    "scripts/verify-phase2de.cjs": "e25f5e86fd4925b08fde9d8e820da1b87ea4302512d19e7950e89157883a3144",
+    "src/webcanbe-engine/core/types.ts": "27c89ff745c4e549e7d648de95fdc6dced575c1aed5af2d39db615dd66e122e8",
+    "src/webcanbe-engine/mutations/durableSource.ts": "84864dc8aaddb89396a0ed734af5367657b4f9818cd87fe1e032466fd980289c",
+    "src/webcanbe-engine/mutations/sourceMutations.ts": "2c016d6726ab0664eb1312eae55d8c2a07b6103694d89dd6e98f08b2db63e718",
+    "src/webcanbe-engine/mutations/sourceValidation.ts": "1d263f0f252e905113904694fc7f54a965404eefb3bc2689e98f17bd9119d728",
+    "src/webcanbe-engine/phase2de.test.ts": "a6654971b691cd406ff3bbf94d0a490afad5b04c4add6b9989f1dfa7dcdeaa55",
+    "src/webcanbe-engine/runtime/projectRegistry.ts": "f7a923c066a9955c5a8b134bb1c356099809c9b95e181672b6ac3de878b2f685",
+    "src/webcanbe-engine/runtime/viteFixturePlugin.ts": "b0ba63a0d9e61edec909d67b5db4085dc8c943daff13f614720662313e27d5e4",
+    "src/webcanbe-engine/visual-editor/CodeWorkspace.tsx": "8458df4342fc25b83440e7fcb83f2e1621584416f855ca62736369c9953c84f9",
+    "src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx": "99dece5634e1228e1ccc22fbc735615e5ba68f7ea8d53d87ec6ccae3b4406f4b",
+    "src/webcanbe-engine/visual-editor/compatibleWorkspace.css": "5ddf909a7da632fe093c337d7aed91832dd7a641d5d89024e16f64f6f2482172"
+  },
+  "cleanup": {
+    "activeRunnerJobUnits": 0,
+    "localVm": "stopped",
+    "taskOwnedBrowserAndServerProcesses": "closed by harness cleanup"
+  },
+  "environment": {
+    "node": "26.4.0",
+    "npm": "11.17.0",
+    "vite": "6.4.3",
+    "typescript": "5.9.3",
+    "hostChromium": "151.0.7922.34",
+    "nativeChromiumSandbox": true
+  }
+}

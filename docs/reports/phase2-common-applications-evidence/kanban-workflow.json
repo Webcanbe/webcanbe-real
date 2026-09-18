@@ -1,0 +1,346 @@
+{
+  "boundary": "Packaged TLS editor / TEST OIDC / PostgreSQL / mTLS native Linux, platform browser receives raster only",
+  "browserPath": "Browser plugin not available; retained Playwright approach",
+  "stages": {
+    "unchangedImport": {
+      "status": "PASS",
+      "commit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+      "archiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+      "fileHashes": {
+        ".github/ISSUE_TEMPLATE/bug_report.md": {
+          "bytes": 504,
+          "sha256": "f952a6b4964d3c9cf55647da302451a0f8a0f4066ecc3f8ecc79d7383b9d26b5"
+        },
+        ".github/ISSUE_TEMPLATE/feature_request.md": {
+          "bytes": 422,
+          "sha256": "784cad0583e952d4413aeceb82c3d2f432cde39c79c916d7044f9f0ee37897dc"
+        },
+        ".github/pull_request_template.md": {
+          "bytes": 533,
+          "sha256": "606b40ee30edaa2da79d4b19d083b29a3b372ed25901631aac0f51117ce1cb3d"
+        },
+        ".gitignore": {
+          "bytes": 46,
+          "sha256": "d6638be47569826278b217ac71ef36aa4936067ecdccefbb8beb8dc1727c5cd0"
+        },
+        "CODE_OF_CONDUCT.md": {
+          "bytes": 1746,
+          "sha256": "7cd0958d14137cf5c8655beea094962a11c0440fd448d0ed22cee84ef8995cd8"
+        },
+        "CONTRIBUTING.md": {
+          "bytes": 305,
+          "sha256": "57b2dc900a696aa946180c87b37c5c0f5c0d715fd7d7ad00660e98f4ef8f2623"
+        },
+        "LICENSE": {
+          "bytes": 1063,
+          "sha256": "4e7eef80a630666270be5ab7fffe4cc9697d644001cb03f86a6b53dfa85fd534"
+        },
+        "README.md": {
+          "bytes": 526,
+          "sha256": "7f6744027b3d3d1f08c08570f956b4f42dca4f526f25221833af80a6aead5a43"
+        },
+        "SECURITY.md": {
+          "bytes": 982,
+          "sha256": "0450d060d287d169f36b05b434ea904a63262fb36d56ea52761c348ab153cc7a"
+        },
+        "index.html": {
+          "bytes": 263,
+          "sha256": "f6eb93a279c1c7ff02b436ea75faf6d987dfba1714e12890d1afb6f3947a00de"
+        },
+        "package.json": {
+          "bytes": 473,
+          "sha256": "30a7e62821c643cdc622709e39b1ff2903919b55bc787d79153bd99c76abf447"
+        },
+        "src/App.tsx": {
+          "bytes": 7508,
+          "sha256": "bdc491861c86b26c0ae252a4c53a9e9365680ba48c71d93efb2d486ab5ea98e5"
+        },
+        "src/index.css": {
+          "bytes": 109,
+          "sha256": "3ae1bf9801d66c07fe14d10eaf5ecfe71728e11dcb3ac0f9ec7954a586096ed2"
+        },
+        "src/main.tsx": {
+          "bytes": 218,
+          "sha256": "cb73c931dedfdcd28280a7390f132fb07f94e47aed1a611f1bdd97bd0d9bf641"
+        },
+        "tsconfig.json": {
+          "bytes": 375,
+          "sha256": "b5de0140fd85b3fee19f0edce6e334d05931d8d1a7c8d4c1ca13961b9bd1208a"
+        },
+        "vite.config.ts": {
+          "bytes": 188,
+          "sha256": "7eb2ed9fc3f51a07d57caf7f516cd0c8385a75b0e341f8796d68f1eed6281052"
+        }
+      }
+    },
+    "render": {
+      "status": "PASS",
+      "profile": "react18-vite6-common-v1",
+      "runtimeErrors": []
+    },
+    "interaction": {
+      "status": "PASS",
+      "action": "Viewer plus \u2192 title/description \u2192 Add Card",
+      "evidence": "kanban-card-created.png",
+      "review": "Visible added card"
+    },
+    "viewerSelection": {
+      "status": "PASS",
+      "identity": {
+        "file": "src/App.tsx",
+        "elementStart": 3295
+      },
+      "computed": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(255, 255, 255)",
+        "fontSize": "30px",
+        "fontWeight": "700",
+        "padding": "0px",
+        "margin": "0px",
+        "gap": "normal",
+        "width": "1232px",
+        "height": "36px",
+        "border": "0px solid rgb(255, 255, 255)",
+        "borderRadius": "0px"
+      }
+    },
+    "visualEdit": {
+      "status": "PASS",
+      "revision": "rev_5b874a85-02c4-45e4-8f86-24f5a0fad298",
+      "diff": "Transaction wcb_b45cff08-d971-4273-9eb4-d17b821ed4e5\nsrc/App.tsx\n@@ offset 3341 @@\n-Kanban Board\n+Delivery Board"
+    },
+    "codeEdit": {
+      "status": "PASS",
+      "revision": "rev_b0fd0e33-b756-4776-8041-35e974ca45ed",
+      "diff": {
+        "omittedSourceDiffSha256": "909cbf32228c627be87c36850b3009960cb93ef190635888a283c16f79e24dd7",
+        "bytes": 15364,
+        "reason": "Full-file Code proposal omitted from public evidence; exact source/export hashes and visible changed text retained."
+      }
+    },
+    "viewports": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 768,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 1280,
+        "status": "PASS",
+        "upstreamLayout": "Fixed four columns; narrow overflow/compression retained"
+      },
+      {
+        "width": 390,
+        "after": true,
+        "fontSize": "30px"
+      },
+      {
+        "width": 768,
+        "after": true,
+        "fontSize": "36px"
+      },
+      {
+        "width": 1280,
+        "after": true,
+        "fontSize": "36px"
+      }
+    ],
+    "responsive": {
+      "status": "PASS",
+      "diff": "Transaction wcb_aba648be-fd6b-42dd-a6a1-f5e2d78e8c15\nsrc/App.tsx\n@@ offset 3310 @@\n-text-3xl\n+text-3xl md:text-4xl",
+      "revision": "rev_04c46195-627f-422e-82c6-5b550d763176"
+    },
+    "history": {
+      "status": "PASS",
+      "transactions": 4,
+      "revision": "rev_04c46195-627f-422e-82c6-5b550d763176"
+    },
+    "undoRedo": {
+      "status": "PASS",
+      "undo": "rev_0e09ea13-f8fd-426c-8fd4-5531d4034756",
+      "redo": "rev_eeb70698-f830-4399-9350-dcb38f52c5bf"
+    },
+    "restart": {
+      "status": "PASS",
+      "sourceAndHistoryByteExact": true,
+      "process": "SIGKILL then exact packaged CLI reconnect"
+    },
+    "export": {
+      "status": "PASS",
+      "files": 16,
+      "archiveSha256": "01775f3a5864d3df958f6c0a21102812f40ee26e4162d4e835b8f977501dde50",
+      "exactAcceptedBytes": true
+    },
+    "exportBuild": {
+      "status": "PASS",
+      "receipt": "kanban-export-build.json"
+    },
+    "exportRender": {
+      "status": "PASS",
+      "receipt": "kanban-export-diagnostic.json",
+      "reason": "Independent real interaction and responsive sizes pass."
+    }
+  },
+  "performance": {
+    "importMs": 45.48000000000002,
+    "coldStartRenderMs": 4268.489167,
+    "visualReactUpdateMs": 3140.7589590000007,
+    "codeReactUpdateMs": 2960.972791,
+    "warmCssUpdateMs": 2741.54925,
+    "responsiveUpdateMs": 3541.412708,
+    "restartRenderMs": 4997.950124999996,
+    "exportMs": 461.2320829999953
+  },
+  "updates": [
+    {
+      "kind": "react-fast-refresh",
+      "generation": "c526c2d7-c601-41df-830c-44fb9fa3bd2a",
+      "ms": 12137.51225
+    },
+    {
+      "kind": "react-fast-refresh",
+      "generation": "c526c2d7-c601-41df-830c-44fb9fa3bd2a",
+      "ms": 16172.2605
+    },
+    {
+      "kind": "css-hot-update",
+      "generation": "c526c2d7-c601-41df-830c-44fb9fa3bd2a",
+      "ms": 19089.55075
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "c526c2d7-c601-41df-830c-44fb9fa3bd2a",
+      "ms": 23963.987333
+    },
+    {
+      "kind": "incremental-rebuild-reload",
+      "generation": "8ffab9c3-816e-4ba0-9a17-96649f0ed043",
+      "ms": 35308.759416
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "initial",
+      "sha256": "fc641b08158745c72d122c1239474316d9843c1420b5bb36b63f873356bd31d9",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "card-form",
+      "sha256": "70580daa86378b9a45e39efdd20262509b200dd3522ed86066e182c8e874dcba",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "card-created",
+      "sha256": "5f71cf94d1bcaae9bd062adf884e9126b3727cfdf19cdafe8143c1a1f188902a",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "visual",
+      "sha256": "4bcf38deebb819ef7df611cfcc41e8fb32a4511c2d50cb7871b5844bfea00bca",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "code",
+      "sha256": "f3520558e23e267557916008b52e72f1a1898bc6e899693fcb113aa1149d46bf",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "css",
+      "sha256": "b4bd0eb17197f7bed03dc829293c886aaa5e53b1bb870d4ab2dc1e937284666c",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-before",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-before",
+      "sha256": "1ea300e4f496f96730a790f4b216978487cb242b9f25bb3ed3714af0e5721ce9",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-before",
+      "sha256": "ba7e4f299c98c0047cf056a13768b19ad2276ee7a9cd4bfb4cb7a8f6ffef439a",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "mobile-after",
+      "sha256": "062d5f5482d9c9ca10bc913fed9741d96ca80a56211df932f0af065dbc80ba1e",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      }
+    },
+    {
+      "name": "tablet-after",
+      "sha256": "82551f733adfbcae53137f0826277b4b2037020d13dc69908cf224c23d429afe",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      }
+    },
+    {
+      "name": "desktop-after",
+      "sha256": "e8e1e8731529208c42014d55079d695e72a1f3571330ec46cb0ba562bec963da",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "restart",
+      "sha256": "e84e73840fd52b68476375bceca5fe79a10e02ce33cbaa5c59cdcea09e447d56",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    }
+  ],
+  "fullWorkflow": "PASS",
+  "platformBrowser": "153.0.8010.12",
+  "platformErrors": [],
+  "review": {
+    "rawWorkflowSha256": "e897f24b5e56c7c12e43cff621db76040fb0715aa4e689c9d7be88a12c59efc4",
+    "method": "Human-visible raster review plus byte-identical screenshot comparison with earlier reviewed receipts. Independent isolated export linked by exact archive SHA-256.",
+    "sourceRevision": "a0899cab6f4a4387116d58ae547230109be52774",
+    "finalAcceptance": "PASS",
+    "limitations": [
+      "Upstream fixed four-column mobile compression/overlap retained; responsive edit is proven, not a polished mobile redesign."
+    ]
+  }
+}

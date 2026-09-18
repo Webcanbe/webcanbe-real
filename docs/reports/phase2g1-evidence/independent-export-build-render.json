@@ -1,0 +1,201 @@
+[
+  {
+    "case": "independent-react18",
+    "build": {
+      "status": "PASS",
+      "profile": "react18-vite5-v1",
+      "lockPresent": false,
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "status": "PASS",
+      "kind": "react18",
+      "browser": "151.0.7922.34",
+      "pageIdentity": true,
+      "meaningfulRender": true,
+      "frameworkOverlayAbsent": true,
+      "imagesLoaded": true,
+      "counterInteraction": true,
+      "widths": [
+        1280,
+        390
+      ],
+      "runtimeErrors": [],
+      "instrumentationAbsent": true,
+      "independentBuildRender": true
+    }
+  },
+  {
+    "case": "independent-react19",
+    "build": {
+      "status": "PASS",
+      "profile": "react19-vite8-v1",
+      "lockPresent": false,
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "status": "PASS",
+      "kind": "react19",
+      "browser": "151.0.7922.34",
+      "pageIdentity": true,
+      "meaningfulRender": true,
+      "frameworkOverlayAbsent": true,
+      "imagesLoaded": true,
+      "counterInteraction": true,
+      "widths": [
+        1280,
+        390
+      ],
+      "runtimeErrors": [],
+      "instrumentationAbsent": true,
+      "independentBuildRender": true
+    }
+  },
+  {
+    "case": "authored-expanded",
+    "build": {
+      "status": "PASS",
+      "profile": "react19-vite8-v1",
+      "lockPresent": true,
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "status": "PASS",
+      "kind": "authored",
+      "browser": "151.0.7922.34",
+      "pageIdentity": true,
+      "meaningfulRender": true,
+      "frameworkOverlayAbsent": true,
+      "imagesLoaded": true,
+      "counterInteraction": true,
+      "widths": [
+        1280,
+        390
+      ],
+      "runtimeErrors": [],
+      "instrumentationAbsent": true,
+      "independentBuildRender": true
+    }
+  },
+  {
+    "case": "authored-responsive-browser",
+    "build": {
+      "status": "PASS",
+      "profile": "react19-vite6",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "result": "PASS",
+      "browser": "151.0.7922.34",
+      "nativeChromiumSandbox": true,
+      "independentViteBuild": true,
+      "noEditorServer": true,
+      "instrumentationAbsent": true,
+      "responsiveTailwind": true,
+      "CSSMedia": true,
+      "CSSModule": true,
+      "inline": true,
+      "flexDirectionGap": true,
+      "gridTracks": true,
+      "sourceOrder": true,
+      "nestedRouteHistoryRefresh": true,
+      "widths": [
+        1280,
+        768,
+        390
+      ],
+      "runtimeErrors": []
+    }
+  },
+  {
+    "case": "authored-responsive-hash",
+    "build": {
+      "status": "PASS",
+      "profile": "react19-vite6",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "result": "PASS",
+      "browser": "151.0.7922.34",
+      "nativeChromiumSandbox": true,
+      "independentViteBuild": true,
+      "noEditorServer": true,
+      "instrumentationAbsent": true,
+      "responsiveTailwind": true,
+      "CSSMedia": true,
+      "CSSModule": true,
+      "inline": true,
+      "flexDirectionGap": true,
+      "gridTracks": true,
+      "sourceOrder": true,
+      "nestedRouteHistoryRefresh": true,
+      "widths": [
+        1280,
+        768,
+        390
+      ],
+      "runtimeErrors": []
+    }
+  },
+  {
+    "case": "authored-code-canvas",
+    "build": {
+      "status": "PASS",
+      "profile": "react19-vite6",
+      "isolation": {
+        "read": true,
+        "write": true,
+        "exec": true,
+        "network": true
+      },
+      "packageScriptsExecuted": false
+    },
+    "render": {
+      "result": "PASS",
+      "browser": "151.0.7922.34",
+      "nativeChromiumSandbox": true,
+      "independentViteBuild": true,
+      "noEditorServer": true,
+      "instrumentationAbsent": true,
+      "sourceTextAndStyle": true,
+      "propLiteral": true,
+      "CSSModule": true,
+      "structuralRemoval": true,
+      "nestedRouteHistoryRefresh": true,
+      "assets": true,
+      "desktop": "1280x900",
+      "mobile": "390x844",
+      "runtimeErrors": []
+    }
+  }
+]

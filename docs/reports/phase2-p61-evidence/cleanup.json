@@ -1,0 +1,16 @@
+{
+  "leases": [
+    {
+      "state": "stopped",
+      "count": 13
+    }
+  ],
+  "activeArtifacts": 0,
+  "privateTestSchemaDropped": true,
+  "testGatewayStopped": true,
+  "tunnelsStopped": true,
+  "localTestPkiRemoved": true,
+  "testRolePasswordCleared": true,
+  "guestPrivateGatewayConfigRemoved": true,
+  "vmStopped": true
+}

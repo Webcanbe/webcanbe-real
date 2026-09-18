@@ -1,0 +1,34 @@
+[
+  {
+    "application": "kanban",
+    "status": "PASS",
+    "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+    "sourceCommit": "83413e1f5fab4690bb46b23201a3438a427ef265",
+    "sourceArchiveSha256": "02ed37cdbd8376163572842145b777754ddd16e6b185608ff3f4d887ef86096a",
+    "exportArchiveSha256": "4950e0586d91683f06048c84654682a67be82f86f85613d1eaa383da4c9bb51f",
+    "rawWorkflow": "kanban-workflow-final.json",
+    "exportBuild": "kanban-export-build-final.json",
+    "exportRender": "kanban-export-render-final.json",
+    "assessment": "Raw workflow deliberately retains REVIEW_REQUIRED interaction and PENDING downstream build/render. This separate adjudication joins the exact export hash to completed independent build/render and reviewed actual interaction screenshots.",
+    "interactionReview": "Visible new Compatibility review card and backlog count 3.",
+    "limitations": "Original fixed four-column narrow-layout compression remains.",
+    "buildMs": 1590.9013269999998,
+    "ordinaryExportCaptureMs": 64.86906900000008
+  },
+  {
+    "application": "habit",
+    "status": "PASS",
+    "candidate": "2d0087ac8a009af36dd43023e988f7dfdcbd6e69",
+    "sourceCommit": "0a874ff471873cc662be5479f0cfe94f7c2d653e",
+    "sourceArchiveSha256": "9eb8083138152efe3796c90cba95b944f0265188f8ec21cf501633cb052941ec",
+    "exportArchiveSha256": "5636d24c10feb976de07fdd2aa49311442e041e30ba9f9daf514f7d6d1c62994",
+    "rawWorkflow": "habit-workflow-final.json",
+    "exportBuild": "habit-export-build-final.json",
+    "exportRender": "habit-export-render-final.json",
+    "assessment": "Raw workflow deliberately retains REVIEW_REQUIRED interaction and PENDING downstream build/render. This separate adjudication joins the exact export hash to completed independent build/render and reviewed actual interaction screenshots.",
+    "interactionReview": "Two distinct habits, completed and renamed Read each day, 50% completion, calendar navigation and populated statistics reviewed.",
+    "limitations": "Original missing /vite.svg favicon retained as optional document chrome; no required asset exemption.",
+    "buildMs": 1054.255773,
+    "ordinaryExportCaptureMs": 86.59507299999996
+  }
+]

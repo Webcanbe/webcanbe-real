@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "boundary": "Linux bwrap unshare-all, unprivileged systemd resource limits, no egress",
+  "buildMs": 780.02183,
+  "output": "vite v5.4.21 building for production...\ntransforming...\n\u2713 31 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.46 kB \u2502 gzip:  0.30 kB\ndist/assets/index-BqQyxwso.css    0.05 kB \u2502 gzip:  0.06 kB\ndist/assets/index-UtAhsQk-.js   142.80 kB \u2502 gzip: 45.90 kB\n\u2713 built in 596ms\n\n",
+  "sourceUnchanged": true,
+  "node": "v20.19.2",
+  "totalMs": 911.0923339999999,
+  "archiveSha256": "4098da191f72f3bd7f9b20e7d3b956c9c3685a2a05ef5d59a4cc6e12f46766d7",
+  "profile": "react18-vite5-v1",
+  "artifactFiles": [
+    {
+      "path": "/index.html",
+      "sha256": "a145601ea1bd1204c7f58654760671477ae3befccf979481cad3a259e0b6f284"
+    },
+    {
+      "path": "/vite.svg",
+      "sha256": "4a748afd443918bb16591c834c401dae33e87861ab5dbad0811c3a3b4a9214fb"
+    },
+    {
+      "path": "/assets/index-BqQyxwso.css",
+      "sha256": "0cb10224879a168900fb726b331cdc43b9659cd33df4b245a0ad898d3fb0c989"
+    },
+    {
+      "path": "/assets/index-UtAhsQk-.js",
+      "sha256": "f14db493ef8bd54a661b234cf1031e97057d83b0822f03af2dfd6aa3b3de4db8"
+    }
+  ],
+  "platformMarkersAbsent": true,
+  "cleanupVerified": true
+}

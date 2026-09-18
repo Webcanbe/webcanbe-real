@@ -1,0 +1,29 @@
+{
+  "command": [
+    "npx",
+    "vitest",
+    "run",
+    "--no-file-parallelism",
+    "src/webcanbe-engine/phase2g2-postgres.test.ts",
+    "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+    "src/webcanbe-engine/phase2g2-refresh.test.ts",
+    "src/webcanbe-engine/phase2-final-capture.test.ts",
+    "src/webcanbe-engine/phase2-final-semantic.test.ts",
+    "src/webcanbe-engine/phase2-final-refresh.test.ts",
+    "src/webcanbe-engine/phase2-final-secrets.test.ts",
+    "src/webcanbe-engine/phase2-final-history.test.ts",
+    "src/webcanbe-engine/phase2-final-migration.test.ts",
+    "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+    "--reporter=json",
+    "--outputFile=.webcanbe/compatibility-breadth/native-final.json"
+  ],
+  "environmentNames": [
+    "WCB_PG_TEST",
+    "WCB_HOSTED_RUNNER_TEST",
+    "WCB_REFRESH_TEST",
+    "WCB_CAPTURE_TEST",
+    "WCB_SEMANTIC_TEST"
+  ],
+  "exit": 0,
+  "elapsedMs": 33850
+}

@@ -1,0 +1,69 @@
+{
+  "result": "PASS",
+  "visualCodeServerRestart": {
+    "source": true,
+    "history": true,
+    "exactHead": true,
+    "separateServerProcess": true,
+    "freshControlledGeneration": true
+  },
+  "codeTextClassCSSModuleProp": {
+    "keyboardSave": true,
+    "text": true,
+    "className": true,
+    "css": true,
+    "cssModule": true,
+    "literalProp": true,
+    "routeAndViewportPreserved": true
+  },
+  "invalidDraftRecovery": {
+    "localDraftRetained": true,
+    "lastGoodRevision": true,
+    "lastGoodPreview": true,
+    "rejectedSaveRecorded": true,
+    "repairedSaveRendered": true
+  },
+  "structureAndVisualRoundTrip": {
+    "add": true,
+    "reorder": true,
+    "remove": true,
+    "reanalysis": true,
+    "staleAnchorRejected": true,
+    "freshSelection": true,
+    "visualCodeVisual": true
+  },
+  "historyCheckpointUndoRedoExport": {
+    "realDiff": true,
+    "checkpoint": true,
+    "undo": true,
+    "redo": true,
+    "sourceExport": true,
+    "mixedHistoryRestart": true
+  },
+  "browser": {
+    "version": "151.0.7922.34",
+    "nativeSandbox": true,
+    "editorViewport": "1600x1100",
+    "previewWidths": [
+      1280,
+      768
+    ],
+    "pageIdentity": true,
+    "meaningfulContent": true,
+    "noFrameworkOverlay": true,
+    "runtimeErrors": [],
+    "boundary": "real Linux controlled raster provider"
+  },
+  "safeFileOperationUI": {
+    "create": true,
+    "rename": true,
+    "delete": true,
+    "compiledBeforeAcceptance": true
+  },
+  "strictHashRouterCode": {
+    "realControlledProvider": true,
+    "tailwindRecompiled": true,
+    "componentPropLiteral": true,
+    "otherInstancePreserved": true
+  }
+}

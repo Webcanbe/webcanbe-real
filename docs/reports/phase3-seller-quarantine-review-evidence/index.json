@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "aba9d0f7abc64d782ab3620218ddfa63136b8d0a",
+  "status": "PASS",
+  "scope": {
+    "quarantineQueue": true,
+    "immutableReviewDecision": true,
+    "submittedCodeExecution": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 4,
+      "total": 4,
+      "skippedUnrelated": 12,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller quarantine review\" --maxWorkers=1"
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "quarantineQueue": "PASS",
+    "queueAuthority": "PASS",
+    "reviewDecisionRecord": "PASS",
+    "reviewerAuthority": "PASS",
+    "snapshotBinding": "PASS",
+    "decisionImmutability": "PASS",
+    "idempotentDuplicateDecision": "PASS",
+    "crossSubmissionAuthority": "PASS",
+    "crossSellerAuthority": "PASS",
+    "implicitPublication": "REFUSED",
+    "implicitReleaseCreation": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "submittedCodeExecution": "ABSENT"
+  },
+  "security": {
+    "scanId": "fb210a8b-bfdc-4583-8785-3983a0ab0eab",
+    "coverage": "complete",
+    "changedFilesReviewed": 5,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

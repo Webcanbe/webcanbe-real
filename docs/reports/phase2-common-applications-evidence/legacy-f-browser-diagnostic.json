@@ -1,0 +1,219 @@
+{
+  "events": [],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 57.68135199999995,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Responsive source workshop\nOpen details\n\nFirst sibling\n\nSecond sibling\n\nThird sibling\n\nGrid one\n\nGrid two\n\nCSS media sample\nShared CSS sample\nModule sample\nInline sample",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 12.958532999999989,
+  "ordinaryPng": {
+    "sha256": "4494cac1e76a4ba276863d4850b9a7db03a4548c3a60d9f769d20fd673390a27"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 73.34461699999997,
+  "rawPng": {
+    "sha256": "4494cac1e76a4ba276863d4850b9a7db03a4548c3a60d9f769d20fd673390a27"
+  },
+  "rawCaptureMs": 29.878017999999997,
+  "exportViewports": [
+    {
+      "width": 1280,
+      "png": {
+        "sha256": "4494cac1e76a4ba276863d4850b9a7db03a4548c3a60d9f769d20fd673390a27"
+      }
+    },
+    {
+      "width": 768,
+      "png": {
+        "sha256": "3cc0a5ee448f202e9070ec76441c1fefbefabbe73915e2edeec21882325f25bd"
+      }
+    },
+    {
+      "width": 390,
+      "png": {
+        "sha256": "1014a01fc27d702426aae106fd233b41340c856b4e63c61a22a8ada601d2c1f0"
+      }
+    }
+  ],
+  "legacyAssertions": {
+    "status": "PASS",
+    "preservedAssertionsFrom": [
+      "verify-phase2de-export.cjs",
+      "verify-phase2f-export.cjs",
+      "verify-phase2g-export.cjs",
+      "verify-phase2g2-hosted-export.cjs"
+    ],
+    "noEditorRuntime": true
+  },
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Responsive source workshop\nOpen details\n\nFirst sibling\n\nSecond sibling\n\nThird sibling\n\nGrid one\n\nGrid two\n\nCSS media sample\nShared CSS sample\nModule sample\nInline sample",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 5329.517833
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 6
+    },
+    {
+      "name": "Frames",
+      "value": 7
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 326
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 66
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 108
+    },
+    {
+      "name": "Resources",
+      "value": 8
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 16
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 8
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 6
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 5
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 2
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 3
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.000198
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.000455
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.010911
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.002138
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.056187
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.042485
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.024863
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 5157340
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 7462912
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 5329.48251
+    },
+    {
+      "name": "NavigationStart",
+      "value": 5329.419006
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=210497536\nMemoryPeak=263340032\nCPUUsageNSec=653117000\nTasksCurrent=94\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=366551040\nMemoryPeak=394854400\nCPUUsageNSec=1420503000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

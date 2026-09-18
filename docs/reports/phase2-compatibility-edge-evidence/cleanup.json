@@ -1,0 +1,30 @@
+{
+  "scope": "Owned local TEST infrastructure only",
+  "ownedGatewayLeases": {
+    "stopped": 17,
+    "otherStates": 0
+  },
+  "remainingWebCanBeSystemdUnits": 0,
+  "gatewaySchemaRemoved": true,
+  "testRolePasswordNullVerified": true,
+  "helperProcessesTerminated": [
+    40233,
+    40396
+  ],
+  "helperTunnelsStopped": true,
+  "generatedCredentialFilesRemoved": [
+    "postgres.json",
+    "gateway-client.json",
+    "gateway.json",
+    "sudoers-qa",
+    "test-pki"
+  ],
+  "guestGeneratedFilesRemoved": [
+    "/opt/wcb-control-qa",
+    "/etc/sudoers.d/wcb-controller-qa",
+    "/tmp/wcb-sudoers-qa"
+  ],
+  "vm": "wcb",
+  "vmFinalStatus": "Stopped",
+  "productionResourcesTouched": false
+}

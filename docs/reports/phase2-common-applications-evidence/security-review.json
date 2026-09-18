@@ -1,0 +1,56 @@
+{
+  "scanId": "2ad633c1-b2c8-4292-9903-9c384ed43225",
+  "status": "SEALED",
+  "base": "ceb95d2b473f6e6b0a03a413bd1c3ce0af509f34",
+  "head": "223a604500912fed5c00ed2050cb535d57d5dd00",
+  "changedFilesReviewed": 23,
+  "toolInventoryFiles": 11,
+  "supplementedFiles": 12,
+  "confirmedSecurityFindings": 0,
+  "candidates": 0,
+  "canonicalArtifacts": [
+    {
+      "path": "scan-manifest.json",
+      "sha256": "5d58049342f2cd516956051943227285dc8f3cffb6eb9a3003c71b5fe8a3d800"
+    },
+    {
+      "path": "findings.json",
+      "sha256": "c8f57704b1366e55223ce35b44d39866a8e1ac5e844cd9cfa60861f17054f982"
+    },
+    {
+      "path": "coverage.json",
+      "sha256": "bcd9de312deb848282c107f0d25bfae098d25b66636a177b18a2e2f74322ef5f"
+    },
+    {
+      "path": "report.md",
+      "sha256": "fd4634254d60994e5083a87e8f5894b65412bf415a4242295583298e9f62004a"
+    },
+    {
+      "path": "exports/results.sarif",
+      "sha256": "d45493d3d2273238d82ca253c281ef41a2a98055c5268fd041054836f4273525"
+    }
+  ],
+  "supplementalRevision": "a0899cab6f4a4387116d58ae547230109be52774",
+  "supplementalReview": "security-peer-reread.json and security-qa-viewer-review.json carry separate file digests; not certified by original seal.",
+  "remediation": [
+    "Required and present optional browser peer locks now verified; trusted code was never attacker selected.",
+    "README accurately describes finite metadata/dotfile/secret checks.",
+    "Recipe heading probe and Linux-only retained export assertion port corrected."
+  ],
+  "limits": [
+    "Source-backed diff review only; no whole repository, exhaustive installed-package, professional penetration-test or production attestation.",
+    "Editor-side static compilation is outside Linux cgroups; original compiler gate/concurrent regression preserved.",
+    "Operator QA setup cleanup is not failure-total; final task-owned cleanup is separately verified."
+  ],
+  "usage": {
+    "coverage": "complete",
+    "source": "codex_rollout",
+    "threadCount": 3,
+    "totalTokens": 14435649,
+    "inputTokens": 14370648,
+    "cachedInputTokens": 13817600,
+    "outputTokens": 65001,
+    "reasoningOutputTokens": 15009,
+    "interpretation": "Tool-returned tracked-thread usage, not an isolated incremental audit-cost measurement."
+  }
+}

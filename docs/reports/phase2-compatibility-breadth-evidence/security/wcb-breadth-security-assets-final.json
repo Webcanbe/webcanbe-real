@@ -1,0 +1,83 @@
+{
+  "reviewType": "focused final-path static source review",
+  "base": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+  "reviewedState": "working-tree file at recorded SHA-256",
+  "reviewedFiles": [
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "sha256": "d67168b8d0c355c9f9849d44b655b80f0b99496214d94d940e9eb50c4dc6a043",
+      "lines": 186
+    }
+  ],
+  "patchSha256": "7ac662ea33bb2f7ec4aca0e37b3341236a2d281a3ae1e4b30235177c6f3a2733",
+  "securityPolicy": "Resolved policy for staticAssets.ts and supporting fastRefreshCompiler.ts: no inherited SECURITY.md content. Existing scoped threat model applies.",
+  "candidates": [],
+  "conclusion": "No new plausible trust-boundary vulnerability identified in the final diff. The helper removes repeated whole-artifact copies, and the reserved refresh manifest is rewritten as data with compiler bootstrap consistency enforced. Existing source/module and network authority controls remain in the call path.",
+  "evidence": [
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 130,
+      "detail": "rewriteJavaScript only parses source and collects string-literal spans; it does not evaluate uploaded/generated code. Existing URL selection semantics and binary fetch sink are retained. The early HTTPS text filter can skip work but grants no new execution or network capability."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 133,
+      "detail": "StringLiteral nodes are leaves; TypeScript source traversal produces ordered disjoint ranges. Each range is replaced once using JSON.stringify of a local digest path, preserving JavaScript string boundaries."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 135,
+      "detail": "Unique URLs are processed in fixed concurrency batches through fetchAsset. Cache, count/byte limits, DNS/IP validation, redirects, MIME/magic checks and current-authority checks at lines73-100 apply equally to URLs newly discovered in manifest code."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 138,
+      "detail": "Single forward chunks array plus one join replaces the reverse-loop full-artifact copy per literal. Total rewrite assembly scales with original source and replacement output size, without repeating the entire artifact for each repeated literal."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 146,
+      "detail": "Only the fixed /_wcb/refresh.json artifact is interpreted. It is emitted by fastRefreshCompiler.ts:102; uploaded public paths cannot replace reserved _wcb artifacts (isolatedPreview.ts:205)."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 148,
+      "detail": "Manifest input requires application/json, at most 24 MiB, version1, string entry, object/nonarray modules with at most2000 members. Every code value must be a string of at most2 MiB (line152). JSON.parse creates data; no custom reviver/getter or host code execution is involved. Invalid/null shapes throw into the existing cleanup path."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 153,
+      "detail": "Only module.code changes. Module IDs, entry, imports, boundary and propagate metadata are retained. Compiler generates IDs/import maps from the admitted bundle graph at fastRefreshCompiler.ts:55-66,93; runtime localRequire authority remains unchanged at its line98."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 155,
+      "detail": "Original canonical JSON must appear in the exact compiler marker let manifest=...;const cache= exactly once. The compiler emits that same marker at fastRefreshCompiler.ts:97. Missing/multiple markers refuse publication. Replacement is one slice/join operation over the compiler-owned app artifact."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 158,
+      "detail": "The same serialized updated manifest is written to both bootstrap and refresh.json. Parsed manifest objects and new Buffers are placed into the copied files map (line70); original build buffers/source bytes are not mutated."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 161,
+      "detail": "Remaining artifact traversal uses the updated map snapshot, so it preserves the replaced bootstrap. Newly inserted binary artifacts have verified inert MIME types and do not introduce executable source."
+    },
+    {
+      "file": "src/webcanbe-engine/runtime/staticAssets.ts",
+      "line": 176,
+      "detail": "Final current-authority/deadline check and snapshot limits (line179) still guard return. Changes do not introduce an alternate output or fetch bypass; finally at line184 retains cancellation and admission cleanup."
+    }
+  ],
+  "supportingFiles": [
+    "src/webcanbe-engine/runtime/fastRefreshCompiler.ts:48-103",
+    "src/webcanbe-engine/runtime/isolatedPreview.ts:168-175,193-217"
+  ],
+  "validation": {
+    "performed": "Read exact final diff and source, inspect minimum compiler-producer/reserved-path evidence, record hash, and run git diff --check for this file.",
+    "notPerformed": "No stress reproduction, test execution, network access, dependency execution, or source edits.",
+    "parentReportedTests": "Ordinary regression tests cover128 repeated URLs and startup/update manifest consistency/refusal; test results not independently rerun."
+  },
+  "limits": "Conclusion is scoped to this diff. It does not re-certify the full static network service or unrelated previously reviewed paths."
+}

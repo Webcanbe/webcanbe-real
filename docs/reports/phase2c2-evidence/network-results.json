@@ -1,0 +1,85 @@
+{
+  "result": "PASS",
+  "boundary": "Linux namespaces + systemd cgroup inside no-mount Lima VM",
+  "resourceProperties": "RuntimeMaxUSec=1min 5s\nCPUQuotaPerSecUSec=1.500000s\nMemoryMax=1610612736\nMemorySwapMax=0\nTasksMax=192\nNoNewPrivileges=yes\nRestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX\nKillMode=control-group\n",
+  "frozenWorkerKilledAfterMs": 65277,
+  "memoryExhaustionKilled": true,
+  "revokedGenerationDenied": true,
+  "testBrowser": "Chromium 152.0.7977.82",
+  "testOnlyLocalNetworkAccessGateDisabled": true,
+  "probeRequestInterception": false,
+  "syntheticDocumentFulfillment": true,
+  "positiveCollectors": {
+    "tcp": 4,
+    "raw-udp": 3,
+    "dns": 1,
+    "fetch": 1,
+    "websocket": 1,
+    "eventsource": 1,
+    "image": 1,
+    "beacon": 1,
+    "stun": 4,
+    "turn": 8,
+    "ice": 32
+  },
+  "isolatedCollectorEvents": 0,
+  "positiveIPv6Tcp": true,
+  "positiveIPv6Udp": true,
+  "control": {
+    "observations": {
+      "fetch": "resolved",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "turnTcp": "offer-created",
+      "ice": "accepted"
+    },
+    "raw": {
+      "procRootEscapeDenied": true,
+      "traversalDenied": false,
+      "secretAbsent": false,
+      "filesystemEscapeDenied": false,
+      "shellDenied": false,
+      "outsideProcessDenied": false,
+      "systemWriteDenied": true,
+      "hostHomeAbsent": true,
+      "vsock": "VSOCK_ALLOWED",
+      "interfaces": [
+        "lo",
+        "eth0"
+      ],
+      "noNewPrivs": false,
+      "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed."
+    },
+    "childInheritsNamespaces": true,
+    "childVsock": "VSOCK_ALLOWED"
+  },
+  "isolated": {
+    "observations": {
+      "fetch": "rejected",
+      "stun": "offer-created",
+      "turn": "offer-created",
+      "turnTcp": "offer-created",
+      "ice": "accepted"
+    },
+    "raw": {
+      "procRootEscapeDenied": true,
+      "traversalDenied": true,
+      "secretAbsent": true,
+      "filesystemEscapeDenied": true,
+      "shellDenied": true,
+      "outsideProcessDenied": true,
+      "systemWriteDenied": true,
+      "hostHomeAbsent": true,
+      "vsock": "VSOCK_DENIED:97",
+      "interfaces": [
+        "lo"
+      ],
+      "noNewPrivs": true,
+      "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed."
+    },
+    "childInheritsNamespaces": true,
+    "childVsock": "VSOCK_DENIED:97"
+  },
+  "distinctNetworkNamespaces": true,
+  "distinctPidNamespaces": true
+}

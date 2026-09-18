@@ -1,0 +1,72 @@
+{
+  "documentType": "codex-security.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "a37c66709706f286e4eb775426ffc7df72352d65c8a9c80a4ccdbf468068a3fe"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "f4025e85401752ca26a9257b3d04883c30c8dfdbc8d187e46eed5e941b4f0d15"
+      }
+    ],
+    "completedAt": "2026-09-15T00:49:02.555528Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "28b26b91-59c0-412e-ba34-1ba51d8d55bb",
+    "preservedSources": {
+      "checkpoints/03e55ee322eb3a6c3af60d1fcf65a9da5fabfde7237282aaea7d603877df5ede.json": "ceb60e6bc5f9ca188aae0afeca03548fb8da25857f9917ebb6ea67cdcdec1a3a",
+      "checkpoints/24d192a992b91c463f9d9c0c979ed189e5465c253762a5bc2ad86b53d659e053.json": "24d192a992b91c463f9d9c0c979ed189e5465c253762a5bc2ad86b53d659e053",
+      "checkpoints/f480f6d35a5c8268178aedc73d664c220ffff27d4e500d060cf0182901719535.json": "40663e79b796cdec9826b3fc1eb0d83d95e5bf422beb3591e69e59c7133be910"
+    },
+    "producer": {
+      "name": "codex-security-plugin",
+      "version": "0.1.24"
+    },
+    "scope": {
+      "artifactsReviewed": [
+        "/tmp/wcb-breadth-security-admission.json",
+        "/tmp/wcb-breadth-security-assets.json",
+        "/tmp/wcb-breadth-security-css.json",
+        "/tmp/wcb-breadth-security-admission-final.json",
+        "/tmp/wcb-breadth-security-css-final.json",
+        "/tmp/wcb-breadth-security-assets-final.json",
+        "docs/reports/phase2-compatibility-breadth-evidence/threat-model.md",
+        ".webcanbe/compatibility-breadth/assets-refresh-final.json",
+        ".webcanbe/compatibility-breadth/default-security-final.json",
+        ".webcanbe/compatibility-breadth/recipe-native.json"
+      ],
+      "context": "Supplied pre-implementation scoped threat model retained verbatim. No P39/P61/later-product audit or professional pentest. Final three security-relevant code paths and focused regressions reread against frozen candidate; QA optional artifact argument reviewed by parent.",
+      "excludePaths": [],
+      "includePaths": [
+        "."
+      ],
+      "limitations": [
+        "No production deployment, external pentest or quantitative denial-of-service stress measurement.",
+        "A cybersecurity safeguard blocked attempted bounded stress validation; not retried. Static source/control/sink assessment and ordinary functional regression establish the bug and correction.",
+        "Immutable scan target aedbc024 includes one low finding. Final remediation commit bc19fac8d91d7360c409285e8613509c3c4e7404 has separate affected-path review; the seal is not represented as a different immutable Git target."
+      ],
+      "runtimeStatus": "504 default passes plus45 separately passing native/hosted identities =549 distinct tests. Five browser groups pass. Exact PG Recipe artifact renders with38 cached resources and ENETUNREACH direct public egress. Final code type/build pass.",
+      "summary": "Frozen compatibility breadth diff 0f33e11..aedbc024: all32 changed paths reviewed. Final remediated code bc19fac additionally reviewed on affected paths without changing the immutable scan target.",
+      "validationMode": "Static complete source/control/sink analysis and ordinary regression verification; actual local PG/mTLS/native integration."
+    },
+    "sealedAt": "2026-09-15T00:49:02.555528Z",
+    "startedAt": "2026-09-15T00:20:36.144599Z",
+    "status": "completed",
+    "target": {
+      "baseRevision": "0f33e11ea60ee4b69ed6a0de5144f73400fe5808",
+      "displayName": "WebCanBe-recovery",
+      "headRevision": "aedbc02414f66d6b2ce83c288dc6c2e246b4ea79",
+      "kind": "git_diff",
+      "snapshotDigest": "codex-security-snapshot/v1:sha256:27690ce0fb4e23aa443efbb6af3d5a276b9b3adc0c54c862d642c46cf7d1ee66",
+      "targetId": "target_sha256_42cde00d65c36327af49fc5a5303d4c9c61fe0885f27c22a108e77905fb8cf01"
+    },
+    "threatModel": {
+      "summary": "# P05\u2013P08 pre-implementation threat model\n\nScope: only compatibility admission, pinned graphs, static HTML/config/CSS interpretation, explicit public runtime values and trusted static resource acquisition. Baseline 0f33e11ea60ee4b69ed6a0de5144f73400fe5808. The authoritative final ledger is reused. P39/P61 and later product scope are excluded.\n\n## Overview and existing boundaries\n\nUploaded ZIPs cross strict path/type/CRC/encoding/member/total/ratio checks before private materialization (projectRegistry.ts:43\u2013113). Runtime inspection selects only repository-owned profiles, checks uploaded package/lock records and confines installed dependencies (runtimeCompatibility.ts:169\u2013249). Source/config is parsed as data; source JavaScript executes only in native isolated Linux. The compiler confines filesystem reads, keeps source canonical and returns ephemeral artifacts (isolatedPreview.ts:54\u2013164). Hosted preview obtains source from PG, then checks current authorization/revision before returning or starting a runner (controlledPreview.ts:156\u2013192,236\u2013264). The worker serves only digest-bound local artifacts (scripts/runner/worker.cjs:63\u201376); the OS launch uses an isolated network namespace. The current GitHub ZIP provider is a separate fixed-host intake API, not a general resource downloader.\n\n## Actors, assets and assumptions\n\nAn authenticated malicious project author controls every imported file, manifest, config literal, source URL and compiled browser request. They do not control operator profiles, trusted service composition, PG grants or the host. Protect other tenants, canonical accepted bytes/history, operator packages, host network/filesystem/credentials, compiler resources, artifact identity and current-generation authority. Public resource servers and DNS answers are untrusted. TEST fixtures/providers do not grant production access. Existing limits remain unchanged; no bundled Yarn executable is run or granted an enlarged member budget.\n\n## Planned boundaries and adversarial acceptance\n\n| Boundary | Threat hypothesis | Required controls and proof |\n|---|---|---|\n| Lock data \u2192 pinned graph | Ambiguous descriptors, alternate protocols, forged integrity or omitted required peers substitute executable dependencies. | Finite versioned grammar; strict sizes/duplicate rejection; exact registry versions/SRI against operator lock; complete dependency/peer traversal; explicit optional peers; no lifecycle/manager execution; no host fallback. Yarn Berry cache checksums are not npm tarball SRI. Unproven Berry/binary Bun forms remain refused. |\n| Config/HTML \u2192 compiler options | Calls/getters/spread/prototypes/URLs turn static interpretation into execution or escape paths; custom HTML adds uncontrolled script entry. | AST-only finite literal semantics, bounded recursion and collections, exact imported known binding identity, confined real paths. One intended local module entry; reject inline/extra/remote scripts, active embedding/event handlers and unknown executable config. Preserve canonical bytes; generated preview HTML is noncanonical. |\n| CSS config \u2192 trusted compiler | Uploaded plugins, content globs/config loading or dynamic functions read host paths/run code/network. | Operator-pinned compiler only; serialize finite validated config data, supply bounded source content explicitly, disable config-file discovery; known finite transforms only. Unknown effects refuse with distinct labels. No uploaded plugin import/eval. |\n| Runtime public-value policy \u2192 artifact | Private/example secrets become browser values, grants cross projects or change mid-compile. | Server-owned explicit project policy, public VITE names and bounded secret-screened values; never auto-read example values; fresh owner/revision checks before and after async work. Values are intentionally public and artifact-bound; accepted source/export unchanged. No confidential server secrets. |\n| Source static URL \u2192 trusted fetch/cache | SSRF, DNS rebinding, redirect pivot, metadata access, cookie leakage, bombs or active content reach the trusted host/another tenant. | HTTPS only, fixed GET and headers/no cookie/auth/proxy, no URL credentials, public address validation and pinned TLS hostname lookup for every hop, reject reserved/private/loopback/link-local/metadata and IPv6 unless validated, bounded redirects/deadline/concurrency/body/aggregate/cache, reject nonidentity encoding, validate MIME and magic. CSS resources parsed without execution; scripts/HTML/SVG active content refused. Tests cover redirects, loop, timeout, oversize, invalid MIME, all denied networks and authorization loss. |\n| Cached bytes \u2192 isolated artifacts | Cache poisoning, stale source fetch authority, unbounded growth or direct runner egress bypass source identity. | Content hashes and source-derived URL references; explicit project authorization before cache access/fetch and after completion; generation/revision checks; bounded immutable artifacts using existing PG artifact store. Rewriting only ephemeral preview output, never canonical source/export. Runner egress remains denied; no new runner-network permission. |\n\nThese are pre-implementation hypotheses and acceptance conditions, not confirmed vulnerabilities. Complete final Codex Security review is required after freeze. The independent scoped architecture review will be retained and reconciled before finalizing this model. Critical/high findings require cross-tenant execution, credential disclosure or host/network authority gain; malformed self-only refusal is not such a finding. Resource exhaustion or stale-grant work is material when it crosses existing bounded admission/authority controls.\n\nIndependent baseline architecture review completed: 12 effective-resource rows and 98 anchors verified against 0f33e11, retained in baseline-architecture.json. Parent confirmed the compiler/profile, fresh PG and runner artifact/no-egress facts at their consumers. New behavior will be reviewed against the final changed revision, not this baseline model.\n"
+    }
+  },
+  "schemaVersion": "1.0"
+}

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "localPostgresHarness": "STOPPED",
+  "localGatewayHarness": "STOPPED",
+  "runnerVM": {
+    "instance": "wcb",
+    "status": "Stopped"
+  },
+  "receiptsPreserved": true,
+  "destructiveCleanupPerformed": false
+}

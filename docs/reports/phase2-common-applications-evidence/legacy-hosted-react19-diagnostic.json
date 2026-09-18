@@ -1,0 +1,229 @@
+{
+  "events": [
+    {
+      "ms": 482,
+      "type": "console-log",
+      "text": "code=0"
+    },
+    {
+      "ms": 720,
+      "type": "console-log",
+      "text": "code=1"
+    },
+    {
+      "ms": 732,
+      "type": "console-log",
+      "text": "typed=Standalone Unicode \ud55c\u5b57"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 73.92578200000003,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Count 0\nVisual hosted heading",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 40.05223099999989,
+  "ordinaryPng": {
+    "sha256": "9b7a97f902b27e77fc00c403b37a92a70308e4097e178371011da7cdf98e1b6c"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 48.704225000000065,
+  "rawPng": {
+    "sha256": "9b7a97f902b27e77fc00c403b37a92a70308e4097e178371011da7cdf98e1b6c"
+  },
+  "rawCaptureMs": 40.460609999999974,
+  "exportViewports": [
+    {
+      "width": 1280,
+      "png": {
+        "sha256": "9d932bee196fe1564b15836ad3215d86e88d4f665f39267b12852ccc8e3614bd"
+      }
+    },
+    {
+      "width": 390,
+      "png": {
+        "sha256": "5b5671526be8eb9854fe6e5e6002c008ecfaa389b362bbe528b9e48b08470dc4"
+      }
+    }
+  ],
+  "legacyAssertions": {
+    "status": "PASS",
+    "preservedAssertionsFrom": [
+      "verify-phase2de-export.cjs",
+      "verify-phase2f-export.cjs",
+      "verify-phase2g-export.cjs",
+      "verify-phase2g2-hosted-export.cjs"
+    ],
+    "noEditorRuntime": true
+  },
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Count 1\nVisual hosted heading",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 5348.930631
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 6
+    },
+    {
+      "name": "Frames",
+      "value": 5
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 176
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 118
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 155
+    },
+    {
+      "name": "Resources",
+      "value": 3
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 14
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 6
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 5
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 15
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.002454
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.003056
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.048638
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.041139
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.125723
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.030436
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.054733
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 3864856
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 5890048
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 5348.547393
+    },
+    {
+      "name": "NavigationStart",
+      "value": 5348.501066
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=261259264\nMemoryPeak=261480448\nCPUUsageNSec=654534000\nTasksCurrent=111\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=402993152\nMemoryPeak=403124224\nCPUUsageNSec=1382985000\nTasksCurrent=113\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

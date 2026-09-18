@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "counts": {
+    "file": "hosted-final.json",
+    "passed": 12,
+    "skipped": 0,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) A and B each read, Code edit, select/Visual edit, history, preview, refresh and export their own project",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) rejects cross-tenant references, stolen capabilities, forged identity fields and origin/CSRF/session attacks",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) supports owner/editor/viewer and revokes project/workspace membership during live capabilities",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) accepts source/history coherently, rejects stale simultaneous edits and replays idempotency after restart",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) durable personal multi-file drafts survive editor restart without changing source and use CAS",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) hosted responsive construction writes real CSS and reload/restart fallbacks remain accurately classified",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) database transaction/history failures never report success or split durable source/history",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) SIGKILL during an HTTP source transaction rolls back and a new editor reconnects to exact accepted bytes",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) artifacts fail closed, runner references/fences/expiry are checked and admission remains PostgreSQL-owned",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) discards an actual delayed mTLS runner result after membership change and quarantines missing cleanup acknowledgement",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) the production-built editor uses cookie/CSRF HTTP for rendered Code/Canvas/history and separate-site viewer",
+      "occurrence": 1,
+      "status": "passed"
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) revoked login session denies source/history/preview and cannot use still-known project IDs",
+      "occurrence": 1,
+      "status": "passed"
+    }
+  ]
+}

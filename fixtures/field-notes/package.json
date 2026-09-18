@@ -1,0 +1,1 @@
+{"name":"field-notes","private":true,"type":"module","scripts":{"dev":"vite","build":"vite build"},"dependencies":{"react":"^19.0.0","react-dom":"^19.0.0"},"devDependencies":{"vite":"^6.4.3","@vitejs/plugin-react":"^4.3.0","tailwindcss":"^4.3.3","@tailwindcss/vite":"^4.3.3"}}

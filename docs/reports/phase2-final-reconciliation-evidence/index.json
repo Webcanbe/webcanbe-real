@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-2-compatible-editor",
+  "startingHeads": {
+    "feature": "ea3830d3bb346c60cfb4154b37b5bc9df015dc25",
+    "p61": "60f0f2f6bd081c3c94338a96c0faae581ccf0553",
+    "p39": "ba43f3c548e34b3860c8f9e513bf4eff1dd000f3",
+    "main": "dd2d9cf8ffa6d82e4fdbb3e0ab37fa43ea9f945b"
+  },
+  "implementationCandidate": "containing phase-2-compatible-editor publication commit",
+  "implementationBase": "9ad95e54aa3e5a00c6426f2cd13c0b150315b797",
+  "p05": "PASS",
+  "p39": "PARTIAL",
+  "p39NativeAcceptance": "DEFERRED",
+  "p61": "PASS",
+  "practicalPhase2": "CLOSED",
+  "internalPhase2": "NOT_YET_STRICT_P39_DEFERRED",
+  "strictPhase2DoD": "NOT_YET",
+  "externalProductionEvidence": "INCOMPLETE",
+  "phase3UnderStrictDoD": false,
+  "phase3WithP39Deferred": true,
+  "ledgerCounts": {
+    "PASS": 50,
+    "PARTIAL": 1,
+    "EXTERNAL-EVIDENCE": 12,
+    "FAIL": 1
+  },
+  "artifacts": {
+    "ledger": "../phase2-final-internal-evidence/final-ledger.json",
+    "report": "../phase2-final-reconciliation.md",
+    "regression": "regression.json",
+    "p39Adjudication": "p39-adjudication.json",
+    "p61Adjudication": "p61-adjudication.json",
+    "cleanup": "cleanup.json",
+    "securityPriorBroadReview": "security/report.md",
+    "securityFinalCleanup": "security-p05-cleanup/report.md",
+    "fullRegressionReceipt": "full-regression.json"
+  }
+}

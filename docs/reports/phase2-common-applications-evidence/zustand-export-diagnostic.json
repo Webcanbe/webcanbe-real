@@ -1,0 +1,263 @@
+{
+  "events": [
+    {
+      "ms": 559,
+      "type": "console-log",
+      "text": "Corpus Code accepted"
+    },
+    {
+      "ms": 670,
+      "type": "console-warning",
+      "text": "[.WebGL-0x4c001b8e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 782,
+      "type": "console-warning",
+      "text": "THREE.WebGLRenderer: Shader chunk \"%s\" has been deprecated. Use \"%s\" instead. encodings_fragment colorspace_fragment"
+    },
+    {
+      "ms": 2074,
+      "type": "console-warning",
+      "text": "[.WebGL-0x4c001b8e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 2852,
+      "type": "console-warning",
+      "text": "[.WebGL-0x4c001b8e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 3555,
+      "type": "console-warning",
+      "text": "[.WebGL-0x4c001b8e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 183.7894060000001,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "import { create } from 'zustand'\n\n\nconst useStore = create((set) => ({\n  count: 1,\n  inc: () => set((state) => ({ count: state.count + 1 })),\n}))\n\n\nfunction Counter() {\n  const { count, inc } = useStore()\n  return (\n    <div>\n      <span>{count}</span>\n      <button onClick={inc}>one up</button>\n    </div>\n  )\n}\nJavaScript\nTypeScript\n1\nEdited button\nDocumentation\nGithub\nIllustrations @ Tina Henschel\n<Source />\n<Playground />\nZUSTAND",
+    "canvases": [
+      {
+        "width": 1280,
+        "height": 900,
+        "clientWidth": 1280,
+        "clientHeight": 900
+      }
+    ],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFrames": "Diagnostic observation deadline",
+  "ordinaryCapture": "page.screenshot: Timeout 4000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+  "ordinaryCaptureMs": 4005.196317,
+  "rawPng": {
+    "sha256": "715dccc8d6b2168c81bfc7a1b1fc4bac13c9407b0d939b6355b28310ffd3215a"
+  },
+  "rawCaptureMs": 1199.8813660000005,
+  "extendedPng": {
+    "sha256": "dd58d61f6237658260b6ecc438bcb502da68e3d78d6b4772f6beaf3ac8ab1e33"
+  },
+  "extendedCapture": "PASS",
+  "extendedCaptureMs": 4102.878221,
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "import { create } from 'zustand'\n\n\nconst useStore = create((set) => ({\n  count: 1,\n  inc: () => set((state) => ({ count: state.count + 1 })),\n}))\n\n\nfunction Counter() {\n  const { count, inc } = useStore()\n  return (\n    <div>\n      <span>{count}</span>\n      <button onClick={inc}>one up</button>\n    </div>\n  )\n}\nJavaScript\nTypeScript\n1\nEdited button\nDocumentation\nGithub\nIllustrations @ Tina Henschel\n<Source />\n<Playground />\nZUSTAND",
+    "canvases": [
+      {
+        "width": 1280,
+        "height": 900,
+        "clientWidth": 1280,
+        "clientHeight": 900
+      }
+    ],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 4103.096049
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 4
+    },
+    {
+      "name": "Frames",
+      "value": 4
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 177
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 327
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 398
+    },
+    {
+      "name": "Resources",
+      "value": 9
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 9
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 4
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 201
+    },
+    {
+      "name": "LayoutCount",
+      "value": 3
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 8
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.012862
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.004067
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.021702
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.331464
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 13.862566
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 13.492471
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.143767
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 10806380
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 16470016
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 4089.273025
+    },
+    {
+      "name": "NavigationStart",
+      "value": 4089.094247
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532290]",
+  "resources": [
+    "Result=success\nMemoryCurrent=260595712\nMemoryPeak=269299712\nCPUUsageNSec=645190000\nTasksCurrent=113\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=494067712\nMemoryPeak=508760064\nCPUUsageNSec=1396834000\nTasksCurrent=114\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=644247552\nMemoryPeak=645111808\nCPUUsageNSec=2071088000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=647180288\nMemoryPeak=647450624\nCPUUsageNSec=2767707000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=662564864\nMemoryPeak=664064000\nCPUUsageNSec=3569298000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=662659072\nMemoryPeak=664100864\nCPUUsageNSec=4309174000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=663011328\nMemoryPeak=664100864\nCPUUsageNSec=5056656000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=663838720\nMemoryPeak=664100864\nCPUUsageNSec=5796170000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=664293376\nMemoryPeak=664530944\nCPUUsageNSec=6631110000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=664281088\nMemoryPeak=664813568\nCPUUsageNSec=7324551000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=664850432\nMemoryPeak=665313280\nCPUUsageNSec=8077707000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=664920064\nMemoryPeak=665374720\nCPUUsageNSec=8816807000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=664924160\nMemoryPeak=665444352\nCPUUsageNSec=9571217000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=666578944\nMemoryPeak=683757568\nCPUUsageNSec=10310550000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=680878080\nMemoryPeak=685600768\nCPUUsageNSec=11069545000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=678318080\nMemoryPeak=685600768\nCPUUsageNSec=11817473000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=668647424\nMemoryPeak=685600768\nCPUUsageNSec=12574756000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=668536832\nMemoryPeak=685600768\nCPUUsageNSec=13322222000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=668540928\nMemoryPeak=685600768\nCPUUsageNSec=14075113000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=667852800\nMemoryPeak=685600768\nCPUUsageNSec=14824268000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=667914240\nMemoryPeak=685600768\nCPUUsageNSec=15618396000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=680964096\nMemoryPeak=685821952\nCPUUsageNSec=16324317000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=684806144\nMemoryPeak=687788032\nCPUUsageNSec=17097936000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=676114432\nMemoryPeak=687788032\nCPUUsageNSec=17825644000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=676110336\nMemoryPeak=687788032\nCPUUsageNSec=18582913000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=678322176\nMemoryPeak=687788032\nCPUUsageNSec=19340636000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=678424576\nMemoryPeak=687788032\nCPUUsageNSec=20069445000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=680058880\nMemoryPeak=687788032\nCPUUsageNSec=20835768000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=680321024\nMemoryPeak=687788032\nCPUUsageNSec=21581969000\nTasksCurrent=115\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

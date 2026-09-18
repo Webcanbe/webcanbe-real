@@ -1,0 +1,24 @@
+{
+  "status": "PARTIAL",
+  "base": "427c77be667c620a65a290ffa4f77fb97ab7950c",
+  "followupBase": "0f2b971c2205a1e5ba1d84f83b62dccf69dc8220",
+  "productionChanged": true,
+  "targetedTests": 19,
+  "full646": "DEFERRED TO FINAL PHASE-2 CLOSURE",
+  "followup": "PARTIAL: Zustand and bounded load pass; historical second-app 422 stage/root cause remain unproven.",
+  "followupTargetedTests": 43,
+  "files": [
+    "cleanup.json",
+    "cleanup-followup.json",
+    "load.json",
+    "retained-scenario.json",
+    "security-review.json",
+    "targeted-tests.json",
+    "verification.json",
+    "followup.json",
+    "security-followup.json",
+    "zustand-attempts.json",
+    "zustand-instrumented.json",
+    "zustand-instrumented.log"
+  ]
+}

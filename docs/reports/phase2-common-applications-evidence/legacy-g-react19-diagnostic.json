@@ -1,0 +1,213 @@
+{
+  "events": [],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 74.30862100000002,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Get started\n\nEdit src/App.tsx and save to test HMR\n\nCount is 0\nDocumentation\n\nYour questions, answered\n\nExplore Vite\nLearn more\nConnect with us\n\nJoin the Vite community\n\nGitHub\nDiscord\nX.com\nBluesky",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 22.943830000000048,
+  "ordinaryPng": {
+    "sha256": "ec84fbb3ff1239e90395e9f40d4b37cf40e3f504b3808b21b1d87adb45ad8b79"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 67.88139699999999,
+  "rawPng": {
+    "sha256": "ec84fbb3ff1239e90395e9f40d4b37cf40e3f504b3808b21b1d87adb45ad8b79"
+  },
+  "rawCaptureMs": 36.23849000000007,
+  "exportViewports": [
+    {
+      "width": 1280,
+      "png": {
+        "sha256": "eb05e765f2c4fd3f1dc443255a5165e411fa8d7363b5b824fc79e460c2ec1bf5"
+      }
+    },
+    {
+      "width": 390,
+      "png": {
+        "sha256": "136c4d8991d3a775277da99143e7f059b30f846938240631183d216379877082"
+      }
+    }
+  ],
+  "legacyAssertions": {
+    "status": "PASS",
+    "preservedAssertionsFrom": [
+      "verify-phase2de-export.cjs",
+      "verify-phase2f-export.cjs",
+      "verify-phase2g-export.cjs",
+      "verify-phase2g2-hosted-export.cjs"
+    ],
+    "noEditorRuntime": true
+  },
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "Get started\n\nEdit src/App.tsx and save to test HMR\n\nCount is 1\nDocumentation\n\nYour questions, answered\n\nExplore Vite\nLearn more\nConnect with us\n\nJoin the Vite community\n\nGitHub\nDiscord\nX.com\nBluesky",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 5343.30127
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 12
+    },
+    {
+      "name": "Frames",
+      "value": 8
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 185
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 333
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 428
+    },
+    {
+      "name": "Resources",
+      "value": 7
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 19
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 12
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 5
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 19
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.039462
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.002433
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.058488
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.029856
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.191954
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.061715
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.069407
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 3798220
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 6676480
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 5342.877558
+    },
+    {
+      "name": "NavigationStart",
+      "value": 5342.807493
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=262995968\nMemoryPeak=266616832\nCPUUsageNSec=654599000\nTasksCurrent=113\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=406073344\nMemoryPeak=406507520\nCPUUsageNSec=1417345000\nTasksCurrent=121\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

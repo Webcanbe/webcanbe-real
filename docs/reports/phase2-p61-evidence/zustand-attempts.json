@@ -1,0 +1,39 @@
+{
+  "applicationCommit": "b57db4f86ef179285da216eeb291266da82c361c",
+  "archiveSha256": "bd5bcca159e5f47025c934c619454254cbe891307ac76d2ad544100d4fb3d11a",
+  "sourceHashesVerified": true,
+  "attempts": [
+    {
+      "instrumentation": "none",
+      "importMs": 78.88150000000007,
+      "startMs": 84.58658300000002,
+      "status": 422
+    },
+    {
+      "instrumentation": "TEST error callback only",
+      "importMs": 94.26658299999997,
+      "startMs": 91.17170899999996,
+      "status": 422
+    },
+    {
+      "instrumentation": "TEST callback and monotonic source/compile timestamps",
+      "importMs": 102.61087499999996,
+      "startMs": 97.80162500000006,
+      "status": 422,
+      "sourceReadMs": 5.801208,
+      "materializationMs": 4.490917,
+      "compileRequestedAtMs": 546.999292
+    }
+  ],
+  "failure": "RuntimeCompatibilityError: Unsupported HTML link semantics. Unchanged index.html contains rel=manifest, absent from the finite link grammar.",
+  "notReached": [
+    "lease acquisition",
+    "browser/context creation",
+    "navigation",
+    "app readiness",
+    "raster request",
+    "raster result"
+  ],
+  "historical4000msFailure": "Not reproduced: current ordinary packaged path refuses earlier. No historical timing is represented as a fresh pass.",
+  "temporaryInstrumentationRemoved": true
+}

@@ -1,0 +1,19 @@
+Checking router BrowserRouter
+Checking visual padding base
+Checking visual padding tw:md
+Checking visual padding css:(max-width: 620px)
+Checking visual padding base
+Checking visual padding base
+Checking visual flexDirection base
+Checking visual gap base
+Checking visual gridTemplateColumns base
+Checking router HashRouter
+Checking visual padding base
+Checking visual padding tw:md
+Checking visual padding css:(max-width: 620px)
+Checking visual padding base
+Checking visual padding base
+Checking visual flexDirection base
+Checking visual gap base
+Checking visual gridTemplateColumns base
+PASS Phase 2F responsive semantic browser acceptance {"BrowserRouter":{"strictRunner":true,"visualBaseExactCodeUndo":true,"responsiveOnlySelectedToken":true,"viewportWidths":[390,768,1280],"CSSMediaScopeRefusalAndEdit":true,"module":true,"inline":true,"siblingReorderPreviewUndo":true,"flexDirectionGap":true,"gridTracks":true,"codeResponsiveCanvas":true,"realServerRestartHeadHistoryUndo":true,"cleanExport":true},"HashRouter":{"strictRunner":true,"visualBaseExactCodeUndo":true,"responsiveOnlySelectedToken":true,"viewportWidths":[390,768,1280],"CSSMediaScopeRefusalAndEdit":true,"module":true,"inline":true,"siblingReorderPreviewUndo":true,"flexDirectionGap":true,"gridTracks":true,"codeResponsiveCanvas":true,"realServerRestartHeadHistoryUndo":true,"cleanExport":true}}

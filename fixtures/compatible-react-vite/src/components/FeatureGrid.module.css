@@ -1,0 +1,11 @@
+.card {
+  min-height: 188px;
+  padding: 24px;
+  border: 1px solid #d8d8d1;
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.index { color: #6c8549; font-size: 12px; font-weight: 700; }
+.card h3 { margin: 34px 0 8px; font-size: 20px; letter-spacing: -.03em; }
+.card p { margin: 0; color: #66665f; line-height: 1.45; }

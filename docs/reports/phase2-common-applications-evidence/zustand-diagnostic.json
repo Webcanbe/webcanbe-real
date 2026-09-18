@@ -1,0 +1,237 @@
+{
+  "events": [
+    {
+      "ms": 936,
+      "type": "console-warning",
+      "text": "[.WebGL-0x2c00199a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 998,
+      "type": "console-warning",
+      "text": "THREE.WebGLRenderer: Shader chunk \"%s\" has been deprecated. Use \"%s\" instead. encodings_fragment colorspace_fragment"
+    },
+    {
+      "ms": 2289,
+      "type": "console-warning",
+      "text": "[.WebGL-0x2c00199a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 3036,
+      "type": "console-warning",
+      "text": "[.WebGL-0x2c00199a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "ms": 3738,
+      "type": "console-warning",
+      "text": "[.WebGL-0x2c00199a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 521.9602189999999,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "import { create } from 'zustand'\n\n\nconst useStore = create((set) => ({\n  count: 1,\n  inc: () => set((state) => ({ count: state.count + 1 })),\n}))\n\n\nfunction Counter() {\n  const { count, inc } = useStore()\n  return (\n    <div>\n      <span>{count}</span>\n      <button onClick={inc}>one up</button>\n    </div>\n  )\n}\nJavaScript\nTypeScript\n1\none up\nDocumentation\nGithub\nIllustrations @ Tina Henschel\n<Source />\n<Playground />\nZUSTAND",
+    "canvases": [
+      {
+        "width": 1280,
+        "height": 900,
+        "clientWidth": 1280,
+        "clientHeight": 900
+      }
+    ],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFrames": "Diagnostic observation deadline",
+  "ordinaryCapture": "page.screenshot: Timeout 4000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n",
+  "ordinaryCaptureMs": 4000.5769929999997,
+  "rawPng": {
+    "sha256": "c81b146b725e64a134af6c6c5484d48d36d830fdeaecae636e4bea512bcb031a"
+  },
+  "rawCaptureMs": 980.0208000000002,
+  "extendedPng": {
+    "sha256": "3e69179e13977e03cd230ebc8d831788e4b82780ef6d6079edf0316808d837f3"
+  },
+  "extendedCapture": "PASS",
+  "extendedCaptureMs": 4225.122472999999,
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "import { create } from 'zustand'\n\n\nconst useStore = create((set) => ({\n  count: 1,\n  inc: () => set((state) => ({ count: state.count + 1 })),\n}))\n\n\nfunction Counter() {\n  const { count, inc } = useStore()\n  return (\n    <div>\n      <span>{count}</span>\n      <button onClick={inc}>one up</button>\n    </div>\n  )\n}\nJavaScript\nTypeScript\n1\none up\nDocumentation\nGithub\nIllustrations @ Tina Henschel\n<Source />\n<Playground />\nZUSTAND",
+    "canvases": [
+      {
+        "width": 1280,
+        "height": 900,
+        "clientWidth": 1280,
+        "clientHeight": 900
+      }
+    ],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 829.777739
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 4
+    },
+    {
+      "name": "Frames",
+      "value": 4
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 186
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 327
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 371
+    },
+    {
+      "name": "Resources",
+      "value": 10
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 9
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 5
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 4
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 2
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 218
+    },
+    {
+      "name": "LayoutCount",
+      "value": 3
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 8
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.006376
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.002437
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.018634
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.390113
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 4.3e-05
+    },
+    {
+      "name": "TaskDuration",
+      "value": 15.254714
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 14.837111
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.249944
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 13380096
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 14548992
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 814.818866
+    },
+    {
+      "name": "NavigationStart",
+      "value": 814.30608
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=671088640\nMemoryPeak=674516992\nCPUUsageNSec=2724669000\nTasksCurrent=121\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=686919680\nMemoryPeak=687890432\nCPUUsageNSec=5716066000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=686628864\nMemoryPeak=687890432\nCPUUsageNSec=8713228000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=683122688\nMemoryPeak=687890432\nCPUUsageNSec=11728988000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=673402880\nMemoryPeak=687890432\nCPUUsageNSec=14718396000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=665497600\nMemoryPeak=687890432\nCPUUsageNSec=17719060000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=680382464\nMemoryPeak=688939008\nCPUUsageNSec=20722177000\nTasksCurrent=126\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=673763328\nMemoryPeak=688939008\nCPUUsageNSec=23716898000\nTasksCurrent=126\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

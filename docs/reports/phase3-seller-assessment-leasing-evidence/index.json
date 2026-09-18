@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "date": "2026-09-16",
+  "branch": "phase-3-hosted-product",
+  "base": "ce5a064ba06227a9e7e3162229188df9f2cecc1a",
+  "status": "PASS",
+  "scope": {
+    "requestedJobClaiming": true,
+    "restartSafeLeasing": true,
+    "assessmentExecution": false,
+    "submittedCodeExecution": false,
+    "externalNetwork": false,
+    "releasePublishing": false,
+    "listingPublishing": false,
+    "entitlementCreation": false,
+    "workspaceMaterialization": false,
+    "landingChanged": false,
+    "buyerRoutesChanged": false,
+    "paymentProvider": false
+  },
+  "verification": {
+    "targetedTests": {
+      "passed": 5,
+      "total": 5,
+      "skippedUnrelated": 20,
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "command": "npx vitest run src/webcanbe-engine/phase3-hosted-product.test.ts -t \"Phase 3 seller assessment leasing\""
+    },
+    "typescript": "PASS",
+    "build": "PASS",
+    "fullRegression": "NOT_RUN"
+  },
+  "guarantees": {
+    "requestedJobClaim": "PASS",
+    "serverProvisionedWorkerAuthority": "PASS",
+    "liveLeaseExclusivity": "PASS",
+    "leaseExpiryReclaim": "PASS",
+    "restartSafety": "PASS",
+    "monotonicFencing": "PASS",
+    "staleOwnerRejection": "PASS",
+    "snapshotBinding": "PASS",
+    "crossJobSubstitution": "REFUSED",
+    "crossSellerSubstitution": "REFUSED",
+    "codeExecution": "ABSENT",
+    "externalNetwork": "ABSENT",
+    "implicitPublication": "REFUSED",
+    "implicitEntitlementCreation": "REFUSED",
+    "implicitMaterialization": "REFUSED"
+  },
+  "security": {
+    "scanId": "ea3b502f-a802-4fff-8f4e-b89bb852a5de",
+    "coverage": "complete",
+    "changedFilesReviewed": 4,
+    "findings": 0,
+    "unresolved": 0
+  }
+}

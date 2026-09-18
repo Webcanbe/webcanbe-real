@@ -1,0 +1,18 @@
+{
+  "exactPackagedEditorCli": true,
+  "boundary": "Local TEST signed OIDC/verified TLS, real PostgreSQL and mTLS native-sandbox Linux; no production infrastructure proof",
+  "checks": [
+    "Two users/projects: signed login → import → source → Code → immutable PG artifact → PG scheduled mTLS runner → input/select → Visual → accepted history → React18/19 state 1/1/2/3 → CSS → export",
+    "Cross-tenant source/history/artifact/preview/generation/mutation/export/diagnostics/logs and identity-ID/cookie/CSRF/origin forgery denied",
+    "Owner/editor writes and viewer read-only; live project/workspace revoke and regrant cannot revive old capability",
+    "HTTP concurrent CAS, stale revision, duplicate key conflict and exact retry with same durable cookie/capability/source/history after process restart",
+    "PostgreSQL personal draft CAS/recovery/isolation; no accepted-source or history effect until atomic two-file Code acceptance",
+    "Composed HTTP missing responsive CSS construction; CSS hot update, component Fast Refresh, entry rebuild/reload with state reset, structural generation restart accurately distinguished",
+    "Actual PostgreSQL source and history trigger faults roll back atomically before HTTP success",
+    "Actual HTTP editor SIGKILL inside PostgreSQL acceptance; connection loss has no success; database rollback and fresh-process source/history reconnect",
+    "HTTP artifact-write failure, cross-project/stale generation and input rejection, real PG host admission, controller epoch fencing, lease expiry, verified recovery and restart",
+    "Actual gateway sample held in mTLS relay then membership revoked: no result/logs escaped; lost revoke acknowledgement retained PG quarantine, new controller periodic recovery verified cleanup without editor allocation",
+    "Built editor desktop/compact UI: HttpOnly session → in-memory CSRF → separate opaque raster viewer → real Code save → PostgreSQL history → Canvas; delayed old-revision capture rejection cannot expire refreshed preview; no browser errors/localStorage bearer/local key",
+    "HTTP logout revokes durable login authority for all subsequent source/history/preview/export operations"
+  ]
+}

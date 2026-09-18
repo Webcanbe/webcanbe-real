@@ -1,0 +1,220 @@
+{
+  "events": [
+    {
+      "ms": 799,
+      "type": "console-log",
+      "text": "DEQA:{\"h\":\"Visual after code.\",\"color\":\"rgb(161, 35, 69)\",\"padding\":\"32px\",\"alt\":\"Coast from code\",\"first\":\"A LOCAL FIELD GUIDE\",\"p\":\"A LOCAL FIELD GUIDE\",\"assets\":true}"
+    }
+  ],
+  "browser": "152.0.7977.82",
+  "sandbox": "Sandbox Status\nLayer 1 Sandbox\tNamespace\nPID namespaces\tYes\nNetwork namespaces\tYes\nSeccomp-BPF sandbox\tYes\nSeccomp-BPF sandbox supports TSYNC\tYes\nPtrace Protection with Yama LSM (Broker)\tNo\nPtrace Protection with Yama LSM (Non-broker)\tNo\n\nYou are adequately sandboxed.",
+  "startup": "PASS",
+  "startMs": 66.13805300000001,
+  "before": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "COAST PATHS\nHome\nVisit the headland\nVisit the harbor\nUnknown place\n\nA LOCAL FIELD GUIDE\n\nVisual after code.\nExplore place 42\nTake the longer way home.",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "twoAnimationFramesMs": 26.20902799999999,
+  "ordinaryPng": {
+    "sha256": "6e7096130c6a186cd412c38d8cf837699294e1708521931d9cfea562b9e635ee"
+  },
+  "ordinaryCapture": "PASS",
+  "ordinaryCaptureMs": 76.50735499999996,
+  "rawPng": {
+    "sha256": "6e7096130c6a186cd412c38d8cf837699294e1708521931d9cfea562b9e635ee"
+  },
+  "rawCaptureMs": 33.481176000000005,
+  "exportViewports": [
+    {
+      "width": 1280,
+      "png": {
+        "sha256": "6e7096130c6a186cd412c38d8cf837699294e1708521931d9cfea562b9e635ee"
+      }
+    },
+    {
+      "width": 390,
+      "png": {
+        "sha256": "c0d967403a6ba8de6e4e4752e45b29a8c7ecc4cb5b427487d838fc08012fb0e9"
+      }
+    }
+  ],
+  "legacyAssertions": {
+    "status": "PASS",
+    "preservedAssertionsFrom": [
+      "verify-phase2de-export.cjs",
+      "verify-phase2f-export.cjs",
+      "verify-phase2g-export.cjs",
+      "verify-phase2g2-hosted-export.cjs"
+    ],
+    "noEditorRuntime": true
+  },
+  "after": {
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "fonts": [],
+    "text": "COAST PATHS\nHome\nVisit the headland\nVisit the harbor\nUnknown place\n\nPLACE 42\n\nA closer look at the coast.\n\nMode: quiet\n\nAnchor: #details\n\nNext place\nGo back\nCoast overview\nJump to details\nDetails from the path.\n\nSalt air and open water.\n\nTake the longer way home.",
+    "canvases": [],
+    "webglAvailable": true,
+    "renderer": "WebKit WebGL"
+  },
+  "performance": [
+    {
+      "name": "Timestamp",
+      "value": 5325.966845
+    },
+    {
+      "name": "AudioHandlers",
+      "value": 0
+    },
+    {
+      "name": "AudioWorkletProcessors",
+      "value": 0
+    },
+    {
+      "name": "Documents",
+      "value": 20
+    },
+    {
+      "name": "Frames",
+      "value": 16
+    },
+    {
+      "name": "JSEventListeners",
+      "value": 554
+    },
+    {
+      "name": "LayoutObjects",
+      "value": 162
+    },
+    {
+      "name": "MediaKeySessions",
+      "value": 0
+    },
+    {
+      "name": "MediaKeys",
+      "value": 0
+    },
+    {
+      "name": "Nodes",
+      "value": 240
+    },
+    {
+      "name": "Resources",
+      "value": 17
+    },
+    {
+      "name": "ContextLifecycleStateObservers",
+      "value": 36
+    },
+    {
+      "name": "V8PerContextDatas",
+      "value": 11
+    },
+    {
+      "name": "WorkerGlobalScopes",
+      "value": 0
+    },
+    {
+      "name": "UACSSResources",
+      "value": 0
+    },
+    {
+      "name": "RTCPeerConnections",
+      "value": 0
+    },
+    {
+      "name": "ResourceFetchers",
+      "value": 20
+    },
+    {
+      "name": "AdSubframes",
+      "value": 0
+    },
+    {
+      "name": "DetachedScriptStates",
+      "value": 8
+    },
+    {
+      "name": "ArrayBufferContents",
+      "value": 0
+    },
+    {
+      "name": "LayoutCount",
+      "value": 3
+    },
+    {
+      "name": "RecalcStyleCount",
+      "value": 3
+    },
+    {
+      "name": "LayoutDuration",
+      "value": 0.00036
+    },
+    {
+      "name": "RecalcStyleDuration",
+      "value": 0.000407
+    },
+    {
+      "name": "DevToolsCommandDuration",
+      "value": 0.014127
+    },
+    {
+      "name": "ScriptDuration",
+      "value": 0.002199
+    },
+    {
+      "name": "V8CompileDuration",
+      "value": 0
+    },
+    {
+      "name": "TaskDuration",
+      "value": 0.035013
+    },
+    {
+      "name": "TaskOtherDuration",
+      "value": 0.01792
+    },
+    {
+      "name": "ThreadTime",
+      "value": 0.023551
+    },
+    {
+      "name": "ProcessTime",
+      "value": 0
+    },
+    {
+      "name": "JSHeapUsedSize",
+      "value": 7548240
+    },
+    {
+      "name": "JSHeapTotalSize",
+      "value": 11055104
+    },
+    {
+      "name": "FirstMeaningfulPaint",
+      "value": 0
+    },
+    {
+      "name": "DomContentLoaded",
+      "value": 5325.893685
+    },
+    {
+      "name": "NavigationStart",
+      "value": 5325.865963
+    }
+  ],
+  "pendingRequests": [],
+  "networkNamespace": "net:[4026532289]",
+  "resources": [
+    "Result=success\nMemoryCurrent=240308224\nMemoryPeak=240308224\nCPUUsageNSec=646467000\nTasksCurrent=117\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=352161792\nMemoryPeak=355037184\nCPUUsageNSec=1392025000\nTasksCurrent=120\nCPUQuotaPerSecUSec=1.500000s",
+    "Result=success\nMemoryCurrent=123924480\nMemoryPeak=438419456\nCPUUsageNSec=2045789000\nTasksCurrent=17\nCPUQuotaPerSecUSec=1.500000s"
+  ],
+  "boundary": "Separate diagnostic only: unchanged 4000ms ordinary capture, bounded 15000ms observation, retained namespace/native sandbox/default egress denial",
+  "cleanupVerified": true
+}

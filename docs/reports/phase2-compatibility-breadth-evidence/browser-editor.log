@@ -1,0 +1,6 @@
+[BABEL] Note: The code generator has deoptimised the styling of /var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-2c-qa-fLP3WM/vite-cache/deps/react-dom_client.js?v=aca76504 as it exceeds the max of 500KB.
+PASS trail-atlas import/profile/assets/routes/source/text/style/diff/reload/undo/redo/export /var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-2c-qa-fLP3WM/.webcanbe/projects/4bca7bf1-8017-40d0-acc7-5b094829e788
+PASS studio-ledger import/profile/assets/routes/source/text/style/diff/reload/undo/redo/export /var/folders/vr/ggpnpx3n697gvtjljwx9c9pc0000gn/T/wcb-2c-qa-fLP3WM/.webcanbe/projects/1769e18d-1644-42fd-8797-c1e956d7185f
+PASS Field Notes: text/CSS Modules/inline/Tailwind/responsive CSS+Tailwind, actual source/diff/undo/redo/export, viewport and parent/API guards.
+PASS native hash selection invalidation, late-inspection rejection, reselection, duplicate-route stability, persistent security notice; editor boundary: wrong origin/source/session/generation and malformed observations denied; genuine hover works; parent tokens denied; stop/restart revokes Blob URL.
+PASS editor regressions with a fresh registry and unchanged production limits.

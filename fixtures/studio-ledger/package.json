@@ -1,0 +1,22 @@
+{
+  "name": "studio-ledger-fixture",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.3",
+    "clsx": "2.1.1"
+  },
+  "devDependencies": {
+    "vite": "6.4.3",
+    "@vitejs/plugin-react": "4.3.4",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3",
+    "typescript": "5.9.3"
+  }
+}

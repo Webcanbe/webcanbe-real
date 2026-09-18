@@ -1,0 +1,46 @@
+{
+  "browser": "153.0.8010.12",
+  "nativeChromiumSandbox": true,
+  "productionHttpEnabled": false,
+  "fullEditorNestedRouteAcceptance": false,
+  "results": [
+    {
+      "fixture": "coast-paths",
+      "classification": "authored fixture; dormant HTTP prototype QA, not editor acceptance",
+      "root": true,
+      "nested": true,
+      "parameters": true,
+      "queryAndAnchor": true,
+      "linkAndNavigate": true,
+      "backAndForward": true,
+      "directEntryAndRefresh": true,
+      "assets": true,
+      "unknownRoute": true,
+      "canonicalUnchangedOnOpen": true,
+      "sourceTextStyleDiffUndoRedo": true,
+      "routeAfterRebuild": true,
+      "geometry": true,
+      "export": true,
+      "parentStorageFetchWorkersDenied": true
+    },
+    {
+      "fixture": "harbor-desk",
+      "classification": "authored fixture; dormant HTTP prototype QA, not editor acceptance",
+      "root": true,
+      "nested": true,
+      "parameters": true,
+      "queryAndAnchor": true,
+      "linkAndNavigate": true,
+      "backAndForward": true,
+      "directEntryAndRefresh": true,
+      "assets": true,
+      "unknownRoute": true,
+      "canonicalUnchangedOnOpen": true,
+      "sourceTextStyleDiffUndoRedo": true,
+      "routeAfterRebuild": true,
+      "geometry": true,
+      "export": true,
+      "parentStorageFetchWorkersDenied": true
+    }
+  ]
+}
