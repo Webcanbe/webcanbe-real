@@ -84,7 +84,7 @@ export function identityJson(url: string, body?: URLSearchParams, ca?: string): 
     request.end(body?.toString())
   })
 }
-export type OidcConfiguration = { issuer: string; authorizationEndpoint: string; tokenEndpoint: string; jwksUri: string; clientId: string; clientSecret?: string; redirectUri: string; ca?: string }
+export type OidcConfiguration = { issuer: string; authorizationEndpoint: string; tokenEndpoint: string; jwksUri: string; clientId: string; clientSecret?: string; redirectUri: string; scopes?: string[]; ca?: string }
 /** Portable OIDC authorization-code + S256 PKCE adapter. Access/refresh tokens are
  * deliberately neither returned nor persisted. Only a verified identity crosses. */
 export class OidcIdentityProvider implements IdentityProvider {
@@ -94,10 +94,12 @@ export class OidcIdentityProvider implements IdentityProvider {
       if (url.protocol !== "https:" || url.username || url.password || url.hash || url.search) throw new AuthorityDenied()
     }
     if (!config.clientId || config.clientId.length > 255) throw new AuthorityDenied()
+    const scopes = config.scopes ?? ["openid"]
+    if (!Array.isArray(scopes) || !scopes.length || scopes.length > 8 || scopes.some(scope => !/^[A-Za-z0-9._:-]{1,64}$/.test(scope)) || !scopes.includes("openid")) throw new AuthorityDenied()
   }
   authorization(attempt: LoginAttempt) {
     const url = new URL(this.config.authorizationEndpoint)
-    url.search = new URLSearchParams({ client_id: this.config.clientId, redirect_uri: this.config.redirectUri, response_type: "code", scope: "openid", state: attempt.state, nonce: attempt.nonce, code_challenge: createHash("sha256").update(attempt.verifier).digest("base64url"), code_challenge_method: "S256", response_mode: "query" }).toString()
+    url.search = new URLSearchParams({ client_id: this.config.clientId, redirect_uri: this.config.redirectUri, response_type: "code", scope: (this.config.scopes ?? ["openid"]).join(" "), state: attempt.state, nonce: attempt.nonce, code_challenge: createHash("sha256").update(attempt.verifier).digest("base64url"), code_challenge_method: "S256", response_mode: "query" }).toString()
     return url.href
   }
   async verify(code: string, attempt: LoginAttempt): Promise<VerifiedIdentity> {
