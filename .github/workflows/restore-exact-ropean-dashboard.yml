@@ -1,0 +1,211 @@
+name: Restore exact Ropean dashboard and hero auth
+on:
+  push:
+    branches:
+      - phase-4-product-ux
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-4-product-ux
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Verify Ropean can be framed
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(curl -sSIL --max-time 30 https://shadcn-admin-template.ropean.org/)"
+          printf '%s\n' "$headers"
+          if printf '%s\n' "$headers" | grep -qi '^x-frame-options: *\(deny\|sameorigin\)'; then
+            echo "Ropean blocks framing via X-Frame-Options"
+            exit 1
+          fi
+          if printf '%s\n' "$headers" | grep -qiE '^content-security-policy:.*frame-ancestors'; then
+            echo "Ropean declares frame-ancestors; refusing exact iframe until inspected"
+            exit 1
+          fi
+
+      - name: Restore exact dashboard and instant hero auth modal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path("src/App.tsx")
+          text=p.read_text()
+
+          # Replace customized dashboard with the exact live Ropean template.
+          start=text.index("function Dashboard()")
+          end=text.index("\n\nfunction Settings()",start)
+          dashboard=r'''function Dashboard() {
+            return <main className="ropean-original-dashboard" aria-label="Ropean dashboard template">
+              <iframe
+                title="Ropean shadcn admin dashboard"
+                src="https://shadcn-admin-template.ropean.org/"
+                referrerPolicy="no-referrer"
+              />
+            </main>
+          }'''
+          text=text[:start]+dashboard+text[end:]
+
+          # Landing iframe posts an auth-open message. Listen in the parent so the
+          # actual landing stays rendered underneath and no route reload occurs.
+          marker='''            useEffect(() => {
+              const handler = (event: Event) => {
+                const detail = (event as CustomEvent<{ signup?: boolean }>).detail
+                setAuthIntent({ signup: Boolean(detail?.signup) })
+              }
+              window.addEventListener("wcb:open-auth", handler)
+              return () => window.removeEventListener("wcb:open-auth", handler)
+            }, [])
+          '''
+          replacement='''            useEffect(() => {
+              const handler = (event: Event) => {
+                const detail = (event as CustomEvent<{ signup?: boolean }>).detail
+                setAuthIntent({ signup: Boolean(detail?.signup) })
+              }
+              const messageHandler = (event: MessageEvent) => {
+                if (event.origin !== window.location.origin) return
+                const data = event.data as { type?: unknown; signup?: unknown } | null
+                if (!data || data.type !== "wcb:open-auth") return
+                setAuthIntent({ signup: Boolean(data.signup) })
+              }
+              window.addEventListener("wcb:open-auth", handler)
+              window.addEventListener("message", messageHandler)
+              return () => {
+                window.removeEventListener("wcb:open-auth", handler)
+                window.removeEventListener("message", messageHandler)
+              }
+            }, [])
+          '''
+          if marker not in text:
+              raise SystemExit("auth event effect anchor missing")
+          text=text.replace(marker,replacement,1)
+          p.write_text(text)
+
+          # Inject same-origin bridge into the static landing. Get started/Create
+          # account opens the parent modal instead of navigating / reloading.
+          landing=Path("public/wcb-landing/index.html")
+          html=landing.read_text(encoding="utf-8")
+          html=re.sub(r'<script id="wcb-auth-bridge">.*?</script>', '', html, flags=re.S)
+          bridge=r'''<script id="wcb-auth-bridge">
+          (() => {
+            document.addEventListener("click", (event) => {
+              const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
+              if (!target) return;
+              const href = target.getAttribute("href");
+              if (!href) return;
+              let url;
+              try { url = new URL(href, window.location.origin); } catch { return; }
+              if (url.origin !== window.location.origin) return;
+              if (url.pathname !== "/signup" && url.pathname !== "/login") return;
+              event.preventDefault();
+              event.stopPropagation();
+              window.parent.postMessage({
+                type: "wcb:open-auth",
+                signup: url.pathname === "/signup"
+              }, window.location.origin);
+            }, true);
+          })();
+          </script>'''
+          if "</body>" not in html:
+              raise SystemExit("landing body close missing")
+          html=html.replace("</body>",bridge+"</body>",1)
+          landing.write_text(html,encoding="utf-8")
+
+          # Replace prior custom-dashboard contract test with exact-template demo contract.
+          t=Path("src/phase4-final-shell.test.ts")
+          t.write_text(r'''import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          const app=fs.readFileSync("src/App.tsx","utf8")
+          const landing=fs.readFileSync("public/wcb-landing/index.html","utf8")
+          const css=fs.readFileSync("src/phase4-final-ui.css","utf8")
+
+          describe("final Phase 4 UI demo shell",()=>{
+            it("uses the exact Ropean dashboard template instead of a custom reinterpretation",()=>{
+              expect(app).toContain('src="https://shadcn-admin-template.ropean.org/"')
+              expect(app).toContain('className="ropean-original-dashboard"')
+              expect(app).not.toContain('const [pane, setPane] = useState("overview")')
+            })
+
+            it("opens auth over the live landing without navigation",()=>{
+              expect(landing).toContain('id="wcb-auth-bridge"')
+              expect(landing).toContain('type: "wcb:open-auth"')
+              expect(app).toContain('window.addEventListener("message", messageHandler)')
+              expect(css).toContain("rgba(255,255,255,.98)")
+            })
+          })
+          '''.replace(/^          /gm,""))
+          PY
+
+          cat >> src/phase4-final-ui.css <<'EOF'
+
+          /* Temporary exact dashboard UI reference: no WebCanBe reinterpretation. */
+          .ropean-original-dashboard{
+            width:100%;
+            height:100vh;
+            min-height:100vh;
+            margin:0;
+            padding:0;
+            overflow:hidden;
+            background:#fff;
+          }
+          .ropean-original-dashboard iframe{
+            display:block;
+            width:100%;
+            height:100%;
+            border:0;
+            margin:0;
+            padding:0;
+            background:#fff;
+          }
+          EOF
+
+          # Update old dashboard regression to the temporary exact-template UI contract.
+          python3 <<'PY2'
+          from pathlib import Path
+          p=Path("src/phase4-product-hub.test.ts")
+          s=p.read_text()
+          s=re.sub(
+              r'  it\("derives dashboard attention from real purchase/copy state rather than fake analytics", \(\) => \{.*?\n  \}\)',
+              '''  it("temporarily uses the exact Ropean dashboard UI during Phase 4 visual finalization", () => {
+                expect(app).toContain('src="https://shadcn-admin-template.ropean.org/"')
+                expect(app).toContain('className="ropean-original-dashboard"')
+              })''',
+              s,
+              count=1,
+              flags=re.S,
+          )
+          p.write_text(s)
+          PY2
+
+      - name: Verify exact dashboard and auth bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npx vitest run             src/phase4-final-shell.test.ts             src/phase4-brand-auth.test.ts             src/phase4-product-hub.test.ts             src/phase4-public-flow.test.ts             src/phase4-operations.test.ts
+          npm run build
+
+      - name: Commit exact dashboard restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Phase 4 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/restore-exact-ropean-dashboard.yml
+          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts public/wcb-landing/index.html
+          git commit -m "Restore exact Ropean dashboard and instant hero auth"
+          git push origin HEAD:phase-4-product-ux
