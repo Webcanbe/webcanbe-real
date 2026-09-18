@@ -11,7 +11,7 @@ const random = () => randomBytes(32).toString("base64url")
  * Uses the same PostgreSQL authority records as source/artifact access, so there
  * is no second session database whose revocation can diverge. */
 export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
-  constructor(private pool: Pool, private registration: Readonly<{ allowSelfRegistration?: boolean }> = {}) {}
+  constructor(private pool: Pool, private registration: Readonly<{ allowSelfRegistration?: boolean; sessionLifetimeMs?: number }> = {}) {}
   async provision(identity: VerifiedIdentity, userId: string) {
     requireOpaqueId(userId)
     if (!identity.issuer || !identity.subject || identity.subject.length > 255) throw new AuthorityDenied()
@@ -48,6 +48,8 @@ export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
     return { state, binding, nonce: row.nonce, verifier: row.verifier, expires: new Date(row.expires_at).getTime() }
   }
   async issueVerifiedIdentity(identity: VerifiedIdentity) {
+    const lifetimeMs = this.registration.sessionLifetimeMs ?? 600000
+    if (!Number.isSafeInteger(lifetimeMs) || lifetimeMs < 300000 || lifetimeMs > 604800000) throw new AuthorityDenied()
     return pgTransaction(this.pool, async client => {
       await client.query("SELECT id FROM wcb_identity_lock WHERE id=1 FOR UPDATE")
       let row = (await client.query("SELECT user_id FROM wcb_identity_accounts WHERE issuer=$1 AND subject=$2 AND active FOR SHARE", [identity.issuer, identity.subject])).rows[0]
@@ -58,7 +60,7 @@ export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
         row = { user_id: userId }
       }
       if (!row) throw new AuthorityDenied()
-      return this.issueIn(client, row.user_id, 600000)
+      return this.issueIn(client, row.user_id, lifetimeMs)
     })
   }
   async issueVerifiedSession(userId: string, lifetimeMs = 600000) {
