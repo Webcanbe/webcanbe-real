@@ -11,7 +11,7 @@ const random = () => randomBytes(32).toString("base64url")
  * Uses the same PostgreSQL authority records as source/artifact access, so there
  * is no second session database whose revocation can diverge. */
 export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
-  constructor(private pool: Pool) {}
+  constructor(private pool: Pool, private registration: Readonly<{ allowSelfRegistration?: boolean }> = {}) {}
   async provision(identity: VerifiedIdentity, userId: string) {
     requireOpaqueId(userId)
     if (!identity.issuer || !identity.subject || identity.subject.length > 255) throw new AuthorityDenied()
@@ -50,7 +50,13 @@ export class PostgresIdentityStore implements LoginStore, LoginSessionStore {
   async issueVerifiedIdentity(identity: VerifiedIdentity) {
     return pgTransaction(this.pool, async client => {
       await client.query("SELECT id FROM wcb_identity_lock WHERE id=1 FOR UPDATE")
-      const row = (await client.query("SELECT user_id FROM wcb_identity_accounts WHERE issuer=$1 AND subject=$2 AND active FOR SHARE", [identity.issuer, identity.subject])).rows[0]
+      let row = (await client.query("SELECT user_id FROM wcb_identity_accounts WHERE issuer=$1 AND subject=$2 AND active FOR SHARE", [identity.issuer, identity.subject])).rows[0]
+      if (!row && this.registration.allowSelfRegistration === true) {
+        const userId = randomUUID(), workspaceId = randomUUID()
+        await client.query("INSERT INTO wcb_identity_accounts(issuer,subject,user_id,active) VALUES($1,$2,$3,true)", [identity.issuer, identity.subject, userId])
+        await client.query("INSERT INTO wcb_workspace_members(workspace_id,user_id,role,epoch,active) VALUES($1,$2,'owner',1,true)", [workspaceId, userId])
+        row = { user_id: userId }
+      }
       if (!row) throw new AuthorityDenied()
       return this.issueIn(client, row.user_id, 600000)
     })
