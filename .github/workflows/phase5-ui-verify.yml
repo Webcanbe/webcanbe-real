@@ -13,6 +13,6 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Focused Phase 5 and inherited Phase 4 tests
-        run: npx vitest run src/phase5-brand.test.ts src/phase4-brand-auth.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts
+        run: npx vitest run src/phase5-brand.test.ts src/phase5-dashboard-polish.test.ts src/phase4-brand-auth.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts
       - name: Production build
         run: npm run build
