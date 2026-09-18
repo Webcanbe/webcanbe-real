@@ -94,11 +94,7 @@ export default {
         return response(SITEMAP, "application/xml; charset=UTF-8", request);
       }
       if (url.pathname === "/") {
-        const rootUrl = new URL("/index.html", url);
-        const asset = await env.ASSETS.fetch(new Request(rootUrl.toString(), {
-          method: request.method,
-          headers: request.headers
-        }));
+        const asset = await env.ASSETS.fetch(request);
         const headers = new Headers(asset.headers);
         headers.set("Cache-Control", "public, max-age=0, must-revalidate");
         headers.set("X-Robots-Tag", "all");
