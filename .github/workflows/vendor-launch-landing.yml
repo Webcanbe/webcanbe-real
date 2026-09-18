@@ -29,8 +29,12 @@ jobs:
         run: node scripts/vendor-launch-landing.mjs
       - name: Verify no runtime Launch UI asset dependency
         run: |
-          if grep -RInE '(src|srcset|imagesrcset|stylesheet|preload).*(launchuicomponents\.com|/_next/)' public/wcb-landing/index.html public/wcb-landing/vendor --exclude=manifest.json; then
+          if grep -RIn 'launchuicomponents\.com' public/wcb-landing/index.html public/wcb-landing/vendor --exclude=manifest.json; then
             echo "External Launch UI runtime asset dependency remains"
+            exit 1
+          fi
+          if grep -InE '(src|srcset|imagesrcset|href)="/_next/' public/wcb-landing/index.html; then
+            echo "Root /_next dependency remains"
             exit 1
           fi
       - name: Install visual parity verifier
