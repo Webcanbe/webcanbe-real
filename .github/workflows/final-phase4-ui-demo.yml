@@ -480,7 +480,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm ci
+          npm install lucide-react@^0.468.0
           npx vitest run             src/phase4-brand-auth.test.ts             src/phase4-operations.test.ts             src/phase4-public-flow.test.ts             src/phase4-product-hub.test.ts             src/phase4-ux-foundation.test.ts             src/phase4-landing-hero.test.ts             src/phase4-landing-webcanbe.test.ts
           npm run build
 
