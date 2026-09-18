@@ -11,12 +11,10 @@ describe("Phase 4 product-library information architecture", () => {
     expect(app).toContain('Nothing here yet')
     expect(app).toContain('Something needs attention')
   })
-  it("derives dashboard attention from real purchase/copy state rather than fake analytics", () => {
-    expect(app).toContain('Ready to open')
-    expect(app).toContain('Recent product activity')
-    expect(app).toContain('Only project and purchase state — no invented analytics.')
-    expect(app).not.toContain('Good afternoon, Oliver.')
-  })
+  it("temporarily uses the exact Ropean dashboard during UI finalization", () => {
+      expect(app).toContain('src="https://shadcn-admin-template.ropean.org/"')
+      expect(app).toContain('className="ropean-original-dashboard"')
+    })
 })
 
 describe("Phase 4 real workspace modes", () => {

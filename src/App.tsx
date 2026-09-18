@@ -391,61 +391,13 @@ function Purchases() {
 }
 
 function Dashboard() {
-  const library = useProductLibrary()
-  const [pane, setPane] = useState("overview")
-  if (library.loading) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="loading" title="Loading your workspace" body=""/></main></AppShell>
-  if (library.error) return <AppShell active={pane} onSectionChange={setPane}><main className="rope-dashboard"><HubState kind="error" title="Workspace overview unavailable" body={library.error}/></main></AppShell>
-
-  const local = !library.hosted
-  const copyItems = local ? projects.slice(0, 3).map(project => ({ project, href: `/workspace/${project.id}`, createdAt: "" })) : library.copies.map(copy => ({ project: releaseProject(library.catalog, copy.releaseId, copy.workspaceProjectId), href: `/workspace/${copy.workspaceProjectId}`, createdAt: copy.createdAt }))
-  const entitlementItems = local ? projects.slice(3, 6).map(project => ({ project, createdAt: "", needsCopy: true })) : library.entitlements.filter(item => item.status === "active").map(entitlement => ({ project: releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), createdAt: entitlement.grantedAt, needsCopy: !library.copies.some(copy => copy.entitlementId === entitlement.entitlementId) }))
-  const needsAttention = entitlementItems.filter(item => item.needsCopy)
-  const continueItem = copyItems[0]
-  const activity = [...copyItems.map(item => ({ label:"Working copy",title:item.project.title,date:item.createdAt })), ...entitlementItems.map(item => ({ label:"Purchase",title:item.project.title,date:item.createdAt }))].slice(0,5)
-  const catalogProjects = local ? projects : library.catalog
-  const dashboardDocs: [string, string][] = [
-    ["Introduction","/docs"],
-    ["Getting started","/docs/getting-started"],
-    ["Customization","/docs/customization"],
-    ["Marketplace","/docs/marketplace"],
-    ["Visual editor","/docs/visual-editor"],
-    ["Code editor","/docs/code-editor"],
-    ["Export","/docs/export"],
-    ["Compatibility","/docs/compatibility"],
-    ["Security","/docs/security"],
-    ["Changelog","/changelog"],
-  ]
-
-  const header = (title:string,description:string,action?:React.ReactNode) => <header className="rope-dashboard-head"><div><h1>{title}</h1><p>{description}</p></div>{action}</header>
-
-  let content: React.ReactNode
-  if (pane === "projects") {
-    content = <main className="rope-dashboard">{header("My projects","Editable working copies in the same dashboard shell.")}<div className="rope-list-card"><div className="rope-table-head"><span>Project</span><span>Stack</span><span>Status</span><span>Updated</span></div>{copyItems.map(item => <div className="rope-table-row" key={item.project.id}><div><b>{item.project.title}</b><small>{item.project.tagline}</small></div><span>{item.project.stack.slice(0,2).join(" · ")}</span><span className="rope-status">Editable</span><span>{item.project.updated || "Working copy"}</span></div>)}</div></main>
-  } else if (pane === "purchases") {
-    content = <main className="rope-dashboard">{header("Purchases","Release-bound purchases, without leaving the dashboard.")}<div className="rope-card-grid">{entitlementItems.map(item => <article className="rope-project-card" key={item.project.id}><Preview project={item.project}/><div><span className="rope-soft-badge">Purchased release</span><h3>{item.project.title}</h3><p>{item.project.tagline}</p><small>{item.needsCopy ? "Ready to create working copy" : "Working copy exists"}</small></div></article>)}</div></main>
-  } else if (pane === "marketplace") {
-    content = <main className="rope-dashboard">{header("Marketplace","Browse working project releases inside the dashboard.",<button className="rope-primary-action" type="button">Explore</button>)}<div className="rope-card-grid">{catalogProjects.slice(0,6).map(project => <article className="rope-project-card" key={project.id}><Preview project={project}/><div><span>{project.category}</span><h3>{project.title}</h3><p>{project.tagline}</p><small>{project.stack.join(" · ")}</small></div></article>)}</div></main>
-  } else if (pane === "creator" || pane === "listings" || pane === "submission") {
-    content = <main className="rope-dashboard">{header(pane === "creator" ? "Creator Studio" : pane === "listings" ? "Listings" : "New submission","Creator tools stay inside the same app shell.")}<div className="rope-creator-grid"><article><Sparkles/><h3>Source-backed publishing</h3><p>Submit working projects instead of flattened files.</p></article><article><PackageCheck/><h3>Immutable releases</h3><p>Published releases remain bound to a source revision.</p></article><article><History/><h3>Review history</h3><p>Assessment and review state stays attached to the submission.</p></article></div></main>
-  } else if (pane === "docs") {
-    content = <main className="rope-dashboard">{header("Documentation","WebCanBe product documentation, shown without leaving Dashboard.")}<div className="rope-doc-grid">{dashboardDocs.map(([label,href]) => <article key={href}><BookOpen/><h3>{label}</h3><p>{href.includes("visual") ? "Source-backed visual editing." : href.includes("code") ? "Edit the actual project source." : "WebCanBe workflow and reference."}</p></article>)}</div></main>
-  } else if (pane === "plans") {
-    content = <main className="rope-dashboard">{header("Plans","UI preview only. Commercial pricing is finalized separately.")}<div className="rope-plan-row"><article><span>Free</span><h3>Explore</h3><p>Open the marketplace and work with a project.</p></article><article className="featured"><span>Pro</span><h3>Build more</h3><p>More workspaces and production features.</p></article><article><span>Studio</span><h3>Publish</h3><p>Creator and team workflows.</p></article></div></main>
-  } else if (pane === "settings" || pane === "control") {
-    content = <main className="rope-dashboard">{header(pane === "settings" ? "Settings" : "Control",pane === "settings" ? "Account and workspace preferences." : "Operator UI preview.")}<div className="rope-settings-card"><div className="rope-settings-nav"><button className="active">Profile</button><button>Account</button><button>Appearance</button><button>Notifications</button></div><div className="rope-settings-form"><label>Display name<input defaultValue="WebCanBe user"/></label><label>Email<input defaultValue="user@webcanbe.com"/></label><button className="rope-primary-action" type="button">Save changes</button></div></div></main>
-  } else {
-    const metrics=[["Working copies",copyItems.length,"Editable source-backed projects"],["Purchases",entitlementItems.length,"Release-bound entitlements"],["Ready to open",needsAttention.length,"Need a working copy"],["Edit modes",3,"Visual · Code · Split"]]
-    content = <main className="rope-dashboard">
-      {header("Dashboard","Continue your projects, review purchases, or start from the marketplace.",<button className="rope-primary-action" type="button" onClick={() => setPane("marketplace")}>Browse marketplace <Arrow/></button>)}
-      <nav className="rope-page-tabs"><button className="active" onClick={() => setPane("overview")}>Overview</button><button onClick={() => setPane("projects")}>Projects</button><button onClick={() => setPane("purchases")}>Purchases</button><button onClick={() => setPane("docs")}>Documentation</button></nav>
-      <section className="rope-metric-grid">{metrics.map(([label,value,note]) => <article className="rope-metric-card" key={String(label)}><div className="rope-metric-title"><span>{label}</span><i><PanelsTopLeft/></i></div><strong>{value}</strong><p>{note}</p></article>)}</section>
-      <section className="rope-dashboard-grid">
-        <article className="rope-card rope-overview-card"><header><div><h2>Overview</h2><p>Current project state, not invented revenue analytics.</p></div></header><div className="rope-mini-chart"><div><span>Working copies</span><i style={{height:`${42 + copyItems.length*12}px`}}/></div><div><span>Purchases</span><i style={{height:`${42 + entitlementItems.length*12}px`}}/></div><div><span>Ready</span><i style={{height:`${42 + needsAttention.length*12}px`}}/></div><div><span>Edit modes</span><i style={{height:"78px"}}/></div></div>{continueItem && <div className="rope-current-project"><Preview project={continueItem.project}/><div><span className="rope-soft-badge">Continue building</span><h3>{continueItem.project.title}</h3><p>{continueItem.project.tagline}</p><button className="rope-primary-action compact" type="button">Open workspace</button></div></div>}</article>
-        <article className="rope-card rope-activity-card"><header><div><h2>Recent product activity</h2><p>Only project and purchase state — no invented analytics.</p></div></header><div className="rope-activity-list">{activity.map((item,index) => <div className="rope-activity-row" key={index}><span className="rope-activity-icon">{item.label==="Purchase"?<ShoppingBag/>:<FileCode2/>}</span><div><b>{item.title}</b><small>{item.label}</small></div><time>{item.date ? new Date(item.date).toLocaleDateString() : "Demo"}</time></div>)}</div></article>
-      </section>
-    </main>
-  }
-  return <AppShell active={pane} onSectionChange={setPane}>{content}</AppShell>
+  return <main className="ropean-original-dashboard" aria-label="Ropean dashboard template">
+    <iframe
+      title="Ropean shadcn admin dashboard"
+      src="https://shadcn-admin-template.ropean.org/"
+      referrerPolicy="no-referrer"
+    />
+  </main>
 }
 
 function Settings() { const [section, setSection] = useState("Profile"); const sections = ["Profile", "Account", "GitHub", "Domains", "Billing", "Preferences"]; return <AppShell><main className="settings"><aside><h1>Settings</h1>{sections.map(x => <button key={x} onClick={() => setSection(x)} className={section === x ? "active" : ""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section === "Profile" ? "Your profile" : `${section} settings`}</h2>{section === "Profile" && <><div className="profile-avatar">OT</div><label>Name<input defaultValue="Oliver Taylor"/></label><label>Public creator name<input defaultValue="Oliver"/></label></>}{section === "GitHub" && <div className="integration"><b>GitHub</b><p>Connect GitHub when you’re ready to push project code to your own repositories.</p><button className="button">Connect GitHub <Arrow/></button></div>}{section === "Domains" && <div className="empty-state"><h3>Connect a domain when you’re ready.</h3><p>Domains are available on Pro and Studio.</p><Link className="button" to="/plans">See plans <Arrow/></Link></div>}{!["Profile", "GitHub", "Domains"].includes(section) && <div className="form-rows"><label>Email<input defaultValue="oliver@example.com"/></label><label>Notifications<select defaultValue="Product updates"><option>Product updates</option><option>Only account notices</option></select></label></div>}<button className="button primary save">Save changes</button></section></main></AppShell> }
@@ -546,6 +498,17 @@ export default function App() {
     }
     window.addEventListener("wcb:open-auth", handler)
     return () => window.removeEventListener("wcb:open-auth", handler)
+  }, [])
+
+  useEffect(() => {
+    const messageHandler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      const data = event.data as { type?: unknown; signup?: unknown } | null
+      if (!data || data.type !== "wcb:open-auth") return
+      setAuthIntent({ signup: Boolean(data.signup) })
+    }
+    window.addEventListener("message", messageHandler)
+    return () => window.removeEventListener("message", messageHandler)
   }, [])
 
   useEffect(() => {
