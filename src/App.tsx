@@ -310,7 +310,8 @@ function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [noticesOpen, setNoticesOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
+  const [sidebarAccountOpen, setSidebarAccountOpen] = useState(false)
+  const [headerAccountOpen, setHeaderAccountOpen] = useState(false)
   const general: Array<[string,string,typeof LayoutDashboard,string]> = [
     ["Dashboard", "/dashboard", LayoutDashboard, ""],
     ["My projects", "/projects", ListTodo, ""],
@@ -328,7 +329,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React
   const searchResults = searchItems.filter(([label]) => label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { setSearchOpen(false); setNoticesOpen(false); setAccountOpen(false); return }
+      if (event.key === "Escape") { setSearchOpen(false); setNoticesOpen(false); setSidebarAccountOpen(false); setHeaderAccountOpen(false); return }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true); setSearchQuery("") }
     }
     window.addEventListener("keydown", handler)
@@ -370,8 +371,8 @@ function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React
         </section>
       </div>
       <div className="rd-sidebar-footer">
-        <button type="button" onClick={() => { setAccountOpen(v => !v); setNoticesOpen(false) }} aria-expanded={accountOpen}><span className="rd-avatar">WC</span><span><b>WebCanBe account</b><small>Account menu</small></span><ChevronsUpDown/></button>
-        {accountOpen && <div className="rd-account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}
+        <button type="button" onClick={() => { setSidebarAccountOpen(v => !v); setHeaderAccountOpen(false); setNoticesOpen(false) }} aria-expanded={sidebarAccountOpen}><span className="rd-avatar">WC</span><span><b>WebCanBe account</b><small>Account menu</small></span><ChevronsUpDown/></button>
+        {sidebarAccountOpen && <div className="rd-account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}
       </div>
     </aside>
     <div className="rd-content">
@@ -383,8 +384,8 @@ function RopeanDashboardShell({ children, purchaseBadge = 0 }: { children: React
           <button className="rd-search" type="button" onClick={() => { setSearchOpen(true); setSearchQuery("") }}><Search/><span>Search WebCanBe</span><kbd>⌘K</kbd></button>
           <button className="rd-header-icon" type="button" aria-label="Light theme" title="WebCanBe is light-only right now" disabled><Sun/></button>
           <button className="rd-header-icon" type="button" aria-label="Display settings unavailable" title="Display settings are not enabled yet" disabled><SlidersHorizontal/></button>
-          <div className="rd-header-popover-wrap"><button className="rd-header-icon" type="button" aria-label="Notifications" aria-expanded={noticesOpen} onClick={() => { setNoticesOpen(v => !v); setAccountOpen(false) }}><Bell/></button>{noticesOpen && <div className="rd-header-popover"><b>No new notifications</b><p>Project and account alerts will appear here when available.</p></div>}</div>
-          <div className="rd-header-popover-wrap"><button className="rd-header-avatar" type="button" aria-label="Account menu" aria-expanded={accountOpen} onClick={() => { setAccountOpen(v => !v); setNoticesOpen(false) }}>WC</button>{accountOpen && <div className="rd-header-popover rd-profile-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}</div>
+          <div className="rd-header-popover-wrap"><button className="rd-header-icon" type="button" aria-label="Notifications" aria-expanded={noticesOpen} onClick={() => { setNoticesOpen(v => !v); setHeaderAccountOpen(false); setSidebarAccountOpen(false) }}><Bell/></button>{noticesOpen && <div className="rd-header-popover"><b>No new notifications</b><p>Project and account alerts will appear here when available.</p></div>}</div>
+          <div className="rd-header-popover-wrap"><button className="rd-header-avatar" type="button" aria-label="Account menu" aria-expanded={headerAccountOpen} onClick={() => { setHeaderAccountOpen(v => !v); setSidebarAccountOpen(false); setNoticesOpen(false) }}>WC</button>{headerAccountOpen && <div className="rd-header-popover rd-profile-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button type="button" onClick={() => void signOut()}><LogOut/>Sign out</button></div>}</div>
         </div>
       </header>
       {children}
