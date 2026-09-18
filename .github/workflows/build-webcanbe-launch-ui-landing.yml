@@ -74,22 +74,34 @@ jobs:
                   if isinstance(href, str) and href.startswith("/"):
                       tag["href"] = urljoin(ORIGIN, href)
 
-          # Remove only the top-right GitHub/X icon buttons.
+          # Remove top GitHub/X controls and the prior top-nav Pricing entry.
+          footer = soup.find("footer")
           for a in list(soup.find_all("a", href=True)):
               href = a.get("href", "").lower()
-              classes = set(a.get("class") or [])
-              if "size-9" in classes and ("github.com" in href or "twitter.com" in href or "x.com" in href):
+              label = " ".join(a.stripped_strings).strip().lower()
+              inside_footer = footer is not None and footer in a.parents
+              if not inside_footer and ("github.com/launch-ui" in href or "twitter.com/mikolajdobrucki" in href or "x.com/mikolajdobrucki" in href):
+                  # The hero GitHub CTA becomes a WebCanBe account CTA; compact social icons disappear.
+                  classes = set(a.get("class") or [])
+                  if "size-9" in classes or label in {"twitter", "x"}:
+                      a.decompose()
+                  else:
+                      a["href"] = "/signup"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Create account")
+              elif not inside_footer and label == "pricing":
                   a.decompose()
 
-          # Preserve the user's prior top-nav decision: no Pricing link in the top nav.
-          header = soup.find("header")
-          if header:
-              for a in list(header.find_all("a")):
-                  if " ".join(a.stripped_strings).strip().lower() == "pricing":
-                      a.decompose()
+          # Remove the full Preview/Color theme/Radius/Appearance/Lines/Shuffle configurator.
+          for panel in list(soup.find_all("div")):
+              body = " ".join(panel.stripped_strings)
+              classes = set(panel.get("class") or [])
+              if {"flex", "grow", "justify-start", "gap-3"}.issubset(classes) and "Color theme" in body and "Border radius" in body and "Shuffle" in body:
+                  panel.decompose()
+                  break
 
-          # Remove bottom theme/settings control.
-          footer = soup.find("footer")
+          # Remove bottom theme/settings control from the footer.
           if footer:
               for button in list(footer.find_all("button")):
                   if "theme" in " ".join(button.stripped_strings).lower():
@@ -105,10 +117,10 @@ jobs:
               if "These are some dummy testimonials" in body:
                   section.decompose()
                   continue
-              if "$499" in body and "Get all-access for your team" in body:
+              if ("Pro Team" in body and "one-time payment" in body) or ("$499" in body and "Get all-access for your team" in body):
                   section.decompose()
                   continue
-              if "used by 54.4" in body and "Figma Community" in body:
+              if ("designers on Figma Community" in body and "installations with shadcn/ui CLI" in body) or ("used by 54.4" in body and "Figma Community" in body):
                   section.decompose()
                   continue
 
@@ -120,6 +132,10 @@ jobs:
 
           copy = {
               "Launch UI v2 is out!": "The source is the product.",
+              "Launch UI v2.10.1": "WebCanBe",
+              "Start building top quality designs yourself": "Build from real projects, not a blank canvas.",
+              "Check out my free course designwithcode.dev": "Explore the marketplace",
+              "Used by 54.4k+ companies and builders": "Source-owned projects • Visual + Code",
               "Read more": "Explore projects",
               "New version of Launch UI is out!": "WebCanBe",
               "Give your big idea the design it deserves": "Edit visually. Leave with real code you own.",
@@ -236,6 +252,7 @@ jobs:
               "Make design yours in no time by changing the variables that control colors, typography, and other styles.": "History, export, and ownership stay attached to the same project source.",
               "Questions and Answers": "Questions about ownership",
               "Why building a great landing page is critical for your business?": "Are these static templates?",
+              "Why good design is critical for your business?": "Are these static templates?",
               "In today's AI-driven world, standing out is harder than ever. While anyone can build a product, a professional landing page makes the difference between success and failure.": "No. Marketplace listings point to versioned working projects and immutable releases.",
               "Launch UI helps you ship faster without compromising on quality.": "You start from something that can become a real editable working copy.",
               "Why use Launch UI instead of a no-code tool?": "Do visual edits change the real source?",
@@ -254,6 +271,10 @@ jobs:
               "Yes! The complete Launch UI template is available for free on the Figma community.": "No. Changing the published source requires a new release identity.",
               "Can I get a discount?": "Does WebCanBe need to stay in the runtime?",
               "Yes! Join the feedback program and get 33% off your purchase by providing feedback on new features and components.": "No. The goal is a normal codebase that continues in your own development workflow.",
+              "Yes! The complete WebCanBe template is available for free on the Figma community.": "No. Changing the published source requires a new release identity.",
+              "For complete details about licensing and usage rights, check out the pricing page": "Ownership should not depend on keeping WebCanBe in your runtime.",
+              "Blocks, components and templates for building websites, landing pages and apps. Made with React, Shadcn/ui and Tailwind. Perfect for early-stage product, startups, indie hackers, and personal projects.": "A source-first marketplace and browser workspace for real web projects. Edit visually, edit code, keep history, and export what you own.",
+              "© 2026 mikolajdobrucki. All rights reserved": "© 2026 WebCanBe. All rights reserved",
               "Start building": "Start from real code",
               "Start building with Launch UI": "Start building with WebCanBe",
               "Get started with Launch UI and build your landing page in no time": "Browse working projects and keep building from source you own.",
@@ -298,12 +319,19 @@ jobs:
               if parent and parent.name in {"style", "script"}:
                   continue
               value = str(node)
-              updated = value.replace("Launch UI", "WebCanBe").replace("@launchui", "@webcanbe")
+              updated = value.replace("Launch UI", "WebCanBe").replace("@launchui", "@webcanbe").replace("mikolajdobrucki", "WebCanBe")
               if updated != value:
                   node.replace_with(updated)
 
-          # Main navigation: keep the Launch UI visual structure, but route into WebCanBe.
+          # Main navigation: find the compact navigation shell even when the live page does not use <header>.
           header = soup.find("header")
+          if header is None:
+              candidates = []
+              for candidate in soup.find_all(["nav", "div"]):
+                  body = " ".join(candidate.stripped_strings)
+                  if "Docs" in body and "Components" in body and len(body) < 700:
+                      candidates.append(candidate)
+              header = min(candidates, key=lambda x: len(" ".join(x.stripped_strings)), default=None)
           if header:
               nav_map = {
                   "Documentation": ("How it works", "#about"),
@@ -316,6 +344,7 @@ jobs:
                   "Creator Studio": ("Creator Studio", "/seller"),
                   "Get Started": ("Browse projects", "/browse"),
                   "Get started": ("Browse projects", "/browse"),
+                  "WebCanBe v2.10.1": ("WebCanBe", "/"),
               }
               for a in list(header.find_all("a")):
                   label = " ".join(a.stripped_strings).strip()
@@ -326,6 +355,43 @@ jobs:
                       a["href"] = href
                       if href.startswith("/"):
                           a["target"] = "_top"
+
+          # Repoint any remaining Launch UI commercial/docs URLs before handling CTA labels.
+          for a in list(soup.find_all("a", href=True)):
+              href = a.get("href", "")
+              low = href.lower()
+              if "twitter.com/mikolajdobrucki" in low or "x.com/mikolajdobrucki" in low:
+                  a.decompose()
+                  continue
+              if "github.com/launch-ui/launch-ui" in low:
+                  if footer is not None and footer in a.parents:
+                      a["href"] = "https://github.com/Webcanbe/webcanbe-real"
+                      a["target"] = "_blank"
+                      a["rel"] = "noreferrer"
+                  else:
+                      a["href"] = "/signup"
+                      a["target"] = "_top"
+                      a.clear()
+                      a.append("Create account")
+                  continue
+              if "launchui.lemonsqueezy.com" in low or "/pricing" in low:
+                  a["href"] = "/plans"
+                  a["target"] = "_top"
+                  continue
+              if "launchuicomponents.com" in low:
+                  if "/docs" in low:
+                      a["href"] = "https://github.com/Webcanbe/webcanbe-real#readme"
+                      a["target"] = "_blank"
+                      a["rel"] = "noreferrer"
+                  elif any(part in low for part in ("/templates", "/blocks", "/illustrations")):
+                      a["href"] = "/browse"
+                      a["target"] = "_top"
+                  else:
+                      a["href"] = "/"
+                      a["target"] = "_top"
+              elif "designwithcode.dev" in low:
+                  a["href"] = "/browse"
+                  a["target"] = "_top"
 
           # Hero/CTA action links.
           for a in soup.find_all("a"):
@@ -355,6 +421,15 @@ jobs:
           # Footer structure stays, but its links become WebCanBe links.
           footer = soup.find("footer")
           if footer:
+              doc_link = next((a for a in footer.find_all("a") if " ".join(a.stripped_strings).strip() == "Documentation"), None)
+              if doc_link is not None and not any(" ".join(a.stripped_strings).strip() == "Changelog" for a in footer.find_all("a")):
+                  changelog = soup.new_tag("a", href="https://github.com/Webcanbe/webcanbe-real/commits/phase-4-product-ux/")
+                  if doc_link.get("class"):
+                      changelog["class"] = list(doc_link.get("class"))
+                  changelog["target"] = "_blank"
+                  changelog["rel"] = "noreferrer"
+                  changelog.string = "Changelog"
+                  doc_link.insert_after(changelog)
               for a in list(footer.find_all("a")):
                   label = " ".join(a.stripped_strings).strip()
                   if label == "Documentation":
@@ -365,7 +440,7 @@ jobs:
                       a["href"] = "https://github.com/Webcanbe/webcanbe-real/commits/phase-4-product-ux/"
                       a["target"] = "_blank"
                       a["rel"] = "noreferrer"
-                  elif label == "GitHub":
+                  elif label.lower() == "github":
                       a["href"] = "https://github.com/Webcanbe/webcanbe-real"
                       a["target"] = "_blank"
                       a["rel"] = "noreferrer"
@@ -421,8 +496,9 @@ jobs:
           visible = " ".join(soup.stripped_strings)
           if "Launch UI" in visible or "@launchui" in visible or "Mikołaj Dobrucki" in visible:
               raise SystemExit("Old Launch UI visible copy remains after WebCanBe rewrite.")
-          if "dark theme" in visible.lower():
-              raise SystemExit("Theme/settings control still visible.")
+          for forbidden in ("dark theme", "color theme", "border radius", "lines on", "lines off", "shuffle"):
+              if forbidden in visible.lower():
+                  raise SystemExit(f"Theme/settings control still visible: {forbidden}")
           if header:
               for a in header.find_all("a", href=True):
                   href = a["href"].lower()
@@ -464,6 +540,49 @@ jobs:
           }
           EOF
 
+          cat > src/phase3-landing.test.ts <<'EOF'
+          import fs from "node:fs"
+          import { describe, expect, it } from "vitest"
+
+          describe("Phase 4 WebCanBe landing", () => {
+            it("uses the local editable landing and preserves product routes", () => {
+              const home = fs.readFileSync("src/Home.tsx", "utf8")
+              const app = fs.readFileSync("src/App.tsx", "utf8")
+              expect(home).toContain('src="/wcb-landing/index.html"')
+              expect(home).toContain('title="WebCanBe"')
+              for (const route of ["/browse", "/project/", "/login", "/signup", "/workspace/", "/projects", "/dashboard", "/settings", "/plans", "/seller"]) expect(app).toContain(route)
+            })
+          })
+          EOF
+
+          python3 <<'PY2'
+          from pathlib import Path
+          import re
+          p = Path("src/phase4-public-flow.test.ts")
+          text = p.read_text()
+          text = re.sub(
+              r'  it\("keeps the live Launch UI homepage unchanged at the public root", \(\) => \{.*?\n  \}\)',
+              '''  it("keeps the local WebCanBe landing at the public root", () => {
+                expect(home).toContain('src="/wcb-landing/index.html"')
+                expect(home).toContain('title="WebCanBe"')
+              })''',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          text = re.sub(
+              r'  it\("keeps the live Launch UI homepage snapshot at the public root", \(\) => \{.*?\n  \}\)',
+              '''  it("keeps the local WebCanBe landing at the public root", () => {
+                expect(home).toContain('src="/wcb-landing/index.html"')
+                expect(home).toContain('title="WebCanBe"')
+              })''',
+              text,
+              count=1,
+              flags=re.S,
+          )
+          p.write_text(text)
+          PY2
+
           cat > src/phase4-landing-webcanbe.test.ts <<'EOF'
           import fs from "node:fs"
           import { describe, expect, it } from "vitest"
@@ -482,6 +601,9 @@ jobs:
               expect(copy).not.toContain("Launch UI")
               expect(copy).not.toContain("Mikołaj Dobrucki")
               expect(copy.toLowerCase()).not.toContain("dark theme")
+              expect(copy.toLowerCase()).not.toContain("color theme")
+              expect(copy.toLowerCase()).not.toContain("border radius")
+              expect(copy.toLowerCase()).not.toContain("shuffle")
               expect(html).toContain("--brand:#5b5cf0")
               expect(html).not.toContain('https://github.com/launch-ui/launch-ui')
               expect(html).not.toContain('https://twitter.com/mikolajdobrucki')
@@ -505,6 +627,6 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/build-webcanbe-launch-ui-landing.yml
           git rm -f .github/workflows/inspect-launch-ui-controls.yml || true
-          git add src/Home.tsx src/phase4-landing-webcanbe.test.ts public/wcb-landing
+          git add src/Home.tsx src/phase3-landing.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts public/wcb-landing
           git commit -m "Rebrand Launch UI landing for WebCanBe"
           git push origin HEAD:phase-4-product-ux
