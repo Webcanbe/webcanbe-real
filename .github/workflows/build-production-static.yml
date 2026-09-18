@@ -1,0 +1,36 @@
+name: Build production static artifact
+on:
+  push:
+    branches:
+      - vercel-production-build
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: vercel-production-build
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - name: Build production dist
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          rm -rf production-dist
+          cp -R dist production-dist
+      - name: Commit production artifact
+        run: |
+          set -euo pipefail
+          git config user.name "WebCanBe Production Build"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/build-production-static.yml
+          git add production-dist
+          git commit -m "Build production static artifact"
+          git push origin HEAD:vercel-production-build
