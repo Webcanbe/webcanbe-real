@@ -288,6 +288,20 @@ jobs:
           EOF
 
           # New contract tests.
+          python3 <<'PY2'
+          from pathlib import Path
+
+          p=Path("src/phase4-product-hub.test.ts")
+          s=p.read_text()
+          s=s.replace('expect(app).toContain(\'if (path === "/purchases") return <Protected><Purchases/></Protected>\')','expect(app).toContain(\'else if (basePath === "/purchases") page = <Protected><Purchases/></Protected>\')')
+          p.write_text(s)
+
+          p=Path("src/phase4-operations.test.ts")
+          s=p.read_text()
+          s=s.replace('expect(app).toContain(\'if (path === "/control") return <Protected><Control/></Protected>\')','expect(app).toContain(\'else if (basePath === "/control") page = <Protected><Control/></Protected>\')')
+          p.write_text(s)
+          PY2
+
           cat > src/phase4-final-shell.test.ts <<'EOF'
           import fs from "node:fs"
           import { describe, expect, it } from "vitest"
@@ -330,6 +344,6 @@ jobs:
           git config user.name "WebCanBe Phase 4 Automation"
           git config user.email "actions@users.noreply.github.com"
           git rm .github/workflows/fix-auth-overlay-dashboard-shell.yml
-          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts
+          git add src/App.tsx src/phase4-final-ui.css src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-operations.test.ts
           git commit -m "Fix auth overlay and dashboard shell"
           git push origin HEAD:phase-4-product-ux
