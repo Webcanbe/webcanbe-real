@@ -419,6 +419,7 @@ export default function App() {
   else if(basePath.startsWith("/workspace/"))page=<Protected><CompatibleWorkspace/></Protected>
   else if(basePath==="/projects")page=<Protected><Projects/></Protected>
   else if(basePath==="/purchases")page=<Protected><Purchases/></Protected>
+  else if(basePath==="/dashboard-preview")page=<Dashboard/>
   else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
   else if(basePath==="/settings")page=<Protected><Settings/></Protected>
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
