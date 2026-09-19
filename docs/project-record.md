@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: Cloudflare auth/API abuse rate limiting
+
+Webcanbe now uses Cloudflare's native Workers Rate Limiting bindings as a
+best-effort abuse-control layer. Authentication entry points and public product
+reads use privacy-preserving SHA-256 fingerprints built from Cloudflare request
+metadata and route scope, while authenticated private API traffic is limited by
+the authoritative internal database user ID after session and CSRF validation.
+
+Over-limit requests receive 429 with a 60-second Retry-After. Rate-limiter
+infrastructure failure deliberately fails open so it cannot become a product
+availability dependency. The limiter is never treated as exact accounting or
+as a replacement for authentication, membership, entitlement, seller, payment,
+or operator authority.
+
+Wrangler's real bundle dry-run accepted the binding configuration.
+
+---
+
 ## 2026-09-19: Enforced CSP after retained-landing compatibility inventory
 
 A dedicated CSP compatibility pass found that the retained landing has no
