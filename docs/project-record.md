@@ -1,5 +1,22 @@
 # WebCanBe project record
 
+## 2026-09-19: Production database readiness endpoint
+
+A same-origin Worker readiness endpoint now verifies the deployment/database
+boundary before interactive launch smoke. It reports only coarse Worker,
+database, and schema readiness and does not expose credentials, connection
+strings, row contents, user identifiers, or database-role identities.
+
+The check covers the critical Phase 5 tables required for sessions, identities,
+workspaces, profiles, catalog/releases/listings, entitlements, and
+materializations. Missing Hyperdrive, unreachable database, incomplete schema,
+and ready states are distinguished with fail-closed HTTP status codes.
+
+The endpoint is intended to be the first post-Hyperdrive smoke step before
+Google/Firebase login and product API verification.
+
+---
+
 ## 2026-09-19: Private SPA routes receive server-side noindex
 
 Private and authenticated SPA routes now receive an HTTP
