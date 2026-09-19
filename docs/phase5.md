@@ -101,6 +101,8 @@ Goal: replace local/demo product state with real server data.
 - [x] Expose read-only working-copy list with active workspace membership checks.
 - [ ] Expose working-copy materialization mutation after live Hyperdrive/session verification.
 - [ ] Preserve server-side workspace/user authorization on every mutation.
+- [x] Prepare a separate read-only production frontend mode for Workspaces, Purchases/Working copies, Dashboard library data, and Account profile without activating seller/control/checkout mutations.
+- [ ] After Hyperdrive smoke passes, activate it with `<meta name="wcb-product-read-mode" content="hosted">`.
 - [ ] Remove production dependence on local demo arrays where a real API exists.
 - [ ] Add explicit loading, empty, permission-denied, and failure states.
 - [x] Add unit coverage for published/available/active filtering, immutable release provenance, filter validation, and missing-Hyperdrive failure.
@@ -113,8 +115,8 @@ Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by
 - [x] Persist Webcanbe account profile independent of provider (`wcb_user_profiles`).
 - [x] Persist workspace ownership/membership; first verified DB identity can atomically receive an owner workspace.
 - [ ] Link provider identities to the same internal account only through explicit verified rules.
-- [ ] Account page reads real email/provider/session information. Backend profile/session data is ready; existing UI is not yet switched to the live product backend.
-- [ ] Workspace selector reads real workspaces.
+- [ ] Account page reads real email/provider/session information in production. Existing Settings UI is already wired to the account API behind the inactive read-only production switch.
+- [ ] Workspace selector reads real workspaces in production. Code is prepared behind the inactive read-only production switch.
 - [ ] Add account deletion/session revocation path.
 - [x] Keep provider credentials/tokens out of Webcanbe browser persistence beyond what Firebase itself requires.
 
