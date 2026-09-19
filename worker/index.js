@@ -4,6 +4,7 @@ import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
+import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -128,6 +129,10 @@ async function establishFirstPartySession(env, identity) {
     return withHyperdrive(env, db => issueDatabaseSession(db, {
       issuer: identity.issuer,
       subject: identity.subject,
+      email: identity.email,
+      emailVerified: identity.emailVerified === true,
+      name: identity.name,
+      picture: identity.picture,
     }, { allowSelfRegistration: true }))
   }
   const token = await createSessionCookie(env, {
@@ -336,7 +341,14 @@ async function session(request, env) {
     return json({
       csrf,
       expiresAt: databaseSession.expiresAt,
-      user: { email: "", name: "", picture: "", provider: "database", signInProvider: "database" },
+      user: {
+        email: databaseSession.email || "",
+        name: databaseSession.displayName || "Webcanbe user",
+        picture: databaseSession.picture || "",
+        emailVerified: databaseSession.emailVerified === true,
+        provider: "database",
+        signInProvider: "database",
+      },
     })
   }
 
@@ -396,6 +408,19 @@ async function privateProduct(request, env, path) {
       if (path === "/__webcanbe/api/product/workspace-projects/list") {
         return json({ workspaceProjects: await databaseWorkspaceProjects(db, databaseSession) })
       }
+      if (path === "/__webcanbe/api/account/get") {
+        return json({ account: await databaseAccount(db, databaseSession) })
+      }
+      if (path === "/__webcanbe/api/account/update") {
+        let body
+        try { body = await smallJsonBody(request) }
+        catch { return json({ error: "Invalid account update." }, 400) }
+        try { return json({ account: await updateDatabaseAccount(db, databaseSession, body) }) }
+        catch (error) {
+          const message = error instanceof Error ? error.message : "Invalid account update."
+          return json({ error: message }, 422)
+        }
+      }
       return json({ error: "Product request refused." }, 404)
     })
   } catch {
@@ -413,7 +438,7 @@ export default {
     if (path === "/__webcanbe/auth/session") return session(request, env)
     if (path === "/__webcanbe/auth/logout") return logout(request, env)
     if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") return publicCatalog(request, env, path)
-    if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list") return privateProduct(request, env, path)
+    if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") return privateProduct(request, env, path)
     return env.ASSETS.fetch(request)
   },
 }
