@@ -86,7 +86,8 @@ Goal: replace local/demo product state with real server data.
 - [x] Remove all `anon`/`authenticated` privileges from Webcanbe tables/functions and lock future default grants.
 - [x] Fix mutable `search_path` warnings on Webcanbe PostgreSQL functions.
 - [x] Create a non-login `webcanbe_runtime` server role with bounded DML privileges.
-- [ ] Create a dedicated login credential inheriting `webcanbe_runtime`, then create/bind Cloudflare Hyperdrive.
+- [x] Prepare dedicated `webcanbe_hyperdrive` NOLOGIN role inheriting `webcanbe_runtime`.
+- [ ] Enable LOGIN with an operator-generated password, then create/bind Cloudflare Hyperdrive.
 - [x] Prepare a PostgreSQL-backed Worker session adapter using the existing `wcb_identity_accounts`, `wcb_sessions`, `wcb_workspace_members`, and `wcb_disabled_users` authority tables.
 - [x] Preserve issuer+subject identity mapping without unsafe automatic email linking; new verified identities can atomically receive an internal UUID + owner workspace once DB mode is activated.
 - [x] Expose authenticated workspace lookup through the Worker DB-session boundary.
@@ -224,7 +225,7 @@ Unless separately promoted into scope:
 
 ## Immediate next task
 
-**Create the dedicated DB login + Cloudflare Hyperdrive binding, then run live DB-session/catalog/private-read smoke.**
+**Enable LOGIN for the prepared `webcanbe_hyperdrive` role, create the Cloudflare Hyperdrive binding, then run live DB-session/catalog/private-read smoke.**
 
 Connected infrastructure audit:
 - Supabase organization discovered: `Webcanbe`.
