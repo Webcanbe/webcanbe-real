@@ -4,6 +4,10 @@ Status date: 2026-09-19 KST
 Production branch: `main`  
 Baseline commit when this plan was written: `fc24f43b0a7a89c84c9d84e7c428ccdac12ade11`
 
+## Recovery / session continuity
+
+If work resumes in a new session, read `docs/phase5-resume-2026-09-19.md` first. It is the authoritative snapshot of the current implementation, infrastructure, completed work, frozen UI rules, and exact Hyperdrive resume point.
+
 ## Phase 5 goal
 
 Turn the current production-looking Webcanbe surface into a real launchable product without another UI redesign.
