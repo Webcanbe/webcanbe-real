@@ -8,6 +8,23 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — live Worker routing + account authority summary
+
+- Worker-first routing is now **confirmed live**, not merely prepared.
+- Automatic production smoke run `35424848026` passed on `main`.
+- Direct production checks confirmed:
+  - real 404 for unknown HTML routes
+  - `/dashboard-preview` blocked on canonical production
+  - `/login` noindex/nofollow
+  - readiness remains Worker-owned and refuses unsupported GET
+- Account profile API now includes server-derived connected provider families and active Webcanbe session count.
+- These values come only from active issuer+subject identity rows and live first-party session rows; email is not an identity-linking authority.
+- Existing Settings UI shows the summary only when product read mode is active.
+- Implementation verification run `35432736254` passed all Phase 5 gates.
+- Hyperdrive is still unbound; do not activate production DB read mode before Hyperdrive/session smoke.
+
+---
+
 ## Latest recovery delta — production Worker-first routing and public smoke
 
 A live production smoke run found that ordinary SPA/static requests were bypassing the Worker because `assets.run_worker_first` only listed API/auth paths. The Worker-owned API/readiness routes were healthy, but normal HTML routes therefore missed the security headers, request ID, server-side noindex, and real-404 middleware implemented in source.
