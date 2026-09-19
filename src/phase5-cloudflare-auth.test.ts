@@ -45,6 +45,7 @@ describe("Phase 5 Cloudflare Google auth", () => {
     expect(client).toContain('window.location.origin === "https://webcanbe.com"')
     expect(client).toContain("productionAuthMode")
     expect(app).toContain("productionAuthMode")
-    expect(app).toContain("const providerPending=auth")
+    expect(app).toContain("productionSignedIn")
+    expect(app).toContain("firebaseAuthenticated")
   })
 })

@@ -23,6 +23,7 @@
     "@codemirror/view": "6.43.11",
     "codemirror": "6.0.2",
     "esbuild": "^0.25.12",
+    "firebase": "^12.19.0",
     "isomorphic-dompurify": "^2.16.0",
     "jose": "6.2.12",
     "jsonc-parser": "3.3.1",
