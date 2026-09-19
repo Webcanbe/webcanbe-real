@@ -5,7 +5,13 @@ function cleanName(value) {
   return clean
 }
 
-function accountFromRow(row, userId) {
+function providerLabel(issuer) {
+  if (issuer === "https://accounts.google.com") return "Google"
+  if (typeof issuer === "string" && issuer.startsWith("https://securetoken.google.com/")) return "Firebase Authentication"
+  return "Other verified provider"
+}
+
+function accountFromRow(row, userId, providers = [], activeSessions = 0) {
   return Object.freeze({
     userId,
     displayName: typeof row?.display_name === "string" ? row.display_name : "Webcanbe user",
@@ -14,7 +20,26 @@ function accountFromRow(row, userId) {
     picture: typeof row?.picture_url === "string" ? row.picture_url : "",
     createdAt: row?.created_at ? new Date(String(row.created_at)).toISOString() : "",
     updatedAt: row?.updated_at ? new Date(String(row.updated_at)).toISOString() : "",
+    providers: Object.freeze([...providers]),
+    activeSessions,
   })
+}
+
+async function accountAuthoritySummary(db, userId) {
+  const identities = await db.query(
+    "SELECT issuer FROM wcb_identity_accounts WHERE user_id=$1 AND active ORDER BY issuer,subject",
+    [userId],
+  )
+  const providers = [...new Set(identities.rows.map(row => providerLabel(row.issuer)))]
+  const sessions = await db.query(
+    "SELECT count(*) AS total FROM wcb_sessions WHERE user_id=$1 AND active AND expires_at>clock_timestamp()",
+    [userId],
+  )
+  const activeSessions = Number(sessions.rows[0]?.total ?? 0)
+  return {
+    providers,
+    activeSessions: Number.isSafeInteger(activeSessions) && activeSessions >= 0 ? activeSessions : 0,
+  }
 }
 
 export async function databaseAccount(db, session) {
@@ -22,7 +47,8 @@ export async function databaseAccount(db, session) {
     "SELECT display_name,email,email_verified,picture_url,created_at,updated_at FROM wcb_user_profiles WHERE user_id=$1",
     [session.userId],
   )
-  return accountFromRow(result.rows[0], session.userId)
+  const authority = await accountAuthoritySummary(db, session.userId)
+  return accountFromRow(result.rows[0], session.userId, authority.providers, authority.activeSessions)
 }
 
 export async function updateDatabaseAccount(db, session, input) {
@@ -38,5 +64,6 @@ export async function updateDatabaseAccount(db, session, input) {
     [session.userId, displayName],
   )
   if (!result.rowCount) throw new Error("Account profile is unavailable.")
-  return accountFromRow(result.rows[0], session.userId)
+  const authority = await accountAuthoritySummary(db, session.userId)
+  return accountFromRow(result.rows[0], session.userId, authority.providers, authority.activeSessions)
 }
