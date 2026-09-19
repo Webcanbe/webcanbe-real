@@ -81,6 +81,17 @@ describe("hosted product route adapter", () => {
     expect(f.seen[0].headers.get("X-WCB-CSRF")).toBeNull()
   })
 
+  it("revokes every server session through the CSRF-protected account boundary", async () => {
+    const f = fixture([
+      ["/__webcanbe/auth/session", { csrf: "csrf-all" }],
+      ["/__webcanbe/api/account/sessions/revoke-all", { ok: true, revokedSessions: 3 }],
+      ["/__webcanbe/auth/session", { csrf: "csrf-new" }],
+    ])
+    expect(await f.client.revokeAllSessions()).toEqual({ ok: true, revokedSessions: 3 })
+    expect(f.seen[1].headers.get("X-WCB-CSRF")).toBe("csrf-all")
+    await expect(f.client.purchases()).rejects.toThrow()
+  })
+
   it("sends the session CSRF token when signing out", async () => {
     const seen: Seen[] = []
     const client = new HostedProductClient(async (input, init) => {
