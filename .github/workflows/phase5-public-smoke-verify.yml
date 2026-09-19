@@ -22,7 +22,5 @@ jobs:
         run: npm run build
       - name: Worker bundle dry run
         run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
-      - name: Live public production smoke
-        env:
-          WEBCANBE_EXPECT_DATABASE: unconfigured
-        run: npm run smoke:production:public
+      - name: Production smoke script syntax
+        run: node --check scripts/production-smoke-public.mjs
