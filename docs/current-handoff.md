@@ -1,3 +1,20 @@
+# PHASE 5 PRODUCTION DATABASE + SUPABASE HARDENING CHECKPOINT — 2026-09-19 KST
+
+- Created Supabase project `webcanbe-production` in Seoul (`ap-northeast-2`) under the existing Webcanbe organization.
+- Confirmed project creation cost: **$0/month** on the current organization plan.
+- Applied the retained `deployment/hosted/postgres.sql` schema as migration `webcanbe_phase3_authoritative_schema`.
+- Verified all 36 Webcanbe product/identity/source/seller/control tables exist; only the two expected singleton lock/pool rows are pre-seeded.
+- Initial Supabase audit correctly found a critical issue: default `anon` and `authenticated` roles had full privileges on the new public-schema Webcanbe tables.
+- Removed all Webcanbe table/function privileges from `anon` and `authenticated`, and removed their future default table/function/sequence grants.
+- Fixed mutable `search_path` on all Webcanbe PostgreSQL functions.
+- Re-ran security advisors: **0 findings**.
+- Created `webcanbe_runtime` as a NOLOGIN, non-superuser server role with only USAGE on public + SELECT/INSERT/UPDATE/DELETE on Webcanbe tables.
+- Recorded the reproducible hardening migration at `deployment/hosted/postgres-supabase-hardening.sql`.
+- RLS was not blindly enabled: with no browser policies it would deny all access and does not match the current server-only Webcanbe DB authority model. Browser roles are instead explicitly stripped of DB privileges.
+- Next blocker: Cloudflare Hyperdrive needs a dedicated PostgreSQL LOGIN credential. The repo/runtime role is prepared, but a password-bearing login must be created and configured into Hyperdrive without exposing it in frontend code/chat.
+
+---
+
 # PHASE 5 P5.2 PUBLIC CATALOG WORKER CHECKPOINT — 2026-09-19 KST
 
 - Main HEAD when recorded: `6b16415789356f28ed30559f2a6f1c6e05dd3f41`.
