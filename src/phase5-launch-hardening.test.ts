@@ -24,6 +24,7 @@ describe("Phase 5 launch hardening", () => {
     expect(worker).toContain("applySecurityHeaders(asset,")
     expect(worker).toContain("shouldNoIndexPath(path)")
     expect(worker).toContain("isKnownAppPath(path)")
+    expect(worker).toContain('import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"')
     expect(worker).toContain("status: 404")
   })
 

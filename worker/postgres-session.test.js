@@ -5,6 +5,7 @@ import {
   issueDatabaseSession,
   resolveDatabaseSession,
   revokeDatabaseSession,
+  revokeAllDatabaseSessions,
   rotateDatabaseCsrf,
   verifyDatabaseCsrf,
 } from "./postgres-session.js"
@@ -79,6 +80,26 @@ describe("PostgreSQL-backed Worker session adapter", () => {
     await expect(issueDatabaseSession(db, { issuer: "issuer", subject: "subject" }, { allowSelfRegistration: true })).rejects.toBeInstanceOf(DatabaseAuthorityDenied)
     expect(db.calls.at(-1).sql).toBe("ROLLBACK")
     expect(db.calls.some(call => call.sql.startsWith("INSERT INTO wcb_identity_accounts"))).toBe(false)
+  })
+
+  it("revokes every active session for the authenticated user after validating the current session", async () => {
+    const session = {
+      sessionId: "22222222-2222-4222-8222-222222222222",
+      userId: "11111111-1111-4111-8111-111111111111",
+      expiresAt: expiresAt.getTime(),
+    }
+    const db = fakeDb((sql, params) => {
+      if (sql.startsWith("SELECT session_id FROM wcb_sessions WHERE session_id=$1")) {
+        expect(params).toEqual([session.sessionId, session.userId, session.expiresAt])
+        return { rows: [{ session_id: session.sessionId }], rowCount: 1 }
+      }
+      if (sql.startsWith("UPDATE wcb_sessions SET active=false WHERE user_id=$1")) {
+        expect(params).toEqual([session.userId])
+        return { rows: [{ session_id: "a" }, { session_id: "b" }, { session_id: "c" }], rowCount: 3 }
+      }
+      throw new Error("Unexpected SQL: " + sql)
+    })
+    expect(await revokeAllDatabaseSessions(db, session)).toBe(3)
   })
 
   it("resolves, rotates CSRF, verifies CSRF and revokes the same durable session", async () => {
