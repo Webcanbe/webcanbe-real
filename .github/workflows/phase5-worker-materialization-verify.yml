@@ -1,0 +1,24 @@
+name: Phase 5 Worker materialization verify
+on:
+  push:
+    branches: [phase5-worker-materialization]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Materialization and product regressions
+        run: npx vitest run worker/materialization.test.js worker/product-private.test.js worker/product-catalog.test.js worker/postgres-session.test.js src/hostedProductClient.test.ts src/phase5-production-read-mode.test.ts
+      - name: Worker syntax
+        run: node --check worker/materialization.js && node --check worker/index.js && node --check worker/product-private.js && node --check worker/postgres-session.js
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
