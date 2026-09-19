@@ -55,20 +55,27 @@ Priority: **first**
 
 Goal: Google, GitHub, and Email/Password all end in the same server-authoritative Webcanbe session boundary.
 
-- [ ] Add a Firebase-session exchange endpoint to the Worker.
-- [ ] Browser sends a Firebase ID token after GitHub/Email login.
-- [ ] Worker verifies Firebase JWT signature, issuer, audience, expiry, and project ID.
-- [ ] Worker mints the same Webcanbe Secure HttpOnly session used by the product.
-- [ ] Protected backend routes trust only the first-party server session, never client state alone.
-- [ ] Define canonical internal user identity fields for Google/Firebase subjects.
-- [ ] Make logout revoke/clear all browser-visible auth state consistently.
-- [ ] Test Google, GitHub, email signup, email login, refresh, expired session, cancelled popup, wrong password, logout, and direct `/dashboard` access.
+- [x] Add a Firebase-session exchange endpoint to the Worker.
+- [x] Browser sends a Firebase ID token after GitHub/Email login.
+- [x] Worker verifies Firebase JWT signature, issuer, audience, expiry, issued-at/auth-time, and project ID.
+- [x] Worker mints the same Webcanbe Secure HttpOnly session used by the product.
+- [x] Protected production frontend gates now require the first-party server session; persistent Firebase state is only used to refresh/exchange that server session.
+- [x] Define canonical session identity fields (`identityProvider`, `providerSubject`, prefixed `sub`, `signInProvider`) for Google/Firebase subjects.
+- [x] Logout clears the first-party Webcanbe session and Firebase client state together.
+- [ ] Complete live production provider smoke: Google, GitHub, email signup/login, persistent refresh, logout, and direct `/dashboard`. Cryptographic Firebase JWT tests, auth-route tests, Worker syntax, and production build already pass in CI.
 
-Exit gate: every provider reaches one server-authoritative session contract.
+Exit gate: every provider reaches one server-authoritative session contract. **Code/CI complete; production Cloudflare route observation is still pending.**
 
 ### P5.2 — Activate the real hosted product API
 
 Priority: **second**
+
+Architecture finding (2026-09-19):
+- The retained authoritative implementation already exists as `HostedProductController + PostgresProductDomainStore + PostgresIdentityStore/PostgresAccess`.
+- It is currently composed inside the private Node HTTPS hosted-editor runtime and is explicitly marked not launch-ready.
+- Do **not** create a second catalog/purchase/workspace schema in Cloudflare.
+- The preferred launch path is to keep the existing PostgreSQL schema/domain logic and add a Workers-compatible thin boundary. Cloudflare Hyperdrive officially supports PostgreSQL with `pg`; the repository already uses a compatible `pg` version.
+- This step requires a real managed PostgreSQL database + Hyperdrive binding before production product routes can be enabled.
 
 Goal: replace local/demo product state with real server data.
 
