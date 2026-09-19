@@ -45,7 +45,7 @@ The repository Worker now implements the authentication boundary including `/__w
 
 GitHub/Email Firebase identity is verified server-side and exchanged for the first-party Webcanbe session before protected production access.
 
-The public catalog adapter preserves the existing PostgreSQL Listing/Release queries and release provenance, and fails closed with `503` when no Hyperdrive database binding exists. Private purchases/workspaces/seller/control routes are still intentionally closed.
+The public catalog adapter preserves the existing PostgreSQL Listing/Release queries and release provenance, and fails closed with `503` when no Hyperdrive database binding exists. Read-only Workspaces, Purchases/Entitlements, Working-copy list, and Account profile routes are implemented behind the DB-session + CSRF boundary. Private product mutations, seller mutations, payment routes, and control mutations remain intentionally closed.
 
 Production route activation is now observed: direct GET probes to both the Firebase exchange and public catalog routes return Worker-level 403 responses instead of the prior SPA 404. Full provider sign-in smoke still remains.
 
@@ -110,13 +110,13 @@ Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by
 
 ### P5.3 — Account and workspace persistence
 
-- [ ] Persist Webcanbe account profile independent of provider.
-- [ ] Persist workspace ownership/membership.
+- [x] Persist Webcanbe account profile independent of provider (`wcb_user_profiles`).
+- [x] Persist workspace ownership/membership; first verified DB identity can atomically receive an owner workspace.
 - [ ] Link provider identities to the same internal account only through explicit verified rules.
-- [ ] Account page reads real email/provider/session information.
+- [ ] Account page reads real email/provider/session information. Backend profile/session data is ready; existing UI is not yet switched to the live product backend.
 - [ ] Workspace selector reads real workspaces.
 - [ ] Add account deletion/session revocation path.
-- [ ] Keep provider credentials/tokens out of browser persistence beyond what Firebase itself requires.
+- [x] Keep provider credentials/tokens out of Webcanbe browser persistence beyond what Firebase itself requires.
 
 Exit gate: a user can leave, return, sign in again, and recover the same account/workspaces.
 
@@ -239,6 +239,6 @@ Connected infrastructure audit:
 - Supabase security advisors are currently clean after server-only privilege hardening.
 - Reported project cost: **$0/month**.
 - Recommended region for the current Korea-based launch path: `ap-northeast-2` (Seoul).
-- Project creation has not been performed because the external project-creation action requires explicit organization/cost confirmation.
+- Production Supabase project creation and authoritative schema migration are complete.
 
 Do not start payments or private product mutations until the durable DB session boundary is activated.
