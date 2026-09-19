@@ -16,7 +16,7 @@ jobs:
         run: npx vitest run src/phase5-brand.test.ts src/phase5-dashboard-polish.test.ts src/phase5-auth-production.test.ts src/phase5-google-branding.test.ts src/phase5-cloudflare-auth.test.ts src/phase5-firebase-auth.test.ts worker/firebase-auth.test.js worker/product-catalog.test.js src/hostedProductClient.test.ts src/phase4-brand-auth.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts
       - name: Worker syntax
         run: node --check worker/index.js && node --check worker/firebase-auth.js && node --check worker/product-catalog.js && node --check worker/hyperdrive.js
-      - name: Worker bundle dry run
-        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
       - name: Production build
         run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
