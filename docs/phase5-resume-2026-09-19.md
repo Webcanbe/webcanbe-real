@@ -8,6 +8,18 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — legal/privacy consistency complete
+
+- Launch-hardening legal review is complete.
+- Current Privacy Policy matches Google + Firebase + first-party session + Cloudflare + Supabase/PostgreSQL data flow.
+- Policy explicitly states that provider email alone is not authority for silent identity merging.
+- Terms continue to qualify payment/deployment and other unfinished features as pre-release/unavailable rather than active.
+- `src/phase5-privacy-current.test.ts` locks the material disclosures and security contact.
+- No dashboard UI changed.
+- Hyperdrive remains unbound and is still the main infrastructure blocker for activating DB-backed production read mode.
+
+---
+
 ## Latest recovery delta — live Worker routing + account authority summary
 
 - Worker-first routing is now **confirmed live**, not merely prepared.
