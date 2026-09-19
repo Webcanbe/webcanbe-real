@@ -397,7 +397,7 @@ export default function CompatibleWorkspace() {
       }
       if (editing) return
 
-      if (!mod && !event.altKey && !event.shiftKey && event.key === "?") { event.preventDefault(); setShortcutsOpen(true); return }
+      if (!mod && !event.altKey && event.key === "?") { event.preventDefault(); setShortcutsOpen(true); return }
       if (mod && !event.altKey && key === "z") { event.preventDefault(); void history(event.shiftKey ? "redo" : "undo"); return }
       if (event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && key === "y") { event.preventDefault(); void history("redo"); return }
       if (mod && event.shiftKey && !event.altKey && key === "e") { event.preventDefault(); if (session) void exportProject(); return }
