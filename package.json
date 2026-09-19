@@ -18,7 +18,8 @@
     "db:backup:verify": "node scripts/db/verify-backup.mjs",
     "deploy:versions": "npx wrangler versions list --json",
     "deploy:deployments": "npx wrangler deployments list",
-    "deploy:rollback": "node scripts/cloudflare-rollback.mjs"
+    "deploy:rollback": "node scripts/cloudflare-rollback.mjs",
+    "security:secrets": "node scripts/security/scan-secrets.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
