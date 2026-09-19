@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this recovery update: `1126a793127cfb044a6c7a21ce36e045016abc2e`  
+Code baseline before this recovery update: `8200a0d54bfeaa8bd4aac81934cbcb6fc661f5ba`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
@@ -771,6 +771,7 @@ test.
 Crawler policy:
 
 - private/authenticated/API routes are disallowed in `robots.txt`
+- private/authenticated SPA responses also receive `X-Robots-Tag: noindex, nofollow`
 - sitemap contains only public routes
 - `/dashboard-preview` is also excluded from crawling even though the route
   remains available for development verification
