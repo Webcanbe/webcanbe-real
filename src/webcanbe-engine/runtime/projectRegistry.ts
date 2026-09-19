@@ -15,10 +15,10 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 
 export const ZIP_LIMITS = Object.freeze({ archiveBytes: 25 * 1024 * 1024, totalBytes: 40 * 1024 * 1024, fileBytes: 2 * 1024 * 1024, entries: 2_000, ratio: 100 })
 const sourceExtension = /\.([cm]?[jt]sx?|css|json)$/
-export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint" | "drafts"
+export type SessionOperation = "inspect" | "compatibility" | "preview" | "source" | "search" | "export" | "mutate" | "undo" | "redo" | "files" | "code" | "validate" | "history" | "revert" | "checkpoint" | "drafts"
 export type SessionBinding = { grant: ProjectGrant; check: (operation: SessionOperation) => boolean }
 export type SessionAuthority = { previewId: string; capability: string; operation: SessionOperation }
-const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint", "drafts"]
+const operations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "search", "export", "mutate", "undo", "redo", "files", "code", "validate", "history", "revert", "checkpoint", "drafts"]
 
 export type FrameworkDetection = {
   supported: boolean
