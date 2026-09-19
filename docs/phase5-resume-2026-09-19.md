@@ -8,6 +8,20 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — read-only truthfulness hardening
+
+This recovery document predates the newest read-only guardrail pass in some earlier sections. The current continuation also includes:
+
+- production read mode cannot create a new working copy; materialization remains behind the full hosted mutation mode
+- empty production catalog/purchase data does not fall back to demo rows in Dashboard
+- missing release metadata uses a neutral placeholder rather than a demo project clone
+- Dashboard renders explicit hosted loading/failure states
+- the committed-secret scanner no longer treats explanatory Markdown mentions of rejected VITE secret-like names as a frontend exposure; executable/configuration sources still receive that heuristic and actual credential patterns still scan all tracked text
+- verification run `35424179755` passed secret scan, focused tests, Worker syntax, Vite build, and Wrangler dry-run
+
+Hyperdrive is still unbound and the production read-mode activation marker is still intentionally absent.
+
+
 ---
 
 ## 1. Non-negotiable current product decisions
@@ -796,9 +810,10 @@ Current response headers:
 
 Do not change COOP to strict `same-origin` without retesting popup auth.
 
-CSP is **not** enabled yet. Do not add a guessed CSP. The retained landing must
-first receive a dedicated inline/script/style/network inventory and compatibility
-test.
+CSP is **enabled** after the retained-landing compatibility inventory. The enforced
+policy keeps same-origin script authority, blocks inline/eval scripts, and retains
+inline styles only because the selected landing requires them. Do not loosen or
+replace this policy without rerunning the compatibility regression.
 
 Crawler policy:
 
