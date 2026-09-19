@@ -96,7 +96,7 @@ export function verifyReleaseSnapshot(row) {
   const decoder = new TextDecoder("utf-8", { fatal: true })
   let editable
   try {
-    editable = [...files].filter(([file]) => sourceMember(file, directory, scope)).map(([file, bytes]) => [file, decoder.decode(bytes)]).sort(([a], [b]) => a.localeCompare(b))
+    editable = [...files].filter(([file]) => sourceMember(file, directory, scope)).map(([file, bytes]) => [file, decoder.decode(bytes)]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
   } catch {
     throw new MaterializationError(409, "Release source integrity check failed.")
   }
