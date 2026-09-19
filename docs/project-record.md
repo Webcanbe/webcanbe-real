@@ -1,5 +1,38 @@
 # WebCanBe project record
 
+## 2026-09-19: Phase 5 launch plan and Firebase authentication
+
+Phase 5 is now explicitly a launch/functionality phase rather than another UI
+redesign pass. The approved dashboard is frozen unless a concrete bug or
+explicit requested UI change requires touching it.
+
+The production frontend now includes the Firebase Web SDK and reads the six
+existing `VITE_FIREBASE_*` build variables. GitHub authentication uses
+`GithubAuthProvider` with `signInWithPopup`; Email/Password signup and login
+use Firebase's modular password APIs. No GitHub OAuth client secret was added to
+frontend code or Cloudflare. Existing Google OAuth remains on the Cloudflare
+Worker's Authorization Code + PKCE path.
+
+Protected frontend routes currently accept either the existing first-party
+Google Worker session or a Firebase client session. This is intentionally not
+the final backend authority model: the next Phase 5 slice must verify/exchange
+Firebase identity server-side and mint the same first-party Webcanbe session
+before private product APIs are exposed.
+
+The current Cloudflare Worker still serves only the authentication boundary;
+the frontend already knows about catalog, purchases, workspaces, seller, and
+control endpoints, but those product routes are not yet live in production.
+The Phase 5 master plan therefore prioritizes identity unification first,
+followed by real hosted product APIs, durable account/workspace state,
+Marketplace/purchase/entitlement/materialization, payments, editor persistence,
+seller pipeline connection, and launch hardening.
+
+Focused inherited Phase 4/5 tests, Worker syntax verification, and the Vite
+production build pass at this checkpoint. See
+[Phase 5 plan](phase5.md) and [current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-17: Phase 3 promoted-release Listing publication
 
 The seller pipeline now ends in a separate explicit Listing-publication
