@@ -116,7 +116,7 @@ Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by
 - [x] Persist Webcanbe account profile independent of provider (`wcb_user_profiles`).
 - [x] Persist workspace ownership/membership; first verified DB identity can atomically receive an owner workspace.
 - [ ] Link provider identities to the same internal account only through explicit verified rules.
-- [ ] Account page reads real email/provider/session information in production. Existing Settings UI is already wired to the account API behind the inactive read-only production switch.
+- [ ] Account page reads real email/provider/session information in production. Code is complete behind the inactive read-only production switch: real profile email, connected provider families, and active first-party session count are server-derived.
 - [ ] Workspace selector reads real workspaces in production. Code is prepared behind the inactive read-only production switch.
 - [x] Add CSRF-protected user-wide session revocation boundary and client method; UI activation waits for Hyperdrive production smoke.
 - [ ] Define full account deletion/data-retention behavior before enabling destructive deletion.
@@ -198,7 +198,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Add a repeatable public production smoke runner for security headers, real 404/noindex, crawler policy, readiness, and catalog fail-closed/read behavior.
 - [x] Detect and fix the static-asset routing gap that bypassed Worker middleware on normal production navigation; `assets.run_worker_first` is now configured as `true` so the Worker applies the shared policy before assets.
 - [x] Add automatic post-`main`-CI production smoke with bounded deployment-propagation retries and a database-state expectation that works before and after Hyperdrive.
-- [ ] Observe the Worker-first routing fix live on production after this change reaches `main`; the pre-fix production smoke correctly failed ordinary HTML/static middleware checks while API/readiness checks passed.
+- [x] Worker-first routing fix observed live in production: automatic production smoke passed on `main`; unknown HTML routes return real 404, private/auth routes remain noindex, and API/readiness requests stay on the Worker boundary.
 - [ ] Mobile pass.
 - [ ] Safari/Chrome/Firefox pass.
 - [ ] Accessibility keyboard/focus pass.
