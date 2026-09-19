@@ -12,6 +12,8 @@ jobs:
           node-version: '26'
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Prepare dedicated runtime profile
+        run: npm run runtime:prepare
       - name: Secret scan
         run: npm run security:secrets
       - name: Project search and authority regressions
