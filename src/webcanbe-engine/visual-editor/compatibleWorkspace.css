@@ -92,3 +92,12 @@
 .source-project-search-results>button code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#3e4851;font:11px ui-monospace,SFMono-Regular,Menlo,monospace}
 .source-project-search-results>p{padding:18px;color:#76818a;font-size:11px;line-height:1.5}
 @media(max-width:680px){.source-project-search-backdrop{padding-top:10px}.source-project-search{width:calc(100% - 20px);max-height:calc(100% - 20px)}.source-project-search form{align-items:stretch;flex-direction:column}.source-project-search form>input{width:100%;min-width:100%}.source-project-search-results>button{grid-template-columns:1fr}.source-project-search-results>button code{white-space:normal}}
+
+
+.source-save-policy{display:grid;grid-template-columns:minmax(140px,.55fr) minmax(260px,1.7fr) auto;align-items:center;gap:14px;margin-bottom:10px;padding:10px 12px;border:1px solid #d5dbe0;border-left-width:4px;border-radius:7px;background:#fff}
+.source-save-policy[data-state="accepted"]{border-left-color:#6f8b66}.source-save-policy[data-state="draft"]{border-left-color:#a27a2e}.source-save-policy[data-state="conflict"]{border-left-color:#a33e3e;background:#fffafa}
+.source-save-policy>div{display:flex;flex-direction:column;gap:2px}.source-save-policy small{padding:0;color:#7b858e;text-transform:uppercase;letter-spacing:.06em;font-size:9px}.source-save-policy strong{font-size:12px}
+.source-save-policy p{margin:0;color:#59636d;font-size:11px;line-height:1.45}.source-save-policy>span{justify-self:end;color:#69747d;font-size:10px;white-space:nowrap}.source-save-policy code{font:10px ui-monospace,SFMono-Regular,Menlo,monospace}
+.source-stale-drafts{margin:0 0 10px;padding:10px 12px;border:1px solid #e0bcbc;border-radius:7px;background:#fff7f7;color:#663434;font-size:11px;line-height:1.45}
+.source-stale-drafts b{display:block;margin-bottom:3px}.source-stale-drafts p{margin:0 0 8px}.source-stale-drafts button{border-color:#c99f9f;background:#fff;color:#663434}
+@media(max-width:900px){.source-save-policy{grid-template-columns:1fr}.source-save-policy>span{justify-self:start;white-space:normal}}
