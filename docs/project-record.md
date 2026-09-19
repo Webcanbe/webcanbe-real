@@ -1,5 +1,27 @@
 # WebCanBe project record
 
+## 2026-09-19: Production database backup and recovery operations
+
+Because the current Supabase Free project has no managed automatic backup
+entitlement, Webcanbe now has explicit operator-controlled logical backup
+tooling. The backup path uses `pg_dump` in custom data-only mode scoped to
+`public.wcb_*`, keeps the database URL out of command-line arguments, and
+produces an adjacent SHA-256 checksum.
+
+A separate verifier checks archive readability with `pg_restore --list`,
+checksum integrity, and the presence of a reasonable set of Webcanbe table-data
+entries. Local backup artifacts are gitignored.
+
+The recovery runbook intentionally uses a recovery-first strategy: provision a
+separate recovery database, reapply source-controlled schema/migrations, restore
+verified data, rerun security/readiness/auth/product smoke, and only then switch
+Hyperdrive/application traffic. No automatic script can overwrite the sole
+production database.
+
+See `docs/operations/database-backup-restore.md`.
+
+---
+
 ## 2026-09-19: User-wide durable session revocation
 
 The durable PostgreSQL session layer can now revoke every active first-party
