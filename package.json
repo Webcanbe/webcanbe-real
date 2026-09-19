@@ -15,7 +15,10 @@
     "runtime:prepare:common": "npm ci --ignore-scripts --prefix runtime-profiles/react18-vite6-common-v1 && npm ci --ignore-scripts --prefix runtime-profiles/react19-vite7-common-v1",
     "deploy:cloudflare": "node scripts/cloudflare-deploy.mjs",
     "db:backup": "node scripts/db/backup.mjs",
-    "db:backup:verify": "node scripts/db/verify-backup.mjs"
+    "db:backup:verify": "node scripts/db/verify-backup.mjs",
+    "deploy:versions": "npx wrangler versions list --json",
+    "deploy:deployments": "npx wrangler deployments list",
+    "deploy:rollback": "node scripts/cloudflare-rollback.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
