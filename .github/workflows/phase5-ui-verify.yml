@@ -1,7 +1,7 @@
 name: Phase 5 UI verify
 on:
   push:
-    branches: [main, phase-5-product-launch, phase5-cloudflare-auth, phase5-dashboard-restore, phase5-ropean-dropdown-restore, phase5-dashboard-layer-animation, phase5-config-drawer, phase5-dashboard-final-ui, phase5-collapsed-sidebar-fix, phase5-firebase-auth]
+    branches: [main, phase-5-product-launch, phase5-cloudflare-auth, phase5-dashboard-restore, phase5-ropean-dropdown-restore, phase5-dashboard-layer-animation, phase5-config-drawer, phase5-dashboard-final-ui, phase5-collapsed-sidebar-fix, phase5-firebase-auth, phase5-p5-1-session-unification]
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -13,8 +13,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Focused Phase 5 and inherited Phase 4 tests
-        run: npx vitest run src/phase5-brand.test.ts src/phase5-dashboard-polish.test.ts src/phase5-auth-production.test.ts src/phase5-google-branding.test.ts src/phase5-cloudflare-auth.test.ts src/phase5-firebase-auth.test.ts src/hostedProductClient.test.ts src/phase4-brand-auth.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts
+        run: npx vitest run src/phase5-brand.test.ts src/phase5-dashboard-polish.test.ts src/phase5-auth-production.test.ts src/phase5-google-branding.test.ts src/phase5-cloudflare-auth.test.ts src/phase5-firebase-auth.test.ts worker/firebase-auth.test.js src/hostedProductClient.test.ts src/phase4-brand-auth.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/phase4-public-flow.test.ts src/phase4-landing-webcanbe.test.ts
       - name: Worker syntax
-        run: node --check worker/index.js
+        run: node --check worker/index.js && node --check worker/firebase-auth.js
       - name: Production build
         run: npm run build

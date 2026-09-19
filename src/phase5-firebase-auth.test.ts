@@ -30,8 +30,8 @@ describe("Phase 5 Firebase Authentication", () => {
   it("connects email signup and login to the Firebase password APIs", () => {
     expect(firebaseAuth).toContain("createUserWithEmailAndPassword(firebaseAuth(), email, password)")
     expect(firebaseAuth).toContain("signInWithEmailAndPassword(firebaseAuth(), email, password)")
-    expect(app).toContain("if(signup)await createEmailAccountFirebase")
-    expect(app).toContain("else await signInWithEmailFirebase")
+    expect(app).toContain("signup?await createEmailAccountFirebase")
+    expect(app).toContain(":await signInWithEmailFirebase")
   })
 
   it("keeps the existing auth modal structure and uses its single field as email then password", () => {
@@ -43,16 +43,20 @@ describe("Phase 5 Firebase Authentication", () => {
     expect(app).toContain('placeholder={emailStep?"Password":"Email address"}')
   })
 
-  it("accepts Firebase sessions for protected production routes and signs out both auth systems", () => {
+  it("exchanges Firebase identity for the same first-party session used by protected routes", () => {
+    expect(firebaseAuth).toContain("currentFirebaseIdToken")
     expect(app).toContain("productionSignedIn")
-    expect(app).toContain("firebaseAuthenticated().catch(()=>false)")
+    expect(app).toContain("hostedProductClient.firebaseExchange(idToken)")
+    expect(app).toContain("credential.user.getIdToken(true)")
     expect(app).toContain("productionSignOut")
     expect(app).toContain("signOutFirebase()")
+    expect(app).not.toContain("firebaseAuthenticated().catch(()=>false)")
   })
 
   it("returns successful GitHub or email auth to the existing dashboard target", () => {
     expect(app).toContain('function Auth({signup=false,next="/dashboard"')
     expect(app).toContain("finish=()=>")
+    expect(app).toContain("await establishFirebaseSession(credential)")
     expect(app).toContain("go(next)")
   })
 

@@ -66,6 +66,21 @@ describe("hosted product route adapter", () => {
   })
 
 
+
+  it("exchanges a Firebase ID token for the first-party session cookie", async () => {
+    const f = fixture([
+      ["/__webcanbe/auth/firebase-exchange", { ok: true }],
+      ["/__webcanbe/auth/session", { csrf: "csrf-firebase" }],
+    ])
+    await f.client.firebaseExchange("header.payload.signature")
+    expect(f.seen.map(call => call.path)).toEqual([
+      "/__webcanbe/auth/firebase-exchange",
+      "/__webcanbe/auth/session",
+    ])
+    expect(f.seen[0].headers.get("Authorization")).toBe("Bearer header.payload.signature")
+    expect(f.seen[0].headers.get("X-WCB-CSRF")).toBeNull()
+  })
+
   it("sends the session CSRF token when signing out", async () => {
     const seen: Seen[] = []
     const client = new HostedProductClient(async (input, init) => {
