@@ -1,3 +1,23 @@
+export const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "script-src 'self'",
+  "script-src-attr 'none'",
+  "style-src 'self' 'unsafe-inline'",
+  "style-src-attr 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com",
+  "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
+  "worker-src 'self' blob:",
+  "media-src 'self' blob: https:",
+  "manifest-src 'self'",
+  "form-action 'self'",
+  "upgrade-insecure-requests",
+].join("; ")
+
 export const SECURITY_HEADERS = Object.freeze({
   "Strict-Transport-Security": "max-age=31536000",
   "X-Content-Type-Options": "nosniff",
@@ -5,6 +25,7 @@ export const SECURITY_HEADERS = Object.freeze({
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+  "Content-Security-Policy": CONTENT_SECURITY_POLICY,
 })
 
 const PRIVATE_EXACT = new Set([
