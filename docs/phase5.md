@@ -43,7 +43,7 @@ GitHub/Email Firebase identity is verified server-side and exchanged for the fir
 
 The public catalog adapter preserves the existing PostgreSQL Listing/Release queries and release provenance, and fails closed with `503` when no Hyperdrive database binding exists. Private purchases/workspaces/seller/control routes are still intentionally closed.
 
-At the latest live check, Cloudflare had not yet been observed serving the new Firebase exchange route; production deployment smoke remains pending even though CI and Wrangler bundle dry-run pass.
+Production route activation is now observed: direct GET probes to both the Firebase exchange and public catalog routes return Worker-level 403 responses instead of the prior SPA 404. Full provider sign-in smoke still remains.
 
 ---
 
@@ -62,9 +62,9 @@ Goal: Google, GitHub, and Email/Password all end in the same server-authoritativ
 - [x] Protected production frontend gates now require the first-party server session; persistent Firebase state is only used to refresh/exchange that server session.
 - [x] Define canonical session identity fields (`identityProvider`, `providerSubject`, prefixed `sub`, `signInProvider`) for Google/Firebase subjects.
 - [x] Logout clears the first-party Webcanbe session and Firebase client state together.
-- [ ] Complete live production provider smoke: Google, GitHub, email signup/login, persistent refresh, logout, and direct `/dashboard`. Cryptographic Firebase JWT tests, auth-route tests, Worker syntax, and production build already pass in CI.
+- [ ] Complete live production provider smoke: Google, GitHub, email signup/login, persistent refresh, logout, and direct `/dashboard`. The Firebase exchange route is now confirmed live at the Worker boundary; cryptographic JWT tests, auth-route tests, Worker syntax, Vite build, and Wrangler bundle dry-run pass.
 
-Exit gate: every provider reaches one server-authoritative session contract. **Code/CI complete; production Cloudflare route observation is still pending.**
+Exit gate: every provider reaches one server-authoritative session contract. **Code/CI and production route activation are complete; interactive GitHub/Email provider smoke remains.**
 
 ### P5.2 — Activate the real hosted product API
 
@@ -82,6 +82,8 @@ Goal: replace local/demo product state with real server data.
 - [ ] Deploy the complete existing `/__webcanbe/api/product/*` boundary.
 - [x] Build the Worker/Hyperdrive connection seam without creating a second data model.
 - [ ] Bind a real managed PostgreSQL database/Hyperdrive configuration to production.
+- [x] Prepare a PostgreSQL-backed Worker session adapter using the existing `wcb_identity_accounts`, `wcb_sessions`, `wcb_workspace_members`, and `wcb_disabled_users` authority tables.
+- [x] Preserve issuer+subject identity mapping without unsafe automatic email linking; new verified identities can atomically receive an internal UUID + owner workspace once DB mode is activated.
 - [ ] Expose authenticated workspace/account lookup.
 - [x] Implement Workers-compatible catalog browse/detail using the retained Phase 3 SQL and public response contract.
 - [x] Route public catalog requests through the Worker and fail closed with 503 while the database binding is absent.
@@ -216,6 +218,14 @@ Unless separately promoted into scope:
 
 ## Immediate next task
 
-**P5.1: Firebase → first-party Webcanbe session exchange and server verification.**
+**Provision the managed PostgreSQL database and Hyperdrive binding, then activate DB-backed sessions and public catalog reads.**
 
-Do not start payments or product mutations before this boundary is complete.
+Connected infrastructure audit:
+- Supabase organization discovered: `Webcanbe`.
+- Organization plan: Free.
+- Current Supabase projects: none.
+- Reported project cost: **$0/month**.
+- Recommended region for the current Korea-based launch path: `ap-northeast-2` (Seoul).
+- Project creation has not been performed because the external project-creation action requires explicit organization/cost confirmation.
+
+Do not start payments or private product mutations until the durable DB session boundary is activated.
