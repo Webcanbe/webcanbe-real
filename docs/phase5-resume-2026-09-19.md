@@ -8,6 +8,19 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — bounded project source search
+
+- Project-wide accepted-source search is implemented server-side behind the existing project/session authority.
+- `Cmd/Ctrl+F` is current-file draft Find/Replace.
+- `Shift+Cmd/Ctrl+F` is project-wide accepted-source search.
+- `search` is read-only: viewer allowed, cross-tenant denied, no source/history mutation.
+- Bounds: 160-character query, 100 results, 20 per file, 512 KiB per file, 8 MiB scanned per request, explicit truncation metadata.
+- Search result offsets are anchored to accepted source; exact jumps are refused when the target file has an unsaved draft.
+- Verification run `35449313942` passed secret scan, actual HTTP authority regressions, production build and Wrangler dry-run.
+- Dashboard/landing unchanged.
+
+---
+
 ## Latest recovery delta — Worker working-copy materialization
 
 - Entitlement → working-copy materialization is implemented in the Cloudflare Worker.
@@ -27,12 +40,11 @@ Production domain: `https://webcanbe.com`
 ## Latest recovery delta — editor navigation and exact code jump
 
 - Quick Open: `Cmd/Ctrl+P`, file-path filtering, recent files.
-- Current-file Find / Replace: `Shift+Cmd/Ctrl+F`, next/previous, case-sensitive, replace/replace-all.
+- Current-file Find / Replace: `Cmd/Ctrl+F`, next/previous, case-sensitive, replace/replace-all.
 - Replacements are draft-only until normal validated source Save.
 - Visual selection opens the exact SourceTarget range in CodeMirror.
 - Resolved component definitions and caller/invocation origins also jump to exact ranges.
 - CodeMirror selects and scrolls the requested range into view.
-- Project-wide search is intentionally deferred to a future server-side bounded search API.
 - Verification run `35447572418` passed all branch gates.
 - Dashboard/landing unchanged.
 

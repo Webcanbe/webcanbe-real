@@ -15,6 +15,40 @@ import type { ProjectPersistence } from "./storageContracts"
 import { exportProjectZip } from "./projectExport"
 
 export type SourceResponse = { status: number; value: Record<string, unknown> }
+
+const SOURCE_SEARCH_LIMITS = Object.freeze({ queryChars: 160, results: 100, perFile: 20, fileBytes: 512 * 1024, scannedBytes: 8 * 1024 * 1024, previewChars: 180 })
+
+function sourceSearch(files: Map<string,string>, query: string, caseSensitive: boolean, requestedLimit?: number) {
+  const limit = requestedLimit === undefined ? SOURCE_SEARCH_LIMITS.results : Math.min(requestedLimit, SOURCE_SEARCH_LIMITS.results)
+  const escaped = [...query].map(character => "^$.*+?()[]{}|".includes(character) || character.charCodeAt(0) === 92 ? String.fromCharCode(92) + character : character).join("")
+  const pattern = new RegExp(escaped, caseSensitive ? "g" : "gi")
+  const results: Array<{ file:string; start:number; end:number; line:number; column:number; preview:string }> = []
+  let scannedBytes = 0, scannedFiles = 0, truncated = false
+  const entries = [...files].sort(([a],[b]) => a.localeCompare(b))
+  for (const [file, source] of entries) {
+    const bytes = Buffer.byteLength(source)
+    if (bytes > SOURCE_SEARCH_LIMITS.fileBytes || scannedBytes + bytes > SOURCE_SEARCH_LIMITS.scannedBytes) { truncated = true; continue }
+    scannedBytes += bytes; scannedFiles += 1
+    pattern.lastIndex = 0
+    let perFile = 0, match: RegExpExecArray | null
+    while (results.length < limit && perFile < SOURCE_SEARCH_LIMITS.perFile && (match = pattern.exec(source))) {
+      const start = match.index, end = start + match[0].length
+      const before = source.slice(0, start), line = before.split("\n").length, lineStart = before.lastIndexOf("\n") + 1
+      const previewStart = Math.max(lineStart, start - Math.floor(SOURCE_SEARCH_LIMITS.previewChars / 2))
+      const lineEndIndex = source.indexOf("\n", end)
+      const previewEnd = Math.min(lineEndIndex < 0 ? source.length : lineEndIndex, end + Math.floor(SOURCE_SEARCH_LIMITS.previewChars / 2))
+      results.push({ file, start, end, line, column: start - lineStart + 1, preview: source.slice(previewStart, previewEnd).replace(/[\r\n\t]+/g," ") })
+      perFile += 1
+      if (!match[0].length) pattern.lastIndex += 1
+    }
+    if (results.length >= limit) {
+      if (pattern.exec(source) || entries.length > scannedFiles) truncated = true
+      break
+    }
+    if (perFile >= SOURCE_SEARCH_LIMITS.perFile && pattern.exec(source)) truncated = true
+  }
+  return { results, scannedFiles, totalFiles: files.size, scannedBytes, truncated }
+}
 /** Shared Code/Canvas/history/export semantics. A hosted caller supplies a private
  * disposable staging checkout and MUST durably accept it before emitting this
  * response. `authorize` protects local synchronous writes only; hosted authority
@@ -34,12 +68,20 @@ export async function executeSourceOperation(context: {
           let analysis: ReturnType<typeof analyzeProjectStyles> | undefined
           const styles = () => analysis ??= analyzeProjectStyles(styleFiles(), Boolean(store.tailwind), width)
           const targets = () => styles().targets.map(target => ({ ...target, identity: { ...target.identity, revisionId: revision, contentHash: contentHash(store.read(target.identity.file) ?? "") } }))
-          if (["inspect", "source"].includes(action) && typeof body.expectedRevision === "string" && body.expectedRevision !== revision) return send(409, { error: "Selection belongs to stale source. Rebuild and select again." })
+          if (["inspect", "source", "search"].includes(action) && typeof body.expectedRevision === "string" && body.expectedRevision !== revision) return send(409, { error: action === "search" ? "Search belongs to stale source. Reload and retry." : "Selection belongs to stale source. Rebuild and select again." })
           if (action === "compatibility") { const analyzed = targets(); return send(200, { summary: summarizeCompatibility(analyzed), targets: analyzed, breakpoints: styles().breakpoints, styleDiagnostics: styles().diagnostics, revision }) }
           if (action === "files") {
             const files = durable.files()
             if (body.file !== undefined && (typeof body.file !== "string" || !files.has(body.file))) return send(404, { error: "Source file is unavailable." })
             return send(200, { files: [...files].map(([file, source]) => ({ file, hash: contentHash(source) })), source: typeof body.file === "string" ? files.get(body.file) : undefined, revision })
+          }
+          if (action === "search") {
+            if (typeof body.query !== "string" || body.query.length < 1 || body.query.length > SOURCE_SEARCH_LIMITS.queryChars || /[\r\n\0]/.test(body.query)) return send(400, { error: "Search query must be 1–160 single-line characters." })
+            if (body.caseSensitive !== undefined && typeof body.caseSensitive !== "boolean") return send(400, { error: "Invalid search case option." })
+            if (body.limit !== undefined && (!Number.isSafeInteger(body.limit) || Number(body.limit) < 1 || Number(body.limit) > SOURCE_SEARCH_LIMITS.results)) return send(400, { error: "Search result limit must be between 1 and 100." })
+            const search = sourceSearch(durable.files(), body.query, body.caseSensitive === true, body.limit as number | undefined)
+            await assertAccess(); durable.assertBase(revision)
+            return send(200, { searchResults: search.results, searchMeta: { scannedFiles: search.scannedFiles, totalFiles: search.totalFiles, scannedBytes: search.scannedBytes, truncated: search.truncated }, query: body.query, caseSensitive: body.caseSensitive === true, revision })
           }
           if (action === "history") {
             const history=durable.history()
