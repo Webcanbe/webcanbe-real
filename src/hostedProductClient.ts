@@ -125,6 +125,23 @@ export class HostedProductClient {
     return value.authorizationUrl
   }
 
+  async firebaseExchange(idToken: string) {
+    if (!idToken || idToken.length > 8192) throw new HostedProductError(400, "Firebase ID token is invalid.")
+    const response = await this.request("/__webcanbe/auth/firebase-exchange", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + idToken,
+      },
+      body: "{}",
+    })
+    const value = await response.json().catch(() => ({})) as { error?: unknown }
+    if (!response.ok) throw new HostedProductError(response.status, typeof value.error === "string" ? value.error : "Firebase sign-in could not be completed.")
+    this.csrf = undefined
+    await this.session()
+  }
+
   async logout() {
     const csrf = await this.session()
     const response = await this.request("/__webcanbe/auth/logout", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-WCB-CSRF": csrf }, body: "{}" })
