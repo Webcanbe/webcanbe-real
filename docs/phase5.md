@@ -187,7 +187,10 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Remove or restrict development-only routes such as public dashboard preview before public launch.
 - [ ] Confirm Firebase Authorized Domains includes production domains.
 - [ ] Confirm Google OAuth redirect/origin/branding verification.
-- [ ] CSP, security headers, CSRF/origin protections, and rate limiting.
+- [x] Baseline security headers on Worker/API/static responses: HSTS, nosniff, DENY framing, strict referrer policy, restricted camera/mic/geolocation, and popup-compatible COOP.
+- [x] CSRF/origin protections on authenticated Worker POST boundaries.
+- [ ] Add CSP only after a dedicated retained-landing compatibility inventory/pass.
+- [ ] Add auth/API abuse rate limiting.
 - [ ] Auth abuse/rate limits.
 - [ ] 404/500 and failed-network UX.
 - [ ] Mobile pass.
@@ -198,7 +201,10 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Database backup/restore procedure.
 - [ ] Rollback procedure tested.
 - [ ] Legal pages match actual data handling.
-- [ ] Robots/sitemap/metadata/favicon final pass.
+- [x] Add `robots.txt` that excludes authenticated/private routes and `/__webcanbe/`.
+- [x] Add public-only `sitemap.xml`.
+- [x] Webcanbe favicon/Apple touch icon and base OG/Twitter metadata are in place.
+- [ ] Final per-route metadata/canonical audit before launch.
 - [ ] Full production smoke test with a clean account.
 
 Exit gate: one clean user can sign up, sign in, browse, purchase, materialize, edit, save, reload, export, and sign out on production without manual intervention.
