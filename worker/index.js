@@ -6,6 +6,7 @@ import { databaseReadiness } from "./readiness.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
+import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -417,6 +418,27 @@ async function privateProduct(request, env, path, traceId) {
       if (path === "/__webcanbe/api/product/workspace-projects/list") {
         return json({ workspaceProjects: await databaseWorkspaceProjects(db, databaseSession) })
       }
+      if (path === "/__webcanbe/api/account/identities/link/firebase") {
+        const idToken = bearerToken(request)
+        if (!idToken) return json({ error: "Verified Firebase identity proof is required." }, 401)
+        let payload
+        try { payload = await verifyFirebaseIdToken(idToken, FIREBASE_PROJECT_ID) }
+        catch { return json({ error: "Firebase identity verification failed." }, 403) }
+        try {
+          const result = await linkDatabaseIdentity(db, databaseSession, {
+            issuer: "https://securetoken.google.com/" + FIREBASE_PROJECT_ID,
+            subject: payload.sub,
+          })
+          return json({
+            linked: true,
+            provider: "Firebase Authentication",
+            alreadyLinked: result.alreadyLinked,
+          })
+        } catch (error) {
+          if (error instanceof IdentityLinkConflict) return json({ error: "This sign-in identity already belongs to another Webcanbe account." }, 409)
+          return json({ error: "Identity linking was refused." }, 403)
+        }
+      }
       if (path === "/__webcanbe/api/account/get") {
         return json({ account: await databaseAccount(db, databaseSession) })
       }
@@ -493,7 +515,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase") response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
