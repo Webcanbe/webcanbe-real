@@ -1,5 +1,21 @@
 # WebCanBe project record
 
+## 2026-09-19: Read-only production backend activation separated from mutations
+
+The frontend now has a dedicated production read-mode boundary rather than
+reusing the all-or-nothing hosted-product mode. This permits account, workspace,
+purchase, working-copy, and dashboard-library reads to be activated after
+Hyperdrive smoke without accidentally enabling Seller, Control, Checkout, or
+other mutation paths whose Worker routes are not yet production-ready.
+
+The switch is intentionally inactive in production. Activation requires a
+specific `wcb-product-read-mode=hosted` meta flag after the live database
+boundary has passed smoke testing. Existing Settings UI is already prepared to
+read/save the persisted account profile through this mode without a visual
+redesign.
+
+---
+
 ## 2026-09-19: Provider-independent account profile persistence
 
 Production PostgreSQL now has `wcb_user_profiles`, keyed only by the internal
