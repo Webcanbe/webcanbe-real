@@ -1,5 +1,33 @@
 # WebCanBe project record
 
+## 2026-09-19: Production PostgreSQL provisioned and locked to server-only authority
+
+A real Supabase PostgreSQL project named `webcanbe-production` now exists in
+Seoul and has the retained Phase 3 authoritative schema applied. The migration
+created the complete Webcanbe identity, session, workspace/project, catalog,
+release/listing, entitlement/materialization, seller assessment/publication,
+Ready, share, deploy-intent, and control/audit structures rather than creating
+a second launch-time data model.
+
+Immediately after migration, Supabase's default public-schema grants exposed
+the new Webcanbe tables to `anon` and `authenticated`. The production
+hardening pass removed those privileges, removed future default grants to those
+roles, fixed mutable function `search_path`, and introduced a NOLOGIN
+`webcanbe_runtime` server role with bounded DML rights. A subsequent Supabase
+security-advisor run reported zero findings.
+
+RLS was not enabled mechanically without policies. Webcanbe's current authority
+model is Worker/Hyperdrive -> PostgreSQL, not browser -> Supabase PostgREST, so
+browser database roles are explicitly denied instead. The reproducible
+hardening SQL is committed at
+`deployment/hosted/postgres-supabase-hardening.sql`.
+
+The next infrastructure step is a dedicated password-bearing login inheriting
+the runtime role plus a Cloudflare Hyperdrive binding; credentials must remain
+server-only.
+
+---
+
 ## 2026-09-19: P5.2 Workers public catalog and Hyperdrive seam
 
 The first production product-API slice now has a Workers-compatible adapter
