@@ -5,6 +5,7 @@ const worker = fs.readFileSync("worker/index.js", "utf8")
 const security = fs.readFileSync("worker/security-headers.js", "utf8")
 const robots = fs.readFileSync("public/robots.txt", "utf8")
 const sitemap = fs.readFileSync("public/sitemap.xml", "utf8")
+const wrangler = JSON.parse(fs.readFileSync("wrangler.jsonc", "utf8")) as { assets?: { run_worker_first?: boolean | string[] } }
 
 describe("Phase 5 launch hardening", () => {
   it("defines conservative security headers compatible with popup authentication", () => {
@@ -18,7 +19,8 @@ describe("Phase 5 launch hardening", () => {
     expect(security).toContain('"style-src \'self\' \'unsafe-inline\'"')
   })
 
-  it("applies security headers to static asset responses as well as dynamic responses", () => {
+  it("routes SPA/static requests through Worker middleware before applying shared security policy", () => {
+    expect(wrangler.assets?.run_worker_first).toBe(true)
     expect(worker).toContain("...SECURITY_HEADERS")
     expect(worker).toContain("const asset = await env.ASSETS.fetch(request)")
     expect(worker).toContain("applySecurityHeaders(asset,")
