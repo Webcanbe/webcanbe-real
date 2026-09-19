@@ -69,6 +69,7 @@ describe("hosted session and project authority (real SQLite, local HTTP QA)", ()
   it("viewer can read but cannot mutate or import, and platform roles are not project roles", () => {
     const d = setup(); d.store.setProjectMember(d.projectA, d.userB, "viewer")
     expect(d.store.grant(d.b.session, d.projectA, "source").role).toBe("viewer")
+    expect(d.store.grant(d.b.session, d.projectA, "search").role).toBe("viewer")
     for (const op of ["code", "mutate", "undo", "redo", "revert", "checkpoint"] as const) expect(() => d.store.grant(d.b.session, d.projectA, op)).toThrow(AuthorityDenied)
     expect(() => d.store.setProjectMember(d.projectA, d.userB, "admin" as any)).toThrow(AuthorityDenied)
     d.store.setWorkspaceMember(d.workspaceA, d.userB, "viewer"); expect(() => d.store.registerProject(d.b.session, d.workspaceA, randomUUID())).toThrow(AuthorityDenied)
@@ -119,7 +120,7 @@ async function apiSetup() {
   return { ...d, registry, project, other, cross, call }
 }
 describe("hosted actual API source/history boundary", () => {
-  it.each(["files", "source", "inspect", "history", "preview", "export", "code", "mutate", "undo", "redo", "revert", "checkpoint", "session"])("denies another user's %s across both workspace cases", async action => {
+  it.each(["files", "source", "search", "inspect", "history", "preview", "export", "code", "mutate", "undo", "redo", "revert", "checkpoint", "session"])("denies another user's %s across both workspace cases", async action => {
     const d = await apiSetup()
     for (const target of [d.other, d.cross]) expect((await d.call(`/projects/${target.id}/${action}`)).status).toBe(403)
   })
@@ -147,6 +148,29 @@ describe("hosted actual API source/history boundary", () => {
       const result = await d.call(`/projects/${d.project.id}/export`, session)
       expect(result.status).toBe(403); expect(JSON.stringify(result.body)).not.toContain("private project diagnostic")
     } finally { validation.mockRestore() }
+  })
+  it("searches accepted project source through read authority without changing source or history", async () => {
+    const d = await apiSetup()
+    const session = (await d.call(`/projects/${d.project.id}/session`)).body.session
+    const beforeFiles = await d.call(`/projects/${d.project.id}/files`, { ...session, file: "src/App.tsx" })
+    const beforeHistory = await d.call(`/projects/${d.project.id}/history`, session)
+    const found = await d.call(`/projects/${d.project.id}/search`, { ...session, expectedRevision: beforeFiles.body.revision, query: "FeatureGrid", caseSensitive: true, limit: 10 })
+    expect(found.status, JSON.stringify(found.body)).toBe(200)
+    expect(found.body.searchResults.some((item: any) => item.file === "src/App.tsx" && item.line > 0 && item.column > 0 && item.preview.includes("FeatureGrid"))).toBe(true)
+    expect(found.body.searchMeta.scannedFiles).toBeGreaterThan(0)
+    expect(found.body.searchMeta.totalFiles).toBeGreaterThanOrEqual(found.body.searchMeta.scannedFiles)
+    expect(found.body.searchResults.length).toBeLessThanOrEqual(10)
+    expect((await d.call(`/projects/${d.project.id}/search`, { ...session, query: "x".repeat(161) })).status).toBe(400)
+    expect((await d.call(`/projects/${d.project.id}/search`, { ...session, query: "FeatureGrid", limit: 101 })).status).toBe(400)
+    const afterFiles = await d.call(`/projects/${d.project.id}/files`, { ...session, file: "src/App.tsx" })
+    const afterHistory = await d.call(`/projects/${d.project.id}/history`, session)
+    expect(afterFiles.body.revision).toBe(beforeFiles.body.revision)
+    expect(afterFiles.body.source).toBe(beforeFiles.body.source)
+    expect(afterHistory.body.history).toEqual(beforeHistory.body.history)
+
+    d.store.setProjectMember(d.project.id, d.userB, "viewer")
+    const viewer = (await d.call(`/projects/${d.project.id}/session`, {}, d.b)).body.session
+    expect((await d.call(`/projects/${d.project.id}/search`, { ...viewer, query: "FeatureGrid" }, d.b)).status).toBe(200)
   })
   it("enforces viewer writes through HTTP and records the authenticated actor on real source transactions", async () => {
     const d = await apiSetup(); d.store.setProjectMember(d.project.id, d.userB, "viewer")
