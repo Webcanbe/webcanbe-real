@@ -1,5 +1,7 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
+import { browseCatalog, catalogDetail } from "./product-catalog.js"
+import { withHyperdrive } from "./hyperdrive.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -115,6 +117,48 @@ async function createSessionCookie(env, identity) {
     iat: now,
     exp: now + 7 * 24 * 60 * 60 * 1000,
   }, env.GOOGLE_OAUTH_CLIENT_SECRET, "session")
+}
+
+async function smallJsonBody(request, maximum = 32 * 1024) {
+  const declared = Number(request.headers.get("Content-Length") || "0")
+  if (Number.isFinite(declared) && declared > maximum) throw new Error("Request too large.")
+  const text = await request.text()
+  if (text.length > maximum) throw new Error("Request too large.")
+  const value = JSON.parse(text || "{}")
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid request.")
+  return value
+}
+
+async function publicCatalog(request, env, path) {
+  if (!requireSameOriginPost(request)) return json({ error: "Catalog request refused." }, 403)
+  if (!env.HYPERDRIVE?.connectionString) return json({ error: "Product database is not configured." }, 503)
+
+  let body
+  try {
+    body = await smallJsonBody(request)
+  } catch {
+    return json({ error: "Invalid catalog request." }, 400)
+  }
+
+  try {
+    return await withHyperdrive(env, async db => {
+      if (path === "/__webcanbe/api/product/catalog/browse") {
+        const listings = await browseCatalog(db, body)
+        return json({ listings })
+      }
+      if (path === "/__webcanbe/api/product/catalog/detail") {
+        if (Object.keys(body).some(key => key !== "reference") || typeof body.reference !== "string") return json({ error: "Invalid catalog request." }, 422)
+        const listing = await catalogDetail(db, body.reference)
+        return listing ? json({ listing }) : json({ error: "Listing not found." }, 404)
+      }
+      return json({ error: "Catalog request refused." }, 404)
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ""
+    if (message.startsWith("Invalid ") || message.includes("too long")) return json({ error: message }, 422)
+    console.error("Public catalog database request failed.")
+    return json({ error: "Product catalog is temporarily unavailable." }, 503)
+  }
 }
 
 async function start(request, env) {
@@ -285,6 +329,7 @@ export default {
     if (path === "/__webcanbe/auth/firebase-exchange") return firebaseExchange(request, env)
     if (path === "/__webcanbe/auth/session") return session(request, env)
     if (path === "/__webcanbe/auth/logout") return logout(request, env)
+    if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") return publicCatalog(request, env, path)
     return env.ASSETS.fetch(request)
   },
 }
