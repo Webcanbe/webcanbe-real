@@ -1,3 +1,32 @@
+# PHASE 5 EDITOR KEYBOARD SHORTCUTS CHECKPOINT — 2026-09-19 KST
+
+- Added keyboard shortcuts to the real Compatible source editor without creating a second history model.
+- Project-level source history:
+  - `Cmd/Ctrl+Z` — undo the last accepted source transaction
+  - `Shift+Cmd/Ctrl+Z` — redo the accepted source transaction
+  - `Ctrl+Y` — Windows-style redo alias
+- Code editor:
+  - `Cmd/Ctrl+S` — save the current dirty source file
+  - `Shift+Cmd/Ctrl+S` — save all dirty drafts together in one validated source transaction
+- Workspace navigation:
+  - `Shift+V` Visual
+  - `Shift+C` Code
+  - `Shift+S` Split
+  - `Shift+H` Changes/history
+- Preview controls:
+  - `V` select elements
+  - `I` interact with preview
+  - `Shift+M/T/D` mobile/tablet/desktop viewport
+  - `Esc` clear selection and return to Select mode
+- `Shift+Cmd/Ctrl+E` exports the project.
+- `?` opens a responsive shortcut guide inside the editor.
+- Important authority boundary: when an input/textarea/select/contenteditable/CodeMirror surface has focus, workspace transaction shortcuts do not intercept typing or CodeMirror's local undo/redo.
+- Added regression coverage in `src/phase5-editor-shortcuts.test.ts`.
+- Verification run `35446327861`: secret scan PASS, editor/source regressions PASS, production build PASS, Wrangler dry-run PASS.
+- Dashboard/landing UI unchanged.
+
+---
+
 # PHASE 5 EXPLICIT IDENTITY LINKING CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `e0e7f876272d68175a3639811f96b7b5a98ca066`.

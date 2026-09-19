@@ -166,6 +166,7 @@ Exit gate: money state and product entitlement state cannot diverge silently.
 - [ ] Export produces a normal standalone codebase.
 - [ ] No hosted runtime dependency is required by exported code.
 - [ ] Large-project and failure recovery tests.
+- [x] Add source-safe keyboard shortcuts and an in-editor shortcut guide for transaction undo/redo, code save/save-all, Visual/Code/Split/History navigation, preview interaction, viewport changes, selection clearing, and export. Text/code editing keeps its own local undo/redo instead of being hijacked by project history.
 
 Exit gate: edit → save → reload → continue → export works on a real persisted project.
 

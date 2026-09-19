@@ -1,5 +1,25 @@
 # WebCanBe project record
 
+## 2026-09-19: Source-safe editor keyboard shortcuts
+
+The Compatible editor now has keyboard shortcuts that operate against the existing
+source-authoritative transaction model rather than a new client-only history stack.
+Outside text/code editing, Cmd/Ctrl+Z undoes the last accepted source transaction and
+Shift+Cmd/Ctrl+Z (plus Ctrl+Y) redoes it. CodeMirror keeps its own text-level undo/redo
+while focused, and Cmd/Ctrl+S saves the current file; Shift+Cmd/Ctrl+S accepts all dirty
+drafts together through the existing validated multi-file save path.
+
+The workspace also exposes Visual/Code/Split/History navigation, Select/Interact mode,
+mobile/tablet/desktop viewport switching, export, Escape-to-clear-selection, and a
+responsive `?` shortcut guide. The global handler explicitly ignores input, textarea,
+select, contenteditable and CodeMirror targets so editor typing cannot accidentally
+trigger project-level source history.
+
+Verification run `35446327861` passed the secret scan, editor/source regression suite,
+production Vite build, and Wrangler bundle dry-run.
+
+---
+
 ## 2026-09-19: Explicit provider identity linking boundary added
 
 Webcanbe now has a bounded account-linking rule instead of relying on matching

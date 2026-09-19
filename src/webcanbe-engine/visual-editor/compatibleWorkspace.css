@@ -26,3 +26,16 @@
 @media (max-width: 1000px) { .source-file-tree { width: 100%; max-height: 140px; overflow: auto; } }
 
 .source-gesture{position:absolute;pointer-events:auto;touch-action:none;z-index:3;border:2px solid #16200e;background:#c9ed70;min-width:18px;min-height:18px;padding:0;color:#16200e;border-radius:3px;font:12px Arial,sans-serif}.source-gesture:focus-visible{outline:3px solid #fff;box-shadow:0 0 0 5px #16200e}.source-gesture:disabled{opacity:.4}.source-gesture-width{right:-9px;top:calc(50% - 9px);cursor:ew-resize}.source-gesture-height{bottom:-9px;left:calc(50% - 9px);cursor:ns-resize}.source-gesture-gap{left:3px;bottom:3px;padding:2px 5px;cursor:ew-resize}.source-gesture-reorder{left:3px;top:3px;padding:2px 5px;cursor:grab}.source-gesture-hint:not(:empty){position:absolute;top:100%;left:0;width:260px;padding:6px;background:#16200e;color:#eef8df;font:12px/1.4 Arial,sans-serif;z-index:4}
+
+
+.compatible-shortcuts-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(10,14,11,.52);backdrop-filter:blur(5px)}
+.compatible-shortcuts{width:min(720px,calc(100vw - 32px));max-height:min(760px,calc(100vh - 48px));overflow:auto;border:1px solid #d5dbd2;border-radius:14px;background:#fff;color:#18222c;box-shadow:0 28px 90px rgba(0,0,0,.28);padding:20px}
+.compatible-shortcuts header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.compatible-shortcuts header small{display:block;color:#6b7468;text-transform:uppercase;letter-spacing:.08em;font-size:10px}
+.compatible-shortcuts h2{margin:5px 0 0;font-size:20px;line-height:1.25;font-weight:600}
+.compatible-shortcuts header button{border:1px solid #cfd5cc;border-radius:7px;background:#f7f8f6;color:#485146;padding:6px 9px;cursor:pointer}
+.compatible-shortcut-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #e4e8e2;border-left:1px solid #e4e8e2}
+.compatible-shortcut-grid>div{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:9px 11px;border-right:1px solid #e4e8e2;border-bottom:1px solid #e4e8e2;font-size:12px}
+.compatible-shortcut-grid kbd{flex:none;border:1px solid #cfd5cc;border-bottom-width:2px;border-radius:5px;background:#f7f8f6;padding:3px 6px;color:#30382f;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.compatible-shortcuts>p{margin:16px 0 0;color:#667062;font-size:11px;line-height:1.55}
+@media(max-width:680px){.compatible-shortcuts-backdrop{padding:10px}.compatible-shortcuts{width:100%;max-height:calc(100vh - 20px);padding:15px}.compatible-shortcut-grid{grid-template-columns:1fr}.compatible-shortcuts h2{font-size:17px}}

@@ -24,6 +24,11 @@ const editableLabels: Partial<Record<StyleProperty, string>> = {
 
 function workspaceProjectId() { const id = window.location.pathname.split("/").filter(Boolean).at(-1); return id && id !== "northstar" ? id : "phase1-fixture" }
 
+function isTextEditingTarget(target: EventTarget | null) {
+  const element = target instanceof Element ? target : null
+  return Boolean(element?.closest('input, textarea, select, [contenteditable="true"], .cm-editor'))
+}
+
 export default function CompatibleWorkspace() {
   const frame = useRef<HTMLIFrameElement>(null)
   const previewModeButton = useRef<HTMLButtonElement>(null)
@@ -113,6 +118,7 @@ export default function CompatibleWorkspace() {
   const [source, setSource] = useState("")
   const [pending, setPending] = useState(false)
   const [surface, setSurface] = useState<"canvas" | "code" | "split" | "history">("canvas")
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [sourceUIOpened, setSourceUIOpened] = useState(false)
   function openSurface(value: "canvas" | "code" | "split" | "history") { if (value !== "canvas") setSourceUIOpened(true); setSurface(value) }
   const [sourceEpoch, setSourceEpoch] = useState(0)
@@ -376,6 +382,41 @@ export default function CompatibleWorkspace() {
   }
 
   useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      const editing = isTextEditingTarget(event.target)
+      const key = event.key.toLowerCase()
+      const mod = event.metaKey || event.ctrlKey
+
+      if (event.key === "Escape") {
+        if (shortcutsOpen) { event.preventDefault(); setShortcutsOpen(false); return }
+        if (!editing) {
+          setSelected(undefined); setHovered(undefined); setTarget(undefined); inspected.current = ""; ++inspectSequence.current
+          setSelectMode(true)
+        }
+        return
+      }
+      if (editing) return
+
+      if (!mod && !event.altKey && event.key === "?") { event.preventDefault(); setShortcutsOpen(true); return }
+      if (mod && !event.altKey && key === "z") { event.preventDefault(); void history(event.shiftKey ? "redo" : "undo"); return }
+      if (event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && key === "y") { event.preventDefault(); void history("redo"); return }
+      if (mod && event.shiftKey && !event.altKey && key === "e") { event.preventDefault(); if (session) void exportProject(); return }
+
+      if (!mod && !event.altKey && !event.shiftKey && key === "v") { event.preventDefault(); setSelectMode(true); return }
+      if (!mod && !event.altKey && !event.shiftKey && key === "i") { event.preventDefault(); setSelectMode(false); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "v") { event.preventDefault(); openSurface("canvas"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "c") { event.preventDefault(); openSurface("code"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "s") { event.preventDefault(); openSurface("split"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "h") { event.preventDefault(); openSurface("history"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "m") { event.preventDefault(); setViewport("mobile"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "t") { event.preventDefault(); setViewport("tablet"); return }
+      if (!mod && !event.altKey && event.shiftKey && key === "d") { event.preventDefault(); setViewport("desktop") }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [shortcutsOpen, pending, session, viewport, project?.name])
+
+  useEffect(() => {
     const container = previewContainer.current
     if (!container) return
     const observer = new ResizeObserver(() => setAvailableWidth(container.clientWidth))
@@ -394,8 +435,9 @@ export default function CompatibleWorkspace() {
     <header className="compatible-topbar">
       <a href="/projects" className="compatible-brand">WebCanBe <span>/ Compatible</span></a>
       <div className="compatible-project-status"><i/> {project?.name ?? "Loading project"} <small>{project?.detection.tailwind ? "Tailwind detected" : "Actual source files"}</small></div>
-      <div className="compatible-mode-tabs" aria-label="Workspace mode"><button type="button" aria-pressed={surface === "canvas"} onClick={() => openSurface("canvas")}>Visual</button><button type="button" aria-pressed={surface === "code"} onClick={() => openSurface("code")}>Code</button><button type="button" aria-pressed={surface === "split"} onClick={() => openSurface("split")}>Split</button></div><div className="compatible-top-actions"><button type="button" aria-pressed={surface === "history"} onClick={() => openSurface("history")}>Changes</button><button type="button" onClick={() => void history("undo")}>Undo</button><button type="button" onClick={() => void history("redo")}>Redo</button><button type="button" onClick={() => void exportProject()} disabled={!session}>Export</button></div>
+      <div className="compatible-mode-tabs" aria-label="Workspace mode"><button type="button" aria-pressed={surface === "canvas"} title="Visual surface (Shift+V)" onClick={() => openSurface("canvas")}>Visual</button><button type="button" aria-pressed={surface === "code"} title="Code surface (Shift+C)" onClick={() => openSurface("code")}>Code</button><button type="button" aria-pressed={surface === "split"} title="Split surface (Shift+S)" onClick={() => openSurface("split")}>Split</button></div><div className="compatible-top-actions"><button type="button" aria-pressed={surface === "history"} title="Source history (Shift+H)" onClick={() => openSurface("history")}>Changes</button><button type="button" aria-keyshortcuts="Meta+Z Control+Z" title="Undo last accepted source transaction (⌘Z / Ctrl+Z)" onClick={() => void history("undo")}>Undo</button><button type="button" aria-keyshortcuts="Meta+Shift+Z Control+Shift+Z Control+Y" title="Redo source transaction (⇧⌘Z / Ctrl+Shift+Z / Ctrl+Y)" onClick={() => void history("redo")}>Redo</button><button type="button" aria-keyshortcuts="Meta+Shift+E Control+Shift+E" title="Export project (⇧⌘E / Ctrl+Shift+E)" onClick={() => void exportProject()} disabled={!session}>Export</button><button type="button" aria-keyshortcuts="?" title="Keyboard shortcuts (?)" onClick={() => setShortcutsOpen(true)}>Shortcuts</button></div>
     </header>
+    {shortcutsOpen && <div className="compatible-shortcuts-backdrop" onMouseDown={() => setShortcutsOpen(false)}><section className="compatible-shortcuts" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onMouseDown={event => event.stopPropagation()}><header><div><small>Keyboard shortcuts</small><h2>Move through the editor without leaving the source boundary.</h2></div><button type="button" onClick={() => setShortcutsOpen(false)} aria-label="Close shortcuts">Esc</button></header><div className="compatible-shortcut-grid"><div><span>Undo accepted source change</span><kbd>⌘/Ctrl Z</kbd></div><div><span>Redo accepted source change</span><kbd>⇧⌘Z / Ctrl Y</kbd></div><div><span>Save current code file</span><kbd>⌘/Ctrl S</kbd></div><div><span>Save all code drafts</span><kbd>⇧⌘/Ctrl S</kbd></div><div><span>Visual surface</span><kbd>Shift V</kbd></div><div><span>Code surface</span><kbd>Shift C</kbd></div><div><span>Split surface</span><kbd>Shift S</kbd></div><div><span>Source history</span><kbd>Shift H</kbd></div><div><span>Select elements</span><kbd>V</kbd></div><div><span>Interact with preview</span><kbd>I</kbd></div><div><span>Mobile / Tablet / Desktop</span><kbd>Shift M / T / D</kbd></div><div><span>Export project</span><kbd>⇧⌘/Ctrl E</kbd></div><div><span>Clear selection / return to Select</span><kbd>Esc</kbd></div><div><span>Open this shortcut guide</span><kbd>?</kbd></div></div><p>While a text field or the code editor is focused, typing and CodeMirror’s own undo/redo take priority. Project-level undo/redo is intentionally not triggered there.</p></section></div>}
     <div className="compatible-layout">
       <aside className="compatible-files">
         {hostedMode ? <>
@@ -410,7 +452,7 @@ export default function CompatibleWorkspace() {
         <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { selectionSource.current = "source"; const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className={`compatible-preview-shell ${surface === "split" ? "split-mode" : ""}`}>
-        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { invalidateRaster(); ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button ref={previewModeButton} type="button" aria-pressed={!selectMode} onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select aria-label="Viewport" value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
+        <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { invalidateRaster(); ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button ref={previewModeButton} type="button" aria-pressed={!selectMode} title={selectMode ? "Interact with preview (I)" : "Select elements (V)"} onClick={() => setSelectMode(value => !value)}>{selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select aria-label="Viewport" value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
         {sourceUIOpened && <Suspense fallback={<p>Loading source editor…</p>}><CodeWorkspace key={projectId} projectId={projectId} request={request} epoch={sourceEpoch} connected={Boolean(session)} visible={surface} openFile={codeFile} onAccepted={sourceAccepted} /></Suspense>}
         <div hidden={surface !== "canvas" && surface !== "split"} ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}><iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}{selected && target && selectionSource.current === "runtime" && target.identity.elementStart === selected.identity.elementStart && target.identity.file === selected.identity.file && <SourceGestures key={JSON.stringify([projectId, preview?.generation, revision.current, selected.identity, selected.rect, viewport, authoringBreakpoint, effectScope, scale, routeInput, previewState])} target={target} origins={effectScope === "source" ? styleOrigins : target.repeated ? [] : styleOrigins.filter(origin => !origin.shared)} scale={scale} breakpoint={authoringBreakpoint} disabled={pending || !session || !selectMode || previewState !== "ready"} onEdit={edit => void mutate(edit)} />}</div>}</div></div>
       </section>
