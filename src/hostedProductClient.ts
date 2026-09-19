@@ -111,6 +111,12 @@ export class HostedProductClient {
     return (await this.post<{ account: AccountData }>("/__webcanbe/api/account/update", { displayName })).account
   }
 
+  async revokeAllSessions() {
+    const result = await this.post<{ ok: true; revokedSessions: number }>("/__webcanbe/api/account/sessions/revoke-all", {})
+    this.csrf = undefined
+    return result
+  }
+
   async workspaces() {
     return (await this.post<{ workspaces: string[] }>("/__webcanbe/api/workspaces", {})).workspaces
   }
