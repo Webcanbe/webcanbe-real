@@ -1,3 +1,22 @@
+# PHASE 5 COMMITTED-SECRET CI CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `3a175a3c60e59089750621d5c68bf1d5c8e25a5c`.
+- Added `scripts/security/scan-secrets.mjs`.
+- CI now runs `npm run security:secrets` before the focused Phase 5 test/build gates.
+- The scanner checks **all tracked files**, not only the latest diff.
+- It blocks:
+  - committed `.env` / `.dev.vars` / backup/credential file types
+  - PEM private keys
+  - common GitHub/Stripe/OpenAI/Slack secret-token formats
+  - PostgreSQL URLs containing non-placeholder embedded passwords
+  - unsafe `VITE_*` server-secret variable names
+- Historical Phase 2 compatibility tests/evidence intentionally contain fake names such as `VITE_SECRET` and `VITE_ACCESS_TOKEN`; only the VITE-name heuristic is skipped for those narrowly scoped fixture paths.
+- Actual token/PEM/PostgreSQL-password scans still run on those historical fixture files.
+- Added gitignore rules for common local private-key/backup artifacts.
+- Final branch verification: secret scan PASS, focused Phase 4/5 tests PASS, Worker/script syntax PASS, Vite build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 CLOUDFLARE ROLLBACK OPERATIONS CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `f7c2c6c42cdcc121c9f638957df1ceabac5072d2`.
