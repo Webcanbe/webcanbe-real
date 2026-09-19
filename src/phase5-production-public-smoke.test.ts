@@ -15,6 +15,7 @@ describe("Phase 5 public production smoke runner", () => {
   it("checks baseline security and real route semantics", () => {
     expect(smoke).toContain("strict-transport-security")
     expect(smoke).toContain("content-security-policy")
+    expect(smoke).toContain('Boolean(csp) && !csp.includes("\'unsafe-eval\'")')
     expect(smoke).toContain("x-request-id")
     expect(smoke).toContain("/__webcanbe-smoke-missing-route")
     expect(smoke).toContain("unknown SPA route returns real 404")
