@@ -181,7 +181,7 @@ describe("hosted actual API source/history boundary", () => {
     const files = await d.call(`/projects/${d.project.id}/files`, { ...editor, file: "src/App.css" })
     const body = { ...editor, expectedRevision: files.body.revision, idempotencyKey: randomUUID(), operations: [{ kind: "update", file: "src/App.css", expectedHash: contentHash(files.body.source), content: files.body.source + "\n/* hosted accepted */" }] }
     const result = await d.call(`/projects/${d.project.id}/code`, body)
-    expect(result.status).toBe(200); expect(result.body.transaction.actor).toBe(d.userA)
+    expect(result.status, JSON.stringify(result.body)).toBe(200); expect(result.body.transaction.actor).toBe(d.userA)
     expect((await d.call(`/projects/${d.project.id}/code`, body)).body.replayed).toBe(true)
     expect((await d.call(`/projects/${d.project.id}/code`, { ...body, operations: [] })).status).toBe(409)
     const persisted = new ProjectRegistry(d.directory).durable(d.project.id)
