@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this recovery update: `1386f4006bd162edbff89613e2557778d8b62ecb`  
+Code baseline before this recovery update: `3c383c6bb0dc0b63df2a03143606f5c575ffbb3f`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
@@ -778,7 +778,38 @@ Crawler policy:
 
 ---
 
-## 18. Next implementation sequence after live DB smoke
+## 18. Abuse rate limiting status
+
+Cloudflare Workers Rate Limiting bindings are now configured in `wrangler.jsonc`:
+
+- `AUTH_RATE_LIMITER`
+  - namespace: `136713667501`
+  - 30 calls / 60 seconds per key
+- `PUBLIC_API_RATE_LIMITER`
+  - namespace: `136713667502`
+  - 180 calls / 60 seconds per key
+- `PRIVATE_API_RATE_LIMITER`
+  - namespace: `136713667503`
+  - 180 calls / 60 seconds per key
+
+Behavior:
+
+- Google auth start/callback and Firebase exchange use a SHA-256 fingerprint of Cloudflare-provided IP + bounded User-Agent + route scope.
+- The raw IP/User-Agent are not stored in the key output and are not logged by Webcanbe telemetry.
+- Public catalog/readiness use the same hashed anonymous strategy.
+- Private product/account API calls are limited by authoritative DB `userId` only **after** session and CSRF validation.
+- Over-limit response: HTTP 429 + `Retry-After: 60`.
+- If the Cloudflare rate-limit service itself errors/unavailable, Webcanbe fails open so abuse protection does not become an availability dependency.
+- Rate limiting is an extra abuse layer only; it never replaces authentication, CSRF, membership, entitlement, seller, payment, or operator authority.
+- Cloudflare's API is local/eventually consistent, so it must never be used for billing/accounting or exact product-state counters.
+
+Implementation:
+
+- `worker/rate-limit.js`
+- `src/phase5-rate-limit.test.ts`
+- `worker/rate-limit.test.js`
+
+## 19. Next implementation sequence after live DB smoke
 
 ### P5.2 continuation
 
@@ -859,7 +890,7 @@ Launch hardening:
 
 ---
 
-## 19. Things not to redo
+## 20. Things not to redo
 
 A future session should **not** restart or repeat these unless there is evidence they are broken:
 
@@ -881,7 +912,7 @@ Continue from Hyperdrive connection.
 
 ---
 
-## 20. Key files to read first in a new session
+## 21. Key files to read first in a new session
 
 In order:
 
@@ -901,7 +932,7 @@ In order:
 
 ---
 
-## 21. Secret-handling rule
+## 22. Secret-handling rule
 
 Never request or store in chat/GitHub:
 
@@ -915,7 +946,7 @@ For the immediate next step, the only value ChatGPT needs from the user is the *
 
 ---
 
-## 22. Resume instruction for the next ChatGPT session
+## 23. Resume instruction for the next ChatGPT session
 
 If the user says “continue Phase 5” after a session break:
 
