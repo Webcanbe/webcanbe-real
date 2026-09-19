@@ -7,6 +7,7 @@ import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verif
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
+import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -166,7 +167,7 @@ async function smallJsonBody(request, maximum = 32 * 1024) {
   return value
 }
 
-async function publicCatalog(request, env, path) {
+async function publicCatalog(request, env, path, traceId) {
   if (!requireSameOriginPost(request)) return json({ error: "Catalog request refused." }, 403)
   if (!env.HYPERDRIVE?.connectionString) return json({ error: "Product database is not configured." }, 503)
 
@@ -193,7 +194,7 @@ async function publicCatalog(request, env, path) {
   } catch (error) {
     const message = error instanceof Error ? error.message : ""
     if (message.startsWith("Invalid ") || message.includes("too long")) return json({ error: message }, 422)
-    console.error("Public catalog database request failed.")
+    safeFailureLog({ event: "public_catalog_database", requestId: traceId, path, status: 503 })
     return json({ error: "Product catalog is temporarily unavailable." }, 503)
   }
 }
@@ -389,7 +390,7 @@ async function logout(request, env) {
   return new Response(null, { status: 204, headers })
 }
 
-async function privateProduct(request, env, path) {
+async function privateProduct(request, env, path, traceId) {
   if (!requireSameOriginPost(request)) return json({ error: "Product request refused." }, 403)
   if (!databaseAvailable(env)) return json({ error: "Product database is not configured." }, 503)
 
@@ -426,12 +427,12 @@ async function privateProduct(request, env, path) {
       return json({ error: "Product request refused." }, 404)
     })
   } catch {
-    console.error("Private product database request failed.")
+    safeFailureLog({ event: "private_product_database", requestId: traceId, path, status: 503 })
     return json({ error: "Product data is temporarily unavailable." }, 503)
   }
 }
 
-async function readiness(request, env) {
+async function readiness(request, env, traceId) {
   if (!requireSameOriginPost(request)) return json({ error: "Readiness request refused." }, 403)
   if (!databaseAvailable(env)) return json({ worker: "ok", database: "unconfigured", schema: "unknown" }, 503)
 
@@ -452,7 +453,7 @@ async function readiness(request, env) {
       readyCount: result.readyCount,
     })
   } catch {
-    console.error("Production readiness database check failed.")
+    safeFailureLog({ event: "production_readiness_database", requestId: traceId, path: "/__webcanbe/ops/readiness", status: 503 })
     return json({ worker: "ok", database: "unavailable", schema: "unknown" }, 503)
   }
 }
@@ -460,14 +461,22 @@ async function readiness(request, env) {
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname
-    if (path === "/__webcanbe/auth/start") return start(request, env)
-    if (path === "/__webcanbe/auth/callback") return callback(request, env)
-    if (path === "/__webcanbe/auth/firebase-exchange") return firebaseExchange(request, env)
-    if (path === "/__webcanbe/auth/session") return session(request, env)
-    if (path === "/__webcanbe/auth/logout") return logout(request, env)
-    if (path === "/__webcanbe/ops/readiness") return readiness(request, env)
-    if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") return publicCatalog(request, env, path)
-    if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") return privateProduct(request, env, path)
-    return applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
+    const traceId = requestId()
+    try {
+      let response
+      if (path === "/__webcanbe/auth/start") response = await start(request, env)
+      else if (path === "/__webcanbe/auth/callback") response = await callback(request, env)
+      else if (path === "/__webcanbe/auth/firebase-exchange") response = await firebaseExchange(request, env)
+      else if (path === "/__webcanbe/auth/session") response = await session(request, env)
+      else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
+      else if (path === "/__webcanbe/ops/readiness") response = await readiness(request, env, traceId)
+      else if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") response = await publicCatalog(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") response = await privateProduct(request, env, path, traceId)
+      else response = applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
+      return withRequestId(response, traceId)
+    } catch {
+      safeFailureLog({ event: "worker_unhandled", requestId: traceId, path, status: 500 })
+      return withRequestId(json({ error: "The request could not be completed." }, 500), traceId)
+    }
   },
 }
