@@ -6,7 +6,7 @@ import { databaseReadiness } from "./readiness.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
-import { SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
+import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
 
