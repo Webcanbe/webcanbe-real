@@ -31,8 +31,10 @@ describe("Phase 5 committed-secret guard", () => {
   it("limits VITE_* fixture exceptions to historical Phase 2 tests/evidence only", () => {
     expect(scanner).toContain('path.startsWith("docs/reports/phase2-")')
     expect(scanner).toContain('/^src\\/webcanbe-engine\\/phase2-[^/]*\\.test\\.(?:ts|js)$/')
-    expect(scanner).toContain("!viteSecretFixture && viteSecret.test(text)")
-    // The fixture exception comes after these scans, so they remain active even there.
+    expect(scanner).toContain("viteSecretSource")
+    expect(scanner).toContain("!viteSecretFixture && viteSecretSource && viteSecret.test(text)")
+    expect(scanner).toContain("Prose docs may")
+    // The fixture/source scoping comes after these scans, so actual secrets remain active everywhere.
     expect(scanner.indexOf("PEM private key")).toBeLessThan(scanner.indexOf("viteSecretFixture"))
     expect(scanner.indexOf("PostgreSQL URL with embedded password")).toBeLessThan(scanner.indexOf("viteSecretFixture"))
   })
