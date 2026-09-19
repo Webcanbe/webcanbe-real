@@ -1,3 +1,24 @@
+# PHASE 5 BASELINE SECURITY HEADERS + CRAWLER POLICY CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `1126a793127cfb044a6c7a21ce36e045016abc2e`.
+- Added shared Worker/static security headers:
+  - `Strict-Transport-Security: max-age=31536000`
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Referrer-Policy: strict-origin-when-cross-origin` for static assets; authenticated dynamic endpoints retain the stricter `no-referrer`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Cross-Origin-Opener-Policy: same-origin-allow-popups`
+- COOP deliberately uses `same-origin-allow-popups` so Firebase/GitHub popup authentication is not broken by a strict opener policy.
+- CSP was deliberately **not** added yet; the retained landing has substantial existing inline/runtime presentation content and requires a dedicated compatibility inventory first.
+- Added `public/robots.txt`:
+  - allows public site discovery
+  - disallows auth/API/dashboard/workspace/settings/checkout/seller/control routes
+- Added `public/sitemap.xml` with public routes only.
+- No dashboard or landing visual change.
+- Verification after test split: 75 focused tests PASS, Worker syntax PASS, Vite production build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 SAFE PRODUCTION READ-MODE CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `706620f50034df1b0053a332b3c6a104f0e7f336`.
