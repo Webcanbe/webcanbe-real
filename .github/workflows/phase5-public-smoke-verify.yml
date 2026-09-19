@@ -1,0 +1,28 @@
+name: Phase 5 public production smoke verify
+on:
+  push:
+    branches: [phase5-public-smoke]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Focused tests
+        run: npx vitest run src/phase5-production-public-smoke.test.ts src/phase5-production-read-mode.test.ts src/phase5-secret-scan.test.ts src/phase5-launch-hardening.test.ts src/phase5-csp-compat.test.ts src/phase5-route-error-hardening.test.ts worker/security-headers.test.js worker/readiness.test.js worker/product-catalog.test.js
+      - name: Syntax
+        run: node --check scripts/production-smoke-public.mjs && node --check worker/index.js
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+      - name: Live public production smoke
+        env:
+          WEBCANBE_EXPECT_DATABASE: unconfigured
+        run: npm run smoke:production:public
