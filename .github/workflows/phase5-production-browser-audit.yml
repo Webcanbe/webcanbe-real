@@ -11,22 +11,37 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '26'
-      - uses: browser-actions/setup-chrome@v1
+      - id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Install Lighthouse
         run: npm install --no-save --ignore-scripts lighthouse@13
       - name: Audit production routes
         env:
           CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: |
+          set -euo pipefail
           mkdir -p .lighthouse
+          run_lighthouse() {
+            local url="$1"
+            local output="$2"
+            shift 2
+            for attempt in 1 2 3; do
+              if npx lighthouse "$url" --quiet "$@" --chrome-path="$CHROME_PATH" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="$output"; then
+                return 0
+              fi
+              echo "Lighthouse attempt $attempt failed for $url; retrying..."
+              sleep 3
+            done
+            return 1
+          }
           for route in root browse login; do
             case "$route" in
               root) url="https://webcanbe.com/" ;;
               browse) url="https://webcanbe.com/browse" ;;
               login) url="https://webcanbe.com/login" ;;
             esac
-            npx lighthouse "$url" --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=".lighthouse/${route}-mobile.json"
-            npx lighthouse "$url" --quiet --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=".lighthouse/${route}-desktop.json"
+            run_lighthouse "$url" ".lighthouse/${route}-mobile.json"
+            run_lighthouse "$url" ".lighthouse/${route}-desktop.json" --preset=desktop
           done
       - name: Print audit summary
         run: |
