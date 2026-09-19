@@ -1,3 +1,19 @@
+# PHASE 5 P5.2 PUBLIC CATALOG WORKER CHECKPOINT — 2026-09-19 KST
+
+- Main HEAD when recorded: `6b16415789356f28ed30559f2a6f1c6e05dd3f41`.
+- Added `worker/hyperdrive.js` using the existing `pg` dependency and Cloudflare Hyperdrive connection-string contract.
+- Added `worker/product-catalog.js` using the same published/available/active Listing SQL and immutable Release provenance as the retained Phase 3 `PostgresProductDomainStore`.
+- Added Worker-first routes for `/__webcanbe/api/product/catalog/browse` and `/__webcanbe/api/product/catalog/detail`.
+- No second catalog schema or D1 mirror was introduced.
+- Without a real `HYPERDRIVE` binding, catalog routes fail closed with HTTP 503 instead of fabricating product state.
+- Private purchases/workspaces/seller/control routes remain closed until DB-backed session authority is connected.
+- Explicit `nodejs_compat` is set for Worker/pg portability.
+- Verification: 57 focused tests PASS, Worker syntax PASS, Vite production build PASS, and Wrangler v4 Worker bundle dry-run PASS with `pg` included.
+- Existing `deployment/hosted/postgres.sql` audit found no CREATE EXTENSION, CREATE ROLE, CREATE DATABASE, SUPERUSER, ALTER SYSTEM, or other obvious privileged migration requirements. It contains the retained immutable triggers/functions and 35 product/identity/source tables.
+- Next infrastructure blocker: provision a real managed PostgreSQL database, apply the existing schema, then create/bind Cloudflare Hyperdrive. Do not activate private product routes before DB-backed first-party sessions use the same `wcb_sessions` authority model.
+
+---
+
 # PHASE 5 P5.1 SESSION UNIFICATION + P5.2 ARCHITECTURE CHECKPOINT — 2026-09-19 KST
 
 - Main HEAD when recorded: `3f672163e93621ee565200887ffec52d59afa5a2`.
