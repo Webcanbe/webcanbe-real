@@ -1,3 +1,23 @@
+# PHASE 5 LIVE WORKER ROUTING + ACCOUNT AUTH SUMMARY CHECKPOINT — 2026-09-19 KST
+
+- Current main after implementation merge: `8464f7e78f1bbfadef41bfc70739aeb7124f7a6e`.
+- Automatic production smoke run `35424848026` completed successfully on the Worker-first routing build.
+- Live observations also confirmed:
+  - unknown HTML path returns HTTP 404
+  - production `/dashboard-preview` is blocked as a 404
+  - `/login` is noindex/nofollow
+  - Worker-only readiness rejects unsupported GET instead of falling through to SPA
+- The previously pending “observe Worker-first fix live” launch-hardening item is now complete.
+- Account profile API now returns server-derived:
+  - connected provider families from active `wcb_identity_accounts`
+  - count of active, unexpired first-party `wcb_sessions`
+- Provider information is never inferred by email. Identity authority remains issuer+subject.
+- Existing Settings > Account layout displays the provider/session summary only when real product-read mode is active; no dashboard redesign occurred.
+- Verification run `35432736254`: secret scan PASS, focused Phase 4/5 tests PASS, Worker syntax PASS, Vite build PASS, Wrangler dry-run PASS.
+- Hyperdrive remains the infrastructure blocker before these DB-backed account reads can be activated on canonical production.
+
+---
+
 # PHASE 5 PRODUCTION WORKER-FIRST / PUBLIC SMOKE CHECKPOINT — 2026-09-19 KST
 
 - Added `scripts/production-smoke-public.mjs` and `npm run smoke:production:public`.
