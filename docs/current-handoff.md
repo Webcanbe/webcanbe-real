@@ -1,3 +1,28 @@
+# PHASE 5 EDITOR NAVIGATION + EXACT CODE JUMP CHECKPOINT — 2026-09-19 KST
+
+- Added source-file Quick Open:
+  - `Cmd/Ctrl+P`
+  - path filtering
+  - recent-file ordering
+  - Enter opens the first match
+- Added a Recent files section to the code workspace.
+- Added current-file Find / Replace:
+  - `Shift+Cmd/Ctrl+F`
+  - next/previous match navigation
+  - case-sensitive option
+  - replace current match
+  - replace all current-file matches
+- Replace operations modify only the draft; accepted source is unchanged until the normal Save source transaction passes validation.
+- Visual selection can now open the exact `SourceTarget.sourceRange` in CodeMirror rather than only opening the containing file.
+- Component definitions and invocation/caller origins can also jump to their exact source ranges.
+- CodeMirror selects and scrolls the requested range into view.
+- Project-wide search was intentionally not faked by downloading every project file into the browser; it remains a separate future server-search boundary.
+- Added regression coverage in `src/phase5-editor-navigation.test.ts`.
+- Verification run `35447572418`: secret scan PASS, editor/source regressions PASS, production build PASS, Wrangler dry-run PASS.
+- Dashboard and landing unchanged.
+
+---
+
 # PHASE 5 EDITOR KEYBOARD SHORTCUTS CHECKPOINT — 2026-09-19 KST
 
 - Added keyboard shortcuts to the real Compatible source editor without creating a second history model.

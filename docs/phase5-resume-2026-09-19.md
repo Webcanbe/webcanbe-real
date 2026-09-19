@@ -8,6 +8,20 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — editor navigation and exact code jump
+
+- Quick Open: `Cmd/Ctrl+P`, file-path filtering, recent files.
+- Current-file Find / Replace: `Shift+Cmd/Ctrl+F`, next/previous, case-sensitive, replace/replace-all.
+- Replacements are draft-only until normal validated source Save.
+- Visual selection opens the exact SourceTarget range in CodeMirror.
+- Resolved component definitions and caller/invocation origins also jump to exact ranges.
+- CodeMirror selects and scrolls the requested range into view.
+- Project-wide search is intentionally deferred to a future server-side bounded search API.
+- Verification run `35447572418` passed all branch gates.
+- Dashboard/landing unchanged.
+
+---
+
 ## Latest recovery delta — editor keyboard shortcuts
 
 - Compatible editor now exposes source-safe keyboard shortcuts on top of the existing source transaction/history authority.

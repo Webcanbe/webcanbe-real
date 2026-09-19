@@ -1,5 +1,27 @@
 # WebCanBe project record
 
+## 2026-09-19: Fast source navigation and exact visual-to-code jumps
+
+The Compatible editor now supports Cmd/Ctrl+P Quick Open with path filtering and a
+bounded recent-file list. The code surface also has current-file find/replace via
+Shift+Cmd/Ctrl+F, including match navigation, case sensitivity, single replace and
+replace-all. Replacement changes stay in the draft layer and do not become accepted
+source until the existing validated Save transaction succeeds.
+
+Visual inspection is now connected to CodeMirror by exact source ranges rather than
+file name alone. A selected element can open its SourceTarget range, resolved component
+definitions can open their definition range, and invocation origins can open the exact
+caller range. CodeMirror focuses, selects and scrolls that source range into view.
+
+Project-wide text search was deliberately not implemented by downloading the entire
+source tree into the browser. That remains a separate server-side bounded search
+boundary for a later slice.
+
+Verification run `35447572418` passed secret scan, editor/source regressions,
+production build and Wrangler dry-run.
+
+---
+
 ## 2026-09-19: Source-safe editor keyboard shortcuts
 
 The Compatible editor now has keyboard shortcuts that operate against the existing
