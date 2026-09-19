@@ -1,3 +1,15 @@
+# PHASE 5 HYPERDRIVE LOGIN ROLE PREP CHECKPOINT — 2026-09-19 KST
+
+- Prepared PostgreSQL role `webcanbe_hyperdrive` in production Supabase.
+- Verified: `NOLOGIN`, non-superuser, cannot create DB/roles, and is a member of `webcanbe_runtime`.
+- No password was generated, displayed, or stored by ChatGPT.
+- Reproducible role creation is now recorded in `deployment/hosted/postgres-supabase-hardening.sql`.
+- This deliberately leaves the final credential step under operator control.
+- Required next manual step: set a strong password on this role, then create Cloudflare Hyperdrive using Supabase's direct PostgreSQL endpoint.
+- Do not send the DB password in chat. Only the resulting Hyperdrive configuration ID is needed back here.
+
+---
+
 # PHASE 5 DB SESSION + PRIVATE READ API CHECKPOINT — 2026-09-19 KST
 
 - Main HEAD after merge: `e1a7dabfc40bb1abd1b2db338ac7c5ddbfef40dd`.
