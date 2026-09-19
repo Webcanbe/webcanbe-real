@@ -1,5 +1,22 @@
 # WebCanBe project record
 
+## 2026-09-19: Public route metadata and real SPA 404 semantics
+
+Public SPA routes now synchronize their document title, description, canonical
+URL, OpenGraph URL/title/description, Twitter metadata, and robots directive.
+Legacy aliases point to the preferred canonical route rather than creating
+duplicate indexable URLs.
+
+The Worker also distinguishes known application routes from unknown HTML
+navigation. Unknown routes still render the existing React NotFound surface,
+but the HTTP response is now 404 instead of the SPA fallback's previous 200.
+Private routes remain noindex and the approved dashboard UI is unchanged.
+
+Verification passed through the focused Phase 4/5 suite, Worker syntax, Vite
+production build, and Wrangler bundle dry-run.
+
+---
+
 ## 2026-09-19: Production preview route and render failures hardened
 
 Canonical production now refuses the public `/dashboard-preview` development
