@@ -10,10 +10,35 @@ export class DatabaseAuthorityDenied extends Error {
   }
 }
 
+function cleanOptional(value, maximum) {
+  if (value === undefined || value === null || value === "") return undefined
+  if (typeof value !== "string") throw new DatabaseAuthorityDenied()
+  const clean = value.trim()
+  if (!clean || clean.length > maximum) throw new DatabaseAuthorityDenied()
+  return clean
+}
+
 function validateIdentity(identity) {
   if (!identity || typeof identity !== "object") throw new DatabaseAuthorityDenied()
   if (typeof identity.issuer !== "string" || !identity.issuer || identity.issuer.length > 255) throw new DatabaseAuthorityDenied()
   if (typeof identity.subject !== "string" || !identity.subject || identity.subject.length > 255) throw new DatabaseAuthorityDenied()
+  cleanOptional(identity.email, 320)
+  cleanOptional(identity.name, 120)
+  cleanOptional(identity.picture, 1000)
+  if (identity.emailVerified !== undefined && typeof identity.emailVerified !== "boolean") throw new DatabaseAuthorityDenied()
+}
+
+function profileFromIdentity(identity) {
+  const email = cleanOptional(identity.email, 320)
+  const name = cleanOptional(identity.name, 120)
+  const picture = cleanOptional(identity.picture, 1000)
+  const fallback = email ? email.split("@")[0].slice(0, 120) : "Webcanbe user"
+  return Object.freeze({
+    displayName: name ?? fallback,
+    email,
+    emailVerified: Boolean(email && identity.emailVerified === true),
+    picture,
+  })
 }
 
 function validateLifetime(lifetimeMs) {
@@ -28,6 +53,7 @@ export async function issueDatabaseSession(db, identity, options = {}) {
   validateIdentity(identity)
   const lifetimeMs = options.lifetimeMs ?? 604800000
   const allowSelfRegistration = options.allowSelfRegistration === true
+  const profile = profileFromIdentity(identity)
   validateLifetime(lifetimeMs)
 
   await db.query("BEGIN")
@@ -61,6 +87,17 @@ export async function issueDatabaseSession(db, identity, options = {}) {
     const userId = String(row.user_id)
     const disabled = await db.query("SELECT user_id FROM wcb_disabled_users WHERE user_id=$1", [userId])
     if (disabled.rowCount) throw new DatabaseAuthorityDenied()
+
+    await db.query(
+      `INSERT INTO wcb_user_profiles(user_id,display_name,email,email_verified,picture_url,created_at,updated_at)
+       VALUES($1,$2,$3,$4,$5,clock_timestamp(),clock_timestamp())
+       ON CONFLICT(user_id) DO UPDATE SET
+         email=COALESCE(EXCLUDED.email,wcb_user_profiles.email),
+         email_verified=CASE WHEN EXCLUDED.email IS NULL THEN wcb_user_profiles.email_verified ELSE EXCLUDED.email_verified END,
+         picture_url=COALESCE(EXCLUDED.picture_url,wcb_user_profiles.picture_url),
+         updated_at=clock_timestamp()`,
+      [userId, profile.displayName, profile.email ?? null, profile.emailVerified, profile.picture ?? null],
+    )
 
     await db.query("DELETE FROM wcb_sessions WHERE expires_at<=clock_timestamp() OR NOT active")
     const counts = (await db.query(
@@ -96,14 +133,26 @@ export async function issueDatabaseSession(db, identity, options = {}) {
 export async function resolveDatabaseSession(db, token) {
   if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return undefined
   const result = await db.query(
-    "SELECT s.session_id,s.user_id,s.expires_at FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE token_hash=$1 AND active AND expires_at>clock_timestamp() AND d.user_id IS NULL",
+    `SELECT s.session_id,s.user_id,s.expires_at,p.display_name,p.email,p.email_verified,p.picture_url
+       FROM wcb_sessions s
+       LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id
+       LEFT JOIN wcb_user_profiles p ON p.user_id=s.user_id
+      WHERE token_hash=$1 AND active AND expires_at>clock_timestamp() AND d.user_id IS NULL`,
     [tokenHash(token)],
   )
   const row = result.rows[0]
   if (!row) return undefined
   const expiresAt = new Date(row.expires_at).getTime()
   if (!Number.isFinite(expiresAt)) return undefined
-  return Object.freeze({ sessionId: String(row.session_id), userId: String(row.user_id), expiresAt })
+  return Object.freeze({
+    sessionId: String(row.session_id),
+    userId: String(row.user_id),
+    expiresAt,
+    displayName: typeof row.display_name === "string" ? row.display_name : "Webcanbe user",
+    email: typeof row.email === "string" ? row.email : "",
+    emailVerified: row.email_verified === true,
+    picture: typeof row.picture_url === "string" ? row.picture_url : "",
+  })
 }
 
 export async function rotateDatabaseCsrf(db, session) {
