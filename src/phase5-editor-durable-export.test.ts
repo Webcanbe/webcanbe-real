@@ -99,7 +99,7 @@ describe("Phase 5 durable save, canonical revision and standalone export", () =>
     expect(workspace).toContain('request("mutate"')
     expect(code).toContain('requests.current("code"')
     expect(sourceApi).toContain('action === "code"')
-    expect(sourceApi).toContain('producer: "visual"')
+    expect(sourceApi).toContain('transactionEntry(project.id, revision, "visual"')
     expect(sourceApi.match(/durable\.commit\(/g)?.length).toBeGreaterThanOrEqual(2)
   })
 
