@@ -1,3 +1,31 @@
+# PHASE 5 MASTER PLAN + FIREBASE AUTH CHECKPOINT — 2026-09-19 KST
+
+- Production branch: `main`.
+- Baseline HEAD: `fc24f43b0a7a89c84c9d84e7c428ccdac12ade11`.
+- Dashboard UI is frozen at the currently approved state; Phase 5 proceeds as functional/backend launch work.
+- Google production auth remains on the Cloudflare Worker Authorization Code + PKCE flow.
+- Firebase Web SDK is now installed and production GitHub + Email/Password auth are connected to the existing login UI.
+- GitHub uses `GithubAuthProvider` + `signInWithPopup`.
+- Email signup uses `createUserWithEmailAndPassword`; email login uses `signInWithEmailAndPassword`.
+- Firebase configuration is read from the six existing `VITE_FIREBASE_*` Cloudflare build variables. GitHub Client ID/Secret remain only in Firebase.
+- Successful GitHub/Email auth returns to the existing `/dashboard`.
+- Current verification: focused inherited Phase 4/5 tests PASS, Worker syntax PASS, Vite production build PASS.
+- The production Cloudflare Worker still implements auth routes only; the frontend's product API calls are not yet backed by deployed Worker product routes.
+- Critical next boundary: exchange/verify Firebase identity server-side and mint the same first-party Webcanbe session before exposing private product APIs.
+- Master plan: `docs/phase5.md`.
+
+Next execution order:
+1. P5.1 unified first-party session boundary for Google + Firebase identities.
+2. P5.2 activate real hosted product APIs and durable account/workspace data.
+3. P5.3 account/workspace persistence.
+4. P5.4 Marketplace → purchase → entitlement → working copy.
+5. P5.5 production payment provider.
+6. P5.6 persisted editor/save/reload/export.
+7. P5.7 connect the existing seller/review/assessment/release/listing pipeline.
+8. P5.8 launch hardening and production smoke test.
+
+---
+
 # PHASE 5 CLOUDFLARE AUTH DEPLOY CHECKPOINT — 2026-09-19 KST
 
 - Production branch: `main`.
