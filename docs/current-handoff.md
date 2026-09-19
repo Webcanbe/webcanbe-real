@@ -1,3 +1,25 @@
+# PHASE 5 EXPLICIT SAVE + STALE DRAFT POLICY CHECKPOINT — 2026-09-19 KST
+
+- The Code surface now makes the save authority explicit instead of treating draft backup like source acceptance.
+- A persistent save-policy banner distinguishes:
+  - accepted source is current
+  - unsaved drafts
+  - stale/conflicting drafts
+- Drafts are still automatically backed up for recovery, but the UI now states that recovery backup does **not** change accepted source, preview, history, project search, or export.
+- `Save source` / `Cmd/Ctrl+S` accepts the current file only after validation.
+- `Save all drafts` / `Shift+Cmd/Ctrl+S` accepts current drafts together through the existing validated source transaction.
+- Stale drafts are detected against the current accepted HEAD before a code-save request is sent.
+- Save buttons are disabled for stale drafts rather than relying only on a later server rejection.
+- The existing server `expectedRevision` / durable CAS boundary remains the final authority; client preflight is only an earlier truthful guard.
+- The editor shows how many drafts are pending and a short accepted HEAD revision.
+- Rebase remains allowed only when the accepted bytes for that file are unchanged; otherwise manual reconciliation is required.
+- Export tooltip/help now states that exports contain the last accepted source and exclude unsaved Code drafts.
+- Added `src/phase5-editor-save-policy.test.ts`.
+- Verification run `35450086111`: secret scan PASS, save-policy/search/navigation regressions PASS, production build PASS, Wrangler dry-run PASS.
+- Dashboard and landing unchanged.
+
+---
+
 # PHASE 5 BOUNDED PROJECT SOURCE SEARCH CHECKPOINT — 2026-09-19 KST
 
 - Added project-wide accepted-source search as a real read-only editor capability.
