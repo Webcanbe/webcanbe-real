@@ -1,5 +1,21 @@
 # WebCanBe project record
 
+## 2026-09-19: Legal/privacy data-flow review completed
+
+The production Privacy Policy now matches the implemented authentication and
+storage model rather than an earlier Google-only design. It discloses Google
+OIDC scope limits, Firebase Authentication for GitHub and Email/Password,
+server-side Firebase token exchange, Secure HttpOnly Webcanbe sessions,
+Cloudflare infrastructure, Supabase-hosted PostgreSQL, provider-profile data,
+and the rule that email alone is not authority to merge provider identities.
+
+The Terms continue to describe unfinished payment/deployment features as
+pre-release or unavailable instead of presenting simulated capabilities as
+active. Regression coverage in `src/phase5-privacy-current.test.ts` protects
+the core disclosures and security contact from silent drift.
+
+---
+
 ## 2026-09-19: Live Worker-first routing verified and account authority summary added
 
 The Worker-first static-routing correction is now observed live rather than
