@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: Privacy-safe Worker request observability
+
+The production Worker now generates a request ID for every request and returns
+it through `X-Request-ID`. This provides a stable correlation value for
+production debugging without requiring user identity, token, or request-body
+logging.
+
+The bounded telemetry helper records only event name, request ID, path, and
+HTTP status. Authentication tokens, cookies, CSRF values, email/profile data,
+database credentials/connection strings, request bodies, and future payment
+secrets are deliberately excluded. Focused tests assert that extra sensitive
+fields passed to the logger are discarded.
+
+This is the baseline observability layer; external log retention and alerting
+remain a separate infrastructure decision.
+
+---
+
 ## 2026-09-19: Production database readiness endpoint
 
 A same-origin Worker readiness endpoint now verifies the deployment/database
