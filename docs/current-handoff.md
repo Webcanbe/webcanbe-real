@@ -1,3 +1,25 @@
+# PHASE 5 EXPLICIT IDENTITY LINKING CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `e0e7f876272d68175a3639811f96b7b5a98ca066`.
+- Added server-only explicit identity link boundary in `worker/identity-link.js`.
+- Linking requires:
+  - an already authenticated first-party Webcanbe DB session
+  - revalidation that the session is active, unexpired, and not disabled
+  - CSRF validation at the existing private Worker boundary
+  - a freshly verified Firebase ID token
+  - exact issuer + subject identity mapping
+- Same-account existing mappings are idempotent.
+- An inactive mapping can be reactivated only when it already belongs to the same internal user.
+- An identity mapped to another internal user returns a conflict and is not merged.
+- Email address is never accepted as linking authority.
+- Worker route prepared: `/__webcanbe/api/account/identities/link/firebase`.
+- Client method prepared: `hostedProductClient.linkFirebaseIdentity(idToken)`.
+- No account-link UI is activated yet; wait for Hyperdrive production smoke before exposing it.
+- Verification run `35433139579`: secret scan PASS, focused tests PASS, Worker syntax PASS, Vite build PASS, Wrangler dry-run PASS.
+- Dashboard UI unchanged.
+
+---
+
 # PHASE 5 LEGAL DATA-FLOW CONSISTENCY CHECKPOINT — 2026-09-19 KST
 
 - Privacy Policy is aligned with the currently implemented production architecture:
