@@ -60,6 +60,14 @@ describe("Phase 5 Firebase Authentication", () => {
     expect(app).toContain("go(next)")
   })
 
+  it("keeps the public Firebase project ID in the Worker rather than requiring another runtime secret", () => {
+    const worker = fs.readFileSync("worker/index.js", "utf8")
+    const deploy = fs.readFileSync("scripts/cloudflare-deploy.mjs", "utf8")
+    expect(worker).toContain('const FIREBASE_PROJECT_ID = "webcanbe-b607e"')
+    expect(deploy).not.toContain("VITE_FIREBASE_PROJECT_ID")
+    expect(deploy).not.toContain("FIREBASE_PROJECT_ID")
+  })
+
   it("pins the Firebase web SDK in the application dependency graph", () => {
     expect(pkg.dependencies?.firebase).toBe("^12.19.0")
   })

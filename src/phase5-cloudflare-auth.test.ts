@@ -49,6 +49,6 @@ describe("Phase 5 Cloudflare Google auth", () => {
     expect(client).toContain("/__webcanbe/auth/firebase-exchange")
     expect(worker).toContain('path === "/__webcanbe/auth/firebase-exchange"')
     expect(worker).toContain("verifyFirebaseIdToken")
-    expect(worker).toContain("FIREBASE_PROJECT_ID")
+    expect(worker).toContain('const FIREBASE_PROJECT_ID = "webcanbe-b607e"')
   })
 })
