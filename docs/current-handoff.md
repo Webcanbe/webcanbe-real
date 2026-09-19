@@ -1,3 +1,20 @@
+# PHASE 5 SEO / CANONICAL / REAL 404 CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `4025da71e5cc4f3324274dde926e71a20fd83ec5`.
+- Added route-specific document title, description, OpenGraph, Twitter, robots meta, and canonical URL synchronization.
+- Aliases canonicalize to preferred routes:
+  - `/templates` → `/browse`
+  - `/pricing` → `/plans`
+  - `/privacy` → `/policy`
+- Public docs/project routes receive canonical URLs.
+- Private or unknown client routes are marked `noindex, nofollow`.
+- Worker now classifies known SPA routes; unknown HTML navigation requests return the existing React 404 surface with a **real HTTP 404 status** instead of SPA 200.
+- Asset requests are unaffected by the HTML-navigation check.
+- Verification: focused Phase 4/5 tests PASS, Worker syntax PASS, Vite production build PASS, Wrangler bundle dry-run PASS.
+- No dashboard or landing visual redesign.
+
+---
+
 # PHASE 5 ROUTE / RENDER FAILURE HARDENING CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `d9744bb06a0e906c97998f78cea403cfcb12d947`.
