@@ -1,0 +1,24 @@
+name: Phase 5 durable editor export verify
+on:
+  push:
+    branches: [phase5-editor-durable-export]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare dedicated runtime profile
+        run: npm run runtime:prepare
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Durable save and standalone export regressions
+        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts worker/materialization.test.js
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
