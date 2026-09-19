@@ -1,3 +1,15 @@
+# PHASE 5 PRIVATE ROUTE NOINDEX CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `8200a0d54bfeaa8bd4aac81934cbcb6fc661f5ba`.
+- Private/authenticated SPA routes now receive `X-Robots-Tag: noindex, nofollow` at the Worker response layer.
+- Covered paths include dashboard, dashboard-preview, projects, purchases, settings, workspace, checkout, seller, control, login/signup, and auth-complete.
+- Public routes such as landing, Marketplace, docs, plans, and public project detail remain indexable.
+- This complements `robots.txt`; it does not rely on robots exclusion alone.
+- No UI change.
+- Verification: focused Phase 4/5 tests PASS, Worker syntax PASS, Vite build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 BASELINE SECURITY HEADERS + CRAWLER POLICY CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `1126a793127cfb044a6c7a21ce36e045016abc2e`.
