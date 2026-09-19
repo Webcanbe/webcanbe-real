@@ -13,7 +13,7 @@ describe("Phase 5 Cloudflare Google auth", () => {
   it("routes the auth boundary through the Worker before SPA assets", () => {
     expect(wrangler).toContain('"main": "./worker/index.js"')
     expect(wrangler).toContain('"binding": "ASSETS"')
-    expect(wrangler).toContain('"/__webcanbe/auth/*"')
+    expect(wrangler).toContain('"run_worker_first": true')
     expect(wrangler).toContain('"single-page-application"')
   })
 
