@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /__webcanbe/
+Disallow: /dashboard
+Disallow: /dashboard-preview
+Disallow: /workspace/
+Disallow: /projects
+Disallow: /purchases
+Disallow: /settings
+Disallow: /checkout/
+Disallow: /seller
+Disallow: /control
+Disallow: /login
+Disallow: /signup
+Disallow: /auth/
+
+Sitemap: https://webcanbe.com/sitemap.xml
