@@ -711,6 +711,18 @@ No server secret values belong in `VITE_*` variables.
 
 ---
 
+## 16. User-wide session revocation
+
+- backend route prepared: `POST /__webcanbe/api/account/sessions/revoke-all`
+- requires live DB session + CSRF
+- revokes all active `wcb_sessions` for the internal user
+- clears current first-party cookie
+- client method: `HostedProductClient.revokeAllSessions()`
+- UI is intentionally not activated until Hyperdrive/session smoke passes
+- full destructive account deletion remains intentionally deferred until retention rules are defined
+
+---
+
 ## 16. Production smoke sequence after Hyperdrive is connected
 
 Run in this order.
