@@ -54,8 +54,15 @@ for (const path of files) {
     if (!placeholderPassword(password)) findings.push({ path, kind: "PostgreSQL URL with embedded password" })
   }
 
+  // Phase 2 compatibility fixtures intentionally contain names such as VITE_SECRET
+  // and VITE_ACCESS_TOKEN to test rejection behavior. Exempt only that variable-name
+  // heuristic for those historical test/evidence fixtures; all actual token, PEM,
+  // PostgreSQL password, and forbidden-file scans above still run on them.
+  const viteSecretFixture =
+    path.startsWith("docs/reports/phase2-") ||
+    /^src\/webcanbe-engine\/phase2-[^/]*\.test\.(?:ts|js)$/.test(path)
   const viteSecret = /\bVITE_[A-Z0-9_]*(?:SECRET|PASSWORD|PRIVATE_KEY|SERVICE_ROLE|ACCESS_TOKEN)[A-Z0-9_]*\b/g
-  if (viteSecret.test(text)) findings.push({ path, kind: "server secret exposed through VITE_* variable" })
+  if (!viteSecretFixture && viteSecret.test(text)) findings.push({ path, kind: "server secret exposed through VITE_* variable" })
 }
 
 if (findings.length) {
