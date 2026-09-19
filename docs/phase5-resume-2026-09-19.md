@@ -989,3 +989,31 @@ If the user says “continue Phase 5” after a session break:
 5. if the user provides a Hyperdrive configuration ID, add the `HYPERDRIVE` binding, deploy, and run the production smoke sequence
 6. do not touch the dashboard UI
 7. update all Phase 5 markdown records after each completed slice
+
+
+---
+
+## Database backup / recovery operations
+
+Current Supabase project is on Free and must not rely on managed automatic backups.
+
+Prepared operator tooling:
+- `scripts/db/backup.mjs`
+- `scripts/db/verify-backup.mjs`
+- `npm run db:backup`
+- `npm run db:backup:verify -- <archive>`
+- runbook: `docs/operations/database-backup-restore.md`
+
+Backup properties:
+- data-only `public.wcb_*`
+- secret URL not passed in command-line args
+- SHA-256 checksum written next to archive
+- `pg_restore --list` verification
+- `backups/` is gitignored
+
+Recovery rule:
+- do not first restore over the only production DB
+- restore into a separate recovery DB/project
+- apply repo schema/migrations first
+- validate security/readiness/auth/product state
+- only then cut Hyperdrive over
