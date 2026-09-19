@@ -8,6 +8,23 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — explicit provider identity linking prepared
+
+- P5.3 provider-linking server boundary is implemented.
+- A live first-party DB session + valid CSRF + freshly verified Firebase ID token is required.
+- Mapping authority is exact issuer+subject only.
+- Same-account linking is idempotent.
+- Inactive same-account mapping can be reactivated.
+- Cross-account identity collisions are refused; no automatic merge occurs.
+- Email is never used as identity-linking authority.
+- Route: `/__webcanbe/api/account/identities/link/firebase`.
+- Client method: `hostedProductClient.linkFirebaseIdentity(idToken)`.
+- UI activation is intentionally deferred until Hyperdrive production smoke.
+- Verification run `35433139579` passed all Phase 5 gates.
+- Dashboard UI unchanged.
+
+---
+
 ## Latest recovery delta — legal/privacy consistency complete
 
 - Launch-hardening legal review is complete.
