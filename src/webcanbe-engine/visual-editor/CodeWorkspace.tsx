@@ -100,19 +100,24 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const initialHashes = new Map<string, string>()
   for (const entry of ledger?.transactions ?? []) if (entry.success) for (const [file, version] of Object.entries(entry.versions ?? {})) if (!initialHashes.has(file)) initialHashes.set(file, version.before)
 
+  async function readAcceptedSnapshot() {
+    const [listing, history] = await Promise.all([requests.current("files"), requests.current("history")])
+    const revision = listing.data.revision
+    if (!listing.ok || !history.ok || !revision || history.data.revision !== revision) return { ok: false as const, error: listing.data.error ?? history.data.error ?? "Accepted source changed while reading its history." }
+    return { ok: true as const, revision, files: listing.data.files ?? [], history: history.data.history }
+  }
+
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; ++serial.current } }, [])
   useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); setRecentFiles([]); setQuickOpen(false); setFindOpen(false); setProjectSearchOpen(false); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError(""); setReveal(undefined); ++serial.current }, [projectId])
   useEffect(() => {
     if (!connected) return
     const sequence = ++serial.current
     void (async () => {
-      const listing = await requests.current("files")
+      const snapshot = await readAcceptedSnapshot()
       if (sequence !== serial.current) return
-      if (!listing.ok) { setStatus(listing.data.error ?? "Source unavailable."); return }
-      setFiles(listing.data.files ?? []); setHead(listing.data.revision ?? "")
-      setActive(current => current || listing.data.files?.[0]?.file || "")
-      const history = await requests.current("history")
-      if (sequence === serial.current && history.ok) setLedger(history.data.history)
+      if (!snapshot.ok) { setStatus(snapshot.error); return }
+      setFiles(snapshot.files); setHead(snapshot.revision); setLedger(snapshot.history)
+      setActive(current => current || snapshot.files[0]?.file || "")
     })().catch(() => { if (sequence === serial.current) setStatus("Source connection unavailable. Drafts are retained.") })
   }, [epoch, connected, projectId])
   useEffect(() => {
@@ -262,16 +267,16 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     const sequence = ++acceptedRefreshSequence.current
     setBusy(true); setStatus("Refreshing accepted source and history…")
     try {
-      const [listing, history] = await Promise.all([requests.current("files"), requests.current("history")])
+      const snapshot = await readAcceptedSnapshot()
       if (!mounted.current || sequence !== acceptedRefreshSequence.current) return
-      const revision = listing.data.revision
-      if (!listing.ok || !history.ok || !revision || history.data.revision !== revision) { setStatus(listing.data.error ?? history.data.error ?? "Accepted source changed during refresh. Retry against the current revision."); return }
+      if (!snapshot.ok) { setStatus(snapshot.error + " Retry against the current revision."); return }
+      const revision = snapshot.revision
       const currentFile = active ? await requests.current("files", { file: active }) : undefined
       if (!mounted.current || sequence !== acceptedRefreshSequence.current) return
       if (currentFile && (!currentFile.ok || currentFile.data.revision !== revision || currentFile.data.source === undefined)) { setStatus(currentFile.data.error ?? "Accepted source changed during refresh. Retry against the current revision."); return }
-      setFiles(listing.data.files ?? [])
+      setFiles(snapshot.files)
       setHead(revision)
-      setLedger(history.data.history)
+      setLedger(snapshot.history)
       if (active && currentFile?.data.source !== undefined) {
         const source = currentFile.data.source
         const hash = currentFile.data.files?.find(file => file.file === active)?.hash ?? ""
