@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this recovery update: `06df252f54379cf4fcde1f67ae24ed5ed2cb0a4d`  
+Code baseline before this recovery update: `90e0707480789d55fecdf52b44d485890523302d`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
