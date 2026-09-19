@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this recovery update: `706620f50034df1b0053a332b3c6a104f0e7f336`  
+Code baseline before this recovery update: `1126a793127cfb044a6c7a21ce36e045016abc2e`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
@@ -744,7 +744,40 @@ With an empty catalog DB:
 
 ---
 
-## 17. Next implementation sequence after live DB smoke
+## 17. Baseline response security headers and crawler policy
+
+Implemented in:
+
+- `worker/security-headers.js`
+- `public/robots.txt`
+- `public/sitemap.xml`
+
+Current response headers:
+
+- HSTS `max-age=31536000`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- static referrer policy `strict-origin-when-cross-origin`
+- authenticated dynamic endpoints remain `no-referrer`
+- permissions policy disables camera/microphone/geolocation
+- COOP is `same-origin-allow-popups` for Firebase/GitHub popup compatibility
+
+Do not change COOP to strict `same-origin` without retesting popup auth.
+
+CSP is **not** enabled yet. Do not add a guessed CSP. The retained landing must
+first receive a dedicated inline/script/style/network inventory and compatibility
+test.
+
+Crawler policy:
+
+- private/authenticated/API routes are disallowed in `robots.txt`
+- sitemap contains only public routes
+- `/dashboard-preview` is also excluded from crawling even though the route
+  remains available for development verification
+
+---
+
+## 18. Next implementation sequence after live DB smoke
 
 ### P5.2 continuation
 
@@ -825,7 +858,7 @@ Launch hardening:
 
 ---
 
-## 18. Things not to redo
+## 19. Things not to redo
 
 A future session should **not** restart or repeat these unless there is evidence they are broken:
 
@@ -847,7 +880,7 @@ Continue from Hyperdrive connection.
 
 ---
 
-## 19. Key files to read first in a new session
+## 20. Key files to read first in a new session
 
 In order:
 
@@ -867,7 +900,7 @@ In order:
 
 ---
 
-## 20. Secret-handling rule
+## 21. Secret-handling rule
 
 Never request or store in chat/GitHub:
 
@@ -881,7 +914,7 @@ For the immediate next step, the only value ChatGPT needs from the user is the *
 
 ---
 
-## 21. Resume instruction for the next ChatGPT session
+## 22. Resume instruction for the next ChatGPT session
 
 If the user says “continue Phase 5” after a session break:
 
