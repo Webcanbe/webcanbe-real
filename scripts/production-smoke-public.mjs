@@ -61,7 +61,7 @@ async function run() {
   assert("popup-compatible COOP retained", root.headers.get("cross-origin-opener-policy") === "same-origin-allow-popups", root.headers.get("cross-origin-opener-policy") || "missing")
   const csp = root.headers.get("content-security-policy") || ""
   assert("CSP enforced", csp.includes("default-src 'self'") && csp.includes("script-src 'self'"), csp || "missing")
-  assert("CSP blocks unsafe eval", !csp.includes("'unsafe-eval'"), csp || "missing")
+  assert("CSP blocks unsafe eval", Boolean(csp) && !csp.includes("'unsafe-eval'"), csp || "missing")
   assert("request ID attached", isUuid(root.headers.get("x-request-id")), root.headers.get("x-request-id") || "missing")
 
   const missing = await request("/__webcanbe-smoke-missing-route", { headers: { Accept: "text/html" } })
