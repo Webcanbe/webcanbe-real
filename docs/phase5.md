@@ -89,11 +89,12 @@ Goal: replace local/demo product state with real server data.
 - [ ] Create a dedicated login credential inheriting `webcanbe_runtime`, then create/bind Cloudflare Hyperdrive.
 - [x] Prepare a PostgreSQL-backed Worker session adapter using the existing `wcb_identity_accounts`, `wcb_sessions`, `wcb_workspace_members`, and `wcb_disabled_users` authority tables.
 - [x] Preserve issuer+subject identity mapping without unsafe automatic email linking; new verified identities can atomically receive an internal UUID + owner workspace once DB mode is activated.
-- [ ] Expose authenticated workspace/account lookup.
+- [x] Expose authenticated workspace lookup through the Worker DB-session boundary.
 - [x] Implement Workers-compatible catalog browse/detail using the retained Phase 3 SQL and public response contract.
 - [x] Route public catalog requests through the Worker and fail closed with 503 while the database binding is absent.
-- [ ] Expose purchases and entitlements.
-- [ ] Expose working-copy list/materialization.
+- [x] Expose read-only purchases/entitlements through a user-scoped DB query.
+- [x] Expose read-only working-copy list with active workspace membership checks.
+- [ ] Expose working-copy materialization mutation after live Hyperdrive/session verification.
 - [ ] Preserve server-side workspace/user authorization on every mutation.
 - [ ] Remove production dependence on local demo arrays where a real API exists.
 - [ ] Add explicit loading, empty, permission-denied, and failure states.
@@ -223,7 +224,7 @@ Unless separately promoted into scope:
 
 ## Immediate next task
 
-**Create the dedicated DB login + Cloudflare Hyperdrive binding, then activate DB-backed sessions and public catalog reads.**
+**Create the dedicated DB login + Cloudflare Hyperdrive binding, then run live DB-session/catalog/private-read smoke.**
 
 Connected infrastructure audit:
 - Supabase organization discovered: `Webcanbe`.
