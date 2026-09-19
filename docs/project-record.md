@@ -1,5 +1,24 @@
 # WebCanBe project record
 
+## 2026-09-19: Provider-independent account profile persistence
+
+Production PostgreSQL now has `wcb_user_profiles`, keyed only by the internal
+Webcanbe user UUID. Verified provider metadata can seed and refresh email,
+verification state, and picture data, while display name becomes independent
+Webcanbe account state. Email is deliberately not used as an automatic
+cross-provider linking key; issuer+subject remains the identity authority.
+
+DB-session resolution now returns persisted profile information, and the Worker
+has CSRF-protected account read/update routes. The update contract currently
+permits only a bounded display-name change, preventing the browser from
+asserting email/provider identity. No dashboard or landing UI was changed.
+
+The migration was applied to production Supabase and browser roles remain
+stripped of direct Webcanbe-table privileges. Security Advisor reports zero
+findings.
+
+---
+
 ## 2026-09-19: Full Phase 5 session recovery snapshot committed
 
 A dedicated continuity document was added at
