@@ -209,7 +209,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Add operator-controlled production DB backup + verification scripts and a recovery-first runbook for the current Supabase Free project.
 - [x] Add guarded Cloudflare Worker rollback tooling and runbook with explicit version IDs and production confirmation.
 - [ ] Perform one controlled live rollback drill before launch; script/CI guardrails are tested, production rollback itself is intentionally not yet exercised.
-- [ ] Legal pages match actual data handling.
+- [x] Legal/privacy pages match the current authentication, session, Cloudflare, Firebase, and Supabase/PostgreSQL data flow; regression coverage locks the disclosure against silent drift.
 - [x] Add `robots.txt` that excludes authenticated/private routes and `/__webcanbe/`.
 - [x] Add server-side `X-Robots-Tag: noindex, nofollow` on private/authenticated SPA routes.
 - [x] Add public-only `sitemap.xml`.
