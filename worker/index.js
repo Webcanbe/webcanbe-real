@@ -466,6 +466,27 @@ async function privateProduct(request, env, path, traceId) {
   }
 }
 
+async function directLanding(request, env) {
+  if (request.method !== "GET" && request.method !== "HEAD") return undefined
+  const source = new URL(request.url)
+  source.pathname = "/wcb-landing/index.html"
+  source.search = ""
+  const landingRequest = new Request(source.href, {
+    method: request.method,
+    headers: request.headers,
+  })
+  const asset = await env.ASSETS.fetch(landingRequest)
+  if (!asset.ok) return undefined
+  const headers = new Headers(asset.headers)
+  headers.set("Content-Type", "text/html; charset=utf-8")
+  headers.set("Cache-Control", "public, max-age=0, must-revalidate")
+  return applySecurityHeaders(new Response(asset.body, {
+    status: asset.status,
+    statusText: asset.statusText,
+    headers,
+  }))
+}
+
 async function readiness(request, env, traceId) {
   if (!requireSameOriginPost(request)) return json({ error: "Readiness request refused." }, 403)
   if (!databaseAvailable(env)) return json({ worker: "ok", database: "unconfigured", schema: "unknown" }, 503)
@@ -516,6 +537,10 @@ export default {
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/" && (request.method === "GET" || request.method === "HEAD")) {
+        response = await directLanding(request, env)
+        if (!response) response = applySecurityHeaders(await env.ASSETS.fetch(request))
+      }
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
