@@ -202,7 +202,8 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Baseline production request observability: per-request response ID + bounded structured failure logs with secrets/personal data excluded.
 - [ ] Connect long-term log retention/alerting after infrastructure choice.
 - [x] Add operator-controlled production DB backup + verification scripts and a recovery-first runbook for the current Supabase Free project.
-- [ ] Rollback procedure tested.
+- [x] Add guarded Cloudflare Worker rollback tooling and runbook with explicit version IDs and production confirmation.
+- [ ] Perform one controlled live rollback drill before launch; script/CI guardrails are tested, production rollback itself is intentionally not yet exercised.
 - [ ] Legal pages match actual data handling.
 - [x] Add `robots.txt` that excludes authenticated/private routes and `/__webcanbe/`.
 - [x] Add server-side `X-Robots-Tag: noindex, nofollow` on private/authenticated SPA routes.
