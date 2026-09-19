@@ -42,6 +42,13 @@ export async function firebaseAuthenticated() {
   return Boolean(auth.currentUser)
 }
 
+export async function currentFirebaseIdToken(forceRefresh = false) {
+  if (!firebaseAuthConfigured()) return undefined
+  const auth = firebaseAuth()
+  await auth.authStateReady()
+  return auth.currentUser ? auth.currentUser.getIdToken(forceRefresh) : undefined
+}
+
 export function signInWithGithubFirebase(): Promise<UserCredential> {
   return signInWithPopup(firebaseAuth(), new GithubAuthProvider())
 }
