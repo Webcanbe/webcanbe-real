@@ -8,6 +8,22 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — editor keyboard shortcuts
+
+- Compatible editor now exposes source-safe keyboard shortcuts on top of the existing source transaction/history authority.
+- Project transaction undo: `Cmd/Ctrl+Z` outside text/code editing.
+- Project transaction redo: `Shift+Cmd/Ctrl+Z` or `Ctrl+Y`.
+- CodeMirror keeps local text undo/redo while focused.
+- Code save: `Cmd/Ctrl+S`; save all dirty drafts: `Shift+Cmd/Ctrl+S`.
+- Surface navigation: `Shift+V/C/S/H` for Visual/Code/Split/History.
+- Preview: `V` Select, `I` Interact, `Shift+M/T/D` viewport, `Esc` clear selection.
+- Export: `Shift+Cmd/Ctrl+E`.
+- `?` opens the in-editor shortcut guide.
+- Verification run `35446327861` passed secret scan, source/editor regressions, Vite build and Wrangler dry-run.
+- Dashboard and landing remain frozen/unchanged.
+
+---
+
 ## Latest recovery delta — explicit provider identity linking prepared
 
 - P5.3 provider-linking server boundary is implemented.
