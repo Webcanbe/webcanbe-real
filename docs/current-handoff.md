@@ -1,3 +1,24 @@
+# PHASE 5 ENFORCED CSP CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `1386f4006bd162edbff89613e2557778d8b62ecb`.
+- Completed a retained-landing + React-root CSP compatibility inventory before enforcement.
+- Retained landing has no inline runtime scripts, external runtime scripts, eval, or new Function.
+- Existing landing does require inline styles, so style policy retains `'unsafe-inline'`.
+- Enforced `Content-Security-Policy` now:
+  - restricts scripts to same-origin
+  - blocks inline script attributes
+  - does not allow unsafe-eval
+  - blocks objects and framing
+  - restricts base URI/forms/workers
+  - explicitly permits Firebase/Google auth connectivity/frame origins
+- Added `src/phase5-csp-compat.test.ts` so runtime external resources/inline scripts cannot silently return.
+- Inventory report: `docs/reports/phase5-csp-inventory.md`.
+- Verification passed: focused Phase 4/5 tests, Worker syntax, Vite build, Wrangler bundle dry-run.
+- No dashboard/landing visual change.
+- Recovery snapshot updated in the same work cycle.
+
+---
+
 # PHASE 5 PRIVACY-SAFE REQUEST OBSERVABILITY CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `90e0707480789d55fecdf52b44d485890523302d`.
