@@ -41,8 +41,11 @@ function sourceSearch(files: Map<string,string>, query: string, caseSensitive: b
       perFile += 1
       if (!match[0].length) pattern.lastIndex += 1
     }
+    if (results.length >= limit) {
+      if (pattern.exec(source) || entries.length > scannedFiles) truncated = true
+      break
+    }
     if (perFile >= SOURCE_SEARCH_LIMITS.perFile && pattern.exec(source)) truncated = true
-    if (results.length >= limit) { if (entries.length > scannedFiles) truncated = true; break }
   }
   return { results, scannedFiles, totalFiles: files.size, scannedBytes, truncated }
 }
