@@ -1,5 +1,25 @@
 # WebCanBe project record
 
+## 2026-09-19: Explicit save authority and stale-draft guardrails
+
+The Code workspace now presents its actual persistence model directly in the UI.
+Drafts are automatically backed up only for recovery; backup does not advance accepted
+source, preview, source history, project search, or exported bytes. Acceptance remains
+an explicit validated Save source / Save all transaction.
+
+The editor tracks each dirty draft's base revision against the current accepted HEAD.
+A stale draft is blocked before a code-save request is sent, while the existing
+server-side expectedRevision and durable CAS checks remain the final source authority.
+Files may be rebased only when their accepted bytes have not changed; otherwise the
+draft must be reconciled manually rather than overwriting newer source.
+
+The Code surface now shows accepted/draft/conflict state, pending draft count and a
+short HEAD revision. Export help also states that unsaved drafts are excluded.
+Verification run `35450086111` passed the secret scan, save-policy/search/navigation
+regressions, production build and Wrangler dry-run.
+
+---
+
 ## 2026-09-19: Bounded project-wide accepted-source search
 
 The Compatible editor now has a server-side project search operation rather than
