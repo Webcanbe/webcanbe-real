@@ -13,7 +13,9 @@ describe("Phase 5 launch hardening", () => {
     expect(security).toContain('"X-Content-Type-Options": "nosniff"')
     expect(security).toContain('"Cross-Origin-Opener-Policy": "same-origin-allow-popups"')
     expect(security).toContain('"Permissions-Policy": "camera=(), microphone=(), geolocation=()"')
-    expect(security).not.toContain("Content-Security-Policy")
+    expect(security).toContain('"Content-Security-Policy": CONTENT_SECURITY_POLICY')
+    expect(security).toContain('"script-src \'self\'"')
+    expect(security).toContain('"style-src \'self\' \'unsafe-inline\'"')
   })
 
   it("applies security headers to static asset responses as well as dynamic responses", () => {
