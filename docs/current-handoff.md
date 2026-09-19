@@ -1,3 +1,23 @@
+# PHASE 5 SAFE PRODUCTION READ-MODE CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `706620f50034df1b0053a332b3c6a104f0e7f336`.
+- Added `productionReadProductMode()` / `productReadMode()` as a separate frontend capability boundary.
+- Activation flag is intentionally **absent** from production `index.html`; current UI/data behavior is unchanged.
+- Future activation flag:
+  `<meta name="wcb-product-read-mode" content="hosted">`
+- The read-only mode is prepared only for:
+  - workspace selector
+  - dashboard/product library reads
+  - purchases
+  - working-copy list
+  - account profile read/update through the existing Settings UI
+- Seller, Control, Checkout, and other mutation-heavy surfaces still use the full `hostedProductMode()` and therefore do not become live when read mode is activated.
+- Existing Settings UI was not redesigned; when read mode is later enabled it loads the real account profile, saves only display name through the server API, and treats provider email as non-editable authority.
+- Production flag must not be activated until Hyperdrive is bound and DB-session/private-read smoke passes.
+- Verification: focused Phase 4/5 tests PASS, Worker syntax PASS, Vite build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 ACCOUNT PROFILE PERSISTENCE CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `cd0d21fd43a0eee8f04ffba56e7a7ab233b9384c`.
