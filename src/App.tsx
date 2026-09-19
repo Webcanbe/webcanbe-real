@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { Component, useEffect, useMemo, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Github, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
@@ -669,6 +669,18 @@ function Control() {
 }
 
 function NotFound({path}:{path:string}){return <PublicShell><main className="not-found"><span className="signal">404</span><h1>This page does not exist.</h1><p><code>{path}</code> is not a Webcanbe route.</p><div><Link className="button primary" to="/">Back home</Link><Link className="button" to="/browse">Marketplace</Link></div></main></PublicShell>}
+
+class AppErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch(_error: Error, _info: ErrorInfo) {
+    // Worker/API failures carry request IDs server-side. Avoid logging user data here.
+  }
+  render() {
+    if (!this.state.failed) return this.props.children
+    return <PublicShell><main className="not-found"><span className="signal">500</span><h1>Something went wrong.</h1><p>Webcanbe could not finish rendering this page.</p><div><button className="button primary" type="button" onClick={()=>window.location.reload()}>Try again</button><Link className="button" to="/">Back home</Link></div></main></PublicShell>
+  }
+}
 export default function App() {
   const path=usePath(),directAuth=path==="/login"||path==="/signup",directNext=new URLSearchParams(window.location.search).get("next")||"/dashboard"
   const [authIntent,setAuthIntent]=useState<{signup:boolean;next:string}|null>(directAuth?{signup:path==="/signup",next:directNext}:null)
@@ -686,7 +698,7 @@ export default function App() {
   else if(basePath.startsWith("/workspace/"))page=<Protected><CompatibleWorkspace/></Protected>
   else if(basePath==="/projects")page=<Protected><Projects/></Protected>
   else if(basePath==="/purchases")page=<Protected><Purchases/></Protected>
-  else if(basePath==="/dashboard-preview")page=<Dashboard/>
+  else if(basePath==="/dashboard-preview")page=productionAuthMode()?<NotFound path={basePath}/>:<Dashboard/>
   else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
   else if(basePath==="/settings")page=<Protected><Settings/></Protected>
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
@@ -696,5 +708,5 @@ export default function App() {
   else if(basePath==="/control")page=<Protected><Control/></Protected>
   else page=<NotFound path={basePath}/>
   const closeAuth=()=>{setAuthIntent(null);if(directAuth){window.history.replaceState({},"","/");window.dispatchEvent(new PopStateEvent("popstate"))}}
-  return <>{page}{authIntent&&<Auth signup={authIntent.signup} next={authIntent.next} onClose={closeAuth}/>}</>
+  return <AppErrorBoundary>{page}{authIntent&&<Auth signup={authIntent.signup} next={authIntent.next} onClose={closeAuth}/>}</AppErrorBoundary>
 }
