@@ -1,5 +1,40 @@
 # WebCanBe project record
 
+## 2026-09-19: P5.1 first-party session unification and P5.2 backend audit
+
+Firebase-backed GitHub and Email/Password authentication no longer counts as
+backend authority merely because the Firebase client is signed in. After
+Firebase authentication, the browser obtains a Firebase ID token and posts it
+to the same-origin Cloudflare authentication boundary. The Worker validates an
+RS256 signature against Google's Firebase signing keys and checks the Firebase
+project audience/issuer, expiration, issued-at/authentication times, and a
+bounded non-empty UID. Only then does it mint the same Secure HttpOnly
+Webcanbe session used by the existing Google flow.
+
+New Webcanbe sessions retain canonical provider/subject fields so Google and
+Firebase subjects cannot collide accidentally. Persistent Firebase state may
+be used only to re-establish the first-party server session; protected
+production routes no longer accept Firebase client state directly. Logout
+clears both layers.
+
+The P5.2 audit also confirmed that the real product domain was already built in
+the Phase 2/3 hosted stack: `HostedProductController`,
+`PostgresProductDomainStore`, `PostgresIdentityStore` and
+`PostgresAccess`. That code is composed into a private Node HTTPS/PostgreSQL
+runtime, not the current Cloudflare static/auth Worker. Phase 5 must therefore
+reuse the PostgreSQL schema/domain rules through a Workers-compatible boundary
+instead of inventing a second catalog/purchase/workspace database. Managed
+PostgreSQL plus Cloudflare Hyperdrive is the preferred next runtime seam.
+
+CI covers real generated RS256 Firebase-token verification as well as the
+existing Phase 4/5 suite, Worker syntax, and production Vite build. Production
+Cloudflare observation of the new exchange route remained pending at this
+checkpoint.
+
+See [Phase 5 plan](phase5.md) and [current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-19: Phase 5 launch plan and Firebase authentication
 
 Phase 5 is now explicitly a launch/functionality phase rather than another UI
