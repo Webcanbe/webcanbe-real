@@ -1,5 +1,21 @@
 # WebCanBe project record
 
+## 2026-09-19: Full Phase 5 session recovery snapshot committed
+
+A dedicated continuity document was added at
+`docs/phase5-resume-2026-09-19.md` so work can resume after a lost ChatGPT
+session without reconstructing decisions from conversation history.
+
+The snapshot records the frozen dashboard/UI rules, React/Vite/Cloudflare
+deployment shape, Google + Firebase auth architecture, server-session migration
+path, Supabase production project and migrations, browser-role hardening,
+database roles, current Worker public/private routes, CI verification state,
+exact Hyperdrive blocker, post-binding production smoke plan, remaining Phase 5
+sequence, secret-handling rules, and a list of completed work that must not be
+repeated.
+
+---
+
 ## 2026-09-19: Dedicated Hyperdrive database role prepared
 
 The production database now contains a dedicated `webcanbe_hyperdrive` role.
