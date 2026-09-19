@@ -1,5 +1,20 @@
 # WebCanBe project record
 
+## 2026-09-19: Dedicated Hyperdrive database role prepared
+
+The production database now contains a dedicated `webcanbe_hyperdrive` role.
+It is intentionally NOLOGIN and inherits the already hardened
+`webcanbe_runtime` role, so no password-bearing database credential exists in
+source control or chat. The role is non-superuser and cannot create databases
+or roles.
+
+The only remaining credential operation is to enable LOGIN with an
+operator-generated password at the moment Cloudflare Hyperdrive is created.
+After that, Worker deployment can bind Hyperdrive without using the Supabase
+postgres superuser or browser-facing roles.
+
+---
+
 ## 2026-09-19: Durable DB sessions and private product reads prepared
 
 The production Worker can now switch from the temporary signed-cookie session
