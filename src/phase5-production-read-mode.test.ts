@@ -34,4 +34,29 @@ describe("Phase 5 production read-only product mode", () => {
     expect(seller).not.toContain("productReadMode()")
     expect(control).not.toContain("productReadMode()")
   })
+
+  it("keeps working-copy creation behind the full hosted mutation mode", () => {
+    const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("type DashboardView"))
+    expect(purchases).toContain("const mutationsEnabled = hostedProductMode()")
+    expect(purchases).toContain('if (!mutationsEnabled)')
+    expect(purchases).toContain("Creation not enabled")
+    expect(purchases).toContain("hostedProductClient.materialize")
+  })
+
+  it("never substitutes demo catalog or purchase rows for empty production data", () => {
+    const dashboard = app.slice(app.indexOf("function Dashboard()"), app.indexOf("function Settings()"))
+    const releaseProject = app.slice(app.indexOf("function releaseProject"), app.indexOf("function HubTabs"))
+    expect(dashboard).toContain("const catalog = lib.hosted ? lib.catalog : projects")
+    expect(dashboard).toContain("const purchaseRows = lib.hosted")
+    expect(dashboard).toContain("The production catalog is empty. Demo listings are not substituted.")
+    expect(releaseProject).not.toContain("projects[0]")
+  })
+
+  it("renders explicit dashboard loading and failure states before product data is trusted", () => {
+    const dashboard = app.slice(app.indexOf("function Dashboard()"), app.indexOf("function Settings()"))
+    expect(dashboard).toContain("if (lib.loading)")
+    expect(dashboard).toContain("Loading your product state")
+    expect(dashboard).toContain("if (lib.error)")
+    expect(dashboard).toContain("Dashboard data could not be loaded")
+  })
 })
