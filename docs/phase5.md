@@ -167,6 +167,7 @@ Exit gate: money state and product entitlement state cannot diverge silently.
 - [ ] No hosted runtime dependency is required by exported code.
 - [ ] Large-project and failure recovery tests.
 - [x] Add source-safe keyboard shortcuts and an in-editor shortcut guide for transaction undo/redo, code save/save-all, Visual/Code/Split/History navigation, preview interaction, viewport changes, selection clearing, and export. Text/code editing keeps its own local undo/redo instead of being hijacked by project history.
+- [x] Add fast code navigation: Quick Open/recent files, current-file find/replace with draft-only replacement semantics, and exact visual-selection/component/caller jumps into CodeMirror source ranges. Project-wide search remains deferred to a bounded server search API rather than browser-fetching every source file.
 
 Exit gate: edit → save → reload → continue → export works on a real persisted project.
 
