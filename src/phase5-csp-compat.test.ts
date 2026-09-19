@@ -6,7 +6,11 @@ const root = fs.readFileSync("index.html", "utf8")
 const security = fs.readFileSync("worker/security-headers.js", "utf8")
 
 const inlineScriptPattern = /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/gi
-const remoteRuntimePattern = /(?:src|href)=["']https?:\/\//gi
+const remoteRuntimePatterns = [
+  /<(?:script|img|source|video|audio|iframe)\b[^>]*(?:src|srcset)=["']https?:\/\//gi,
+  /<link\b(?=[^>]*rel=["'](?:stylesheet|preload|modulepreload|icon|apple-touch-icon)["'])[^>]*href=["']https?:\/\//gi,
+  /url\((?:["']?)https?:\/\//gi,
+]
 
 describe("Phase 5 CSP compatibility inventory", () => {
   it("keeps the retained landing free of runtime scripts and external runtime asset origins", () => {
