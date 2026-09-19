@@ -1017,3 +1017,25 @@ Recovery rule:
 - apply repo schema/migrations first
 - validate security/readiness/auth/product state
 - only then cut Hyperdrive over
+
+
+---
+
+## Cloudflare Worker rollback operations
+
+Prepared:
+- `scripts/cloudflare-rollback.mjs`
+- `docs/operations/cloudflare-rollback.md`
+- `npm run deploy:versions`
+- `npm run deploy:deployments`
+- `npm run deploy:rollback -- <VERSION_ID>`
+
+Guardrails:
+- exact UUID-shaped version ID required
+- `WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION` required
+- no automatic “previous version” selection
+- Worker rollback and DB recovery are separate procedures
+
+Important:
+- Cloudflare rollback does not rewind PostgreSQL rows/schema or external provider state.
+- A controlled live production rollback drill is still pending.
