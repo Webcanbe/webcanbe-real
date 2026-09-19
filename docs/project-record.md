@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: Guarded Cloudflare Worker rollback operations
+
+Webcanbe now has an explicit rollback wrapper for Cloudflare Worker
+deployments. The operator must choose a specific Worker Version ID and set a
+production confirmation variable; the script never silently rolls back to
+whatever happens to be “previous”.
+
+The repository also exposes version/deployment inspection commands and a
+production runbook. Worker rollback is intentionally separated from database
+recovery because Cloudflare version rollback does not revert PostgreSQL rows,
+schema migrations, payment-provider state, Firebase accounts, or other external
+side effects.
+
+Script guardrails and CI are verified. A deliberate live production rollback
+drill remains pending until a safe window/version is chosen.
+
+---
+
 ## 2026-09-19: Production database backup and recovery operations
 
 Because the current Supabase Free project has no managed automatic backup
