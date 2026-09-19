@@ -81,7 +81,12 @@ Goal: replace local/demo product state with real server data.
 
 - [ ] Deploy the complete existing `/__webcanbe/api/product/*` boundary.
 - [x] Build the Worker/Hyperdrive connection seam without creating a second data model.
-- [ ] Bind a real managed PostgreSQL database/Hyperdrive configuration to production.
+- [x] Provision a real managed PostgreSQL database in Supabase Seoul (`webcanbe-production`).
+- [x] Apply the retained authoritative Phase 3 PostgreSQL schema (36 Webcanbe tables + triggers/functions).
+- [x] Remove all `anon`/`authenticated` privileges from Webcanbe tables/functions and lock future default grants.
+- [x] Fix mutable `search_path` warnings on Webcanbe PostgreSQL functions.
+- [x] Create a non-login `webcanbe_runtime` server role with bounded DML privileges.
+- [ ] Create a dedicated login credential inheriting `webcanbe_runtime`, then create/bind Cloudflare Hyperdrive.
 - [x] Prepare a PostgreSQL-backed Worker session adapter using the existing `wcb_identity_accounts`, `wcb_sessions`, `wcb_workspace_members`, and `wcb_disabled_users` authority tables.
 - [x] Preserve issuer+subject identity mapping without unsafe automatic email linking; new verified identities can atomically receive an internal UUID + owner workspace once DB mode is activated.
 - [ ] Expose authenticated workspace/account lookup.
@@ -218,12 +223,14 @@ Unless separately promoted into scope:
 
 ## Immediate next task
 
-**Provision the managed PostgreSQL database and Hyperdrive binding, then activate DB-backed sessions and public catalog reads.**
+**Create the dedicated DB login + Cloudflare Hyperdrive binding, then activate DB-backed sessions and public catalog reads.**
 
 Connected infrastructure audit:
 - Supabase organization discovered: `Webcanbe`.
 - Organization plan: Free.
-- Current Supabase projects: none.
+- Supabase project created: `webcanbe-production` (`ap-northeast-2`, Seoul).
+- Authoritative schema migration applied successfully.
+- Supabase security advisors are currently clean after server-only privilege hardening.
 - Reported project cost: **$0/month**.
 - Recommended region for the current Korea-based launch path: `ap-northeast-2` (Seoul).
 - Project creation has not been performed because the external project-creation action requires explicit organization/cost confirmation.
