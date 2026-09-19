@@ -2,6 +2,32 @@
   "name": "webcanbe-real",
   "compatibility_date": "2026-09-18",
   "main": "./worker/index.js",
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "136713667501",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    },
+    {
+      "name": "PUBLIC_API_RATE_LIMITER",
+      "namespace_id": "136713667502",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    },
+    {
+      "name": "PRIVATE_API_RATE_LIMITER",
+      "namespace_id": "136713667503",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

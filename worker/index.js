@@ -8,6 +8,7 @@ import { databasePurchases, databaseWorkspaceProjects } from "./product-private.
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
+import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -32,6 +33,10 @@ function json(value, status = 200, extra = {}) {
     status,
     headers: { ...commonHeaders, "Content-Type": "application/json; charset=utf-8", ...extra },
   })
+}
+
+function rateLimitedResponse() {
+  return json({ error: "Too many requests. Try again shortly." }, 429, { "Retry-After": "60" })
 }
 
 function base64url(bytes) {
@@ -401,6 +406,7 @@ async function privateProduct(request, env, path, traceId) {
       if (!databaseSession) return json({ error: "Sign in to continue." }, 403)
       const csrf = request.headers.get("X-WCB-CSRF")
       if (!await verifyDatabaseCsrf(db, databaseSession, csrf)) return json({ error: "Product request refused." }, 403)
+      if (!await rateLimitAllowed(env.PRIVATE_API_RATE_LIMITER, "user:" + databaseSession.userId)) return rateLimitedResponse()
 
       if (path === "/__webcanbe/api/workspaces") {
         return json({ workspaces: await databaseWorkspaces(db, databaseSession) })
@@ -464,13 +470,23 @@ export default {
     const traceId = requestId()
     try {
       let response
-      if (path === "/__webcanbe/auth/start") response = await start(request, env)
-      else if (path === "/__webcanbe/auth/callback") response = await callback(request, env)
-      else if (path === "/__webcanbe/auth/firebase-exchange") response = await firebaseExchange(request, env)
+      if (path === "/__webcanbe/auth/start" || path === "/__webcanbe/auth/callback" || path === "/__webcanbe/auth/firebase-exchange") {
+        const key = await anonymousRateKey(request, "auth:" + path)
+        if (!await rateLimitAllowed(env.AUTH_RATE_LIMITER, key)) response = rateLimitedResponse()
+        else if (path === "/__webcanbe/auth/start") response = await start(request, env)
+        else if (path === "/__webcanbe/auth/callback") response = await callback(request, env)
+        else response = await firebaseExchange(request, env)
+      }
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
       else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
-      else if (path === "/__webcanbe/ops/readiness") response = await readiness(request, env, traceId)
-      else if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") response = await publicCatalog(request, env, path, traceId)
+      else if (path === "/__webcanbe/ops/readiness") {
+        const key = await anonymousRateKey(request, "ops:readiness")
+        response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await readiness(request, env, traceId)
+      }
+      else if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") {
+        const key = await anonymousRateKey(request, "public:" + path)
+        response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
+      }
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") response = await privateProduct(request, env, path, traceId)
       else response = applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
       return withRequestId(response, traceId)
