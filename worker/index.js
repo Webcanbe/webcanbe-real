@@ -488,7 +488,15 @@ export default {
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") response = await privateProduct(request, env, path, traceId)
-      else response = applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
+      else {
+        const asset = await env.ASSETS.fetch(request)
+        const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
+        const unknownAppPath = acceptsHtml && !isKnownAppPath(path)
+        const secured = applySecurityHeaders(asset, { noIndex: shouldNoIndexPath(path) || unknownAppPath })
+        response = unknownAppPath && secured.status === 200
+          ? new Response(secured.body, { status: 404, headers: secured.headers })
+          : secured
+      }
       return withRequestId(response, traceId)
     } catch {
       safeFailureLog({ event: "worker_unhandled", requestId: traceId, path, status: 500 })

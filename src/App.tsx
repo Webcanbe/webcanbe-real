@@ -668,6 +668,74 @@ function Control() {
   return <AppShell><main className="control"><header className="control-head"><span className="signal">Control</span><h1>Operational product state.</h1><p>Read-only Phase 4 view over existing authoritative records. IDs remain references; this screen does not mint authority.</p></header><section className="control-metrics">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</section><aside className="control-stepup"><b>High-risk changes require fresh step-up.</b><p>The backend already enforces server-minted, session-bound, expiring step-up evidence. Phase 4 does not fake a passkey ceremony or expose a client-side bypass.</p></aside><section className="control-section"><div className="hub-section-head"><div><h2>Seller applications</h2><p>Application state across tenants for authorized operators.</p></div></div><ControlRows rows={control.sellerApplications} columns={[{label:"Application",keys:["application_id"]},{label:"User",keys:["user_id"]},{label:"Status",keys:["status"]},{label:"Updated",keys:["updated_at","created_at"]}]}/></section><section className="control-section"><div className="hub-section-head"><div><h2>Submission pipeline</h2><p>Quarantine/review state without source bodies or worker credentials.</p></div></div><ControlRows rows={control.submissions} columns={[{label:"Submission",keys:["submission_id"]},{label:"Seller",keys:["seller_user_id"]},{label:"Status",keys:["status"]},{label:"Revision",keys:["source_revision_id"]}]}/></section><section className="control-split"><div><div className="hub-section-head"><div><h2>Listings</h2><p>Published product records.</p></div></div><ControlRows rows={control.listings} columns={[{label:"Listing",keys:["listing_id"]},{label:"Title",keys:["title"]},{label:"Status",keys:["status"]},{label:"Availability",keys:["availability"]}]}/></div><div><div className="hub-section-head"><div><h2>Ready</h2><p>Server-authoritative qualification.</p></div></div><ControlRows rows={control.ready} columns={[{label:"Release",keys:["release_id"]},{label:"Status",keys:["qualification_status"]},{label:"Version",keys:["qualification_version"]}]}/></div></section><section className="control-section"><div className="hub-section-head"><div><h2>Privileged audit</h2><p>Append-only evidence for Control mutations.</p></div></div><ControlRows rows={control.audit} columns={[{label:"Actor",keys:["actor_user_id"]},{label:"Action",keys:["action"]},{label:"Target",keys:["target_id"]},{label:"Created",keys:["created_at"]}]}/></section></main></AppShell>
 }
 
+const PUBLIC_ORIGIN = "https://webcanbe.com"
+
+type RouteMetadata = Readonly<{ title: string; description: string; canonical?: string; noIndex?: boolean }>
+
+function routeMetadata(path: string): RouteMetadata {
+  const exact: Record<string, RouteMetadata> = {
+    "/": { title: "Webcanbe — Edit visually. Leave with real code you own.", description: "Start from working web projects, edit the real source visually or in code, and keep the codebase.", canonical: "/" },
+    "/browse": { title: "Marketplace — Webcanbe", description: "Browse working web projects with real source code, visual editing, code editing, and export.", canonical: "/browse" },
+    "/templates": { title: "Marketplace — Webcanbe", description: "Browse working web projects with real source code, visual editing, code editing, and export.", canonical: "/browse" },
+    "/plans": { title: "Plans — Webcanbe", description: "Compare Webcanbe plans for source-first web project editing and ownership.", canonical: "/plans" },
+    "/pricing": { title: "Plans — Webcanbe", description: "Compare Webcanbe plans for source-first web project editing and ownership.", canonical: "/plans" },
+    "/about": { title: "About — Webcanbe", description: "Learn why Webcanbe keeps real project source at the center of visual and code editing.", canonical: "/about" },
+    "/changelog": { title: "Changelog — Webcanbe", description: "Product updates and changes to Webcanbe.", canonical: "/changelog" },
+    "/contact": { title: "Contact — Webcanbe", description: "Contact Webcanbe.", canonical: "/contact" },
+    "/updates": { title: "Updates — Webcanbe", description: "Webcanbe product and platform updates.", canonical: "/updates" },
+    "/licenses": { title: "Licenses — Webcanbe", description: "Webcanbe licensing information.", canonical: "/licenses" },
+    "/terms": { title: "Terms — Webcanbe", description: "Webcanbe terms of service.", canonical: "/terms" },
+    "/policy": { title: "Privacy Policy — Webcanbe", description: "How Webcanbe handles account and product data.", canonical: "/policy" },
+    "/privacy": { title: "Privacy Policy — Webcanbe", description: "How Webcanbe handles account and product data.", canonical: "/policy" },
+  }
+  if (exact[path]) return exact[path]
+  if (path === "/docs" || path.startsWith("/docs/")) {
+    const title = docPages[path]?.title ?? "Documentation"
+    return { title: title + " — Webcanbe", description: "Webcanbe documentation for source-first projects, editing, compatibility, export, and security.", canonical: path }
+  }
+  if (path.startsWith("/project/")) {
+    const preview = path.endsWith("/preview")
+    return { title: (preview ? "Project preview" : "Project") + " — Webcanbe", description: "Inspect a real source-backed Webcanbe project and its release details.", canonical: path }
+  }
+  return { title: "Webcanbe", description: "Source-first web projects with visual and code editing.", noIndex: true }
+}
+
+function syncRouteMetadata(path: string) {
+  const meta = routeMetadata(path)
+  document.title = meta.title
+
+  const setMeta = (selector: string, attribute: "name" | "property", key: string, content: string) => {
+    let node = document.head.querySelector<HTMLMetaElement>(selector)
+    if (!node) {
+      node = document.createElement("meta")
+      node.setAttribute(attribute, key)
+      document.head.appendChild(node)
+    }
+    node.content = content
+  }
+
+  setMeta('meta[name="description"]', "name", "description", meta.description)
+  setMeta('meta[property="og:title"]', "property", "og:title", meta.title)
+  setMeta('meta[property="og:description"]', "property", "og:description", meta.description)
+  setMeta('meta[name="twitter:title"]', "name", "twitter:title", meta.title)
+  setMeta('meta[name="twitter:description"]', "name", "twitter:description", meta.description)
+  setMeta('meta[name="robots"]', "name", "robots", meta.noIndex ? "noindex, nofollow" : "index, follow")
+
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (meta.canonical) {
+    if (!canonical) {
+      canonical = document.createElement("link")
+      canonical.rel = "canonical"
+      document.head.appendChild(canonical)
+    }
+    canonical.href = PUBLIC_ORIGIN + meta.canonical
+    setMeta('meta[property="og:url"]', "property", "og:url", canonical.href)
+  } else {
+    canonical?.remove()
+    document.head.querySelector('meta[property="og:url"]')?.remove()
+  }
+}
+
 function NotFound({path}:{path:string}){return <PublicShell><main className="not-found"><span className="signal">404</span><h1>This page does not exist.</h1><p><code>{path}</code> is not a Webcanbe route.</p><div><Link className="button primary" to="/">Back home</Link><Link className="button" to="/browse">Marketplace</Link></div></main></PublicShell>}
 
 class AppErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -686,6 +754,7 @@ export default function App() {
   const [authIntent,setAuthIntent]=useState<{signup:boolean;next:string}|null>(directAuth?{signup:path==="/signup",next:directNext}:null)
   useEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:string}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:d?.next?.startsWith("/")&&!d.next.startsWith("//")?d.next:"/dashboard"})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
   useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
+  useEffect(()=>{syncRouteMetadata(path)},[path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
   if(basePath==="/")page=<Landing/>
   else if(basePath==="/browse"||basePath==="/templates")page=<Browse/>
