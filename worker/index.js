@@ -3,7 +3,7 @@ import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
 import { databaseReadiness } from "./readiness.js"
-import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, databaseWorkspaces } from "./postgres-session.js"
+import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
@@ -430,6 +430,12 @@ async function privateProduct(request, env, path, traceId) {
           return json({ error: message }, 422)
         }
       }
+      if (path === "/__webcanbe/api/account/sessions/revoke-all") {
+        const revokedSessions = await revokeAllDatabaseSessions(db, databaseSession)
+        const headers = new Headers({ ...commonHeaders, "Content-Type": "application/json; charset=utf-8" })
+        appendCookie(headers, clearCookie(SESSION_COOKIE, "Strict"))
+        return new Response(JSON.stringify({ ok: true, revokedSessions }), { status: 200, headers })
+      }
       return json({ error: "Product request refused." }, 404)
     })
   } catch {
@@ -487,7 +493,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all") response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
