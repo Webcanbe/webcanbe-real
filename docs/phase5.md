@@ -34,16 +34,16 @@ The dashboard UI is frozen unless an explicit bug or user-requested change requi
 
 ### Important current boundary
 
-The deployed Cloudflare Worker currently implements only:
+The repository Worker now implements the authentication boundary including `/__webcanbe/auth/firebase-exchange` and has a Workers-compatible public catalog route for:
 
-- `/__webcanbe/auth/start`
-- `/__webcanbe/auth/callback`
-- `/__webcanbe/auth/session`
-- `/__webcanbe/auth/logout`
+- `/__webcanbe/api/product/catalog/browse`
+- `/__webcanbe/api/product/catalog/detail`
 
-The frontend client already has calls for product/catalog/purchase/workspace/seller/control APIs, but those product API routes are not yet deployed by the production Worker. That is the main Phase 5 gap.
+GitHub/Email Firebase identity is verified server-side and exchanged for the first-party Webcanbe session before protected production access.
 
-Also, Google currently creates the first-party Worker session directly, while GitHub/Email create a Firebase client session. Protected frontend routes accept either. Before private product APIs are exposed, Firebase identities must be exchanged/verified server-side so backend authorization never relies on browser-only Firebase state.
+The public catalog adapter preserves the existing PostgreSQL Listing/Release queries and release provenance, and fails closed with `503` when no Hyperdrive database binding exists. Private purchases/workspaces/seller/control routes are still intentionally closed.
+
+At the latest live check, Cloudflare had not yet been observed serving the new Firebase exchange route; production deployment smoke remains pending even though CI and Wrangler bundle dry-run pass.
 
 ---
 
@@ -79,15 +79,19 @@ Architecture finding (2026-09-19):
 
 Goal: replace local/demo product state with real server data.
 
-- [ ] Deploy the existing `/__webcanbe/api/product/*` boundary.
-- [ ] Connect it to the retained durable product/account store rather than creating a second source of truth.
+- [ ] Deploy the complete existing `/__webcanbe/api/product/*` boundary.
+- [x] Build the Worker/Hyperdrive connection seam without creating a second data model.
+- [ ] Bind a real managed PostgreSQL database/Hyperdrive configuration to production.
 - [ ] Expose authenticated workspace/account lookup.
-- [ ] Expose catalog browse/detail.
+- [x] Implement Workers-compatible catalog browse/detail using the retained Phase 3 SQL and public response contract.
+- [x] Route public catalog requests through the Worker and fail closed with 503 while the database binding is absent.
 - [ ] Expose purchases and entitlements.
 - [ ] Expose working-copy list/materialization.
 - [ ] Preserve server-side workspace/user authorization on every mutation.
 - [ ] Remove production dependence on local demo arrays where a real API exists.
 - [ ] Add explicit loading, empty, permission-denied, and failure states.
+- [x] Add unit coverage for published/available/active filtering, immutable release provenance, filter validation, and missing-Hyperdrive failure.
+- [x] Add real `wrangler deploy --dry-run` bundling to CI so Workers/pg compatibility is verified before merge.
 
 Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by real persisted data.
 
