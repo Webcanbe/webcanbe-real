@@ -1,5 +1,15 @@
 # WebCanBe project record
 
+## 2026-09-19: Live public production smoke exposed asset-first middleware bypass
+
+A new public production smoke runner tested the actual `webcanbe.com` deployment rather than inferring production behavior from source and CI. The Worker-owned readiness and catalog endpoints behaved correctly and reported the still-unconfigured Hyperdrive boundary. Normal HTML/static navigation did not: root/dashboard/unknown SPA routes were served directly by Cloudflare Static Assets and therefore missed the Worker security headers, request IDs, server-side noindex policy, and real HTTP 404 conversion.
+
+The source implementation itself was present. The routing gap came from `assets.run_worker_first` being scoped only to API/auth paths. The corrective branch changes it to `true`, which makes the Worker apply the existing shared policy before delegating to `env.ASSETS.fetch()`.
+
+A repeatable `npm run smoke:production:public` command and an automatic post-main-CI production smoke workflow now guard this distinction between “implemented in source” and “actually observed live”. Branch verification run `35424537541` passes secret scan, focused tests, syntax checks, Vite production build, and Wrangler dry-run. The live routing fix remains pending until Cloudflare deploys the merged main commit and the post-deploy smoke passes.
+
+---
+
 ## 2026-09-19: Production read-mode truthfulness and secret-scan reliability
 
 The inactive production read-only backend switch was hardened before Hyperdrive activation. Read mode can open existing working copies but cannot create a new one; materialization remains gated by the full hosted mutation mode. Dashboard/catalog/purchase reads also stop substituting local demo rows when the authoritative production database is empty or missing release metadata.
