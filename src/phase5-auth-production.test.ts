@@ -45,10 +45,12 @@ describe("Phase 5 production authentication", () => {
     expect(googleConfig).toContain('"sessionLifetimeMs": 604800000')
   })
 
-  it("activates only Google on the hosted production auth surface for now", () => {
-    expect(app).toContain("Google is the first production sign-in provider.")
-    expect(app).toContain("providerPending")
-    expect(app).toContain("GitHub sign-in is not connected yet")
+  it("keeps Google on the Worker boundary while GitHub and email use Firebase", () => {
+    expect(app).toContain("hostedProductClient.authStart()")
+    expect(app).toContain("signInWithGithubFirebase()")
+    expect(app).toContain("createEmailAccountFirebase")
+    expect(app).toContain("signInWithEmailFirebase")
+    expect(app).toContain("Google, GitHub, and email sign-in are available.")
     expect(app).toContain("Phone sign-in is not connected yet")
   })
 })
