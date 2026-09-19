@@ -35,7 +35,8 @@ function releaseFixture() {
     past: [],
     future: [],
   }
-  const snapshotHash = sha256(JSON.stringify({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files, history }))
+  const snapshotFiles = [...files].sort(([a], [b]) => a.localeCompare(b))
+  const snapshotHash = sha256(JSON.stringify({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files: snapshotFiles, history }))
   return {
     entitlement_id: entitlementId,
     user_id: userId,
