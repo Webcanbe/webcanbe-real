@@ -107,6 +107,7 @@ Goal: replace local/demo product state with real server data.
 - [ ] Add explicit loading, empty, permission-denied, and failure states.
 - [x] Add unit coverage for published/available/active filtering, immutable release provenance, filter validation, and missing-Hyperdrive failure.
 - [x] Add real `wrangler deploy --dry-run` bundling to CI so Workers/pg compatibility is verified before merge.
+- [x] Add same-origin production readiness endpoint for Hyperdrive/DB/schema smoke without exposing secrets.
 
 Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by real persisted data.
 
