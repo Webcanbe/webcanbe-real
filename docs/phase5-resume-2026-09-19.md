@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this recovery update: `cd0d21fd43a0eee8f04ffba56e7a7ab233b9384c`  
+Code baseline before this recovery update: `706620f50034df1b0053a332b3c6a104f0e7f336`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
@@ -542,7 +542,45 @@ until Hyperdrive is live and DB-backed production smoke passes.
 
 ---
 
-## 11. Browser product client status
+## 11. Safe production read-only frontend switch
+
+Implementation:
+
+- `productionReadProductMode()`
+- `productReadMode()`
+
+Activation marker:
+
+`<meta name="wcb-product-read-mode" content="hosted">`
+
+**This marker is intentionally absent from production right now.**
+
+When later activated after Hyperdrive smoke, it affects only read-oriented
+surfaces that already have server routes:
+
+- AppShell workspace selector
+- Dashboard/product library reads
+- Purchases
+- Working-copy list
+- Account profile read/update in the existing Settings UI
+
+It does not activate:
+
+- Seller
+- Control
+- Checkout
+- test entitlement grants
+- materialization mutations
+- payment mutations
+
+Those continue to require the full `hostedProductMode()`.
+
+This separation prevents a single frontend flag from exposing unfinished
+mutation APIs.
+
+---
+
+## 12. Browser product client status
 
 Client:
 
@@ -568,7 +606,7 @@ The currently live/implemented Worker scope is the source of truth.
 
 ---
 
-## 12. Latest verification state
+## 13. Latest verification state
 
 Latest `main` GitHub Actions run checked for this snapshot:
 
@@ -592,7 +630,7 @@ Repository dependency audit at the same time reported no npm vulnerabilities dur
 
 ---
 
-## 13. Repository hygiene already fixed
+## 14. Repository hygiene already fixed
 
 The old Framer-export README was removed.
 
@@ -622,7 +660,7 @@ No server secret values belong in `VITE_*` variables.
 
 ---
 
-## 14. Production authentication details worth preserving
+## 15. Production authentication details worth preserving
 
 ### Google Worker routes
 
@@ -653,7 +691,7 @@ No server secret values belong in `VITE_*` variables.
 
 ---
 
-## 15. Production smoke sequence after Hyperdrive is connected
+## 16. Production smoke sequence after Hyperdrive is connected
 
 Run in this order.
 
@@ -706,7 +744,7 @@ With an empty catalog DB:
 
 ---
 
-## 16. Next implementation sequence after live DB smoke
+## 17. Next implementation sequence after live DB smoke
 
 ### P5.2 continuation
 
@@ -787,7 +825,7 @@ Launch hardening:
 
 ---
 
-## 17. Things not to redo
+## 18. Things not to redo
 
 A future session should **not** restart or repeat these unless there is evidence they are broken:
 
@@ -809,7 +847,7 @@ Continue from Hyperdrive connection.
 
 ---
 
-## 18. Key files to read first in a new session
+## 19. Key files to read first in a new session
 
 In order:
 
@@ -829,7 +867,7 @@ In order:
 
 ---
 
-## 19. Secret-handling rule
+## 20. Secret-handling rule
 
 Never request or store in chat/GitHub:
 
@@ -843,7 +881,7 @@ For the immediate next step, the only value ChatGPT needs from the user is the *
 
 ---
 
-## 20. Resume instruction for the next ChatGPT session
+## 21. Resume instruction for the next ChatGPT session
 
 If the user says “continue Phase 5” after a session break:
 
