@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: Enforced CSP after retained-landing compatibility inventory
+
+A dedicated CSP compatibility pass found that the retained landing has no
+runtime scripts, no external runtime asset origins, and no eval/new-Function
+dependency. The landing does still contain inline style blocks/attributes, so
+the enforced policy keeps inline styles allowed while script authority remains
+same-origin only with inline/eval scripts blocked.
+
+The Worker now emits an enforced Content-Security-Policy covering script,
+style, object, frame, base, worker, media, manifest, form, Firebase/Google auth
+connectivity, and framing boundaries. A regression test prevents external
+runtime resources or inline scripts from silently re-entering the retained
+landing.
+
+See `docs/reports/phase5-csp-inventory.md`.
+
+---
+
 ## 2026-09-19: Privacy-safe Worker request observability
 
 The production Worker now generates a request ID for every request and returns
