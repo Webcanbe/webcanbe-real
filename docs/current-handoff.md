@@ -1,3 +1,19 @@
+# PHASE 5 P5.1 SESSION UNIFICATION + P5.2 ARCHITECTURE CHECKPOINT — 2026-09-19 KST
+
+- Main HEAD when recorded: `3f672163e93621ee565200887ffec52d59afa5a2`.
+- P5.1 code is merged: Firebase GitHub/Email login now sends a Firebase ID token to `/__webcanbe/auth/firebase-exchange`.
+- The Worker verifies Firebase RS256 signing keys plus issuer, audience, expiry, issued-at, auth-time, and bounded UID before minting the normal Secure HttpOnly Webcanbe session.
+- New sessions carry canonical provider/subject fields; Google sessions are canonicalized the same way.
+- Protected production frontend gates no longer accept Firebase browser state as authority. A persisted Firebase login may only refresh/exchange into the first-party server session.
+- Logout clears both the first-party Worker session and Firebase state.
+- Real cryptographic Firebase-token tests use generated RS256 keys; focused Phase 4/5 tests, Worker syntax and Vite production build PASS.
+- The Firebase project ID is treated as public configuration inside the Worker rather than as a redundant runtime secret.
+- Production observation is still pending: at the time of this checkpoint, `webcanbe.com/__webcanbe/auth/firebase-exchange` still returned the prior SPA 404, so Cloudflare's latest deployment has not yet been observed live.
+- P5.2 audit: the existing authoritative Product API is already implemented in the Node/PostgreSQL hosted stack. It must be adapted/reused rather than rewritten as a second Cloudflare data model.
+- Recommended P5.2 runtime direction: managed PostgreSQL + Cloudflare Hyperdrive + a Workers-compatible adapter around the retained PostgreSQL stores. A real database/Hyperdrive binding is the next infrastructure requirement.
+
+---
+
 # PHASE 5 MASTER PLAN + FIREBASE AUTH CHECKPOINT — 2026-09-19 KST
 
 - Production branch: `main`.
