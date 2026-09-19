@@ -162,7 +162,7 @@ Exit gate: money state and product entitlement state cannot diverge silently.
 - [ ] Save creates durable revision/history state.
 - [x] Explicit-save policy is defined and visible: drafts auto-back up for recovery only, while preview/history/project-search/export stay on accepted source until validated Save source / Save all succeeds.
 - [x] Detect stale/conflicting revisions: Code drafts compare their base revision to current accepted HEAD before save, stale saves are blocked in the UI, and server expectedRevision/CAS remains final authority.
-- [ ] Reload restores the same source and history.
+- [x] Reload/reconnect restores a coherent accepted source/history snapshot and backed-up drafts through separate authority boundaries; `Refresh accepted` re-syncs HEAD/files/history without discarding dirty drafts. Canonical production DB activation remains Hyperdrive/session-smoke gated.
 - [ ] Export produces a normal standalone codebase.
 - [ ] No hosted runtime dependency is required by exported code.
 - [ ] Large-project and failure recovery tests.
