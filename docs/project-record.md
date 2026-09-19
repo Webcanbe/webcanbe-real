@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: User-wide durable session revocation
+
+The durable PostgreSQL session layer can now revoke every active first-party
+Webcanbe session for the authenticated internal user. The boundary requires the
+existing DB session plus CSRF evidence, validates the current session before the
+bulk update, invalidates all matching active `wcb_sessions`, and clears the
+current secure cookie.
+
+The browser client has a prepared `revokeAllSessions()` method, but no new UI
+was exposed before Hyperdrive production smoke. Full account deletion remains a
+separate decision because product ownership, purchases, seller records, and
+audit retention require an explicit data-retention policy.
+
+This slice also fixed and regression-guarded a missing `isKnownAppPath` Worker
+import that could have caused a runtime ReferenceError on unknown SPA paths.
+
+---
+
 ## 2026-09-19: Public route metadata and real SPA 404 semantics
 
 Public SPA routes now synchronize their document title, description, canonical
