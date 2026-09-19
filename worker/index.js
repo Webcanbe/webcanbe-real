@@ -472,19 +472,20 @@ export default {
       let response
       if (path === "/__webcanbe/auth/start" || path === "/__webcanbe/auth/callback" || path === "/__webcanbe/auth/firebase-exchange") {
         const key = await anonymousRateKey(request, "auth:" + path)
-        response = await rateLimitAllowed(env.AUTH_RATE_LIMITER, key)
-          ? (path === "/__webcanbe/auth/start" ? start(request, env) : path === "/__webcanbe/auth/callback" ? callback(request, env) : firebaseExchange(request, env))
-          : rateLimitedResponse()
+        if (!await rateLimitAllowed(env.AUTH_RATE_LIMITER, key)) response = rateLimitedResponse()
+        else if (path === "/__webcanbe/auth/start") response = await start(request, env)
+        else if (path === "/__webcanbe/auth/callback") response = await callback(request, env)
+        else response = await firebaseExchange(request, env)
       }
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
       else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
       else if (path === "/__webcanbe/ops/readiness") {
         const key = await anonymousRateKey(request, "ops:readiness")
-        response = await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? readiness(request, env, traceId) : rateLimitedResponse()
+        response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await readiness(request, env, traceId)
       }
       else if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") {
         const key = await anonymousRateKey(request, "public:" + path)
-        response = await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? publicCatalog(request, env, path, traceId) : rateLimitedResponse()
+        response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") response = await privateProduct(request, env, path, traceId)
       else response = applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
