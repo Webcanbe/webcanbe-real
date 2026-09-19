@@ -1,3 +1,22 @@
+# PHASE 5 LEGAL DATA-FLOW CONSISTENCY CHECKPOINT — 2026-09-19 KST
+
+- Privacy Policy is aligned with the currently implemented production architecture:
+  - Google OAuth only requests OpenID/email/profile and does not request Gmail/Drive/Calendar access
+  - GitHub and Email/Password authentication are handled through Firebase Authentication
+  - Firebase ID tokens are verified by the Webcanbe Worker and exchanged for first-party sessions
+  - first-party sessions use Secure HttpOnly cookies
+  - Cloudflare is disclosed as delivery/Worker infrastructure
+  - Supabase-hosted PostgreSQL is disclosed as server-side product/account storage
+  - provider email alone is explicitly not an identity-linking authority
+  - browser-facing Supabase roles are explicitly not given direct Webcanbe table access
+  - deletion/retention and provider revocation behavior are described conservatively
+- Terms do not claim that payment, deployment, or other unfinished integrations are already available; pre-release availability is explicitly qualified.
+- `src/phase5-privacy-current.test.ts` locks the important provider/session/infrastructure disclosures and canonical security contact.
+- Phase 5 launch-hardening item “Legal pages match actual data handling” is now complete.
+- No dashboard UI was changed.
+
+---
+
 # PHASE 5 LIVE WORKER ROUTING + ACCOUNT AUTH SUMMARY CHECKPOINT — 2026-09-19 KST
 
 - Current main after implementation merge: `8464f7e78f1bbfadef41bfc70739aeb7124f7a6e`.
