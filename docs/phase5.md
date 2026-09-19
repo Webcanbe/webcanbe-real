@@ -103,8 +103,8 @@ Goal: replace local/demo product state with real server data.
 - [ ] Preserve server-side workspace/user authorization on every mutation.
 - [x] Prepare a separate read-only production frontend mode for Workspaces, Purchases/Working copies, Dashboard library data, and Account profile without activating seller/control/checkout mutations.
 - [ ] After Hyperdrive smoke passes, activate it with `<meta name="wcb-product-read-mode" content="hosted">`.
-- [ ] Remove production dependence on local demo arrays where a real API exists.
-- [ ] Add explicit loading, empty, permission-denied, and failure states.
+- [ ] Remove production dependence on local demo arrays where a real API exists. Dashboard/catalog/purchase read surfaces no longer substitute demo rows when production read mode is active; continue auditing remaining surfaces as their real APIs come online.
+- [ ] Add explicit loading, empty, permission-denied, and failure states. Dashboard and library reads now have explicit loading/error/empty behavior; continue this requirement for later mutation-heavy surfaces.
 - [x] Add unit coverage for published/available/active filtering, immutable release provenance, filter validation, and missing-Hyperdrive failure.
 - [x] Add real `wrangler deploy --dry-run` bundling to CI so Workers/pg compatibility is verified before merge.
 - [x] Add same-origin production readiness endpoint for Hyperdrive/DB/schema smoke without exposing secrets.
@@ -200,7 +200,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Accessibility keyboard/focus pass.
 - [ ] Performance/Lighthouse pass on landing and app shell.
 - [x] Baseline production request observability: per-request response ID + bounded structured failure logs with secrets/personal data excluded.
-- [x] Enforce a committed-secret scanner in Phase 5 CI across all tracked files, with narrow fixture-only exceptions.
+- [x] Enforce a committed-secret scanner in Phase 5 CI across all tracked files, with narrow fixture-only exceptions. The VITE public-secret-name heuristic is scoped to executable/configuration sources so explanatory Markdown does not false-positive; actual credential patterns still scan every tracked text file.
 - [ ] Connect long-term log retention/alerting after infrastructure choice.
 - [x] Add operator-controlled production DB backup + verification scripts and a recovery-first runbook for the current Supabase Free project.
 - [x] Add guarded Cloudflare Worker rollback tooling and runbook with explicit version IDs and production confirmation.
@@ -240,6 +240,24 @@ Unless separately promoted into scope:
    - `docs/project-record.md` when the change is architecturally meaningful.
 5. No fake production state: disabled or honest empty states are preferred to simulated success.
 6. Client state is never authority for account, money, entitlement, seller, release, publication, or project ownership.
+
+
+## 2026-09-19 read-only truthfulness hardening
+
+Production read-mode was tightened before activation:
+
+- no new working-copy materialization from the read-only Purchases surface
+- no demo catalog/purchase fallback when real production data is empty
+- neutral missing-release metadata instead of cloning a demo project
+- explicit Dashboard loading/failure states
+- regression tests for the boundary
+- secret-scanner prose false-positive fixed without weakening actual credential scans
+
+Verification run `35424179755`: secret scan PASS, focused tests PASS, Worker syntax PASS, Vite build PASS, Wrangler dry-run PASS.
+
+The Hyperdrive blocker and production-read activation sequence are unchanged.
+
+---
 
 ## Immediate next task
 

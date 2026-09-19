@@ -61,8 +61,16 @@ for (const path of files) {
   const viteSecretFixture =
     path.startsWith("docs/reports/phase2-") ||
     /^src\/webcanbe-engine\/phase2-[^/]*\.test\.(?:ts|js)$/.test(path)
+  // The VITE_* name heuristic protects executable/configuration sources where a
+  // server credential could actually be bundled into the browser. Prose docs may
+  // safely describe rejected names such as VITE_SECRET; real token/PEM/DB-password
+  // patterns above still scan every tracked text file, including Markdown.
+  const viteSecretSource =
+    /\.(?:[cm]?[jt]sx?|jsonc?|ya?ml|toml|html|sh|bash|zsh)$/i.test(path) ||
+    path === "Dockerfile" ||
+    path.endsWith("/Dockerfile")
   const viteSecret = /\bVITE_[A-Z0-9_]*(?:SECRET|PASSWORD|PRIVATE_KEY|SERVICE_ROLE|ACCESS_TOKEN)[A-Z0-9_]*\b/g
-  if (!viteSecretFixture && viteSecret.test(text)) findings.push({ path, kind: "server secret exposed through VITE_* variable" })
+  if (!viteSecretFixture && viteSecretSource && viteSecret.test(text)) findings.push({ path, kind: "server secret exposed through VITE_* variable" })
 }
 
 if (findings.length) {
