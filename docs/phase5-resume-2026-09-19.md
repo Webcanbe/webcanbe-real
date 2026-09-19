@@ -1,7 +1,7 @@
 # Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
-Code baseline before this continuity-document commit: `7f1008cc5c557a0793d1ff03c8a04470b40fcf67`  
+Code baseline before this recovery update: `cd0d21fd43a0eee8f04ffba56e7a7ab233b9384c`  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
 Production domain: `https://webcanbe.com`
@@ -113,6 +113,7 @@ Important Wrangler facts at this snapshot:
   - `/__webcanbe/api/workspaces`
   - `/__webcanbe/api/product/purchases`
   - `/__webcanbe/api/product/workspace-projects/list`
+  - `/__webcanbe/api/account/*`
 
 ### Cloudflare secret delivery
 
@@ -302,6 +303,7 @@ These migrations are already applied in production:
 2. `20260919011359 lock_webcanbe_schema_to_server_only`
 3. `20260919011451 create_server_only_webcanbe_runtime_role`
 4. `20260919012300 prepare_hyperdrive_login_role`
+5. `20260919013329 add_webcanbe_user_profiles`
 
 ### Authoritative schema
 
@@ -313,7 +315,7 @@ The existing Phase 3 schema was reused. No second launch-time product schema was
 
 It includes the existing identity/session/workspace/project/catalog/release/listing/entitlement/materialization/seller/assessment/control/deploy-intent model.
 
-Current production DB has **36 Webcanbe tables**.
+Current production DB has **37 Webcanbe tables**, including provider-independent `wcb_user_profiles`.
 
 Only the expected singleton lock/pool rows were initially pre-seeded.
 
@@ -389,7 +391,41 @@ No DB password was generated or saved in GitHub/chat.
 
 ---
 
-## 8. Exact current manual blocker: Hyperdrive credential + binding
+## 8. Provider-independent account profile status
+
+Production table:
+
+`wcb_user_profiles`
+
+Repository migration:
+
+`deployment/hosted/postgres-account-profile.sql`
+
+Current behavior:
+
+- internal Webcanbe user UUID is the profile key
+- profile persists display name, email, email verification state, picture URL, timestamps
+- provider email is metadata only; it is not an automatic identity-linking authority
+- first DB-backed login seeds the profile
+- later logins can refresh provider-derived email/picture state
+- a user-edited display name is not overwritten on login
+- DB session resolution returns real profile values
+- Worker account routes:
+  - `/__webcanbe/api/account/get`
+  - `/__webcanbe/api/account/update`
+- account update currently permits only `displayName`
+- frontend adapter has `account()` and `updateAccount()`
+- existing Settings UI has not yet been switched to live DB mode; do not redesign it
+
+Supabase security after adding this table:
+
+- no `anon` or `authenticated` direct grants
+- `webcanbe_runtime` has bounded DML access
+- Security Advisor: 0 findings
+
+---
+
+## 9. Exact current manual blocker: Hyperdrive credential + binding
 
 This is the exact point where Phase 5 should resume.
 
@@ -444,7 +480,7 @@ Do not put the database password in `wrangler.jsonc`, GitHub, frontend code, or 
 
 ---
 
-## 9. Worker Product API status
+## 10. Worker Product API status
 
 ### Public catalog routes — implemented
 
@@ -473,6 +509,8 @@ Routes:
 - `/__webcanbe/api/workspaces`
 - `/__webcanbe/api/product/purchases`
 - `/__webcanbe/api/product/workspace-projects/list`
+- `/__webcanbe/api/account/get`
+- `/__webcanbe/api/account/update`
 
 Implementation:
 
@@ -504,7 +542,7 @@ until Hyperdrive is live and DB-backed production smoke passes.
 
 ---
 
-## 10. Browser product client status
+## 11. Browser product client status
 
 Client:
 
@@ -530,7 +568,7 @@ The currently live/implemented Worker scope is the source of truth.
 
 ---
 
-## 11. Latest verification state
+## 12. Latest verification state
 
 Latest `main` GitHub Actions run checked for this snapshot:
 
@@ -554,7 +592,7 @@ Repository dependency audit at the same time reported no npm vulnerabilities dur
 
 ---
 
-## 12. Repository hygiene already fixed
+## 13. Repository hygiene already fixed
 
 The old Framer-export README was removed.
 
@@ -584,7 +622,7 @@ No server secret values belong in `VITE_*` variables.
 
 ---
 
-## 13. Production authentication details worth preserving
+## 14. Production authentication details worth preserving
 
 ### Google Worker routes
 
@@ -615,7 +653,7 @@ No server secret values belong in `VITE_*` variables.
 
 ---
 
-## 14. Production smoke sequence after Hyperdrive is connected
+## 15. Production smoke sequence after Hyperdrive is connected
 
 Run in this order.
 
@@ -668,7 +706,7 @@ With an empty catalog DB:
 
 ---
 
-## 15. Next implementation sequence after live DB smoke
+## 16. Next implementation sequence after live DB smoke
 
 ### P5.2 continuation
 
@@ -749,7 +787,7 @@ Launch hardening:
 
 ---
 
-## 16. Things not to redo
+## 17. Things not to redo
 
 A future session should **not** restart or repeat these unless there is evidence they are broken:
 
@@ -771,7 +809,7 @@ Continue from Hyperdrive connection.
 
 ---
 
-## 17. Key files to read first in a new session
+## 18. Key files to read first in a new session
 
 In order:
 
@@ -791,7 +829,7 @@ In order:
 
 ---
 
-## 18. Secret-handling rule
+## 19. Secret-handling rule
 
 Never request or store in chat/GitHub:
 
@@ -805,7 +843,7 @@ For the immediate next step, the only value ChatGPT needs from the user is the *
 
 ---
 
-## 19. Resume instruction for the next ChatGPT session
+## 20. Resume instruction for the next ChatGPT session
 
 If the user says “continue Phase 5” after a session break:
 
