@@ -42,10 +42,33 @@ const PRIVATE_EXACT = new Set([
 
 const PRIVATE_PREFIXES = ["/workspace/", "/checkout/", "/seller/"]
 
+const PUBLIC_EXACT = new Set([
+  "/",
+  "/browse",
+  "/templates",
+  "/changelog",
+  "/about",
+  "/contact",
+  "/updates",
+  "/licenses",
+  "/terms",
+  "/policy",
+  "/privacy",
+  "/plans",
+  "/pricing",
+])
+
+export function isKnownAppPath(path) {
+  if (typeof path !== "string" || !path.startsWith("/")) return false
+  if (PUBLIC_EXACT.has(path) || PRIVATE_EXACT.has(path) || path === "/seller") return true
+  if (path === "/docs" || path.startsWith("/docs/")) return true
+  if (path.startsWith("/project/")) return true
+  return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
+}
+
 export function shouldNoIndexPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return true
-  if (PRIVATE_EXACT.has(path)) return true
-  if (path === "/seller") return true
+  if (PRIVATE_EXACT.has(path) || path === "/seller") return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 
