@@ -1,3 +1,19 @@
+# PHASE 5 PRODUCTION WORKER-FIRST / PUBLIC SMOKE CHECKPOINT — 2026-09-19 KST
+
+- Added `scripts/production-smoke-public.mjs` and `npm run smoke:production:public`.
+- Live production smoke run `35424398121` exposed a real deployment/configuration gap:
+  - Worker-owned readiness/catalog routes behaved correctly and reported the database as intentionally unconfigured.
+  - ordinary HTML/static navigation was still being served asset-first, so root/dashboard/unknown routes did **not** receive Worker security headers, request IDs, server-side noindex, or real HTTP 404 status.
+- Root cause: `assets.run_worker_first` only listed API/auth paths, while the static/SPA security and 404 middleware lives in `worker/index.js`.
+- Fix prepared on this branch: `wrangler.jsonc -> assets.run_worker_first: true`, so all application/static requests reach the Worker before `env.ASSETS.fetch()`.
+- Added regression coverage requiring Worker-first routing.
+- Added a persistent post-CI workflow `.github/workflows/phase5-production-smoke.yml` that automatically retries public production smoke after successful `main` Phase 5 CI, while accepting either pre-Hyperdrive or ready database state.
+- Branch verification run `35424537541`: secret scan PASS, focused tests PASS, syntax PASS, Vite build PASS, Wrangler bundle dry-run PASS.
+- Live verification of the Worker-first fix remains pending until this branch is merged and Cloudflare has deployed the new `main`.
+- This change does not redesign the dashboard or landing.
+
+---
+
 # PHASE 5 READ-ONLY TRUTHFULNESS + SECRET-SCAN RELIABILITY CHECKPOINT — 2026-09-19 KST
 
 - Working branch verification run: GitHub Actions `35424179755` — **PASS**.
