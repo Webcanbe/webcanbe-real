@@ -1,3 +1,15 @@
+# PHASE 5 ROUTE / RENDER FAILURE HARDENING CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `d9744bb06a0e906c97998f78cea403cfcb12d947`.
+- Canonical production no longer exposes the unauthenticated `/dashboard-preview`; it resolves to the normal Webcanbe 404 surface.
+- Non-production preview behavior remains available for development.
+- Added a top-level React error boundary so unexpected render failures show a recoverable 500 surface instead of a blank page.
+- Recovery UI reuses the existing Webcanbe not-found/button styles; no dashboard redesign or new visual system was introduced.
+- Focused Phase 4/5 tests PASS, Worker syntax PASS, Vite production build PASS, Wrangler bundle dry-run PASS.
+- Dashboard route itself remains protected and otherwise unchanged.
+
+---
+
 # PHASE 5 CLOUDFLARE RATE LIMITING CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `3c383c6bb0dc0b63df2a03143606f5c575ffbb3f`.
