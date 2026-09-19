@@ -179,6 +179,20 @@ export async function revokeDatabaseSession(db, sessionId) {
   await db.query("UPDATE wcb_sessions SET active=false WHERE session_id=$1", [sessionId])
 }
 
+export async function revokeAllDatabaseSessions(db, session) {
+  if (!session || typeof session.userId !== "string" || !session.userId) throw new DatabaseAuthorityDenied()
+  const current = await db.query(
+    "SELECT session_id FROM wcb_sessions WHERE session_id=$1 AND user_id=$2 AND active AND expires_at=to_timestamp($3/1000.0) AND expires_at>clock_timestamp()",
+    [session.sessionId, session.userId, session.expiresAt],
+  )
+  if (!current.rowCount) throw new DatabaseAuthorityDenied()
+  const result = await db.query(
+    "UPDATE wcb_sessions SET active=false WHERE user_id=$1 AND active RETURNING session_id",
+    [session.userId],
+  )
+  return result.rowCount ?? result.rows.length
+}
+
 export async function databaseWorkspaces(db, session) {
   const current = await db.query(
     "SELECT s.session_id FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE s.session_id=$1 AND s.user_id=$2 AND s.active AND s.expires_at=to_timestamp($3/1000.0) AND s.expires_at>clock_timestamp() AND d.user_id IS NULL",
