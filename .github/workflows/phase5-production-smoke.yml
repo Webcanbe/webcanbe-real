@@ -1,0 +1,39 @@
+name: Phase 5 production smoke
+on:
+  workflow_run:
+    workflows: ["Phase 5 UI verify"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      database_expectation:
+        description: Expected production database state
+        type: choice
+        options:
+          - either
+          - unconfigured
+          - ready
+        default: either
+jobs:
+  public-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - name: Live production smoke with deployment propagation retry
+        env:
+          WEBCANBE_EXPECT_DATABASE: ${{ github.event_name == 'workflow_dispatch' && inputs.database_expectation || 'either' }}
+        run: |
+          for attempt in $(seq 1 18); do
+            echo "Production smoke attempt $attempt/18"
+            if npm run smoke:production:public; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 18 ]; then
+              sleep 10
+            fi
+          done
+          exit 1
