@@ -77,7 +77,7 @@ export async function executeSourceOperation(context: {
             if (body.limit !== undefined && (!Number.isSafeInteger(body.limit) || Number(body.limit) < 1 || Number(body.limit) > SOURCE_SEARCH_LIMITS.results)) return send(400, { error: "Search result limit must be between 1 and 100." })
             const search = sourceSearch(durable.files(), body.query, body.caseSensitive === true, body.limit as number | undefined)
             await assertAccess(); durable.assertBase(revision)
-            return send(200, { ...search, query: body.query, caseSensitive: body.caseSensitive === true, revision })
+            return send(200, { searchResults: search.results, searchMeta: { scannedFiles: search.scannedFiles, totalFiles: search.totalFiles, scannedBytes: search.scannedBytes, truncated: search.truncated }, query: body.query, caseSensitive: body.caseSensitive === true, revision })
           }
           if (action === "history") {
             const history=durable.history()
