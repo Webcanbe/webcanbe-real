@@ -1,5 +1,22 @@
 # WebCanBe project record
 
+## 2026-09-19: Production preview route and render failures hardened
+
+Canonical production now refuses the public `/dashboard-preview` development
+route and falls through to the existing 404 surface. The normal `/dashboard`
+route remains protected and the approved dashboard component itself was not
+redesigned.
+
+A top-level React error boundary was also added. Unexpected render failures now
+produce a recoverable 500 page with retry/home actions instead of a blank
+screen. The implementation intentionally reuses the existing Webcanbe
+not-found/button styling rather than introducing another visual system.
+
+Verification passed through the focused Phase 4/5 suite, Worker syntax, Vite
+production build, and Wrangler bundle dry-run.
+
+---
+
 ## 2026-09-19: Cloudflare auth/API abuse rate limiting
 
 Webcanbe now uses Cloudflare's native Workers Rate Limiting bindings as a
