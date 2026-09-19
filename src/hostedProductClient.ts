@@ -13,6 +13,16 @@ export type HostedListingDetail = HostedListing & Readonly<{
 
 export type SourceProjectSummary = Readonly<{ id: string; name: string }>
 
+export type AccountData = Readonly<{
+  userId: string
+  displayName: string
+  email: string
+  emailVerified: boolean
+  picture: string
+  createdAt: string
+  updatedAt: string
+}>
+
 export type CreatorStudioData = Readonly<{
   application: SellerApplication
   submissions: SellerSubmission[]
@@ -91,6 +101,14 @@ export class HostedProductClient {
 
   async workspaceProjects() {
     return (await this.post<{ workspaceProjects: WorkspaceProject[] }>("/__webcanbe/api/product/workspace-projects/list", {})).workspaceProjects
+  }
+
+  async account() {
+    return (await this.post<{ account: AccountData }>("/__webcanbe/api/account/get", {})).account
+  }
+
+  async updateAccount(displayName: string) {
+    return (await this.post<{ account: AccountData }>("/__webcanbe/api/account/update", { displayName })).account
   }
 
   async workspaces() {
