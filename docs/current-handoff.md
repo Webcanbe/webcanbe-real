@@ -1,3 +1,17 @@
+# PHASE 5 USER-WIDE SESSION REVOCATION CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `d19b0538f6351776f5edc01ae11f81f89f8bf849`.
+- Added `revokeAllDatabaseSessions()` to the PostgreSQL session authority layer.
+- New private route:
+  `POST /__webcanbe/api/account/sessions/revoke-all`
+- Requires the existing first-party DB session, CSRF verification, and authenticated private-user rate limit boundary.
+- The operation revalidates the current live session, revokes every active `wcb_sessions` row for that internal user, and clears the current `__Host-wcb-session` cookie.
+- Added `HostedProductClient.revokeAllSessions()`; no new Settings/dashboard UI has been activated before live Hyperdrive smoke.
+- Also fixed a real runtime issue: `isKnownAppPath()` was used by the Worker 404 path without being imported on `main`. The import is now fixed and covered by regression tests.
+- Verification: focused Phase 4/5 tests PASS, Worker syntax PASS, Vite production build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 SEO / CANONICAL / REAL 404 CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `4025da71e5cc4f3324274dde926e71a20fd83ec5`.
