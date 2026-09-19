@@ -1,3 +1,34 @@
+# PHASE 5 BOUNDED PROJECT SOURCE SEARCH CHECKPOINT — 2026-09-19 KST
+
+- Added project-wide accepted-source search as a real read-only editor capability.
+- Standard editor shortcuts are now:
+  - `Cmd/Ctrl+F` — current-file Find / Replace against the local draft
+  - `Shift+Cmd/Ctrl+F` — project-wide search against accepted source
+- Project search runs server-side through the existing authorized project/session boundary; the browser does not download every source file to grep locally.
+- `search` is included in read operations and viewer authority, but not write operations.
+- Search is deliberately bounded:
+  - query: 1–160 single-line characters
+  - results: max 100
+  - per file: max 20
+  - individual scanned file: max 512 KiB
+  - total scanned source per request: max 8 MiB
+  - result preview: bounded to a short line fragment
+- Responses include scanned/total file counts and an explicit `truncated` flag when the bounded scan cannot prove completeness.
+- Search is literal rather than regex-driven; case-insensitive matching retains offsets against the original accepted source.
+- Hosted reads recheck current PostgreSQL source state through the existing `withHostedSource` CAS/revalidation boundary.
+- Search results jump to exact CodeMirror ranges when the target file has no unsaved draft.
+- If a result file has an unsaved draft, Webcanbe refuses to present the accepted-source offset as an exact draft location and asks the user to save/discard before retrying.
+- Added actual HTTP authority coverage:
+  - cross-tenant project search denied
+  - viewer search allowed
+  - invalid query/limit rejected
+  - source revision/history unchanged by search
+- Added `src/phase5-project-search.test.ts` and extended Phase 2G authority/cross-tenant coverage.
+- Verification run `35449171295`: dedicated runtime profile prepared, secret scan PASS, project-search + authority regressions PASS, production build PASS, Wrangler dry-run PASS.
+- Dashboard and landing unchanged.
+
+---
+
 # PHASE 5 WORKER MATERIALIZATION CHECKPOINT — 2026-09-19 KST
 
 - Added Cloudflare Worker working-copy materialization in `worker/materialization.js`.

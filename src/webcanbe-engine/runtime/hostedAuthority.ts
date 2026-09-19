@@ -16,7 +16,7 @@ export const opaqueId = () => randomUUID()
 export { requireOpaqueId, AuthorityDenied } from "./authorityIdentity"
 import { requireOpaqueId, AuthorityDenied } from "./authorityIdentity"
 const hash = (value: string) => createHash("sha256").update(value).digest("hex")
-export const readOperations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "export", "files", "validate", "history"]
+export const readOperations: SessionOperation[] = ["inspect", "compatibility", "preview", "source", "search", "export", "files", "validate", "history"]
 export const writeOperations: SessionOperation[] = ["mutate", "undo", "redo", "code", "revert", "checkpoint", "drafts"]
 export const roleOperations = (role: ProjectRole): SessionOperation[] => role === "viewer" ? [...readOperations] : [...readOperations, ...writeOperations]
 export type ServerSession = Readonly<{ sessionId: string; userId: string; expiresAt: number }>
