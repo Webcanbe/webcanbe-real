@@ -8,6 +8,21 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — production Worker-first routing and public smoke
+
+A live production smoke run found that ordinary SPA/static requests were bypassing the Worker because `assets.run_worker_first` only listed API/auth paths. The Worker-owned API/readiness routes were healthy, but normal HTML routes therefore missed the security headers, request ID, server-side noindex, and real-404 middleware implemented in source.
+
+Current branch correction:
+- `wrangler.jsonc` uses `assets.run_worker_first: true`
+- public production smoke runner added
+- automatic post-main-CI smoke workflow added
+- regression requires Worker-first routing
+- branch verification run `35424537541` passes secret scan, tests, syntax, Vite build and Wrangler dry-run
+
+Do not claim the routing correction is live until the post-merge production smoke passes after Cloudflare deployment. Hyperdrive remains unbound.
+
+---
+
 ## Latest recovery delta — read-only truthfulness hardening
 
 This recovery document predates the newest read-only guardrail pass in some earlier sections. The current continuation also includes:
