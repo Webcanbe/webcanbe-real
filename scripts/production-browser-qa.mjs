@@ -80,6 +80,7 @@ try {
     for (const route of routes) {
       const label = `${route.name}-${viewport.name}`
       const page = await browser.newPage()
+      await page.setBypassCSP(true)
       await page.setViewport(viewport)
 
       const consoleErrors = []
@@ -112,6 +113,8 @@ try {
       })
 
       await page.addScriptTag({ content: axe.source })
+      const axeReady = await page.evaluate(() => Boolean(window.axe?.run))
+      if (!axeReady) throw new Error(`Axe injection failed for ${label}`)
       const axeResult = await page.evaluate(async () => {
         return await window.axe.run(document, {
           runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] },
