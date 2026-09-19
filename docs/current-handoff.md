@@ -1,3 +1,21 @@
+# PHASE 5 DB SESSION + PRIVATE READ API CHECKPOINT — 2026-09-19 KST
+
+- Main HEAD after merge: `e1a7dabfc40bb1abd1b2db338ac7c5ddbfef40dd`.
+- Google/Firebase auth now automatically switches to the durable PostgreSQL session implementation when a `HYPERDRIVE` binding exists.
+- Before Hyperdrive is configured, the current signed-cookie auth fallback remains intact so production login is not broken.
+- Added DB-session CSRF rotation/verification and DB-backed logout/revocation.
+- Added Worker-first private read routes:
+  - `/__webcanbe/api/workspaces`
+  - `/__webcanbe/api/product/purchases`
+  - `/__webcanbe/api/product/workspace-projects/list`
+- Purchases are strictly scoped to `session.userId`.
+- Working-copy reads require both the materialization owner and an active owner/editor workspace membership.
+- No private mutation route, payment route, or fake product state was enabled.
+- Verification: focused Phase 4/5 suite PASS, Worker syntax PASS, Vite production build PASS, Wrangler Worker bundle dry-run PASS.
+- Production DB already exists and is hardened; the only infrastructure blocker for live DB-backed behavior is the Cloudflare Hyperdrive binding + dedicated password-bearing DB login.
+
+---
+
 # PHASE 5 PRODUCTION DATABASE + SUPABASE HARDENING CHECKPOINT — 2026-09-19 KST
 
 - Created Supabase project `webcanbe-production` in Seoul (`ap-northeast-2`) under the existing Webcanbe organization.
