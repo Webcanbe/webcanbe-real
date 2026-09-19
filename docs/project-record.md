@@ -1,5 +1,35 @@
 # WebCanBe project record
 
+## 2026-09-19: P5.2 Workers public catalog and Hyperdrive seam
+
+The first production product-API slice now has a Workers-compatible adapter
+without duplicating the Phase 3 data model. The new public catalog path queries
+the existing `wcb_listings`, `wcb_project_releases`,
+`wcb_catalog_projects`, and `wcb_ready_qualifications` contract and returns
+the same Listing and immutable Release provenance used by
+`PostgresProductDomainStore`.
+
+The Worker now owns browse/detail route dispatch and a Hyperdrive connection
+seam using the existing compatible `pg` dependency. No Hyperdrive binding is
+invented in source; until a real database is provisioned the routes fail closed
+with HTTP 503. Purchases, workspace mutations, seller state, and Control remain
+closed because they require durable DB-backed user/session authority first.
+
+CI now performs a real Wrangler v4 dry-run after the Vite build, in addition to
+the focused tests and syntax checks. This verifies that the Worker bundle,
+including node-postgres, is actually bundleable under the committed
+`nodejs_compat` configuration.
+
+A static audit of the retained PostgreSQL migration found no extension, role,
+database, superuser, or ALTER SYSTEM requirement. The migration keeps its
+existing PL/pgSQL immutability/guard triggers and authoritative Phase 2/3
+tables. The next infrastructure step is therefore a managed PostgreSQL
+instance plus a Cloudflare Hyperdrive binding, not a replacement schema.
+
+See [Phase 5 plan](phase5.md) and [current handoff](current-handoff.md).
+
+---
+
 ## 2026-09-19: P5.1 first-party session unification and P5.2 backend audit
 
 Firebase-backed GitHub and Email/Password authentication no longer counts as
