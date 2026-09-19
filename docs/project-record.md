@@ -1,5 +1,17 @@
 # WebCanBe project record
 
+## 2026-09-19: Private SPA routes receive server-side noindex
+
+Private and authenticated SPA routes now receive an HTTP
+`X-Robots-Tag: noindex, nofollow` from the Cloudflare Worker. This adds a
+server-side indexing boundary on top of `robots.txt`, including the
+development dashboard preview route.
+
+Public product/docs/company/legal routes remain indexable. The change has no
+visual effect.
+
+---
+
 ## 2026-09-19: Baseline production security headers and crawler policy
 
 The Cloudflare Worker now applies a conservative baseline of security headers
