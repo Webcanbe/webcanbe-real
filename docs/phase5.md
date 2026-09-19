@@ -198,7 +198,8 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Safari/Chrome/Firefox pass.
 - [ ] Accessibility keyboard/focus pass.
 - [ ] Performance/Lighthouse pass on landing and app shell.
-- [ ] Production logging/observability with secrets and personal data redacted.
+- [x] Baseline production request observability: per-request response ID + bounded structured failure logs with secrets/personal data excluded.
+- [ ] Connect long-term log retention/alerting after infrastructure choice.
 - [ ] Database backup/restore procedure.
 - [ ] Rollback procedure tested.
 - [ ] Legal pages match actual data handling.
