@@ -160,8 +160,8 @@ Exit gate: money state and product entitlement state cannot diverge silently.
 - [ ] Open a materialized working copy from the real project store.
 - [ ] Visual / Code / Split operate on the same canonical source revision.
 - [ ] Save creates durable revision/history state.
-- [ ] Autosave or explicit-save policy is defined and visible.
-- [ ] Detect stale/conflicting revisions.
+- [x] Explicit-save policy is defined and visible: drafts auto-back up for recovery only, while preview/history/project-search/export stay on accepted source until validated Save source / Save all succeeds.
+- [x] Detect stale/conflicting revisions: Code drafts compare their base revision to current accepted HEAD before save, stale saves are blocked in the UI, and server expectedRevision/CAS remains final authority.
 - [ ] Reload restores the same source and history.
 - [ ] Export produces a normal standalone codebase.
 - [ ] No hosted runtime dependency is required by exported code.

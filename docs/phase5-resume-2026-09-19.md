@@ -8,6 +8,20 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — explicit save and stale drafts
+
+- Code uses an explicit-save policy.
+- Drafts are auto-backed up for recovery only; accepted source, preview, history, project search and export do not change until Save succeeds.
+- The save-policy banner shows accepted/draft/conflict state, pending draft count and accepted HEAD.
+- Stale drafts are detected against current HEAD before save; Save source / Save all are blocked for stale bases.
+- Server expectedRevision/CAS remains final authority.
+- Rebase is allowed only when the accepted file bytes are unchanged; otherwise manual reconciliation is required.
+- Export explicitly uses accepted source and excludes unsaved Code drafts.
+- Verification run `35450086111` passed all branch gates.
+- Dashboard/landing unchanged.
+
+---
+
 ## Latest recovery delta — bounded project source search
 
 - Project-wide accepted-source search is implemented server-side behind the existing project/session authority.
