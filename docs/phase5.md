@@ -200,6 +200,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Accessibility keyboard/focus pass.
 - [ ] Performance/Lighthouse pass on landing and app shell.
 - [x] Baseline production request observability: per-request response ID + bounded structured failure logs with secrets/personal data excluded.
+- [x] Enforce a committed-secret scanner in Phase 5 CI across all tracked files, with narrow fixture-only exceptions.
 - [ ] Connect long-term log retention/alerting after infrastructure choice.
 - [x] Add operator-controlled production DB backup + verification scripts and a recovery-first runbook for the current Supabase Free project.
 - [x] Add guarded Cloudflare Worker rollback tooling and runbook with explicit version IDs and production confirmation.
