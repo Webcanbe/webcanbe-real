@@ -1,5 +1,30 @@
 # WebCanBe project record
 
+## 2026-09-19: Bounded project-wide accepted-source search
+
+The Compatible editor now has a server-side project search operation rather than
+fetching every source file into the browser. `search` is a read-only
+`SessionOperation`: viewer roles may search projects they can already read, while
+cross-tenant access is denied by the same project/session capability boundary.
+
+Search operates only on accepted source and is bounded to a 160-character single-line
+literal query, 100 results, 20 results per file, 512 KiB per scanned file, and 8 MiB
+of source per request. Responses include bounded previews plus scanned-file counts and
+an explicit truncation flag. Hosted execution retains the existing PostgreSQL source
+snapshot revalidation before bytes escape.
+
+The UI uses `Cmd/Ctrl+F` for current-file draft Find/Replace and
+`Shift+Cmd/Ctrl+F` for project-wide accepted-source search. Clicking a server result
+opens the exact CodeMirror source range only when the target file has no unsaved draft;
+otherwise the editor reports that the accepted-source offset cannot truthfully identify
+the modified draft.
+
+Actual HTTP regression coverage proves viewer search, cross-tenant denial, invalid-input
+rejection and zero source/history mutation. Verification run `35449171295` passed
+after the dedicated runtime profile was prepared.
+
+---
+
 ## 2026-09-19: Fast source navigation and exact visual-to-code jumps
 
 The Compatible editor now supports Cmd/Ctrl+P Quick Open with path filtering and a
