@@ -2,6 +2,8 @@ import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
+import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, databaseWorkspaces } from "./postgres-session.js"
+import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -117,6 +119,34 @@ async function createSessionCookie(env, identity) {
     iat: now,
     exp: now + 7 * 24 * 60 * 60 * 1000,
   }, env.GOOGLE_OAUTH_CLIENT_SECRET, "session")
+}
+
+const databaseAvailable = env => Boolean(env.HYPERDRIVE?.connectionString)
+
+async function establishFirstPartySession(env, identity) {
+  if (databaseAvailable(env)) {
+    return withHyperdrive(env, db => issueDatabaseSession(db, {
+      issuer: identity.issuer,
+      subject: identity.subject,
+    }, { allowSelfRegistration: true }))
+  }
+  const token = await createSessionCookie(env, {
+    provider: identity.provider,
+    subject: identity.subject,
+    email: identity.email,
+    emailVerified: identity.emailVerified,
+    name: identity.name,
+    picture: identity.picture,
+    signInProvider: identity.signInProvider,
+  })
+  return { cookie: SESSION_COOKIE + "=" + token + "; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=604800" }
+}
+
+async function readDatabaseSession(request, env) {
+  if (!databaseAvailable(env)) return undefined
+  const token = cookie(request, SESSION_COOKIE)
+  if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return undefined
+  return withHyperdrive(env, db => resolveDatabaseSession(db, token))
 }
 
 async function smallJsonBody(request, maximum = 32 * 1024) {
@@ -238,7 +268,8 @@ async function callback(request, env) {
     return json({ error: "Google identity verification failed." }, 403)
   }
 
-  const session = await createSessionCookie(env, {
+  const session = await establishFirstPartySession(env, {
+    issuer: GOOGLE_ISSUER,
     provider: "google",
     subject: payload.sub,
     email: payload.email,
@@ -249,7 +280,7 @@ async function callback(request, env) {
   })
 
   const headers = new Headers({ ...commonHeaders, Location: "/auth/complete" })
-  appendCookie(headers, SESSION_COOKIE + "=" + session + "; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=604800")
+  appendCookie(headers, session.cookie)
   appendCookie(headers, clearCookie(LOGIN_COOKIE, "Lax"))
   return new Response(null, { status: 303, headers })
 }
@@ -273,7 +304,8 @@ async function firebaseExchange(request, env) {
     ? firebaseClaim.sign_in_provider
     : "firebase"
 
-  const session = await createSessionCookie(env, {
+  const session = await establishFirstPartySession(env, {
+    issuer: "https://securetoken.google.com/" + FIREBASE_PROJECT_ID,
     provider: "firebase",
     subject: payload.sub,
     email: typeof payload.email === "string" ? payload.email : "",
@@ -284,7 +316,7 @@ async function firebaseExchange(request, env) {
   })
 
   const headers = new Headers({ ...commonHeaders, "Content-Type": "application/json; charset=utf-8" })
-  appendCookie(headers, SESSION_COOKIE + "=" + session + "; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=604800")
+  appendCookie(headers, session.cookie)
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers })
 }
 
@@ -297,6 +329,17 @@ async function readSession(request, env) {
 
 async function session(request, env) {
   if (!requireSameOriginPost(request)) return json({ error: "Session request refused." }, 403)
+
+  const databaseSession = await readDatabaseSession(request, env)
+  if (databaseSession) {
+    const csrf = await withHyperdrive(env, db => rotateDatabaseCsrf(db, databaseSession))
+    return json({
+      csrf,
+      expiresAt: databaseSession.expiresAt,
+      user: { email: "", name: "", picture: "", provider: "database", signInProvider: "database" },
+    })
+  }
+
   const value = await readSession(request, env)
   if (!value) return json({ error: "Sign in to continue." }, 403)
   return json({
@@ -314,11 +357,51 @@ async function session(request, env) {
 
 async function logout(request, env) {
   if (!requireSameOriginPost(request)) return json({ error: "Sign-out request refused." }, 403)
+
+  const databaseSession = await readDatabaseSession(request, env)
+  if (databaseSession) {
+    const allowed = await withHyperdrive(env, db => verifyDatabaseCsrf(db, databaseSession, request.headers.get("X-WCB-CSRF")))
+    if (!allowed) return json({ error: "Sign-out request refused." }, 403)
+    await withHyperdrive(env, db => revokeDatabaseSession(db, databaseSession.sessionId))
+    const headers = new Headers(commonHeaders)
+    appendCookie(headers, clearCookie(SESSION_COOKIE, "Strict"))
+    return new Response(null, { status: 204, headers })
+  }
+
   const value = await readSession(request, env)
   if (!value || request.headers.get("X-WCB-CSRF") !== value.csrf) return json({ error: "Sign-out request refused." }, 403)
   const headers = new Headers(commonHeaders)
   appendCookie(headers, clearCookie(SESSION_COOKIE, "Strict"))
   return new Response(null, { status: 204, headers })
+}
+
+async function privateProduct(request, env, path) {
+  if (!requireSameOriginPost(request)) return json({ error: "Product request refused." }, 403)
+  if (!databaseAvailable(env)) return json({ error: "Product database is not configured." }, 503)
+
+  try {
+    return await withHyperdrive(env, async db => {
+      const token = cookie(request, SESSION_COOKIE)
+      const databaseSession = token ? await resolveDatabaseSession(db, token) : undefined
+      if (!databaseSession) return json({ error: "Sign in to continue." }, 403)
+      const csrf = request.headers.get("X-WCB-CSRF")
+      if (!await verifyDatabaseCsrf(db, databaseSession, csrf)) return json({ error: "Product request refused." }, 403)
+
+      if (path === "/__webcanbe/api/workspaces") {
+        return json({ workspaces: await databaseWorkspaces(db, databaseSession) })
+      }
+      if (path === "/__webcanbe/api/product/purchases") {
+        return json({ entitlements: await databasePurchases(db, databaseSession) })
+      }
+      if (path === "/__webcanbe/api/product/workspace-projects/list") {
+        return json({ workspaceProjects: await databaseWorkspaceProjects(db, databaseSession) })
+      }
+      return json({ error: "Product request refused." }, 404)
+    })
+  } catch {
+    console.error("Private product database request failed.")
+    return json({ error: "Product data is temporarily unavailable." }, 503)
+  }
 }
 
 export default {
@@ -330,6 +413,7 @@ export default {
     if (path === "/__webcanbe/auth/session") return session(request, env)
     if (path === "/__webcanbe/auth/logout") return logout(request, env)
     if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") return publicCatalog(request, env, path)
+    if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list") return privateProduct(request, env, path)
     return env.ASSETS.fetch(request)
   },
 }
