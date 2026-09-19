@@ -1,5 +1,22 @@
 # WebCanBe project record
 
+## 2026-09-19: Live Worker-first routing verified and account authority summary added
+
+The Worker-first static-routing correction is now observed live rather than
+merely passing CI. The automatic production smoke workflow passed on main, and
+direct production probes confirmed real 404 behavior for unknown routes,
+production blocking of the dashboard preview route, noindex behavior on login,
+and Worker ownership of readiness/API paths.
+
+The DB-backed account profile contract was also extended to return connected
+verified provider families and the count of active unexpired first-party
+Webcanbe sessions. Both values are derived server-side from
+`wcb_identity_accounts` and `wcb_sessions`; email is not used to infer or
+merge identity authority. The existing Settings Account surface can display
+this data once production read mode is activated after Hyperdrive smoke.
+
+---
+
 ## 2026-09-19: Live public production smoke exposed asset-first middleware bypass
 
 A new public production smoke runner tested the actual `webcanbe.com` deployment rather than inferring production behavior from source and CI. The Worker-owned readiness and catalog endpoints behaved correctly and reported the still-unconfigured Hyperdrive boundary. Normal HTML/static navigation did not: root/dashboard/unknown SPA routes were served directly by Cloudflare Static Assets and therefore missed the Worker security headers, request IDs, server-side noindex policy, and real HTTP 404 conversion.
