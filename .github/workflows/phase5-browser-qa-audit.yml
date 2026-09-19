@@ -1,0 +1,32 @@
+name: Phase 5 browser QA audit
+on:
+  push:
+    branches: [phase5-browser-qa]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install browser QA tooling
+        run: npm install --no-save --package-lock=false puppeteer-core@25.11.0 axe-core@4.13.0
+      - name: Locate Chrome
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Live production browser QA
+        env:
+          WEBCANBE_BROWSER_ORIGIN: https://webcanbe.com
+        run: node scripts/production-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-browser-qa
+          path: .production-browser-qa
+          if-no-files-found: ignore
