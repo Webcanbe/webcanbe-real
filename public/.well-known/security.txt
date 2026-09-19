@@ -1,0 +1,5 @@
+Contact: mailto:hello@webcanbe.com
+Expires: 2027-09-19T00:00:00.000Z
+Preferred-Languages: en, ko
+Canonical: https://webcanbe.com/.well-known/security.txt
+Policy: https://webcanbe.com/policy
