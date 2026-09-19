@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { CONTENT_SECURITY_POLICY, SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
+import { CONTENT_SECURITY_POLICY, SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 
 describe("Worker security header adapter", () => {
   it("preserves response status and existing headers while adding security headers", async () => {
@@ -35,6 +35,16 @@ describe("Worker security header adapter", () => {
 
     const response = applySecurityHeaders(new Response("private"), { noIndex: true })
     expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow")
+  })
+
+
+  it("distinguishes known SPA routes from unknown navigation paths", () => {
+    for (const path of ["/","/browse","/docs","/docs/security","/project/example","/dashboard","/login","/seller/projects"]) {
+      expect(isKnownAppPath(path)).toBe(true)
+    }
+    for (const path of ["/definitely-not-a-route","/unknown/nested"]) {
+      expect(isKnownAppPath(path)).toBe(false)
+    }
   })
 
   it("enforces the inventoried CSP without enabling inline/eval scripts", () => {
