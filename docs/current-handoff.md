@@ -1,3 +1,19 @@
+# PHASE 5 READ-ONLY TRUTHFULNESS + SECRET-SCAN RELIABILITY CHECKPOINT — 2026-09-19 KST
+
+- Working branch verification run: GitHub Actions `35424179755` — **PASS**.
+- Production read-only mode no longer exposes the working-copy materialization mutation.
+- Existing working copies may still be opened; creating a new copy remains disabled until the full hosted mutation mode is deliberately activated.
+- Empty production catalog/purchase state no longer falls back to demo `projects` rows inside the Dashboard.
+- Missing release metadata now renders a neutral source-backed placeholder rather than cloning the first demo project.
+- Dashboard now shows explicit loading and failure states before trusting hosted product data.
+- Added regression coverage to keep these boundaries closed.
+- Fixed a committed-secret scanner false positive: prose documentation may describe rejected `VITE_SECRET`-style names without failing CI, while executable/configuration sources still receive the unsafe-`VITE_*` name heuristic and all tracked text still receives real token/PEM/PostgreSQL-password scans.
+- Secret scan, focused Phase 4/5 tests, Worker syntax, Vite production build, and Wrangler bundle dry-run all passed.
+- Hyperdrive remains intentionally unbound; the production read-mode activation marker remains absent.
+- Dashboard visual structure remains frozen; this pass changed product-state truthfulness/guardrails, not the approved visual system.
+
+---
+
 # PHASE 5 COMMITTED-SECRET CI CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `3a175a3c60e59089750621d5c68bf1d5c8e25a5c`.
