@@ -50,6 +50,22 @@ jobs:
               cls: Number((a['cumulative-layout-shift']?.numericValue ?? 0).toFixed(3)),
               tbtMs: Math.round(a['total-blocking-time']?.numericValue ?? 0),
             }))
+            const failingA11y = Object.entries(a)
+              .filter(([,audit]) => audit?.scoreDisplayMode === 'binary' && audit?.score === 0 && audit?.details?.type === 'table')
+              .filter(([id]) => ['button-name','link-name','image-alt','label','color-contrast','heading-order','aria-allowed-attr','aria-valid-attr','aria-required-attr','aria-hidden-body','duplicate-id-aria'].includes(id))
+              .map(([id,audit]) => ({ id, title: audit.title, count: audit.details?.items?.length ?? 0 }))
+            if (failingA11y.length) console.log(JSON.stringify({ file, failingA11y }))
+            const opportunities = Object.entries(a)
+              .filter(([,audit]) => typeof audit?.details?.overallSavingsMs === 'number' && audit.details.overallSavingsMs > 100)
+              .map(([id,audit]) => ({ id, title: audit.title, savingsMs: Math.round(audit.details.overallSavingsMs) }))
+              .sort((x,y) => y.savingsMs - x.savingsMs)
+              .slice(0,8)
+            if (opportunities.length) console.log(JSON.stringify({ file, opportunities }))
+            const diagnostics = ['unused-javascript','bootup-time','mainthread-work-breakdown','dom-size','network-requests','total-byte-weight','long-tasks']
+              .map(id => [id, a[id]])
+              .filter(([,audit]) => audit && audit.score !== 1)
+              .map(([id,audit]) => ({ id, title: audit.title, displayValue: audit.displayValue, numericValue: audit.numericValue }))
+            if (diagnostics.length) console.log(JSON.stringify({ file, diagnostics }))
           }
           NODE
       - uses: actions/upload-artifact@v4
