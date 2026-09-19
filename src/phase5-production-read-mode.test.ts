@@ -10,7 +10,10 @@ describe("Phase 5 production read-only product mode", () => {
     expect(client).toContain("productionReadProductMode")
     expect(client).toContain('meta[name="wcb-product-read-mode"]')
     expect(client).toContain("productReadMode")
+    expect(client).toContain("productionMutationProductMode")
+    expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     expect(index).not.toContain('name="wcb-product-read-mode"')
+    expect(index).not.toContain('name="wcb-product-mutation-mode"')
   })
 
   it("prepares only read-oriented account/workspace/library surfaces for the future switch", () => {
@@ -37,7 +40,7 @@ describe("Phase 5 production read-only product mode", () => {
 
   it("keeps working-copy creation behind the full hosted mutation mode", () => {
     const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("type DashboardView"))
-    expect(purchases).toContain("const mutationsEnabled = hostedProductMode()")
+    expect(purchases).toContain("const mutationsEnabled = productMutationMode()")
     expect(purchases).toContain('if (!mutationsEnabled)')
     expect(purchases).toContain("Creation not enabled")
     expect(purchases).toContain("hostedProductClient.materialize")
