@@ -12,7 +12,7 @@ describe("Phase 5 CSP compatibility inventory", () => {
   it("keeps the retained landing free of runtime scripts and external runtime asset origins", () => {
     expect(landing.match(inlineScriptPattern) ?? []).toHaveLength(0)
     expect(landing.match(/<script\b[^>]*\bsrc=/gi) ?? []).toHaveLength(0)
-    expect(landing.match(remoteRuntimePattern) ?? []).toHaveLength(0)
+    for (const pattern of remoteRuntimePatterns) expect(landing.match(pattern) ?? []).toHaveLength(0)
     expect(landing).not.toMatch(/\beval\s*\(/)
     expect(landing).not.toMatch(/new\s+Function\s*\(/)
   })
