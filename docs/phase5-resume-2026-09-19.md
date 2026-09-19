@@ -26,6 +26,8 @@ Final UI constraints already established:
 - Keep account/profile dropdowns and their existing subtle fade/slide animations.
 - Keep collapsed sidebar icon-only; do not let labels leak underneath content.
 - Keep bottom account dropdown above content; do not reintroduce clipping.
+- Canonical production must not expose `/dashboard-preview`; it is development-only.
+- Top-level React render failures use the existing 500 recovery surface rather than a blank page.
 - Top-right brightness/theme button is removed.
 - Top-right settings icon remains **visual UI only**; it currently has no Theme Settings drawer/function.
 - Settings and Account use visually distinct icons; Account uses `UserCircle2`.
@@ -657,6 +659,16 @@ Updated `.gitignore` to ignore:
 while allowing `.env.example`.
 
 No server secret values belong in `VITE_*` variables.
+
+---
+
+## 15. Route/error hardening now complete
+
+- canonical production `/dashboard-preview` is blocked
+- normal `/dashboard` remains protected
+- unknown paths use the real 404 surface
+- unexpected React render failures use a top-level recoverable 500 surface
+- no dashboard visual redesign was introduced
 
 ---
 
