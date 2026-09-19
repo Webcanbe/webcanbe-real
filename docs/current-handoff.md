@@ -1,3 +1,25 @@
+# PHASE 5 EDITOR RELOAD / RECOVERY CONSISTENCY CHECKPOINT — 2026-09-19 KST
+
+- Initial Code workspace load now accepts source files + source history only when both report the same accepted revision.
+- The shared `readAcceptedSnapshot()` boundary reads `files` and `history` together and refuses a mixed-revision snapshot.
+- Added `Refresh accepted` for multi-tab / multi-session source changes.
+- Refresh behavior:
+  - re-reads authoritative accepted files + history
+  - requires one coherent revision before moving local HEAD
+  - re-reads the active accepted file against that same revision
+  - keeps every dirty local draft byte-for-byte intact
+  - refreshes a clean active file to current accepted bytes/hash/baseRevision
+  - clears stale validation, pending-save identity, and project-search results derived from the previous HEAD
+  - re-evaluates stale-draft status against the new HEAD
+- Refresh never treats recovery drafts as accepted source and never discards them silently.
+- Backed-up drafts are still recovered through the existing draft boundary after reconnect; accepted source/history remain separate authority.
+- Added `src/phase5-editor-refresh-recovery.test.ts`.
+- Verification run `35450499806`: secret scan PASS, editor refresh/recovery + save-policy/search/navigation regressions PASS, production build PASS, Wrangler dry-run PASS.
+- P5.6 reload/recovery code path is complete; canonical production activation remains Hyperdrive/session-smoke gated.
+- Dashboard and landing unchanged.
+
+---
+
 # PHASE 5 EXPLICIT SAVE + STALE DRAFT POLICY CHECKPOINT — 2026-09-19 KST
 
 - The Code surface now makes the save authority explicit instead of treating draft backup like source acceptance.
