@@ -12,7 +12,8 @@
       "/__webcanbe/api/workspaces",
       "/__webcanbe/api/product/purchases",
       "/__webcanbe/api/product/workspace-projects/list",
-      "/__webcanbe/api/account/*"
+      "/__webcanbe/api/account/*",
+      "/__webcanbe/ops/readiness"
     ]
   },
   "compatibility_flags": [
