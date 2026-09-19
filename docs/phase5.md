@@ -185,7 +185,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 
 ### P5.8 — Launch hardening
 
-- [ ] Remove or restrict development-only routes such as public dashboard preview before public launch.
+- [x] Restrict public `/dashboard-preview` on canonical production; non-production preview remains available.
 - [ ] Confirm Firebase Authorized Domains includes production domains.
 - [ ] Confirm Google OAuth redirect/origin/branding verification.
 - [x] Baseline security headers on Worker/API/static responses: HSTS, nosniff, DENY framing, strict referrer policy, restricted camera/mic/geolocation, and popup-compatible COOP.
@@ -193,7 +193,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Enforce CSP after a dedicated retained-landing compatibility inventory/pass; same-origin scripts only, inline/eval scripts blocked, Firebase/Google auth origins explicit, inline styles retained for landing compatibility.
 - [x] Add Cloudflare Workers Rate Limiting bindings for auth, public API, and authenticated private-user traffic.
 - [x] Auth abuse/rate limits are enforced as a best-effort Cloudflare layer; authority checks remain separate.
-- [ ] 404/500 and failed-network UX.
+- [x] Add real 404 routing plus top-level recoverable 500 render fallback. Network/API failures already surface bounded product-specific messages; final live failure smoke remains.
 - [ ] Mobile pass.
 - [ ] Safari/Chrome/Firefox pass.
 - [ ] Accessibility keyboard/focus pass.
