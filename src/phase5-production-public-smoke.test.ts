@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 
 const smoke = fs.readFileSync("scripts/production-smoke-public.mjs", "utf8")
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")) as { scripts: Record<string, string> }
+const workflow = fs.readFileSync(".github/workflows/phase5-production-smoke.yml", "utf8")
 
 describe("Phase 5 public production smoke runner", () => {
   it("targets HTTPS production and has an explicit database expectation", () => {
@@ -32,7 +33,12 @@ describe("Phase 5 public production smoke runner", () => {
     expect(smoke).toContain("readiness does not expose credentials")
   })
 
-  it("is exposed as an operator command", () => {
+  it("is exposed as an operator command and automatically runs after successful main CI", () => {
     expect(pkg.scripts["smoke:production:public"]).toBe("node scripts/production-smoke-public.mjs")
+    expect(workflow).toContain('workflows: ["Phase 5 UI verify"]')
+    expect(workflow).toContain("branches: [main]")
+    expect(workflow).toContain("workflow_dispatch")
+    expect(workflow).toContain("Production smoke attempt")
+    expect(workflow).toContain("WEBCANBE_EXPECT_DATABASE")
   })
 })
