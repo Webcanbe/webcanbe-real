@@ -1,3 +1,22 @@
+# PHASE 5 CLOUDFLARE ROLLBACK OPERATIONS CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `f7c2c6c42cdcc121c9f638957df1ceabac5072d2`.
+- Added `scripts/cloudflare-rollback.mjs`.
+- Production rollback refuses to run unless:
+  - the operator supplies an explicit UUID-shaped Worker Version ID
+  - `WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION` is present
+- The wrapper never automatically chooses “the previous version”.
+- Added package commands:
+  - `npm run deploy:versions`
+  - `npm run deploy:deployments`
+  - `npm run deploy:rollback -- <VERSION_ID>`
+- Added `docs/operations/cloudflare-rollback.md`.
+- Runbook explicitly separates Worker rollback from PostgreSQL/data recovery. Cloudflare Worker rollback does not rewind Supabase rows, schema migrations, payment state, Firebase users, or external side effects.
+- Regression coverage + syntax checks + full focused Phase 4/5 verification + Vite build + Wrangler dry-run all PASS.
+- A controlled live production rollback drill is intentionally still pending; do not mark that final drill complete until it is exercised safely.
+
+---
+
 # PHASE 5 DATABASE BACKUP / RECOVERY OPERATIONS CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `deb36aef80f5881e906e3f9d93459e2db1775820`.
