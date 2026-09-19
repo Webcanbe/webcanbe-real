@@ -664,6 +664,14 @@ No server secret values belong in `VITE_*` variables.
 
 ## 15. Route/error hardening now complete
 
+### Route metadata / canonical status
+
+- public SPA routes synchronize title/description/canonical/OpenGraph/Twitter metadata
+- aliases canonicalize: `/templates`→`/browse`, `/pricing`→`/plans`, `/privacy`→`/policy`
+- private/unknown client routes use `noindex, nofollow`
+- unknown HTML navigation gets a real HTTP 404 from the Worker while still rendering the React NotFound surface
+
+
 - canonical production `/dashboard-preview` is blocked
 - normal `/dashboard` remains protected
 - unknown paths use the real 404 surface
