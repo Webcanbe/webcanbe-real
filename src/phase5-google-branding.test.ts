@@ -21,7 +21,7 @@ describe("Phase 5 Google OAuth public legal pages", () => {
     expect(app).toContain("openid, email, and profile")
     expect(app).toContain("does not request access to Gmail, Google Drive, Google Calendar")
     expect(app).toContain("does not persist Google access tokens or refresh tokens")
-    expect(app).toContain("does not sell Google user data")
+    expect(app).toContain("does not sell personal information")
     expect(app).toContain("hello@webcanbe.com")
   })
 })
