@@ -1,3 +1,37 @@
+# PHASE 5 WORKER MATERIALIZATION CHECKPOINT — 2026-09-19 KST
+
+- Added Cloudflare Worker working-copy materialization in `worker/materialization.js`.
+- The mutation requires all of:
+  - live first-party DB session
+  - CSRF
+  - private-user rate limit
+  - active owner/editor workspace membership
+  - active entitlement owned by the current user
+  - published immutable release
+  - valid idempotency key
+- Before source creation, the Worker re-verifies release provenance:
+  - safe/unique bounded file paths
+  - source tree content hash
+  - history head revision/content hash
+  - immutable release snapshot hash
+- Creation is one PostgreSQL transaction:
+  - reserve/replay materialization identity
+  - create `wcb_projects`
+  - create owner `wcb_project_members`
+  - mark `wcb_entitlement_materializations` ready
+  - recheck live session/workspace authority before commit
+- Exact retry is idempotent and does not create a second project.
+- Workspace project capacity remains 20.
+- Production remains fail-closed:
+  - Worker requires `WEBCANBE_PRODUCT_MUTATIONS=enabled`
+  - frontend additionally requires inactive `wcb-product-mutation-mode=hosted` marker
+  - neither is active on canonical production
+- Read mode and mutation mode are now separate activation seams.
+- Verification run `35448977411`: secret scan PASS, materialization/product regressions PASS, Worker syntax PASS, Vite build PASS, Wrangler dry-run PASS.
+- Dashboard/landing unchanged.
+
+---
+
 # PHASE 5 EDITOR NAVIGATION + EXACT CODE JUMP CHECKPOINT — 2026-09-19 KST
 
 - Added source-file Quick Open:

@@ -5,6 +5,7 @@ import { withHyperdrive } from "./hyperdrive.js"
 import { databaseReadiness } from "./readiness.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
+import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
@@ -418,6 +419,19 @@ async function privateProduct(request, env, path, traceId) {
       if (path === "/__webcanbe/api/product/workspace-projects/list") {
         return json({ workspaceProjects: await databaseWorkspaceProjects(db, databaseSession) })
       }
+      if (path === "/__webcanbe/api/product/workspace-projects/materialize") {
+        if (env.WEBCANBE_PRODUCT_MUTATIONS !== "enabled") return json({ error: "Product mutations are not enabled." }, 503)
+        let body
+        try { body = await smallJsonBody(request) }
+        catch { return json({ error: "Invalid materialization request." }, 400) }
+        try {
+          const workspaceProject = await materializeDatabaseWorkspaceProject(db, databaseSession, body)
+          return json({ workspaceProject }, 201)
+        } catch (error) {
+          if (error instanceof MaterializationError) return json({ error: error.message }, error.status)
+          return json({ error: "Working-copy creation is temporarily unavailable." }, 503)
+        }
+      }
       if (path === "/__webcanbe/api/account/identities/link/firebase") {
         const idToken = bearerToken(request)
         if (!idToken) return json({ error: "Verified Firebase identity proof is required." }, 401)
@@ -515,7 +529,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase") response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")

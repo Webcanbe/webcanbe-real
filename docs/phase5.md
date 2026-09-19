@@ -99,7 +99,7 @@ Goal: replace local/demo product state with real server data.
 - [x] Route public catalog requests through the Worker and fail closed with 503 while the database binding is absent.
 - [x] Expose read-only purchases/entitlements through a user-scoped DB query.
 - [x] Expose read-only working-copy list with active workspace membership checks.
-- [ ] Expose working-copy materialization mutation after live Hyperdrive/session verification.
+- [x] Implement the Worker working-copy materialization mutation with immutable release verification, workspace/session authority rechecks, atomic project/member creation, and idempotent replay. Production activation remains gated until live Hyperdrive/session verification.
 - [ ] Preserve server-side workspace/user authorization on every mutation.
 - [x] Prepare a separate read-only production frontend mode for Workspaces, Purchases/Working copies, Dashboard library data, and Account profile without activating seller/control/checkout mutations.
 - [ ] After Hyperdrive smoke passes, activate it with `<meta name="wcb-product-read-mode" content="hosted">`.
@@ -132,7 +132,7 @@ Exit gate: a user can leave, return, sign in again, and recover the same account
 - [ ] Payment success is accepted only from a verified provider webhook.
 - [ ] Entitlement grant is atomic/idempotent.
 - [ ] Purchases page reads real entitlements.
-- [ ] “Create working copy” materializes from the purchased immutable release.
+- [x] Working-copy materialization logic is implemented against the purchased immutable release and existing canonical source/history schema; production UI/API activation remains intentionally gated until Hyperdrive/session smoke.
 - [ ] Duplicate webhook/retry cannot double-grant.
 - [ ] Refund/reversal path has defined entitlement behavior.
 
@@ -271,6 +271,16 @@ The Hyperdrive blocker and production-read activation sequence are unchanged.
 A live GitHub-runner smoke test proved that production API/readiness requests were reaching the Worker while normal SPA/static navigation was still asset-first. That meant the security-header, request-ID, private-noindex, and real-404 implementation existed in source but was not actually applied to ordinary production pages.
 
 The branch now sets `assets.run_worker_first: true`, adds regression coverage, and adds an automatic post-CI production smoke workflow. Branch verification run `35424537541` passes secret scan, focused tests, syntax, Vite build, and Wrangler dry-run. Live post-deploy verification remains the gate before declaring this routing correction complete.
+
+---
+
+## 2026-09-19 Worker materialization boundary
+
+The Cloudflare Worker now has the real entitlement → editable working-copy mutation without creating a second project model. The release snapshot is cryptographically/provenance checked before source creation, the current DB session and workspace authority are checked inside the same transaction, and retries are idempotent.
+
+Activation is deliberately two-keyed: the Worker needs `WEBCANBE_PRODUCT_MUTATIONS=enabled` and the production frontend needs `wcb-product-mutation-mode=hosted`. Both remain absent now, so Hyperdrive read/session smoke still happens before any production mutation is opened.
+
+Verification run `35448977411` passed all branch gates.
 
 ---
 

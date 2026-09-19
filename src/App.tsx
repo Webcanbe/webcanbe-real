@@ -3,7 +3,7 @@ import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookO
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
-import { hostedProductClient, hostedProductMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
+import { hostedProductClient, hostedProductMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
@@ -333,7 +333,7 @@ function Projects() {
 
 function Purchases() {
   const library = useProductLibrary()
-  const mutationsEnabled = hostedProductMode()
+  const mutationsEnabled = productMutationMode()
   const [working, setWorking] = useState("")
   const [actionError, setActionError] = useState("")
   const localPurchases = projects.slice(3)

@@ -1,5 +1,29 @@
 # WebCanBe project record
 
+## 2026-09-19: Worker entitlement materialization boundary completed
+
+The Cloudflare Worker can now materialize an active user-owned entitlement into the
+existing `wcb_projects` source/history model. It does not mint a parallel project
+representation. Before committing, it verifies the stored release file set, source
+content hash, history head, and immutable snapshot hash, then creates the project row,
+owner project membership, and ready materialization state in one PostgreSQL
+transaction.
+
+The mutation revalidates the live first-party database session and active owner/editor
+workspace membership inside the transaction. An idempotency key is bound to the same
+user/entitlement/workspace tuple; exact replay returns the existing working copy while
+conflicting reuse is refused.
+
+Production activation is intentionally separate from implementation. The Worker
+requires `WEBCANBE_PRODUCT_MUTATIONS=enabled`, and the browser requires the separate
+`wcb-product-mutation-mode=hosted` marker. Neither is active before Hyperdrive
+session/read smoke.
+
+Verification run `35448977411` passed secret scan, product/materialization tests,
+Worker syntax, Vite production build and Wrangler dry-run.
+
+---
+
 ## 2026-09-19: Fast source navigation and exact visual-to-code jumps
 
 The Compatible editor now supports Cmd/Ctrl+P Quick Open with path filtering and a

@@ -231,5 +231,7 @@ export class HostedProductClient {
 export const hostedProductMode = () => typeof document !== "undefined" && document.querySelector('meta[name="wcb-editor-mode"]')?.getAttribute("content") === "hosted"
 export const productionReadProductMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-product-read-mode"]')?.getAttribute("content") === "hosted"
 export const productReadMode = () => hostedProductMode() || productionReadProductMode()
+export const productionMutationProductMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-product-mutation-mode"]')?.getAttribute("content") === "hosted"
+export const productMutationMode = () => hostedProductMode() || productionMutationProductMode()
 export const productionAuthMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-auth-mode"]')?.getAttribute("content") === "google"
 export const hostedProductClient = new HostedProductClient()

@@ -8,6 +8,22 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — Worker working-copy materialization
+
+- Entitlement → working-copy materialization is implemented in the Cloudflare Worker.
+- It verifies immutable release file/history/content/snapshot provenance before creating source.
+- It creates the existing `wcb_projects` row + owner project membership + ready materialization atomically.
+- Session and workspace authority are rechecked inside the DB transaction.
+- Exact retry is idempotent; conflicting key/workspace reuse is refused.
+- Production mutation activation remains closed behind BOTH:
+  - Worker env `WEBCANBE_PRODUCT_MUTATIONS=enabled`
+  - frontend meta `wcb-product-mutation-mode=hosted`
+- Neither activation switch is enabled yet.
+- Hyperdrive read/session smoke is still the next infrastructure gate.
+- Verification run `35448977411` passed all branch gates.
+
+---
+
 ## Latest recovery delta — editor navigation and exact code jump
 
 - Quick Open: `Cmd/Ctrl+P`, file-path filtering, recent files.
