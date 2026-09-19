@@ -66,7 +66,19 @@ $$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO webcanbe_runtime;
 
--- Intentionally no LOGIN/password here.
--- A dedicated login role should be created only when the Cloudflare Hyperdrive
--- connection is provisioned. Do not use anon/authenticated or the browser API as
--- the Webcanbe product authority boundary.
+DO $
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'webcanbe_hyperdrive') THEN
+    CREATE ROLE webcanbe_hyperdrive
+      NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
+  END IF;
+END
+$;
+
+GRANT webcanbe_runtime TO webcanbe_hyperdrive;
+
+-- Intentionally NOLOGIN and no password in source control.
+-- At Hyperdrive provisioning time, an operator may run:
+--   ALTER ROLE webcanbe_hyperdrive LOGIN PASSWORD '<operator-generated secret>';
+-- The password must remain only in the database/Cloudflare secret configuration,
+-- never frontend code, GitHub, or chat.
