@@ -7,6 +7,7 @@ const GOOGLE_ISSUER = "https://accounts.google.com"
 const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth"
 const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token"
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"))
+const FIREBASE_PROJECT_ID = "webcanbe-b607e"
 const LOGIN_COOKIE = "__Host-wcb-login"
 const SESSION_COOKIE = "__Host-wcb-session"
 const encoder = new TextEncoder()
@@ -211,14 +212,14 @@ async function callback(request, env) {
 
 async function firebaseExchange(request, env) {
   if (!requireSameOriginPost(request)) return json({ error: "Firebase session exchange refused." }, 403)
-  if (!env.FIREBASE_PROJECT_ID || !env.GOOGLE_OAUTH_CLIENT_SECRET) return json({ error: "Firebase session exchange is not configured." }, 503)
+  if (!env.GOOGLE_OAUTH_CLIENT_SECRET) return json({ error: "Firebase session exchange is not configured." }, 503)
 
   const idToken = bearerToken(request)
   if (!idToken) return json({ error: "Firebase ID token is required." }, 401)
 
   let payload
   try {
-    payload = await verifyFirebaseIdToken(idToken, env.FIREBASE_PROJECT_ID)
+    payload = await verifyFirebaseIdToken(idToken, FIREBASE_PROJECT_ID)
   } catch {
     return json({ error: "Firebase identity verification failed." }, 403)
   }
