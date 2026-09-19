@@ -1,5 +1,24 @@
 # WebCanBe project record
 
+## 2026-09-19: Explicit provider identity linking boundary added
+
+Webcanbe now has a bounded account-linking rule instead of relying on matching
+email addresses. A provider identity can be linked only while the user already
+holds a live first-party DB session and presents a freshly verified Firebase
+ID token. The database session is rechecked, the global identity lock
+serializes the mapping, and authority is keyed only by provider issuer and
+subject.
+
+Linking is idempotent when the same identity already belongs to the same
+internal user. An inactive same-user mapping may be reactivated, but a mapping
+owned by a different internal user is refused with a conflict. There is no
+automatic cross-account merge and no email-based linking path.
+
+The route and client method are prepared but remain UI-inactive until
+Hyperdrive production session smoke is complete.
+
+---
+
 ## 2026-09-19: Legal/privacy data-flow review completed
 
 The production Privacy Policy now matches the implemented authentication and
