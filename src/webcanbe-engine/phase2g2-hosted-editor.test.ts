@@ -149,7 +149,7 @@ run("composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS L
     passed("Two users/projects: signed login → import → source → Code → immutable PG artifact → PG scheduled mTLS runner → input/select → Visual → accepted history → React18/19 state 1/1/2/3 → CSS → export")
   },60000)
   it("rejects cross-tenant references, stolen capabilities, forged identity fields and origin/CSRF/session attacks",async()=>{
-    for(const action of ["session","files","source","history","export","preview","inspect","validate","mutate","code","artifact","diagnostics","logs"]) {
+    for(const action of ["session","files","source","search","history","export","preview","inspect","validate","mutate","code","artifact","diagnostics","logs"]) {
       const result=await api(a,pb,action,{file:"src/App.tsx",command:"capture",generation:pb.generation,expectedRevision:pb.revision});expect(result.status,action).toBe(403);expect(JSON.stringify(result.body)).not.toContain("Hosted heading")
     }
     for(const field of ["accountId","userId","projectId","artifactId","runnerId","revisionId","generationId","root","role"])expect((await api(a,pa,"files",{[field]:pb.id})).status,field).toBe(403)
