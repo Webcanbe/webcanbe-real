@@ -1,5 +1,22 @@
 # WebCanBe project record
 
+## 2026-09-19: Baseline production security headers and crawler policy
+
+The Cloudflare Worker now applies a conservative baseline of security headers
+to both dynamic API responses and static asset responses. The policy prevents
+framing, disables MIME sniffing, restricts high-risk browser capabilities, and
+uses `same-origin-allow-popups` rather than strict COOP so Firebase/GitHub popup
+authentication remains compatible.
+
+A CSP was intentionally deferred instead of being guessed: the retained landing
+must first be inventoried for inline/runtime presentation dependencies. This
+avoids turning a security hardening pass into an unverified landing outage.
+
+`robots.txt` now excludes authenticated/private/API routes and a public-only
+`sitemap.xml` is committed. No product UI was changed.
+
+---
+
 ## 2026-09-19: Read-only production backend activation separated from mutations
 
 The frontend now has a dedicated production read-mode boundary rather than
