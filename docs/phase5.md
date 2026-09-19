@@ -202,6 +202,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Rollback procedure tested.
 - [ ] Legal pages match actual data handling.
 - [x] Add `robots.txt` that excludes authenticated/private routes and `/__webcanbe/`.
+- [x] Add server-side `X-Robots-Tag: noindex, nofollow` on private/authenticated SPA routes.
 - [x] Add public-only `sitemap.xml`.
 - [x] Webcanbe favicon/Apple touch icon and base OG/Twitter metadata are in place.
 - [ ] Final per-route metadata/canonical audit before launch.
