@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify } from "jose"
+import { verifyFirebaseIdToken } from "./firebase-auth.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -91,6 +92,30 @@ function clearCookie(name, sameSite) {
   return name + "=; Path=/; Secure; HttpOnly; SameSite=" + sameSite + "; Max-Age=0"
 }
 
+function bearerToken(request) {
+  const header = request.headers.get("Authorization") || ""
+  const match = /^Bearer ([A-Za-z0-9._~-]+)$/.exec(header)
+  return match?.[1]
+}
+
+async function createSessionCookie(env, identity) {
+  if (!env.GOOGLE_OAUTH_CLIENT_SECRET) throw new Error("Session signing is not configured.")
+  const now = Date.now()
+  return signPayload({
+    sub: identity.provider + ":" + identity.subject,
+    identityProvider: identity.provider,
+    providerSubject: identity.subject,
+    email: typeof identity.email === "string" ? identity.email.slice(0, 320) : "",
+    emailVerified: identity.emailVerified === true,
+    name: typeof identity.name === "string" ? identity.name.slice(0, 200) : "",
+    picture: typeof identity.picture === "string" ? identity.picture.slice(0, 1000) : "",
+    signInProvider: typeof identity.signInProvider === "string" ? identity.signInProvider.slice(0, 100) : identity.provider,
+    csrf: randomToken(),
+    iat: now,
+    exp: now + 7 * 24 * 60 * 60 * 1000,
+  }, env.GOOGLE_OAUTH_CLIENT_SECRET, "session")
+}
+
 async function start(request, env) {
   if (!requireSameOriginPost(request)) return json({ error: "Sign-in request refused." }, 403)
   if (!env.GOOGLE_OAUTH_CLIENT_ID || !env.GOOGLE_OAUTH_CLIENT_SECRET) return json({ error: "Google sign-in is not configured." }, 503)
@@ -168,21 +193,54 @@ async function callback(request, env) {
     return json({ error: "Google identity verification failed." }, 403)
   }
 
-  const now = Date.now()
-  const session = await signPayload({
-    sub: payload.sub,
+  const session = await createSessionCookie(env, {
+    provider: "google",
+    subject: payload.sub,
     email: payload.email,
-    name: typeof payload.name === "string" ? payload.name.slice(0, 200) : "",
-    picture: typeof payload.picture === "string" ? payload.picture.slice(0, 1000) : "",
-    csrf: randomToken(),
-    iat: now,
-    exp: now + 7 * 24 * 60 * 60 * 1000,
-  }, env.GOOGLE_OAUTH_CLIENT_SECRET, "session")
+    emailVerified: payload.email_verified === true,
+    name: payload.name,
+    picture: payload.picture,
+    signInProvider: "google.com",
+  })
 
   const headers = new Headers({ ...commonHeaders, Location: "/auth/complete" })
   appendCookie(headers, SESSION_COOKIE + "=" + session + "; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=604800")
   appendCookie(headers, clearCookie(LOGIN_COOKIE, "Lax"))
   return new Response(null, { status: 303, headers })
+}
+
+async function firebaseExchange(request, env) {
+  if (!requireSameOriginPost(request)) return json({ error: "Firebase session exchange refused." }, 403)
+  if (!env.FIREBASE_PROJECT_ID || !env.GOOGLE_OAUTH_CLIENT_SECRET) return json({ error: "Firebase session exchange is not configured." }, 503)
+
+  const idToken = bearerToken(request)
+  if (!idToken) return json({ error: "Firebase ID token is required." }, 401)
+
+  let payload
+  try {
+    payload = await verifyFirebaseIdToken(idToken, env.FIREBASE_PROJECT_ID)
+  } catch {
+    return json({ error: "Firebase identity verification failed." }, 403)
+  }
+
+  const firebaseClaim = payload.firebase
+  const signInProvider = firebaseClaim && typeof firebaseClaim === "object" && typeof firebaseClaim.sign_in_provider === "string"
+    ? firebaseClaim.sign_in_provider
+    : "firebase"
+
+  const session = await createSessionCookie(env, {
+    provider: "firebase",
+    subject: payload.sub,
+    email: typeof payload.email === "string" ? payload.email : "",
+    emailVerified: payload.email_verified === true,
+    name: typeof payload.name === "string" ? payload.name : "",
+    picture: typeof payload.picture === "string" ? payload.picture : "",
+    signInProvider,
+  })
+
+  const headers = new Headers({ ...commonHeaders, "Content-Type": "application/json; charset=utf-8" })
+  appendCookie(headers, SESSION_COOKIE + "=" + session + "; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=604800")
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers })
 }
 
 async function readSession(request, env) {
@@ -199,7 +257,13 @@ async function session(request, env) {
   return json({
     csrf: value.csrf,
     expiresAt: value.exp,
-    user: { email: value.email || "", name: value.name || "", picture: value.picture || "" },
+    user: {
+      email: value.email || "",
+      name: value.name || "",
+      picture: value.picture || "",
+      provider: value.identityProvider || "legacy",
+      signInProvider: value.signInProvider || value.identityProvider || "legacy",
+    },
   })
 }
 
@@ -217,6 +281,7 @@ export default {
     const path = new URL(request.url).pathname
     if (path === "/__webcanbe/auth/start") return start(request, env)
     if (path === "/__webcanbe/auth/callback") return callback(request, env)
+    if (path === "/__webcanbe/auth/firebase-exchange") return firebaseExchange(request, env)
     if (path === "/__webcanbe/auth/session") return session(request, env)
     if (path === "/__webcanbe/auth/logout") return logout(request, env)
     return env.ASSETS.fetch(request)
