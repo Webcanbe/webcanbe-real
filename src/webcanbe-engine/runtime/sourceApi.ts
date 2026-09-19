@@ -20,9 +20,7 @@ const SOURCE_SEARCH_LIMITS = Object.freeze({ queryChars: 160, results: 100, perF
 
 function sourceSearch(files: Map<string,string>, query: string, caseSensitive: boolean, requestedLimit?: number) {
   const limit = requestedLimit === undefined ? SOURCE_SEARCH_LIMITS.results : Math.min(requestedLimit, SOURCE_SEARCH_LIMITS.results)
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\  const needle = caseSensitive ? query : query.toLowerCase()
-  const results: Array<{ file:string; start:number; end:number; line:number; column:number; preview:string }> = []
-")
+  const escaped = [...query].map(character => "^$.*+?()[]{}|".includes(character) || character.charCodeAt(0) === 92 ? String.fromCharCode(92) + character : character).join("")
   const pattern = new RegExp(escaped, caseSensitive ? "g" : "gi")
   const results: Array<{ file:string; start:number; end:number; line:number; column:number; preview:string }> = []
   let scannedBytes = 0, scannedFiles = 0, truncated = false
