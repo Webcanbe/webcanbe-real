@@ -1,5 +1,5 @@
 import type { DraftState } from "../runtime/draftStore"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { basicSetup, EditorView } from "codemirror"
 import { keymap } from "@codemirror/view"
 import { javascript } from "@codemirror/lang-javascript"
@@ -10,8 +10,25 @@ import type { FileOperation, MutationTransaction, RevisionLedger, SourceValidati
 export type SourceResponse = { archivedHistory?: {transactions: MutationTransaction[];revisions: RevisionLedger["revisions"]}; restorePreview?: {baseRevision:string;revisionId:string;files:Array<{file:string;kind:string;expectedHash:string|null;afterHash:string|null}>;diff:string;truncatedPerFile:number}; draftState?: DraftState; files?: Array<{ file: string; hash: string }>; source?: string; revision?: string; history?: RevisionLedger; validation?: SourceValidation; transaction?: MutationTransaction; diff?: string; error?: string }
 type Request = (action: string, body?: Record<string, unknown>) => Promise<{ ok: boolean; data: SourceResponse }>
 type Draft = { file: string; text: string; baseline: string; hash: string; baseRevision: string }
+export type CodeOpenLocation = Readonly<{ file: string; start?: number; end?: number; sequence: number }>
+type TextMatch = Readonly<{ start: number; end: number }>
 
-function CodeEditor({ file, value, onChange, onSave, onSaveAll }: { file: string; value: string; onChange: (text: string) => void; onSave: () => void; onSaveAll: () => void }) {
+function findTextMatches(text: string, query: string, caseSensitive: boolean): TextMatch[] {
+  if (!query) return []
+  const haystack = caseSensitive ? text : text.toLowerCase()
+  const needle = caseSensitive ? query : query.toLowerCase()
+  const matches: TextMatch[] = []
+  let from = 0
+  while (matches.length < 1000) {
+    const start = haystack.indexOf(needle, from)
+    if (start < 0) break
+    matches.push({ start, end: start + query.length })
+    from = start + Math.max(query.length, 1)
+  }
+  return matches
+}
+
+function CodeEditor({ file, value, reveal, onChange, onSave, onSaveAll }: { file: string; value: string; reveal?: CodeOpenLocation; onChange: (text: string) => void; onSave: () => void; onSaveAll: () => void }) {
   const host = useRef<HTMLDivElement>(null), view = useRef<EditorView | undefined>(undefined)
   const callbacks = useRef({ onChange, onSave, onSaveAll }); callbacks.current = { onChange, onSave, onSaveAll }
   useEffect(() => {
@@ -29,10 +46,19 @@ function CodeEditor({ file, value, onChange, onSave, onSaveAll }: { file: string
     return () => { editor.destroy(); view.current = undefined }
   }, [file])
   useEffect(() => { const editor = view.current; if (editor && editor.state.doc.toString() !== value) editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: value } }) }, [value])
+  useEffect(() => {
+    const editor = view.current
+    if (!editor || !reveal || reveal.file !== file) return
+    const length = editor.state.doc.length
+    const start = Math.max(0, Math.min(reveal.start ?? 0, length))
+    const end = Math.max(start, Math.min(reveal.end ?? start, length))
+    editor.dispatch({ selection: { anchor: start, head: end }, effects: EditorView.scrollIntoView(start, { y: "center" }) })
+    editor.focus()
+  }, [file, reveal?.sequence])
   return <div ref={host} className="source-code-editor" />
 }
 
-export default function CodeWorkspace({ projectId, request, epoch, connected, visible, openFile, onAccepted }: { projectId: string; request: Request; epoch: number; connected: boolean; visible: "canvas" | "code" | "split" | "history"; openFile?: string; onAccepted: (data: SourceResponse) => Promise<void> }) {
+export default function CodeWorkspace({ projectId, request, epoch, connected, visible, openFile, openLocation, onAccepted }: { projectId: string; request: Request; epoch: number; connected: boolean; visible: "canvas" | "code" | "split" | "history"; openFile?: string; openLocation?: CodeOpenLocation; onAccepted: (data: SourceResponse) => Promise<void> }) {
   const [files, setFiles] = useState<Array<{ file: string; hash: string }>>([])
   const [drafts, setDrafts] = useState<Record<string, Draft>>({})
   const [active, setActive] = useState("")
@@ -49,18 +75,29 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const [selectedEntry, setSelectedEntry] = useState<MutationTransaction>()
   const [fileAction, setFileAction] = useState<"create" | "rename" | "delete">("create")
   const [newPath, setNewPath] = useState("src/New.tsx")
-  const serial = useRef(0), mounted = useRef(true), saving = useRef(false)
+  const [quickOpen, setQuickOpen] = useState(false), [quickQuery, setQuickQuery] = useState("")
+  const [findOpen, setFindOpen] = useState(false), [findQuery, setFindQuery] = useState(""), [replaceValue, setReplaceValue] = useState(""), [caseSensitive, setCaseSensitive] = useState(false), [matchIndex, setMatchIndex] = useState(0)
+  const [recentFiles, setRecentFiles] = useState<string[]>([])
+  const [reveal, setReveal] = useState<CodeOpenLocation>()
+  const serial = useRef(0), mounted = useRef(true), saving = useRef(false), revealSequence = useRef(0)
   const validationVersion = useRef(0), validationState = useRef({head,drafts})
   validationState.current = {head,drafts}
   const pendingSave = useRef<{ signature: string; key: string } | undefined>(undefined)
   const requests = useRef(request); requests.current = request
   const draft = drafts[active], dirty = Boolean(draft && draft.text !== draft.baseline)
   const conflict = Boolean(dirty && draft.baseRevision !== head)
+  const searchMatches = useMemo(() => findTextMatches(draft?.text ?? "", findQuery, caseSensitive), [draft?.text, findQuery, caseSensitive])
+  const quickFiles = useMemo(() => {
+    const all = files.map(item => item.file)
+    const query = quickQuery.trim().toLowerCase()
+    if (query) return all.filter(file => file.toLowerCase().includes(query)).slice(0, 60)
+    return [...recentFiles, ...all.filter(file => !recentFiles.includes(file))].slice(0, 60)
+  }, [files, quickQuery, recentFiles])
   const initialHashes = new Map<string, string>()
   for (const entry of ledger?.transactions ?? []) if (entry.success) for (const [file, version] of Object.entries(entry.versions ?? {})) if (!initialHashes.has(file)) initialHashes.set(file, version.before)
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; ++serial.current } }, [])
-  useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); ++serial.current }, [projectId])
+  useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); setRecentFiles([]); setQuickOpen(false); setFindOpen(false); setReveal(undefined); ++serial.current }, [projectId])
   useEffect(() => {
     if (!connected) return
     const sequence = ++serial.current
@@ -112,7 +149,56 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     void requests.current("history").then(response => { if (!cancelled && response.ok) { setLedger(response.data.history); setHead(response.data.revision ?? "") } }).catch(() => {})
     return () => { cancelled = true }
   }, [visible, connected])
-  useEffect(() => { if (openFile) setActive(openFile) }, [openFile])
+  function openSourceFile(file: string) {
+    if (!file) return
+    setActive(file)
+    setValidation(undefined)
+    setRecentFiles(current => [file, ...current.filter(value => value !== file)].slice(0, 6))
+    setQuickOpen(false)
+  }
+  function revealRange(file: string, start: number, end: number) {
+    openSourceFile(file)
+    setReveal({ file, start, end, sequence: ++revealSequence.current })
+  }
+  function jumpToMatch(index: number) {
+    if (!active || !searchMatches.length) return
+    const normalized = (index + searchMatches.length) % searchMatches.length
+    const match = searchMatches[normalized]
+    setMatchIndex(normalized)
+    revealRange(active, match.start, match.end)
+  }
+  function replaceCurrentMatch() {
+    if (!draft || !searchMatches.length) return
+    const match = searchMatches[Math.min(matchIndex, searchMatches.length - 1)]
+    const next = draft.text.slice(0, match.start) + replaceValue + draft.text.slice(match.end)
+    setDrafts(all => ({ ...all, [active]: { ...all[active], text: next } }))
+    setStatus("Replaced one match in the draft. Save source to accept it.")
+    setMatchIndex(0)
+    setReveal({ file: active, start: match.start, end: match.start + replaceValue.length, sequence: ++revealSequence.current })
+  }
+  function replaceAllMatches() {
+    if (!draft || !searchMatches.length) return
+    let next = draft.text
+    for (const match of [...searchMatches].reverse()) next = next.slice(0, match.start) + replaceValue + next.slice(match.end)
+    setDrafts(all => ({ ...all, [active]: { ...all[active], text: next } }))
+    setStatus(`Replaced ${searchMatches.length} matches in the draft. Save source to accept them.`)
+    setMatchIndex(0)
+  }
+  useEffect(() => { if (openFile) openSourceFile(openFile) }, [openFile])
+  useEffect(() => { if (openLocation) { openSourceFile(openLocation.file); setReveal(openLocation) } }, [openLocation?.sequence])
+  useEffect(() => { if (active) setRecentFiles(current => current[0] === active ? current : [active, ...current.filter(value => value !== active)].slice(0, 6)) }, [active])
+  useEffect(() => { setMatchIndex(0) }, [findQuery, caseSensitive, active])
+  useEffect(() => {
+    if (!connected || (visible !== "code" && visible !== "split")) return
+    const handler = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase(), mod = event.metaKey || event.ctrlKey
+      if (mod && !event.shiftKey && !event.altKey && key === "p") { event.preventDefault(); setQuickOpen(true); setQuickQuery(""); return }
+      if (mod && event.shiftKey && !event.altKey && key === "f") { event.preventDefault(); setFindOpen(true); return }
+      if (event.key === "Escape") { setQuickOpen(false); setFindOpen(false) }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [connected, visible])
   useEffect(() => {
     if (!active || !connected) return
     let cancelled = false
@@ -237,13 +323,14 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   }
 
   return <div className="source-workspace" hidden={visible === "canvas"}>
-    {(visible === "code" || visible === "split") && <>
-      <div className="source-file-tree" aria-label="Source file tree">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => { setActive(item.file); setValidation(undefined) }}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div>
+    {(visible === "code" || visible === "split") && <>{quickOpen && <div className="source-quick-open-backdrop" onMouseDown={() => setQuickOpen(false)}><section className="source-quick-open" role="dialog" aria-modal="true" aria-label="Quick open source file" onMouseDown={event => event.stopPropagation()}><header><strong>Quick open</strong><kbd>⌘/Ctrl P</kbd></header><input autoFocus aria-label="Quick open file" value={quickQuery} onChange={event => setQuickQuery(event.target.value)} placeholder="Type a file path…" onKeyDown={event => { if (event.key === "Enter" && quickFiles[0]) { event.preventDefault(); openSourceFile(quickFiles[0]) } if (event.key === "Escape") setQuickOpen(false) }} /><div>{quickFiles.length ? quickFiles.map(file => <button type="button" key={file} onClick={() => openSourceFile(file)}><span>{file}</span>{recentFiles.includes(file) && <small>Recent</small>}</button>) : <p>No matching source files.</p>}</div></section></div>}
+      <div className="source-file-tree" aria-label="Source file tree"><div className="source-file-tree-head"><span>Files</span><button type="button" onClick={() => { setQuickOpen(true); setQuickQuery("") }}>Quick open <kbd>⌘P</kbd></button></div>{recentFiles.length > 0 && <div className="source-recent-files"><small>Recent</small>{recentFiles.map(file => <button type="button" key={file} aria-pressed={active === file} onClick={() => openSourceFile(file)}>{file}</button>)}</div>}<div className="source-all-files">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => openSourceFile(item.file)}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div></div>
       <div className="source-editor-panel">
-        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
+        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button type="button" onClick={() => { setFindOpen(value => !value); if (!findOpen) setFindQuery("") }}>Find / replace</button><button onClick={() => void save()} disabled={!dirty || busy || !connected}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected}>Save all drafts</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
+        {findOpen && <div className="source-find-panel"><div className="source-find-row"><input autoFocus aria-label="Find in current file" value={findQuery} onChange={event => setFindQuery(event.target.value)} placeholder="Find in current file…" onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); jumpToMatch(event.shiftKey ? matchIndex - 1 : matchIndex + 1) } }} /><span>{findQuery ? `${searchMatches.length ? matchIndex + 1 : 0} / ${searchMatches.length}` : "0 / 0"}</span><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex - 1)}>Previous</button><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex + 1)}>Next</button><label><input type="checkbox" checked={caseSensitive} onChange={event => setCaseSensitive(event.target.checked)} /> Match case</label></div><div className="source-find-row"><input aria-label="Replace in current file" value={replaceValue} onChange={event => setReplaceValue(event.target.value)} placeholder="Replace with…" /><button type="button" disabled={!searchMatches.length} onClick={replaceCurrentMatch}>Replace</button><button type="button" disabled={!searchMatches.length} onClick={replaceAllMatches}>Replace all</button><small>Replacements modify the draft only. Save source performs the accepted transaction.</small></div></div>}
         <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Renames update statically resolved source, CSS and asset references in the same transaction. Ambiguous references require a Code edit. The preview build must still pass.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
         {conflict && <p role="alert">HEAD changed while this draft was open. Save will reject this stale base. <button onClick={() => void reloadBase()}>Rebase unchanged file</button></p>}
-        {draft && <CodeEditor file={active} value={draft.text} onChange={value => setDrafts(all => ({ ...all, [active]: { ...all[active], text: value } }))} onSave={() => void save()} onSaveAll={() => void save(true)} />}
+        {draft && <CodeEditor file={active} value={draft.text} reveal={reveal} onChange={value => setDrafts(all => ({ ...all, [active]: { ...all[active], text: value } }))} onSave={() => void save()} onSaveAll={() => void save(true)} />}
         {validation && <div className="source-diagnostics" role="status">{validation.level === "semantic" ? (validation.passed ? "Semantic TypeScript checks passed. Build and runtime validation are separate." : "Semantic TypeScript errors — source remains unchanged.") : validation.passed ? "Parse checks passed. Save validates the controlled preview bundle." : "Syntax/validation error — draft retained; preview remains at the last accepted revision."}{validation.diagnostics.map((item, index) => <p key={index}>{item.file}{item.line ? `:${item.line}:${item.column ?? 0}` : ""}: {item.message}</p>)}</div>}
         {showDiff && draft && <pre className="draft-diff">{`${active}\n--- Accepted source\n${draft.baseline.split("\n").map(line => "-" + line).join("\n")}\n+++ Draft\n${draft.text.split("\n").map(line => "+" + line).join("\n")}`}</pre>}
         <small>⌘S / Ctrl+S saves this file. ⇧⌘S / Ctrl+Shift+S saves all dirty drafts in one validated source transaction.</small><p className="draft-backup-status" role="status">{backupStatus}</p>
