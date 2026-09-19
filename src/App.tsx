@@ -4,7 +4,7 @@ import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
 import { hostedProductClient, hostedProductMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
-import { createEmailAccountFirebase, firebaseAuthenticated, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
+import { createEmailAccountFirebase, currentFirebaseIdToken, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
@@ -65,11 +65,15 @@ function SiteFooter() {
 }
 function localSignedIn(){try{return sessionStorage.getItem("wcb-demo-auth")==="1"}catch{return false}}
 async function productionSignedIn(){
-  const [google,firebase]=await Promise.all([
-    hostedProductClient.authenticated().catch(()=>false),
-    firebaseAuthenticated().catch(()=>false),
-  ])
-  return google||firebase
+  if(await hostedProductClient.authenticated().catch(()=>false))return true
+  const idToken=await currentFirebaseIdToken().catch(()=>undefined)
+  if(!idToken)return false
+  try{
+    await hostedProductClient.firebaseExchange(idToken)
+    return await hostedProductClient.authenticated()
+  }catch{
+    return false
+  }
 }
 async function productionSignOut(){
   await Promise.allSettled([
@@ -143,9 +147,13 @@ function authNext() {
 function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:string;onClose?:()=>void}) {
   const auth=productionAuthMode(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[emailStep,setEmailStep]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState("")
   const finish=()=>{window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(next)}
+  const establishFirebaseSession=async(credential:Awaited<ReturnType<typeof signInWithGithubFirebase>>)=>{
+    const idToken=await credential.user.getIdToken(true)
+    await hostedProductClient.firebaseExchange(idToken)
+  }
   const runGoogle=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){try{sessionStorage.setItem("wcb-auth-next",next)}catch{}window.location.assign(await hostedProductClient.authStart());return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){setError(e instanceof Error?e.message:"Sign-in is unavailable.");setBusy(false)}}
-  const runGithub=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){await signInWithGithubFirebase();finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){setError(firebaseAuthErrorMessage(e));setBusy(false)}}
-  const runEmail=async()=>{if(busy)return;setError("");if(!emailStep){if(!email.trim()){setError("Enter your email address.");return}setEmailStep(true);return}if(!password){setError("Enter your password.");return}setBusy(true);try{if(auth){if(signup)await createEmailAccountFirebase(email.trim(),password);else await signInWithEmailFirebase(email.trim(),password);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){setError(firebaseAuthErrorMessage(e));setBusy(false)}}
+  const runGithub=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){const credential=await signInWithGithubFirebase();await establishFirebaseSession(credential);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
+  const runEmail=async()=>{if(busy)return;setError("");if(!emailStep){if(!email.trim()){setError("Enter your email address.");return}setEmailStep(true);return}if(!password){setError("Enter your password.");return}setBusy(true);try{if(auth){const credential=signup?await createEmailAccountFirebase(email.trim(),password):await signInWithEmailFirebase(email.trim(),password);await establishFirebaseSession(credential);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
   const phonePending=auth
   return <div className="auth-demo-layer"><div className="auth-demo-backdrop"/><section className="auth-demo-modal" role="dialog" aria-modal="true"><button className="auth-demo-close" onClick={onClose}><X/></button><h1>{signup?"Create your Webcanbe account":"Log in to Webcanbe"}</h1><p>Open projects, keep source history, and continue from any workspace.</p><div className="auth-demo-actions"><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGoogle()}><span className="google-g">G</span><span>Continue with Google</span></button><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGithub()}><Github/><span>Continue with GitHub</span></button><button className="auth-demo-provider" disabled={busy||phonePending} title={phonePending?"Phone sign-in is not connected yet":undefined} onClick={()=>void runGoogle()}><Phone/><span>Continue with phone</span></button></div><div className="auth-demo-divider"><span>OR</span></div><input className="auth-demo-email" type={emailStep?"password":"email"} placeholder={emailStep?"Password":"Email address"} value={emailStep?password:email} autoComplete={emailStep?(signup?"new-password":"current-password"):"email"} onChange={event=>emailStep?setPassword(event.target.value):setEmail(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void runEmail()}}/><button className="auth-demo-continue" disabled={busy} onClick={()=>void runEmail()}>{busy?"Continuing…":"Continue"}</button>{auth&&<p className="auth-demo-provider-note">Google, GitHub, and email sign-in are available.</p>}{error&&<p className="auth-demo-error">{error}</p>}</section></div>
 }
@@ -447,7 +455,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
           <span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span><ChevronsUpDown/>
         </button>
         {accountMenu && <div className="rd-dropdown rd-account-dropdown">
-          <div className="rd-dropdown-user"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in with Google</small></span></div>
+          <div className="rd-dropdown-user"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span></div>
           <div className="rd-dropdown-separator"/>
           <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><Sparkles/><span>Upgrade to Pro</span></button>
           <div className="rd-dropdown-separator"/>
@@ -477,7 +485,7 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
           <div className="rd-menu-anchor">
             <button className={"rd-header-avatar" + (profileMenu ? " is-open" : "")} type="button" aria-label="Profile" aria-expanded={profileMenu} onClick={() => { setProfileMenu(v => !v); setAccountMenu(false); setTeamMenu(false) }}>WC</button>
             {profileMenu && <div className="rd-dropdown rd-profile-dropdown">
-              <div className="rd-dropdown-user compact"><span><b>Webcanbe account</b><small>Signed in with Google</small></span></div>
+              <div className="rd-dropdown-user compact"><span><b>Webcanbe account</b><small>Signed in</small></span></div>
               <div className="rd-dropdown-separator"/>
               <button type="button" className="rd-dropdown-item" onClick={() => choose("settings")}><span>Profile</span><kbd>⇧⌘P</kbd></button>
               <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><span>Billing</span><kbd>⌘B</kbd></button>
@@ -572,7 +580,7 @@ function Settings() {
   const sections=["Profile","Account","GitHub","Domains","Billing","Preferences"]
   const save=()=>{try{localStorage.setItem("wcb-ui-settings",JSON.stringify({name,email}))}catch{}setMessage("Saved for this browser.")}
   const signOut=async()=>{if(auth)await productionSignOut();else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
-  return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} onChange={e=>setEmail(e.target.value)}/></label><div className="settings-action-row"><div><b>Session</b><p>Sign out returns directly to the landing page.</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Account connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<div className="settings-billing"><b>Plan and billing</b><p>Real billing is not simulated before the payment backend exists.</p><Link className="button" to="/plans">Review plans</Link></div>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={save}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
+  return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} onChange={e=>setEmail(e.target.value)}/></label><div className="settings-action-row"><div><b>Session</b><p>Sign out returns directly to the landing page.</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Repository connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<div className="settings-billing"><b>Plan and billing</b><p>Real billing is not simulated before the payment backend exists.</p><Link className="button" to="/plans">Review plans</Link></div>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={save}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
 }
 function Plans() { const [annual, setAnnual] = useState(false); const plans = [{name:"Free", price:"$0", desc:"For opening a project, changing it, and taking it with you.", items:["Unlimited editing", "Code export", "1 workspace"]},{name:"Pro",price:annual?"$15.83":"$19",desc:"For one person building more than one real thing.",items:["Unlimited workspaces", "AI allowance", "Domains, deployment, GitHub"]},{name:"Studio",price:annual?"$40.83":"$49",desc:"For people building with clients and collaborators.",items:["5 seats", "Larger AI allowance", "Client handoff and selling"]}]; return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan.</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Yearly <span>2 months free</span></button></div></div><section className="plan-grid">{plans.map((p,i) => <article className={i === 1 ? "featured" : ""} key={p.name}>{i === 1 && <span className="popular">Most chosen</span>}<h2>{p.name}</h2><p>{p.desc}</p><strong>{p.price}<small>{p.price !== "$0" && "/ month"}</small></strong><ul>{p.items.map(x => <li key={x}>✓ {x}</li>)}</ul><button className={i === 1 ? "button primary" : "button"} onClick={() => go(i ? "/signup" : "/browse")}>{i === 0 ? "Start for free" : `Choose ${p.name}`} <Arrow/></button></article>)}</section></main></PublicShell> }
 
