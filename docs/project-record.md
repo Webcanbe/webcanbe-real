@@ -1,5 +1,23 @@
 # WebCanBe project record
 
+## 2026-09-19: Committed-secret scanning enforced in CI
+
+Phase 5 CI now scans the full tracked repository before tests/builds for
+credential-bearing files and several unambiguous secret patterns. The guard
+covers private-key material, common provider tokens, PostgreSQL URLs with
+embedded non-placeholder passwords, and accidental server-secret exposure
+through Vite public environment names.
+
+The first scanner run surfaced historical Phase 2 compatibility fixtures that
+intentionally contain fake `VITE_SECRET` / `VITE_ACCESS_TOKEN` names. The
+exception was kept deliberately narrow: only that Vite variable-name heuristic
+is skipped for Phase 2 test/evidence fixtures; real token, PEM and DB-password
+checks remain active there.
+
+The complete Phase 5 verification pipeline passes with the scanner enabled.
+
+---
+
 ## 2026-09-19: Guarded Cloudflare Worker rollback operations
 
 Webcanbe now has an explicit rollback wrapper for Cloudflare Worker
