@@ -3,3 +3,9 @@ node_modules
 dist
 .DS_Store
 *.tsbuildinfo
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+!.env.example
