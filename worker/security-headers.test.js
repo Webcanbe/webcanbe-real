@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
+import { CONTENT_SECURITY_POLICY, SECURITY_HEADERS, applySecurityHeaders, shouldNoIndexPath } from "./security-headers.js"
 
 describe("Worker security header adapter", () => {
   it("preserves response status and existing headers while adding security headers", async () => {
@@ -37,7 +37,16 @@ describe("Worker security header adapter", () => {
     expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow")
   })
 
-  it("does not add a CSP before the retained landing has a dedicated compatibility pass", () => {
-    expect(SECURITY_HEADERS).not.toHaveProperty("Content-Security-Policy")
+  it("enforces the inventoried CSP without enabling inline/eval scripts", () => {
+    expect(SECURITY_HEADERS["Content-Security-Policy"]).toBe(CONTENT_SECURITY_POLICY)
+    expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self'")
+    expect(CONTENT_SECURITY_POLICY).toContain("script-src-attr 'none'")
+    expect(CONTENT_SECURITY_POLICY).not.toContain("'unsafe-eval'")
+    expect(CONTENT_SECURITY_POLICY).not.toContain("script-src 'self' 'unsafe-inline'")
+    expect(CONTENT_SECURITY_POLICY).toContain("style-src 'self' 'unsafe-inline'")
+    expect(CONTENT_SECURITY_POLICY).toContain("object-src 'none'")
+    expect(CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'")
+    expect(CONTENT_SECURITY_POLICY).toContain("https://*.googleapis.com")
+    expect(CONTENT_SECURITY_POLICY).toContain("https://*.firebaseapp.com")
   })
 })
