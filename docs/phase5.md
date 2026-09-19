@@ -193,7 +193,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Enforce CSP after a dedicated retained-landing compatibility inventory/pass; same-origin scripts only, inline/eval scripts blocked, Firebase/Google auth origins explicit, inline styles retained for landing compatibility.
 - [x] Add Cloudflare Workers Rate Limiting bindings for auth, public API, and authenticated private-user traffic.
 - [x] Auth abuse/rate limits are enforced as a best-effort Cloudflare layer; authority checks remain separate.
-- [x] Add real 404 routing plus top-level recoverable 500 render fallback. Network/API failures already surface bounded product-specific messages; final live failure smoke remains.
+- [x] Add real HTTP 404 responses for unknown HTML SPA paths plus top-level recoverable 500 render fallback. Network/API failures already surface bounded product-specific messages; final live failure smoke remains.
 - [ ] Mobile pass.
 - [ ] Safari/Chrome/Firefox pass.
 - [ ] Accessibility keyboard/focus pass.
@@ -207,7 +207,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Add server-side `X-Robots-Tag: noindex, nofollow` on private/authenticated SPA routes.
 - [x] Add public-only `sitemap.xml`.
 - [x] Webcanbe favicon/Apple touch icon and base OG/Twitter metadata are in place.
-- [ ] Final per-route metadata/canonical audit before launch.
+- [x] Route-specific title/description/canonical/OpenGraph/Twitter metadata is synchronized for public SPA routes; aliases canonicalize to the preferred route.
 - [ ] Full production smoke test with a clean account.
 
 Exit gate: one clean user can sign up, sign in, browse, purchase, materialize, edit, save, reload, export, and sign out on production without manual intervention.
