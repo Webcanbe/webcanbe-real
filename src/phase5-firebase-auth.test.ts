@@ -30,8 +30,8 @@ describe("Phase 5 Firebase Authentication", () => {
   it("connects email signup and login to the Firebase password APIs", () => {
     expect(firebaseAuth).toContain("createUserWithEmailAndPassword(firebaseAuth(), email, password)")
     expect(firebaseAuth).toContain("signInWithEmailAndPassword(firebaseAuth(), email, password)")
-    expect(app).toContain("if(signup)await createEmailAccountFirebase")
-    expect(app).toContain("else await signInWithEmailFirebase")
+    expect(app).toContain("signup?await createEmailAccountFirebase")
+    expect(app).toContain(":await signInWithEmailFirebase")
   })
 
   it("keeps the existing auth modal structure and uses its single field as email then password", () => {
