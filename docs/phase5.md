@@ -189,12 +189,16 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Restrict public `/dashboard-preview` on canonical production; non-production preview remains available.
 - [ ] Confirm Firebase Authorized Domains includes production domains.
 - [ ] Confirm Google OAuth redirect/origin/branding verification.
-- [x] Baseline security headers on Worker/API/static responses: HSTS, nosniff, DENY framing, strict referrer policy, restricted camera/mic/geolocation, and popup-compatible COOP.
+- [x] Baseline security-header implementation exists for Worker/API/static responses: HSTS, nosniff, DENY framing, strict referrer policy, restricted camera/mic/geolocation, and popup-compatible COOP.
 - [x] CSRF/origin protections on authenticated Worker POST boundaries.
 - [x] Enforce CSP after a dedicated retained-landing compatibility inventory/pass; same-origin scripts only, inline/eval scripts blocked, Firebase/Google auth origins explicit, inline styles retained for landing compatibility.
 - [x] Add Cloudflare Workers Rate Limiting bindings for auth, public API, and authenticated private-user traffic.
 - [x] Auth abuse/rate limits are enforced as a best-effort Cloudflare layer; authority checks remain separate.
-- [x] Add real HTTP 404 responses for unknown HTML SPA paths plus top-level recoverable 500 render fallback. Network/API failures already surface bounded product-specific messages; final live failure smoke remains.
+- [x] Add real HTTP 404 responses for unknown HTML SPA paths plus top-level recoverable 500 render fallback. Network/API failures already surface bounded product-specific messages.
+- [x] Add a repeatable public production smoke runner for security headers, real 404/noindex, crawler policy, readiness, and catalog fail-closed/read behavior.
+- [x] Detect and fix the static-asset routing gap that bypassed Worker middleware on normal production navigation; `assets.run_worker_first` is now configured as `true` so the Worker applies the shared policy before assets.
+- [x] Add automatic post-`main`-CI production smoke with bounded deployment-propagation retries and a database-state expectation that works before and after Hyperdrive.
+- [ ] Observe the Worker-first routing fix live on production after this change reaches `main`; the pre-fix production smoke correctly failed ordinary HTML/static middleware checks while API/readiness checks passed.
 - [ ] Mobile pass.
 - [ ] Safari/Chrome/Firefox pass.
 - [ ] Accessibility keyboard/focus pass.
@@ -256,6 +260,15 @@ Production read-mode was tightened before activation:
 Verification run `35424179755`: secret scan PASS, focused tests PASS, Worker syntax PASS, Vite build PASS, Wrangler dry-run PASS.
 
 The Hyperdrive blocker and production-read activation sequence are unchanged.
+
+---
+
+
+## 2026-09-19 public production smoke and Worker-first routing
+
+A live GitHub-runner smoke test proved that production API/readiness requests were reaching the Worker while normal SPA/static navigation was still asset-first. That meant the security-header, request-ID, private-noindex, and real-404 implementation existed in source but was not actually applied to ordinary production pages.
+
+The branch now sets `assets.run_worker_first: true`, adds regression coverage, and adds an automatic post-CI production smoke workflow. Branch verification run `35424537541` passes secret scan, focused tests, syntax, Vite build, and Wrangler dry-run. Live post-deploy verification remains the gate before declaring this routing correction complete.
 
 ---
 
