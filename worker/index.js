@@ -2,6 +2,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
+import { databaseReadiness } from "./readiness.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, databaseWorkspaces } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
@@ -430,6 +431,32 @@ async function privateProduct(request, env, path) {
   }
 }
 
+async function readiness(request, env) {
+  if (!requireSameOriginPost(request)) return json({ error: "Readiness request refused." }, 403)
+  if (!databaseAvailable(env)) return json({ worker: "ok", database: "unconfigured", schema: "unknown" }, 503)
+
+  try {
+    const result = await withHyperdrive(env, db => databaseReadiness(db))
+    if (!result.ok) return json({
+      worker: "ok",
+      database: "reachable",
+      schema: "incomplete",
+      requiredCount: result.requiredCount,
+      readyCount: result.readyCount,
+    }, 503)
+    return json({
+      worker: "ok",
+      database: "ready",
+      schema: "ready",
+      requiredCount: result.requiredCount,
+      readyCount: result.readyCount,
+    })
+  } catch {
+    console.error("Production readiness database check failed.")
+    return json({ worker: "ok", database: "unavailable", schema: "unknown" }, 503)
+  }
+}
+
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname
@@ -438,6 +465,7 @@ export default {
     if (path === "/__webcanbe/auth/firebase-exchange") return firebaseExchange(request, env)
     if (path === "/__webcanbe/auth/session") return session(request, env)
     if (path === "/__webcanbe/auth/logout") return logout(request, env)
+    if (path === "/__webcanbe/ops/readiness") return readiness(request, env)
     if (path === "/__webcanbe/api/product/catalog/browse" || path === "/__webcanbe/api/product/catalog/detail") return publicCatalog(request, env, path)
     if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update") return privateProduct(request, env, path)
     return applySecurityHeaders(await env.ASSETS.fetch(request), { noIndex: shouldNoIndexPath(path) })
