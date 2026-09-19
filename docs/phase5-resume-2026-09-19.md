@@ -1039,3 +1039,24 @@ Guardrails:
 Important:
 - Cloudflare rollback does not rewind PostgreSQL rows/schema or external provider state.
 - A controlled live production rollback drill is still pending.
+
+
+---
+
+## Committed-secret CI guard
+
+Prepared and active on `main`:
+- `scripts/security/scan-secrets.mjs`
+- `npm run security:secrets`
+- Phase 5 CI runs it before tests/builds
+
+Scans all tracked files for:
+- secret-bearing files such as committed .env/.dev.vars/private-key/backup artifacts
+- PEM private keys
+- common live GitHub/Stripe/OpenAI/Slack token shapes
+- PostgreSQL URLs containing a real embedded password
+- unsafe Vite public environment names carrying SECRET/PASSWORD/PRIVATE_KEY/SERVICE_ROLE/ACCESS_TOKEN
+
+Historical Phase 2 compatibility fixtures intentionally contain fake `VITE_SECRET` / `VITE_ACCESS_TOKEN` names. Only the VITE-name heuristic is skipped for those narrow fixture paths; actual credential patterns are still scanned there.
+
+Latest branch verification with the scanner enabled passed the secret scan, focused Phase 4/5 tests, syntax checks, Vite build and Wrangler dry-run.
