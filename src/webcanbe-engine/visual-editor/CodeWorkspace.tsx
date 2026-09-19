@@ -81,7 +81,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const [projectResults, setProjectResults] = useState<SourceSearchResult[]>([]), [projectSearchMeta, setProjectSearchMeta] = useState<SourceSearchMeta>(), [projectSearching, setProjectSearching] = useState(false), [projectSearchError, setProjectSearchError] = useState("")
   const [recentFiles, setRecentFiles] = useState<string[]>([])
   const [reveal, setReveal] = useState<CodeOpenLocation>()
-  const serial = useRef(0), mounted = useRef(true), saving = useRef(false), revealSequence = useRef(0)
+  const serial = useRef(0), mounted = useRef(true), saving = useRef(false), revealSequence = useRef(0), acceptedRefreshSequence = useRef(0)
   const validationVersion = useRef(0), validationState = useRef({head,drafts})
   validationState.current = {head,drafts}
   const pendingSave = useRef<{ signature: string; key: string } | undefined>(undefined)
@@ -100,19 +100,24 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const initialHashes = new Map<string, string>()
   for (const entry of ledger?.transactions ?? []) if (entry.success) for (const [file, version] of Object.entries(entry.versions ?? {})) if (!initialHashes.has(file)) initialHashes.set(file, version.before)
 
+  async function readAcceptedSnapshot() {
+    const [listing, history] = await Promise.all([requests.current("files"), requests.current("history")])
+    const revision = listing.data.revision
+    if (!listing.ok || !history.ok || !revision || history.data.revision !== revision) return { ok: false as const, error: listing.data.error ?? history.data.error ?? "Accepted source changed while reading its history." }
+    return { ok: true as const, revision, files: listing.data.files ?? [], history: history.data.history }
+  }
+
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; ++serial.current } }, [])
   useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); setRecentFiles([]); setQuickOpen(false); setFindOpen(false); setProjectSearchOpen(false); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError(""); setReveal(undefined); ++serial.current }, [projectId])
   useEffect(() => {
     if (!connected) return
     const sequence = ++serial.current
     void (async () => {
-      const listing = await requests.current("files")
+      const snapshot = await readAcceptedSnapshot()
       if (sequence !== serial.current) return
-      if (!listing.ok) { setStatus(listing.data.error ?? "Source unavailable."); return }
-      setFiles(listing.data.files ?? []); setHead(listing.data.revision ?? "")
-      setActive(current => current || listing.data.files?.[0]?.file || "")
-      const history = await requests.current("history")
-      if (sequence === serial.current && history.ok) setLedger(history.data.history)
+      if (!snapshot.ok) { setStatus(snapshot.error); return }
+      setFiles(snapshot.files); setHead(snapshot.revision); setLedger(snapshot.history)
+      setActive(current => current || snapshot.files[0]?.file || "")
     })().catch(() => { if (sequence === serial.current) setStatus("Source connection unavailable. Drafts are retained.") })
   }, [epoch, connected, projectId])
   useEffect(() => {
@@ -257,6 +262,38 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     return () => window.removeEventListener("beforeunload", preventLoss)
   }, [drafts])
 
+  async function refreshAcceptedSource() {
+    if (!connected || busy) return
+    const sequence = ++acceptedRefreshSequence.current
+    setBusy(true); setStatus("Refreshing accepted source and history…")
+    try {
+      const snapshot = await readAcceptedSnapshot()
+      if (!mounted.current || sequence !== acceptedRefreshSequence.current) return
+      if (!snapshot.ok) { setStatus(snapshot.error + " Retry against the current revision."); return }
+      const revision = snapshot.revision
+      const currentFile = active ? await requests.current("files", { file: active }) : undefined
+      if (!mounted.current || sequence !== acceptedRefreshSequence.current) return
+      if (currentFile && (!currentFile.ok || currentFile.data.revision !== revision || currentFile.data.source === undefined)) { setStatus(currentFile.data.error ?? "Accepted source changed during refresh. Retry against the current revision."); return }
+      setFiles(snapshot.files)
+      setHead(revision)
+      setLedger(snapshot.history)
+      if (active && currentFile?.data.source !== undefined) {
+        const source = currentFile.data.source
+        const hash = currentFile.data.files?.find(file => file.file === active)?.hash ?? ""
+        setDrafts(all => {
+          const existing = all[active]
+          if (existing && existing.text !== existing.baseline) return all
+          return { ...all, [active]: { file: active, text: source, baseline: source, hash, baseRevision: revision } }
+        })
+      }
+      pendingSave.current = undefined
+      setValidation(undefined)
+      setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError("")
+      setStatus(dirtyDrafts.length ? "Accepted source and history refreshed. Local drafts were retained; stale drafts are now marked against the new HEAD." : "Accepted source and history refreshed.")
+    } catch { if (mounted.current && sequence === acceptedRefreshSequence.current) setStatus("Accepted source refresh is unavailable. Local drafts were retained.") }
+    finally { if (mounted.current && sequence === acceptedRefreshSequence.current) setBusy(false) }
+  }
+
   async function save(all = false) {
     const proposals = all ? dirtyDrafts : draft && dirty ? [draft] : []
     if (!proposals.length || saving.current || !connected) return
@@ -359,8 +396,8 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
     {(visible === "code" || visible === "split") && <>{projectSearchOpen && <div className="source-project-search-backdrop" onMouseDown={() => setProjectSearchOpen(false)}><section className="source-project-search" role="dialog" aria-modal="true" aria-label="Search accepted project source" onMouseDown={event => event.stopPropagation()}><header><div><strong>Search project</strong><small>Accepted source only · unsaved drafts stay local</small></div><kbd>⇧⌘/Ctrl F</kbd></header><form onSubmit={event => { event.preventDefault(); void runProjectSearch() }}><input autoFocus aria-label="Search project source" value={projectQuery} onChange={event => { setProjectQuery(event.target.value); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError("") }} placeholder="Search accepted source…" maxLength={160}/><label><input type="checkbox" checked={projectCaseSensitive} onChange={event => { setProjectCaseSensitive(event.target.checked); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError("") }}/> Match case</label><button type="submit" disabled={projectSearching || !projectQuery.trim()}>{projectSearching ? "Searching…" : "Search"}</button></form>{projectSearchError && <p className="source-project-search-error" role="alert">{projectSearchError}</p>}{projectSearchMeta && <p className="source-project-search-meta">{projectResults.length} results · {projectSearchMeta.scannedFiles}/{projectSearchMeta.totalFiles} files scanned{projectSearchMeta.truncated ? " · bounded/truncated" : ""}</p>}<div className="source-project-search-results">{projectResults.length ? projectResults.map((result,index) => { const fileDraft=drafts[result.file], dirtyResult=Boolean(fileDraft&&fileDraft.text!==fileDraft.baseline); return <button type="button" key={`${result.file}:${result.start}:${index}`} onClick={() => openProjectSearchResult(result)}><span><b>{result.file}</b><small>{result.line}:{result.column}{dirtyResult ? " · unsaved draft" : ""}</small></span><code>{result.preview}</code></button> }) : projectSearchMeta && !projectSearching ? <p>No matches in the scanned accepted source.</p> : <p>Search is bounded to 100 results, 20 per file, 512 KiB per file, and 8 MiB scanned per request.</p>}</div></section></div>}{quickOpen && <div className="source-quick-open-backdrop" onMouseDown={() => setQuickOpen(false)}><section className="source-quick-open" role="dialog" aria-modal="true" aria-label="Quick open source file" onMouseDown={event => event.stopPropagation()}><header><strong>Quick open</strong><kbd>⌘/Ctrl P</kbd></header><input autoFocus aria-label="Quick open file" value={quickQuery} onChange={event => setQuickQuery(event.target.value)} placeholder="Type a file path…" onKeyDown={event => { if (event.key === "Enter" && quickFiles[0]) { event.preventDefault(); openSourceFile(quickFiles[0]) } if (event.key === "Escape") setQuickOpen(false) }} /><div>{quickFiles.length ? quickFiles.map(file => <button type="button" key={file} onClick={() => openSourceFile(file)}><span>{file}</span>{recentFiles.includes(file) && <small>Recent</small>}</button>) : <p>No matching source files.</p>}</div></section></div>}
       <div className="source-file-tree" aria-label="Source file tree"><div className="source-file-tree-head"><span>Files</span><button type="button" onClick={() => { setQuickOpen(true); setQuickQuery("") }}>Quick open <kbd>⌘P</kbd></button></div>{recentFiles.length > 0 && <div className="source-recent-files"><small>Recent</small>{recentFiles.map(file => <button type="button" key={file} aria-pressed={active === file} onClick={() => openSourceFile(file)}>{file}</button>)}</div>}<div className="source-all-files">{files.map(item => <button key={item.file} aria-pressed={active === item.file} onClick={() => openSourceFile(item.file)}>{item.file}{drafts[item.file]?.text !== drafts[item.file]?.baseline ? " ●" : initialHashes.has(item.file) && initialHashes.get(item.file) !== item.hash ? " M" : ""}</button>)}</div></div>
       <div className="source-editor-panel">
-        <section className="source-save-policy" data-state={savePolicyState} aria-label="Source save policy"><div><small>Explicit save</small><strong>{conflictedDrafts.length ? `${conflictedDrafts.length} stale draft${conflictedDrafts.length === 1 ? "" : "s"}` : dirtyDrafts.length ? `${dirtyDrafts.length} unsaved draft${dirtyDrafts.length === 1 ? "" : "s"}` : "Accepted source is current"}</strong></div><p>Drafts are backed up automatically for recovery only. Preview, Changes/history, project search, and Export continue to use the accepted source until Save source or Save all succeeds.</p><span>HEAD <code>{head ? head.slice(0, 18) : "…"}</code>{dirtyDrafts.length > 0 && <> · {dirtyDrafts.length} draft{dirtyDrafts.length === 1 ? "" : "s"} pending</>}</span></section>
-        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button type="button" title="Find / replace current file (⌘/Ctrl+F)" onClick={() => { setFindOpen(value => !value); if (!findOpen) setFindQuery("") }}>Find / replace</button><button type="button" title="Search accepted project source (⇧⌘/Ctrl+F)" onClick={() => setProjectSearchOpen(true)}>Search project</button><button onClick={() => void save()} disabled={!dirty || busy || !connected || conflict}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected || conflictedDrafts.length > 0}>Save all drafts{dirtyDrafts.length > 1 ? ` (${dirtyDrafts.length})` : ""}</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
+        <section className="source-save-policy" data-state={savePolicyState} aria-label="Source save policy"><div><small>Explicit save</small><strong>{conflictedDrafts.length ? `${conflictedDrafts.length} stale draft${conflictedDrafts.length === 1 ? "" : "s"}` : dirtyDrafts.length ? `${dirtyDrafts.length} unsaved draft${dirtyDrafts.length === 1 ? "" : "s"}` : "Accepted source is current"}</strong></div><p>Drafts are backed up automatically for recovery only. Preview, Changes/history, project search, and Export continue to use the accepted source until Save succeeds. Refresh accepted re-reads server source/history without discarding local drafts.</p><span>HEAD <code>{head ? head.slice(0, 18) : "…"}</code>{dirtyDrafts.length > 0 && <> · {dirtyDrafts.length} draft{dirtyDrafts.length === 1 ? "" : "s"} pending</>}</span></section>
+        <div className="source-editor-actions"><strong>{active || "Connect to open source"}{dirty ? " • Unsaved draft" : " • Accepted source"}</strong><button type="button" title="Refresh accepted source and history without discarding local drafts" onClick={() => void refreshAcceptedSource()} disabled={busy || !connected}>Refresh accepted</button><button type="button" title="Find / replace current file (⌘/Ctrl+F)" onClick={() => { setFindOpen(value => !value); if (!findOpen) setFindQuery("") }}>Find / replace</button><button type="button" title="Search accepted project source (⇧⌘/Ctrl+F)" onClick={() => setProjectSearchOpen(true)}>Search project</button><button onClick={() => void save()} disabled={!dirty || busy || !connected || conflict}>Save source</button><button onClick={() => void save(true)} disabled={dirtyDrafts.length < 2 || busy || !connected || conflictedDrafts.length > 0}>Save all drafts{dirtyDrafts.length > 1 ? ` (${dirtyDrafts.length})` : ""}</button><button onClick={() => void checkTypes()} disabled={busy || !connected || conflict}>Check types</button><button onClick={() => setShowDiff(value => !value)} disabled={!draft}>Draft diff</button><button onClick={() => void discard()} disabled={!dirty || busy}>Discard draft</button></div>
         {findOpen && <div className="source-find-panel"><div className="source-find-row"><input autoFocus aria-label="Find in current file" value={findQuery} onChange={event => setFindQuery(event.target.value)} placeholder="Find in current file…" onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); jumpToMatch(event.shiftKey ? matchIndex - 1 : matchIndex + 1) } }} /><span>{findQuery ? `${searchMatches.length ? matchIndex + 1 : 0} / ${searchMatches.length}` : "0 / 0"}</span><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex - 1)}>Previous</button><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex + 1)}>Next</button><label><input type="checkbox" checked={caseSensitive} onChange={event => setCaseSensitive(event.target.checked)} /> Match case</label></div><div className="source-find-row"><input aria-label="Replace in current file" value={replaceValue} onChange={event => setReplaceValue(event.target.value)} placeholder="Replace with…" /><button type="button" disabled={!searchMatches.length} onClick={replaceCurrentMatch}>Replace</button><button type="button" disabled={!searchMatches.length} onClick={replaceAllMatches}>Replace all</button><small>Replacements modify the draft only. Save source performs the accepted transaction.</small></div></div>}
         <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Renames update statically resolved source, CSS and asset references in the same transaction. Ambiguous references require a Code edit. The preview build must still pass.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
         {conflictedDrafts.length > 0 && <div className="source-stale-drafts" role="alert"><b>Accepted HEAD changed after {conflictedDrafts.length} draft{conflictedDrafts.length === 1 ? "" : "s"} opened.</b><p>Stale drafts cannot be saved over newer accepted source. Rebase a file only when its accepted bytes are unchanged; otherwise reconcile manually.</p>{conflict && <button type="button" onClick={() => void reloadBase()}>Rebase current file if unchanged</button>}</div>}

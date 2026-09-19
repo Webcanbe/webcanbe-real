@@ -1,5 +1,26 @@
 # WebCanBe project record
 
+## 2026-09-19: Coherent reload and accepted-source refresh
+
+The Code workspace now treats accepted source plus source history as one revision-bound
+snapshot during initial load. Files and history are read together and the client refuses
+to advance its HEAD if their reported revisions do not match.
+
+A new `Refresh accepted` action handles changes accepted by another tab or editor
+session. It refreshes the authoritative file listing, history and active accepted file
+against one revision. Dirty drafts are retained unchanged and become visibly stale
+when their base revision no longer matches the new HEAD. A clean active file is
+rehydrated from current accepted bytes. Derived validation, pending-save identity and
+project-search state are invalidated when authority moves.
+
+Recovery drafts remain a separate persistence layer: reconnect can restore them, but
+neither reload nor refresh silently promotes them to accepted source. Verification run
+`35450499806` passed the secret scan, editor recovery regressions, production build
+and Wrangler dry-run. Canonical production DB activation still waits for Hyperdrive
+and first-party session smoke.
+
+---
+
 ## 2026-09-19: Explicit save authority and stale-draft guardrails
 
 The Code workspace now presents its actual persistence model directly in the UI.

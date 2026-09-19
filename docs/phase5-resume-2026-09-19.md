@@ -8,6 +8,20 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — coherent reload / Refresh accepted
+
+- Initial Code workspace load accepts files + history only when both report the same accepted revision.
+- `Refresh accepted` re-reads accepted files/history and the active file against one revision.
+- Dirty drafts are never discarded by refresh; clean active files update to accepted bytes.
+- A moved HEAD immediately turns older dirty drafts stale under the existing explicit-save guard.
+- Validation, pending-save identity and project-search results derived from the old HEAD are cleared.
+- Draft recovery remains separate from accepted-source authority.
+- Verification run `35450499806` passed secret scan, recovery/save/search/navigation regressions, Vite build and Wrangler dry-run.
+- P5.6 reload/recovery implementation is complete in code; canonical production DB activation remains Hyperdrive/session-smoke gated.
+- Dashboard/landing unchanged.
+
+---
+
 ## Latest recovery delta — explicit save and stale drafts
 
 - Code uses an explicit-save policy.
