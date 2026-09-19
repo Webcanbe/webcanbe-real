@@ -201,7 +201,7 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [ ] Performance/Lighthouse pass on landing and app shell.
 - [x] Baseline production request observability: per-request response ID + bounded structured failure logs with secrets/personal data excluded.
 - [ ] Connect long-term log retention/alerting after infrastructure choice.
-- [ ] Database backup/restore procedure.
+- [x] Add operator-controlled production DB backup + verification scripts and a recovery-first runbook for the current Supabase Free project.
 - [ ] Rollback procedure tested.
 - [ ] Legal pages match actual data handling.
 - [x] Add `robots.txt` that excludes authenticated/private routes and `/__webcanbe/`.
