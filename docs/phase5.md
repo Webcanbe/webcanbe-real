@@ -191,8 +191,8 @@ Exit gate: a creator can submit a real project and an authorized operator can pu
 - [x] Baseline security headers on Worker/API/static responses: HSTS, nosniff, DENY framing, strict referrer policy, restricted camera/mic/geolocation, and popup-compatible COOP.
 - [x] CSRF/origin protections on authenticated Worker POST boundaries.
 - [x] Enforce CSP after a dedicated retained-landing compatibility inventory/pass; same-origin scripts only, inline/eval scripts blocked, Firebase/Google auth origins explicit, inline styles retained for landing compatibility.
-- [ ] Add auth/API abuse rate limiting.
-- [ ] Auth abuse/rate limits.
+- [x] Add Cloudflare Workers Rate Limiting bindings for auth, public API, and authenticated private-user traffic.
+- [x] Auth abuse/rate limits are enforced as a best-effort Cloudflare layer; authority checks remain separate.
 - [ ] 404/500 and failed-network UX.
 - [ ] Mobile pass.
 - [ ] Safari/Chrome/Firefox pass.
