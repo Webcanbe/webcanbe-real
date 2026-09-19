@@ -17,17 +17,7 @@ type SourceSearchMeta = Readonly<{ scannedFiles: number; totalFiles: number; sca
 
 function findTextMatches(text: string, query: string, caseSensitive: boolean): TextMatch[] {
   if (!query) return []
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\  const haystack = caseSensitive ? text : text.toLowerCase()
-  const needle = caseSensitive ? query : query.toLowerCase()
-  const matches: TextMatch[] = []
-  let from = 0
-  while (matches.length < 1000) {
-    const start = haystack.indexOf(needle, from)
-    if (start < 0) break
-    matches.push({ start, end: start + query.length })
-    from = start + Math.max(query.length, 1)
-  }
-")
+  const escaped = [...query].map(character => "^$.*+?()[]{}|".includes(character) || character.charCodeAt(0) === 92 ? String.fromCharCode(92) + character : character).join("")
   const pattern = new RegExp(escaped, caseSensitive ? "g" : "gi")
   const matches: TextMatch[] = []
   let match: RegExpExecArray | null
