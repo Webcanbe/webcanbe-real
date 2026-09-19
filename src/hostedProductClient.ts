@@ -113,6 +113,28 @@ export class HostedProductClient {
     return (await this.post<{ account: AccountData }>("/__webcanbe/api/account/update", { displayName })).account
   }
 
+  async linkFirebaseIdentity(idToken: string) {
+    if (!idToken || idToken.length > 8192) throw new HostedProductError(400, "Firebase ID token is invalid.")
+    const csrf = await this.session()
+    const response = await this.request("/__webcanbe/api/account/identities/link/firebase", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "X-WCB-CSRF": csrf,
+        "Authorization": "Bearer " + idToken,
+      },
+      body: "{}",
+    })
+    const value = await response.json().catch(() => ({})) as { linked?: unknown; provider?: unknown; alreadyLinked?: unknown; error?: unknown }
+    if (!response.ok || value.linked !== true) throw new HostedProductError(response.status, typeof value.error === "string" ? value.error : "Identity linking was refused.")
+    return {
+      linked: true as const,
+      provider: typeof value.provider === "string" ? value.provider : "Firebase Authentication",
+      alreadyLinked: value.alreadyLinked === true,
+    }
+  }
+
   async revokeAllSessions() {
     const result = await this.post<{ ok: true; revokedSessions: number }>("/__webcanbe/api/account/sessions/revoke-all", {})
     this.csrf = undefined
