@@ -1,61 +1,79 @@
 import { describe, expect, it } from "vitest"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 
-describe("DB-backed account profile adapter", () => {
-  it("reads the provider-independent account profile by internal user id", async () => {
-    const calls = []
-    const db = {
+const userId = "11111111-1111-4111-8111-111111111111"
+
+function mockDb({ displayName = "Sihoo" } = {}) {
+  const calls = []
+  return {
+    calls,
+    db: {
       async query(sql, params) {
         calls.push({ sql, params })
-        return {
-          rows: [{
-            display_name: "Sihoo",
-            email: "sihoo@example.com",
-            email_verified: true,
-            picture_url: "https://example.com/avatar.png",
-            created_at: "2026-09-19T00:00:00Z",
-            updated_at: "2026-09-19T01:00:00Z",
-          }],
-          rowCount: 1,
+        if (sql.includes("FROM wcb_user_profiles") || sql.includes("UPDATE wcb_user_profiles")) {
+          return {
+            rows: [{
+              display_name: sql.includes("UPDATE") ? params[1] : displayName,
+              email: "sihoo@example.com",
+              email_verified: true,
+              picture_url: "https://example.com/avatar.png",
+              created_at: "2026-09-19T00:00:00Z",
+              updated_at: "2026-09-19T01:00:00Z",
+            }],
+            rowCount: 1,
+          }
         }
+        if (sql.includes("FROM wcb_identity_accounts")) {
+          return {
+            rows: [
+              { issuer: "https://accounts.google.com" },
+              { issuer: "https://securetoken.google.com/webcanbe-b607e" },
+              { issuer: "https://securetoken.google.com/webcanbe-b607e" },
+            ],
+            rowCount: 3,
+          }
+        }
+        if (sql.includes("FROM wcb_sessions")) {
+          return { rows: [{ total: "2" }], rowCount: 1 }
+        }
+        throw new Error("unexpected query")
       },
-    }
-    const account = await databaseAccount(db, { userId: "11111111-1111-4111-8111-111111111111" })
-    expect(calls[0].params).toEqual(["11111111-1111-4111-8111-111111111111"])
+    },
+  }
+}
+
+describe("DB-backed account profile adapter", () => {
+  it("reads profile, verified provider families, and active first-party session count", async () => {
+    const { db, calls } = mockDb()
+    const account = await databaseAccount(db, { userId })
+    expect(calls[0].params).toEqual([userId])
     expect(account).toMatchObject({
-      userId: "11111111-1111-4111-8111-111111111111",
+      userId,
       displayName: "Sihoo",
       email: "sihoo@example.com",
       emailVerified: true,
+      providers: ["Google", "Firebase Authentication"],
+      activeSessions: 2,
     })
+    expect(calls[1].sql).toContain("wcb_identity_accounts")
+    expect(calls[1].sql).toContain("active")
+    expect(calls[2].sql).toContain("expires_at>clock_timestamp()")
   })
 
-  it("updates only the editable display name", async () => {
-    const calls = []
-    const db = {
-      async query(sql, params) {
-        calls.push({ sql, params })
-        return {
-          rows: [{
-            display_name: params[1],
-            email: "sihoo@example.com",
-            email_verified: true,
-            picture_url: null,
-            created_at: "2026-09-19T00:00:00Z",
-            updated_at: "2026-09-19T01:00:00Z",
-          }],
-          rowCount: 1,
-        }
-      },
-    }
+  it("updates only the editable display name and keeps auth summary server-derived", async () => {
+    const { db, calls } = mockDb()
     const account = await updateDatabaseAccount(
       db,
-      { userId: "11111111-1111-4111-8111-111111111111" },
+      { userId },
       { displayName: "  Min Sihoo  " },
     )
     expect(calls[0].sql).toContain("SET display_name=$2")
-    expect(calls[0].params).toEqual(["11111111-1111-4111-8111-111111111111", "Min Sihoo"])
-    expect(account.displayName).toBe("Min Sihoo")
+    expect(calls[0].params).toEqual([userId, "Min Sihoo"])
+    expect(account).toMatchObject({
+      displayName: "Min Sihoo",
+      providers: ["Google", "Firebase Authentication"],
+      activeSessions: 2,
+    })
   })
 
   it("rejects unknown fields, empty names, and oversized names", async () => {
