@@ -118,7 +118,8 @@ Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by
 - [ ] Link provider identities to the same internal account only through explicit verified rules.
 - [ ] Account page reads real email/provider/session information in production. Existing Settings UI is already wired to the account API behind the inactive read-only production switch.
 - [ ] Workspace selector reads real workspaces in production. Code is prepared behind the inactive read-only production switch.
-- [ ] Add account deletion/session revocation path.
+- [x] Add CSRF-protected user-wide session revocation boundary and client method; UI activation waits for Hyperdrive production smoke.
+- [ ] Define full account deletion/data-retention behavior before enabling destructive deletion.
 - [x] Keep provider credentials/tokens out of Webcanbe browser persistence beyond what Firebase itself requires.
 
 Exit gate: a user can leave, return, sign in again, and recover the same account/workspaces.
