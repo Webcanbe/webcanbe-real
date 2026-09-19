@@ -1,3 +1,30 @@
+# PHASE 5 ACCOUNT PROFILE PERSISTENCE CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `cd0d21fd43a0eee8f04ffba56e7a7ab233b9384c`.
+- Added production PostgreSQL table `wcb_user_profiles` through migration `add_webcanbe_user_profiles`.
+- Production Webcanbe table count is now 37.
+- Profile fields are provider-independent internal account state:
+  - display name
+  - provider-derived email + verification flag
+  - picture URL
+  - created/updated timestamps
+- Email is **not** used to silently merge Google/Firebase identities. Identity authority remains issuer + subject.
+- Durable DB session issuance seeds a profile on first login and refreshes provider-derived email/picture metadata without overwriting a user-edited display name.
+- DB session resolution now returns the real persisted profile instead of blank account fields.
+- Added CSRF-protected Worker account APIs:
+  - `/__webcanbe/api/account/get`
+  - `/__webcanbe/api/account/update`
+- Account update currently permits only a bounded display-name change; client-supplied email/provider authority is rejected.
+- Added corresponding `HostedProductClient.account()` and `updateAccount()` methods.
+- No dashboard/landing visual changes.
+- Branch verification passed: focused Phase 4/5 tests, Worker syntax, Vite build, and Wrangler bundle dry-run.
+- Supabase `anon`/`authenticated` have no direct privilege on `wcb_user_profiles`; `webcanbe_runtime` has the intended DML rights.
+- Supabase Security Advisor remains at 0 findings.
+- RLS remains intentionally disabled for the server-only Webcanbe schema; browser Supabase roles have no Webcanbe DB privileges.
+- Hyperdrive binding is still the remaining infrastructure blocker before live DB-backed account/product smoke.
+
+---
+
 # SESSION CONTINUITY / RECOVERY POINTER — 2026-09-19 KST
 
 A complete recovery snapshot for the current Phase 5 state is committed at:
