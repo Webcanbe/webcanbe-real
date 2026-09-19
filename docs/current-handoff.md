@@ -1,3 +1,21 @@
+# PHASE 5 CLOUDFLARE RATE LIMITING CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `3c383c6bb0dc0b63df2a03143606f5c575ffbb3f`.
+- Added native Cloudflare Workers Rate Limiting bindings:
+  - `AUTH_RATE_LIMITER`: 30/min per auth fingerprint key
+  - `PUBLIC_API_RATE_LIMITER`: 180/min per public/readiness fingerprint key
+  - `PRIVATE_API_RATE_LIMITER`: 180/min per authenticated DB user
+- Anonymous keys hash Cloudflare IP + bounded User-Agent + route scope with SHA-256; raw IP/UA are not logged.
+- Private limits run only after first-party DB-session + CSRF validation and key on internal `userId`.
+- Rate-limit response: HTTP 429 + `Retry-After: 60`.
+- Limiter errors fail open; authentication/CSRF/authority remain independent and fail closed.
+- Cloudflare rate-limit counters are treated only as abuse protection, never billing/accounting/product authority.
+- Wrangler dry-run accepted the real `ratelimits` configuration.
+- Focused Phase 4/5 tests, Worker syntax, Vite build, and Wrangler bundle dry-run all PASS.
+- Recovery snapshot updated in the same work cycle.
+
+---
+
 # PHASE 5 ENFORCED CSP CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `1386f4006bd162edbff89613e2557778d8b62ecb`.
