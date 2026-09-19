@@ -1,3 +1,28 @@
+# PHASE 5 DATABASE BACKUP / RECOVERY OPERATIONS CHECKPOINT — 2026-09-19 KST
+
+- Main merge: `deb36aef80f5881e906e3f9d93459e2db1775820`.
+- Current Supabase organization/project remains on the Free plan, which does not include managed automatic database backups.
+- Added `scripts/db/backup.mjs`:
+  - requires `WEBCANBE_DATABASE_URL`
+  - does not pass the database URL/password as a `pg_dump` command-line argument
+  - maps credentials to PostgreSQL child-process environment variables
+  - dumps data only for `public.wcb_*`
+  - writes a SHA-256 checksum alongside the archive
+- Added `scripts/db/verify-backup.mjs`:
+  - verifies non-empty archive
+  - checks SHA-256 when present
+  - runs `pg_restore --list`
+  - requires a reasonable count of Webcanbe table-data entries
+- Added package scripts:
+  - `npm run db:backup`
+  - `npm run db:backup:verify -- <archive>`
+- Added `docs/operations/database-backup-restore.md`.
+- `backups/` is gitignored; production dumps must never be committed.
+- Recovery procedure deliberately restores first into a separate recovery DB/project before Hyperdrive cutover; no destructive in-place production restore script was created.
+- Verification: focused Phase 4/5 tests PASS, script syntax PASS, Worker syntax PASS, Vite build PASS, Wrangler bundle dry-run PASS.
+
+---
+
 # PHASE 5 USER-WIDE SESSION REVOCATION CHECKPOINT — 2026-09-19 KST
 
 - Main merge: `d19b0538f6351776f5edc01ae11f81f89f8bf849`.
