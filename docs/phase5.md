@@ -115,7 +115,7 @@ Exit gate: dashboard, Marketplace, Purchases, and project lists can be driven by
 
 - [x] Persist Webcanbe account profile independent of provider (`wcb_user_profiles`).
 - [x] Persist workspace ownership/membership; first verified DB identity can atomically receive an owner workspace.
-- [ ] Link provider identities to the same internal account only through explicit verified rules.
+- [x] Provider-linking boundary is explicit and verified: a live first-party DB session plus fresh Firebase issuer+subject proof is required; same-account linking is idempotent, cross-account collisions are refused, and email is never linking authority. UI activation remains deferred until Hyperdrive smoke.
 - [ ] Account page reads real email/provider/session information in production. Code is complete behind the inactive read-only production switch: real profile email, connected provider families, and active first-party session count are server-derived.
 - [ ] Workspace selector reads real workspaces in production. Code is prepared behind the inactive read-only production switch.
 - [x] Add CSRF-protected user-wide session revocation boundary and client method; UI activation waits for Hyperdrive production smoke.
