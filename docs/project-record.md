@@ -1,5 +1,24 @@
 # WebCanBe project record
 
+## 2026-09-19: Durable DB sessions and private product reads prepared
+
+The production Worker can now switch from the temporary signed-cookie session
+fallback to the durable PostgreSQL session model automatically when Hyperdrive
+is bound. Google and Firebase identities both create the same DB-authoritative
+session path, and session refresh, CSRF verification, and logout/revocation use
+the retained `wcb_sessions` authority tables.
+
+Three read-only private product routes are now implemented: workspaces,
+purchases/entitlements, and ready working-copy listing. Every request requires a
+live DB session plus CSRF evidence. Purchases are user-scoped, and working-copy
+reads additionally require an active owner/editor workspace membership.
+
+The write side remains intentionally closed. Materialization, payment,
+entitlement mutation, seller mutation, and control routes will not be enabled
+until Hyperdrive is live and the DB-session path has passed production smoke.
+
+---
+
 ## 2026-09-19: Production PostgreSQL provisioned and locked to server-only authority
 
 A real Supabase PostgreSQL project named `webcanbe-production` now exists in
