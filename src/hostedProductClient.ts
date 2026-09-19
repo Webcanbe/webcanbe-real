@@ -21,6 +21,8 @@ export type AccountData = Readonly<{
   picture: string
   createdAt: string
   updatedAt: string
+  providers: string[]
+  activeSessions: number
 }>
 
 export type CreatorStudioData = Readonly<{
