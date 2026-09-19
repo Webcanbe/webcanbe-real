@@ -1,3 +1,21 @@
+# PHASE 5 PRODUCTION READINESS ENDPOINT CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `06df252f54379cf4fcde1f67ae24ed5ed2cb0a4d`.
+- Added same-origin `POST /__webcanbe/ops/readiness`.
+- The endpoint exposes no credentials, connection strings, row contents, user identifiers, or DB role names.
+- It distinguishes:
+  - Hyperdrive unconfigured
+  - database unavailable
+  - critical schema incomplete
+  - database/schema ready
+- Critical schema verification covers the core session, identity, workspace, profile, catalog, release, listing, entitlement, and materialization tables.
+- Added focused tests and Worker-first routing.
+- Verification passed: focused Phase 4/5 tests, Worker syntax, Vite production build, and Wrangler bundle dry-run.
+- Use this endpoint immediately after Hyperdrive binding before interactive provider/product smoke.
+- Recovery snapshot `docs/phase5-resume-2026-09-19.md` was updated in the same work cycle.
+
+---
+
 # PHASE 5 PRIVATE ROUTE NOINDEX CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `8200a0d54bfeaa8bd4aac81934cbcb6fc661f5ba`.
