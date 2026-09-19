@@ -20,8 +20,11 @@ describe("Phase 5 launch hardening", () => {
 
   it("applies security headers to static asset responses as well as dynamic responses", () => {
     expect(worker).toContain("...SECURITY_HEADERS")
-    expect(worker).toContain("applySecurityHeaders(await env.ASSETS.fetch(request),")
+    expect(worker).toContain("const asset = await env.ASSETS.fetch(request)")
+    expect(worker).toContain("applySecurityHeaders(asset,")
     expect(worker).toContain("shouldNoIndexPath(path)")
+    expect(worker).toContain("isKnownAppPath(path)")
+    expect(worker).toContain("status: 404")
   })
 
   it("keeps private and authenticated routes out of crawler discovery", () => {
