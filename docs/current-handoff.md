@@ -1,3 +1,25 @@
+# SESSION CONTINUITY / RECOVERY POINTER — 2026-09-19 KST
+
+A complete recovery snapshot for the current Phase 5 state is committed at:
+
+`docs/phase5-resume-2026-09-19.md`
+
+Recovery snapshot commit: `189ac3726bfa2c3458cf4241d02dfb2d7fe71458`.
+
+It contains the exact current architecture, frozen dashboard rules, Cloudflare deployment model, Google/Firebase auth state, Supabase production project/migrations/security hardening, DB roles, implemented Worker routes, verification state, manual Hyperdrive blocker, next smoke sequence, and “do not redo” list.
+
+If this chat/session is lost, **read that file first before making changes**.
+
+Immediate resume point:
+1. user privately enables LOGIN/password for `webcanbe_hyperdrive`
+2. user creates Cloudflare Hyperdrive with Supabase Direct connection
+3. user sends only the Hyperdrive configuration ID
+4. add `HYPERDRIVE` binding to `wrangler.jsonc`
+5. deploy and smoke-test DB sessions/catalog/workspaces/purchases/working-copy reads
+6. continue Phase 5 without changing dashboard UI
+
+---
+
 # PHASE 5 HYPERDRIVE LOGIN ROLE PREP CHECKPOINT — 2026-09-19 KST
 
 - Prepared PostgreSQL role `webcanbe_hyperdrive` in production Supabase.
