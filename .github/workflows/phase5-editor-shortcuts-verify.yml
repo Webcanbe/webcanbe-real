@@ -1,0 +1,22 @@
+name: Phase 5 editor shortcuts verify
+on:
+  push:
+    branches: [phase5-editor-shortcuts]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Editor shortcut and source regressions
+        run: npx vitest run src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts src/phase5-dashboard-polish.test.ts src/phase4-final-shell.test.ts src/phase4-product-hub.test.ts src/webcanbe-engine/phase2-source-*.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
