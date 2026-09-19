@@ -1,0 +1,59 @@
+name: Phase 5 production browser audit
+on:
+  push:
+    branches: [phase5-production-browser-audit]
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - uses: browser-actions/setup-chrome@v1
+      - name: Install Lighthouse
+        run: npm install --no-save --ignore-scripts lighthouse@13
+      - name: Audit production routes
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: |
+          mkdir -p .lighthouse
+          for route in root browse login; do
+            case "$route" in
+              root) url="https://webcanbe.com/" ;;
+              browse) url="https://webcanbe.com/browse" ;;
+              login) url="https://webcanbe.com/login" ;;
+            esac
+            npx lighthouse "$url" --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=".lighthouse/${route}-mobile.json"
+            npx lighthouse "$url" --quiet --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=".lighthouse/${route}-desktop.json"
+          done
+      - name: Print audit summary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          const files = fs.readdirSync('.lighthouse').filter(x => x.endsWith('.json')).sort()
+          for (const file of files) {
+            const report = JSON.parse(fs.readFileSync('.lighthouse/' + file, 'utf8'))
+            const c = report.categories
+            const a = report.audits
+            const score = key => Math.round((c[key]?.score ?? 0) * 100)
+            console.log(JSON.stringify({
+              file,
+              url: report.finalUrl,
+              performance: score('performance'),
+              accessibility: score('accessibility'),
+              bestPractices: score('best-practices'),
+              seo: score('seo'),
+              fcpMs: Math.round(a['first-contentful-paint']?.numericValue ?? 0),
+              lcpMs: Math.round(a['largest-contentful-paint']?.numericValue ?? 0),
+              cls: Number((a['cumulative-layout-shift']?.numericValue ?? 0).toFixed(3)),
+              tbtMs: Math.round(a['total-blocking-time']?.numericValue ?? 0),
+            }))
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase5-production-lighthouse
+          path: .lighthouse/*.json
+          retention-days: 7
