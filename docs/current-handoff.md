@@ -1,3 +1,22 @@
+# PHASE 5 PRIVACY-SAFE REQUEST OBSERVABILITY CHECKPOINT — 2026-09-19 KST
+
+- Main implementation merge: `90e0707480789d55fecdf52b44d485890523302d`.
+- Every Worker response now carries an `X-Request-ID` UUID for production correlation.
+- Added `worker/telemetry.js`.
+- Structured failure logs are intentionally bounded to:
+  - event
+  - request ID
+  - path
+  - status
+- Tokens, cookies, CSRF values, emails, profiles, request bodies, DB credentials/connection strings, and payment secrets are not logged by this helper.
+- Public catalog, private product, readiness DB failures, and top-level unhandled Worker failures use the request-ID correlation path.
+- Focused privacy test verifies extra sensitive fields passed to the logger are discarded.
+- Verification passed: focused Phase 4/5 tests, Worker syntax, Vite build, and Wrangler bundle dry-run.
+- Recovery snapshot was updated in the same work cycle.
+- Long-term log retention/alerting remains a later infrastructure choice.
+
+---
+
 # PHASE 5 PRODUCTION READINESS ENDPOINT CHECKPOINT — 2026-09-19 KST
 
 - Main implementation merge: `06df252f54379cf4fcde1f67ae24ed5ed2cb0a4d`.
