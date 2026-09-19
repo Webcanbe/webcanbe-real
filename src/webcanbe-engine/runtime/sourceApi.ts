@@ -20,7 +20,10 @@ const SOURCE_SEARCH_LIMITS = Object.freeze({ queryChars: 160, results: 100, perF
 
 function sourceSearch(files: Map<string,string>, query: string, caseSensitive: boolean, requestedLimit?: number) {
   const limit = requestedLimit === undefined ? SOURCE_SEARCH_LIMITS.results : Math.min(requestedLimit, SOURCE_SEARCH_LIMITS.results)
-  const needle = caseSensitive ? query : query.toLowerCase()
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\  const needle = caseSensitive ? query : query.toLowerCase()
+  const results: Array<{ file:string; start:number; end:number; line:number; column:number; preview:string }> = []
+")
+  const pattern = new RegExp(escaped, caseSensitive ? "g" : "gi")
   const results: Array<{ file:string; start:number; end:number; line:number; column:number; preview:string }> = []
   let scannedBytes = 0, scannedFiles = 0, truncated = false
   const entries = [...files].sort(([a],[b]) => a.localeCompare(b))
@@ -28,19 +31,19 @@ function sourceSearch(files: Map<string,string>, query: string, caseSensitive: b
     const bytes = Buffer.byteLength(source)
     if (bytes > SOURCE_SEARCH_LIMITS.fileBytes || scannedBytes + bytes > SOURCE_SEARCH_LIMITS.scannedBytes) { truncated = true; continue }
     scannedBytes += bytes; scannedFiles += 1
-    const haystack = caseSensitive ? source : source.toLowerCase()
-    let from = 0, perFile = 0
-    while (results.length < limit && perFile < SOURCE_SEARCH_LIMITS.perFile) {
-      const start = haystack.indexOf(needle, from)
-      if (start < 0) break
+    pattern.lastIndex = 0
+    let perFile = 0, match: RegExpExecArray | null
+    while (results.length < limit && perFile < SOURCE_SEARCH_LIMITS.perFile && (match = pattern.exec(source))) {
+      const start = match.index, end = start + match[0].length
       const before = source.slice(0, start), line = before.split("\n").length, lineStart = before.lastIndexOf("\n") + 1
       const previewStart = Math.max(lineStart, start - Math.floor(SOURCE_SEARCH_LIMITS.previewChars / 2))
-      const lineEndIndex = source.indexOf("\n", start + query.length)
-      const previewEnd = Math.min(lineEndIndex < 0 ? source.length : lineEndIndex, start + query.length + Math.floor(SOURCE_SEARCH_LIMITS.previewChars / 2))
-      results.push({ file, start, end: start + query.length, line, column: start - lineStart + 1, preview: source.slice(previewStart, previewEnd).replace(/[\r\n\t]+/g," ") })
-      perFile += 1; from = start + Math.max(query.length, 1)
+      const lineEndIndex = source.indexOf("\n", end)
+      const previewEnd = Math.min(lineEndIndex < 0 ? source.length : lineEndIndex, end + Math.floor(SOURCE_SEARCH_LIMITS.previewChars / 2))
+      results.push({ file, start, end, line, column: start - lineStart + 1, preview: source.slice(previewStart, previewEnd).replace(/[\r\n\t]+/g," ") })
+      perFile += 1
+      if (!match[0].length) pattern.lastIndex += 1
     }
-    if (perFile >= SOURCE_SEARCH_LIMITS.perFile && haystack.indexOf(needle, from) >= 0) truncated = true
+    if (perFile >= SOURCE_SEARCH_LIMITS.perFile && pattern.exec(source)) truncated = true
     if (results.length >= limit) { if (entries.length > scannedFiles) truncated = true; break }
   }
   return { results, scannedFiles, totalFiles: files.size, scannedBytes, truncated }
