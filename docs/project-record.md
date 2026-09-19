@@ -1,5 +1,17 @@
 # WebCanBe project record
 
+## 2026-09-19: Production read-mode truthfulness and secret-scan reliability
+
+The inactive production read-only backend switch was hardened before Hyperdrive activation. Read mode can open existing working copies but cannot create a new one; materialization remains gated by the full hosted mutation mode. Dashboard/catalog/purchase reads also stop substituting local demo rows when the authoritative production database is empty or missing release metadata.
+
+Dashboard now exposes explicit hosted loading and failure states instead of briefly presenting demo data while real product state is unresolved. Regression tests preserve these boundaries.
+
+The same pass fixed a CI reliability issue in the committed-secret scanner. The unsafe VITE public-secret-name heuristic now applies to executable/configuration sources rather than prose Markdown, while real token, PEM private-key, embedded PostgreSQL password, and forbidden secret-bearing file scans still cover tracked content. GitHub Actions run `35424179755` passed the secret scan, focused Phase 4/5 suite, Worker syntax, Vite production build, and Wrangler bundle dry-run.
+
+Hyperdrive and the production read-mode activation marker remain intentionally unconfigured.
+
+---
+
 ## 2026-09-19: Committed-secret scanning enforced in CI
 
 Phase 5 CI now scans the full tracked repository before tests/builds for
