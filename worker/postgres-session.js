@@ -133,7 +133,7 @@ export async function issueDatabaseSession(db, identity, options = {}) {
 export async function resolveDatabaseSession(db, token) {
   if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return undefined
   const result = await db.query(
-    `SELECT s.session_id,s.user_id,s.expires_at,s.auth_issuer,s.auth_subject,s.auth_provider,p.display_name,p.email,p.email_verified,p.picture_url
+    `SELECT s.session_id,s.user_id,s.created_at,s.expires_at,s.auth_issuer,s.auth_subject,s.auth_provider,p.display_name,p.email,p.email_verified,p.picture_url
        FROM wcb_sessions s
        LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id
        LEFT JOIN wcb_user_profiles p ON p.user_id=s.user_id
