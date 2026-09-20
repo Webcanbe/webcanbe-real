@@ -137,6 +137,15 @@ Production materialization acceptance:
 
 Keep payment-provider entitlement creation and unrelated seller mutations closed until separately qualified.
 
+## Gate 4 preverification: **CHAIN PASS ON STAGING**
+
+- checkpoint `75810cef69b3b43947029ccaf42f844f4e319ac6`
+- UI `35511923446`: PASS
+- durable `35511923498`: PASS
+- Bigperson `35511923419`: PASS
+- release provenance → materialized history → durable edit → reload → independent export/build is regression-proven
+- real production clean-account E2E still requires Gate 2 then Gate 3 activation
+
 ## Gate 4 — Clean-account product E2E
 
 Required launch path:
@@ -184,4 +193,7 @@ Additionally requires:
 
 ## Current next action
 
-Finish Gate 1 CI on `phase5-product-read-launch`. Merge to `main` only if all launch branch workflows are green. Immediately after deployment, run Gate 2 instead of starting unrelated features.
+1. Complete the live browser Gate 2 flow at `https://webcanbe.com/_ops/gate2-auth-smoke` using Google as the baseline, then link GitHub and Email before testing those provider logins.
+2. Only after Gate 2 is green, use `phase5-gate3-materialization-staging-v2` as the activation source.
+3. Apply the internal launch-smoke fixture, verify no public Listing was created, then activate materialization and execute the production clean-account E2E.
+4. Do not use the older Gate 3 staging branch.
