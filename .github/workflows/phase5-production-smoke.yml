@@ -25,7 +25,7 @@ jobs:
           node-version: '26'
       - name: Live production smoke with deployment propagation retry
         env:
-          WEBCANBE_EXPECT_DATABASE: ${{ github.event_name == 'workflow_dispatch' && inputs.database_expectation || 'either' }}
+          WEBCANBE_EXPECT_DATABASE: ${{ github.event_name == 'workflow_dispatch' && inputs.database_expectation || 'ready' }}
         run: |
           for attempt in $(seq 1 18); do
             echo "Production smoke attempt $attempt/18"
