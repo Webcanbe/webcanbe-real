@@ -61,7 +61,8 @@ async function bootstrapFactor(password, env, pepper) {
   if (!salt) throw new Error("Bigperson bootstrap factor salt is not configured.")
   const digest = await deriveFactor(password, salt, pepper)
   const expected = String(env.WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST || "")
-  if (expected && !equalText(digest, expected)) throw new Error("Privileged factor refused.")
+  if (!expected) throw new Error("Bigperson bootstrap factor digest is not configured.")
+  if (!equalText(digest, expected)) throw new Error("Privileged factor refused.")
   return { salt, digest }
 }
 async function assertBoundGoogle(db, session, row) {
