@@ -1,3 +1,19 @@
+# PHASE 5 BIGPERSON PUBLICATION + TEST ENTITLEMENT CHECKPOINT — 2026-09-20 KST
+
+- Privileged Operations now extends beyond review/assessment into the retained Phase 3 publication lineage.
+- Admin+ can promote a **passed immutable assessment result** into an immutable `wcb_project_releases` row plus `wcb_seller_release_promotions`.
+- Promotion derives submission/seller/review/lease provenance server-side, requires exact catalog ownership/source/workspace matching, re-verifies the frozen submission snapshot with the same release-integrity boundary used by materialization, and refuses failed/errored or substituted results.
+- Admin+ can publish exactly one promoted release as exactly one published Listing plus immutable `wcb_listing_publications`; seller/catalog/release provenance is rechecked server-side and duplicate/conflicting publication is refused.
+- Admin+ can grant and terminate **provider=test only** entitlements from Control. Payment-provider entitlements remain outside this mutation surface.
+- Release promotion, Listing publication and TEST entitlement grant/transition each require a fresh Google + privileged factor + operation-bound device passkey ceremony and append immutable Control audit evidence.
+- Control read now includes bounded catalog-project, promotion and publication lineage so an operator does not need source bodies or worker credentials.
+- The Control UI now exposes release-promotion, Listing-publication and TEST-entitlement controls; entered privileged factor is still cleared before each passkey ceremony.
+- Backup before this slice: `backup-phase5-before-publication-control-2026-09-20` at `2006c905b4f974e895c470a977bdb6cae294a29b`.
+- **Ready qualification is intentionally not faked.** The retained Phase 3 implementation derives Ready from actual immutable release source through the React compatibility analyzer. That exact trusted analysis still needs a production-server/Worker-compatible execution boundary before Control can mint immutable `wcb_ready_qualifications`.
+- Next Admin slice: exact Ready analyzer/qualification → production Bigperson provisioning/smoke → final privileged E2E.
+
+---
+
 # PHASE 5 BIGPERSON PRIVILEGED MUTATION CHECKPOINT — 2026-09-20 KST
 
 - Control is no longer read-only. The production Worker now exposes operation-bound privileged mutations for:
