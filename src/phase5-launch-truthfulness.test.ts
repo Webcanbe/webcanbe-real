@@ -1,0 +1,41 @@
+import fs from "node:fs"
+import { describe, expect, it } from "vitest"
+
+const app = fs.readFileSync("src/App.tsx", "utf8")
+
+describe("Phase 5 launch truthfulness cleanup", () => {
+  it("never maps unavailable phone sign-in to another provider", () => {
+    const auth = app.slice(app.indexOf("function Auth("), app.indexOf("const docPages"))
+    expect(auth).toContain('title="Phone sign-in is not connected yet"')
+    expect(auth).toContain('<button className="auth-demo-provider" disabled title="Phone sign-in is not connected yet">')
+    expect(auth).not.toContain("phonePending")
+    const phoneButton = auth.slice(auth.indexOf('title="Phone sign-in is not connected yet"') - 120, auth.indexOf('title="Phone sign-in is not connected yet"') + 240)
+    expect(phoneButton).not.toContain("runGoogle")
+  })
+
+  it("removes stale account-backend copy from the dashboard", () => {
+    const dashboard = app.slice(app.indexOf("function Dashboard()"), app.indexOf("function Settings()"))
+    expect(dashboard).toContain("Profile data is backed by the production account store.")
+    expect(dashboard).toContain("Verified sign-in methods and active Webcanbe sessions are backed by the production account store")
+    expect(dashboard).not.toContain("Full editable profile fields will use the account backend when that phase is connected.")
+    expect(dashboard).not.toContain("Additional account controls will connect to the production account store.")
+    expect(dashboard).not.toContain("Google sign-in is active.")
+  })
+
+  it("does not present paid plans as purchasable before billing activation", () => {
+    const plans = app.slice(app.indexOf("function Plans()"), app.indexOf("function CreatorListingEditor"))
+    expect(plans).toContain("Paid billing is not active yet")
+    expect(plans).toContain("launch pricing previews")
+    expect(plans).toContain("Yearly preview")
+    expect(plans).toContain("Coming soon")
+    expect(plans).toContain("disabled={i > 0}")
+    expect(plans).toContain("Billing coming soon")
+    expect(plans).not.toContain("Most chosen")
+    expect(plans).not.toContain("Choose ${p.name}")
+  })
+
+  it("keeps the public update page aligned with current launch closure", () => {
+    expect(app).toContain("Launch closure is in progress: production reads are live")
+    expect(app).not.toContain("Phase 4 UI finalization is in progress.")
+  })
+})
