@@ -39,6 +39,24 @@ describe("Phase 5 bigperson Control foundation", () => {
     expect(finalUi).toContain("min-height:100vh")
   })
 
+  it("organizes every manager capability inside the unified Bigperson console", () => {
+    const control = app.slice(app.indexOf("function Control()"), app.indexOf("const BIGPERSON_CONTROL_PATH"))
+    for (const label of ["Overview","Sellers & Review","Publishing","Access & Roles","Audit"]) expect(control).toContain(label)
+    expect(control).toContain("Bigperson inherits every reviewer and admin capability")
+    expect(control).toContain("Bigperson includes Reviewer + Admin permissions.")
+    expect(control).toContain("Seller applications")
+    expect(control).toContain("Approve review")
+    expect(control).toContain("Admit assessment")
+    expect(control).toContain("Promote release")
+    expect(control).toContain("Publish Listing")
+    expect(control).toContain("Derive & qualify Ready")
+    expect(control).toContain("Grant TEST entitlement")
+    expect(control).toContain("Privileged operators")
+    expect(control).toContain("Privileged audit")
+    expect(finalUi).toContain(".control-console-nav")
+    expect(finalUi).toContain(".control-overview-grid")
+  })
+
   it("keeps obscurity separate from authorization", () => {
     expect(app).toContain("The path itself is not trusted as authorization")
     expect(worker).toContain('env.WEBCANBE_CONTROL_MODE !== "enabled"')
