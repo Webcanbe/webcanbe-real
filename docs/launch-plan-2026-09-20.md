@@ -58,6 +58,14 @@ Acceptance:
 - production build + Wrangler dry-run PASS
 - after main deployment, production smoke confirms read=on / mutation=off
 
+## Gate 2 automated preflight: **CLOSED**
+
+- main `ef175c6659d3a09f73e8e36ee486b91ffbf9e881`
+- UI / Bigperson / durable / production smoke all PASS
+- anonymous private reads and materialization fail closed in production
+- clean-account backend reads return truthful empty arrays
+- interactive provider-specific browser smoke remains
+
 ## Gate 2 — Interactive production auth + private-read smoke
 
 Run against a clean/new account and an existing account.
