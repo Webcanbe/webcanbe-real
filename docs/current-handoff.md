@@ -1,4 +1,4 @@
-# PHASE 5 BIGPERSON MANDATORY THREE-FACTOR CHECKPOINT — 2026-09-20 KST
+Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# PHASE 5 BIGPERSON MANDATORY THREE-FACTOR CHECKPOINT — 2026-09-20 KST
 
 - Bigperson Control now requires all three factors for every privileged Control read/operation:
   1. current first-party session must have been created by the enrolled Google issuer+subject
