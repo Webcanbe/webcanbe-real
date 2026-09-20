@@ -1,4 +1,4 @@
-# WebCanBe project record
+Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
 ## 2026-09-20: Bigperson mandatory three-factor verification
 
