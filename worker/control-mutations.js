@@ -70,7 +70,7 @@ export async function transitionOperator(db,session,input,evidenceId){
   const transition={before:before?{active:Boolean(before.active),role:String(before.role)}:{active:false,role:null},after:{active,role},previousEpoch:before?Number(before.epoch):0,nextEpoch:before?Number(before.epoch)+1:1}
   const inserted=await audit(db,session,evidenceId,"operator.authority.transition","user",target,transition,input?.idempotencyKey)
   if(!inserted) return (await db.query("SELECT user_id,active,epoch,role FROM wcb_product_operators WHERE user_id=$1",[target])).rows[0]
-  return (await db.query("INSERT INTO wcb_product_operators(user_id,active,epoch,role) VALUES($1,$2,1,$3) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,role=excluded.role,epoch=wcb_product_operators.epoch+1 RETURNING user_id,active,epoch,role",[target,active,role])).rows[0]
+  return (await db.query("INSERT INTO wcb_product_operators(user_id,active,epoch,role) VALUES($1,$2,1,$3) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,role=excluded.role,epoch=wcb_product_operators.epoch+1,updated_at=clock_timestamp() RETURNING user_id,active,epoch,role",[target,active,role])).rows[0]
 }
 export async function transitionSellerApplication(db,session,input,evidenceId){
   const application=id(input?.applicationId,"seller application"), status=String(input?.status||"")
