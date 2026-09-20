@@ -193,7 +193,7 @@ Additionally requires:
 
 ## Current next action
 
-1. Complete the live browser Gate 2 flow at `https://webcanbe.com/_ops/gate2-auth-smoke` using Google as the baseline, then link GitHub and Email before testing those provider logins.
-2. Only after Gate 2 is green, use `phase5-gate3-materialization-staging-v2` as the activation source.
-3. Apply the internal launch-smoke fixture, verify no public Listing was created, then activate materialization and execute the production clean-account E2E.
-4. Do not use the older Gate 3 staging branch.
+1. Complete the live Gate 2 flow at `https://webcanbe.com/_ops/gate2-auth-smoke`: Google baseline, private reads, refresh, link GitHub, link Email, logout, then linked GitHub/Email login verification.
+2. After Gate 2 is green, activate from `phase5-gate3-materialization-staging-v2`.
+3. Apply the private launch-smoke fixture and verify it creates zero public Listing rows.
+4. Enable materialization, then execute the production Gate 4 chain through save/reload/export/independent build.
