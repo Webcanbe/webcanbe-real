@@ -1,5 +1,14 @@
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
+## 2026-09-20: Three-factor review and assessment operations
+
+Privileged Operations now creates immutable seller review decisions and admits approved
+submissions to assessment. Each action requires a new operation-bound three-factor
+ceremony. The Worker rechecks the immutable submission snapshot and review provenance
+inside the mutation transaction and appends Control audit evidence.
+
+---
+
 ## 2026-09-20: Privileged session security and audit detail
 
 Control now exposes bounded active-session metadata to an authenticated Bigperson
