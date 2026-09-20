@@ -107,6 +107,17 @@ Acceptance:
 - private requests require live DB session + CSRF
 - clear empty/error/loading states
 
+## Gate 3 v3 staging: **VERIFIED, NOT DEPLOYED**
+
+- branch: `phase5-gate3-materialization-staging-v3`
+- code checkpoint: `67b0010bc17fb71cf8d71e31664585e0553166e6`
+- UI `35514261090`: PASS
+- durable `35514261052`: PASS
+- Bigperson `35514261054`: PASS
+- based on current main and includes the live auth-logo/spinner polish
+- Gate 4 materialize → durable edit → reopen → standalone export/build regression included
+- production activation remains blocked on interactive Gate 2
+
 ## Gate 3 — Materialization mutation activation
 
 Only after Gate 2 passes.
@@ -177,5 +188,5 @@ Additionally requires:
 2. Establish the Google baseline and run private reads + refresh persistence.
 3. While still on that Google-backed internal account, link GitHub and Email identities.
 4. Verify logout, then verify linked GitHub and linked Email logins return to the same Webcanbe account and pass the same reads.
-5. After Gate 2 is green, use `phase5-gate3-materialization-staging-v2` for activation. It is current-main based and already passes UI/durable/Bigperson CI.
+5. After Gate 2 is green, use `phase5-gate3-materialization-staging-v3` for activation. It is current-main based, includes the latest auth polish, and already passes UI/durable/Bigperson CI.
 6. Apply the private launch-smoke entitlement/release fixture, verify zero public Listing, activate materialization, then execute the production Gate 4 chain.
