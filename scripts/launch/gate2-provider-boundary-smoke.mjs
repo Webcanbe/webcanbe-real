@@ -86,6 +86,8 @@ try {
   })
 
   const forbiddenRequests = []
+  const failedResponses = []
+  const failedRequests = []
   const consoleErrors = []
   const pageErrors = []
 
@@ -97,6 +99,24 @@ try {
       }
     } catch {
       // Ignore non-URL requests.
+    }
+  })
+
+  context.on("response", response => {
+    if (response.status() < 400) return
+    try {
+      const url = new URL(response.url())
+      failedResponses.push(`${response.status()} ${url.origin}${url.pathname}`)
+    } catch {
+      failedResponses.push(`${response.status()} [unparseable URL]`)
+    }
+  })
+  context.on("requestfailed", request => {
+    try {
+      const url = new URL(request.url())
+      failedRequests.push(`${request.failure()?.errorText || "request failed"} ${url.origin}${url.pathname}`)
+    } catch {
+      failedRequests.push(request.failure()?.errorText || "request failed")
     }
   })
 
@@ -190,6 +210,8 @@ try {
     firstPartySession ? "unexpected __Host-wcb-session cookie" : "no first-party session cookie",
   )
 
+  if (failedResponses.length) console.log("HTTP failures: " + [...new Set(failedResponses)].join(" | "))
+  if (failedRequests.length) console.log("Request failures: " + [...new Set(failedRequests)].join(" | "))
   if (consoleErrors.length) console.log("Browser console errors: " + consoleErrors.join(" | "))
   if (pageErrors.length) console.log("Page errors: " + pageErrors.join(" | "))
 
