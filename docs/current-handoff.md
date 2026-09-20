@@ -1,3 +1,26 @@
+# AUTH POLISH LIVE / GATE 3 V3 READY — 2026-09-20 KST
+
+- Production login polish remains live at main code checkpoint `f6e702960bfad13d33a97f071d217b7951ce2fc7`:
+  - real Google multicolor SVG mark
+  - real GitHub SVG mark
+  - circular translucent-gray route/session/auth spinner instead of the old top progress bar
+  - main UI `35513994500`, durable `35513994502`, Bigperson `35513994499`, production smoke `35514035976`: **PASS**
+- Live DOM verification observed both provider buttons using SVG brand marks and bundle `/assets/index-CVqoyDUU.js`.
+- Current Gate 3 activation branch is now **`phase5-gate3-materialization-staging-v3`**.
+- Gate 3 v3 is rebuilt from current main, so it includes the auth polish and all current handoff changes.
+- Verified Gate 3 v3 code checkpoint: `67b0010bc17fb71cf8d71e31664585e0553166e6`.
+- Gate 3 v3 CI:
+  - UI `35514261090`: **PASS**
+  - durable editor/export `35514261052`: **PASS**
+  - Bigperson `35514261054`: **PASS**
+- Gate 3 v3 is ahead of current main and behind by 0 at the verified checkpoint.
+- Gate 4 materialization → durable edit → reopen → standalone export → independent build regression remains included.
+- Production DB recheck still shows Google identity 1 / Firebase identity 0 / active entitlement 0 / materialization 0.
+- Therefore interactive Gate 2 is still the only release blocker. Do not deploy Gate 3 v3 until GitHub + Email are linked/tested in the real browser.
+- v2 and older Gate 3 branches are historical. Resume from v3.
+
+---
+
 # AUTH BRAND + LOADING POLISH LIVE — 2026-09-20 KST
 
 - Production code checkpoint: `f6e702960bfad13d33a97f071d217b7951ce2fc7`.
