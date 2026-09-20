@@ -1,3 +1,16 @@
+## Latest recovery delta — green main + production smoke + FK index hardening
+
+- Admin + durable editor integration is on main and passed all three main verification workflows.
+- Automatic production smoke `35495723690` passed 21/21 checks against live `webcanbe.com`; the database is still deliberately unconfigured and Worker readiness/catalog fail closed with 503.
+- Integration exposed and fixed stale whole-suite assumptions for Control routing, DB session auth provenance, and runtime-profile preparation.
+- Production Supabase migration `20260920070349 phase5_fk_covering_indexes` adds 21 FK covering indexes identified by the performance advisor.
+- Production catalog query now confirms zero uncovered `wcb_*` foreign keys.
+- Performance advisor's remaining findings are unused-index INFO only, expected before traffic.
+- Canonical schema and regression test preserve the index set.
+- Immediate live gate: create/bind Hyperdrive without exposing the DB password, then run DB-session/provider/private-read smoke and first Bigperson enrollment/Control E2E.
+
+---
+
 ## Latest recovery delta — Admin + durable editor proof integrated
 
 - The six-commit `phase5-editor-durable-export` proof branch has been functionally integrated onto the newer Bigperson/Admin line.
