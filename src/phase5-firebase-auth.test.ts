@@ -19,6 +19,11 @@ describe("Phase 5 Firebase Authentication", () => {
     expect(firebaseAuth).toContain("getAuth(app)")
   })
 
+  it("keeps the public Firebase project ID as a safe build fallback", () => {
+    expect(firebaseAuth).toContain('const FIREBASE_PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID || "webcanbe-b607e"')
+    expect(firebaseAuth).toContain("projectId: FIREBASE_PROJECT_ID")
+  })
+
   it("connects GitHub with Firebase popup auth and no GitHub client secret", () => {
     expect(firebaseAuth).toContain("new GithubAuthProvider()")
     expect(firebaseAuth).toContain("signInWithPopup(firebaseAuth(), new GithubAuthProvider())")
