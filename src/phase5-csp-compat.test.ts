@@ -29,7 +29,7 @@ describe("Phase 5 CSP compatibility inventory", () => {
   it("documents why inline styles remain allowed while inline scripts do not", () => {
     expect(landing.match(/<style\b/gi)?.length ?? 0).toBeGreaterThan(0)
     expect(landing.match(/\sstyle=["'][^"']*["']/gi)?.length ?? 0).toBeGreaterThan(0)
-    expect(security).toContain('"script-src \'self\'"')
+    expect(security).toContain('"script-src \'self\' https://apis.google.com https://www.gstatic.com"')
     expect(security).not.toContain('"script-src \'self\' \'unsafe-inline\'"')
     expect(security).toContain('"style-src \'self\' \'unsafe-inline\'"')
   })
