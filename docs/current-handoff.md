@@ -1,3 +1,26 @@
+# AUTH BRAND + LOADING POLISH LIVE — 2026-09-20 KST
+
+- Production code checkpoint: `f6e702960bfad13d33a97f071d217b7951ce2fc7`.
+- Login polish shipped:
+  - Google provider button now renders the multicolor Google brand SVG instead of the placeholder letter `G`.
+  - GitHub provider button now renders the GitHub brand mark SVG.
+  - the route transition top progress bar was removed and replaced by a centered circular translucent-gray spinner.
+  - session-checking and auth busy states use the same spinner family.
+- Verification:
+  - branch UI `35513926569`: **PASS**
+  - main UI `35513994500`: **PASS**
+  - main durable editor/export `35513994502`: **PASS**
+  - main Bigperson `35513994499`: **PASS**
+  - production smoke `35514035976`: **PASS**
+- Live browser verification:
+  - Google first child is `svg.auth-provider-google`
+  - GitHub first child is `svg.auth-provider-github`
+  - live application bundle observed as `/assets/index-CVqoyDUU.js`
+- Rollback: `backup-main-before-auth-logos-spinner-2026-09-20`.
+- This was UI-only launch polish. Product mutation remains outside this change and Gate 2 interactive provider smoke remains the release blocker.
+
+---
+
 # GATE 2 INTERACTIVE RESUME CHECKPOINT — 2026-09-20 KST
 
 - Main rechecked at `97f9602cf7f95d63b6ae1c4771f2780a2ab4fa8a`.
