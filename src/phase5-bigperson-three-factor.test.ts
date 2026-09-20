@@ -13,7 +13,7 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
   it("binds first-party sessions to the identity that authenticated them", () => {
     expect(session).toContain("auth_issuer,auth_subject,auth_provider")
     expect(session).toContain("identity.issuer, identity.subject, identity.provider")
-    expect(session).toContain("createdAt:")
+    expect(session).toContain("const createdAt = new Date(row.created_at).getTime()")
     expect(auth).toContain('session.authProvider !== "google"')
     expect(auth).toContain('session.authIssuer !== GOOGLE_ISSUER')
     expect(auth).toContain("GOOGLE_SESSION_MAX_AGE_MS")
