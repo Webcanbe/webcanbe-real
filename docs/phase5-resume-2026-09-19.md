@@ -8,6 +8,22 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — mandatory Bigperson three-factor security
+
+- Every Bigperson Control operation requires all three: enrolled Google-authenticated first-party session + separate privileged factor + verified WebAuthn/passkey assertion.
+- Google authority is issuer+subject after bootstrap; deployment allowlist email is not the durable identity key.
+- Bigperson Google sessions must be no older than 10 minutes.
+- Privileged factor is never stored as plaintext; PBKDF2-SHA256 600k + per-user salt + server-only pepper.
+- First Bigperson bootstrap requires all three factors and closes after an active Bigperson exists.
+- WebAuthn requires user verification; operation challenges expire after 90 seconds and bind exact user/session/method/path/body hash.
+- Challenges are one-time and passkey counters are persisted.
+- Control UI clears the entered factor before passkey and requires a new ceremony for each Control read.
+- Migration: `deployment/hosted/postgres-bigperson-3factor.sql`.
+- Credential values are intentionally absent from Git and Markdown.
+- Production secret provisioning and first passkey enrollment still wait for deployment/Hyperdrive availability.
+
+---
+
 ## Latest recovery delta — bigperson Control foundation
 
 - Platform authority is `reviewer → admin → bigperson`, separate from workspace roles.
