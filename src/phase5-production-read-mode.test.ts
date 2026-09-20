@@ -14,7 +14,7 @@ describe("Phase 5 production read-only product mode", () => {
     expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     expect(index).not.toContain('name="wcb-product-read-mode"')
     expect(index).not.toContain('name="wcb-product-mutation-mode"')
-    expect(index).not.toContain('name="wcb-control-mode"')
+    expect(index).toContain('<meta name="wcb-control-mode" content="hosted" />')
   })
 
   it("prepares only read-oriented account/workspace/library surfaces for the future switch", () => {
@@ -28,7 +28,7 @@ describe("Phase 5 production read-only product mode", () => {
     expect(settings).toContain("hostedProductClient.updateAccount(name)")
   })
 
-  it("does not enable seller/control or checkout mutation surfaces through the read-only switch", () => {
+  it("keeps seller/checkout disabled while Control uses its own explicit production switch", () => {
     const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     const control = app.slice(app.indexOf("function Control()"), app.indexOf("\nfunction ", app.indexOf("function Control()")+20))
     const checkout = app.slice(app.indexOf("function Checkout()"), app.indexOf("\nfunction ", app.indexOf("function Checkout()")+20))
