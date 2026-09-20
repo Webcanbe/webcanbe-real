@@ -50,6 +50,18 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(app).toContain(">Revoke<")
     expect(app).toContain("Tokens and hashes are never exposed.")
   })
+  it("makes immutable review decisions and assessment admission three-factor operations",()=>{
+    expect(mutations).toContain("decideSubmissionReview")
+    expect(mutations).toContain("submission.review.decision")
+    expect(mutations).toContain("admitAssessment")
+    expect(mutations).toContain("submission.assessment.admit")
+    expect(worker).toContain("/__webcanbe/api/ops/reviews/decide")
+    expect(worker).toContain("/__webcanbe/api/ops/assessments/admit")
+    expect(client).toContain("controlReviewDecision")
+    expect(client).toContain("controlAdmitAssessment")
+    expect(app).toContain("Approve review")
+    expect(app).toContain("Admit assessment")
+  })
   it("shows bounded audit transition detail without making audit mutable",()=>{
     expect(app).toContain('{label:"Transition",keys:["transition"]}')
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
