@@ -25,6 +25,7 @@ function validateIdentity(identity) {
   cleanOptional(identity.email, 320)
   cleanOptional(identity.name, 120)
   cleanOptional(identity.picture, 1000)
+  cleanOptional(identity.provider, 100)
   if (identity.emailVerified !== undefined && typeof identity.emailVerified !== "boolean") throw new DatabaseAuthorityDenied()
 }
 
@@ -111,7 +112,7 @@ export async function issueDatabaseSession(db, identity, options = {}) {
     const csrf = randomToken()
     const sessionResult = await db.query(
       "INSERT INTO wcb_sessions(session_id,user_id,expires_at,active,token_hash,csrf_hash,auth_issuer,auth_subject,auth_provider) VALUES($1,$2,date_trunc('milliseconds',clock_timestamp())+$3*interval '1 millisecond',true,$4,$5,$6,$7,$8) RETURNING expires_at",
-      [sessionId, userId, lifetimeMs, tokenHash(token), tokenHash(csrf), identity.issuer, identity.subject, identity.provider ?? null],
+      [sessionId, userId, lifetimeMs, tokenHash(token), tokenHash(csrf), identity.issuer, identity.subject, cleanOptional(identity.provider, 100) ?? null],
     )
     const expiresAt = new Date(sessionResult.rows[0].expires_at).getTime()
     if (!Number.isFinite(expiresAt)) throw new DatabaseAuthorityDenied()
