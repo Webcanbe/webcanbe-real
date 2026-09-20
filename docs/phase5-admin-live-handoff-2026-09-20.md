@@ -1,3 +1,38 @@
+# SYNCED APPLE PASSKEY POLICY FIX — 2026-09-20 KST
+
+- First Bigperson WebAuthn registration reached the server successfully far enough for the server to inspect the authenticator metadata.
+- The server rejected the registration with:
+  `Bigperson requires a device-bound passkey that is not cloud-synced.`
+- Production DB immediately after the rejection:
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active Bigperson passkeys: 0
+  - one live registration challenge existed
+  - fresh active Google session existed.
+- Root cause:
+  - macOS/Apple created a valid WebAuthn passkey;
+  - the credential was reported as sync-capable/backed-up;
+  - the retained Bigperson policy rejected any credential not reported as single-device + non-backed-up.
+- This policy conflicts with normal Apple/iCloud Passkey behavior and is not required for the intended three-factor model.
+- Policy change in progress on `phase5-bigperson-synced-passkey`:
+  - allow synced/backed-up WebAuthn credentials;
+  - continue recording `device_type` and `backed_up` metadata in PostgreSQL;
+  - do not use those metadata fields as an authentication rejection condition.
+- Security controls retained unchanged:
+  - fresh allowlisted Google-backed first-party session
+  - separate privileged factor
+  - mandatory WebAuthn user verification
+  - RP/origin validation
+  - ES256/RS256 restriction
+  - 90-second one-time challenge
+  - exact operation method/path/body binding
+  - public-key and signature verification
+  - authenticator counter update
+  - privileged audit/evidence.
+- After CI + production deployment, retry first registration. No KDF Secret rotation is required for this policy change.
+
+---
+
 # KDF ROTATION COMPLETE / FIRST ENROLLMENT STILL PENDING — 2026-09-20 KST
 
 - User reports the Cloudflare Bigperson bootstrap factor set has been regenerated/replaced for the final 100,000-iteration PBKDF2 contract.
