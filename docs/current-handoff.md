@@ -1,3 +1,25 @@
+# LIVE CONTROL DEPLOYMENT CHECKPOINT — 2026-09-20 KST
+
+- Canonical main: `1d0e46ffaed2d75e6387f1e42534296835f141d3`.
+- Hyperdrive is live and production DB/schema/catalog smoke passes.
+- Bigperson bootstrap factor secrets are configured in Cloudflare; the bootstrap digest is mandatory and fail-closed in code.
+- Production Control source activation is complete:
+  - `index.html` contains `<meta name="wcb-control-mode" content="hosted" />`
+  - Worker `WEBCANBE_CONTROL_MODE=enabled`
+  - product read/mutation production switches remain intentionally absent.
+- Wrangler now declares required runtime secret names so future deploys fail if Google OAuth or Bigperson factor secrets are missing; values remain secret and are not committed.
+- Branch and main CI pass UI, durable editor/export, Bigperson, secret scan, production build, and Wrangler dry-run.
+- Production smoke `35500479487` deliberately FAILED only the new live-Control assertion while all DB/security/catalog checks passed:
+  - database ready/schema ready
+  - catalog authoritative DB read 200
+  - live root HTML does NOT yet contain `wcb-control-mode=hosted`.
+- Conclusion: the latest source is not yet deployed to Cloudflare production. This is not a DB/Hyperdrive/secret failure.
+- Exact manual gate: deploy/retry the latest `main` build for Worker `webcanbe-real` using the existing production build/deploy path. After deployment, rerun `35500479487`.
+- After that smoke passes, perform fresh Google login → first Bigperson passkey registration → three-factor Control read E2E.
+- Current production DB before first ceremony: no active Bigperson/passkey yet.
+
+---
+
 # PHASE 5 MAIN PRODUCTION + DB INDEX HARDENING CHECKPOINT — 2026-09-20 KST
 
 - Verified Admin + durable integration was fast-forwarded to `main`.
