@@ -1,3 +1,35 @@
+# SYNCED APPLE PASSKEY POLICY DEPLOYED — RETRY NOW — 2026-09-20 KST
+
+- Synced/backed-up Apple/iCloud WebAuthn passkeys are now accepted for Bigperson enrollment and authentication.
+- The server still records `device_type` and `backed_up` metadata but no longer rejects credentials based on those fields.
+- Security controls retained:
+  - fresh allowlisted Google-backed first-party session
+  - privileged factor
+  - mandatory WebAuthn user verification
+  - RP/origin validation
+  - ES256/RS256
+  - 90-second one-time challenge
+  - exact operation method/path/body binding
+  - public-key/signature verification
+  - authenticator counter update
+  - privileged evidence/audit.
+- Main verification after deployment:
+  - Phase 5 UI verify `35505454995`: PASS
+  - Phase 5 Bigperson checkpoint verify `35505454985`: PASS
+  - Phase 5 durable editor/export verify `35505454984`: PASS
+  - production smoke `35505496861`: PASS
+- Current DB immediately before retry:
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active passkeys: 0
+  - live registration challenges: 0
+  - active Google session: 1
+  - newest Google session age: ~353 seconds (~5m53s)
+- Immediate next action: on the current Operations screen, enter the factor and click `First Bigperson: register passkey` again now. The session is still inside the 10-minute freshness window. If retry is delayed past the window, re-login first.
+- If Apple reports an existing passkey because the previous local ceremony already created one before server rejection, capture that exact prompt/error before changing server state.
+
+---
+
 # SYNCED APPLE PASSKEY POLICY FIX — 2026-09-20 KST
 
 - First Bigperson WebAuthn registration reached the server successfully far enough for the server to inspect the authenticator metadata.
