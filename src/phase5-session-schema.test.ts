@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest"
 const migration = fs.readFileSync("deployment/hosted/postgres-session-created-at.sql", "utf8")
 const schema = fs.readFileSync("deployment/hosted/postgres.sql", "utf8")
 const session = fs.readFileSync("worker/postgres-session.js", "utf8")
+const worker = fs.readFileSync("worker/index.js", "utf8")
+const providerMigration = fs.readFileSync("deployment/hosted/postgres-session-auth-provider.sql", "utf8")
 
 describe("Phase 5 DB session creation timestamp", () => {
   it("keeps created_at in the canonical wcb_sessions schema", () => {
@@ -24,4 +26,20 @@ describe("Phase 5 DB session creation timestamp", () => {
     expect(session).toContain("s.created_at")
     expect(session).toContain("const createdAt = new Date(row.created_at).getTime()")
   })
+
+  it("preserves verified provider provenance when issuing DB sessions", () => {
+    expect(worker).toContain("provider: identity.provider")
+    expect(session).toContain("cleanOptional(identity.provider, 100)")
+    expect(session).toContain("identity.subject, cleanOptional(identity.provider, 100) ?? null")
+  })
+
+  it("backfills only known Google/Firebase providers for older sessions", () => {
+    expect(providerMigration).toContain("auth_provider IS NULL")
+    expect(providerMigration).toContain("https://accounts.google.com")
+    expect(providerMigration).toContain("THEN 'google'")
+    expect(providerMigration).toContain("https://securetoken.google.com/webcanbe-b607e")
+    expect(providerMigration).toContain("THEN 'firebase'")
+    expect(providerMigration).not.toMatch(/\bDELETE\b|\bTRUNCATE\b|\bDROP\b/i)
+  })
+
 })
