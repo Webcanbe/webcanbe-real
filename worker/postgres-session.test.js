@@ -108,8 +108,9 @@ describe("PostgreSQL-backed Worker session adapter", () => {
       userId: "11111111-1111-4111-8111-111111111111",
       expiresAt: expiresAt.getTime(),
     }
+    const createdAt = new Date("2026-09-20T00:00:00.000Z")
     const db = fakeDb(sql => {
-      if (sql.startsWith("SELECT s.session_id,s.user_id,s.expires_at")) return { rows: [{ session_id: session.sessionId, user_id: session.userId, expires_at: expiresAt, display_name: "Sihoo", email: "sihoo@example.com", email_verified: true, picture_url: "https://example.com/p.png" }], rowCount: 1 }
+      if (sql.startsWith("SELECT s.session_id,s.user_id,s.created_at,s.expires_at")) return { rows: [{ session_id: session.sessionId, user_id: session.userId, created_at: createdAt, expires_at: expiresAt, auth_issuer: "https://accounts.google.com", auth_subject: "google-subject", auth_provider: "google", display_name: "Sihoo", email: "sihoo@example.com", email_verified: true, picture_url: "https://example.com/p.png" }], rowCount: 1 }
       if (sql.startsWith("UPDATE wcb_sessions s SET csrf_hash")) return { rows: [], rowCount: 1 }
       if (sql.startsWith("SELECT s.session_id FROM wcb_sessions s LEFT JOIN wcb_disabled_users")) return { rows: [{ session_id: session.sessionId }], rowCount: 1 }
       if (sql.startsWith("UPDATE wcb_sessions SET active=false")) return { rows: [], rowCount: 1 }
@@ -117,7 +118,7 @@ describe("PostgreSQL-backed Worker session adapter", () => {
       throw new Error("Unexpected SQL: " + sql)
     })
     const resolved = await resolveDatabaseSession(db, "t".repeat(43))
-    expect(resolved).toEqual({ ...session, displayName: "Sihoo", email: "sihoo@example.com", emailVerified: true, picture: "https://example.com/p.png" })
+    expect(resolved).toEqual({ ...session, createdAt: createdAt.getTime(), authIssuer: "https://accounts.google.com", authSubject: "google-subject", authProvider: "google", displayName: "Sihoo", email: "sihoo@example.com", emailVerified: true, picture: "https://example.com/p.png" })
     const csrf = await rotateDatabaseCsrf(db, session)
     expect(csrf).toMatch(/^[A-Za-z0-9_-]{43}$/)
     expect(await verifyDatabaseCsrf(db, session, csrf)).toBe(true)
