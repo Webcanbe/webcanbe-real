@@ -40,6 +40,15 @@ describe("Phase 5 browser launch hardening", () => {
     expect(script).toContain("plans explain billing state")
   })
 
+  it("enforces deterministic production build-size budgets", () => {
+    const budget = fs.readFileSync("scripts/launch/build-budget.mjs", "utf8")
+    expect(budget).toContain("15 * 1024 * 1024")
+    expect(budget).toContain("2 * 1024 * 1024")
+    expect(budget).toContain("700 * 1024")
+    expect(budget).toContain("180 * 1024")
+    expect(budget).toContain("production source maps")
+  })
+
   it("pins the Playwright runtime and runs on main", () => {
     expect(workflow).toContain("mcr.microsoft.com/playwright:v1.56.1-noble")
     expect(workflow).toContain("playwright@1.56.1")
