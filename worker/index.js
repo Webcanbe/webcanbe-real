@@ -10,7 +10,7 @@ import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
-import { transitionOperator, transitionSellerApplication } from "./control-mutations.js"
+import { transitionOperator, transitionSellerApplication, revokeSession } from "./control-mutations.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -464,16 +464,18 @@ async function privateProduct(request, env, path, traceId) {
               throw error
             }
           }
-          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition") {
+          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition" || path === "/__webcanbe/api/ops/sessions/revoke") {
             const operationBody = body?.operationBody ?? {}
             await db.query("BEGIN")
             try {
               const proof = await consumeBigpersonOperation(db, databaseSession, body, env, request, { method: "POST", path, body: operationBody })
               const result = path.endsWith("/operators/transition")
                 ? await transitionOperator(db, databaseSession, operationBody, proof.evidenceId)
-                : await transitionSellerApplication(db, databaseSession, operationBody, proof.evidenceId)
+                : path.endsWith("/seller-applications/transition")
+                  ? await transitionSellerApplication(db, databaseSession, operationBody, proof.evidenceId)
+                  : await revokeSession(db, databaseSession, operationBody, proof.evidenceId)
               await db.query("COMMIT")
-              return json(path.endsWith("/operators/transition") ? { operator: result } : { application: result })
+              return json(path.endsWith("/operators/transition") ? { operator: result } : path.endsWith("/seller-applications/transition") ? { application: result } : { session: result })
             } catch (error) {
               await db.query("ROLLBACK")
               throw error
