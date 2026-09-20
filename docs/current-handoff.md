@@ -1,3 +1,23 @@
+# PHASE 5 ADMIN + DURABLE EDITOR INTEGRATION CHECKPOINT — 2026-09-20 KST
+
+- The previously separate `phase5-editor-durable-export` proof has been integrated onto the completed Bigperson/Admin branch without replacing newer Admin code or documents.
+- Integrated durable proof:
+  - accepted Code save persists as one durable source revision + history transaction
+  - reopen reads the accepted revision and exact accepted bytes
+  - export contains accepted source, excludes Webcanbe runtime state, and independently builds in a fresh checkout
+  - Visual / Code / Split remain wired to the same request/revision acceptance path
+  - export remains behind independent-build validation and fresh authority
+- The old production-read regression that assumed Control used `hostedProductMode()` was superseded by the stronger current design: Control uses a separate `controlMode()` / production Control gate and remains unreachable through read-only product activation.
+- Integrated verification on the combined branch:
+  - Bigperson/Admin regression + Worker syntax + Vite build + Wrangler dry-run: GitHub Actions `35495424755` **PASS**
+  - durable save/history/export regression + Vite build + Wrangler dry-run: GitHub Actions `35495424762` **PASS**
+- Durable proof is now required on `main` by its dedicated workflow, and Bigperson regression is also configured to run on `main`.
+- Dashboard/landing visuals were not redesigned.
+- Current branch is a strict fast-forward descendant of `main`; no merge conflict is required.
+- Next repository action: back up current `main`, then fast-forward `main` to this verified integrated checkpoint.
+
+---
+
 # PHASE 5 BIGPERSON PRODUCTION SCHEMA CHECKPOINT — 2026-09-20 KST
 
 - Production Supabase project `webcanbe-production` now has the privileged Control schema actually applied.
