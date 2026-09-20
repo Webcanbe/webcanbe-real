@@ -1,3 +1,9 @@
+# CURRENT BLOCKER FIXED IN CODE — PBKDF2 RUNTIME — 2026-09-20 KST
+
+The live first-Bigperson attempt exposed Cloudflare WebCrypto's PBKDF2 iteration cap: 600,000 iterations were rejected. The implementation now keeps the existing 600,000-iteration bootstrap format but uses Worker-supported `node:crypto.pbkdf2Sync`, which matches the already configured digest. No factor-set regeneration is required. CI/build/Wrangler verification passes. After production deployment, retry first passkey registration with a fresh Google session.
+
+---
+
 # CURRENT LIVE BLOCKER — FRESH GOOGLE SESSION — 2026-09-20 KST
 
 First Bigperson enrollment reached the server but was rejected only because the current Google-backed first-party session was ~35 minutes old while Bigperson requires a session created within 10 minutes. Next action: sign out, sign in again with Google, return immediately to `/_ops/keystone-7f31`, enter the privileged factor, and click `First Bigperson: register passkey`.
