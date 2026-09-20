@@ -111,9 +111,11 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(mutations).toContain('await role(db,session,"admin")')
     expect(mutations).toContain('await role(db,session,"reviewer")')
   })
-  it("keeps privileged audit append-only",()=>{
+  it("keeps privileged audit append-only and compares JSONB transitions canonically",()=>{
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
     expect(mutations).toContain("idempotency_key")
+    expect(mutations).toContain("canonicalJson(prior.transition)!==canonicalJson(transition)")
+    expect(mutations).toContain("A terminal TEST entitlement cannot be re-granted.")
     expect(schema).toContain("wcb_protect_last_bigperson")
   })
 })
