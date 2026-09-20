@@ -1,3 +1,11 @@
+## 2026-09-20: Admin and durable editor branches reconciled
+
+The separate durable-editor proof was reconciled into the completed privileged Admin branch by content rather than by overwriting the newer tree. The durable test and CI assets were imported; current Phase 5 CI now retains the proof on main. The only semantic conflict was an obsolete assertion that Control had to use the general hosted-product mode. Current Control intentionally uses an independent activation boundary, so the regression was corrected to prove read-only product activation cannot expose Control.
+
+Combined branch evidence: Actions `35495424755` passes privileged Bigperson/Ready regressions, Worker syntax, production build and Wrangler dry-run; Actions `35495424762` passes durable save/reload/history/export regressions, production build and Wrangler dry-run. No dashboard/landing redesign occurred. The branch remains a fast-forward descendant of main.
+
+---
+
 ## 2026-09-20: Production Bigperson schema and canonical Ready closure
 
 The privileged Phase 5 branch completed source-derived Ready qualification using the retained Phase 3 React source analyzer and compatibility summarizer. Qualification re-verifies immutable release provenance and derives `ready/partial/code_only` server-side; no browser-provided compatibility status is trusted. Dedicated Ready regression, TypeScript/Vite build, Worker syntax and Wrangler dry-run pass.
