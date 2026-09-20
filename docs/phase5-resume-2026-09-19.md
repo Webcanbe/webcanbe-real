@@ -1,3 +1,17 @@
+## Latest recovery delta — production Bigperson schema applied
+
+- Production Supabase migrations `phase5_control_roles` and `phase5_bigperson_three_factor` are applied and recorded.
+- Production has the reviewer/admin/bigperson role constraint, final-Bigperson protection trigger, and the three Bigperson 3-factor tables.
+- Bigperson FKs were corrected before deployment to use `wcb_user_profiles(user_id)`, not nonexistent `wcb_users`.
+- Production privilege verification after migration: anon=0 grants, authenticated=0 grants, webcanbe_runtime=160 table grants across 40 wcb tables.
+- Supabase Security Advisor currently reports 0 lints. The generic RLS-disabled warning from table listing is expected under the deliberate server-only/no-browser-grants model; do not blindly enable RLS.
+- All Bigperson security/passkey/challenge tables are empty before first enrollment.
+- Ready qualification now uses the canonical immutable-source React compatibility analyzer server-side and is CI-proven.
+- Admin code/schema work is closed. The remaining live Admin gate is Hyperdrive + production Bigperson config + first device-bound passkey enrollment + Control E2E.
+- Proceed next with safe integration of the already-passing durable editor proof while keeping production activation closed.
+
+---
+
 ## Latest recovery delta — publication and TEST entitlement Control
 
 - Admin+ Control now promotes passed immutable assessment results into immutable releases with full stored provenance revalidation.
