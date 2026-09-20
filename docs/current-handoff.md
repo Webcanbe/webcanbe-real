@@ -1,3 +1,46 @@
+# LAUNCH READINESS CHECKPOINT — 2026-09-20 KST
+
+Current launch-readiness estimate, weighted by user-visible launch gates rather than raw checklist count:
+
+- **Free / limited public beta:** about **80–85% complete**
+- **Full commercial launch with payments + seller publishing:** about **55–60% complete**
+
+Why beta is much closer:
+- production landing/dashboard/auth shell already exists
+- first-party session architecture is implemented
+- PostgreSQL schema/domain model is implemented
+- Worker public catalog/private-read/materialization seams are implemented
+- editor source authority, explicit save, stale conflict detection, coherent reload/recovery, project search and exact code jumps are implemented
+- current durable-save + standalone-export proof branch has already passed its dedicated CI run `35450898867`
+- security headers, CSP, rate limits, real 404/noindex, request IDs, backups, rollback tooling, legal/privacy and automatic production smoke are implemented
+
+Remaining beta launch gates:
+1. Finish/merge the current durable-save + standalone-export Phase 5 proof.
+2. Enable LOGIN for the prepared `webcanbe_hyperdrive` database role, create/bind Cloudflare Hyperdrive, then run live DB/session/catalog/private-read smoke.
+3. Activate the real production read mode only after that smoke.
+4. Run interactive production auth smoke for Google, GitHub, Email/Password, session refresh, logout and direct dashboard entry.
+5. Activate and smoke the already-built working-copy materialization path only after DB/session authority is proven.
+6. Finish the clean-account end-to-end production path: account/workspace -> browse -> materialize -> edit -> save -> reload -> export -> sign out.
+7. Launch hardening still needs mobile, Safari/Chrome/Firefox, keyboard/focus accessibility and performance passes.
+
+Remaining full commercial launch gates beyond beta:
+- server-side checkout creation
+- actual payment provider integration
+- verified signed payment webhook
+- atomic/idempotent entitlement grant
+- retry / duplicate-event protection
+- refund/reversal semantics
+- receipt/purchase record
+- real seller submission/review/assessment/publication flow
+- creator studio backed only by real server state
+- full production purchase -> entitlement -> working-copy end-to-end smoke
+
+Largest immediate blocker remains **Hyperdrive production activation/smoke**, not editor UI.
+
+Do not represent the product as commercially launch-ready until payment and seller gates are complete. A limited beta can launch earlier if payment/seller mutations remain disabled and the product truthfully exposes only the real features that passed production smoke.
+
+---
+
 # PHASE 5 EDITOR RELOAD / RECOVERY CONSISTENCY CHECKPOINT — 2026-09-19 KST
 
 - Initial Code workspace load now accepts source files + source history only when both report the same accepted revision.
