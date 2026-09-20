@@ -106,6 +106,21 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(app).toContain('{label:"Transition",keys:["transition"]}')
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
   })
+  it("makes Bigperson a strict superset of reviewer and admin manager powers",()=>{
+    expect(mutations).toContain("const ROLE_RANK=Object.freeze({reviewer:1,admin:2,bigperson:3})")
+    expect(mutations).toContain("ROLE_RANK[String(row.role)]<ROLE_RANK[minimum]")
+    const threshold = (name:string,next:string) => mutations.split("export async function "+name,2)[1].split("export async function "+next,1)[0]
+    expect(threshold("transitionSellerApplication","revokeSession")).toContain('await role(db,session,"admin")')
+    expect(threshold("revokeSession","decideSubmissionReview")).toContain('await role(db,session,"admin")')
+    expect(threshold("decideSubmissionReview","admitAssessment")).toContain('await role(db,session,"reviewer")')
+    expect(threshold("admitAssessment","promoteAssessmentRelease")).toContain('await role(db,session,"reviewer")')
+    expect(threshold("promoteAssessmentRelease","publishPromotedListing")).toContain('await role(db,session,"admin")')
+    expect(threshold("publishPromotedListing","grantTestEntitlement")).toContain('await role(db,session,"admin")')
+    expect(mutations.split("export async function grantTestEntitlement",2)[1]).toContain('await role(db,session,"admin")')
+    expect(mutations.split("export async function transitionTestEntitlement",2)[1]).toContain('await role(db,session,"admin")')
+    expect(mutations.split("export async function transitionOperator",2)[1].split("export async function transitionSellerApplication",1)[0]).toContain('await role(db,session,"bigperson")')
+  })
+
   it("enforces role thresholds on the server, not only in UI",()=>{
     expect(mutations).toContain('await role(db,session,"bigperson")')
     expect(mutations).toContain('await role(db,session,"admin")')
