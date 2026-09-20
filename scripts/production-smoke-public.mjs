@@ -63,6 +63,9 @@ async function run() {
   assert("CSP enforced", csp.includes("default-src 'self'") && csp.includes("script-src 'self'"), csp || "missing")
   assert("CSP blocks unsafe eval", Boolean(csp) && !csp.includes("'unsafe-eval'"), csp || "missing")
   assert("request ID attached", isUuid(root.headers.get("x-request-id")), root.headers.get("x-request-id") || "missing")
+  const rootHtml = await root.text()
+  assert("production Control switch is deployed", rootHtml.includes('<meta name="wcb-control-mode" content="hosted"'), "wcb-control-mode=hosted")
+  assert("product read/mutation switches remain closed", !rootHtml.includes('name="wcb-product-read-mode"') && !rootHtml.includes('name="wcb-product-mutation-mode"'), "Control-only activation")
 
   const missing = await request("/__webcanbe-smoke-missing-route", { headers: { Accept: "text/html" } })
   assert("unknown SPA route returns real 404", missing.status === 404, `status ${missing.status}`)
