@@ -1,3 +1,29 @@
+# PHASE 5 BIGPERSON PRIVILEGED MUTATION CHECKPOINT — 2026-09-20 KST
+
+- Control is no longer read-only. The production Worker now exposes operation-bound privileged mutations for:
+  - platform operator role/active transitions
+  - seller application approval/rejection
+  - first-party session revocation
+  - immutable seller review decisions
+  - assessment admission
+- Every mutation uses the same mandatory three-factor ceremony as Control reads: enrolled Google identity + separate privileged factor + device-bound WebAuthn passkey.
+- The WebAuthn challenge is bound to the exact mutation method/path/body; the browser cannot reuse proof for a different target or action.
+- Successful WebAuthn verification mints fresh session-bound `control_high_risk` evidence consumed by the mutation transaction.
+- Server role thresholds are explicit:
+  - reviewer+: review decision and assessment admission
+  - admin+: seller application transition and session revocation
+  - bigperson only: privileged platform-role transition
+- UI role checks are not trusted; Worker/PostgreSQL recheck the current role before mutation.
+- Operator transitions remain protected by the PostgreSQL final-Bigperson trigger.
+- Mutations are idempotency-keyed and append privileged audit evidence.
+- Seller rejection remains terminal.
+- Review decisions remain immutable and provenance-bound to the exact submission snapshot.
+- Assessment admission requires the approved immutable review provenance.
+- The Control UI clears the entered factor before every passkey ceremony.
+- Session tokens/hashes and provider credentials are not exposed by Control reads.
+
+---
+
 # PHASE 5 BIGPERSON REVIEW / ASSESSMENT CHECKPOINT — 2026-09-20 KST
 
 - Operations now performs immutable seller review decisions from the privileged surface.
