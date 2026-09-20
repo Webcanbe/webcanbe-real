@@ -1,5 +1,19 @@
 # GATE 5 RECOVERY / DR PREFLIGHT CLOSED — 2026-09-20 KST
 
+# GATE 3 V4 CURRENT-MAIN STAGING VERIFIED — 2026-09-21 KST
+
+- Current activation candidate is `phase5-gate3-materialization-staging-v4`; v3 is historical/backup only.
+- v4 was rebuilt directly from current main after Firebase build-variable/project-ID/CSP fixes rather than merging the diverged v3 tree.
+- Verified checkpoint: `bd03d69726b31a70e2a981b35b609fe3ac69e33f`.
+- Integrated run `35545791365` / job `106171321936`: **PASS** across Gate 3/4 launch-chain, durable editor/export, Bigperson authority, build budget, production build and Worker dry-run.
+- Firebase/CSP focused run `35545791377`: **PASS**.
+- Backup before retiring v3 as the active line: `backup/gate3-v3-before-firebase-sync-20260921`.
+- Conflicted PR #44 was closed without merge; draft PR #45 is the v4 staging candidate.
+- Production materialization mutation remains OFF; no fixture has been applied.
+- Gate 2 authenticated same-account GitHub/Email E2E remains required before v4 can be promoted.
+
+---
+
 - Production verification trigger/code checkpoint: `0ad5747a89a01414b966ac8ceee82eb44c6c1768`.
 - Main verification:
   - UI `35517472985`: **PASS**
