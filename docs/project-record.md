@@ -1,3 +1,9 @@
+# Gate 5 browser hardening — 2026-09-20 KST
+
+Production browser compatibility smoke `35516707994` passed on Chromium, Firefox, and WebKit for desktop and mobile. Production smoke `35516693367` also passed. Landing overflow/accessibility hardening and build-size budgets are live. See `docs/current-handoff.md` for the full checkpoint.
+
+---
+
 # GATE 3 V3 REBASED ON CURRENT PRODUCTION — 2026-09-20 KST
 
 - Production launch-truthfulness code checkpoint remains `cb1c168771b988a25b74d42902da29b36e04c190`.
