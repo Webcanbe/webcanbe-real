@@ -235,12 +235,23 @@ export class HostedProductClient {
     return await this.post<{ registered: boolean }>("/__webcanbe/api/ops/bigperson/register/verify", { challengeId: begin.challengeId, response })
   }
 
-  async controlRead(password: string) {
+  private async privilegedMutation<T>(password: string, path: string, operationBody: Record<string, unknown>) {
     if (!productionControlMode()) throw new HostedProductError(404, "Privileged operations are not enabled.")
-    const path = "/__webcanbe/api/ops/control/read"
-    const begin = await this.post<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]["optionsJSON"] }>("/__webcanbe/api/ops/bigperson/operation/options", { password, operation: { method: "POST", path, body: {} } })
+    const begin = await this.post<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]["optionsJSON"] }>("/__webcanbe/api/ops/bigperson/operation/options", { password, operation: { method: "POST", path, body: operationBody } })
     const response = await startAuthentication({ optionsJSON: begin.options })
-    return (await this.post<{ control: ControlData }>(path, { challengeId: begin.challengeId, response })).control
+    return await this.post<T>(path, { challengeId: begin.challengeId, response, operationBody })
+  }
+
+  async controlRead(password: string) {
+    return (await this.privilegedMutation<{ control: ControlData }>(password, "/__webcanbe/api/ops/control/read", {})).control
+  }
+
+  async controlTransitionOperator(password: string, input: { targetUserId: string; active: boolean; role: "reviewer" | "admin" | "bigperson" }) {
+    return (await this.privilegedMutation<{ operator: Record<string, unknown> }>(password, "/__webcanbe/api/ops/operators/transition", { ...input, idempotencyKey: crypto.randomUUID() })).operator
+  }
+
+  async controlTransitionSellerApplication(password: string, input: { applicationId: string; status: "approved" | "rejected" }) {
+    return (await this.privilegedMutation<{ application: Record<string, unknown> }>(password, "/__webcanbe/api/ops/seller-applications/transition", { ...input, idempotencyKey: crypto.randomUUID() })).application
   }
 
 }
