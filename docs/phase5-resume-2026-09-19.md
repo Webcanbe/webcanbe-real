@@ -1,3 +1,31 @@
+# GATE 2 AUTHENTICATED SMOKE UI LIVE — 2026-09-20 KST
+
+- Main checkpoint: `d6311f5ea11f8ab8b39b44b504b85104df4bef4f`.
+- Main verification:
+  - Phase 5 UI verify `35510422402`: **PASS**
+  - Phase 5 durable editor/export verify `35510422417`: **PASS**
+  - Phase 5 Bigperson checkpoint verify `35510422431`: **PASS**
+  - Phase 5 production smoke `35510459871`: **PASS**
+- Live diagnostic URL: `https://webcanbe.com/_ops/gate2-auth-smoke`.
+- Live verification: HTTP 200, `noindex, nofollow`, production read mode active.
+- Diagnostic checks only the signed-in user's own first-party session and read APIs:
+  - Account
+  - Workspace
+  - Purchases
+  - Working copies
+  - Catalog
+  - full-page refresh persistence
+  - logout invalidation
+- It can start Google, GitHub/Firebase, Email signup and Email login using the existing production auth paths.
+- The diagnostic does not enable product mutations, does not materialize projects, and does not render internal account IDs.
+- One branch CI failure occurred only because of a quote typo in the new static regression; after correction the full UI CI passed.
+- Remaining Gate 2 blocker is human provider interaction in a real browser. Gate 3 may be prepared on a staging branch but must not be merged/activated until Gate 2 passes.
+- Rollback checkpoints:
+  - `backup-main-before-gate2-auth-smoke-ui-2026-09-20`
+  - `backup-main-before-gate2-auth-smoke-route-fix-2026-09-20`
+
+---
+
 # GATE 2 AUTOMATED PREFLIGHT CLOSED IN PRODUCTION — 2026-09-20 KST
 
 - Main checkpoint: `ef175c6659d3a09f73e8e36ee486b91ffbf9e881`.
