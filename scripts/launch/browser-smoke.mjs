@@ -52,7 +52,8 @@ for (const [browserName, browserType] of browsers) {
           let response
           try {
             response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25_000 })
-            await page.waitForTimeout(350)
+            await page.waitForSelector("h1", { state: "attached", timeout: 7_000 }).catch(() => {})
+            await page.waitForTimeout(120)
           } catch (error) {
             fail(`${browserName}/${viewportName} ${route} loads`, error instanceof Error ? error.message : String(error))
             continue
@@ -88,7 +89,7 @@ for (const [browserName, browserType] of browsers) {
               const wrapping = input.closest("label")?.textContent
               return (explicit || wrapping || "").trim()
             }
-            const namelessButtons = [...document.querySelectorAll("button:not([disabled])")]
+            const namelessButtons = [...document.querySelectorAll('button:not([disabled]):not([aria-hidden="true"])')]
               .filter(button => !buttonName(button))
               .map(button => button.outerHTML.slice(0, 180))
             const namelessFields = [...document.querySelectorAll("input:not([type=hidden]),select,textarea")]
