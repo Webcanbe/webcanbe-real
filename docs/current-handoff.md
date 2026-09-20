@@ -1,3 +1,26 @@
+# HYPERDRIVE LIVE CUTOVER CHECKPOINT — 2026-09-20 KST
+
+- Canonical main: `17a97df78730b9433ccb08f293bcc7a3de019290`.
+- `wrangler.jsonc` now contains only the intended non-secret Hyperdrive cutover data:
+  - `WEBCANBE_BIGPERSON_GOOGLE_EMAIL`
+  - `WEBCANBE_CONTROL_MODE=enabled`
+  - `HYPERDRIVE` binding → configuration `7f537011fc1a4303aac7aff9601a1699`
+- DB password, connection string, Bigperson pepper/salt/digest values are not committed.
+- Production DB role `webcanbe_hyperdrive` is LOGIN=true, non-superuser, cannot create DB/roles, and inherits `webcanbe_runtime`.
+- Hyperdrive activation branch CI passed UI, durable editor/export, Bigperson regressions, secret scan, production build, and Wrangler dry-run.
+- Main UI/durable/Bigperson verification passed after cutover.
+- Automatic production smoke was strengthened from database=`either` to database=`ready`.
+- Ready smoke run `35499385905` correctly FAILED after all 18 retries because live Worker still returned `database: unconfigured`. This proves the production Worker does not yet have an active `HYPERDRIVE` binding; it is not a PostgreSQL/schema failure.
+- Manual Cloudflare action now required: on Worker `webcanbe-real`, activate binding name `HYPERDRIVE` to Hyperdrive configuration `webcanbe-production-db` and deploy/save that Worker configuration. Repository config already matches, so this is not configuration drift.
+- Security hardening found and fixed before first Bigperson: bootstrap factor digest is now mandatory. Missing `WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST` fails closed instead of accepting any initial factor.
+- Production currently has 0 active Bigpersons, 0 Bigperson security rows, 0 Bigperson passkeys; therefore bootstrap pepper/salt may safely be rotated before first enrollment.
+- After the user activates the live binding and configures the bootstrap digest Secret, rerun failed production smoke `35499385905`. Then continue DB-backed auth/session smoke and first Bigperson passkey/Control E2E.
+- Backups:
+  - `backup-main-before-hyperdrive-binding-2026-09-20`
+  - `backup-main-hyperdrive-bound-before-ready-gate-2026-09-20`
+
+---
+
 # PHASE 5 MAIN PRODUCTION + DB INDEX HARDENING CHECKPOINT — 2026-09-20 KST
 
 - Verified Admin + durable integration was fast-forwarded to `main`.
