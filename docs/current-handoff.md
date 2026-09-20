@@ -1,3 +1,59 @@
+# GATE 5 BROWSER HARDENING CLOSED — 2026-09-20 KST
+
+- Production code checkpoint: `cc3584c4232d1bc382865cb8bcc775895391b2fb`.
+- UI `35516646841`: PASS
+- durable editor/export `35516646678`: PASS
+- Bigperson `35516646722`: PASS
+- production smoke `35516693367`: PASS
+- browser compatibility smoke `35516707994`: PASS
+- Browser matrix: Chromium / Firefox / WebKit, desktop 1440×900 and mobile 390×844.
+- Automated checks now cover public-route loading, horizontal overflow, keyboard focus, basic accessible names, uncaught page errors, and a basic navigation timing budget.
+- Auth checks cover Google/GitHub SVG marks, unavailable phone sign-in disabled, labelled auth dialog, and labelled close control.
+- Landing host now repairs injected vendor control accessibility and clips carousel overflow at the host boundary.
+- Production build-size budgets are enforced and production source maps remain absent.
+- Supabase Security Advisor: 0 findings.
+- Supabase Performance Advisor: 24 unused-index INFO findings only; no index was removed because production traffic is still too low for this signal to be meaningful.
+- Product mutation remains OFF. No Gate 3 fixture has been applied to production.
+
+---
+
+# GATE 5 BROWSER / ACCESSIBILITY / BUILD HARDENING CLOSED — 2026-09-20 KST
+
+- Production code checkpoint: `cc3584c4232d1bc382865cb8bcc775895391b2fb`.
+- Production verification:
+  - UI `35516646841`: **PASS**
+  - durable editor/export `35516646678`: **PASS**
+  - Bigperson `35516646722`: **PASS**
+  - production smoke `35516693367`: **PASS**
+  - browser compatibility smoke `35516707994`: **PASS**
+- Browser matrix now runs only after a successful production smoke and retries deployment propagation before failing.
+- Browser coverage:
+  - Chromium / Firefox / WebKit
+  - desktop 1440×900
+  - mobile 390×844
+  - landing, Marketplace, Plans, Login, Updates, Docs/Security
+  - horizontal overflow, keyboard focus, accessible button/field names, uncaught page errors, basic navigation timing
+  - Google/GitHub SVG marks, disabled unavailable phone sign-in, labelled auth dialog/close button
+  - truthful pre-payment plan controls
+- Landing host hardening:
+  - icon-only injected mobile navigation receives an accessible name
+  - decorative vendor slide controls are removed from the accessibility/tab order
+  - landing host now clips vendor carousel overflow at the host boundary
+- Production build budget is enforced:
+  - total dist <= 15 MiB
+  - total JS <= 2 MiB
+  - main JS chunk <= 700 KiB
+  - app CSS <= 180 KiB
+  - all CSS <= 500 KiB
+  - largest CSS <= 300 KiB
+  - no production source maps
+- Supabase Security Advisor recheck: **0 findings**.
+- Supabase Performance Advisor currently reports 24 `unused_index` INFO findings only. No index was removed because production traffic is still too low for “unused” to be meaningful and several indexes are deliberate FK/operations coverage.
+- Rollback branch for the browser-hardening production integration: `backup-main-before-browser-hardening-2026-09-20`.
+- Product mutation remains OFF and no Gate 3 fixture has been applied to production.
+
+---
+
 # GATE 3 V3 REBASED ON CURRENT PRODUCTION — 2026-09-20 KST
 
 - Production launch-truthfulness code checkpoint remains `cb1c168771b988a25b74d42902da29b36e04c190`.
