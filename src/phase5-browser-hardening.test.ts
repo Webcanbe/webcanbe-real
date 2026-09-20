@@ -58,7 +58,9 @@ describe("Phase 5 browser launch hardening", () => {
     expect(budget).toContain("15 * 1024 * 1024")
     expect(budget).toContain("2 * 1024 * 1024")
     expect(budget).toContain("700 * 1024")
-    expect(budget).toContain("180 * 1024")
+    expect(budget).toContain("500 * 1024")
+    expect(budget).toContain("appCssTotal: 180 * 1024")
+    expect(budget).toContain("300 * 1024")
     expect(budget).toContain("production source maps")
   })
 
