@@ -10,6 +10,7 @@ import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
+import { transitionOperator, transitionSellerApplication } from "./control-mutations.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -458,6 +459,21 @@ async function privateProduct(request, env, path, traceId) {
               if (!control) throw new Error("Privileged operation refused.")
               await db.query("COMMIT")
               return json({ control })
+            } catch (error) {
+              await db.query("ROLLBACK")
+              throw error
+            }
+          }
+          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition") {
+            const operationBody = body?.operationBody ?? {}
+            await db.query("BEGIN")
+            try {
+              const proof = await consumeBigpersonOperation(db, databaseSession, body, env, request, { method: "POST", path, body: operationBody })
+              const result = path.endsWith("/operators/transition")
+                ? await transitionOperator(db, databaseSession, operationBody, proof.evidenceId)
+                : await transitionSellerApplication(db, databaseSession, operationBody, proof.evidenceId)
+              await db.query("COMMIT")
+              return json(path.endsWith("/operators/transition") ? { operator: result } : { application: result })
             } catch (error) {
               await db.query("ROLLBACK")
               throw error
