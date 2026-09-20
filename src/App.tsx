@@ -280,10 +280,39 @@ type Gate2Check = Readonly<{ label: string; ok: boolean; detail: string }>
 function Gate2AuthSmoke() {
   const auth=productionAuthMode(), live=productReadMode()
   const [signedIn,setSignedIn]=useState(false), [busy,setBusy]=useState(false), [message,setMessage]=useState("")
-  const [checks,setChecks]=useState<Gate2Check[]>([]), [email,setEmail]=useState(""), [password,setPassword]=useState("")
+  const [checks,setChecks]=useState<Gate2Check[]>([]), [email,setEmail]=useState(""), [password,setPassword]=useState(""), [linkedProviders,setLinkedProviders]=useState<string[]>([])
   const [provider,setProvider]=useState(()=>{try{return sessionStorage.getItem(GATE2_PROVIDER_KEY)||"existing session"}catch{return"existing session"}})
 
   const rememberProvider=(value:string)=>{setProvider(value);try{sessionStorage.setItem(GATE2_PROVIDER_KEY,value)}catch{}}
+
+  const markLinked=(label:string)=>setLinkedProviders(current=>current.includes(label)?current:[...current,label])
+
+  const linkGithub=async()=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      if(!await hostedProductClient.authenticated())throw new Error("Sign in with Google first before linking GitHub.")
+      const credential=await signInWithGithubFirebase()
+      const result=await hostedProductClient.linkFirebaseIdentity(await credential.user.getIdToken(true))
+      markLinked("GitHub")
+      setMessage(result.alreadyLinked?"GitHub identity was already linked to this Webcanbe account.":"GitHub identity is now linked to this Webcanbe account.")
+    }catch(error){
+      setMessage(error instanceof Error?error.message:firebaseAuthErrorMessage(error))
+    }finally{setBusy(false)}
+  }
+
+  const linkEmail=async(signup:boolean)=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      if(!await hostedProductClient.authenticated())throw new Error("Sign in with Google first before linking Email.")
+      const credential=signup?await createEmailAccountFirebase(email,password):await signInWithEmailFirebase(email,password)
+      const result=await hostedProductClient.linkFirebaseIdentity(await credential.user.getIdToken(true))
+      markLinked("Email")
+      setPassword("")
+      setMessage(result.alreadyLinked?"Email identity was already linked to this Webcanbe account.":"Email identity is now linked to this Webcanbe account.")
+    }catch(error){
+      setMessage(error instanceof Error?error.message:firebaseAuthErrorMessage(error))
+    }finally{setBusy(false)}
+  }
 
   const collectReads=async(afterReload=false)=>{
     setBusy(true);setMessage("")
@@ -341,10 +370,10 @@ function Gate2AuthSmoke() {
   const github=async()=>{
     if(busy)return;setBusy(true);setMessage("")
     try{
-      rememberProvider("GitHub via Firebase")
+      rememberProvider("GitHub via Firebase (linked)")
       const credential=await signInWithGithubFirebase()
       await hostedProductClient.firebaseExchange(await credential.user.getIdToken(true))
-      setSignedIn(true);setMessage("GitHub sign-in exchanged into a first-party Webcanbe session.")
+      setSignedIn(true);setMessage("Linked GitHub identity exchanged into the existing first-party Webcanbe account.")
     }catch(error){await signOutFirebase().catch(()=>{});setMessage(firebaseAuthErrorMessage(error))}
     finally{setBusy(false)}
   }
@@ -352,10 +381,10 @@ function Gate2AuthSmoke() {
   const emailAuth=async(signup:boolean)=>{
     if(busy)return;setBusy(true);setMessage("")
     try{
-      rememberProvider(signup?"Email signup via Firebase":"Email login via Firebase")
+      rememberProvider(signup?"Email signup via Firebase (linked)":"Email login via Firebase (linked)")
       const credential=signup?await createEmailAccountFirebase(email,password):await signInWithEmailFirebase(email,password)
       await hostedProductClient.firebaseExchange(await credential.user.getIdToken(true))
-      setSignedIn(true);setPassword("");setMessage(signup?"Email signup exchanged into a first-party Webcanbe session.":"Email login exchanged into a first-party Webcanbe session.")
+      setSignedIn(true);setPassword("");setMessage(signup?"Linked Email signup exchanged into the existing first-party Webcanbe account.":"Linked Email login exchanged into the existing first-party Webcanbe account.")
     }catch(error){setMessage(firebaseAuthErrorMessage(error))}
     finally{setBusy(false)}
   }
@@ -379,8 +408,12 @@ function Gate2AuthSmoke() {
   return <PublicShell><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Launch diagnostics</span><h1>Gate 2 authenticated read smoke</h1><p>Temporary noindex launch diagnostic. It exercises only your own first-party session and read APIs; product mutations remain closed.</p></div><Link className="button" to="/dashboard">Back to dashboard</Link></header>
     {!auth||!live?<section className="hub-section"><HubState kind="error" title="Production read boundary is not ready" body="This diagnostic requires production authentication and read-only product mode."/></section>:
     <section className="hub-section"><div className="hub-section-head"><div><h2>Session</h2><p>Current path: {provider}. No password or token is stored by this diagnostic.</p></div><span>{signedIn?"Signed in":"Signed out"}</span></div>
-      {!signedIn?<div className="form-rows"><div className="settings-action-row"><div><b>Google</b><p>Runs the Worker OAuth flow and returns here.</p></div><button className="button" disabled={busy} onClick={()=>void google()}>Test Google</button></div><div className="settings-action-row"><div><b>GitHub</b><p>Uses Firebase GitHub popup, then exchanges the ID token into the first-party session.</p></div><button className="button" disabled={busy} onClick={()=>void github()}>Test GitHub</button></div><label>Email<input value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email"/></label><label>Password<input type="password" value={password} onChange={event=>setPassword(event.target.value)} autoComplete="current-password"/></label><div className="settings-action-row"><div><b>Email/password</b><p>Use an unused email for signup or an existing Firebase email account for login.</p></div><div><button className="button" disabled={busy||!email||!password} onClick={()=>void emailAuth(true)}>Test signup</button><button className="button" disabled={busy||!email||!password} onClick={()=>void emailAuth(false)}>Test login</button></div></div></div>:
-      <div className="settings-action-row"><div><b>Authenticated session ready</b><p>Run reads, then reload persistence, then logout invalidation in that order.</p></div><div><button className="button primary" disabled={busy} onClick={()=>void collectReads(false)}>Run private reads</button><button className="button" disabled={busy||!checks.some(item=>item.label==="Account"&&item.ok)} onClick={reloadCheck}>Verify refresh</button><button className="button" disabled={busy} onClick={()=>void logoutCheck()}>Verify logout</button></div></div>}
+      {signedIn?<><div className="settings-action-row"><div><b>1. Verify current account reads</b><p>Start from the existing Google-backed Webcanbe session and establish the account baseline.</p></div><div><button className="button primary" disabled={busy} onClick={()=>void collectReads(false)}>Run private reads</button><button className="button" disabled={busy||!checks.some(item=>item.label==="Account"&&item.ok)} onClick={reloadCheck}>Verify refresh</button></div></div>
+      <div className="settings-action-row"><div><b>2. Link GitHub to this account</b><p>Firebase GitHub proves the provider identity, then Webcanbe links it to the currently authenticated internal account. It does not replace the current first-party session.</p></div><button className="button" disabled={busy} onClick={()=>void linkGithub()}>{linkedProviders.includes("GitHub")?"GitHub linked":"Link GitHub"}</button></div>
+      <label>Email for provider-link test<input value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email"/></label><label>Password<input type="password" value={password} onChange={event=>setPassword(event.target.value)} autoComplete="current-password"/></label>
+      <div className="settings-action-row"><div><b>3. Link Email identity to this account</b><p>Use an unused Firebase email for Link new Email, or existing Firebase credentials for Link existing Email. Linking is conflict-checked server-side.</p></div><div><button className="button" disabled={busy||!email||!password} onClick={()=>void linkEmail(true)}>{linkedProviders.includes("Email")?"Email linked":"Link new Email"}</button><button className="button" disabled={busy||!email||!password} onClick={()=>void linkEmail(false)}>Link existing Email</button></div></div>
+      <div className="settings-action-row"><div><b>4. End the Google session</b><p>After the identities are linked, verify logout. Then use the signed-out provider buttons below to prove GitHub/Email returns to the same internal account.</p></div><button className="button" disabled={busy} onClick={()=>void logoutCheck()}>Verify logout</button></div></>:
+      <div className="form-rows"><p className="settings-note">Provider login tests should be run only after that Firebase identity was linked from the Google-backed session above. This prevents accidental creation of a second Webcanbe internal account.</p><div className="settings-action-row"><div><b>Google baseline</b><p>Use this first when starting a fresh Gate 2 run.</p></div><button className="button" disabled={busy} onClick={()=>void google()}>Test Google</button></div><div className="settings-action-row"><div><b>GitHub — linked identity only</b><p>Use after Link GitHub succeeded during the Google-backed session.</p></div><button className="button" disabled={busy} onClick={()=>void github()}>Test linked GitHub</button></div><label>Email<input value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email"/></label><label>Password<input type="password" value={password} onChange={event=>setPassword(event.target.value)} autoComplete="current-password"/></label><div className="settings-action-row"><div><b>Email/password — linked identity only</b><p>Use after the same Firebase email identity was linked to the Google-backed Webcanbe account.</p></div><div><button className="button" disabled={busy||!email||!password} onClick={()=>void emailAuth(false)}>Test linked Email login</button></div></div></div>}
       {message&&<p className="settings-save-status" role="status">{message}</p>}
     </section>}
     {checks.length>0&&<section className="hub-section"><div className="hub-section-head"><div><h2>Results</h2><p>Counts are shown; internal account identifiers are not rendered.</p></div></div><div className="hub-list">{checks.map(item=><article className="hub-row" key={item.label}><div className="hub-row-copy"><span>{item.ok?"PASS":"FAIL"}</span><h3>{item.label}</h3><p>{item.detail}</p></div></article>)}</div></section>}
