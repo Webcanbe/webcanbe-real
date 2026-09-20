@@ -1,3 +1,21 @@
+## 2026-09-20 live Admin handoff
+
+Authoritative current state: `docs/phase5-admin-live-handoff-2026-09-20.md`.
+
+- [x] Hyperdrive live.
+- [x] Production DB/schema readiness live.
+- [x] Production Control independently activated.
+- [x] DB-backed Google first-party session live.
+- [x] Cloudflare TypeScript Worker compatibility fixed.
+- [x] DB session created_at schema fixed.
+- [x] DB session auth-provider provenance fixed.
+- [x] Current main UI / Bigperson / durable CI green.
+- [ ] First production Bigperson passkey enrollment.
+- [ ] First successful three-factor Control read.
+- [ ] Then deliberately activate product read/mutation modes in later gates.
+
+---
+
 ## 2026-09-20 production integration and DB performance checkpoint
 
 - [x] Fast-forward verified Admin + durable editor integration to main.
