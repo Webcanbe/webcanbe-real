@@ -57,3 +57,34 @@ export async function revokeSession(db,session,input,evidenceId){
   if(inserted&&current.active) await db.query("UPDATE wcb_sessions SET active=false WHERE session_id=$1",[target])
   return {session_id:target,user_id:String(current.user_id),active:false,expires_at:current.expires_at}
 }
+
+export async function decideSubmissionReview(db,session,input,evidenceId){
+  const submissionId=id(input?.submissionId,"submission"), snapshot=String(input?.snapshotHash||""), decision=String(input?.decision||"")
+  if(!/^[a-f0-9]{64}$/.test(snapshot)||!["approved_for_next_stage","rejected"].includes(decision)) throw new Error("Invalid review decision.")
+  await evidence(db,session,evidenceId)
+  await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,93))",[submissionId])
+  const submission=(await db.query("SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id) WHERE s.submission_id=$1 FOR SHARE",[submissionId])).rows[0]
+  if(!submission||String(submission.snapshot_hash)!==snapshot||submission.submission_status!=="pending_review") throw new Error("Review provenance does not match the pending immutable submission.")
+  const existing=(await db.query("SELECT * FROM wcb_seller_review_decisions WHERE submission_id=$1",[submissionId])).rows[0]
+  if(existing){
+    if(String(existing.submission_snapshot_hash)!==snapshot||existing.decision!==decision) throw new Error("Submission already has another immutable review decision.")
+    return existing
+  }
+  const auditKey=key(input?.idempotencyKey), transition={before:"pending_review",after:decision,snapshotHash:snapshot}
+  await audit(db,session,evidenceId,"submission.review.decision","submission",submissionId,transition,auditKey)
+  return (await db.query("INSERT INTO wcb_seller_review_decisions(decision_id,submission_id,seller_application_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,decision,reviewer_user_id,idempotency_key,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,clock_timestamp()) RETURNING *",[crypto.randomUUID(),submissionId,submission.seller_application_id,submission.seller_user_id,submission.source_project_id,submission.source_revision_id,submission.source_content_hash,snapshot,decision,session.userId,auditKey])).rows[0]
+}
+export async function admitAssessment(db,session,input,evidenceId){
+  const submissionId=id(input?.submissionId,"submission"), snapshot=String(input?.snapshotHash||""), seller=id(input?.sellerUserId,"seller"), decisionId=id(input?.reviewDecisionId,"review decision")
+  if(!/^[a-f0-9]{64}$/.test(snapshot)) throw new Error("Invalid assessment admission.")
+  await evidence(db,session,evidenceId)
+  await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,94))",[submissionId])
+  const submission=(await db.query("SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id) WHERE s.submission_id=$1 FOR SHARE",[submissionId])).rows[0]
+  const decision=(await db.query("SELECT * FROM wcb_seller_review_decisions WHERE submission_id=$1",[submissionId])).rows[0]
+  if(!submission||!decision||decision.decision!=="approved_for_next_stage"||String(submission.seller_user_id)!==seller||String(submission.snapshot_hash)!==snapshot||String(decision.decision_id)!==decisionId) throw new Error("Assessment admission does not match the approved immutable submission.")
+  const existing=(await db.query("SELECT * FROM wcb_seller_assessment_requests WHERE submission_id=$1",[submissionId])).rows[0]
+  if(existing)return existing
+  const auditKey=key(input?.idempotencyKey), transition={before:"review_approved",after:"assessment_requested",snapshotHash:snapshot,reviewDecisionId:decisionId}
+  await audit(db,session,evidenceId,"submission.assessment.admit","submission",submissionId,transition,auditKey)
+  return (await db.query("INSERT INTO wcb_seller_assessment_requests(assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,status,admitted_by,idempotency_key,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'requested',$9,$10,clock_timestamp()) RETURNING *",[crypto.randomUUID(),submissionId,submission.seller_user_id,submission.source_project_id,submission.source_revision_id,submission.source_content_hash,submission.snapshot_hash,decisionId,session.userId,auditKey])).rows[0]
+}
