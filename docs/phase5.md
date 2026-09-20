@@ -294,7 +294,7 @@ Verification run `35448977411` passed all branch gates.
 - [x] Restrict publication/entitlement authority to admin+ and platform-role transitions to bigperson.
 - [x] Protect the final active bigperson at the database layer.
 - [x] Keep high-risk Control mutations behind fresh session-bound step-up evidence.
-- [ ] Connect real WebAuthn/passkey verification to step-up evidence minting.
+- [x] Add real WebAuthn/passkey registration and authentication verification for Bigperson using pinned SimpleWebAuthn; require user verification, one-time operation-bound challenges, passkey counter updates, and current Google-session binding. Bigperson Control reads now require Google + separate privileged factor + passkey every time. Production secrets/bootstrap enrollment remain deployment-gated.
 - [ ] Add privileged mutation UI for role management and seller/application operations without exposing authority client-side.
 - [ ] Add privileged session/security controls and audit drill-down.
 - [ ] Production smoke with an explicitly provisioned bigperson after Hyperdrive is connected.
