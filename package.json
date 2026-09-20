@@ -20,7 +20,8 @@
     "deploy:deployments": "npx wrangler deployments list",
     "deploy:rollback": "node scripts/cloudflare-rollback.mjs",
     "security:secrets": "node scripts/security/scan-secrets.mjs",
-    "smoke:production:public": "node scripts/production-smoke-public.mjs"
+    "smoke:production:public": "node scripts/production-smoke-public.mjs",
+    "launch:smoke-fixture": "node scripts/launch/materialization-smoke-fixture.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
