@@ -1,3 +1,15 @@
+## 2026-09-20 authoritative resume pointer
+
+The newest complete state is in:
+
+`docs/phase5-admin-live-handoff-2026-09-20.md`
+
+Read that file before the older recovery deltas below. Hyperdrive, production DB sessions, production Control deployment, Cloudflare TypeScript runtime compatibility, and the DB session created_at/auth-provider incidents have all been resolved after the older checkpoints in this file.
+
+Current immediate step: first production Bigperson passkey enrollment + three-factor Control read.
+
+---
+
 ## Latest recovery delta — green main + production smoke + FK index hardening
 
 - Admin + durable editor integration is on main and passed all three main verification workflows.
