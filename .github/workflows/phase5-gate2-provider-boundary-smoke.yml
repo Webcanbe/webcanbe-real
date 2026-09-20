@@ -1,0 +1,26 @@
+name: Phase 5 Gate 2 provider boundary smoke
+on:
+  push:
+    branches: [phase5-gate2-provider-boundary-smoke]
+  workflow_dispatch:
+
+jobs:
+  provider-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HOME: /root
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright package
+        run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Static Gate 2 boundary checks
+        run: npx vitest run src/phase5-gate2-auth-smoke.test.ts src/phase5-gate2-provider-boundary.test.ts
+      - name: Provider-boundary smoke syntax
+        run: node --check scripts/launch/gate2-provider-boundary-smoke.mjs
+      - name: GitHub provider boundary without credentials
+        env:
+          WEBCANBE_GATE2_ORIGIN: https://webcanbe.com
+        run: node scripts/launch/gate2-provider-boundary-smoke.mjs
