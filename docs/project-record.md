@@ -1,5 +1,29 @@
 # WebCanBe project record
 
+## 2026-09-20: Bigperson mandatory three-factor verification
+
+Bigperson privileged access now requires three independent server-verified conditions on
+every Control operation: the current first-party session must have been authenticated
+through the enrolled Google issuer+subject, the separate privileged factor must verify,
+and a registered WebAuthn credential must produce a fresh user-verified assertion.
+
+The Google session is additionally limited to a ten-minute Bigperson freshness window.
+The separate factor is not stored as plaintext; the database stores a salted
+PBKDF2-SHA256 digest and verification also requires a server-only pepper. No credential
+values are committed to the repository or continuity documents.
+
+WebAuthn registration and authentication use pinned SimpleWebAuthn packages. First
+Bigperson bootstrap closes after the first active Bigperson exists. Operation challenges
+expire after 90 seconds and bind user, exact first-party session, HTTP method, path and
+request-body hash. Challenges are one-time, passkey counters are updated, and replay or
+cross-session reuse is refused.
+
+The browser clears the entered factor before starting the passkey ceremony. Privileged
+Control data is not automatically loaded or cached as continuing authority: another
+Control read requires another three-factor ceremony.
+
+---
+
 ## 2026-09-20: Bigperson privileged Control foundation
 
 The privileged platform authority is now explicitly modeled as `reviewer → admin →
