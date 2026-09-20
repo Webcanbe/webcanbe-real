@@ -18,7 +18,7 @@ function cleanPassword(value) {
   if (typeof value !== "string" || value.length < 6 || value.length > 256) throw new Error("Privileged factor refused.")
   return value
 }
-async function deriveFactor(password, salt, pepper) {
+export async function deriveFactor(password, salt, pepper) {
   return pbkdf2Sync(cleanPassword(password) + "\0" + pepper, salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64url")
 }
 function equalText(a, b) {
