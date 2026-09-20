@@ -1108,6 +1108,18 @@ describe("Phase 3 Admin Control backend", () => {
     return { ...f, controller, call }
   }
 
+  it("separates reviewer, admin, and bigperson platform authority", async () => {
+    const f = await fixture()
+    await f.product.provisionOperator(f.a.id, true, "reviewer")
+    await f.product.provisionOperator(f.b.id, true, "admin")
+    expect((await f.call(f.a, "/control/read", {})).status).toBe(200)
+    expect((await f.call(f.b, "/control/read", {})).status).toBe(200)
+    await expect(f.product.grantTestEntitlement(f.a.session, f.a.id, f.release.releaseId, "reviewer-grant")).rejects.toThrow()
+    await expect(f.product.controlSetOperatorAuthority(f.b.session, (await f.product.provisionControlStepUp(f.b.session)).evidenceId, f.a.id, false, "admin-demote")).rejects.toThrow()
+    const bigStep = await f.product.provisionControlStepUp(f.operator.session)
+    await expect(f.product.controlSetOperatorAuthority(f.operator.session, bigStep.evidenceId, f.a.id, true, "bigperson-promote", "admin")).resolves.toMatchObject({ role: "admin", active: true })
+  })
+
   it("allows only current operators to read Control state and makes revocation immediate", async () => {
     const f = await fixture(), stepUp = await f.product.provisionControlStepUp(f.operator.session)
     expect((await f.call(f.operator, "/control/read", {})).status).toBe(200)
