@@ -10,7 +10,7 @@ import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
-import { transitionOperator, transitionSellerApplication, revokeSession } from "./control-mutations.js"
+import { transitionOperator, transitionSellerApplication, revokeSession, decideSubmissionReview, admitAssessment } from "./control-mutations.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -464,7 +464,7 @@ async function privateProduct(request, env, path, traceId) {
               throw error
             }
           }
-          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition" || path === "/__webcanbe/api/ops/sessions/revoke") {
+          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition" || path === "/__webcanbe/api/ops/sessions/revoke" || path === "/__webcanbe/api/ops/reviews/decide" || path === "/__webcanbe/api/ops/assessments/admit") {
             const operationBody = body?.operationBody ?? {}
             await db.query("BEGIN")
             try {
@@ -473,9 +473,13 @@ async function privateProduct(request, env, path, traceId) {
                 ? await transitionOperator(db, databaseSession, operationBody, proof.evidenceId)
                 : path.endsWith("/seller-applications/transition")
                   ? await transitionSellerApplication(db, databaseSession, operationBody, proof.evidenceId)
-                  : await revokeSession(db, databaseSession, operationBody, proof.evidenceId)
+                  : path.endsWith("/sessions/revoke")
+                    ? await revokeSession(db, databaseSession, operationBody, proof.evidenceId)
+                    : path.endsWith("/reviews/decide")
+                      ? await decideSubmissionReview(db, databaseSession, operationBody, proof.evidenceId)
+                      : await admitAssessment(db, databaseSession, operationBody, proof.evidenceId)
               await db.query("COMMIT")
-              return json(path.endsWith("/operators/transition") ? { operator: result } : path.endsWith("/seller-applications/transition") ? { application: result } : { session: result })
+              return json(path.endsWith("/operators/transition") ? { operator: result } : path.endsWith("/seller-applications/transition") ? { application: result } : path.endsWith("/sessions/revoke") ? { session: result } : path.endsWith("/reviews/decide") ? { review: result } : { assessment: result })
             } catch (error) {
               await db.query("ROLLBACK")
               throw error
