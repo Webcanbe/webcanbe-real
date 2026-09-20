@@ -1,3 +1,16 @@
+## Latest recovery delta — publication and TEST entitlement Control
+
+- Admin+ Control now promotes passed immutable assessment results into immutable releases with full stored provenance revalidation.
+- Admin+ Control now publishes one promoted release into one published Listing through the retained `wcb_listing_publications` boundary.
+- Admin+ Control now grants/transitions only `provider=test` entitlements; payment-provider entitlements cannot be mutated from this surface.
+- All three operations require a new exact-body-bound mandatory three-factor proof and append privileged audit evidence.
+- Bounded Control reads now include catalog projects, promotions and publication rows.
+- Backup before this slice: `backup-phase5-before-publication-control-2026-09-20` at `2006c905b4f974e895c470a977bdb6cae294a29b`.
+- Ready qualification remains the next Admin item because the canonical Phase 3 Ready result is source-derived through the React compatibility analyzer. Do not create a weaker immutable qualification from operator/client input.
+- After exact Ready qualification: provision the first production Bigperson, run Control smoke/E2E, then continue Hyperdrive/product activation and editor-branch integration.
+
+---
+
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
