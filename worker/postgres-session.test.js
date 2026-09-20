@@ -37,7 +37,7 @@ describe("PostgreSQL-backed Worker session adapter", () => {
       if (sql.startsWith("INSERT INTO wcb_sessions")) return { rows: [{ expires_at: expiresAt }], rowCount: 1 }
       throw new Error("Unexpected SQL: " + sql)
     })
-    const issued = await issueDatabaseSession(db, { issuer: "https://accounts.google.com", subject: "google-sub", email: "user@example.com", emailVerified: true, name: "Webcanbe User", picture: "https://example.com/avatar.png" }, { allowSelfRegistration: true })
+    const issued = await issueDatabaseSession(db, { issuer: "https://accounts.google.com", subject: "google-sub", provider: "google", email: "user@example.com", emailVerified: true, name: "Webcanbe User", picture: "https://example.com/avatar.png" }, { allowSelfRegistration: true })
     expect(issued.session.userId).toBe(userId)
     expect(issued.token).toMatch(/^[A-Za-z0-9_-]{43}$/)
     expect(issued.csrf).toMatch(/^[A-Za-z0-9_-]{43}$/)
@@ -45,6 +45,8 @@ describe("PostgreSQL-backed Worker session adapter", () => {
     expect(db.calls.some(call => call.sql.includes("INSERT INTO wcb_workspace_members"))).toBe(false)
     const profileCall = db.calls.find(call => call.sql.includes("INSERT INTO wcb_user_profiles"))
     expect(profileCall?.params.slice(0, 5)).toEqual([userId, "Webcanbe User", "user@example.com", true, "https://example.com/avatar.png"])
+    const sessionCall = db.calls.find(call => call.sql.startsWith("INSERT INTO wcb_sessions"))
+    expect(sessionCall?.params[7]).toBe("google")
   })
 
   it("atomically creates an internal user and owner workspace for a new verified identity", async () => {
