@@ -44,5 +44,15 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "vars": {
+    "WEBCANBE_BIGPERSON_GOOGLE_EMAIL": "sihumin196@gmail.com",
+    "WEBCANBE_CONTROL_MODE": "enabled"
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "7f537011fc1a4303aac7aff9601a1699"
+    }
   ]
 }
