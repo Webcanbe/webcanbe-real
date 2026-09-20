@@ -63,5 +63,9 @@
       "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_SALT",
       "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST"
     ]
+  },
+  "define": {
+    "__filename": "\"/worker/index.js\"",
+    "__dirname": "\"/worker\""
   }
 }
