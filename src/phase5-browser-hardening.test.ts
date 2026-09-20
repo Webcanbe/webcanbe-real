@@ -15,6 +15,17 @@ describe("Phase 5 browser launch hardening", () => {
     expect(app).toContain('className="auth-demo-error" role="alert"')
   })
 
+  it("repairs injected landing controls without rewriting the vendor document", () => {
+    const home = fs.readFileSync("src/Home.tsx", "utf8")
+    expect(home).toContain("function hardenLandingAccessibility")
+    expect(home).toContain('button[data-slot="sheet-trigger"]')
+    expect(home).toContain('button.setAttribute("aria-label", "Open navigation")')
+    expect(home).toContain('button[data-slot="slide-button"]')
+    expect(home).toContain('button.setAttribute("aria-hidden", "true")')
+    expect(home).toContain("button.tabIndex = -1")
+    expect(home).toContain("hardenLandingAccessibility(host.current)")
+  })
+
   it("runs production smoke in all three major browser engines", () => {
     expect(script).toContain('["chromium", chromium]')
     expect(script).toContain('["firefox", firefox]')
@@ -25,6 +36,8 @@ describe("Phase 5 browser launch hardening", () => {
 
   it("checks responsive overflow, keyboard focus, accessible names, JS exceptions and a launch timing budget", () => {
     expect(script).toContain("has no meaningful horizontal overflow")
+    expect(script).toContain('button:not([disabled]):not([aria-hidden="true"])')
+    expect(script).toContain('waitForSelector("h1"')
     expect(script).toContain("buttons have accessible names")
     expect(script).toContain("fields have accessible names")
     expect(script).toContain("accepts keyboard focus")
@@ -52,6 +65,7 @@ describe("Phase 5 browser launch hardening", () => {
   it("pins the Playwright runtime and runs on main", () => {
     expect(workflow).toContain("mcr.microsoft.com/playwright:v1.56.1-noble")
     expect(workflow).toContain("playwright@1.56.1")
+    expect(workflow).toContain("HOME: /root")
     expect(workflow).toContain("branches: [main, phase5-launch-browser-hardening]")
     expect(workflow).toContain("node scripts/launch/browser-smoke.mjs")
   })
