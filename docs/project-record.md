@@ -1,3 +1,14 @@
+# NEXT RELEASE BLOCKER / GATE 3 PRESTAGED — 2026-09-20 KST
+
+- Gate 2 authenticated smoke is live at `https://webcanbe.com/_ops/gate2-auth-smoke`.
+- Gate 3 has been fully prepared but not deployed on `phase5-gate3-materialization-staging`.
+- Verified staging code checkpoint: `47550c1ecb1d505d52f7672744f4b08fe6d4ad33`.
+- Staging CI: UI `35510969693` PASS; durable `35510969613` PASS.
+- The staged launch-smoke fixture is source-backed, passes production release-integrity verification, creates no public Listing, and has not been applied to production.
+- Do not merge Gate 3 until real-browser Google/GitHub/Email Gate 2 smoke is green.
+
+---
+
 # GATE 2 AUTHENTICATED SMOKE UI LIVE — 2026-09-20 KST
 
 - Main checkpoint: `d6311f5ea11f8ab8b39b44b504b85104df4bef4f`.
