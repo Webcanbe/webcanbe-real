@@ -110,8 +110,8 @@ export async function issueDatabaseSession(db, identity, options = {}) {
     const token = randomToken()
     const csrf = randomToken()
     const sessionResult = await db.query(
-      "INSERT INTO wcb_sessions(session_id,user_id,expires_at,active,token_hash,csrf_hash) VALUES($1,$2,date_trunc('milliseconds',clock_timestamp())+$3*interval '1 millisecond',true,$4,$5) RETURNING expires_at",
-      [sessionId, userId, lifetimeMs, tokenHash(token), tokenHash(csrf)],
+      "INSERT INTO wcb_sessions(session_id,user_id,expires_at,active,token_hash,csrf_hash,auth_issuer,auth_subject,auth_provider) VALUES($1,$2,date_trunc('milliseconds',clock_timestamp())+$3*interval '1 millisecond',true,$4,$5,$6,$7,$8) RETURNING expires_at",
+      [sessionId, userId, lifetimeMs, tokenHash(token), tokenHash(csrf), identity.issuer, identity.subject, identity.provider ?? null],
     )
     const expiresAt = new Date(sessionResult.rows[0].expires_at).getTime()
     if (!Number.isFinite(expiresAt)) throw new DatabaseAuthorityDenied()
@@ -133,7 +133,7 @@ export async function issueDatabaseSession(db, identity, options = {}) {
 export async function resolveDatabaseSession(db, token) {
   if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return undefined
   const result = await db.query(
-    `SELECT s.session_id,s.user_id,s.expires_at,p.display_name,p.email,p.email_verified,p.picture_url
+    `SELECT s.session_id,s.user_id,s.expires_at,s.auth_issuer,s.auth_subject,s.auth_provider,p.display_name,p.email,p.email_verified,p.picture_url
        FROM wcb_sessions s
        LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id
        LEFT JOIN wcb_user_profiles p ON p.user_id=s.user_id
