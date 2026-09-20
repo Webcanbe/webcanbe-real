@@ -66,14 +66,14 @@ $$;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO webcanbe_runtime;
 
-DO $
+DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'webcanbe_hyperdrive') THEN
     CREATE ROLE webcanbe_hyperdrive
       NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
   END IF;
 END
-$;
+$$;
 
 GRANT webcanbe_runtime TO webcanbe_hyperdrive;
 
