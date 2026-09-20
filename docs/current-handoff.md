@@ -1,3 +1,9 @@
+# CURRENT STATE — FIRST BIGPERSON ENROLLED — 2026-09-20 KST
+
+First production Bigperson enrollment succeeded. DB verifies Bigperson=1, security=1, active passkey=1, consumed registration challenge=1, and no live leftover registration challenge. Final Admin step: re-enter the privileged factor and click `Verify all 3 factors`, complete the passkey assertion, and confirm the privileged Control view opens.
+
+---
+
 # CURRENT VERIFIED STATE — OPERATOR SCHEMA FIX LIVE — 2026-09-20 KST
 
 The missing `wcb_product_operators.updated_at` production schema bug is fixed and migration `20260920103846` is applied. Main UI/Bigperson/durable CI and production smoke all pass at `4aeeef50d929...`. Retry first Bigperson enrollment only after a fresh Google login because the Bigperson freshness window is 10 minutes.
