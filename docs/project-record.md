@@ -1,5 +1,28 @@
 # WebCanBe project record
 
+## 2026-09-20: Bigperson privileged Control foundation
+
+The privileged platform authority is now explicitly modeled as `reviewer → admin →
+bigperson`, separate from project/workspace owner/editor/viewer roles. The old public
+`/control` entry and sidebar link were removed. Control is mounted at the non-public
+`/_ops/keystone-7f31` route, excluded from crawler surfaces, and production activation
+has its own gate. The path is deliberately not treated as authentication.
+
+PostgreSQL operator records now carry a platform role. Reviewer authority covers the
+review/assessment workflow, admin authority covers seller intake plus publication and
+TEST entitlement operations, and only bigperson authority can grant/revoke platform
+roles. High-risk operations retain fresh server-minted session-bound step-up evidence.
+
+An explicit schema migration adds the role column/check and a database trigger prevents
+the final active bigperson from being disabled, demoted, or deleted. The production
+Worker also has a bounded Control read that rechecks role/epoch after reading and does
+not expose provider credentials, token hashes, or step-up evidence.
+
+This checkpoint intentionally stops before client mutation controls or passkey ceremony.
+Those are the next privileged-Control slice.
+
+---
+
 ## 2026-09-19: Coherent reload and accepted-source refresh
 
 The Code workspace now treats accepted source plus source history as one revision-bound
