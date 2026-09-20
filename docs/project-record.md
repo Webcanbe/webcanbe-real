@@ -1,3 +1,9 @@
+## 2026-09-20: Hyperdrive, live Control and DB-session recovery closure
+
+A comprehensive current-state handoff is now stored at `docs/phase5-admin-live-handoff-2026-09-20.md`. Hyperdrive is live; production readiness is DB/schema ready; the authoritative catalog is reachable; production Control is independently enabled; the Cloudflare TypeScript `__filename` deployment failure is fixed; and the Google DB-session defects discovered live were corrected with production migrations for `wcb_sessions.created_at` and `auth_provider`. Current main verification passes UI, Bigperson, durable editor/export and production smoke. The live user has reached the three-factor Bigperson Operations gate. No Bigperson/passkey is enrolled yet; first passkey registration and one three-factor Control read are the remaining Admin E2E actions.
+
+---
+
 ## 2026-09-20: Main production verification and PostgreSQL FK index hardening
 
 The verified Admin + durable editor line was fast-forwarded to main. Main Actions `35495682185`, `35495682150`, and `35495682167` all pass. Automatic live smoke `35495723690` passed 21/21 public production checks on its first attempt, including security headers/CSP, request IDs, real 404/noindex behavior, dashboard noindex, robots/sitemap, and fail-closed Worker readiness/catalog while Hyperdrive remains absent.
