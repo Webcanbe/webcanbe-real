@@ -1,3 +1,9 @@
+# CURRENT NEXT ACTION — ROTATE BIGPERSON BOOTSTRAP KDF SET — 2026-09-20 KST
+
+The Cloudflare PBKDF2 hard-cap fix is deployed and all main CI + production smoke pass. The Worker now derives the Bigperson bootstrap factor at 100,000 PBKDF2-SHA256 iterations. Before retrying first enrollment, regenerate PEPPER/SALT/DIGEST together at 100,000 iterations and replace the three existing Cloudflare Bigperson secrets. The remembered raw factor can stay the same.
+
+---
+
 # CURRENT BIGPERSON BOOTSTRAP CONTRACT — 2026-09-20 KST
 
 The previous attempt to preserve 600,000 PBKDF2 iterations through `node:crypto.pbkdf2Sync` was disproved by production: Cloudflare workerd caps PBKDF2 at 100,000 for both paths. The final Worker contract is now PBKDF2-SHA256 at 100,000 iterations with the same factor+NUL+pepper / salt / 32-byte base64url format. Because no Bigperson/security/passkey row exists yet, regenerate the three Cloudflare bootstrap factor secrets together at 100,000 iterations before retrying first enrollment.
