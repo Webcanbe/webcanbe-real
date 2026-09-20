@@ -1,3 +1,61 @@
+# UNIFIED BIGPERSON MANAGER CONSOLE — 2026-09-20 KST
+
+- Bigperson platform authority remains the strict top of the server-side role hierarchy:
+  - reviewer = rank 1
+  - admin = rank 2
+  - bigperson = rank 3
+- The shared server role guard compares ranks, so Bigperson automatically satisfies every reviewer/admin minimum while retaining Bigperson-only operator-authority transitions.
+- Explicit regression now locks the inheritance contract:
+  - seller application approve/reject: admin minimum → Bigperson allowed
+  - session revoke: admin minimum → Bigperson allowed
+  - submission review: reviewer minimum → Bigperson allowed
+  - assessment admission: reviewer minimum → Bigperson allowed
+  - release promotion: admin minimum → Bigperson allowed
+  - Listing publication: admin minimum → Bigperson allowed
+  - Ready qualification: admin minimum → Bigperson allowed
+  - TEST entitlement grant/transition: admin minimum → Bigperson allowed
+  - platform operator role/state transition: Bigperson only.
+- Bigperson Operations UI is reorganized into one clean standalone console with tabs:
+  - Overview
+  - Sellers & Review
+  - Publishing
+  - Access & Roles
+  - Audit
+- Overview surfaces pending seller intake, pending review queue, active platform operators and published Listing counts with direct navigation into the relevant manager surface.
+- Sellers & Review contains:
+  - seller approve/reject
+  - submission review approve/reject
+  - review history
+  - assessment admission/state.
+- Publishing contains:
+  - assessment result → immutable release promotion
+  - release/promotion records
+  - Listing publication
+  - Ready qualification
+  - deploy intents.
+- Access & Roles contains:
+  - reviewer/admin/bigperson assignment/state
+  - users
+  - active sessions + revoke
+  - workspaces
+  - TEST entitlements.
+- Audit contains append-only privileged audit history.
+- UI explicitly displays current returned platform authority and, for Bigperson, states that Reviewer + Admin + platform authority are included.
+- Ordinary dashboard shell remains absent from the hidden Admin route.
+- Every write still clears/consumes a fresh privileged factor and starts a new operation-bound passkey ceremony.
+- Security invariants remain in visible copy and tests:
+  - hidden path itself is not authorization
+  - platform hierarchy is reviewer → admin → bigperson
+  - workspace owner/editor/viewer remains separate.
+- Branch `phase5-bigperson-unified-operations` verification:
+  - Phase 5 UI verify `35506923400`: PASS
+  - Phase 5 Bigperson checkpoint verify `35506923474`: PASS
+  - Phase 5 durable editor/export verify `35506923428`: PASS
+  - production build and Wrangler dry-run: PASS.
+- One first-run Bigperson CI failure during this UI refactor was caused only by stale exact-copy assertions after changing console copy. The authority/mutation tests themselves passed. The two valid security statements were restored in the new copy and the final run is green.
+
+---
+
 # PERMANENT ADMIN ENTRY URL — 2026-09-20 KST
 
 Permanent production Admin/Bigperson entry URL:
