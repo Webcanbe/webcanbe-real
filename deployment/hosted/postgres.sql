@@ -103,10 +103,17 @@ CREATE TABLE IF NOT EXISTS wcb_license_entitlements (
   granted_at timestamptz NOT NULL DEFAULT clock_timestamp(), revoked_at timestamptz, UNIQUE(user_id,release_id,provider)
 );
 CREATE TABLE IF NOT EXISTS wcb_product_operators (
-  user_id uuid PRIMARY KEY, active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1,
-  role text NOT NULL DEFAULT 'admin' CHECK(role IN ('reviewer','admin','bigperson'))
+  user_id uuid PRIMARY KEY,
+  active boolean NOT NULL DEFAULT true,
+  epoch bigint NOT NULL DEFAULT 1,
+  role text NOT NULL DEFAULT 'admin' CHECK(role IN ('reviewer','admin','bigperson')),
+  updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 ALTER TABLE wcb_product_operators ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'admin';
+ALTER TABLE wcb_product_operators ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+UPDATE wcb_product_operators SET updated_at=clock_timestamp() WHERE updated_at IS NULL;
+ALTER TABLE wcb_product_operators ALTER COLUMN updated_at SET DEFAULT clock_timestamp();
+ALTER TABLE wcb_product_operators ALTER COLUMN updated_at SET NOT NULL;
 DO $
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='wcb_product_operators_role_check' AND conrelid='wcb_product_operators'::regclass) THEN
