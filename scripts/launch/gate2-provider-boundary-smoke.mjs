@@ -45,6 +45,9 @@ try {
   })
 
   const forbiddenRequests = []
+  const consoleErrors = []
+  const pageErrors = []
+
   context.on("request", request => {
     try {
       const url = new URL(request.url())
@@ -57,11 +60,16 @@ try {
   })
 
   const page = await context.newPage()
+  page.on("console", message => {
+    if (message.type() === "error") consoleErrors.push(message.text())
+  })
+  page.on("pageerror", error => pageErrors.push(error.message))
 
   // This smoke checks only whether the deployed Firebase GitHub provider can
   // reach GitHub. The sessionStorage value bypasses the diagnostic page's
-  // "linked provider" UX guard only; the popup is closed before credentials or
-  // authorization, and server-side exchange/link endpoints are forbidden below.
+  // "linked provider" UX guard only; the provider window is closed before
+  // credentials or authorization, and server-side exchange/link endpoints are
+  // forbidden below.
   await page.addInitScript(() => {
     sessionStorage.setItem("wcb-gate2-linked-providers", JSON.stringify(["GitHub"]))
   })
@@ -80,28 +88,44 @@ try {
   await page.getByRole("heading", { name: "Gate 2 authenticated read smoke" }).waitFor({ timeout: 10_000 })
   const githubButton = page.getByRole("button", { name: "Test linked GitHub" })
   await githubButton.waitFor({ state: "visible", timeout: 10_000 })
-  assert("GitHub provider probe control is enabled", !(await githubButton.isDisabled()), "button disabled")
+  const buttonEnabled = !(await githubButton.isDisabled())
+  assert("GitHub provider probe control is enabled", buttonEnabled, buttonEnabled ? "enabled" : "disabled")
 
-  const popupPromise = page.waitForEvent("popup", { timeout: 12_000 })
   await githubButton.click()
-  const popup = await popupPromise
 
-  let providerUrl = popup.url()
-  const deadline = Date.now() + 20_000
-  while (!isOfficialGithubHost(providerUrl) && Date.now() < deadline) {
-    await popup.waitForTimeout(250)
-    providerUrl = popup.url()
+  let popup
+  let providerMessage = ""
+  const popupDeadline = Date.now() + 12_000
+  while (!popup && !providerMessage && Date.now() < popupDeadline) {
+    popup = context.pages().find(candidate => candidate !== page)
+    providerMessage = (await page.locator(".settings-save-status").textContent().catch(() => ""))?.trim() || ""
+    if (!popup && !providerMessage) await page.waitForTimeout(200)
+  }
+
+  assert(
+    "Firebase GitHub flow opens a provider window",
+    Boolean(popup),
+    providerMessage || pageErrors.at(-1) || consoleErrors.at(-1) || "no popup and no rendered Firebase error",
+  )
+
+  let providerUrl = popup?.url() || ""
+  if (popup) {
+    const providerDeadline = Date.now() + 20_000
+    while (!isOfficialGithubHost(providerUrl) && Date.now() < providerDeadline) {
+      await popup.waitForTimeout(250)
+      providerUrl = popup.url()
+    }
   }
 
   assert(
     "Firebase GitHub flow reaches the official GitHub provider boundary",
-    isOfficialGithubHost(providerUrl),
-    providerUrl || "popup never reached github.com",
+    Boolean(popup) && isOfficialGithubHost(providerUrl),
+    providerUrl || providerMessage || pageErrors.at(-1) || consoleErrors.at(-1) || "provider window never reached github.com",
   )
 
   // Stop at the provider boundary. Do not enter credentials and do not make an
   // authorization decision.
-  await popup.close().catch(() => {})
+  if (popup) await popup.close().catch(() => {})
   await page.waitForTimeout(350)
 
   assert(
@@ -117,6 +141,9 @@ try {
     !firstPartySession,
     firstPartySession ? "unexpected __Host-wcb-session cookie" : "no first-party session cookie",
   )
+
+  if (consoleErrors.length) console.log("Browser console errors: " + consoleErrors.join(" | "))
+  if (pageErrors.length) console.log("Page errors: " + pageErrors.join(" | "))
 
   await context.close()
 } finally {
