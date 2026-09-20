@@ -38,6 +38,7 @@ export type CreatorStudioData = Readonly<{
 }>
 
 export type ControlData = Readonly<{
+  authority: Readonly<{ role: "reviewer" | "admin" | "bigperson"; epoch: number }>
   sellerApplications: Array<Record<string, unknown>>
   submissions: Array<Record<string, unknown>>
   reviews: Array<Record<string, unknown>>
