@@ -1,3 +1,33 @@
+# GATE 2 INTERACTIVE RESUME CHECKPOINT — 2026-09-20 KST
+
+- Main rechecked at `97f9602cf7f95d63b6ae1c4771f2780a2ab4fa8a`.
+- Production DB still reports:
+  - active Google identities: 1
+  - active Firebase identities: 0
+  - active Google sessions: 1
+  - active Firebase sessions: 0
+  - active entitlements: 0
+  - materializations: 0
+- Therefore Gate 2 provider smoke has not started/completed yet.
+- Live diagnostic rechecked: `https://webcanbe.com/_ops/gate2-auth-smoke`
+  - HTTP 200
+  - robots: `noindex, nofollow`
+  - `wcb-product-read-mode=hosted`
+  - no production product-mutation meta
+- Safe human sequence:
+  1. Google-backed session → Run private reads
+  2. Verify refresh
+  3. Link GitHub to the current Webcanbe account
+  4. Link a Firebase Email identity to the current Webcanbe account
+  5. Verify logout
+  6. Test linked GitHub login and rerun private reads/refresh
+  7. Verify logout
+  8. Test linked Email login and rerun private reads/refresh/logout
+- Do not share passwords, ID tokens, cookies, or session secrets in chat.
+- Gate 3 v2 and Gate 4 launch-chain staging remain ready but must stay undeployed until this interactive Gate 2 sequence is green.
+
+---
+
 # SESSION STOP CHECKPOINT — 2026-09-20 KST
 
 - Latest main documentation HEAD: `e7504303700c99abc28978820d9ae8c6948e4d8a`.
