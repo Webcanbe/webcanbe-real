@@ -1,3 +1,9 @@
+# ADMIN COMPLETE / STANDALONE PANEL LIVE — 2026-09-20 KST
+
+Admin production E2E is complete and the Admin route has been simplified to a standalone Operations panel. The normal sidebar, top navigation/search/profile, bottom account UI, and site footer are removed from `/_ops/keystone-7f31`. Three-factor/server authority is unchanged. Main `5a844f267ffc...` passes UI `35506420844`, Bigperson `35506420826`, durable `35506420823`, and production smoke `35506452936`. Next Phase 5 work is staged product read activation.
+
+---
+
 # ADMIN E2E COMPLETE / PANEL-ONLY UI IN PROGRESS — 2026-09-20 KST
 
 Production Admin E2E is now closed: Bigperson=1, security=1, passkey=1, one consumed privileged operation challenge, and active step-up evidence are verified. The hidden Admin route is now being simplified to remove the normal sidebar/header/account/footer shell and show only the Operations panel; authority logic remains unchanged.
