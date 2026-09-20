@@ -42,6 +42,18 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(app).toContain('const factor=mutationFactor; setMutationFactor(""); setBusy(true)')
     expect(app).toContain("One factor entry authorizes only the single operation")
   })
+  it("revokes a specific first-party session only after a fresh three-factor proof",()=>{
+    expect(mutations).toContain("revokeSession")
+    expect(mutations).toContain("session.revoke")
+    expect(worker).toContain("/__webcanbe/api/ops/sessions/revoke")
+    expect(client).toContain("controlRevokeSession")
+    expect(app).toContain(">Revoke<")
+    expect(app).toContain("Tokens and hashes are never exposed.")
+  })
+  it("shows bounded audit transition detail without making audit mutable",()=>{
+    expect(app).toContain('{label:"Transition",keys:["transition"]}')
+    expect(mutations).toContain("INSERT INTO wcb_control_audit")
+  })
   it("keeps privileged audit append-only",()=>{
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
     expect(mutations).toContain("idempotency_key")
