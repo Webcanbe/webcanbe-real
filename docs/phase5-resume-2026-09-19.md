@@ -1,3 +1,18 @@
+# GATE 4 CHAIN PREVERIFIED ON STAGING — 2026-09-20 KST
+
+- Staging checkpoint: `75810cef69b3b43947029ccaf42f844f4e319ac6`.
+- CI:
+  - Phase 5 UI verify `35511923446`: **PASS**
+  - Phase 5 durable editor/export verify `35511923498`: **PASS**
+  - Phase 5 Bigperson checkpoint verify `35511923419`: **PASS**
+- New launch-chain regression proves one continuous source lineage:
+  `internal immutable release → verifyReleaseSnapshot → materialized releaseOrigin/history → DurableSource → accepted Code save → reopen same accepted revision → standalone export → fresh independent build`.
+- The accepted edit preserves the original entitlement/release/catalog/source/snapshot provenance through reload.
+- Export contains the accepted edited bytes and excludes `.webcanbe` runtime state.
+- This remains staging-only. Production Gate 3 activation is still blocked on real-browser Gate 2 provider smoke.
+
+---
+
 # GATE 3 V2 REBASED STAGING VERIFIED — 2026-09-20 KST
 
 - Rebuilt Gate 3 staging from current main `5a36af97c6b55f5854edc4430cc1668eb7436dfd`, preserving the safe Gate 2 provider-linking sequence.
