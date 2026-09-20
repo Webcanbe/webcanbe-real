@@ -1,3 +1,26 @@
+# GATE 3 V3 REBASED ON CURRENT PRODUCTION — 2026-09-20 KST
+
+- Production launch-truthfulness code checkpoint remains `cb1c168771b988a25b74d42902da29b36e04c190`.
+- Gate 3 staging branch remains `phase5-gate3-materialization-staging-v3`.
+- Gate 3 v3 was reconciled with the current production App/UI truthfulness changes and newest regression suite.
+- Verified staging checkpoint: `d9d7b5be1f0334bb988f663e508c74cc7ddc0f81`.
+- Verification:
+  - UI `35514962485`: **PASS**
+  - durable editor/export `35514962469`: **PASS**
+  - Bigperson `35514962482`: **PASS**
+- The verified staging tree includes:
+  - current Google/GitHub brand marks + circular spinner
+  - disabled unavailable phone sign-in
+  - truthful pre-payment plan UI
+  - current Gate 2 provider-link safety
+  - Gate 3 materialization switches/fixture
+  - Gate 4 materialize → durable edit → reopen → standalone export/build regression
+- Production remains mutation-off. The Gate 3 fixture has not been applied to production.
+- Interactive Gate 2 is still the only release blocker before Gate 3 activation.
+- Resume from Gate 3 v3 only; v2 and older Gate 3 branches are historical.
+
+---
+
 # LAUNCH TRUTHFULNESS CLEANUP LIVE — 2026-09-20 KST
 
 - Production code checkpoint: `cb1c168771b988a25b74d42902da29b36e04c190`.
