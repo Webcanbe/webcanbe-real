@@ -8,6 +8,19 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — Bigperson mutation UI
+
+- Bigperson can now perform audited platform-role/active-state transitions and seller application approve/reject from Operations.
+- Every mutation starts a new mandatory three-factor ceremony; opening Control does not authorize later writes.
+- The WebAuthn challenge binds exact method/path/body hash.
+- Successful proof mints short-lived session-bound `control_high_risk` evidence used by append-only Control audit.
+- Operator epoch advances on authority change; final active Bigperson remains DB-protected.
+- Rejected seller applications cannot be reopened through this intake mutation.
+- Browser clears the separate factor before passkey.
+- Next: privileged session/security controls + audit drill-down + remaining review/publication operations.
+
+---
+
 ## Latest recovery delta — mandatory Bigperson three-factor security
 
 - Every Bigperson Control operation requires all three: enrolled Google-authenticated first-party session + separate privileged factor + verified WebAuthn/passkey assertion.
