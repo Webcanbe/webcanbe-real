@@ -1,3 +1,9 @@
+# CURRENT LIVE FIX — OPERATOR updated_at — 2026-09-20 KST
+
+The latest first-Bigperson attempt reached the final DB bootstrap transaction but failed because production `wcb_product_operators` lacked the `updated_at` column already referenced by runtime code. Production migration `20260920103846 phase5_product_operator_updated_at` is now applied and the column exists. No partial Bigperson/passkey rows were committed. The current Google session is already ~10m21s old, so re-login before the next registration retry.
+
+---
+
 # CURRENT NEXT ACTION — RETRY FIRST PASSKEY NOW — 2026-09-20 KST
 
 Synced Apple/iCloud passkeys are now accepted and the policy change is deployed. Main UI/Bigperson/durable verification and production smoke all pass. Current Google session age is ~5m53s, so it is still inside the 10-minute Bigperson freshness window. Enter the factor and click `First Bigperson: register passkey` again now. Bigperson/security/passkey rows remain 0 before retry.
