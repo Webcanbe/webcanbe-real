@@ -65,6 +65,9 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(auth).toContain("verifyRegistrationResponse")
     expect(auth).toContain("preferredAuthenticatorType: \"localDevice\"")
     expect(auth).toContain("supportedAlgorithmIDs: [-7, -257]")
+    expect(auth).toContain('credentialDeviceType !== "singleDevice"')
+    expect(auth).toContain("credentialBackedUp")
+    expect(auth).toContain('passkey.device_type) !== "singleDevice"')
     expect(auth).toContain("role='bigperson'")
   })
 
