@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS wcb_bigperson_challenges (
   operation_path text,
   operation_body_hash text,
   factor_verified_at timestamptz NOT NULL,
+  pending_factor_salt text,
+  pending_factor_digest text,
   expires_at timestamptz NOT NULL,
   used_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT clock_timestamp()
