@@ -1,3 +1,20 @@
+# LAUNCH CLOSURE ORDER — 2026-09-20 KST
+
+Current source branch: `phase5-product-read-launch` from main `ac60ef75ce5ad0c5024febae92b99b25a3acab44`.
+
+Release sequence:
+1. production read activation + branch CI;
+2. production Google/GitHub/Email private-read smoke;
+3. deliberate materialization mutation activation;
+4. clean-account browse → entitlement → materialize → edit → save → reload → export E2E;
+5. browser/mobile/accessibility/performance + backup/rollback final pass;
+6. beta/public activation;
+7. commercial payment/payout closure for the paid launch.
+
+Detailed gate criteria: `docs/launch-plan-2026-09-20.md`.
+
+---
+
 ## 2026-09-20 authoritative resume pointer
 
 The newest complete state is in:
