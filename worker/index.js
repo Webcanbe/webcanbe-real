@@ -142,6 +142,7 @@ async function establishFirstPartySession(env, identity) {
     return withHyperdrive(env, db => issueDatabaseSession(db, {
       issuer: identity.issuer,
       subject: identity.subject,
+      provider: identity.provider,
       email: identity.email,
       emailVerified: identity.emailVerified === true,
       name: identity.name,
