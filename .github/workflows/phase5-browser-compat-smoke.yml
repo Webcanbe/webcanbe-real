@@ -1,0 +1,22 @@
+name: Phase 5 browser compatibility smoke
+on:
+  push:
+    branches: [main, phase5-launch-browser-hardening]
+  workflow_dispatch:
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright package
+        run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Browser smoke syntax
+        run: node --check scripts/launch/browser-smoke.mjs
+      - name: Chrome Firefox WebKit production smoke
+        env:
+          WEBCANBE_BROWSER_SMOKE_ORIGIN: https://webcanbe.com
+        run: node scripts/launch/browser-smoke.mjs
