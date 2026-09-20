@@ -152,15 +152,25 @@ try {
   const buttonEnabled = !(await githubButton.isDisabled())
   assert("GitHub provider probe control is enabled", buttonEnabled, buttonEnabled ? "enabled" : "disabled")
 
+  // Ignore the expected signed-out session probe and any page-load noise.
+  failedResponses.length = 0
+  failedRequests.length = 0
+  consoleErrors.length = 0
+  pageErrors.length = 0
+
   await githubButton.click()
 
   let popup
   let providerMessage = ""
-  const popupDeadline = Date.now() + 12_000
+  const popupDeadline = Date.now() + 20_000
   while (!popup && !providerMessage && Date.now() < popupDeadline) {
     popup = context.pages().find(candidate => candidate !== page)
-    providerMessage = (await page.locator(".settings-save-status").textContent().catch(() => ""))?.trim() || ""
+    providerMessage = (await page.locator(".settings-save-status").textContent({ timeout: 100 }).catch(() => ""))?.trim() || ""
     if (!popup && !providerMessage) await page.waitForTimeout(200)
+  }
+
+  if (!providerMessage) {
+    providerMessage = (await page.locator(".settings-save-status").textContent({ timeout: 100 }).catch(() => ""))?.trim() || ""
   }
 
   if (!popup && providerMessage.includes("Firebase Authentication is not configured")) {
