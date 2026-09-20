@@ -1,3 +1,22 @@
+# GATE 2 PRIVATE-READ PREFLIGHT — 2026-09-20 KST
+
+- Active branch: `phase5-gate2-private-read-preflight`.
+- Production DB aggregate before interactive auth smoke:
+  - users: 1
+  - active sessions: 1
+  - active Google sessions: 1
+  - active Firebase sessions: 0
+  - active workspace memberships: 1
+  - entitlements: 0
+  - materializations: 0
+  - published/available listings: 0
+- Added production smoke assertions that unauthenticated Workspaces, Purchases, Working-copy list, and Account reads all fail closed with HTTP 403.
+- Added a production smoke assertion that anonymous materialization is refused before mutation evaluation.
+- Added backend regressions proving a clean account returns empty purchases/working copies rather than fabricated rows and that private reads derive user scope only from the authoritative session.
+- Interactive Google/GitHub/Email read E2E remains the only Gate 2 part that needs a real browser-authenticated session.
+
+---
+
 # GATE 1 CLOSED — PRODUCTION READ MODE LIVE — 2026-09-20 KST
 
 - Main deployment trigger checkpoint: `df98015bdd7f905ccbf7d0a23fe497bb49e8e331`.
