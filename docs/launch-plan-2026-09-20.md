@@ -107,6 +107,16 @@ Acceptance:
 - private requests require live DB session + CSRF
 - clear empty/error/loading states
 
+## Gate 3 staging: **READY / NOT DEPLOYED**
+
+- branch `phase5-gate3-materialization-staging`
+- checkpoint `47550c1ecb1d505d52f7672744f4b08fe6d4ad33`
+- UI `35510969693`: PASS
+- durable `35510969613`: PASS
+- non-public launch-smoke fixture builder verified against production release integrity code
+- no Listing is created by the fixture
+- do not merge until Gate 2 provider smoke is green
+
 ## Gate 3 — Materialization mutation activation
 
 Only after Gate 2 passes.
