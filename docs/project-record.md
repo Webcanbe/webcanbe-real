@@ -9,7 +9,7 @@ and a registered WebAuthn credential must produce a fresh user-verified assertio
 
 The Google session is additionally limited to a ten-minute Bigperson freshness window.
 The separate factor is not stored as plaintext; the database stores a salted
-PBKDF2-SHA256 digest and verification also requires a server-only pepper. No credential
+PBKDF2-SHA256 digest and verification also requires a server-only pepper. During the one-time first bootstrap, a deployment salt is combined with the entered factor and pepper; only the derived digest is persisted. An optional pre-provisioned digest can additionally pin the bootstrap factor. No credential
 values are committed to the repository or continuity documents.
 
 WebAuthn registration and authentication use pinned SimpleWebAuthn packages. First
