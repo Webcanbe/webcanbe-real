@@ -20,6 +20,9 @@ describe("Phase 5 Gate 2 provider-boundary smoke", () => {
     expect(script).toContain("forbiddenRequests.length === 0")
     expect(script).toContain('"__Host-wcb-session"')
     expect(script).toContain("await popup.close()")
+    expect(script).toContain("failedResponses.push")
+    expect(script).toContain("url.origin}${url.pathname}")
+    expect(script).not.toContain("url.search")
   })
 
   it("uses a pinned credential-free Playwright workflow against production", () => {
