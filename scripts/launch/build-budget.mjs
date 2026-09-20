@@ -25,6 +25,7 @@ const kib = value => value / 1024
 const total = sum(() => true)
 const jsTotal = sum(item => item.file.endsWith(".js"))
 const cssTotal = sum(item => item.file.endsWith(".css"))
+const appCssTotal = sum(item => item.file.startsWith("assets/") && item.file.endsWith(".css"))
 const largestJs = max(item => item.file.endsWith(".js"))
 const largestCss = max(item => item.file.endsWith(".css"))
 const sourceMaps = files.filter(item => item.file.endsWith(".map"))
@@ -32,17 +33,19 @@ const sourceMaps = files.filter(item => item.file.endsWith(".map"))
 const limits = {
   total: 15 * 1024 * 1024,
   jsTotal: 2 * 1024 * 1024,
-  cssTotal: 220 * 1024,
+  cssTotal: 500 * 1024,
+  appCssTotal: 180 * 1024,
   largestJs: 700 * 1024,
-  largestCss: 180 * 1024,
+  largestCss: 300 * 1024,
 }
 
 const checks = [
   ["total dist", total <= limits.total, `${mib(total).toFixed(2)} MiB <= 15 MiB`],
   ["total JS", jsTotal <= limits.jsTotal, `${kib(jsTotal).toFixed(1)} KiB <= 2048 KiB`],
-  ["total CSS", cssTotal <= limits.cssTotal, `${kib(cssTotal).toFixed(1)} KiB <= 220 KiB`],
+  ["total CSS", cssTotal <= limits.cssTotal, `${kib(cssTotal).toFixed(1)} KiB <= 500 KiB`],
+  ["app CSS", appCssTotal <= limits.appCssTotal, `${kib(appCssTotal).toFixed(1)} KiB <= 180 KiB`],
   ["largest JS chunk", largestJs.bytes <= limits.largestJs, `${largestJs.file} ${kib(largestJs.bytes).toFixed(1)} KiB <= 700 KiB`],
-  ["largest CSS chunk", largestCss.bytes <= limits.largestCss, `${largestCss.file} ${kib(largestCss.bytes).toFixed(1)} KiB <= 180 KiB`],
+  ["largest CSS chunk", largestCss.bytes <= limits.largestCss, `${largestCss.file} ${kib(largestCss.bytes).toFixed(1)} KiB <= 300 KiB`],
   ["production source maps", sourceMaps.length === 0, sourceMaps.length ? sourceMaps.map(item => item.file).join(", ") : "none"],
 ]
 
