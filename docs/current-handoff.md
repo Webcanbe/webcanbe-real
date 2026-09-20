@@ -1,3 +1,9 @@
+# CURRENT NEXT ACTION — FRESH GOOGLE LOGIN THEN PASSKEY — 2026-09-20 KST
+
+The user reports the final 100k Bigperson KDF Secret set has been updated. Production DB still shows Bigperson 0 / security 0 / passkey 0 / no consumed challenge, and the only active Google session is ~38 minutes old. Next: sign out, sign in with Google again, return immediately to the Operations route, enter the factor, and click `First Bigperson: register passkey` within 10 minutes.
+
+---
+
 # CURRENT NEXT ACTION — ROTATE BIGPERSON BOOTSTRAP KDF SET — 2026-09-20 KST
 
 The Cloudflare PBKDF2 hard-cap fix is deployed and all main CI + production smoke pass. The Worker now derives the Bigperson bootstrap factor at 100,000 PBKDF2-SHA256 iterations. Before retrying first enrollment, regenerate PEPPER/SALT/DIGEST together at 100,000 iterations and replace the three existing Cloudflare Bigperson secrets. The remembered raw factor can stay the same.
