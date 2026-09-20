@@ -33,7 +33,13 @@ describe("Phase 5 Gate 3 staged materialization activation", () => {
     expect(fixture).toContain("publicListingCreated: false")
   })
 
-  it("preserves Gate 2 safe provider-linking while staging materialization", () => {\n    expect(app).toContain("hostedProductClient.linkFirebaseIdentity")\n    expect(app).toContain("GATE2_LINKED_KEY")\n    expect(app).toContain("prevents accidental creation of a second Webcanbe internal account")\n  })\n\n  it("keeps materialization behind session, CSRF, workspace and entitlement authority", () => {
+  it("preserves Gate 2 safe provider-linking while staging materialization", () => {
+    expect(app).toContain("hostedProductClient.linkFirebaseIdentity")
+    expect(app).toContain("GATE2_LINKED_KEY")
+    expect(app).toContain("prevents accidental creation of a second Webcanbe internal account")
+  })
+
+  it("keeps materialization behind session, CSRF, workspace and entitlement authority", () => {
     const privateProduct = worker.slice(worker.indexOf("async function privateProduct"), worker.indexOf("async function readiness"))
     expect(privateProduct).toContain("resolveDatabaseSession")
     expect(privateProduct).toContain("verifyDatabaseCsrf")
