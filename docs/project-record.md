@@ -1,3 +1,32 @@
+# SESSION STOP CHECKPOINT — 2026-09-20 KST
+
+- Latest main documentation HEAD: `e7504303700c99abc28978820d9ae8c6948e4d8a`.
+- Latest verified substantive main code checkpoint remains `5a36af97c6b55f5854edc4430cc1668eb7436dfd`; later main commits are documentation-only `[skip ci]` checkpoints.
+- Gate 2 live diagnostic remains: `https://webcanbe.com/_ops/gate2-auth-smoke`.
+- Production DB was rechecked at this stop point:
+  - active Google identities: 1
+  - active Firebase identities: 0
+  - active Google sessions: 1
+  - active Firebase sessions: 0
+  - active entitlements: 0
+  - materializations: 0
+  - published/available listings: 0
+- Therefore interactive GitHub/Email Gate 2 has **not** been completed. Do not infer completion from code/CI alone.
+- Gate 3 current source branch: `phase5-gate3-materialization-staging-v2`.
+- Gate 3 latest documentation HEAD: `1f5e7db117b7bcbcf676efb94318311b3d851d36`.
+- Latest verified Gate 3/Gate 4 code checkpoint remains `75810cef69b3b43947029ccaf42f844f4e319ac6`:
+  - UI `35511923446`: PASS
+  - durable editor/export `35511923498`: PASS
+  - Bigperson `35511923419`: PASS
+- Gate 3 v2 is currently ahead of main and not behind; it preserves the safe provider-link flow.
+- Gate 4 launch-chain regression is already included in that verified staging checkpoint:
+  `immutable release → materialized history → DurableSource → accepted Code save → reopen → standalone export → independent build`.
+- No Gate 3 fixture has been applied to production.
+- No product mutation switch has been activated in production.
+- Resume rule: first re-read GitHub + this block. If Firebase identity count is still 0, continue with interactive Gate 2 only. If Gate 2 has become green, then proceed to Gate 3 production activation from the v2 branch, not the old staging branch.
+
+---
+
 # CURRENT RELEASE BLOCKER / GATE 3 V2 READY — 2026-09-20 KST
 
 - Current main: `5a36af97c6b55f5854edc4430cc1668eb7436dfd` with safe Gate 2 provider-linking and all main verification green.
