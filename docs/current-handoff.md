@@ -1,3 +1,9 @@
+# CURRENT BIGPERSON BOOTSTRAP CONTRACT — 2026-09-20 KST
+
+The previous attempt to preserve 600,000 PBKDF2 iterations through `node:crypto.pbkdf2Sync` was disproved by production: Cloudflare workerd caps PBKDF2 at 100,000 for both paths. The final Worker contract is now PBKDF2-SHA256 at 100,000 iterations with the same factor+NUL+pepper / salt / 32-byte base64url format. Because no Bigperson/security/passkey row exists yet, regenerate the three Cloudflare bootstrap factor secrets together at 100,000 iterations before retrying first enrollment.
+
+---
+
 # CURRENT NEXT ACTION — PBKDF2 FIX LIVE — 2026-09-20 KST
 
 The 600,000-iteration Bigperson PBKDF2 runtime failure is fixed and deployed. Main UI/Bigperson/durable CI and production smoke pass. Current Google session is ~7m23s old against a 10-minute Bigperson freshness limit, so sign out/in once more, then immediately enter the existing factor and click `First Bigperson: register passkey`. Bigperson/passkey rows remain 0 before retry.
