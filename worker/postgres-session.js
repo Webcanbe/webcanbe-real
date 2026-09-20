@@ -142,12 +142,17 @@ export async function resolveDatabaseSession(db, token) {
   )
   const row = result.rows[0]
   if (!row) return undefined
+  const createdAt = new Date(row.created_at).getTime()
   const expiresAt = new Date(row.expires_at).getTime()
-  if (!Number.isFinite(expiresAt)) return undefined
+  if (!Number.isFinite(createdAt) || !Number.isFinite(expiresAt)) return undefined
   return Object.freeze({
     sessionId: String(row.session_id),
     userId: String(row.user_id),
+    createdAt,
     expiresAt,
+    authIssuer: row.auth_issuer ? String(row.auth_issuer) : undefined,
+    authSubject: row.auth_subject ? String(row.auth_subject) : undefined,
+    authProvider: row.auth_provider ? String(row.auth_provider) : undefined,
     displayName: typeof row.display_name === "string" ? row.display_name : "Webcanbe user",
     email: typeof row.email === "string" ? row.email : "",
     emailVerified: row.email_verified === true,
