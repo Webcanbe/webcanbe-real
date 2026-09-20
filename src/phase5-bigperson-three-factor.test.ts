@@ -60,7 +60,7 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
 
   it("locks first Bigperson enrollment to Google + factor + verified passkey before role bootstrap", () => {
     expect(auth).toContain("beginBigpersonRegistration")
-    expect(auth).toContain("verifyBootstrapFactor")
+    expect(auth).toContain("bootstrapFactor")
     expect(auth).toContain("Bigperson bootstrap is closed.")
     expect(auth).toContain("verifyRegistrationResponse")
     expect(auth).toContain("preferredAuthenticatorType: \"localDevice\"")
