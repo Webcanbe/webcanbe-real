@@ -75,6 +75,15 @@ Acceptance:
 - refresh-persistence and logout-invalidation checks included
 - product mutation still closed
 
+## Launch truthfulness cleanup: **LIVE**
+
+- code: `cb1c168771b988a25b74d42902da29b36e04c190`
+- UI `35514696758`, durable `35514696790`, Bigperson `35514696759`, production smoke `35514742329`: PASS
+- unavailable phone sign-in is disabled instead of redirecting to another provider
+- paid plans cannot be purchased before billing activation
+- stale Phase 4/account-backend copy removed
+- no product mutation/payment authority was enabled
+
 ## Gate 2 — Interactive production auth + private-read smoke
 
 Run against a clean/new account and an existing account.
