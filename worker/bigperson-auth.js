@@ -4,6 +4,7 @@ const GOOGLE_ISSUER = "https://accounts.google.com"
 const RP_ID = "webcanbe.com"
 const ORIGIN = "https://webcanbe.com"
 const CHALLENGE_MS = 90_000
+const GOOGLE_SESSION_MAX_AGE_MS = 10 * 60_000
 const PBKDF2_ITERATIONS = 600_000
 const encoder = new TextEncoder()
 
@@ -39,6 +40,7 @@ function requireConfig(env) {
 }
 function requireGoogleSession(session, allowedEmail) {
   if (!session || session.authProvider !== "google" || session.authIssuer !== GOOGLE_ISSUER || !session.authSubject) throw new Error("A fresh Google-authenticated Webcanbe session is required.")
+  if (!Number.isFinite(session.createdAt) || Date.now() - session.createdAt > GOOGLE_SESSION_MAX_AGE_MS) throw new Error("Google authentication is older than the Bigperson freshness window. Sign in with Google again.")
   if (String(session.profile?.email || "").trim().toLowerCase() !== allowedEmail || session.profile?.emailVerified !== true) throw new Error("Google identity is not authorized for Bigperson bootstrap.")
 }
 async function activeBigperson(db, session) {
