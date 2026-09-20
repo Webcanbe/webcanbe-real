@@ -13,7 +13,7 @@ Production domain: `https://webcanbe.com`
 - Every Bigperson Control operation requires all three: enrolled Google-authenticated first-party session + separate privileged factor + verified WebAuthn/passkey assertion.
 - Google authority is issuer+subject after bootstrap; deployment allowlist email is not the durable identity key.
 - Bigperson Google sessions must be no older than 10 minutes.
-- Privileged factor is never stored as plaintext; PBKDF2-SHA256 600k + per-user salt + server-only pepper.
+- Privileged factor is never stored as plaintext; PBKDF2-SHA256 600k + per-user salt + server-only pepper. During the one-time first bootstrap, a deployment salt is combined with the entered factor and pepper; only the derived digest is persisted. An optional pre-provisioned digest can additionally pin the bootstrap factor.
 - First Bigperson bootstrap requires all three factors and closes after an active Bigperson exists.
 - WebAuthn requires user verification; operation challenges expire after 90 seconds and bind exact user/session/method/path/body hash.
 - Challenges are one-time and passkey counters are persisted.\n- Dedicated Bigperson ceremony rate limit: 5 attempts/minute/user.
