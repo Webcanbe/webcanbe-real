@@ -1,3 +1,40 @@
+# GATE 5 RECOVERY / DR PREFLIGHT CLOSED — 2026-09-20 KST
+
+- Production verification trigger/code checkpoint: `0ad5747a89a01414b966ac8ceee82eb44c6c1768`.
+- Main verification:
+  - UI `35517472985`: **PASS**
+  - durable editor/export `35517473076`: **PASS**
+  - Bigperson `35517473013`: **PASS**
+  - production smoke `35517512404`: **PASS**
+  - Chromium / Firefox / WebKit browser matrix `35517525373`: **PASS**
+- Production DB recovery invariants were rechecked live:
+  - 40 `public.wcb_*` tables
+  - 11 recorded Supabase migrations
+  - direct `anon` / `authenticated` table grants on `wcb_*`: **0**
+  - direct `anon` / `authenticated` routine grants on `wcb_*`: **0**
+  - `webcanbe_runtime`: non-superuser, non-login, no create-role/create-db/replication/bypass-RLS
+  - `webcanbe_hyperdrive`: bounded login role, non-superuser, no create-role/create-db/replication/bypass-RLS
+  - immutable project-release, published-listing guard, and control-audit triggers are present
+  - Supabase Security Advisor: **0 findings**
+- Supabase table inspection also emits its generic “RLS disabled” advisory because the `wcb_*` tables do not use RLS. This is not currently equivalent to browser exposure: direct browser-role table/routine grants were independently verified as zero. Do not blindly enable RLS; the current authority model is server-only grants.
+- Added `scripts/db/recovery-preflight.mjs` and `npm run db:recovery:preflight` for a read-only recovery-database invariant check.
+- Added behavioral DR rehearsal:
+  - rollback wrapper refuses missing confirmation and malformed version IDs before the Wrangler boundary
+  - explicitly approved version IDs are forwarded exactly
+  - backup wrapper keeps the DB credential out of command-line arguments
+  - generated archive + checksum + `pg_restore --list` verification path is exercised with fake tools
+  - branch UI rehearsal `35517366141`: **PASS**
+- A live production Worker rollback drill is still intentionally pending.
+- A real off-site production DB backup/restore drill is still pending because it requires the private operator DB connection and a separate recovery target.
+- Gate 2 interactive state remains incomplete: Firebase identity count is still 0. Product mutation remains OFF.
+- Gate 3 staging current head: `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e`, main-behind: 0.
+  - UI `35517938841`: **PASS**
+  - durable `35517938853`: **PASS**
+  - Bigperson `35517938844`: **PASS**
+- Note: Gate 3 v3 preserves its older `package.json` operator command set because package-script synchronization was blocked by tool safety. Before Gate 3 production activation, rebuild the activation branch from latest main or explicitly reconcile this one package-script delta so `db:recovery:preflight` is not lost.
+
+---
+
 # GATE 5 BROWSER HARDENING CLOSED — 2026-09-20 KST
 
 - Production code checkpoint: `cc3584c4232d1bc382865cb8bcc775895391b2fb`.
