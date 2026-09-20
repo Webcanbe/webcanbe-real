@@ -1,3 +1,15 @@
+# FACTOR ORIGIN CLARIFICATION — 2026-09-20 KST
+
+- The privileged factor was not created in Cloudflare.
+- It was the raw user-entered value typed locally in the Mac terminal when generating the bootstrap PEPPER/SALT/DIGEST set.
+- The terminal command began with:
+  `read -s "FACTOR?Bigperson factor: "; echo`
+- Because `read -s` is silent input, the entered characters were not displayed on screen.
+- The raw factor is not stored in Git, Cloudflare vars, or PostgreSQL.
+- If the user does not remember the original raw factor, do not guess it. Before first enrollment, with 0 Bigpersons / 0 Bigperson security rows / 0 passkeys, the correct recovery is to choose a new factor and regenerate the matching Pepper/Salt/Digest set.
+
+---
+
 # PRIVILEGED FACTOR DEFINITION / RECOVERY — 2026-09-20 KST
 
 - `Privileged factor` means the user-chosen Bigperson-only password/string entered at the terminal prompt `Bigperson factor:`.
