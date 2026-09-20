@@ -285,6 +285,20 @@ Verification run `35448977411` passed all branch gates.
 
 ---
 
+## Bigperson privileged Control
+
+- [x] Separate platform roles from workspace roles: reviewer → admin → bigperson.
+- [x] Remove privileged Control from ordinary navigation and the obvious `/control` route.
+- [x] Put Control behind a non-public route plus independent production activation gate; route obscurity is explicitly not trusted as authorization.
+- [x] Add server-authoritative role/epoch checks and bounded production Control reads.
+- [x] Restrict publication/entitlement authority to admin+ and platform-role transitions to bigperson.
+- [x] Protect the final active bigperson at the database layer.
+- [x] Keep high-risk Control mutations behind fresh session-bound step-up evidence.
+- [ ] Connect real WebAuthn/passkey verification to step-up evidence minting.
+- [ ] Add privileged mutation UI for role management and seller/application operations without exposing authority client-side.
+- [ ] Add privileged session/security controls and audit drill-down.
+- [ ] Production smoke with an explicitly provisioned bigperson after Hyperdrive is connected.
+
 ## Immediate next task
 
 **Enable LOGIN for the prepared `webcanbe_hyperdrive` role, create the Cloudflare Hyperdrive binding, then run live DB-session/catalog/private-read smoke.**
