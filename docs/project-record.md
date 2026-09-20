@@ -1,3 +1,20 @@
+# GATE 1 CLOSED — PRODUCTION READ MODE LIVE — 2026-09-20 KST
+
+- Main deployment trigger checkpoint: `df98015bdd7f905ccbf7d0a23fe497bb49e8e331`.
+- Main verification:
+  - Phase 5 UI verify `35509468797`: **PASS**
+  - Phase 5 durable editor export verify `35509468729`: **PASS**
+  - Phase 5 Bigperson checkpoint verify `35509468846`: **PASS**
+  - Phase 5 production smoke `35509542122`: **PASS**
+- Live production HTML now exposes `wcb-product-read-mode=hosted`.
+- Live production continues to expose `wcb-control-mode=hosted`.
+- `wcb-product-mutation-mode` remains absent/closed.
+- Public Marketplace browse/detail/preview are on the authoritative production read boundary.
+- Gate 1 is complete. Next gate is authenticated Google/GitHub/Email private-read E2E; materialization mutation must remain closed until that passes.
+- Rollback branch remains `backup-main-before-product-read-launch-2026-09-20`.
+
+---
+
 # PRODUCT READ LAUNCH BRANCH CI GREEN — 2026-09-20 KST
 
 Production read activation code checkpoint `2aba73e72901f9208378a7a6595ddadb1141da26` is verified.
