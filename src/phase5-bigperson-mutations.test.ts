@@ -81,6 +81,15 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(client).toContain("controlPublishPromotedListing")
     expect(app).toContain("Publish Listing")
   })
+  it("derives Ready on the server from immutable release source instead of client claims",()=>{
+    expect(mutations).toContain("qualifyReleaseReady")
+    expect(mutations).toContain("deriveReleaseReadiness")
+    expect(mutations).toContain("release.ready.qualify")
+    expect(mutations).toContain("wcb_ready_qualifications")
+    expect(worker).toContain("/__webcanbe/api/ops/releases/ready/qualify")
+    expect(client).toContain("controlQualifyReleaseReady")
+    expect(app).toContain("browser cannot submit a Ready score or status")
+  })
   it("keeps Control entitlement authority limited to TEST entitlements",()=>{
     expect(mutations).toContain("grantTestEntitlement")
     expect(mutations).toContain("transitionTestEntitlement")
