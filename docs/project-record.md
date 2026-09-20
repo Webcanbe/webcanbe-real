@@ -1,5 +1,23 @@
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
+## 2026-09-20: Three-factor privileged mutation UI
+
+The Bigperson Control surface now performs real privileged mutations for platform-role
+management and seller intake decisions. A mutation cannot reuse the proof that opened
+Control: it starts a new Google-bound + separate-factor + WebAuthn ceremony whose
+challenge is bound to the exact method, path and operation-body hash.
+
+A successful ceremony creates short-lived session-bound `control_high_risk` evidence.
+Operator transitions and seller decisions consume that evidence while writing the
+existing append-only Control audit. Operator epoch advances on authority changes, the
+database still protects the final active Bigperson, and rejected seller intake cannot
+be silently reopened.
+
+The browser clears the separate factor before invoking WebAuthn and updates only the
+returned bounded Control state after a successful server mutation.
+
+---
+
 ## 2026-09-20: Bigperson mandatory three-factor verification
 
 Bigperson privileged access now requires three independent server-verified conditions on
