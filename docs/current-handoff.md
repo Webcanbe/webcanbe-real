@@ -1,3 +1,9 @@
+# NEXT BUTTON — 2026-09-20 KST
+
+After entering the privileged factor on the current production Admin screen, click `First Bigperson: register passkey` first. Complete the macOS/WebAuthn prompt. Use `Verify all 3 factors` only after passkey enrollment succeeds.
+
+---
+
 # FACTOR ORIGIN — 2026-09-20 KST
 
 The Bigperson privileged factor was the silent value entered locally at the Mac terminal prompt `Bigperson factor:` while generating the bootstrap Pepper/Salt/Digest set. It was not a Cloudflare-created value. If it is forgotten before first enrollment, regenerate the factor set instead of guessing.
