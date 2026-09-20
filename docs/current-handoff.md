@@ -1,3 +1,9 @@
+# CURRENT VERIFIED STATE — OPERATOR SCHEMA FIX LIVE — 2026-09-20 KST
+
+The missing `wcb_product_operators.updated_at` production schema bug is fixed and migration `20260920103846` is applied. Main UI/Bigperson/durable CI and production smoke all pass at `4aeeef50d929...`. Retry first Bigperson enrollment only after a fresh Google login because the Bigperson freshness window is 10 minutes.
+
+---
+
 # CURRENT LIVE FIX — OPERATOR updated_at — 2026-09-20 KST
 
 The latest first-Bigperson attempt reached the final DB bootstrap transaction but failed because production `wcb_product_operators` lacked the `updated_at` column already referenced by runtime code. Production migration `20260920103846 phase5_product_operator_updated_at` is now applied and the column exists. No partial Bigperson/passkey rows were committed. The current Google session is already ~10m21s old, so re-login before the next registration retry.
