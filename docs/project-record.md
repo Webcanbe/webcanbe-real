@@ -18,7 +18,7 @@ expire after 90 seconds and bind user, exact first-party session, HTTP method, p
 request-body hash. Challenges are one-time, passkey counters are updated, and replay or
 cross-session reuse is refused.
 
-The browser clears the entered factor before starting the passkey ceremony. Privileged
+A dedicated Cloudflare binding limits Bigperson ceremonies to five attempts per minute per user.\n\nThe browser clears the entered factor before starting the passkey ceremony. Privileged
 Control data is not automatically loaded or cached as continuing authority: another
 Control read requires another three-factor ceremony.
 
