@@ -667,19 +667,30 @@ function ControlRows({ rows, columns }: { rows: Array<Record<string, unknown>>; 
 }
 
 function Control() {
-  const hosted = controlMode(), [control, setControl] = useState<ControlData>(), [loading, setLoading] = useState(hosted), [error, setError] = useState("")
-  useEffect(() => {
-    if (!hosted) return
-    let current = true
-    void hostedProductClient.controlRead().then(value => { if (current) { setControl(value); setLoading(false) } }, reason => { if (current) { setError(reason instanceof Error ? reason.message : "Operations are unavailable."); setLoading(false) } })
-    return () => { current = false }
-  }, [hosted])
+  const hosted = controlMode(), [control, setControl] = useState<ControlData>(), [password, setPassword] = useState(""), [busy, setBusy] = useState(false), [error, setError] = useState("")
+  const verifyAndRead = async () => {
+    if (!password || busy) return
+    const factor = password
+    setPassword(""); setBusy(true); setError(""); setControl(undefined)
+    try { setControl(await hostedProductClient.controlRead(factor)) }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "Three-factor privileged verification was refused.") }
+    finally { setBusy(false) }
+  }
+  const enrollPasskey = async () => {
+    if (!password || busy) return
+    const factor = password
+    setPassword(""); setBusy(true); setError("")
+    try {
+      await hostedProductClient.registerBigpersonPasskey(factor)
+      setError("Passkey registered. Enter the privileged factor again and verify all three factors to open Operations.")
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Bigperson passkey registration was refused.") }
+    finally { setBusy(false) }
+  }
   if (!hosted) return <AppShell><main className="control"><header className="control-head"><span className="signal">Operations</span><h1>Hosted privileged session required.</h1><p>The local product preview does not fabricate privileged records or platform roles.</p></header></main></AppShell>
-  if (loading) return <AppShell><main className="control"><header className="control-head"><span className="signal">Operations</span><h1>Loading privileged state…</h1></header><HubState kind="loading" title="Loading operations" body=""/></main></AppShell>
-  if (error || !control) return <AppShell><main className="control"><header className="control-head"><span className="signal">Operations</span><h1>Privileged access unavailable.</h1><p>Knowing this route is not authority. A current server-authorized reviewer, admin, or bigperson session is required.</p></header><HubState kind="error" title="Privileged read refused" body={error || "Operations data was not returned."}/></main></AppShell>
+  if (!control) return <AppShell><main className="control"><header className="control-head"><span className="signal">Bigperson Operations</span><h1>Three factors are required every time.</h1><p>This surface accepts only a first-party session created by the enrolled Google identity, the separate privileged factor, and a verified WebAuthn passkey assertion. The route and ordinary login session are never sufficient.</p></header><section className="control-auth-gate"><div><b>1. Google identity</b><p>Verified again on the server from the current first-party session and the enrolled Google issuer + subject.</p></div><div><b>2. Privileged factor</b><p>Entered for this operation only. It is cleared from UI state before the passkey ceremony.</p></div><div><b>3. Apple / WebAuthn passkey</b><p>User verification is required. The signed challenge is one-time, session-bound, operation-bound and expires after 90 seconds.</p></div><label>Privileged factor<input type="password" autoComplete="current-password" value={password} onChange={event=>setPassword(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void verifyAndRead()}}/></label><div className="control-auth-actions"><button className="button primary" disabled={busy||!password} onClick={()=>void verifyAndRead()}>{busy?"Verifying…":"Verify all 3 factors"}</button><button className="button" disabled={busy||!password} onClick={()=>void enrollPasskey()}>First Bigperson: register passkey</button></div>{error&&<p className="creator-message" role="status">{error}</p>}</section></main></AppShell>
   const metrics = [["Users", control.users.length], ["Operators", control.operators.filter(row => field(row,"active") === true).length], ["Seller applications", control.sellerApplications.length], ["Submissions", control.submissions.length], ["Listings", control.listings.length], ["Audit events", control.audit.length]] as const
   return <AppShell><main className="control"><header className="control-head"><span className="signal">Operations</span><h1>Privileged platform control.</h1><p>This surface is intentionally absent from public navigation. The path itself is not trusted as authorization; every read and mutation still requires current server-side platform authority.</p></header>
-    <section className="control-metrics">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</section>
+    <section className="control-authenticated"><b>Three-factor proof consumed for this read.</b><p>Refreshing privileged data requires a new Google-bound session check, privileged factor verification, and a new passkey assertion.</p><button className="button" onClick={()=>setControl(undefined)}>Lock Operations</button></section><section className="control-metrics">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</section>
     <aside className="control-stepup"><b>Platform roles: reviewer → admin → bigperson.</b><p>Workspace owner/editor/viewer roles remain separate. High-risk mutations require fresh server-minted, session-bound step-up evidence. The final active bigperson is protected at the database layer from accidental removal or demotion.</p></aside>
     <section className="control-section"><div className="hub-section-head"><div><h2>Privileged operators</h2><p>Reviewer, admin and bigperson authority. Role changes are trusted-server operations only.</p></div></div><ControlRows rows={control.operators} columns={[{label:"User",keys:["user_id"]},{label:"Role",keys:["role"]},{label:"Active",keys:["active"]},{label:"Epoch",keys:["epoch"]}]}/></section>
     <section className="control-split"><div><div className="hub-section-head"><div><h2>Users</h2><p>Identity-account aggregation without provider credentials.</p></div></div><ControlRows rows={control.users} columns={[{label:"User",keys:["user_id"]},{label:"Identities",keys:["identity_count"]},{label:"Active identity",keys:["has_active_identity"]}]}/></div><div><div className="hub-section-head"><div><h2>Sessions</h2><p>Bounded session counts and expiry metadata.</p></div></div><ControlRows rows={control.sessions} columns={[{label:"User",keys:["user_id"]},{label:"Active sessions",keys:["active_sessions"]},{label:"Latest expiry",keys:["latest_expiry"]}]}/></div></section>
