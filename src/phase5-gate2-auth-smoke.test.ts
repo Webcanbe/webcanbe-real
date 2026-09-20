@@ -34,7 +34,7 @@ describe("Phase 5 Gate 2 authenticated read smoke", () => {
     expect(smoke).toContain("createEmailAccountFirebase(email,password)")
     expect(smoke).toContain("signInWithEmailFirebase(email,password)")
     expect(smoke).toContain("hostedProductClient.firebaseExchange")
-    expect(smoke).toContain("setPassword("")")
+    expect(smoke).toContain('setPassword("")')
     expect(smoke).not.toContain("localStorage.setItem")
   })
 
