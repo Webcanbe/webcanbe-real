@@ -1,3 +1,40 @@
+# BIGPERSON PBKDF2 CLOUDFLARE RUNTIME FIX — 2026-09-20 KST
+
+- First Bigperson registration progressed past Google freshness and reached privileged-factor derivation.
+- Production returned:
+  `Pbkdf2 failed: iteration counts above 100000 are not supported (requested 600000).`
+- Root cause:
+  - the Bigperson factor implementation used Cloudflare WebCrypto `crypto.subtle` PBKDF2;
+  - this runtime path rejects iteration counts above 100,000;
+  - the configured bootstrap digest was intentionally generated at 600,000 iterations.
+- The iteration count was **not lowered**. Lowering it would make the configured bootstrap digest incompatible and weaken the intended derivation.
+- Fix:
+  - `worker/bigperson-auth.js` now uses `node:crypto` `pbkdf2Sync`;
+  - input remains `factor + "\0" + pepper`;
+  - salt remains the configured bootstrap salt;
+  - iterations remain 600,000;
+  - key length remains 32 bytes;
+  - digest remains SHA-256;
+  - output remains base64url.
+- Cloudflare Workers officially supports `node:crypto` under the current Node compatibility runtime.
+- A direct known-vector regression proves the Worker derivation matches the operator bootstrap command exactly.
+- No factor/PEPPER/SALT/DIGEST rotation is required for this fix.
+- Branch verification:
+  - Phase 5 UI verify: PASS
+  - Phase 5 Bigperson checkpoint verify: PASS
+  - Phase 5 durable editor/export verify: PASS
+  - production build: PASS
+  - Wrangler dry-run: PASS.
+- Next after production deployment:
+  1. sign in with a fresh Google session if the 10-minute freshness window has elapsed;
+  2. enter the existing privileged factor;
+  3. click `First Bigperson: register passkey`;
+  4. complete WebAuthn enrollment;
+  5. verify DB Bigperson/security/passkey rows;
+  6. perform first `Verify all 3 factors` Control read.
+
+---
+
 # BIGPERSON FRESH-GOOGLE REAUTH CHECKPOINT — 2026-09-20 KST
 
 - First Bigperson registration was attempted from the live production Operations gate.
