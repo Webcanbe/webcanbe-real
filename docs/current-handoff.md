@@ -1,3 +1,9 @@
+# CURRENT NEXT ACTION — PBKDF2 FIX LIVE — 2026-09-20 KST
+
+The 600,000-iteration Bigperson PBKDF2 runtime failure is fixed and deployed. Main UI/Bigperson/durable CI and production smoke pass. Current Google session is ~7m23s old against a 10-minute Bigperson freshness limit, so sign out/in once more, then immediately enter the existing factor and click `First Bigperson: register passkey`. Bigperson/passkey rows remain 0 before retry.
+
+---
+
 # CURRENT BLOCKER FIXED IN CODE — PBKDF2 RUNTIME — 2026-09-20 KST
 
 The live first-Bigperson attempt exposed Cloudflare WebCrypto's PBKDF2 iteration cap: 600,000 iterations were rejected. The implementation now keeps the existing 600,000-iteration bootstrap format but uses Worker-supported `node:crypto.pbkdf2Sync`, which matches the already configured digest. No factor-set regeneration is required. CI/build/Wrangler verification passes. After production deployment, retry first passkey registration with a fresh Google session.
