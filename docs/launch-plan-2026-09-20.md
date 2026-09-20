@@ -127,6 +127,15 @@ Acceptance:
 - Gate 4 materialize → durable edit → reopen → standalone export/build regression included
 - production activation remains blocked on interactive Gate 2
 
+## Gate 3 v3 current-production rebase: **VERIFIED**
+
+- staging checkpoint: `d9d7b5be1f0334bb988f663e508c74cc7ddc0f81`
+- UI `35514962485`: PASS
+- durable `35514962469`: PASS
+- Bigperson `35514962482`: PASS
+- includes latest production auth/UI truthfulness changes plus Gate 3/4 regressions
+- still not deployed; interactive Gate 2 remains required first
+
 ## Gate 3 — Materialization mutation activation
 
 Only after Gate 2 passes.
