@@ -8,6 +8,16 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — Bigperson session security
+
+- Control exposes bounded active-session IDs/user/provider/expiry but never token/cookie hashes.
+- Bigperson can revoke an individual first-party session only through a new three-factor operation-bound ceremony.
+- Session revocation is append-only audited as `session.revoke`.
+- Audit UI now displays bounded before/after transition detail.
+- Next: remaining review/assessment/release/listing/Ready mutations + production provisioning/E2E.
+
+---
+
 ## Latest recovery delta — Bigperson mutation UI
 
 - Bigperson can now perform audited platform-role/active-state transitions and seller application approve/reject from Operations.
