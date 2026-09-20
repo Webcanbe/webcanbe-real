@@ -1,3 +1,18 @@
+## 2026-09-20 production integration and DB performance checkpoint
+
+- [x] Fast-forward verified Admin + durable editor integration to main.
+- [x] Main UI verification `35495682185`.
+- [x] Main Bigperson verification `35495682150`.
+- [x] Main durable editor/export verification `35495682167`.
+- [x] Live automatic production smoke `35495723690`: 21/21.
+- [x] Correct integration regressions found by the first whole-main suite.
+- [x] Add/apply 21 PostgreSQL FK covering indexes; production uncovered FK count is 0.
+- [ ] Hyperdrive binding and DB-backed session smoke.
+- [ ] First production Bigperson enrollment and Control E2E.
+- [ ] Activate production read/mutation modes only after those gates.
+
+---
+
 ## 2026-09-20 integrated Admin + durable editor checkpoint
 
 - [x] Bigperson/Admin authority, mandatory three-factor security, review/assessment, release promotion, Listing publication, canonical source-derived Ready qualification and TEST entitlement controls.
