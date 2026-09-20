@@ -22,7 +22,7 @@ Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudfl
 - Passkey counters are persisted after successful authentication.
 - The Control UI clears the entered privileged factor before the passkey ceremony and does not retain it between operations.
 - Control data is not auto-loaded: each read requires a new three-factor ceremony.
-- Existing protections remain: CSRF/same-origin, rate limiting, server-side Bigperson role/epoch, last-Bigperson DB protection, no client role trust, private/noindex Control route.
+- Dedicated Bigperson ceremony rate limit: 5 attempts per minute per user through its own Cloudflare binding.\n- Existing protections remain: CSRF/same-origin, rate limiting, server-side Bigperson role/epoch, last-Bigperson DB protection, no client role trust, private/noindex Control route.
 - Deployment migration: `deployment/hosted/postgres-bigperson-3factor.sql`.
 - Secrets/config still need to be provisioned in Cloudflare before production enrollment; no user credential values are stored in the repository.
 
