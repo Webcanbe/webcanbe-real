@@ -1,3 +1,32 @@
+# FIRST PRODUCTION BIGPERSON ENROLLMENT SUCCEEDED — 2026-09-20 KST
+
+- The live production UI now reports:
+  `Passkey registered. Enter the privileged factor again and verify all three factors to open Operations.`
+- Production DB verification confirms the enrollment committed successfully:
+  - active Bigperson operators: **1**
+  - Bigperson security rows: **1**
+  - active Bigperson passkeys: **1**
+  - consumed registration challenges: **1**
+  - live leftover challenges: **0**
+  - newest active Google session age at verification: ~84 seconds
+- Therefore the first production Bigperson bootstrap is complete.
+- The registration transaction successfully persisted:
+  - platform operator authority
+  - Google issuer/subject binding
+  - factor salt/digest verifier
+  - WebAuthn public-key credential
+  - authenticator metadata
+  - consumed one-time registration challenge.
+- Immediate final Admin E2E step:
+  1. re-enter the same privileged factor in the current Operations screen;
+  2. click `Verify all 3 factors`;
+  3. complete the passkey assertion prompt;
+  4. confirm the privileged Control data view opens;
+  5. verify DB challenge consumption / step-up evidence and then mark Admin production E2E closed.
+- Do not press `First Bigperson: register passkey` again. Bootstrap is now closed because an active Bigperson exists.
+
+---
+
 # OPERATOR updated_at FIX VERIFIED ON MAIN — 2026-09-20 KST
 
 - Production migration `20260920103846 phase5_product_operator_updated_at` is applied.
