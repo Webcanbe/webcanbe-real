@@ -22,4 +22,14 @@ describe("Phase 5 production Hyperdrive configuration", () => {
     expect(configText).not.toMatch(/connection[_-]?string/i)
     expect(configText).not.toMatch(/db[_-]?password|database[_-]?password/i)
   })
+  it("declares required runtime secrets without committing their values", () => {
+    expect(config.secrets?.required).toEqual(expect.arrayContaining([
+      "GOOGLE_OAUTH_CLIENT_ID",
+      "GOOGLE_OAUTH_CLIENT_SECRET",
+      "WEBCANBE_BIGPERSON_FACTOR_PEPPER",
+      "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_SALT",
+      "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST",
+    ]))
+  })
+
 })
