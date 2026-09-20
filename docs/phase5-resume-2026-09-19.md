@@ -8,6 +8,16 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — Bigperson review / assessment
+
+- Operations can make immutable seller review approve/reject decisions with a fresh three-factor proof.
+- Worker rechecks pending state + immutable snapshot hash before review insert.
+- Approved reviews can be admitted to assessment only with another fresh three-factor proof and matching seller/snapshot/review provenance.
+- Review/assessment mutations append privileged Control audit transitions.
+- Next: release promotion, Listing publication, Ready qualification, entitlement operations, then provisioning/E2E.
+
+---
+
 ## Latest recovery delta — Bigperson session security
 
 - Control exposes bounded active-session IDs/user/provider/expiry but never token/cookie hashes.
