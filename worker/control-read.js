@@ -26,7 +26,7 @@ export async function databaseControlRead(db, session) {
     rows(db, "SELECT qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_revision_id,source_content_hash,snapshot_hash,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,qualified_at FROM wcb_ready_qualifications ORDER BY qualified_at DESC LIMIT 200"),
     rows(db, "SELECT deploy_intent_id,project_id,workspace_id,requested_by,source_revision_id,source_content_hash,status,created_at,updated_at FROM wcb_deploy_intents ORDER BY created_at DESC LIMIT 200"),
     rows(db, "SELECT user_id,count(*)::int AS identity_count,bool_or(active) AS has_active_identity FROM wcb_identity_accounts GROUP BY user_id ORDER BY user_id LIMIT 500"),
-    rows(db, "SELECT user_id,count(*) FILTER (WHERE active AND expires_at>clock_timestamp())::int AS active_sessions,max(expires_at) AS latest_expiry FROM wcb_sessions GROUP BY user_id ORDER BY user_id LIMIT 500"),
+    rows(db, "SELECT session_id,user_id,created_at,expires_at,active,auth_provider FROM wcb_sessions WHERE active AND expires_at>clock_timestamp() ORDER BY created_at DESC LIMIT 500"),
     rows(db, "SELECT workspace_id,count(*) FILTER (WHERE active)::int AS active_members,count(*) FILTER (WHERE active AND role='owner')::int AS owners FROM wcb_workspace_members GROUP BY workspace_id ORDER BY workspace_id LIMIT 500"),
     rows(db, "SELECT user_id,role,active,epoch FROM wcb_product_operators ORDER BY CASE role WHEN 'bigperson' THEN 1 WHEN 'admin' THEN 2 ELSE 3 END,user_id LIMIT 200"),
     rows(db, "SELECT entitlement_id,user_id,release_id,provider,status,granted_at,revoked_at FROM wcb_license_entitlements ORDER BY granted_at DESC LIMIT 200"),
