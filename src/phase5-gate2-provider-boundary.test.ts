@@ -23,6 +23,8 @@ describe("Phase 5 Gate 2 provider-boundary smoke", () => {
     expect(script).toContain("failedResponses.push")
     expect(script).toContain("url.origin}${url.pathname}")
     expect(script).not.toContain("url.search")
+    expect(script).toContain("INFO  Firebase authDomain init helper")
+    expect(script).not.toContain("Firebase authDomain init config resolves")
   })
 
   it("uses a pinned credential-free Playwright workflow against production", () => {
