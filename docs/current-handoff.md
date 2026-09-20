@@ -1,3 +1,16 @@
+# HYPERDRIVE AUTOMATION BLOCKER CHECKPOINT — 2026-09-20 KST
+
+- Admin code, production schema, full Phase 5 CI, durable editor CI, Bigperson CI and automatic production smoke are all complete and passing on canonical main `417e4c11ef912e92e2ec3153ec6b3fcb6b653ddb`.
+- Active continuation branch: `phase5-hyperdrive-activation`.
+- Safe rollback: `backup-main-before-hyperdrive-2026-09-20`.
+- Cloudflare Hyperdrive automation was attempted only after rechecking official Cloudflare/Supabase Direct-connection guidance.
+- The browser automation run never started because its external automation wallet had insufficient balance. No database credential was created or transferred.
+- Production `webcanbe_hyperdrive` remains `NOLOGIN`.
+- Do not generate or persist a Hyperdrive DB password until a Cloudflare configuration can be created in the same controlled operation.
+- Resume point: create `webcanbe-production-db` in Cloudflare Hyperdrive using Supabase Direct PostgreSQL; then add only the non-secret config ID to `wrangler.jsonc`, deploy, require DB readiness, run DB-backed auth/private-read smoke, enroll first Bigperson passkey, and run Control E2E.
+
+---
+
 # PHASE 5 ADMIN CLOSED / HYPERDRIVE ACTIVATION HANDOFF — 2026-09-20 KST
 
 - Canonical main + Admin branch checkpoint: `417e4c11ef912e92e2ec3153ec6b3fcb6b653ddb`.
