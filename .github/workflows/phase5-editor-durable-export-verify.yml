@@ -1,7 +1,7 @@
 name: Phase 5 durable editor export verify
 on:
   push:
-    branches: [main, phase5-editor-durable-export, phase5-bigperson-control, phase5-hyperdrive-live, phase5-admin-live-control, phase5-cloudflare-typescript-runtime, phase5-bigperson-pbkdf2-node-crypto, phase5-bigperson-pbkdf2-cloudflare-cap, phase5-bigperson-synced-passkey, phase5-product-operator-updated-at, phase5-admin-panel-only, phase5-bigperson-unified-operations, phase5-product-read-launch, phase5-gate2-private-read-preflight]
+    branches: [main, phase5-editor-durable-export, phase5-bigperson-control, phase5-hyperdrive-live, phase5-admin-live-control, phase5-cloudflare-typescript-runtime, phase5-bigperson-pbkdf2-node-crypto, phase5-bigperson-pbkdf2-cloudflare-cap, phase5-bigperson-synced-passkey, phase5-product-operator-updated-at, phase5-admin-panel-only, phase5-bigperson-unified-operations, phase5-product-read-launch, phase5-gate2-private-read-preflight, phase5-gate3-materialization-staging-v2]
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
       - name: Secret scan
         run: npm run security:secrets
       - name: Durable save and standalone export regressions
-        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts worker/materialization.test.js
+        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts src/phase5-materialization-activation.test.ts scripts/launch/materialization-smoke-fixture.test.js worker/materialization.test.js
       - name: Production build
         run: npm run build
       - name: Worker bundle dry run
