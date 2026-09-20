@@ -1,3 +1,27 @@
+# CLOUDFLARE TYPESCRIPT RUNTIME FIX + LIVE CONTROL PASS — 2026-09-20 KST
+
+- Canonical main: `d83731bedfa749074aef7c37795a3d2ab66b199e`.
+- Cloudflare deploy failure `10021` was caused by bundled `typescript` evaluating CommonJS globals under Worker ESM:
+  - `ReferenceError: __filename is not defined`
+  - stack reached `src/webcanbe-engine/adapters/react/reactSourceAdapter.ts`.
+- Fix: Wrangler `define` now supplies Worker-safe `__filename` and `__dirname` values while preserving the canonical React/Ready analyzer.
+- UI, Bigperson/Admin, durable editor/export, secret scan, production build and Wrangler dry-run all pass on the fix.
+- Automatic production smoke `35501017695` ultimately passed **23/23** after deployment propagation.
+- Live production now confirms:
+  - Control switch deployed (`wcb-control-mode=hosted`)
+  - product read/mutation switches still closed
+  - Hyperdrive database ready
+  - schema ready
+  - authoritative catalog read 200
+  - security/crawler/noindex checks pass
+- Remaining Admin gate is interactive only:
+  - fresh Google first-party session for the allowlisted Bigperson identity
+  - first Bigperson passkey registration
+  - one three-factor Control read
+  - DB verification of operator/security/passkey/audit state.
+
+---
+
 # PHASE 5 MAIN PRODUCTION + DB INDEX HARDENING CHECKPOINT — 2026-09-20 KST
 
 - Verified Admin + durable integration was fast-forwarded to `main`.
