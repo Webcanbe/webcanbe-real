@@ -8,6 +8,21 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — bigperson Control foundation
+
+- Platform authority is `reviewer → admin → bigperson`, separate from workspace roles.
+- Ordinary navigation no longer exposes Control and the obvious `/control` route is gone.
+- Privileged route: `/_ops/keystone-7f31`; obscurity is not authorization.
+- Production Control has an independent activation gate and bounded Worker read path.
+- reviewer handles review/assessment authority; admin+ handles seller/publication/TEST entitlement authority; only bigperson may change privileged platform roles.
+- Fresh session-bound high-risk step-up evidence remains mandatory for Control mutations.
+- Database trigger protects the final active bigperson.
+- Explicit migration: `deployment/hosted/postgres-control-roles.sql`.
+- Next slice: passkey-backed step-up minting + privileged mutation UI + privileged session/security controls.
+- Dashboard/landing unchanged.
+
+---
+
 ## Latest recovery delta — coherent reload / Refresh accepted
 
 - Initial Code workspace load accepts files + history only when both report the same accepted revision.
