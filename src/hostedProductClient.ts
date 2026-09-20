@@ -277,6 +277,10 @@ export class HostedProductClient {
     return await this.privilegedMutation<{ publication: Record<string, unknown>; listing: Record<string, unknown> }>(password, "/__webcanbe/api/ops/listings/publish", { ...input, idempotencyKey: crypto.randomUUID() })
   }
 
+  async controlQualifyReleaseReady(password: string, input: { releaseId: string; assessmentResultId: string; qualificationVersion: string }) {
+    return (await this.privilegedMutation<{ qualification: Record<string, unknown> }>(password, "/__webcanbe/api/ops/releases/ready/qualify", { ...input, idempotencyKey: crypto.randomUUID() })).qualification
+  }
+
   async controlGrantTestEntitlement(password: string, input: { beneficiaryUserId: string; releaseId: string }) {
     return (await this.privilegedMutation<{ entitlement: Record<string, unknown> }>(password, "/__webcanbe/api/ops/entitlements/test/grant", { ...input, idempotencyKey: crypto.randomUUID() })).entitlement
   }
