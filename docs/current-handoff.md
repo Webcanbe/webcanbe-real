@@ -1,3 +1,28 @@
+# PHASE 5 BIGPERSON PRODUCTION SCHEMA CHECKPOINT — 2026-09-20 KST
+
+- Production Supabase project `webcanbe-production` now has the privileged Control schema actually applied.
+- Recorded migrations:
+  - `20260920064953 phase5_control_roles`
+  - `20260920064957 phase5_bigperson_three_factor`
+- `wcb_product_operators.role` is live with `reviewer/admin/bigperson` constraint and default `admin`.
+- Database trigger `wcb_protect_last_bigperson_trigger` is live on operator UPDATE/DELETE.
+- Production now contains `wcb_bigperson_security`, `wcb_bigperson_passkeys`, and `wcb_bigperson_challenges`.
+- Bigperson user foreign keys bind to the real internal account authority `wcb_user_profiles(user_id)`; challenge sessions bind to `wcb_sessions(session_id)`.
+- All three Bigperson tables are empty before first enrollment.
+- Direct production privilege verification:
+  - `anon`: 0 grants on `wcb_*`
+  - `authenticated`: 0 grants on `wcb_*`
+  - `webcanbe_runtime`: SELECT/INSERT/UPDATE/DELETE on all 40 current `wcb_*` tables = 160 grants
+- Supabase's generic table listing still flags RLS-disabled public tables, but the deliberate server-only model is verified by zero browser-role grants and the Supabase Security Advisor currently reports 0 lints. Do not blindly enable RLS without redesigning server access.
+- Before applying, both Control/3-factor migrations and the corrected Supabase hardening script were executed against production inside rollback transactions and passed.
+- A critical pre-production migration defect was caught and fixed: the original 3-factor migration referenced nonexistent `wcb_users(id)`; it now references `wcb_user_profiles(user_id)`. The canonical fresh-install schema was corrected too.
+- The malformed final `DO $ ... $` block in the retained Supabase hardening script was also corrected to `DO $$ ... $$` and production dry-run verified.
+- Canonical source-derived Ready qualification is implemented and CI-proven; browser/operator input cannot supply the Ready score/status.
+- Admin/Bigperson code + production schema are now complete up to the live first-Bigperson ceremony.
+- Remaining live Admin gate: Hyperdrive/DB-backed first-party session + Cloudflare Bigperson deployment configuration, then first device-bound passkey enrollment and production Control E2E. No privileged secret values belong in Git/chat.
+
+---
+
 # PHASE 5 BIGPERSON PUBLICATION + TEST ENTITLEMENT CHECKPOINT — 2026-09-20 KST
 
 - Privileged Operations now extends beyond review/assessment into the retained Phase 3 publication lineage.
