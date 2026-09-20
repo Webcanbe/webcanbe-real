@@ -14,6 +14,7 @@ describe("Phase 5 production read-only product mode", () => {
     expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     expect(index).not.toContain('name="wcb-product-read-mode"')
     expect(index).not.toContain('name="wcb-product-mutation-mode"')
+    expect(index).not.toContain('name="wcb-control-mode"')
   })
 
   it("prepares only read-oriented account/workspace/library surfaces for the future switch", () => {
@@ -32,8 +33,10 @@ describe("Phase 5 production read-only product mode", () => {
     const control = app.slice(app.indexOf("function Control()"), app.indexOf("\nfunction ", app.indexOf("function Control()")+20))
     const checkout = app.slice(app.indexOf("function Checkout()"), app.indexOf("\nfunction ", app.indexOf("function Checkout()")+20))
     expect(seller).toContain("hostedProductMode()")
-    expect(control).toContain("hostedProductMode()")
+    expect(control).toContain("controlMode()")
     expect(checkout).toContain("hostedProductMode()")
+    expect(client).toContain("productionControlMode")
+    expect(client).toContain("controlMode = () => hostedProductMode() || productionControlMode()")
     expect(seller).not.toContain("productReadMode()")
     expect(control).not.toContain("productReadMode()")
   })
