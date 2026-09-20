@@ -53,7 +53,9 @@ describe("Worker security header adapter", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self' https://apis.google.com https://www.gstatic.com")
     expect(CONTENT_SECURITY_POLICY).toContain("script-src-attr 'none'")
     expect(CONTENT_SECURITY_POLICY).not.toContain("'unsafe-eval'")
-    expect(CONTENT_SECURITY_POLICY).not.toContain("'unsafe-inline'")
+    const scriptDirective = CONTENT_SECURITY_POLICY.split("; ").find(value => value.startsWith("script-src ")) ?? ""
+    expect(scriptDirective).not.toContain("'unsafe-inline'")
+    expect(scriptDirective).not.toContain("'unsafe-eval'")
     expect(CONTENT_SECURITY_POLICY).toContain("style-src 'self' 'unsafe-inline'")
     expect(CONTENT_SECURITY_POLICY).toContain("object-src 'none'")
     expect(CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'")
