@@ -34,6 +34,12 @@ describe("Phase 5 public production smoke runner", () => {
     expect(smoke).toContain("/__webcanbe/api/product/catalog/browse")
     expect(smoke).toContain("Product database is not configured.")
     expect(smoke).toContain("readiness does not expose credentials")
+    expect(smoke).toContain("anonymous private read is refused")
+    expect(smoke).toContain("/__webcanbe/api/workspaces")
+    expect(smoke).toContain("/__webcanbe/api/product/purchases")
+    expect(smoke).toContain("/__webcanbe/api/product/workspace-projects/list")
+    expect(smoke).toContain("/__webcanbe/api/account/get")
+    expect(smoke).toContain("anonymous materialization is refused before mutation evaluation")
   })
 
   it("is exposed as an operator command and automatically runs after successful main CI", () => {
