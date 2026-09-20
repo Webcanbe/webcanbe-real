@@ -7,6 +7,7 @@ const session = fs.readFileSync("worker/postgres-session.js", "utf8")
 const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const schema = fs.readFileSync("deployment/hosted/postgres-bigperson-3factor.sql", "utf8")
+const wrangler = fs.readFileSync("wrangler.jsonc", "utf8")
 
 describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
   it("binds first-party sessions to the identity that authenticated them", () => {
@@ -49,6 +50,12 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(client).toContain("/__webcanbe/api/ops/bigperson/operation/options")
     expect(app).toContain("Three factors are required every time.")
     expect(app).toContain("Verify all 3 factors")
+  })
+
+  it("adds a dedicated low-volume ceremony rate limit", () => {
+    expect(wrangler).toContain('"BIGPERSON_RATE_LIMITER"')
+    expect(wrangler).toContain('"limit": 5')
+    expect(worker).toContain('rateLimitAllowed(env.BIGPERSON_RATE_LIMITER, "bigperson:" + databaseSession.userId)')
   })
 
   it("locks first Bigperson enrollment to Google + factor + verified passkey before role bootstrap", () => {
