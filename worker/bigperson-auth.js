@@ -182,5 +182,7 @@ export async function consumeBigpersonOperation(db, session, body, env, request,
   const consumed = await db.query("UPDATE wcb_bigperson_challenges SET used_at=clock_timestamp() WHERE challenge_id=$1 AND used_at IS NULL RETURNING challenge_id", [challenge.challenge_id])
   if (!consumed.rows.length) throw new Error("Privileged operation challenge was already used.")
   await db.query("UPDATE wcb_bigperson_passkeys SET counter=$2,last_used_at=clock_timestamp() WHERE credential_id=$1", [passkey.credential_id, verification.authenticationInfo.newCounter])
-  return { verified: true, credentialId: String(passkey.credential_id) }
+  const evidenceId = crypto.randomUUID()
+  await db.query("INSERT INTO wcb_operator_step_up_evidence(evidence_id,operator_user_id,session_id,authority,verified_at,expires_at,active) VALUES($1,$2,$3,'control_high_risk',clock_timestamp(),clock_timestamp()+interval '5 minutes',true)", [evidenceId, session.userId, session.sessionId])
+  return { verified: true, credentialId: String(passkey.credential_id), evidenceId }
 }
