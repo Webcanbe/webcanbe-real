@@ -1,3 +1,13 @@
+## 2026-09-20: Production Bigperson schema and canonical Ready closure
+
+The privileged Phase 5 branch completed source-derived Ready qualification using the retained Phase 3 React source analyzer and compatibility summarizer. Qualification re-verifies immutable release provenance and derives `ready/partial/code_only` server-side; no browser-provided compatibility status is trusted. Dedicated Ready regression, TypeScript/Vite build, Worker syntax and Wrangler dry-run pass.
+
+Before production migration, audit found two retained schema defects: Bigperson 3-factor SQL referenced nonexistent `wcb_users(id)`, and the Supabase hardening file retained one malformed final `DO $ ... $` block. Bigperson authority now references `wcb_user_profiles(user_id)`; canonical `postgres.sql` includes the profile table for fresh installs; Bigperson table privileges are explicit; the hardening delimiter is corrected. Both schema sets passed production rollback-only dry runs before mutation.
+
+Production Supabase then recorded `phase5_control_roles` and `phase5_bigperson_three_factor`. Verification proves the role constraint, final-Bigperson trigger, user/session foreign keys and three empty Bigperson tables. Browser roles retain zero direct `wcb_*` grants; `webcanbe_runtime` has four DML grants across all 40 `wcb_*` tables. Supabase Security Advisor reports zero lints. Live first-Bigperson provisioning remains intentionally impossible until Hyperdrive provides DB-backed first-party sessions and operator-controlled Cloudflare Bigperson configuration is provisioned without exposing secrets.
+
+---
+
 ## 2026-09-20: Bigperson publication and TEST entitlement Control continuation
 
 Continued `phase5-bigperson-control` from verified checkpoint `2006c905b4f974e895c470a977bdb6cae294a29b`; rollback snapshot `backup-phase5-before-publication-control-2026-09-20` preserves that exact state.
