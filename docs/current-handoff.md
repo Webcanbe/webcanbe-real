@@ -1,3 +1,9 @@
+# FACTOR ORIGIN — 2026-09-20 KST
+
+The Bigperson privileged factor was the silent value entered locally at the Mac terminal prompt `Bigperson factor:` while generating the bootstrap Pepper/Salt/Digest set. It was not a Cloudflare-created value. If it is forgotten before first enrollment, regenerate the factor set instead of guessing.
+
+---
+
 # FACTOR CLARIFICATION — 2026-09-20 KST
 
 `Privileged factor` is the separate Bigperson password/string the user personally entered at the earlier terminal prompt `Bigperson factor:`. It is distinct from Pepper/Salt/Digest. If forgotten before first enrollment, regenerate the bootstrap factor set; do not restart Hyperdrive/auth work.
