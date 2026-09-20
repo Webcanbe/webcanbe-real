@@ -9,6 +9,7 @@ import { MaterializationError, materializeDatabaseWorkspaceProject } from "./mat
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
+import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -433,10 +434,38 @@ async function privateProduct(request, env, path, traceId) {
           return json({ error: "Working-copy creation is temporarily unavailable." }, 503)
         }
       }
-      if (path === "/__webcanbe/api/ops/control/read") {
+      if (path.startsWith("/__webcanbe/api/ops/")) {
         if (env.WEBCANBE_CONTROL_MODE !== "enabled") return json({ error: "Privileged operations are not enabled." }, 404)
-        const control = await databaseControlRead(db, databaseSession)
-        return control ? json({ control }) : json({ error: "Privileged operation refused." }, 403)
+        let body
+        try { body = await smallJsonBody(request) }
+        catch { return json({ error: "Invalid privileged request." }, 400) }
+        try {
+          if (path === "/__webcanbe/api/ops/bigperson/register/options") {
+            return json(await beginBigpersonRegistration(db, databaseSession, body, env, request))
+          }
+          if (path === "/__webcanbe/api/ops/bigperson/register/verify") {
+            return json(await finishBigpersonRegistration(db, databaseSession, body, env, request), 201)
+          }
+          if (path === "/__webcanbe/api/ops/bigperson/operation/options") {
+            return json(await beginBigpersonOperation(db, databaseSession, body, env, request))
+          }
+          if (path === "/__webcanbe/api/ops/control/read") {
+            await db.query("BEGIN")
+            try {
+              await consumeBigpersonOperation(db, databaseSession, body, env, request, { method: "POST", path, body: {} })
+              const control = await databaseControlRead(db, databaseSession)
+              if (!control) throw new Error("Privileged operation refused.")
+              await db.query("COMMIT")
+              return json({ control })
+            } catch (error) {
+              await db.query("ROLLBACK")
+              throw error
+            }
+          }
+          return json({ error: "Privileged operation is unavailable." }, 404)
+        } catch (error) {
+          return json({ error: error instanceof Error ? error.message : "Privileged operation refused." }, 403)
+        }
       }
       if (path === "/__webcanbe/api/account/identities/link/firebase") {
         const idToken = bearerToken(request)
@@ -535,7 +564,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path === "/__webcanbe/api/ops/control/read") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
