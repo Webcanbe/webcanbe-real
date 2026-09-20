@@ -2,6 +2,48 @@
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
 
+## Latest continuation — Firebase/CSP + Gate 3 v4
+
+- Production/main code HEAD: `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
+- The operator added and saved all six `VITE_FIREBASE_*` values under Cloudflare Builds → Variables and secrets and triggered a fresh production build.
+- After that rebuild, the old `Firebase Authentication is not configured.` failure disappeared. The next real browser failure was `auth/internal-error` caused by production CSP blocking `https://apis.google.com/js/api.js`.
+- Minimal CSP fix was verified on branch/PR #43 and squash-merged to main:
+  - `script-src 'self' https://apis.google.com https://www.gstatic.com`
+  - script `unsafe-inline` remains forbidden
+  - `unsafe-eval` remains forbidden
+  - focused Firebase/CSP tests, production build, and Wrangler dry-run: run `35545390283` **PASS**
+- A provider-boundary smoke rerun immediately after the merge still observed the old live CSP (`script-src 'self'`), so Cloudflare propagation of `c0889c8` was **not yet proven** at that instant. Do not interpret that rerun as a failure of the merged CSP code.
+- Actual authenticated GitHub/Email same-account E2E remains **NOT PASS**. Product mutation remains OFF on production.
+- Diagnostic branch/PR #42 remains a no-credential provider-boundary probe; it must never enter credentials, approve OAuth, link an identity, or create a first-party session during the boundary-only check.
+
+### Gate 3 v4 staging
+
+- Old v3 was backed up at `backup/gate3-v3-before-firebase-sync-20260921`.
+- The conflicted main→v3 sync PR #44 was closed without merge.
+- New branch: `phase5-gate3-materialization-staging-v4`, rebuilt directly from current main `c0889c8`.
+- Draft PR: #45.
+- v4 carries forward:
+  - private source-backed launch-smoke fixture/runbook
+  - `launch:smoke-fixture` while retaining `db:recovery:preflight`
+  - explicit staged frontend + Worker materialization switches
+  - Gate 3 mutation-authority regression
+  - Gate 4 immutable release → materialize → durable Code edit → reopen → standalone export/build regression
+  - durable-editor and Bigperson verification coverage
+  - the latest Firebase project-ID fallback and popup CSP fix from main
+- Exact main→v4 relationship before this documentation commit: **ahead 15 / behind 0**.
+- Integrated v4 verification workflow has been added; its final result is **pending** at this checkpoint.
+- v4 is staging-only. Do **not** merge/deploy its mutation switches to production until authenticated Gate 2 is green.
+
+### Exact next actions
+
+1. Re-run the credential-free Gate 2 provider-boundary smoke once live Cloudflare production serves the new CSP; require an official `github.com` provider page with zero exchange/link/session side effects.
+2. Finish/read the Gate 3 v4 integrated CI and repair only genuine regressions.
+3. If provider boundary passes but actual login/linking needs the operator, record that human-only Gate 2 blocker once and continue independent Gate 3/4/5 work.
+4. Never enable production materialization mutation before same-account GitHub/Email login + private reads + refresh + logout evidence is green.
+5. After Gate 2, use v4—not v3—as the activation candidate.
+
+---
+
 ## Verified starting point
 
 - Repository: `Webcanbe/webcanbe-real`.
