@@ -1,7 +1,7 @@
 name: Phase 5 durable editor export verify
 on:
   push:
-    branches: [phase5-editor-durable-export, phase5-bigperson-control]
+    branches: [main, phase5-editor-durable-export, phase5-bigperson-control]
 jobs:
   verify:
     runs-on: ubuntu-latest
