@@ -1,3 +1,13 @@
+## 2026-09-20: Bigperson publication and TEST entitlement Control continuation
+
+Continued `phase5-bigperson-control` from verified checkpoint `2006c905b4f974e895c470a977bdb6cae294a29b`; rollback snapshot `backup-phase5-before-publication-control-2026-09-20` preserves that exact state.
+
+The production Worker privileged boundary now carries the existing Phase 3 immutable publication lineage forward: passed assessment result → release promotion → published Listing. Promotion rechecks review/request/submission/lease/result lineage, catalog ownership/workspace/source binding and the frozen source snapshot before inserting `wcb_project_releases` / `wcb_seller_release_promotions`. Listing publication rechecks the promoted release/catalog/seller lineage before inserting `wcb_listings` / `wcb_listing_publications`. Admin+ can also grant or terminate TEST-only entitlements; external payment-provider entitlements remain outside Control authority. Every operation consumes a fresh operation-bound Google + privileged factor + device-bound WebAuthn proof and writes append-only privileged audit evidence.
+
+Control reads/UI now expose bounded catalog project, promotion, publication and TEST entitlement state without source bodies, token hashes or worker credentials. Ready qualification remains deliberately open: the canonical Phase 3 implementation derives compatibility from immutable source using the React analyzer, so no weaker client/operator-supplied immutable Ready record has been introduced. Next privileged slice is exact Ready analysis/qualification followed by production Bigperson provisioning and E2E.
+
+---
+
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
 ## 2026-09-20: Three-factor privileged Control mutations
