@@ -1,3 +1,38 @@
+# BIGPERSON PBKDF2 FIX DEPLOYED / RETRY CHECKPOINT — 2026-09-20 KST
+
+- The Cloudflare PBKDF2 runtime failure is now fixed in production.
+- Bigperson derivation still uses the original bootstrap contract:
+  - factor + NUL + pepper
+  - PBKDF2-SHA256
+  - 600,000 iterations
+  - 32-byte output
+  - base64url digest
+- Runtime implementation now uses Worker-supported `node:crypto.pbkdf2Sync`, not WebCrypto PBKDF2.
+- Existing factor / pepper / salt / digest remain valid and were not rotated.
+- A direct known-vector regression confirms the runtime derivation matches the original operator bootstrap command.
+- Main verification after the fix:
+  - Phase 5 UI verify `35503200847`: PASS
+  - Phase 5 Bigperson checkpoint verify `35503200840`: PASS
+  - Phase 5 durable editor/export verify `35503200846`: PASS
+  - production smoke `35503233800`: PASS
+- Current DB state immediately before retry:
+  - active Google sessions: 1
+  - newest Google session age: about 443 seconds (~7m23s)
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active Bigperson passkeys: 0
+  - live unused Bigperson challenges: 0
+- Because the Bigperson Google freshness window is 10 minutes and the current session is already close to it, the safest retry is:
+  1. sign out;
+  2. immediately sign in again with Google;
+  3. return to `/_ops/keystone-7f31`;
+  4. enter the existing privileged factor;
+  5. click `First Bigperson: register passkey`;
+  6. complete WebAuthn registration;
+  7. verify DB rows before using `Verify all 3 factors`.
+
+---
+
 # BIGPERSON PBKDF2 CLOUDFLARE RUNTIME FIX — 2026-09-20 KST
 
 - First Bigperson registration progressed past Google freshness and reached privileged-factor derivation.
