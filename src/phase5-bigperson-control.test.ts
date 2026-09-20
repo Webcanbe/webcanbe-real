@@ -8,6 +8,7 @@ const worker = fs.readFileSync("worker/index.js", "utf8")
 const headers = fs.readFileSync("worker/security-headers.js", "utf8")
 const migration = fs.readFileSync("deployment/hosted/postgres-control-roles.sql", "utf8")
 const domain = fs.readFileSync("src/webcanbe-engine/runtime/postgresProductDomain.ts", "utf8")
+const finalUi = fs.readFileSync("src/phase4-final-ui.css", "utf8")
 
 function db(role?: string) {
   return {
@@ -34,6 +35,8 @@ describe("Phase 5 bigperson Control foundation", () => {
     expect(control).not.toContain("<AppShell>")
     expect(control).not.toContain("RopeanDashboardShell")
     expect(control).not.toContain("site-footer")
+    expect(finalUi).toContain(".control-standalone")
+    expect(finalUi).toContain("min-height:100vh")
   })
 
   it("keeps obscurity separate from authorization", () => {
