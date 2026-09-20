@@ -50,4 +50,7 @@ CREATE TABLE IF NOT EXISTS wcb_bigperson_challenges (
 CREATE INDEX IF NOT EXISTS wcb_bigperson_passkeys_user_idx ON wcb_bigperson_passkeys(user_id,active);
 CREATE INDEX IF NOT EXISTS wcb_bigperson_challenges_session_idx ON wcb_bigperson_challenges(session_id,expires_at);
 
+REVOKE ALL PRIVILEGES ON TABLE wcb_bigperson_security, wcb_bigperson_passkeys, wcb_bigperson_challenges FROM anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE wcb_bigperson_security, wcb_bigperson_passkeys, wcb_bigperson_challenges TO webcanbe_runtime;
+
 COMMIT;
