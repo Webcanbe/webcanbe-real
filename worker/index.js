@@ -435,6 +435,7 @@ async function privateProduct(request, env, path, traceId) {
         }
       }
       if (path.startsWith("/__webcanbe/api/ops/")) {
+        if (!await rateLimitAllowed(env.BIGPERSON_RATE_LIMITER, "bigperson:" + databaseSession.userId)) return rateLimitedResponse()
         if (env.WEBCANBE_CONTROL_MODE !== "enabled") return json({ error: "Privileged operations are not enabled." }, 404)
         let body
         try { body = await smallJsonBody(request) }
