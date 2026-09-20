@@ -17,9 +17,9 @@ jobs:
       - name: Secret scan
         run: npm run security:secrets
       - name: Bigperson and privileged authority regressions
-        run: npx vitest run src/phase5-bigperson-control.test.ts src/phase5-bigperson-three-factor.test.ts src/phase5-launch-hardening.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts
+        run: npx vitest run src/phase5-bigperson-control.test.ts src/phase5-bigperson-three-factor.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-launch-hardening.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts
       - name: Worker syntax
-        run: node --check worker/bigperson-auth.js && node --check worker/index.js && node --check worker/postgres-session.js
+        run: node --check worker/bigperson-auth.js && node --check worker/control-mutations.js && node --check worker/index.js && node --check worker/postgres-session.js
       - name: Production build
         run: npm run build
       - name: Worker bundle dry run
