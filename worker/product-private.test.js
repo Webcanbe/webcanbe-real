@@ -55,4 +55,33 @@ describe("Workers private product reads", () => {
       releaseSnapshotHash: "b".repeat(64),
     })
   })
+
+  it("returns truthful empty arrays for a clean account instead of fabricating purchases or working copies", async () => {
+    const calls = []
+    const db = {
+      async query(sql, params) {
+        calls.push({ sql, params })
+        return { rows: [] }
+      }
+    }
+    const session = { userId: "77777777-7777-4777-8777-777777777777" }
+    expect(await databasePurchases(db, session)).toEqual([])
+    expect(await databaseWorkspaceProjects(db, session)).toEqual([])
+    expect(calls).toHaveLength(2)
+    expect(calls.every(call => call.params[0] === session.userId)).toBe(true)
+  })
+
+  it("never accepts a caller-supplied user id for private library reads", async () => {
+    const seen = []
+    const db = {
+      async query(_sql, params) {
+        seen.push(params)
+        return { rows: [] }
+      }
+    }
+    const session = { userId: "88888888-8888-4888-8888-888888888888" }
+    await databasePurchases(db, session)
+    await databaseWorkspaceProjects(db, session)
+    expect(seen).toEqual([[session.userId], [session.userId]])
+  })
 })
