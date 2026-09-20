@@ -1,3 +1,26 @@
+# LIVE BIGPERSON ENROLLMENT SCREEN CHECKPOINT — 2026-09-20 KST
+
+- User has reached the real production route `/_ops/keystone-7f31`.
+- Production UI visibly shows the Bigperson Operations gate:
+  - `Three factors are required every time.`
+  - privileged factor input
+  - `Verify all 3 factors`
+  - `First Bigperson: register passkey`
+- Current DB state before enrollment remains:
+  - active Google first-party session: 1
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active Bigperson passkeys: 0
+- Exact next action:
+  1. enter the same privileged factor that was used to derive the configured bootstrap digest;
+  2. click `First Bigperson: register passkey`;
+  3. complete the browser/macOS WebAuthn registration prompt;
+  4. then verify DB rows before attempting a normal Control read.
+- Do **not** use `Verify all 3 factors` before first passkey enrollment because there is no enrolled Bigperson passkey yet.
+- If WebAuthn registration is rejected, capture the exact UI/server error and inspect credential device type/backed-up policy before changing unrelated auth/Hyperdrive state.
+
+---
+
 # Webcanbe Phase 5 — Admin / Hyperdrive / Live Production Handoff
 
 Status timestamp: **2026-09-20 KST**  
