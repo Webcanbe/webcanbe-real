@@ -1,3 +1,18 @@
+# PHASE 5 BIGPERSON REVIEW / ASSESSMENT CHECKPOINT — 2026-09-20 KST
+
+- Operations now performs immutable seller review decisions from the privileged surface.
+- Review approve/reject requires a new exact-operation three-factor proof.
+- The Worker verifies the submission is still pending review and that the submitted snapshot hash matches the immutable submission before inserting a decision.
+- Existing review decisions cannot be rewritten to a different result.
+- Approved review decisions can be admitted to assessment from Operations.
+- Assessment admission requires another new three-factor proof and rechecks seller ID, submission snapshot and review decision ID against stored immutable provenance.
+- Duplicate/conflicting assessment admission is refused; the first valid request remains authoritative.
+- Both review and assessment actions append bounded privileged Control audit transitions.
+- No source bodies or worker credentials are exposed to the Control UI.
+- Next Control slice: release promotion, Listing publication, Ready qualification, entitlement operations, then final provisioning/E2E.
+
+---
+
 # PHASE 5 BIGPERSON SESSION SECURITY CHECKPOINT — 2026-09-20 KST
 
 - Operations now reads bounded active-session metadata: session ID, user ID, creation/expiry, active state and authentication provider; token/cookie hashes are never returned.
