@@ -34,7 +34,7 @@ Branch code checkpoint: `2aba73e72901f9208378a7a6595ddadb1141da26`
 - UI `35509040875`: PASS
 - Bigperson `35509040888`: PASS
 - durable editor/export `35509040858`: PASS
-- status: **implementation verified; main integration/production smoke pending**
+- status: **CLOSED IN PRODUCTION** — main UI, Bigperson, durable, and production smoke all PASS; live read=hosted and mutation=closed.
 
 ## Gate 1 — Production read activation
 
