@@ -2,7 +2,52 @@
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
 
-## Verified starting point
+## Latest verified checkpoint
+
+- Production/main remains `381fdc7e300d05e6f4b22cf46e2e7715614e7d01`.
+- Gate 3 staging was reconciled with current main instead of being promoted from the diverged `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e` tree unchanged.
+- Backup before reconciliation: `backup/gate3-v3-before-main-reconcile-20260921` at `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e`.
+- Reconciled Gate 3 code checkpoint: `edc11bb0df4b54defec030a9cfa068b10ae2236c`.
+- Exact main → reconciled staging comparison: **ahead 52 / behind 0**. The diff contains the intended Gate 3 launch/materialization helpers and workflow targeting changes; current-main handoff/launch documents are preserved rather than dropped.
+- `package.json` at the reconciled checkpoint contains both operator commands:
+  - `db:recovery:preflight` → `node scripts/db/recovery-preflight.mjs`
+  - `launch:smoke-fixture` → `node scripts/launch/materialization-smoke-fixture.mjs`
+- Reconciled staging verification at `edc11bb0df4b54defec030a9cfa068b10ae2236c`:
+  - UI `35520243803`: **PASS**
+  - durable editor/export `35520243786`: **PASS**
+  - Bigperson `35520243691`: **PASS**
+- No production mutation switch, entitlement fixture, payment authority, or production data mutation was enabled by this reconciliation.
+
+## Gate 2 evidence recovered in this continuation
+
+- Main source wiring was re-read rather than inferred from identity counts:
+  - GitHub uses Firebase `signInWithPopup(..., new GithubAuthProvider())`.
+  - Email signup/login use Firebase password APIs and the ordinary auth UI refuses blank email/password before provider calls.
+  - The Gate 2 diagnostic only links GitHub/Email after an existing first-party session, and signed-out linked-provider tests exchange a fresh Firebase ID token for the Webcanbe first-party session.
+  - Existing Gate 2 tests assert the noindex diagnostic route, provider-link gating, read-only private-read checks, password clearing, and no raw internal account ID rendering.
+- This is **static source/test evidence only**. It does not prove that the deployed Firebase/GitHub provider configuration reaches the official provider screen or that a real linked login returns to the same production account.
+- An isolated no-credential production browser check was attempted, but the permitted browser connector failed before opening the page with a usage-limit error. No browser, account, credential, session, or provider state was changed.
+- Therefore Gate 2 / Gate 2B remain **not PASS**. Do not treat the static verification as authenticated E2E.
+
+## Current launch status
+
+- Gate 3 staging is now based on current main history and no longer drops the recovery-preflight operator command.
+- Gate 3 remains staging-only. Product mutation remains OFF in production.
+- Gate 2 authenticated GitHub/Email linking, same-account login, refresh and logout evidence remains the production activation blocker.
+- Live Worker rollback and real off-site database restore remain separate pending Gate 5 drills.
+- Payment/seller commercial activation remains separate unfinished work.
+
+## Next autonomous action
+
+When permitted isolated-browser execution is available, open `https://webcanbe.com/_ops/gate2-auth-smoke`, initiate the GitHub sign-in flow only until the official GitHub/Firebase provider page is reached, enter no credentials, make no authorization/link decision, and record the provider-boundary result or any pre-provider error. If the provider boundary succeeds, keep actual login/linking as user-authenticated E2E; do not mark Gate 2 green without that evidence.
+
+---
+
+## Earlier interruption snapshot
+
+The following block is retained only as the pre-reconciliation snapshot. Where it conflicts with the latest verified checkpoint above, the latest checkpoint wins.
+
+### Verified starting point
 
 - Repository: `Webcanbe/webcanbe-real`.
 - Main at the start of this continuation: `044a6a5d29b5f91b2f5074ff2c8eff2a4bacae10`.
@@ -12,7 +57,7 @@ Recorded: 2026-09-21 KST. This is an incremental continuation record, not a repl
 - Active materialization staging: `phase5-gate3-materialization-staging-v3` at `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e`.
 - Comparing those exact main/staging SHAs returned 50 ahead / 3 behind, merge base `0ad5747a89a01414b966ac8ceee82eb44c6c1768`. These counts are a snapshot, not a merge approval.
 
-## Evidence recovered after interruption
+### Evidence recovered after interruption
 
 - Main browser matrix `35517525373`, job `106095859190`: completed successfully; result re-read in this continuation. This is the existing public Chromium/Firefox/WebKit desktop/mobile matrix, not authenticated provider E2E.
 - Staging UI verification `35517938841`, job `106096928007`: completed successfully; result re-read in this continuation.
@@ -20,35 +65,20 @@ Recorded: 2026-09-21 KST. This is an incremental continuation record, not a repl
 - Existing main handoff records staging durable `35517938853` and Bigperson `35517938844` as PASS.
 - Do not rerun unchanged completed work merely because a conversation or tool response was interrupted.
 
-## Important unresolved integration delta
+### Important unresolved integration delta at that time
 
 The manifest difference was re-read directly at the pinned SHAs:
 
-- Main `package.json` includes `db:recovery:preflight: node scripts/db/recovery-preflight.mjs`.
-- Staging `package.json` includes `launch:smoke-fixture: node scripts/launch/materialization-smoke-fixture.mjs` but lacks `db:recovery:preflight`.
-- Therefore the existing staging tip is not safe to promote unchanged, despite its passing selected CI and the historical claim that it was zero behind.
+- Main `package.json` included `db:recovery:preflight: node scripts/db/recovery-preflight.mjs`.
+- Staging `package.json` included `launch:smoke-fixture: node scripts/launch/materialization-smoke-fixture.mjs` but lacked `db:recovery:preflight`.
+- Therefore that staging tip was not safe to promote unchanged, despite its passing selected CI and the historical claim that it was zero behind.
 - Preserve both commands in any eventual approved integration. Do not hide the omission with a synthetic merge or suppress the recovery regression to obtain green CI.
-- Earlier package-script writes were reported blocked by tool safety. This continuation did not retry that blocked write through a different interface and did not change either package manifest.
 
-## Gate status to preserve
+### Gate status preserved from the earlier snapshot
 
-- Production product reads and Control are already live according to the verified handoff.
-- Gate 2 authenticated GitHub/Email linking, same-account login, refresh and logout evidence remains incomplete. This continuation made no database query and must not represent historical identity counts as newly checked.
-- Gate 3 production mutation activation and the private fixture application remain pending. This continuation did not enable either.
-- Gate 4 staging source/save/export tests are not proof of the full production buyer/editor path.
-- Public browser/accessibility/basic performance checks and recovery-wrapper rehearsals are completed subchecks; the live Worker rollback and real off-site database restore drill remain pending. Gate 5 as a whole is not closed.
-- Payment and seller commercial activation remain separate unfinished work.
-
-## Hourly interruption recovery
-
-The existing `Webcanbe Launch Work` hourly task was updated without changing its schedule or creating another task.
-
-At the next invocation after any interruption, inspect remote heads, this note, the current handoff/plan and the exact existing CI runs first. Recover the last unfinished implementation, verification or documentation step. Check whether writes with lost responses already landed before retrying. Continue automatically on that scheduled invocation; another user message is not required.
-
-Before each write, re-read affected branch/file state. On a non-fast-forward conflict, preserve concurrent changes and reconcile rather than force-pushing. Save a bounded checkpoint before a long test. Record pending tests as pending, and blocked work as blocked. A permission or safety denial is not permission to switch interfaces to bypass it.
-
-`docs/current-handoff.md` and the launch plan contain the latest recovery work; the legacy resume/project-record headers may still show the earlier browser checkpoint. Use this incremental record to avoid falling back to that older state. Do not repeatedly prepend unchanged status to all documents merely to create activity.
-
-## Next autonomous action
-
-Check the existing production GitHub/Firebase sign-in initiation in an isolated browser without entering credentials or linking accounts, and capture any failure before the provider sign-in screen. This can distinguish a code/configuration blocker from the remaining user-only authenticated E2E. If the official provider sign-in screen is reached, record that limited result and keep the actual login/linking gate pending; do not impersonate the user or create accounts. Reconcile the staging integration delta only through permitted operations before any future activation.
+- Production product reads and Control were already live according to the verified handoff.
+- Gate 2 authenticated GitHub/Email linking, same-account login, refresh and logout evidence was incomplete.
+- Gate 3 production mutation activation and the private fixture application were pending.
+- Gate 4 staging source/save/export tests were not proof of the full production buyer/editor path.
+- Public browser/accessibility/basic performance checks and recovery-wrapper rehearsals were completed subchecks; the live Worker rollback and real off-site database restore drill remained pending.
+- Payment and seller commercial activation remained separate unfinished work.
