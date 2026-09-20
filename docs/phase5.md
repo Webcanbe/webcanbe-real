@@ -297,11 +297,15 @@ Verification run `35448977411` passed all branch gates.
 - [x] Add real WebAuthn/passkey registration and authentication verification for Bigperson using pinned SimpleWebAuthn; require user verification, one-time operation-bound challenges, passkey counter updates, and current Google-session binding. Bigperson Control reads now require Google + separate privileged factor + passkey every time. Production secrets/bootstrap enrollment remain deployment-gated.
 - [x] Add privileged mutation UI for Bigperson role management and seller application approval/rejection. Each operation requires a fresh Google + privileged factor + operation-bound passkey proof and append-only audit evidence; client role claims remain non-authoritative.
 - [x] Add privileged session/security controls and audit drill-down: bounded active-session metadata, three-factor individual session revocation with append-only audit, and visible bounded before/after audit transitions without exposing session/token hashes.
+- [x] Promote passed immutable assessment results into immutable releases through the retained Phase 3 provenance model.
+- [x] Publish one promoted immutable release into one published Listing with append-only privileged audit.
+- [x] Grant/terminate admin-controlled TEST-only entitlements without exposing payment-provider entitlement mutation.
+- [ ] Port/invoke the exact trusted React compatibility analysis for immutable Ready qualification; do not derive Ready from operator/client assertions or a weaker heuristic.
 - [ ] Production smoke with an explicitly provisioned bigperson after Hyperdrive is connected.
 
 ## Immediate next task
 
-**Enable LOGIN for the prepared `webcanbe_hyperdrive` role, create the Cloudflare Hyperdrive binding, then run live DB-session/catalog/private-read smoke.**
+**Finish exact server-authoritative Ready qualification first. Then provision/smoke the first production Bigperson; after Admin is closed, continue Hyperdrive/product activation and merge the durable editor proof.**
 
 Connected infrastructure audit:
 - Supabase organization discovered: `Webcanbe`.
