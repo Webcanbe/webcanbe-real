@@ -1,4 +1,4 @@
-# Webcanbe Phase 5 — Session Recovery Snapshot
+Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# Webcanbe Phase 5 — Session Recovery Snapshot
 
 Snapshot date: **2026-09-19 KST**  
 Code baseline before this recovery update: `3c383c6bb0dc0b63df2a03143606f5c575ffbb3f`  
