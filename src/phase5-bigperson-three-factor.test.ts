@@ -24,6 +24,8 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(auth).toContain("PBKDF2_ITERATIONS = 600_000")
     expect(auth).toContain('name: "PBKDF2"')
     expect(auth).toContain("WEBCANBE_BIGPERSON_FACTOR_PEPPER")
+    expect(auth).toContain("WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST")
+    expect(auth).toContain("Bigperson bootstrap factor digest is not configured.")
     expect(schema).toContain("factor_salt text")
     expect(schema).toContain("factor_digest text")
     expect(schema).not.toMatch(/password\s+text/i)
