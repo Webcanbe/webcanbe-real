@@ -1,3 +1,9 @@
+# ADMIN E2E COMPLETE / PANEL-ONLY UI IN PROGRESS — 2026-09-20 KST
+
+Production Admin E2E is now closed: Bigperson=1, security=1, passkey=1, one consumed privileged operation challenge, and active step-up evidence are verified. The hidden Admin route is now being simplified to remove the normal sidebar/header/account/footer shell and show only the Operations panel; authority logic remains unchanged.
+
+---
+
 # CURRENT STATE — FIRST BIGPERSON ENROLLED — 2026-09-20 KST
 
 First production Bigperson enrollment succeeded. DB verifies Bigperson=1, security=1, active passkey=1, consumed registration challenge=1, and no live leftover registration challenge. Final Admin step: re-enter the privileged factor and click `Verify all 3 factors`, complete the passkey assertion, and confirm the privileged Control view opens.
