@@ -173,4 +173,9 @@ Additionally requires:
 
 ## Current next action
 
-Finish Gate 1 CI on `phase5-product-read-launch`. Merge to `main` only if all launch branch workflows are green. Immediately after deployment, run Gate 2 instead of starting unrelated features.
+1. Open `https://webcanbe.com/_ops/gate2-auth-smoke` in the user's real browser.
+2. Establish the Google baseline and run private reads + refresh persistence.
+3. While still on that Google-backed internal account, link GitHub and Email identities.
+4. Verify logout, then verify linked GitHub and linked Email logins return to the same Webcanbe account and pass the same reads.
+5. After Gate 2 is green, use `phase5-gate3-materialization-staging-v2` for activation. It is current-main based and already passes UI/durable/Bigperson CI.
+6. Apply the private launch-smoke entitlement/release fixture, verify zero public Listing, activate materialization, then execute the production Gate 4 chain.
