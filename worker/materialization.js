@@ -31,7 +31,7 @@ function safePath(value) {
   return true
 }
 
-function sourceMember(file, directory, scope) {
+export function sourceMember(file, directory, scope) {
   if (!safePath(file) || !file.startsWith(directory + "/")) return false
   return scope === 2 ? /\.(?:tsx?|jsx?|mts|cts|mjs|cjs|css|json)$/.test(file) : /\.(?:tsx?|jsx?|css|json)$/.test(file)
 }
