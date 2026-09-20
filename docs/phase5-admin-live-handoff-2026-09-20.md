@@ -3,7 +3,7 @@
 Status timestamp: **2026-09-20 KST**  
 Repository: `Webcanbe/webcanbe-real`  
 Production branch: `main`  
-Canonical commit: `12ca43d3c0d58848e81bf1d657da6d48ae4f75e1`  
+Canonical code baseline (last non-documentation change): `12ca43d3c0d58848e81bf1d657da6d48ae4f75e1`  
 Production domain: `https://webcanbe.com`
 
 > This is the current recovery document. Read this file first before older Phase 5 handoffs.
@@ -88,7 +88,7 @@ That means a normal cloud-synced passkey may be rejected by the current policy. 
 
 ## 3. Current canonical main and verification
 
-Canonical main:
+Canonical code baseline (documentation-only commits follow it on `main`):
 
 `12ca43d3c0d58848e81bf1d657da6d48ae4f75e1`
 
