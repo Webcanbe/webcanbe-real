@@ -1,5 +1,17 @@
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
+## 2026-09-20: Privileged session security and audit detail
+
+Control now exposes bounded active-session metadata to an authenticated Bigperson
+without returning token or cookie hashes. An individual first-party session can be
+revoked only through a new operation-bound three-factor ceremony. The resulting
+`session.revoke` transition is written to the append-only Control audit.
+
+The Operations audit view now includes the bounded transition object so privileged
+before/after state is inspectable without making audit evidence mutable.
+
+---
+
 ## 2026-09-20: Three-factor privileged mutation UI
 
 The Bigperson Control surface now performs real privileged mutations for platform-role
