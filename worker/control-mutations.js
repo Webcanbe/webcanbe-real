@@ -46,3 +46,14 @@ export async function transitionSellerApplication(db,session,input,evidenceId){
   if(!inserted||current.status===status) return current
   return (await db.query("UPDATE wcb_seller_applications SET status=$2,decision_by=$3,decided_at=clock_timestamp(),updated_at=clock_timestamp() WHERE application_id=$1 RETURNING *",[application,status,session.userId])).rows[0]
 }
+
+export async function revokeSession(db,session,input,evidenceId){
+  const target=id(input?.sessionId,"session")
+  await evidence(db,session,evidenceId)
+  const current=(await db.query("SELECT session_id,user_id,active,expires_at FROM wcb_sessions WHERE session_id=$1 FOR UPDATE",[target])).rows[0]
+  if(!current) throw new Error("Session is unavailable.")
+  const transition={before:{active:Boolean(current.active)},after:{active:false}}
+  const inserted=await audit(db,session,evidenceId,"session.revoke","session",target,transition,input?.idempotencyKey)
+  if(inserted&&current.active) await db.query("UPDATE wcb_sessions SET active=false WHERE session_id=$1",[target])
+  return {session_id:target,user_id:String(current.user_id),active:false,expires_at:current.expires_at}
+}
