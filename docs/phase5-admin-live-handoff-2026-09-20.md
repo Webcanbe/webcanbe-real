@@ -1,3 +1,44 @@
+# UNIFIED BIGPERSON MANAGER CONSOLE DEPLOYED — 2026-09-20 KST
+
+- Unified Bigperson Operations console is now on `main`.
+- Main checkpoint: `15d9d6aadabe67fdfbafaaa3d9b8610428642cd2`.
+- Server hierarchy is explicitly locked as:
+  - reviewer = 1
+  - admin = 2
+  - bigperson = 3
+- Bigperson is therefore a strict superset of all Reviewer/Admin manager powers.
+- Bigperson can perform, from the same hidden Operations console:
+  - seller application approve/reject
+  - submission review approve/reject
+  - assessment admission
+  - passed assessment → immutable release promotion
+  - promoted release → Listing publication
+  - server-derived Webcanbe Ready qualification
+  - TEST entitlement grant/revoke/invalidate
+  - active session revoke
+  - reviewer/admin/bigperson assignment and activation state
+  - platform/user/workspace/session inspection
+  - privileged audit inspection.
+- UI is organized into:
+  - Overview
+  - Sellers & Review
+  - Publishing
+  - Access & Roles
+  - Audit
+- Overview shows pending seller intake, pending reviews, active platform operators and published Listing counts with direct navigation.
+- Current platform role is returned by the server and shown in the console. Bigperson displays Reviewer + Admin + platform authority.
+- Ordinary dashboard sidebar/header/account/footer remain absent from the hidden Admin route.
+- Every mutation still requires a fresh operation-bound three-factor ceremony; no capability was weakened for the UI consolidation.
+- Final main verification:
+  - Phase 5 UI verify `35507009832`: PASS
+  - Phase 5 Bigperson checkpoint verify `35507009889`: PASS
+  - Phase 5 durable editor/export verify `35507009845`: PASS
+  - production smoke `35507044862`: PASS
+- Backup before this change:
+  - `backup-main-before-unified-bigperson-console-2026-09-20`
+
+---
+
 # UNIFIED BIGPERSON MANAGER CONSOLE — 2026-09-20 KST
 
 - Bigperson platform authority remains the strict top of the server-side role hierarchy:
