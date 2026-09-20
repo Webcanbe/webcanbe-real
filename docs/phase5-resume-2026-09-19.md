@@ -16,7 +16,7 @@ Production domain: `https://webcanbe.com`
 - Privileged factor is never stored as plaintext; PBKDF2-SHA256 600k + per-user salt + server-only pepper.
 - First Bigperson bootstrap requires all three factors and closes after an active Bigperson exists.
 - WebAuthn requires user verification; operation challenges expire after 90 seconds and bind exact user/session/method/path/body hash.
-- Challenges are one-time and passkey counters are persisted.
+- Challenges are one-time and passkey counters are persisted.\n- Dedicated Bigperson ceremony rate limit: 5 attempts/minute/user.
 - Control UI clears the entered factor before passkey and requires a new ceremony for each Control read.
 - Migration: `deployment/hosted/postgres-bigperson-3factor.sql`.
 - Credential values are intentionally absent from Git and Markdown.
