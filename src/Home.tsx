@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react"
 
+function hardenLandingAccessibility(root: HTMLElement) {
+  root.querySelectorAll<HTMLButtonElement>('button[data-slot="sheet-trigger"]').forEach(button => {
+    if (!button.getAttribute("aria-label") && !(button.textContent || "").trim()) button.setAttribute("aria-label", "Open navigation")
+  })
+  root.querySelectorAll<HTMLButtonElement>('button[data-slot="slide-button"]').forEach(button => {
+    button.setAttribute("aria-hidden", "true")
+    button.tabIndex = -1
+  })
+}
+
 export default function Home({ onNavigate }: { onNavigate: (to: string) => void }) {
   const host = useRef<HTMLDivElement>(null)
   const [error, setError] = useState("")
@@ -26,6 +36,7 @@ export default function Home({ onNavigate }: { onNavigate: (to: string) => void 
         document.documentElement.className = Array.from(new Set((previousHtmlClass + " " + parsed.documentElement.className + " mounted").split(/\s+/).filter(Boolean))).join(" ")
         document.body.className = parsed.body.className
         host.current.innerHTML = parsed.body.innerHTML
+        hardenLandingAccessibility(host.current)
       } catch (reason) {
         if (active) setError(reason instanceof Error ? reason.message : "Landing page unavailable.")
       }
