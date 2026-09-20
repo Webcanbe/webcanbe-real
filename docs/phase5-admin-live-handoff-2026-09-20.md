@@ -1,3 +1,27 @@
+# KDF ROTATION COMPLETE / FIRST ENROLLMENT STILL PENDING — 2026-09-20 KST
+
+- User reports the Cloudflare Bigperson bootstrap factor set has been regenerated/replaced for the final 100,000-iteration PBKDF2 contract.
+- Production DB verification immediately afterward shows:
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active Bigperson passkeys: 0
+  - consumed Bigperson challenges: 0
+  - live unused Bigperson challenges: 0
+  - active Google sessions: 1
+  - newest active Google session age: about 2292 seconds (~38 minutes)
+- Therefore the secret/KDF rotation is prepared, but the first Bigperson registration ceremony has not yet succeeded or started far enough to persist a challenge.
+- Exact next action:
+  1. sign out of Webcanbe;
+  2. sign in again with the allowlisted Google account;
+  3. immediately return to `/_ops/keystone-7f31`;
+  4. enter the remembered privileged factor;
+  5. click `First Bigperson: register passkey` within the 10-minute freshness window;
+  6. complete the WebAuthn prompt;
+  7. then verify DB operator/security/passkey rows before the first normal Control read.
+- Do not redo the KDF secrets again unless the next server response specifically indicates factor mismatch.
+
+---
+
 # FINAL PBKDF2 CAP FIX DEPLOYED — 2026-09-20 KST
 
 - Production confirmed Cloudflare workerd rejects PBKDF2 iteration counts above 100,000 even when called through the Node compatibility crypto path.
