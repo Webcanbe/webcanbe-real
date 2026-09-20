@@ -1,3 +1,17 @@
+# PHASE 5 PRODUCT READ LAUNCH SLICE — 2026-09-20 KST
+
+- Launch closure has started from verified main `ac60ef75ce5ad0c5024febae92b99b25a3acab44`.
+- Active implementation branch: `phase5-product-read-launch`.
+- This slice activates production **read-only** product mode while keeping product mutations closed.
+- `/browse`, project detail, and public preview now use `productReadMode()`, preventing production from silently showing demo project data after read activation.
+- Existing DB-backed workspace/dashboard/projects/purchases/settings reads remain on the same read-only authority boundary.
+- Seller, Checkout, materialization, seller mutation, and payment mutation are not activated by this slice.
+- Production smoke now requires `wcb-product-read-mode=hosted` while still requiring `wcb-product-mutation-mode` to be absent.
+- Launch execution plan: `docs/launch-plan-2026-09-20.md`.
+- Branch verification is required before integration to `main`.
+
+---
+
 # BIGPERSON NOW INCLUDES ALL MANAGER POWERS — 2026-09-20 KST
 
 Unified Bigperson Operations is live on main `15d9d6aadabe...`. Bigperson inherits every Reviewer/Admin permission and the standalone console is organized into Overview / Sellers & Review / Publishing / Access & Roles / Audit. Seller approval, review, assessment, release/Listing/Ready, TEST entitlements, session revoke, operator-role management and audit are all available in the same Admin console. Main UI `35507009832`, Bigperson `35507009889`, durable `35507009845` and production smoke `35507044862` all pass.
