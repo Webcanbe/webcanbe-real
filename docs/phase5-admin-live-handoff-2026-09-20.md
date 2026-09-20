@@ -1,3 +1,32 @@
+# ADMIN PRODUCTION E2E CLOSED / PANEL-ONLY UI CLEANUP — 2026-09-20 KST
+
+- The first production Bigperson enrollment and first three-factor Control read have both succeeded.
+- Production DB verification after the successful Control read:
+  - active Bigperson: 1
+  - Bigperson security rows: 1
+  - active Bigperson passkeys: 1
+  - consumed privileged operation challenges: 1
+  - active step-up evidence: 1
+- This closes the Admin/Bigperson production E2E gate.
+- No privileged mutation has been executed yet after opening Control, so `wcb_control_audit` remaining empty is expected; Control read itself proves three-factor access but does not create a business-mutation audit event.
+- User requested a UI-only cleanup of the hidden Admin route:
+  - remove ordinary left navigation/sidebar;
+  - remove top search/profile/notification controls;
+  - remove lower account controls;
+  - remove ordinary site footer;
+  - leave only the Operations panel/content.
+- Security/authority behavior is unchanged:
+  - route remains `/_ops/keystone-7f31`
+  - Protected first-party auth remains
+  - server Control gate remains
+  - every privileged operation still requires fresh three-factor proof.
+- UI cleanup branch: `phase5-admin-panel-only`.
+- Implementation replaces the ordinary `AppShell` wrapper inside `Control()` with a standalone `control-standalone` page wrapper.
+- Production CSS is updated in `src/phase4-final-ui.css`.
+- A regression verifies the Control function contains no `AppShell`, `RopeanDashboardShell`, or site footer.
+
+---
+
 # FIRST PRODUCTION BIGPERSON ENROLLMENT SUCCEEDED — 2026-09-20 KST
 
 - The live production UI now reports:
