@@ -1,3 +1,9 @@
+# FACTOR CLARIFICATION — 2026-09-20 KST
+
+`Privileged factor` is the separate Bigperson password/string the user personally entered at the earlier terminal prompt `Bigperson factor:`. It is distinct from Pepper/Salt/Digest. If forgotten before first enrollment, regenerate the bootstrap factor set; do not restart Hyperdrive/auth work.
+
+---
+
 # CURRENT SCREEN / NEXT ACTION — 2026-09-20 KST
 
 The user is now on the live production Bigperson Operations screen at `/_ops/keystone-7f31`.
