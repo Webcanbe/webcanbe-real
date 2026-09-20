@@ -1,3 +1,52 @@
+# CLOUDFLARE PBKDF2 HARD CAP — FINAL BOOTSTRAP CONTRACT — 2026-09-20 KST
+
+- A second live retry proved that switching from WebCrypto to `node:crypto.pbkdf2Sync` did **not** bypass Cloudflare's production PBKDF2 limit.
+- The exact same runtime error remained:
+  `Pbkdf2 failed: iteration counts above 100000 are not supported (requested 600000).`
+- Root cause is Cloudflare workerd's production PBKDF2 hard cap of 100,000 iterations. The Node compatibility PBKDF2 path reaches the same workerd PBKDF2 implementation.
+- Therefore the earlier handoff statement claiming `node:crypto` could preserve 600,000 iterations is superseded and must not be followed.
+- Final production-compatible bootstrap contract:
+  - PBKDF2-SHA256
+  - 100,000 iterations
+  - input = factor + NUL + pepper
+  - configured salt
+  - 32-byte derived output
+  - base64url digest
+  - WebCrypto implementation.
+- Why this change is safe at this exact point:
+  - active Bigperson count is still 0;
+  - Bigperson security rows are still 0;
+  - active Bigperson passkeys are still 0;
+  - no enrolled factor verifier exists in PostgreSQL yet;
+  - bootstrap Cloudflare factor secrets can therefore be rotated without invalidating an enrolled operator.
+- Security layers retained around the factor:
+  - independent Google-backed fresh session
+  - separate Cloudflare-secret pepper
+  - per-bootstrap salt
+  - mandatory stored bootstrap digest
+  - 5/min Bigperson rate limit
+  - mandatory WebAuthn factor
+  - operation-bound one-time challenges after enrollment.
+- Existing 600k bootstrap digest is no longer compatible with the Worker. Before the next enrollment attempt, regenerate the bootstrap Pepper/Salt/Digest set at 100,000 iterations using the same remembered factor (or a new factor if desired), then replace the three Cloudflare secrets together.
+- Branch verification for the final 100k contract:
+  - Phase 5 UI verify: PASS
+  - Phase 5 Bigperson checkpoint verify: PASS
+  - Phase 5 durable editor/export verify: PASS
+  - production build: PASS
+  - Wrangler dry-run: PASS.
+- Exact next sequence after production deployment:
+  1. regenerate matching factor Pepper/Salt/Digest at 100,000 iterations;
+  2. update the three existing Cloudflare Bigperson secrets;
+  3. deploy/save if Cloudflare requires it for secret changes;
+  4. fresh Google login;
+  5. enter factor;
+  6. click `First Bigperson: register passkey`;
+  7. complete WebAuthn;
+  8. verify DB Bigperson/security/passkey rows;
+  9. perform first three-factor Control read.
+
+---
+
 # BIGPERSON PBKDF2 FIX DEPLOYED / RETRY CHECKPOINT — 2026-09-20 KST
 
 - The Cloudflare PBKDF2 runtime failure is now fixed in production.
