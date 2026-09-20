@@ -1,3 +1,9 @@
+const ROLE_RANK=Object.freeze({reviewer:1,admin:2,bigperson:3})
+async function role(db,session,minimum){
+  const row=(await db.query("SELECT role,active,epoch FROM wcb_product_operators WHERE user_id=$1 AND active FOR SHARE",[session.userId])).rows[0]
+  if(!row||!ROLE_RANK[String(row.role)]||ROLE_RANK[String(row.role)]<ROLE_RANK[minimum]) throw new Error(minimum+" authority required.")
+  return row
+}
 function id(value, label) {
   const text = String(value || "")
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text)) throw new Error("Invalid " + label + ".")
@@ -25,6 +31,7 @@ async function audit(db, session, evidenceId, action, targetType, targetId, tran
 export async function transitionOperator(db,session,input,evidenceId){
   const target=id(input?.targetUserId,"target user"), active=input?.active, role=String(input?.role||"")
   if(typeof active!=="boolean"||!["reviewer","admin","bigperson"].includes(role)) throw new Error("Invalid operator transition.")
+  await role(db,session,"bigperson")
   await evidence(db,session,evidenceId)
   const known=(await db.query("SELECT user_id FROM wcb_identity_accounts WHERE user_id=$1 LIMIT 1",[target])).rows[0]
   if(!known) throw new Error("Target user is unavailable.")
@@ -37,6 +44,7 @@ export async function transitionOperator(db,session,input,evidenceId){
 export async function transitionSellerApplication(db,session,input,evidenceId){
   const application=id(input?.applicationId,"seller application"), status=String(input?.status||"")
   if(!["approved","rejected"].includes(status)) throw new Error("Invalid seller application transition.")
+  await role(db,session,"admin")
   await evidence(db,session,evidenceId)
   const current=(await db.query("SELECT * FROM wcb_seller_applications WHERE application_id=$1 FOR UPDATE",[application])).rows[0]
   if(!current) throw new Error("Seller application is unavailable.")
@@ -49,6 +57,7 @@ export async function transitionSellerApplication(db,session,input,evidenceId){
 
 export async function revokeSession(db,session,input,evidenceId){
   const target=id(input?.sessionId,"session")
+  await role(db,session,"admin")
   await evidence(db,session,evidenceId)
   const current=(await db.query("SELECT session_id,user_id,active,expires_at FROM wcb_sessions WHERE session_id=$1 FOR UPDATE",[target])).rows[0]
   if(!current) throw new Error("Session is unavailable.")
@@ -61,6 +70,7 @@ export async function revokeSession(db,session,input,evidenceId){
 export async function decideSubmissionReview(db,session,input,evidenceId){
   const submissionId=id(input?.submissionId,"submission"), snapshot=String(input?.snapshotHash||""), decision=String(input?.decision||"")
   if(!/^[a-f0-9]{64}$/.test(snapshot)||!["approved_for_next_stage","rejected"].includes(decision)) throw new Error("Invalid review decision.")
+  await role(db,session,"reviewer")
   await evidence(db,session,evidenceId)
   await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,93))",[submissionId])
   const submission=(await db.query("SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id) WHERE s.submission_id=$1 FOR SHARE",[submissionId])).rows[0]
@@ -77,6 +87,7 @@ export async function decideSubmissionReview(db,session,input,evidenceId){
 export async function admitAssessment(db,session,input,evidenceId){
   const submissionId=id(input?.submissionId,"submission"), snapshot=String(input?.snapshotHash||""), seller=id(input?.sellerUserId,"seller"), decisionId=id(input?.reviewDecisionId,"review decision")
   if(!/^[a-f0-9]{64}$/.test(snapshot)) throw new Error("Invalid assessment admission.")
+  await role(db,session,"reviewer")
   await evidence(db,session,evidenceId)
   await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,94))",[submissionId])
   const submission=(await db.query("SELECT s.*,st.status AS submission_status FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st USING(submission_id) WHERE s.submission_id=$1 FOR SHARE",[submissionId])).rows[0]
