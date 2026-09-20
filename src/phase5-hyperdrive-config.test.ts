@@ -32,4 +32,9 @@ describe("Phase 5 production Hyperdrive configuration", () => {
     ]))
   })
 
+  it("defines CommonJS file globals needed by the bundled TypeScript analyzer", () => {
+    expect(config.define?.__filename).toBe('"/worker/index.js"')
+    expect(config.define?.__dirname).toBe('"/worker"')
+  })
+
 })
