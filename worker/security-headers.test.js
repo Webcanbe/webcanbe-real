@@ -19,7 +19,7 @@ describe("Worker security header adapter", () => {
       "/projects",
       "/purchases",
       "/settings",
-      "/control",
+      "/_ops/keystone-7f31",
       "/login",
       "/signup",
       "/auth/complete",
@@ -42,7 +42,7 @@ describe("Worker security header adapter", () => {
     for (const path of ["/","/browse","/docs","/docs/security","/project/example","/dashboard","/login","/seller/projects"]) {
       expect(isKnownAppPath(path)).toBe(true)
     }
-    for (const path of ["/definitely-not-a-route","/unknown/nested"]) {
+    for (const path of ["/definitely-not-a-route","/unknown/nested","/control"]) {
       expect(isKnownAppPath(path)).toBe(false)
     }
   })
