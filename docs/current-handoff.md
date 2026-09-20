@@ -1,3 +1,22 @@
+# GATE 5 BROWSER HARDENING CLOSED — 2026-09-20 KST
+
+- Production code checkpoint: `cc3584c4232d1bc382865cb8bcc775895391b2fb`.
+- UI `35516646841`: PASS
+- durable editor/export `35516646678`: PASS
+- Bigperson `35516646722`: PASS
+- production smoke `35516693367`: PASS
+- browser compatibility smoke `35516707994`: PASS
+- Browser matrix: Chromium / Firefox / WebKit, desktop 1440×900 and mobile 390×844.
+- Automated checks now cover public-route loading, horizontal overflow, keyboard focus, basic accessible names, uncaught page errors, and a basic navigation timing budget.
+- Auth checks cover Google/GitHub SVG marks, unavailable phone sign-in disabled, labelled auth dialog, and labelled close control.
+- Landing host now repairs injected vendor control accessibility and clips carousel overflow at the host boundary.
+- Production build-size budgets are enforced and production source maps remain absent.
+- Supabase Security Advisor: 0 findings.
+- Supabase Performance Advisor: 24 unused-index INFO findings only; no index was removed because production traffic is still too low for this signal to be meaningful.
+- Product mutation remains OFF. No Gate 3 fixture has been applied to production.
+
+---
+
 # GATE 5 BROWSER / ACCESSIBILITY / BUILD HARDENING CLOSED — 2026-09-20 KST
 
 - Production code checkpoint: `cc3584c4232d1bc382865cb8bcc775895391b2fb`.
