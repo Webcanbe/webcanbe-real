@@ -1,3 +1,4 @@
+import { pbkdf2Sync } from "node:crypto"
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server"
 
 const GOOGLE_ISSUER = "https://accounts.google.com"
@@ -18,9 +19,7 @@ function cleanPassword(value) {
   return value
 }
 async function deriveFactor(password, salt, pepper) {
-  const material = await crypto.subtle.importKey("raw", encoder.encode(cleanPassword(password) + "\0" + pepper), "PBKDF2", false, ["deriveBits"])
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: encoder.encode(salt), iterations: PBKDF2_ITERATIONS }, material, 256)
-  return b64url(new Uint8Array(bits))
+  return pbkdf2Sync(cleanPassword(password) + "\0" + pepper, salt, PBKDF2_ITERATIONS, 32, "sha256").toString("base64url")
 }
 function equalText(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false
