@@ -1,3 +1,18 @@
+# PRODUCT READ LAUNCH BRANCH CI GREEN — 2026-09-20 KST
+
+Production read activation code checkpoint `2aba73e72901f9208378a7a6595ddadb1141da26` is verified.
+
+- Phase 5 UI verify `35509040875`: **PASS**
+- Phase 5 durable editor export verify `35509040858`: **PASS**
+- Phase 5 Bigperson checkpoint verify `35509040888`: **PASS**
+- Branch is ahead of main with no behind commits at the verified checkpoint.
+- Product read is configured to turn on; product mutation remains closed.
+- Public Marketplace browse/detail/preview now use authoritative production read mode.
+- No Admin/Bigperson or durable-editor regression was detected.
+- Next release action is main integration/deployment, followed immediately by interactive production auth/private-read smoke. Do not start materialization mutation activation before that smoke passes.
+
+---
+
 # 2026-09-20 — Launch closure / production read activation
 
 - Started `phase5-product-read-launch` from verified main `ac60ef75ce5ad0c5024febae92b99b25a3acab44`.
