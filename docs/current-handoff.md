@@ -1,3 +1,30 @@
+# PHASE 5 BIGPERSON CONTROL FOUNDATION CHECKPOINT — 2026-09-20 KST
+
+- Restored the previously agreed platform-role hierarchy: `reviewer → admin → bigperson`.
+- Platform roles are separate from workspace `owner/editor/viewer` membership.
+- Removed privileged Control from ordinary app/sidebar navigation.
+- Removed the obvious `/control` route.
+- Privileged UI currently lives at the non-public route `/_ops/keystone-7f31`.
+  - This route name is only obscurity/convenience, never an authorization boundary.
+  - It is noindex/robots-disallowed and absent from normal navigation.
+- Production Control has a separate activation gate (`wcb-control-mode` + Worker `WEBCANBE_CONTROL_MODE=enabled`) rather than piggybacking on ordinary product read mode.
+- Production Worker Control read is server-side and bounded; it rechecks the current operator role/epoch after reading.
+- Current Control read surface covers operators, users, sessions, workspaces, entitlements, seller applications, submissions, reviews, assessments/results, releases, listings, Ready qualifications, deploy intents, and immutable privileged audit.
+- Canonical PostgreSQL operator authority now carries `role IN ('reviewer','admin','bigperson')`.
+- Existing operator rows migrate to `admin` by default; the explicit migration is `deployment/hosted/postgres-control-roles.sql`.
+- Role authority:
+  - reviewer: review/quarantine/assessment workflow reads and decisions
+  - admin: seller application decisions, release/listing/Ready publication authority, TEST entitlement authority
+  - bigperson: platform-role grant/revoke/demotion authority
+- High-risk mutations continue to require fresh server-minted `control_high_risk` evidence bound to the exact operator session, with a maximum five-minute freshness window.
+- Only a bigperson may transition privileged platform roles.
+- Database trigger `wcb_protect_last_bigperson` prevents removal, deactivation, or demotion of the final active bigperson.
+- Browser-supplied role flags remain non-authoritative.
+- This checkpoint establishes authority + hidden Control read foundation. Mutation UI/passkey ceremony/session-security controls are the next checkpoint.
+- Dashboard and landing visual systems remain unchanged.
+
+---
+
 # PHASE 5 EDITOR RELOAD / RECOVERY CONSISTENCY CHECKPOINT — 2026-09-19 KST
 
 - Initial Code workspace load now accepts source files + source history only when both report the same accepted revision.
