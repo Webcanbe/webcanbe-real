@@ -86,8 +86,30 @@ CREATE TABLE IF NOT EXISTS wcb_license_entitlements (
   granted_at timestamptz NOT NULL DEFAULT clock_timestamp(), revoked_at timestamptz, UNIQUE(user_id,release_id,provider)
 );
 CREATE TABLE IF NOT EXISTS wcb_product_operators (
-  user_id uuid PRIMARY KEY, active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1
+  user_id uuid PRIMARY KEY, active boolean NOT NULL DEFAULT true, epoch bigint NOT NULL DEFAULT 1,
+  role text NOT NULL DEFAULT 'admin' CHECK(role IN ('reviewer','admin','bigperson'))
 );
+ALTER TABLE wcb_product_operators ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'admin';
+DO $
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='wcb_product_operators_role_check' AND conrelid='wcb_product_operators'::regclass) THEN
+    ALTER TABLE wcb_product_operators ADD CONSTRAINT wcb_product_operators_role_check CHECK(role IN ('reviewer','admin','bigperson'));
+  END IF;
+END
+$;
+CREATE OR REPLACE FUNCTION wcb_protect_last_bigperson() RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $
+BEGIN
+  IF OLD.active AND OLD.role='bigperson' AND (TG_OP='DELETE' OR NOT NEW.active OR NEW.role<>'bigperson') THEN
+    IF NOT EXISTS (SELECT 1 FROM public.wcb_product_operators WHERE active AND role='bigperson' AND user_id<>OLD.user_id) THEN
+      RAISE EXCEPTION 'The final active bigperson cannot be removed or demoted';
+    END IF;
+  END IF;
+  RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
+END
+$;
+DROP TRIGGER IF EXISTS wcb_protect_last_bigperson_trigger ON wcb_product_operators;
+CREATE TRIGGER wcb_protect_last_bigperson_trigger BEFORE UPDATE OR DELETE ON wcb_product_operators
+  FOR EACH ROW EXECUTE FUNCTION wcb_protect_last_bigperson();
 CREATE TABLE IF NOT EXISTS wcb_operator_step_up_evidence (
   evidence_id uuid PRIMARY KEY, operator_user_id uuid NOT NULL REFERENCES wcb_product_operators,
   session_id uuid NOT NULL, authority text NOT NULL CHECK(authority='control_high_risk'),
