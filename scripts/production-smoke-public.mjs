@@ -65,7 +65,7 @@ async function run() {
   assert("request ID attached", isUuid(root.headers.get("x-request-id")), root.headers.get("x-request-id") || "missing")
   const rootHtml = await root.text()
   assert("production Control switch is deployed", rootHtml.includes('<meta name="wcb-control-mode" content="hosted"'), "wcb-control-mode=hosted")
-  assert("product read/mutation switches remain closed", !rootHtml.includes('name="wcb-product-read-mode"') && !rootHtml.includes('name="wcb-product-mutation-mode"'), "Control-only activation")
+  assert("product read is live while mutations remain closed", rootHtml.includes('<meta name="wcb-product-read-mode" content="hosted"') && !rootHtml.includes('name="wcb-product-mutation-mode"'), "read-only activation")
 
   const missing = await request("/__webcanbe-smoke-missing-route", { headers: { Accept: "text/html" } })
   assert("unknown SPA route returns real 404", missing.status === 404, `status ${missing.status}`)
