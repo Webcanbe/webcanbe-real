@@ -254,14 +254,14 @@ export class PostgresProductDomainStore {
     identifier(applicationId)
     if (!["approved", "rejected"].includes(status)) throw new Error("Invalid seller application state.")
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       const current = (await client.query("SELECT * FROM wcb_seller_applications WHERE application_id=$1 FOR UPDATE", [applicationId])).rows[0]
       if (!current) throw new AuthorityDenied()
-      if (current.status === status) { await this.requireOperatorIn(client, operator); return this.sellerApplicationFrom(current) }
+      if (current.status === status) { await this.requireOperatorIn(client, operator, "admin"); return this.sellerApplicationFrom(current) }
       if (current.status === "rejected") throw new ProductConflict("Rejected seller application cannot be reopened by this intake workflow.")
       const row = (await client.query(`UPDATE wcb_seller_applications SET status=$2,decision_by=$3,decided_at=clock_timestamp(),updated_at=clock_timestamp()
         WHERE application_id=$1 RETURNING *`, [applicationId, status, operator.userId])).rows[0]
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       return this.sellerApplicationFrom(row)
     })
   }
@@ -638,7 +638,7 @@ export class PostgresProductDomainStore {
     if (!/^[a-f0-9]{64}$/.test(input.snapshotHash)) throw new Error("Invalid promotion snapshot.")
     const version = cleanText(input.version, "release version", 100), key = cleanKey(input.idempotencyKey)
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,96))", [input.resultId])
       const row = (await client.query(`SELECT ar.*,req.status AS request_status,req.submission_id AS request_submission_id,req.seller_user_id AS request_seller_user_id,
         req.source_project_id AS request_source_project_id,req.source_revision_id AS request_source_revision_id,req.source_content_hash AS request_source_content_hash,
@@ -665,7 +665,7 @@ export class PostgresProductDomainStore {
         if (!byKey || !existing || String(byKey.promotion_id) !== String(existing.promotion_id) || String(existing.assessment_request_id) !== input.assessmentJobId || String(existing.submission_id) !== input.submissionId || String(existing.seller_user_id) !== input.sellerUserId || String(existing.submission_snapshot_hash) !== input.snapshotHash || String(existing.catalog_project_id) !== input.catalogProjectId || String(existing.version) !== version || String(existing.idempotency_key) !== key) throw new ProductConflict("Assessment result already has a conflicting promotion.")
         const releaseRow = (await client.query("SELECT * FROM wcb_project_releases WHERE release_id=$1 AND catalog_project_id=$2 FOR SHARE", [existing.release_id, existing.catalog_project_id])).rows[0]
         if (!releaseRow || String(releaseRow.source_project_id) !== String(existing.source_project_id) || String(releaseRow.source_revision_id) !== String(existing.source_revision_id) || String(releaseRow.source_content_hash) !== String(existing.source_content_hash) || String(releaseRow.snapshot_hash) !== String(existing.submission_snapshot_hash)) throw new Error("Promoted release provenance is inconsistent.")
-        await this.requireOperatorIn(client, operator)
+        await this.requireOperatorIn(client, operator, "admin")
         return Object.freeze({ promotion: this.sellerReleasePromotionFrom(existing), release: releaseFrom(releaseRow as ReleaseRow) })
       }
 
@@ -682,7 +682,7 @@ export class PostgresProductDomainStore {
         VALUES($1,$2,$3,'published',$4,$5,$6,$7,$8,$9,$10,clock_timestamp()) RETURNING *`, [releaseId, input.catalogProjectId, version, row.source_project_id, row.source_revision_id, row.source_content_hash, input.snapshotHash, JSON.stringify(encodeFiles(files)), JSON.stringify(history), operator.userId])).rows[0]
       const promotionRow = (await client.query(`INSERT INTO wcb_seller_release_promotions(promotion_id,result_id,assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,catalog_project_id,release_id,version,promoted_by,idempotency_key,created_at)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,clock_timestamp()) RETURNING *`, [promotionId, input.resultId, input.assessmentJobId, input.submissionId, input.sellerUserId, row.source_project_id, row.source_revision_id, row.source_content_hash, input.snapshotHash, row.review_decision_id, input.catalogProjectId, releaseId, version, operator.userId, key])).rows[0]
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       return Object.freeze({ promotion: this.sellerReleasePromotionFrom(promotionRow), release: releaseFrom(releaseRow as ReleaseRow) })
     })
   }
@@ -748,7 +748,7 @@ export class PostgresProductDomainStore {
     identifier(input.promotionId); identifier(input.sellerUserId); identifier(input.catalogProjectId); identifier(input.releaseId)
     const key = cleanKey(input.idempotencyKey), listing = { slug: cleanSlug(input.slug), title: cleanText(input.title, "listing title", 200), summary: cleanText(input.summary, "listing summary", 2000), tags: cleanTags(input.tags), demoMetadata: jsonObject(input.demoMetadata, "demo metadata") }
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,97))", [input.catalogProjectId])
       const lineage = (await client.query(`SELECT p.*,r.status AS release_status,r.source_project_id AS release_source_project_id,r.source_revision_id AS release_source_revision_id,
         r.source_content_hash AS release_source_content_hash,r.snapshot_hash AS release_snapshot_hash,c.source_project_id AS catalog_source_project_id,
@@ -768,7 +768,7 @@ export class PostgresProductDomainStore {
         if (!byKey || !existing || String(byKey.publication_id) !== String(existing.publication_id) || String(existing.seller_user_id) !== input.sellerUserId || String(existing.catalog_project_id) !== input.catalogProjectId || String(existing.release_id) !== input.releaseId || String(existing.idempotency_key) !== key) throw new ProductConflict("Promoted release already has a conflicting Listing publication.")
         const listingRow = (await client.query("SELECT * FROM wcb_listings WHERE listing_id=$1 AND catalog_project_id=$2 AND release_id=$3 AND status='published' FOR SHARE", [existing.listing_id, input.catalogProjectId, input.releaseId])).rows[0]
         if (!listingRow) throw new ProductConflict("Published Listing binding is inconsistent.")
-        await this.requireOperatorIn(client, operator)
+        await this.requireOperatorIn(client, operator, "admin")
         return Object.freeze({ publication: this.listingPublicationFrom(existing), listing: this.listingFrom(listingRow) })
       }
       if ((await client.query("SELECT listing_id FROM wcb_listings WHERE catalog_project_id=$1 OR slug=$2 FOR SHARE", [input.catalogProjectId, listing.slug])).rowCount) throw new ProductConflict("Catalog project or slug already has a Listing.")
@@ -778,7 +778,7 @@ export class PostgresProductDomainStore {
         VALUES($1,$2,$3,$4,$5,$6,'published','available',$7,$8,clock_timestamp()) RETURNING *`, [listingId, input.catalogProjectId, input.releaseId, listing.slug, listing.title, listing.summary, JSON.stringify(listing.tags), JSON.stringify(listing.demoMetadata)])).rows[0]
       const publicationRow = (await client.query(`INSERT INTO wcb_listing_publications(publication_id,promotion_id,result_id,seller_user_id,catalog_project_id,release_id,listing_id,status,published_by,idempotency_key,published_at)
         VALUES($1,$2,$3,$4,$5,$6,$7,'published',$8,$9,clock_timestamp()) RETURNING *`, [publicationId, input.promotionId, lineage.result_id, input.sellerUserId, input.catalogProjectId, input.releaseId, listingId, operator.userId, key])).rows[0]
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       return Object.freeze({ publication: this.listingPublicationFrom(publicationRow), listing: this.listingFrom(listingRow) })
     })
   }
@@ -787,7 +787,7 @@ export class PostgresProductDomainStore {
     identifier(input.releaseId); identifier(input.assessmentResultId)
     const version = cleanText(input.qualificationVersion, "qualification version", 100), key = cleanKey(input.idempotencyKey)
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))", [input.releaseId])
       const lineage = (await client.query(`SELECT r.*,p.promotion_id,p.result_id,p.catalog_project_id AS promotion_catalog_id,p.source_project_id AS promotion_project_id,p.source_revision_id AS promotion_revision_id,
         p.source_content_hash AS promotion_content_hash,p.submission_snapshot_hash AS promotion_snapshot_hash,
@@ -805,12 +805,12 @@ export class PostgresProductDomainStore {
       if (existing.length) {
         const row = existing[0]
         if (existing.some(item => String(item.qualification_id) !== String(row.qualification_id)) || String(row.release_id) !== input.releaseId || String(row.assessment_result_id) !== input.assessmentResultId || String(row.qualification_version) !== version || String(row.idempotency_key) !== key) throw new ProductConflict("Ready qualification already exists with different immutable evidence.")
-        await this.requireOperatorIn(client, operator); return this.readyQualificationFrom(row)
+        await this.requireOperatorIn(client, operator, "admin"); return this.readyQualificationFrom(row)
       }
       const snapshot = this.decodeRelease(lineage), compatibility = releaseCompatibility(snapshot.files, snapshot.history), derived = readiness(compatibility)
       const row = (await client.query(`INSERT INTO wcb_ready_qualifications(qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,assessment_result_digest,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,idempotency_key,qualified_at)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,clock_timestamp()) RETURNING *`, [randomUUID(), input.releaseId, lineage.catalog_project_id, lineage.promotion_id, input.assessmentResultId, lineage.source_project_id, lineage.source_revision_id, lineage.source_content_hash, lineage.snapshot_hash, lineage.result_digest, derived.status, JSON.stringify(compatibility), JSON.stringify(derived.reasons), version, operator.userId, key])).rows[0]
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       return this.readyQualificationFrom(row)
     })
   }
@@ -882,7 +882,7 @@ export class PostgresProductDomainStore {
   async grantTestEntitlement(operator: ServerSession, beneficiaryUserId: string, releaseId: string, idempotencyKey: string): Promise<LicenseEntitlement> {
     identifier(beneficiaryUserId); identifier(releaseId); const key = cleanKey(idempotencyKey), providerReference = `test:${beneficiaryUserId}:${key}`
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,92))", [`${beneficiaryUserId}:${releaseId}`])
       const known = await client.query("SELECT user_id FROM wcb_sessions WHERE user_id=$1 UNION SELECT user_id FROM wcb_identity_accounts WHERE user_id=$1", [beneficiaryUserId])
       if (!known.rowCount) throw new AuthorityDenied()
@@ -892,14 +892,14 @@ export class PostgresProductDomainStore {
       const byReference = (await client.query("SELECT * FROM wcb_license_entitlements WHERE provider_reference=$1 FOR UPDATE", [providerReference])).rows[0]
       if (byReference) {
         if (String(byReference.user_id) !== beneficiaryUserId || String(byReference.release_id) !== releaseId) throw new ProductConflict("Idempotency key was already used for a different entitlement.")
-        await this.requireOperatorIn(client, operator); return this.entitlement(byReference)
+        await this.requireOperatorIn(client, operator, "admin"); return this.entitlement(byReference)
       }
       const existing = (await client.query("SELECT * FROM wcb_license_entitlements WHERE user_id=$1 AND release_id=$2 AND provider='test' FOR UPDATE", [beneficiaryUserId, releaseId])).rows[0]
-      if (existing) { await this.requireOperatorIn(client, operator); return this.entitlement(existing) }
+      if (existing) { await this.requireOperatorIn(client, operator, "admin"); return this.entitlement(existing) }
       const entitlementId = randomUUID()
       const row = (await client.query(`INSERT INTO wcb_license_entitlements(entitlement_id,user_id,release_id,provider,provider_reference,status,granted_at)
         VALUES($1,$2,$3,'test',$4,'active',clock_timestamp()) RETURNING *`, [entitlementId, beneficiaryUserId, releaseId, providerReference])).rows[0]
-      await this.requireOperatorIn(client, operator); return this.entitlement(row)
+      await this.requireOperatorIn(client, operator, "admin"); return this.entitlement(row)
     })
   }
 
@@ -911,13 +911,13 @@ export class PostgresProductDomainStore {
     identifier(entitlementId)
     if (!["revoked", "invalid"].includes(status)) throw new Error("Invalid entitlement state.")
     return pgTransaction(this.pool, async client => {
-      await this.requireOperatorIn(client, operator)
+      await this.requireOperatorIn(client, operator, "admin")
       const current = (await client.query("SELECT * FROM wcb_license_entitlements WHERE entitlement_id=$1 AND provider='test' FOR UPDATE", [entitlementId])).rows[0]
       if (!current) throw new EntitlementUnavailable("TEST entitlement is unavailable.")
       if (current.status === status) return this.entitlement(current)
       if (current.status !== "active") throw new EntitlementUnavailable(`Entitlement is ${String(current.status)}.`)
       const row = (await client.query("UPDATE wcb_license_entitlements SET status=$2,revoked_at=clock_timestamp() WHERE entitlement_id=$1 RETURNING *", [entitlementId, status])).rows[0]
-      await this.requireOperatorIn(client, operator); return this.entitlement(row)
+      await this.requireOperatorIn(client, operator, "admin"); return this.entitlement(row)
     })
   }
 
