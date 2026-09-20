@@ -50,13 +50,17 @@ describe("Worker security header adapter", () => {
 
   it("enforces the inventoried CSP without enabling inline/eval scripts", () => {
     expect(SECURITY_HEADERS["Content-Security-Policy"]).toBe(CONTENT_SECURITY_POLICY)
-    expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self'")
+    expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self' https://apis.google.com https://www.gstatic.com")
     expect(CONTENT_SECURITY_POLICY).toContain("script-src-attr 'none'")
     expect(CONTENT_SECURITY_POLICY).not.toContain("'unsafe-eval'")
-    expect(CONTENT_SECURITY_POLICY).not.toContain("script-src 'self' 'unsafe-inline'")
+    const scriptDirective = CONTENT_SECURITY_POLICY.split("; ").find(value => value.startsWith("script-src ")) ?? ""
+    expect(scriptDirective).not.toContain("'unsafe-inline'")
+    expect(scriptDirective).not.toContain("'unsafe-eval'")
     expect(CONTENT_SECURITY_POLICY).toContain("style-src 'self' 'unsafe-inline'")
     expect(CONTENT_SECURITY_POLICY).toContain("object-src 'none'")
     expect(CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'")
+    expect(CONTENT_SECURITY_POLICY).toContain("https://apis.google.com")
+    expect(CONTENT_SECURITY_POLICY).toContain("https://www.gstatic.com")
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.googleapis.com")
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.firebaseapp.com")
   })

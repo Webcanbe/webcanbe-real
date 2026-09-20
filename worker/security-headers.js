@@ -3,7 +3,7 @@ export const CONTENT_SECURITY_POLICY = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "script-src 'self'",
+  "script-src 'self' https://apis.google.com https://www.gstatic.com",
   "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline'",
   "style-src-attr 'unsafe-inline'",
