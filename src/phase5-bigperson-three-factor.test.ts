@@ -7,6 +7,7 @@ const session = fs.readFileSync("worker/postgres-session.js", "utf8")
 const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const schema = fs.readFileSync("deployment/hosted/postgres-bigperson-3factor.sql", "utf8")
+const hardening = fs.readFileSync("deployment/hosted/postgres-supabase-hardening.sql", "utf8")
 const wrangler = fs.readFileSync("wrangler.jsonc", "utf8")
 
 describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
@@ -69,6 +70,15 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(auth).toContain("credentialBackedUp")
     expect(auth).toContain('passkey.device_type) !== "singleDevice"')
     expect(auth).toContain("role='bigperson'")
+  })
+
+  it("binds Bigperson rows to the real internal account profile and preserves server-only DB access", () => {
+    expect(schema).toContain("REFERENCES wcb_user_profiles(user_id)")
+    expect(schema).not.toContain("wcb_users")
+    expect(schema).toContain("REVOKE ALL PRIVILEGES ON TABLE wcb_bigperson_security, wcb_bigperson_passkeys, wcb_bigperson_challenges FROM anon, authenticated")
+    expect(schema).toContain("GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE wcb_bigperson_security, wcb_bigperson_passkeys, wcb_bigperson_challenges TO webcanbe_runtime")
+    expect(hardening).toContain("DO $")
+    expect(hardening).not.toContain("DO $\nBEGIN")
   })
 
   it("keeps sensitive values out of the repository", () => {
