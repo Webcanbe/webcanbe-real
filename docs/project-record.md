@@ -1,3 +1,11 @@
+## 2026-09-20: Main production verification and PostgreSQL FK index hardening
+
+The verified Admin + durable editor line was fast-forwarded to main. Main Actions `35495682185`, `35495682150`, and `35495682167` all pass. Automatic live smoke `35495723690` passed 21/21 public production checks on its first attempt, including security headers/CSP, request IDs, real 404/noindex behavior, dashboard noindex, robots/sitemap, and fail-closed Worker readiness/catalog while Hyperdrive remains absent.
+
+The Supabase performance advisor then reported 21 foreign keys without covering indexes, including the new Bigperson challenge user reference and retained Phase 3 provenance relations. Repository migration `deployment/hosted/postgres-phase5-fk-indexes.sql` adds all 21 with non-destructive `CREATE INDEX IF NOT EXISTS`; the canonical schema carries the same set. The migration passed a production rollback-only dry run, Phase 5 CI, and was applied as `20260920070349 phase5_fk_covering_indexes`. Direct catalog verification now returns zero uncovered Webcanbe FKs. Remaining advisor output is unused-index INFO only, which is expected on the pre-traffic database.
+
+---
+
 ## 2026-09-20: Admin and durable editor branches reconciled
 
 The separate durable-editor proof was reconciled into the completed privileged Admin branch by content rather than by overwriting the newer tree. The durable test and CI assets were imported; current Phase 5 CI now retains the proof on main. The only semantic conflict was an obsolete assertion that Control had to use the general hosted-product mode. Current Control intentionally uses an independent activation boundary, so the regression was corrected to prove read-only product activation cannot expose Control.
