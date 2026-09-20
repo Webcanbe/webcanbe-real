@@ -27,13 +27,20 @@ describe("Phase 5 Gate 2 authenticated read smoke", () => {
     expect(smoke).toContain('label:"Logout invalidation"')
   })
 
-  it("exercises all three production authentication entry paths without persisting credentials", () => {
+  it("links Firebase identities to the current first-party account before provider login smoke", () => {
     const smoke = app.slice(app.indexOf("function Gate2AuthSmoke()"), app.indexOf("function Checkout()"))
     expect(smoke).toContain("hostedProductClient.authStart()")
     expect(smoke).toContain("signInWithGithubFirebase()")
     expect(smoke).toContain("createEmailAccountFirebase(email,password)")
     expect(smoke).toContain("signInWithEmailFirebase(email,password)")
+    expect(smoke).toContain("hostedProductClient.linkFirebaseIdentity")
     expect(smoke).toContain("hostedProductClient.firebaseExchange")
+    expect(smoke).toContain("Sign in with Google first before linking GitHub.")
+    expect(smoke).toContain("Sign in with Google first before linking Email.")
+    expect(smoke).toContain("prevents accidental creation of a second Webcanbe internal account")
+    expect(smoke).toContain('disabled={busy||!linkedProviders.includes("GitHub")}')
+    expect(smoke).toContain('disabled={busy||!email||!password||!linkedProviders.includes("Email")}')
+    expect(smoke).toContain("GATE2_LINKED_KEY")
     expect(smoke).toContain('setPassword("")')
     expect(smoke).not.toContain("localStorage.setItem")
   })
