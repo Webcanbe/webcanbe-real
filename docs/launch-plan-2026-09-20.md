@@ -107,6 +107,17 @@ Acceptance:
 - private requests require live DB session + CSRF
 - clear empty/error/loading states
 
+## Gate 3 v2 staging: **VERIFIED, NOT DEPLOYED**
+
+- branch: `phase5-gate3-materialization-staging-v2`
+- code checkpoint: `718588c99f4af96f7c46e9140abd9f0c17bda054`
+- UI `35511748159`: PASS
+- durable `35511748083`: PASS
+- Bigperson `35511748095`: PASS
+- rebased from current main, including safe provider-linking changes
+- no public Listing created by the launch fixture
+- production activation remains blocked on interactive Gate 2
+
 ## Gate 3 — Materialization mutation activation
 
 Only after Gate 2 passes.
