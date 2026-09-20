@@ -121,14 +121,18 @@ export class PostgresProductDomainStore {
     if (!row.rowCount) throw new AuthorityDenied()
   }
 
-  private async requireOperatorIn(client: PoolClient, session: ServerSession) {
+  private async requireOperatorIn(client: PoolClient, session: ServerSession, minimum: "reviewer" | "admin" | "bigperson" = "reviewer") {
     await this.requireSessionIn(client, session)
-    const row = await client.query("SELECT user_id FROM wcb_product_operators WHERE user_id=$1 AND active FOR SHARE", [session.userId])
-    if (!row.rowCount) throw new AuthorityDenied()
+    const row = (await client.query("SELECT user_id,role,epoch FROM wcb_product_operators WHERE user_id=$1 AND active FOR SHARE", [session.userId])).rows[0]
+    if (!row) throw new AuthorityDenied()
+    const rank = { reviewer: 1, admin: 2, bigperson: 3 } as const
+    const role = String(row.role) as keyof typeof rank
+    if (!rank[role] || rank[role] < rank[minimum]) throw new AuthorityDenied()
+    return Object.freeze({ userId: String(row.user_id), role, epoch: Number(row.epoch) })
   }
 
-  private async requireControlStepUpIn(client: PoolClient, session: ServerSession, evidenceId: string) {
-    identifier(evidenceId); await this.requireOperatorIn(client, session)
+  private async requireControlStepUpIn(client: PoolClient, session: ServerSession, evidenceId: string, minimum: "admin" | "bigperson" = "admin") {
+    identifier(evidenceId); await this.requireOperatorIn(client, session, minimum)
     const freshAfter = new Date(Date.now() - 5 * 60_000)
     const row = await client.query(`SELECT evidence_id FROM wcb_operator_step_up_evidence
       WHERE evidence_id=$1 AND operator_user_id=$2 AND session_id=$3 AND authority='control_high_risk'
@@ -149,9 +153,10 @@ export class PostgresProductDomainStore {
 
   /** Trusted provisioning seam. It is intentionally absent from the HTTP
    * controller; authenticated clients cannot assert operator authority. */
-  async provisionOperator(userId: string, active = true) {
+  async provisionOperator(userId: string, active = true, role: "reviewer" | "admin" | "bigperson" = "admin") {
     identifier(userId)
-    await this.pool.query("INSERT INTO wcb_product_operators(user_id,active,epoch) VALUES($1,$2,1) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,epoch=wcb_product_operators.epoch+1", [userId, active])
+    if (!["reviewer","admin","bigperson"].includes(role)) throw new Error("Invalid platform role.")
+    await this.pool.query("INSERT INTO wcb_product_operators(user_id,active,epoch,role) VALUES($1,$2,1,$3) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,role=excluded.role,epoch=wcb_product_operators.epoch+1", [userId, active, role])
   }
 
   /** Trusted authentication-service seam. No HTTP route can mint step-up evidence. */
@@ -178,23 +183,30 @@ export class PostgresProductDomainStore {
         listings: await rows("SELECT listing_id,catalog_project_id,release_id,slug,title,summary,status,availability,tags,demo_metadata,updated_at FROM wcb_listings ORDER BY updated_at DESC"),
         ready: await rows("SELECT qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_revision_id,source_content_hash,snapshot_hash,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,qualified_at FROM wcb_ready_qualifications ORDER BY qualified_at DESC"),
         deployIntents: await rows("SELECT deploy_intent_id,project_id,workspace_id,requested_by,source_revision_id,source_content_hash,status,history,created_at,updated_at FROM wcb_deploy_intents ORDER BY created_at DESC"),
+        users: await rows("SELECT user_id,count(*)::int AS identity_count,bool_or(active) AS has_active_identity FROM wcb_identity_accounts GROUP BY user_id ORDER BY user_id"),
+        sessions: await rows("SELECT user_id,count(*) FILTER (WHERE active AND expires_at>clock_timestamp())::int AS active_sessions,max(expires_at) AS latest_expiry FROM wcb_sessions GROUP BY user_id ORDER BY user_id"),
+        workspaces: await rows("SELECT workspace_id,count(*) FILTER (WHERE active)::int AS active_members,count(*) FILTER (WHERE active AND role='owner')::int AS owners FROM wcb_workspace_members GROUP BY workspace_id ORDER BY workspace_id"),
+        operators: await rows("SELECT user_id,role,active,epoch FROM wcb_product_operators ORDER BY CASE role WHEN 'bigperson' THEN 1 WHEN 'admin' THEN 2 ELSE 3 END,user_id"),
+        entitlements: await rows("SELECT entitlement_id,user_id,release_id,provider,status,granted_at,revoked_at FROM wcb_license_entitlements ORDER BY granted_at DESC"),
         audit: await rows("SELECT audit_id,actor_user_id,actor_authority,action,target_type,target_id,transition,created_at FROM wcb_control_audit ORDER BY created_at DESC")
       }
       await this.requireOperatorIn(client, operator); return Object.freeze(result)
     })
   }
 
-  async controlSetOperatorAuthority(operator: ServerSession, evidenceId: string, targetUserId: string, active: boolean, idempotencyKey: string) {
+  async controlSetOperatorAuthority(operator: ServerSession, evidenceId: string, targetUserId: string, active: boolean, idempotencyKey: string, role?: "reviewer" | "admin" | "bigperson") {
     identifier(targetUserId); if (typeof active !== "boolean") throw new Error("Invalid operator state.")
+    if (role !== undefined && !["reviewer","admin","bigperson"].includes(role)) throw new Error("Invalid platform role.")
     return pgTransaction(this.pool, async client => {
-      await this.requireControlStepUpIn(client, operator, evidenceId)
+      await this.requireControlStepUpIn(client, operator, evidenceId, "bigperson")
       const known = await client.query("SELECT user_id FROM wcb_sessions WHERE user_id=$1 UNION SELECT user_id FROM wcb_identity_accounts WHERE user_id=$1", [targetUserId])
       if (!known.rowCount) throw new AuthorityDenied()
-      const before = (await client.query("SELECT active,epoch FROM wcb_product_operators WHERE user_id=$1 FOR UPDATE", [targetUserId])).rows[0]
-      const transition = { before: before ? Boolean(before.active) : false, after: active, previousEpoch: before ? Number(before.epoch) : 0, nextEpoch: before ? Number(before.epoch) + 1 : 1 }
+      const before = (await client.query("SELECT active,epoch,role FROM wcb_product_operators WHERE user_id=$1 FOR UPDATE", [targetUserId])).rows[0]
+      const nextRole = role ?? (before ? String(before.role) : "reviewer")
+      const transition = { before: before ? { active: Boolean(before.active), role: String(before.role) } : { active: false, role: null }, after: { active, role: nextRole }, previousEpoch: before ? Number(before.epoch) : 0, nextEpoch: before ? Number(before.epoch) + 1 : 1 }
       await this.appendControlAuditIn(client, operator, evidenceId, "operator.authority.transition", "user", targetUserId, transition, idempotencyKey)
-      const row = (await client.query("INSERT INTO wcb_product_operators(user_id,active,epoch) VALUES($1,$2,1) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,epoch=wcb_product_operators.epoch+1 RETURNING user_id,active,epoch", [targetUserId, active])).rows[0]
-      return Object.freeze({ userId: String(row.user_id), active: Boolean(row.active), epoch: Number(row.epoch) })
+      const row = (await client.query("INSERT INTO wcb_product_operators(user_id,active,epoch,role) VALUES($1,$2,1,$3) ON CONFLICT(user_id) DO UPDATE SET active=excluded.active,role=excluded.role,epoch=wcb_product_operators.epoch+1 RETURNING user_id,active,epoch,role", [targetUserId, active, nextRole])).rows[0]
+      return Object.freeze({ userId: String(row.user_id), active: Boolean(row.active), epoch: Number(row.epoch), role: String(row.role) })
     })
   }
 
