@@ -1,3 +1,25 @@
+# BIGPERSON FRESH-GOOGLE REAUTH CHECKPOINT — 2026-09-20 KST
+
+- First Bigperson registration was attempted from the live production Operations gate.
+- The server correctly rejected the attempt with:
+  `Google authentication is older than the Bigperson freshness window. Sign in with Google again.`
+- This is not a privileged-factor failure and not a passkey failure.
+- Production DB inspection at this checkpoint:
+  - active Google session: 1
+  - newest Google session age: about 2112 seconds (~35 minutes)
+  - Bigperson freshness limit in code: 10 minutes
+- Exact next action:
+  1. sign out of the current Webcanbe session;
+  2. revisit `/_ops/keystone-7f31`;
+  3. sign in again with the allowlisted Google account;
+  4. immediately enter the privileged factor;
+  5. click `First Bigperson: register passkey` within the 10-minute freshness window;
+  6. complete WebAuthn registration;
+  7. verify DB operator/security/passkey rows before the first normal Control read.
+- Do not change Hyperdrive, factor secrets, OAuth configuration, or database schema for this error.
+
+---
+
 # FIRST BIGPERSON BUTTON ORDER — 2026-09-20 KST
 
 At the live production Bigperson Operations gate, after entering the remembered privileged factor:
