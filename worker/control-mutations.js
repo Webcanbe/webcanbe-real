@@ -1,4 +1,5 @@
 import { verifyReleaseSnapshot } from "./materialization.js"
+import { deriveReleaseReadiness } from "./ready-qualification.js"
 
 const ROLE_RANK=Object.freeze({reviewer:1,admin:2,bigperson:3})
 async function role(db,session,minimum){
@@ -253,4 +254,40 @@ export async function transitionTestEntitlement(db,session,input,evidenceId){
   if(current.status===status) return current
   if(current.status!=="active") throw new Error("TEST entitlement is already terminal.")
   return (await db.query("UPDATE wcb_license_entitlements SET status=$2,revoked_at=clock_timestamp() WHERE entitlement_id=$1 RETURNING *",[entitlementId,status])).rows[0]
+}
+
+
+export async function qualifyReleaseReady(db,session,input,evidenceId){
+  const releaseId=id(input?.releaseId,"release"), resultId=id(input?.assessmentResultId,"assessment result"), version=cleanText(input?.qualificationVersion,"qualification version",100), auditKey=key(input?.idempotencyKey)
+  await role(db,session,"admin")
+  await evidence(db,session,evidenceId)
+  await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,95))",[releaseId])
+  const lineage=(await db.query(`SELECT r.*,p.promotion_id,p.result_id,p.catalog_project_id AS promotion_catalog_id,p.source_project_id AS promotion_project_id,
+    p.source_revision_id AS promotion_revision_id,p.source_content_hash AS promotion_content_hash,p.submission_snapshot_hash AS promotion_snapshot_hash,
+    ar.source_project_id AS result_project_id,ar.source_revision_id AS result_revision_id,ar.source_content_hash AS result_content_hash,
+    ar.submission_snapshot_hash AS result_snapshot_hash,ar.result_status,ar.result_digest
+    FROM wcb_project_releases r
+    JOIN wcb_seller_release_promotions p ON p.release_id=r.release_id
+    JOIN wcb_seller_assessment_results ar ON ar.result_id=p.result_id
+    WHERE r.release_id=$1 AND ar.result_id=$2 FOR SHARE`,[releaseId,resultId])).rows[0]
+  if(!lineage||lineage.result_status!=="passed"||String(lineage.catalog_project_id)!==String(lineage.promotion_catalog_id)
+    ||String(lineage.source_project_id)!==String(lineage.promotion_project_id)||String(lineage.source_revision_id)!==String(lineage.promotion_revision_id)
+    ||String(lineage.source_content_hash)!==String(lineage.promotion_content_hash)||String(lineage.snapshot_hash)!==String(lineage.promotion_snapshot_hash)
+    ||String(lineage.source_project_id)!==String(lineage.result_project_id)||String(lineage.source_revision_id)!==String(lineage.result_revision_id)
+    ||String(lineage.source_content_hash)!==String(lineage.result_content_hash)||String(lineage.snapshot_hash)!==String(lineage.result_snapshot_hash)) throw new Error("Ready qualification does not match one promoted passed assessment snapshot.")
+
+  const existing=(await db.query("SELECT * FROM wcb_ready_qualifications WHERE release_id=$1 OR (qualified_by=$2 AND idempotency_key=$3) FOR SHARE",[releaseId,session.userId,auditKey])).rows
+  if(existing.length){
+    const row=existing[0]
+    if(existing.some(item=>String(item.qualification_id)!==String(row.qualification_id))||String(row.release_id)!==releaseId||String(row.assessment_result_id)!==resultId||String(row.qualification_version)!==version||String(row.idempotency_key)!==auditKey) throw new Error("Ready qualification already exists with different immutable evidence.")
+    const transition={before:null,after:String(row.qualification_status),releaseId,assessmentResultId:resultId,qualificationVersion:version}
+    await audit(db,session,evidenceId,"release.ready.qualify","release",releaseId,transition,auditKey)
+    return row
+  }
+
+  const derived=deriveReleaseReadiness(lineage)
+  const transition={before:null,after:derived.status,releaseId,assessmentResultId:resultId,qualificationVersion:version}
+  await audit(db,session,evidenceId,"release.ready.qualify","release",releaseId,transition,auditKey)
+  return (await db.query(`INSERT INTO wcb_ready_qualifications(qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_project_id,source_revision_id,source_content_hash,snapshot_hash,assessment_result_digest,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,idempotency_key,qualified_at)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,clock_timestamp()) RETURNING *`,[crypto.randomUUID(),releaseId,lineage.catalog_project_id,lineage.promotion_id,resultId,lineage.source_project_id,lineage.source_revision_id,lineage.source_content_hash,lineage.snapshot_hash,lineage.result_digest,derived.status,JSON.stringify(derived.compatibility),JSON.stringify(derived.reasons),version,session.userId,auditKey])).rows[0]
 }
