@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import { describe, expect, it } from "vitest"
+import { deriveFactor } from "../worker/bigperson-auth.js"
 
 const auth = fs.readFileSync("worker/bigperson-auth.js", "utf8")
 const worker = fs.readFileSync("worker/index.js", "utf8")
@@ -19,6 +20,14 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(auth).toContain('session.authProvider !== "google"')
     expect(auth).toContain('session.authIssuer !== GOOGLE_ISSUER')
     expect(auth).toContain("GOOGLE_SESSION_MAX_AGE_MS")
+  })
+
+  it("derives the same 600k PBKDF2 digest as the operator bootstrap command", async () => {
+    await expect(deriveFactor(
+      "example-factor",
+      "salt-example-abcdef",
+      "pepper-example-0123456789",
+    )).resolves.toBe("RT_cx0rR2kE-crYLc6Lz7pWuX4inCCwmD4Jup82czt4")
   })
 
   it("never stores the entered privileged factor as plaintext", () => {
