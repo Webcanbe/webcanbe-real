@@ -1,3 +1,33 @@
+# PHASE 5 ADMIN CLOSED / HYPERDRIVE ACTIVATION HANDOFF — 2026-09-20 KST
+
+- Canonical main + Admin branch checkpoint: `417e4c11ef912e92e2ec3153ec6b3fcb6b653ddb`.
+- Main CI at that checkpoint:
+  - Phase 5 UI verify: PASS
+  - durable editor/export verify: PASS
+  - Bigperson/Admin verify: PASS
+  - automatic production smoke: PASS
+- Admin/Bigperson implementation is complete in code and production PostgreSQL schema:
+  - reviewer/admin/bigperson authority
+  - mandatory Google + privileged factor + device-bound passkey ceremony
+  - session revocation
+  - seller review/assessment
+  - immutable release promotion
+  - Listing publication
+  - canonical source-derived Ready qualification
+  - TEST entitlement operations
+  - append-only privileged audit
+  - final-Bigperson DB protection
+- Production Supabase privileged schema is applied and verified.
+- Remaining Admin work is live-only: Hyperdrive connection → DB-backed first-party session → first Bigperson passkey enrollment → Control production E2E.
+- `webcanbe_hyperdrive` is still `NOLOGIN`; no DB password has been created or persisted.
+- Cloudflare Hyperdrive official guidance was rechecked: use Supabase Direct connection (not pooled/Supavisor), PostgreSQL host `db.kappcfofcobhudmeuzmt.supabase.co`, port 5432, database `postgres`, least-privilege user `webcanbe_hyperdrive`.
+- Automated transfer of a newly generated DB password into Cloudflare browser automation was blocked by the tool security boundary. Do not bypass this by writing the secret to Git, Markdown, frontend code, or chat.
+- Safe rollback point before Hyperdrive: `backup-main-before-hyperdrive-2026-09-20`.
+- Active continuation branch: `phase5-hyperdrive-activation`.
+- Once a Cloudflare Hyperdrive configuration exists, only its non-secret configuration ID is needed in `wrangler.jsonc`; then deploy and require database readiness before enabling production read/mutation switches.
+
+---
+
 # PHASE 5 ADMIN + DURABLE EDITOR INTEGRATION CHECKPOINT — 2026-09-20 KST
 
 - The previously separate `phase5-editor-durable-export` proof has been integrated onto the completed Bigperson/Admin branch without replacing newer Admin code or documents.
