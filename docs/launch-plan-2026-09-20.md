@@ -1,5 +1,19 @@
 # Webcanbe Launch Closure Plan — 2026-09-20 KST
 
+## Gate 3 v4 current-main staging: **VERIFIED, NOT DEPLOYED**
+
+- branch: `phase5-gate3-materialization-staging-v4`
+- draft PR: #45
+- verified checkpoint: `bd03d69726b31a70e2a981b35b609fe3ac69e33f`
+- integrated verification `35545791365`: **PASS**
+- Firebase/CSP focused verification `35545791377`: **PASS**
+- rebuilt from current main after Firebase build-variable fallback and popup CSP work
+- preserves `db:recovery:preflight` + adds `launch:smoke-fixture`
+- includes private no-Listing launch fixture + explicit staged frontend/Worker materialization switches
+- includes Gate 4 immutable release → materialize → durable edit → reopen → standalone export/build regression
+- production mutation remains OFF
+- v3 is superseded for activation; use v4 after Gate 2 is green
+
 ## Active continuation — 2026-09-21 KST
 
 Read `docs/launch-resume-2026-09-21.md` before resuming after an interruption. The latest verified implementation remains `0ad5747a89a01414b966ac8ceee82eb44c6c1768`; later documentation commits are not new production feature evidence. The existing hourly task resumes unfinished work automatically at its next invocation and checks whether lost-response writes already landed.
