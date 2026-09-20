@@ -1,3 +1,18 @@
+# CURRENT SCREEN / NEXT ACTION — 2026-09-20 KST
+
+The user is now on the live production Bigperson Operations screen at `/_ops/keystone-7f31`.
+
+Immediate next step:
+- enter the configured privileged factor;
+- click `First Bigperson: register passkey`;
+- complete WebAuthn registration;
+- then verify DB operator/security/passkey rows;
+- only after enrollment, run `Verify all 3 factors`.
+
+Do not restart Hyperdrive, Google OAuth, Firebase, or DB-session work. Those are already live and verified.
+
+---
+
 # CURRENT AUTHORITATIVE HANDOFF — 2026-09-20 KST
 
 Read **`docs/phase5-admin-live-handoff-2026-09-20.md` first**.
