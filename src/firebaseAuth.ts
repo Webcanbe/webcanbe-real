@@ -10,10 +10,16 @@ import {
   type UserCredential,
 } from "firebase/auth"
 
+// Firebase project IDs are public browser configuration. Keep the environment
+// variable as the preferred source, but retain the verified production project
+// ID so a single missing build variable cannot silently disable GitHub/Email
+// authentication while the other Firebase Web config is present.
+const FIREBASE_PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID || "webcanbe-b607e"
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  projectId: FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
