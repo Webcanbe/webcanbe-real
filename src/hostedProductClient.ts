@@ -254,6 +254,10 @@ export class HostedProductClient {
     return (await this.privilegedMutation<{ application: Record<string, unknown> }>(password, "/__webcanbe/api/ops/seller-applications/transition", { ...input, idempotencyKey: crypto.randomUUID() })).application
   }
 
+  async controlRevokeSession(password: string, sessionId: string) {
+    return (await this.privilegedMutation<{ session: Record<string, unknown> }>(password, "/__webcanbe/api/ops/sessions/revoke", { sessionId, idempotencyKey: crypto.randomUUID() })).session
+  }
+
 }
 
 export const hostedProductMode = () => typeof document !== "undefined" && document.querySelector('meta[name="wcb-editor-mode"]')?.getAttribute("content") === "hosted"
