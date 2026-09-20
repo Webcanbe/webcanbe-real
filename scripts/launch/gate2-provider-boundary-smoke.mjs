@@ -8,6 +8,14 @@ const forbiddenPaths = new Set([
   "/__webcanbe/auth/firebase-exchange",
   "/__webcanbe/api/account/identities/link/firebase",
 ])
+const firebaseBuildKeys = [
+  "VITE_FIREBASE_API_KEY",
+  "VITE_FIREBASE_AUTH_DOMAIN",
+  "VITE_FIREBASE_PROJECT_ID",
+  "VITE_FIREBASE_STORAGE_BUCKET",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  "VITE_FIREBASE_APP_ID",
+]
 
 const checks = []
 const failures = []
@@ -34,6 +42,39 @@ function isOfficialGithubHost(value) {
   } catch {
     return false
   }
+}
+
+async function firebaseBundleEvidence(page) {
+  const scriptUrls = await page.evaluate(() =>
+    [...document.querySelectorAll("script[src]")]
+      .map(node => node instanceof HTMLScriptElement ? node.src : "")
+      .filter(Boolean),
+  )
+  let combined = ""
+  for (const source of scriptUrls) {
+    try {
+      const url = new URL(source)
+      if (url.origin !== origin.origin || !url.pathname.endsWith(".js")) continue
+      const response = await fetch(url)
+      if (response.ok) combined += "\n" + await response.text()
+    } catch {
+      // Best-effort diagnostic only.
+    }
+  }
+
+  const unresolved = firebaseBuildKeys.filter(key => combined.includes(key))
+  const marker = "Firebase Authentication is not configured."
+  const markerIndex = combined.indexOf(marker)
+  let snippet = ""
+  if (markerIndex >= 0) {
+    snippet = combined
+      .slice(Math.max(0, markerIndex - 2200), markerIndex + marker.length + 200)
+      .replace(/AIza[A-Za-z0-9_-]{20,}/g, "[REDACTED_FIREBASE_API_KEY]")
+      .replace(/\s+/g, " ")
+      .slice(0, 2600)
+  }
+
+  return { unresolved, snippet, scripts: scriptUrls.length }
 }
 
 const browser = await chromium.launch({ headless: true })
@@ -100,6 +141,13 @@ try {
     popup = context.pages().find(candidate => candidate !== page)
     providerMessage = (await page.locator(".settings-save-status").textContent().catch(() => ""))?.trim() || ""
     if (!popup && !providerMessage) await page.waitForTimeout(200)
+  }
+
+  if (!popup && providerMessage.includes("Firebase Authentication is not configured")) {
+    const evidence = await firebaseBundleEvidence(page)
+    console.log("Firebase production bundle unresolved build keys: " + (evidence.unresolved.join(", ") || "none detected"))
+    console.log("Firebase production bundle script count: " + evidence.scripts)
+    if (evidence.snippet) console.log("Firebase production bundle config snippet: " + evidence.snippet)
   }
 
   assert(
