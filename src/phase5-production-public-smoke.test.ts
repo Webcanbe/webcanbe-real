@@ -24,7 +24,7 @@ describe("Phase 5 public production smoke runner", () => {
     expect(smoke).toContain("x-robots-tag")
     expect(smoke).toContain("production Control switch is deployed")
     expect(smoke).toContain('wcb-control-mode" content="hosted"')
-    expect(smoke).toContain("product read/mutation switches remain closed")
+    expect(smoke).toContain("product read is live while mutations remain closed")
   })
 
   it("checks crawler policy and Worker database boundaries without credentials", () => {
