@@ -168,6 +168,16 @@ Also verify:
 - direct workspace route protection
 - export excludes Webcanbe runtime state
 
+## Gate 5 browser/accessibility/build hardening: **CLOSED**
+
+- production code `cc3584c4232d1bc382865cb8bcc775895391b2fb`
+- UI `35516646841`, durable `35516646678`, Bigperson `35516646722`, production smoke `35516693367`: PASS
+- Chromium / Firefox / WebKit production matrix `35516707994`: PASS
+- desktop/mobile responsive overflow, keyboard focus, accessible names, uncaught page errors and basic timing checks are automated
+- production build-size budgets are enforced
+- Supabase Security Advisor: 0 findings
+- Performance Advisor currently reports unused-index INFO only; no index removal at low traffic
+
 ## Gate 5 — Launch hardening
 
 Before broad public traffic:
