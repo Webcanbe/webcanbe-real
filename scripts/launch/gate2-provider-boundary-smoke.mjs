@@ -4,6 +4,7 @@ const origin = new URL(process.env.WEBCANBE_GATE2_ORIGIN || "https://webcanbe.co
 if (origin.protocol !== "https:") throw new Error("Gate 2 provider smoke origin must use HTTPS.")
 
 const gatePath = "/_ops/gate2-auth-smoke"
+const firebaseAuthDomainOrigin = "https://webcanbe-b607e.firebaseapp.com"
 const forbiddenPaths = new Set([
   "/__webcanbe/auth/firebase-exchange",
   "/__webcanbe/api/account/identities/link/firebase",
@@ -144,6 +145,18 @@ try {
     "Gate 2 diagnostic is noindex",
     (response?.headers()["x-robots-tag"] || "").includes("noindex"),
     response?.headers()["x-robots-tag"] || "missing",
+  )
+
+  const firebaseInit = await context.request.get(firebaseAuthDomainOrigin + "/__/firebase/init.json")
+  let firebaseProjectId = ""
+  if (firebaseInit.ok()) {
+    const value = await firebaseInit.json().catch(() => ({}))
+    firebaseProjectId = typeof value?.projectId === "string" ? value.projectId : ""
+  }
+  assert(
+    "Firebase authDomain init config resolves",
+    firebaseInit.status() === 200 && firebaseProjectId === "webcanbe-b607e",
+    `status ${firebaseInit.status()}, projectId ${firebaseProjectId || "missing"}`,
   )
 
   await page.getByRole("heading", { name: "Gate 2 authenticated read smoke" }).waitFor({ timeout: 10_000 })
