@@ -46,6 +46,11 @@ export type ControlData = Readonly<{
   listings: Array<Record<string, unknown>>
   ready: Array<Record<string, unknown>>
   deployIntents: Array<Record<string, unknown>>
+  users: Array<Record<string, unknown>>
+  sessions: Array<Record<string, unknown>>
+  workspaces: Array<Record<string, unknown>>
+  operators: Array<Record<string, unknown>>
+  entitlements: Array<Record<string, unknown>>
   audit: Array<Record<string, unknown>>
 }>
 
