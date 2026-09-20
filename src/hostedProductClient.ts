@@ -1,3 +1,4 @@
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 import type { LicenseEntitlement, Listing, ProjectRelease, ReadyQualification, SellerApplication, SellerGitHubAdmission, SellerSubmission, SellerZipAdmission, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
 export type HostedListing = Listing & Readonly<{
@@ -227,9 +228,19 @@ export class HostedProductClient {
     return (await this.post<{ submission: SellerSubmission }>("/__webcanbe/api/product/seller/submissions/create", { sellerApplicationId, workspaceId, sourceProjectId })).submission
   }
 
-  async controlRead() {
-    const path = productionControlMode() ? "/__webcanbe/api/ops/control/read" : "/__webcanbe/api/product/control/read"
-    return (await this.post<{ control: ControlData }>(path, {})).control
+  async registerBigpersonPasskey(password: string) {
+    if (!productionControlMode()) throw new HostedProductError(404, "Bigperson registration is available only on the production Control boundary.")
+    const begin = await this.post<{ challengeId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>("/__webcanbe/api/ops/bigperson/register/options", { password })
+    const response = await startRegistration({ optionsJSON: begin.options })
+    return await this.post<{ registered: boolean }>("/__webcanbe/api/ops/bigperson/register/verify", { challengeId: begin.challengeId, response })
+  }
+
+  async controlRead(password: string) {
+    if (!productionControlMode()) throw new HostedProductError(404, "Privileged operations are not enabled.")
+    const path = "/__webcanbe/api/ops/control/read"
+    const begin = await this.post<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]["optionsJSON"] }>("/__webcanbe/api/ops/bigperson/operation/options", { password, operation: { method: "POST", path, body: {} } })
+    const response = await startAuthentication({ optionsJSON: begin.options })
+    return (await this.post<{ control: ControlData }>(path, { challengeId: begin.challengeId, response })).control
   }
 
 }
