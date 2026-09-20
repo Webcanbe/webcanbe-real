@@ -1,3 +1,16 @@
+# PHASE 5 BIGPERSON SESSION SECURITY CHECKPOINT — 2026-09-20 KST
+
+- Operations now reads bounded active-session metadata: session ID, user ID, creation/expiry, active state and authentication provider; token/cookie hashes are never returned.
+- Bigperson can revoke an individual first-party session from Operations.
+- Session revocation requires a new mandatory three-factor ceremony and is bound to the exact target session ID.
+- Revocation writes append-only `session.revoke` Control audit evidence.
+- Operations audit table now shows the bounded before/after transition object in addition to actor/action/target/time.
+- The single-use privileged factor field is shared by mutations but cleared before each passkey ceremony.
+- This completes the initial privileged session/security control and audit drill-down slice.
+- Remaining Control work: review/assessment/release/listing/Ready mutation surfaces and final production E2E/provisioning.
+
+---
+
 # PHASE 5 BIGPERSON MUTATION UI CHECKPOINT — 2026-09-20 KST
 
 - Privileged Control now has real mutation paths for:
