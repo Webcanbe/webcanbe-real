@@ -1,7 +1,7 @@
 name: Phase 5 bigperson checkpoint verify
 on:
   push:
-    branches: [phase5-bigperson-control]
+    branches: [main, phase5-bigperson-control]
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -17,7 +17,7 @@ jobs:
       - name: Secret scan
         run: npm run security:secrets
       - name: Bigperson and privileged authority regressions
-        run: npx vitest run src/phase5-bigperson-control.test.ts src/phase5-bigperson-three-factor.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-ready-qualification.test.ts src/phase5-launch-hardening.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts
+        run: npx vitest run src/phase5-bigperson-control.test.ts src/phase5-bigperson-three-factor.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-ready-qualification.test.ts src/phase5-editor-durable-export.test.ts src/phase5-launch-hardening.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts
       - name: Worker syntax
         run: node --check worker/bigperson-auth.js && node --check worker/control-mutations.js && node --check worker/ready-qualification.js && node --check worker/index.js && node --check worker/postgres-session.js
       - name: Production build
