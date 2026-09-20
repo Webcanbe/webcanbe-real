@@ -8,6 +8,18 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — privileged Control mutations
+
+- Real production Worker mutations exist for operator role/state, seller approval/rejection, session revoke, review decision and assessment admission.
+- Every mutation consumes a fresh exact-body-bound three-factor proof.
+- reviewer+: review/assessment; admin+: seller/session; bigperson only: platform-role transition.
+- Role thresholds are enforced server-side; UI state is not authority.
+- All mutations are idempotency-keyed and append immutable privileged audit evidence.
+- Control UI clears the factor before each passkey prompt and exposes no session tokens/hashes.
+- Final-Bigperson DB protection remains active.
+
+---
+
 ## Latest recovery delta — Bigperson review / assessment
 
 - Operations can make immutable seller review approve/reject decisions with a fresh three-factor proof.
