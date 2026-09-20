@@ -1,3 +1,15 @@
+# 2026-09-20 — Launch closure / production read activation
+
+- Started `phase5-product-read-launch` from verified main `ac60ef75ce5ad0c5024febae92b99b25a3acab44`.
+- Production read-only switch is being activated without opening `wcb-product-mutation-mode`.
+- Public Marketplace browse/detail/preview were corrected to follow `productReadMode()`; production no longer relies on the legacy full-hosted flag for those read-only surfaces.
+- Production smoke contract now requires read=hosted and mutation=closed.
+- UI, Bigperson, and durable workflows were extended to verify this launch branch.
+- Launch gate plan recorded at `docs/launch-plan-2026-09-20.md`.
+- Do not advance to materialization mutation activation until production auth/private-read smoke passes.
+
+---
+
 ## 2026-09-20: Hyperdrive, live Control and DB-session recovery closure
 
 A comprehensive current-state handoff is now stored at `docs/phase5-admin-live-handoff-2026-09-20.md`. Hyperdrive is live; production readiness is DB/schema ready; the authoritative catalog is reachable; production Control is independently enabled; the Cloudflare TypeScript `__filename` deployment failure is fixed; and the Google DB-session defects discovered live were corrected with production migrations for `wcb_sessions.created_at` and `auth_provider`. Current main verification passes UI, Bigperson, durable editor/export and production smoke. The live user has reached the three-factor Bigperson Operations gate. No Bigperson/passkey is enrolled yet; first passkey registration and one three-factor Control read are the remaining Admin E2E actions.
