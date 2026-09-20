@@ -22,19 +22,19 @@ describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
     expect(auth).toContain("GOOGLE_SESSION_MAX_AGE_MS")
   })
 
-  it("derives the same 600k PBKDF2 digest as the operator bootstrap command", async () => {
+  it("derives the same Cloudflare-supported PBKDF2 digest as the operator bootstrap command", async () => {
     await expect(deriveFactor(
       "example-factor",
       "salt-example-abcdef",
       "pepper-example-0123456789",
-    )).resolves.toBe("RT_cx0rR2kE-crYLc6Lz7pWuX4inCCwmD4Jup82czt4")
+    )).resolves.toBe("7S--aJxD_Q7_RCFHqP5qyrnYYHJpCq0pzSgJLDnxWpk")
   })
 
   it("never stores the entered privileged factor as plaintext", () => {
-    expect(auth).toContain("PBKDF2_ITERATIONS = 600_000")
-    expect(auth).toContain('import { pbkdf2Sync } from "node:crypto"')
-    expect(auth).toContain('pbkdf2Sync(cleanPassword(password) + "\\0" + pepper, salt, PBKDF2_ITERATIONS, 32, "sha256")')
-    expect(auth).not.toContain('deriveBits({ name: "PBKDF2"')
+    expect(auth).toContain("PBKDF2_ITERATIONS = 100_000")
+    expect(auth).toContain('name: "PBKDF2"')
+    expect(auth).toContain("iterations: PBKDF2_ITERATIONS")
+    expect(auth).not.toContain('pbkdf2Sync')
     expect(auth).toContain("WEBCANBE_BIGPERSON_FACTOR_PEPPER")
     expect(auth).toContain("WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST")
     expect(auth).toContain("Bigperson bootstrap factor digest is not configured.")
