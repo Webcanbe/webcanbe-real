@@ -1,3 +1,9 @@
+# BIGPERSON NOW INCLUDES ALL MANAGER POWERS — 2026-09-20 KST
+
+Unified Bigperson Operations is live on main `15d9d6aadabe...`. Bigperson inherits every Reviewer/Admin permission and the standalone console is organized into Overview / Sellers & Review / Publishing / Access & Roles / Audit. Seller approval, review, assessment, release/Listing/Ready, TEST entitlements, session revoke, operator-role management and audit are all available in the same Admin console. Main UI `35507009832`, Bigperson `35507009889`, durable `35507009845` and production smoke `35507044862` all pass.
+
+---
+
 # UNIFIED BIGPERSON OPERATIONS CONSOLE — 2026-09-20 KST
 
 Bigperson is explicitly locked as a superset of all Reviewer/Admin manager permissions. The standalone Admin UI is now organized as Overview / Sellers & Review / Publishing / Access & Roles / Audit, with seller approval, review, assessment, release/Listing/Ready, TEST entitlements, sessions, role management and audit in one console. Branch CI is green: UI `35506923400`, Bigperson `35506923474`, durable `35506923428`.
