@@ -1,3 +1,24 @@
+# GATE 3 V2 REBASED STAGING VERIFIED — 2026-09-20 KST
+
+- Rebuilt Gate 3 staging from current main `5a36af97c6b55f5854edc4430cc1668eb7436dfd`, preserving the safe Gate 2 provider-linking sequence.
+- Active staging branch: `phase5-gate3-materialization-staging-v2`.
+- Verified code checkpoint: `718588c99f4af96f7c46e9140abd9f0c17bda054`.
+- CI:
+  - Phase 5 UI verify `35511748159`: **PASS**
+  - Phase 5 durable editor/export verify `35511748083`: **PASS**
+  - Phase 5 Bigperson checkpoint verify `35511748095`: **PASS**
+- Staged only:
+  - frontend `wcb-product-mutation-mode=hosted`
+  - Worker `WEBCANBE_PRODUCT_MUTATIONS=enabled`
+  - source-backed internal launch-smoke fixture
+  - materialization activation regressions
+- Gate 2 safe provider linking is explicitly regression-locked on this branch.
+- The fixture creates no public Listing and is not applied to production.
+- Do **not** merge/deploy this branch until the real-browser Gate 2 provider smoke is green.
+- The old `phase5-gate3-materialization-staging` branch is historical; use v2 for any future Gate 3 work.
+
+---
+
 # NEXT RELEASE BLOCKER / GATE 3 PRESTAGED — 2026-09-20 KST
 
 - Gate 2 authenticated smoke is live at `https://webcanbe.com/_ops/gate2-auth-smoke`.
