@@ -8,6 +8,7 @@ import { databasePurchases, databaseWorkspaceProjects } from "./product-private.
 import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
+import { databaseControlRead } from "./control-read.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -432,6 +433,11 @@ async function privateProduct(request, env, path, traceId) {
           return json({ error: "Working-copy creation is temporarily unavailable." }, 503)
         }
       }
+      if (path === "/__webcanbe/api/ops/control/read") {
+        if (env.WEBCANBE_CONTROL_MODE !== "enabled") return json({ error: "Privileged operations are not enabled." }, 404)
+        const control = await databaseControlRead(db, databaseSession)
+        return control ? json({ control }) : json({ error: "Privileged operation refused." }, 403)
+      }
       if (path === "/__webcanbe/api/account/identities/link/firebase") {
         const idToken = bearerToken(request)
         if (!idToken) return json({ error: "Verified Firebase identity proof is required." }, 401)
@@ -529,7 +535,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase") response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path === "/__webcanbe/api/ops/control/read") response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
