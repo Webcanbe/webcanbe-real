@@ -1,3 +1,17 @@
+# PERMANENT ADMIN ENTRY URL — 2026-09-20 KST
+
+Permanent production Admin/Bigperson entry URL:
+
+`https://webcanbe.com/_ops/keystone-7f31`
+
+Behavior:
+- if no valid first-party session exists, the protected route redirects to sign-in;
+- after sign-in, return to the same hidden Admin route;
+- opening the route alone never grants authority;
+- privileged access still requires the Bigperson three-factor ceremony.
+
+---
+
 # ADMIN PANEL-ONLY UI DEPLOYED / ADMIN E2E CLOSED — 2026-09-20 KST
 
 - Production Admin/Bigperson E2E is complete:
