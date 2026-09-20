@@ -1,3 +1,16 @@
+## 2026-09-20 integrated Admin + durable editor checkpoint
+
+- [x] Bigperson/Admin authority, mandatory three-factor security, review/assessment, release promotion, Listing publication, canonical source-derived Ready qualification and TEST entitlement controls.
+- [x] Production Supabase privileged role + three-factor schema applied and privilege-verified.
+- [x] Durable accepted save/history/reload + standalone export proof integrated from the former dedicated branch.
+- [x] Combined Admin verification run `35495424755`.
+- [x] Combined durable editor/export verification run `35495424762`.
+- [ ] Fast-forward verified integrated tree to `main` after preserving the current main ref.
+- [ ] Hyperdrive + first production Bigperson enrollment + Control E2E.
+- [ ] Production read/mutation activation only after DB/session smoke.
+
+---
+
 # Webcanbe Phase 5 — Launch Plan
 
 Status date: 2026-09-19 KST  
