@@ -24,7 +24,7 @@ Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudfl
 - Control data is not auto-loaded: each read requires a new three-factor ceremony.
 - Dedicated Bigperson ceremony rate limit: 5 attempts per minute per user through its own Cloudflare binding.\n- Existing protections remain: CSRF/same-origin, rate limiting, server-side Bigperson role/epoch, last-Bigperson DB protection, no client role trust, private/noindex Control route.
 - Deployment migration: `deployment/hosted/postgres-bigperson-3factor.sql`.
-- Secrets/config still need to be provisioned in Cloudflare before production enrollment; no user credential values are stored in the repository.
+- Secrets/config still need to be provisioned in Cloudflare before production enrollment; no user credential values are stored in the repository.\n- Verification run `35485848079`: three-factor/privileged authority regressions PASS, Worker syntax PASS, production build PASS, Wrangler dry-run PASS.
 
 ---
 
