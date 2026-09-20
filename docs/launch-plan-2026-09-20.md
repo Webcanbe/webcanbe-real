@@ -66,6 +66,15 @@ Acceptance:
 - clean-account backend reads return truthful empty arrays
 - interactive provider-specific browser smoke remains
 
+## Gate 2 authenticated smoke UI: **LIVE**
+
+- `https://webcanbe.com/_ops/gate2-auth-smoke`
+- HTTP 200 / noindex
+- Google, GitHub/Firebase, Email signup/login entry paths available
+- automatic Account / Workspace / Purchases / Working copies / Catalog checks
+- refresh-persistence and logout-invalidation checks included
+- product mutation still closed
+
 ## Gate 2 — Interactive production auth + private-read smoke
 
 Run against a clean/new account and an existing account.
