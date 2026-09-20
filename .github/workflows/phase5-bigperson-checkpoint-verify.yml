@@ -1,7 +1,7 @@
 name: Phase 5 bigperson checkpoint verify
 on:
   push:
-    branches: [main, phase5-bigperson-control, phase5-hyperdrive-live, phase5-admin-live-control, phase5-cloudflare-typescript-runtime, phase5-session-created-at-fix, phase5-bigperson-pbkdf2-node-crypto, phase5-bigperson-pbkdf2-cloudflare-cap, phase5-bigperson-synced-passkey, phase5-product-operator-updated-at, phase5-admin-panel-only]
+    branches: [main, phase5-bigperson-control, phase5-hyperdrive-live, phase5-admin-live-control, phase5-cloudflare-typescript-runtime, phase5-session-created-at-fix, phase5-bigperson-pbkdf2-node-crypto, phase5-bigperson-pbkdf2-cloudflare-cap, phase5-bigperson-synced-passkey, phase5-product-operator-updated-at, phase5-admin-panel-only, phase5-bigperson-unified-operations]
 jobs:
   verify:
     runs-on: ubuntu-latest
