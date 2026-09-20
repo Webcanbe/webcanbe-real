@@ -1,3 +1,36 @@
+# GATE 3 MATERIALIZATION STAGING READY — 2026-09-20 KST
+
+- Staging branch: `phase5-gate3-materialization-staging`.
+- Verified staging checkpoint: `47550c1ecb1d505d52f7672744f4b08fe6d4ad33`.
+- Branch verification:
+  - Phase 5 UI verify `35510969693`: **PASS**
+  - Phase 5 durable editor/export verify `35510969613`: **PASS**
+- This branch is intentionally **NOT merged to main** until Gate 2 authenticated provider smoke passes.
+- Staged activation:
+  - frontend `wcb-product-mutation-mode=hosted`
+  - Worker `WEBCANBE_PRODUCT_MUTATIONS=enabled`
+- Seller/payment mutation surfaces remain closed; the production Worker still exposes only the existing materialization mutation on this gate.
+- Added internal materialization fixture builder:
+  - `scripts/launch/materialization-smoke-fixture.mjs`
+  - command: `npm run launch:smoke-fixture`
+- Fixture source: `fixtures/studio-ledger`.
+- Fixture integrity is verified by the actual production `verifyReleaseSnapshot()` implementation.
+- The generated fixture creates:
+  - one internal catalog provenance row
+  - one immutable published release
+  - one active `launch-smoke` entitlement
+- It creates **no `wcb_listings` row**, so it never appears in the public Marketplace.
+- Runbook: `docs/operations/launch-materialization-smoke.md`.
+- Production DB currently has zero projects/releases/listings/entitlements/materializations; no smoke fixture has been applied yet.
+- Exact next gate:
+  1. complete Gate 2 at `https://webcanbe.com/_ops/gate2-auth-smoke`;
+  2. record provider smoke results;
+  3. generate/apply the non-public launch fixture;
+  4. merge/activate Gate 3;
+  5. run materialize → edit → save → reload → export E2E.
+
+---
+
 # GATE 2 AUTHENTICATED SMOKE UI LIVE — 2026-09-20 KST
 
 - Main checkpoint: `d6311f5ea11f8ab8b39b44b504b85104df4bef4f`.
