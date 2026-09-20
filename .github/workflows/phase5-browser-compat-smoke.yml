@@ -1,0 +1,39 @@
+name: Phase 5 browser compatibility smoke
+on:
+  workflow_run:
+    workflows: ["Phase 5 production smoke"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  browser-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HOME: /root
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Install pinned Playwright package
+        run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Browser smoke syntax
+        run: node --check scripts/launch/browser-smoke.mjs
+      - name: Chrome Firefox WebKit production smoke
+        env:
+          WEBCANBE_BROWSER_SMOKE_ORIGIN: https://webcanbe.com
+        run: |
+          for attempt in 1 2 3; do
+            echo "Browser smoke attempt ${attempt}/3"
+            if node scripts/launch/browser-smoke.mjs; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 3 ]; then
+              exit 1
+            fi
+            sleep 20
+          done
