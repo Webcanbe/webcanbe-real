@@ -1,3 +1,17 @@
+## Latest recovery delta — Admin + durable editor proof integrated
+
+- The six-commit `phase5-editor-durable-export` proof branch has been functionally integrated onto the newer Bigperson/Admin line.
+- The integrated durable test proves persisted accepted save/history, restart/reopen consistency, fresh-checkout standalone export build, shared Visual/Code/Split source authority, and export validation authority.
+- A stale read-mode regression was updated to the current safer architecture: product read mode cannot activate Control; Control uses its own production gate.
+- Combined integrated runs:
+  - `35495424755` Bigperson/Admin: PASS
+  - `35495424762` durable editor/export: PASS
+- Production Bigperson schema is already applied and verified.
+- The integrated branch is ahead of `main` with no commits behind, so it can be fast-forwarded after a main backup.
+- After main integration, the remaining live infrastructure gate is Hyperdrive + first production Bigperson enrollment/Control E2E, with production read/mutation activation still closed.
+
+---
+
 ## Latest recovery delta — production Bigperson schema applied
 
 - Production Supabase migrations `phase5_control_roles` and `phase5_bigperson_three_factor` are applied and recorded.
