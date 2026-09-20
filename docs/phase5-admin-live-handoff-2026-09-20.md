@@ -1,3 +1,16 @@
+# FIRST BIGPERSON BUTTON ORDER — 2026-09-20 KST
+
+At the live production Bigperson Operations gate, after entering the remembered privileged factor:
+
+1. click `First Bigperson: register passkey`;
+2. complete the macOS/WebAuthn device-authentication prompt;
+3. verify production DB operator/security/passkey rows;
+4. only after enrollment succeeds, re-enter the factor and use `Verify all 3 factors` for the first Control read.
+
+Do not press `Verify all 3 factors` before a passkey exists.
+
+---
+
 # FACTOR ORIGIN CLARIFICATION — 2026-09-20 KST
 
 - The privileged factor was not created in Cloudflare.
