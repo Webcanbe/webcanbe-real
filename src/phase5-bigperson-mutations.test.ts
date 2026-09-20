@@ -66,6 +66,11 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(app).toContain('{label:"Transition",keys:["transition"]}')
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
   })
+  it("enforces role thresholds on the server, not only in UI",()=>{
+    expect(mutations).toContain('await role(db,session,"bigperson")')
+    expect(mutations).toContain('await role(db,session,"admin")')
+    expect(mutations).toContain('await role(db,session,"reviewer")')
+  })
   it("keeps privileged audit append-only",()=>{
     expect(mutations).toContain("INSERT INTO wcb_control_audit")
     expect(mutations).toContain("idempotency_key")
