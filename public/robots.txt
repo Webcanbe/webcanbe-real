@@ -9,7 +9,7 @@ Disallow: /purchases
 Disallow: /settings
 Disallow: /checkout/
 Disallow: /seller
-Disallow: /control
+Disallow: /_ops/
 Disallow: /login
 Disallow: /signup
 Disallow: /auth/
