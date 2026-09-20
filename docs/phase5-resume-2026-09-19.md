@@ -1,3 +1,13 @@
+## Latest recovery delta — Hyperdrive source bound, live Worker binding still pending
+
+- Main `17a97df78730b9433ccb08f293bcc7a3de019290` includes production Hyperdrive config ID, Bigperson normal vars, fail-closed bootstrap digest hardening, and database=ready production smoke gate.
+- All source/CI verification is green; production smoke `35499385905` deliberately fails because the live Worker still reports Hyperdrive `unconfigured`.
+- Required manual action: deploy/activate Worker binding `HYPERDRIVE` → `webcanbe-production-db` in Cloudflare. Then add the missing secret `WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST` using a digest generated from the same bootstrap factor/pepper/salt algorithm.
+- Bigperson tables remain empty, so rotating bootstrap pepper/salt before first enrollment is safe.
+- After manual Cloudflare completion, rerun smoke `35499385905`, then DB-backed provider/session smoke and first Bigperson Control E2E.
+
+---
+
 ## Latest recovery delta — green main + production smoke + FK index hardening
 
 - Admin + durable editor integration is on main and passed all three main verification workflows.
