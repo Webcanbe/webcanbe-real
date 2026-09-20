@@ -20,6 +20,7 @@ describe("Worker security header adapter", () => {
       "/purchases",
       "/settings",
       "/_ops/keystone-7f31",
+      "/_ops/gate2-auth-smoke",
       "/login",
       "/signup",
       "/auth/complete",
@@ -39,7 +40,7 @@ describe("Worker security header adapter", () => {
 
 
   it("distinguishes known SPA routes from unknown navigation paths", () => {
-    for (const path of ["/","/browse","/docs","/docs/security","/project/example","/dashboard","/login","/seller/projects"]) {
+    for (const path of ["/","/browse","/docs","/docs/security","/project/example","/dashboard","/login","/seller/projects","/_ops/gate2-auth-smoke"]) {
       expect(isKnownAppPath(path)).toBe(true)
     }
     for (const path of ["/definitely-not-a-route","/unknown/nested","/control"]) {
