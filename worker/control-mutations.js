@@ -1,5 +1,4 @@
 import { verifyReleaseSnapshot } from "./materialization.js"
-import { deriveReleaseReadiness } from "./ready-qualification.js"
 
 const ROLE_RANK=Object.freeze({reviewer:1,admin:2,bigperson:3})
 async function role(db,session,minimum){
@@ -285,6 +284,7 @@ export async function qualifyReleaseReady(db,session,input,evidenceId){
     return row
   }
 
+  const { deriveReleaseReadiness } = await import("./ready-qualification.js")
   const derived=deriveReleaseReadiness(lineage)
   const transition={before:null,after:derived.status,releaseId,assessmentResultId:resultId,qualificationVersion:version}
   await audit(db,session,evidenceId,"release.ready.qualify","release",releaseId,transition,auditKey)
