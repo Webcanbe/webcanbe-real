@@ -175,9 +175,11 @@ export class HostedProductController {
       }
       if (action === "/control/read") { exact(body, []); return send(200, { control: await this.store.controlRead(session) }) }
       if (action === "/control/operators/transition") {
-        exact(body, ["stepUpEvidenceId", "targetUserId", "active", "idempotencyKey"])
+        exact(body, ["stepUpEvidenceId", "targetUserId", "active", "idempotencyKey"], ["role"])
         if (typeof body.active !== "boolean") throw new Error("Invalid operator state.")
-        return send(200, { operator: await this.store.controlSetOperatorAuthority(session, text(body, "stepUpEvidenceId"), text(body, "targetUserId"), body.active, text(body, "idempotencyKey")) })
+        const role = body.role === undefined ? undefined : text(body, "role")
+        if (role !== undefined && !["reviewer","admin","bigperson"].includes(role)) throw new Error("Invalid platform role.")
+        return send(200, { operator: await this.store.controlSetOperatorAuthority(session, text(body, "stepUpEvidenceId"), text(body, "targetUserId"), body.active, text(body, "idempotencyKey"), role as "reviewer" | "admin" | "bigperson" | undefined) })
       }
       throw new AuthorityDenied()
     } catch (error) {
