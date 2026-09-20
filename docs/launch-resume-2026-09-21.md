@@ -2,6 +2,25 @@
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
 
+## Gate 2 provider boundary verified — 2026-09-21 KST
+
+- Credential-free production smoke run `35546047348` reached the official `github.com` OAuth/login boundary successfully.
+- Verified before stopping:
+  - diagnostic route HTTP 200
+  - noindex/nofollow
+  - GitHub provider control enabled
+  - Firebase GitHub popup opened
+  - official GitHub OAuth boundary reached
+  - no `/__webcanbe/auth/firebase-exchange` request
+  - no identity-link request
+  - no Webcanbe first-party session cookie
+  - no credentials entered and no OAuth authorization decision made
+- The Firebase Hosting helper `/__/firebase/init.json` currently returns 404, but this did not block the configured Firebase popup from reaching GitHub and is retained as diagnostic evidence only.
+- Gate 2 as a whole is **NOT PASS**: same-account GitHub + Email linking/login, private reads, reload persistence and logout invalidation still require the operator's authenticated browser session.
+- Do not repeatedly stop on this human-only blocker. Continue independent Gate 3/4/5 launch work while production product mutation stays OFF.
+
+---
+
 ## Gate 3 v4 verification closed — 2026-09-21 KST
 
 - Active staging branch: `phase5-gate3-materialization-staging-v4`.
