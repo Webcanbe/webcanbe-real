@@ -117,6 +117,23 @@ async function run() {
     assert("catalog is Worker-owned", (catalog.status === 200 && Array.isArray(catalogBody.listings)) || (catalog.status === 503 && typeof catalogBody.error === "string"), `status ${catalog.status}`)
   }
 
+  if (expectedDatabase === "ready") {
+    for (const path of [
+      "/__webcanbe/api/workspaces",
+      "/__webcanbe/api/product/purchases",
+      "/__webcanbe/api/product/workspace-projects/list",
+      "/__webcanbe/api/account/get",
+    ]) {
+      const privateRead = await request(path, { method: "POST", headers: postHeaders, body: "{}" })
+      const privateBody = await readJson(privateRead)
+      assert(`anonymous private read is refused: ${path}`, privateRead.status === 403 && privateBody.error === "Sign in to continue.", `status ${privateRead.status}`)
+    }
+
+    const materialize = await request("/__webcanbe/api/product/workspace-projects/materialize", { method: "POST", headers: postHeaders, body: "{}" })
+    const materializeBody = await readJson(materialize)
+    assert("anonymous materialization is refused before mutation evaluation", materialize.status === 403 && materializeBody.error === "Sign in to continue.", `status ${materialize.status}`)
+  }
+
   console.log(`\nProduction smoke complete: ${checks.length} checks, ${failures.length} failures.`)
   if (failures.length) process.exit(1)
 }
