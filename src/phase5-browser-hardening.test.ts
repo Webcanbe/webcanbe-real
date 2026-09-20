@@ -15,6 +15,10 @@ describe("Phase 5 browser launch hardening", () => {
     expect(app).toContain('className="auth-demo-error" role="alert"')
   })
 
+  it("clips vendor carousel overflow at the landing host boundary", () => {
+    const css = fs.readFileSync("src/phase4-final-ui.css", "utf8")
+    expect(css).toContain(".landing-react-host{min-height:100vh;width:100%;max-width:100vw;min-width:0;overflow-x:hidden;background:#fff}")
+  })
   it("repairs injected landing controls without rewriting the vendor document", () => {
     const home = fs.readFileSync("src/Home.tsx", "utf8")
     expect(home).toContain("function hardenLandingAccessibility")
