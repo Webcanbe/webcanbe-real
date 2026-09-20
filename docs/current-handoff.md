@@ -1,3 +1,32 @@
+# PHASE 5 MAIN PRODUCTION + DB INDEX HARDENING CHECKPOINT — 2026-09-20 KST
+
+- Verified Admin + durable integration was fast-forwarded to `main`.
+- Main verification after integration:
+  - Phase 5 UI verify `35495682185`: PASS
+  - Bigperson/Admin verify `35495682150`: PASS
+  - durable editor/export verify `35495682167`: PASS
+  - automatic live production smoke `35495723690`: **21/21 PASS**
+- Live production smoke confirmed on first attempt:
+  - root 200
+  - HSTS/nosniff/frame-deny/COOP/CSP
+  - request ID
+  - real 404 + noindex for unknown route
+  - dashboard route 200 + server-side noindex
+  - robots/sitemap correctness
+  - Worker-owned readiness/catalog fail closed with 503 while database binding is unconfigured
+  - no credentials exposed by readiness
+- Full-main regression initially exposed three integration mismatches; all were corrected before the final green main:
+  - whole-suite CI now prepares the locked runtime profile before the durable export test
+  - PostgreSQL session mock now covers created/auth provenance fields
+  - private-route test now targets the actual hidden Operations route instead of removed `/control`
+- Supabase performance advisor then identified 21 unindexed foreign keys. A production-safe `phase5_fk_covering_indexes` migration was added, rollback-dry-run verified, CI verified, and applied as migration `20260920070349`.
+- Production now reports `uncovered_fk_count = 0`.
+- Performance advisor now reports only `unused_index` INFO findings; this is expected before real traffic and is not a reason to delete launch-protective indexes.
+- Canonical `deployment/hosted/postgres.sql` contains the same 21 covering indexes for fresh installs.
+- Next live blocker remains Hyperdrive / DB-backed first-party sessions. Until then readiness/catalog correctly remain fail-closed and product read/mutation activation stays off.
+
+---
+
 # PHASE 5 ADMIN + DURABLE EDITOR INTEGRATION CHECKPOINT — 2026-09-20 KST
 
 - The previously separate `phase5-editor-durable-export` proof has been integrated onto the completed Bigperson/Admin branch without replacing newer Admin code or documents.
