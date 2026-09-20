@@ -228,7 +228,8 @@ export class HostedProductClient {
   }
 
   async controlRead() {
-    return (await this.post<{ control: ControlData }>("/__webcanbe/api/product/control/read", {})).control
+    const path = productionControlMode() ? "/__webcanbe/api/ops/control/read" : "/__webcanbe/api/product/control/read"
+    return (await this.post<{ control: ControlData }>(path, {})).control
   }
 
 }
@@ -238,5 +239,7 @@ export const productionReadProductMode = () => typeof window !== "undefined" && 
 export const productReadMode = () => hostedProductMode() || productionReadProductMode()
 export const productionMutationProductMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-product-mutation-mode"]')?.getAttribute("content") === "hosted"
 export const productMutationMode = () => hostedProductMode() || productionMutationProductMode()
+export const productionControlMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-control-mode"]')?.getAttribute("content") === "hosted"
+export const controlMode = () => hostedProductMode() || productionControlMode()
 export const productionAuthMode = () => typeof window !== "undefined" && window.location.origin === "https://webcanbe.com" && document.querySelector('meta[name="wcb-auth-mode"]')?.getAttribute("content") === "google"
 export const hostedProductClient = new HostedProductClient()
