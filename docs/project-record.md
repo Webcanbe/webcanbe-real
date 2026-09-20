@@ -1,5 +1,24 @@
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# WebCanBe project record
 
+## 2026-09-20: Three-factor privileged Control mutations
+
+The private Operations surface now performs real privileged mutations rather than only
+reading Control state. Operator role changes, seller intake decisions, session revocation,
+seller review decisions and assessment admission all start a new operation-bound
+Google + privileged-factor + device-bound-passkey ceremony.
+
+The signed challenge binds the exact method, path and canonical mutation body. Successful
+verification creates fresh session-bound high-risk evidence inside the same privileged
+flow. The Worker then independently enforces reviewer/admin/bigperson role thresholds,
+uses idempotency keys, and appends immutable Control audit evidence.
+
+Role transitions are Bigperson-only; seller intake and session revocation require admin+;
+review and assessment admission require reviewer+. Seller rejection remains terminal,
+review decisions remain immutable, and assessment admission must match approved immutable
+submission provenance.
+
+---
+
 ## 2026-09-20: Three-factor review and assessment operations
 
 Privileged Operations now creates immutable seller review decisions and admits approved
