@@ -5,7 +5,7 @@ Read **`docs/phase5-admin-live-handoff-2026-09-20.md` first**.
 That file supersedes older checkpoint statements in this document where they say Hyperdrive is unbound, DB sessions are not live, or production Control is not deployed.
 
 Current canonical state at the time of that handoff:
-- main: `12ca43d3c0d58848e81bf1d657da6d48ae4f75e1`
+- last non-documentation code baseline: `12ca43d3c0d58848e81bf1d657da6d48ae4f75e1`
 - Hyperdrive live
 - DB/schema ready
 - production Control live
