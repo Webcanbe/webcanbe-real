@@ -1,3 +1,14 @@
+# PRIVILEGED FACTOR DEFINITION / RECOVERY — 2026-09-20 KST
+
+- `Privileged factor` means the user-chosen Bigperson-only password/string entered at the terminal prompt `Bigperson factor:`.
+- It is not the Google password, DB password, Cloudflare password, Pepper, Salt, or Digest.
+- Bootstrap derivation is: user factor + NUL + Pepper → PBKDF2-SHA256 using Salt, 600,000 iterations → base64url Digest.
+- The raw factor is intentionally not stored in the repository or DB.
+- The production Control input expects that original user-chosen factor.
+- If the original factor was forgotten, it cannot be recovered from the stored digest. Because production still has 0 active Bigpersons / 0 Bigperson security rows / 0 active passkeys before first enrollment, the safe recovery is to choose a new factor and regenerate a matching Pepper/Salt/Digest set before enrollment.
+
+---
+
 # LIVE BIGPERSON ENROLLMENT SCREEN CHECKPOINT — 2026-09-20 KST
 
 - User has reached the real production route `/_ops/keystone-7f31`.
