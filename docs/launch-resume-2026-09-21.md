@@ -2,6 +2,25 @@
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
 
+## Gate 3 v4 verification closed — 2026-09-21 KST
+
+- Active staging branch: `phase5-gate3-materialization-staging-v4`.
+- Verified tree/code checkpoint: `bd03d69726b31a70e2a981b35b609fe3ac69e33f`.
+- Integrated workflow run `35545791365`, job `106171321936`: **PASS**.
+- Passed:
+  - runtime-profile preparation + secret scan
+  - Gate 3 activation / private fixture / Gate 4 launch-chain regressions
+  - durable editor/export regressions
+  - Bigperson / privileged-authority regressions
+  - Worker + fixture syntax
+  - production build
+  - production build budget
+  - Wrangler Worker bundle dry-run
+- Firebase/CSP focused verification on the same PR/tree, run `35545791377`: **PASS**.
+- Main → v4 was ahead-only / 0 behind before the documentation-only checkpoint.
+- v4 remains staging-only. Production mutation is still OFF and the private fixture has not been applied.
+- Draft PR #45 must remain unmerged until authenticated Gate 2 is green.
+
 ## Latest continuation — Firebase/CSP + Gate 3 v4
 
 - Production/main code HEAD: `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
