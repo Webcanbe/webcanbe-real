@@ -1,3 +1,34 @@
+# FINAL PBKDF2 CAP FIX DEPLOYED — 2026-09-20 KST
+
+- Production confirmed Cloudflare workerd rejects PBKDF2 iteration counts above 100,000 even when called through the Node compatibility crypto path.
+- The previous 600,000-iteration bootstrap contract is superseded.
+- Final Bigperson bootstrap KDF contract now deployed:
+  - PBKDF2-SHA256
+  - 100,000 iterations
+  - input = factor + NUL + pepper
+  - configured salt
+  - 32-byte output
+  - base64url digest
+  - Worker WebCrypto path.
+- Main verification after final cap fix:
+  - Phase 5 UI verify `35503686413`: PASS
+  - Phase 5 durable editor/export verify `35503686409`: PASS
+  - Phase 5 Bigperson checkpoint verify `35503686505`: PASS
+  - Phase 5 production smoke `35503719358`: PASS
+- No Bigperson is enrolled yet, so rotating the bootstrap factor verifier is still safe.
+- The user's remembered raw factor may remain the same.
+- Required manual rotation before the next enrollment attempt:
+  1. generate a new PEPPER and SALT;
+  2. derive DIGEST with PBKDF2-SHA256 at 100,000 iterations using the remembered factor;
+  3. replace the three Cloudflare secrets:
+     - `WEBCANBE_BIGPERSON_FACTOR_PEPPER`
+     - `WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_SALT`
+     - `WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST`
+  4. return to the Operations route with a fresh Google login and retry `First Bigperson: register passkey`.
+- Do not use the old 600k-derived DIGEST after this code change; it will not match the new Worker derivation.
+
+---
+
 # CLOUDFLARE PBKDF2 HARD CAP — FINAL BOOTSTRAP CONTRACT — 2026-09-20 KST
 
 - A second live retry proved that switching from WebCrypto to `node:crypto.pbkdf2Sync` did **not** bypass Cloudflare's production PBKDF2 limit.
