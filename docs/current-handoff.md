@@ -1,3 +1,9 @@
+# CURRENT LIVE BLOCKER — FRESH GOOGLE SESSION — 2026-09-20 KST
+
+First Bigperson enrollment reached the server but was rejected only because the current Google-backed first-party session was ~35 minutes old while Bigperson requires a session created within 10 minutes. Next action: sign out, sign in again with Google, return immediately to `/_ops/keystone-7f31`, enter the privileged factor, and click `First Bigperson: register passkey`.
+
+---
+
 # NEXT BUTTON — 2026-09-20 KST
 
 After entering the privileged factor on the current production Admin screen, click `First Bigperson: register passkey` first. Complete the macOS/WebAuthn prompt. Use `Verify all 3 factors` only after passkey enrollment succeeds.
