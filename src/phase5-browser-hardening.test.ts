@@ -66,7 +66,7 @@ describe("Phase 5 browser launch hardening", () => {
     expect(workflow).toContain("mcr.microsoft.com/playwright:v1.56.1-noble")
     expect(workflow).toContain("playwright@1.56.1")
     expect(workflow).toContain("HOME: /root")
-    expect(workflow).toContain("branches: [main, phase5-launch-browser-hardening]")
+    expect(workflow).toContain("branches: [main]")
     expect(workflow).toContain("node scripts/launch/browser-smoke.mjs")
   })
 })
