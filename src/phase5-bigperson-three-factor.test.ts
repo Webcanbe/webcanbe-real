@@ -13,7 +13,8 @@ const wrangler = fs.readFileSync("wrangler.jsonc", "utf8")
 describe("Phase 5 Bigperson mandatory three-factor boundary", () => {
   it("binds first-party sessions to the identity that authenticated them", () => {
     expect(session).toContain("auth_issuer,auth_subject,auth_provider")
-    expect(session).toContain("identity.issuer, identity.subject, identity.provider")
+    expect(session).toContain("identity.issuer, identity.subject, cleanOptional(identity.provider, 100) ?? null")
+    expect(worker).toContain("provider: identity.provider")
     expect(session).toContain("const createdAt = new Date(row.created_at).getTime()")
     expect(auth).toContain('session.authProvider !== "google"')
     expect(auth).toContain('session.authIssuer !== GOOGLE_ISSUER')
