@@ -300,12 +300,13 @@ Verification run `35448977411` passed all branch gates.
 - [x] Promote passed immutable assessment results into immutable releases through the retained Phase 3 provenance model.
 - [x] Publish one promoted immutable release into one published Listing with append-only privileged audit.
 - [x] Grant/terminate admin-controlled TEST-only entitlements without exposing payment-provider entitlement mutation.
-- [ ] Port/invoke the exact trusted React compatibility analysis for immutable Ready qualification; do not derive Ready from operator/client assertions or a weaker heuristic.
+- [x] Port/invoke the exact trusted React compatibility analysis for immutable Ready qualification; Ready is derived from immutable source and never from browser/operator assertions.
+- [x] Apply the privileged platform-role + mandatory three-factor schema to production Supabase and verify server-only privileges.
 - [ ] Production smoke with an explicitly provisioned bigperson after Hyperdrive is connected.
 
 ## Immediate next task
 
-**Finish exact server-authoritative Ready qualification first. Then provision/smoke the first production Bigperson; after Admin is closed, continue Hyperdrive/product activation and merge the durable editor proof.**
+**Admin code and production schema are closed. Safely integrate the already-passing durable editor proof next while production mutation/read activation remains off. Then connect Hyperdrive, provision the first production Bigperson without exposing secrets, and run Control + clean-account E2E.**
 
 Connected infrastructure audit:
 - Supabase organization discovered: `Webcanbe`.
