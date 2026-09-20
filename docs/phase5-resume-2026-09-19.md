@@ -1,3 +1,32 @@
+# GATE 2 AUTOMATED PREFLIGHT CLOSED IN PRODUCTION — 2026-09-20 KST
+
+- Main checkpoint: `ef175c6659d3a09f73e8e36ee486b91ffbf9e881`.
+- Verification:
+  - Phase 5 UI verify `35509855707`: **PASS**
+  - Phase 5 Bigperson checkpoint verify `35509855712`: **PASS**
+  - Phase 5 durable editor/export verify `35509855720`: **PASS**
+  - Phase 5 production smoke `35509893495`: **PASS**
+- Production smoke now proves anonymous/private access is fail-closed for:
+  - Workspaces
+  - Purchases
+  - Working-copy list
+  - Account
+  - materialization
+- Clean-account backend regressions prove purchases and working-copy reads return truthful empty arrays and remain scoped only by authoritative session user ID.
+- Production aggregate at this checkpoint:
+  - users: 1
+  - active sessions: 1
+  - active Google sessions: 1
+  - active Firebase sessions: 0
+  - active workspace memberships: 1
+  - entitlements: 0
+  - materializations: 0
+  - published/available listings: 0
+- Remaining Gate 2 work is only browser-authenticated E2E for Google, GitHub/Firebase and Email/password. Product mutation remains closed.
+- Rollback branch: `backup-main-before-gate2-private-read-preflight-2026-09-20`.
+
+---
+
 # GATE 1 CLOSED — PRODUCTION READ MODE LIVE — 2026-09-20 KST
 
 - Main deployment trigger checkpoint: `df98015bdd7f905ccbf7d0a23fe497bb49e8e331`.
