@@ -43,7 +43,10 @@ export type ControlData = Readonly<{
   reviews: Array<Record<string, unknown>>
   assessments: Array<Record<string, unknown>>
   results: Array<Record<string, unknown>>
+  catalogProjects: Array<Record<string, unknown>>
+  promotions: Array<Record<string, unknown>>
   releases: Array<Record<string, unknown>>
+  publications: Array<Record<string, unknown>>
   listings: Array<Record<string, unknown>>
   ready: Array<Record<string, unknown>>
   deployIntents: Array<Record<string, unknown>>
@@ -264,6 +267,22 @@ export class HostedProductClient {
 
   async controlAdmitAssessment(password: string, input: { submissionId: string; sellerUserId: string; snapshotHash: string; reviewDecisionId: string }) {
     return (await this.privilegedMutation<{ assessment: Record<string, unknown> }>(password, "/__webcanbe/api/ops/assessments/admit", { ...input, idempotencyKey: crypto.randomUUID() })).assessment
+  }
+
+  async controlPromoteAssessmentRelease(password: string, input: { resultId: string; catalogProjectId: string; version: string }) {
+    return await this.privilegedMutation<{ promotion: Record<string, unknown>; release: Record<string, unknown> }>(password, "/__webcanbe/api/ops/releases/promote", { ...input, idempotencyKey: crypto.randomUUID() })
+  }
+
+  async controlPublishPromotedListing(password: string, input: { promotionId: string; slug: string; title: string; summary: string; tags?: string[]; demoMetadata?: Record<string, unknown> }) {
+    return await this.privilegedMutation<{ publication: Record<string, unknown>; listing: Record<string, unknown> }>(password, "/__webcanbe/api/ops/listings/publish", { ...input, idempotencyKey: crypto.randomUUID() })
+  }
+
+  async controlGrantTestEntitlement(password: string, input: { beneficiaryUserId: string; releaseId: string }) {
+    return (await this.privilegedMutation<{ entitlement: Record<string, unknown> }>(password, "/__webcanbe/api/ops/entitlements/test/grant", { ...input, idempotencyKey: crypto.randomUUID() })).entitlement
+  }
+
+  async controlTransitionTestEntitlement(password: string, input: { entitlementId: string; status: "revoked" | "invalid" }) {
+    return (await this.privilegedMutation<{ entitlement: Record<string, unknown> }>(password, "/__webcanbe/api/ops/entitlements/test/transition", { ...input, idempotencyKey: crypto.randomUUID() })).entitlement
   }
 
 }
