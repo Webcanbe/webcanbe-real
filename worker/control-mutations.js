@@ -17,6 +17,12 @@ function key(value) {
   return text
 }
 
+function canonicalJson(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value)
+  if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]"
+  return "{" + Object.keys(value).sort().map(k => JSON.stringify(k) + ":" + canonicalJson(value[k])).join(",") + "}"
+}
+
 function cleanText(value, label, maximum) {
   if (typeof value !== "string" || !value.trim() || value.trim().length > maximum || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value)) throw new Error("Invalid " + label + ".")
   return value.trim()
@@ -46,7 +52,7 @@ async function audit(db, session, evidenceId, action, targetType, targetId, tran
   const k=key(idempotencyKey)
   const prior=(await db.query("SELECT action,target_type,target_id,transition,step_up_evidence_id FROM wcb_control_audit WHERE actor_user_id=$1 AND idempotency_key=$2 FOR SHARE",[session.userId,k])).rows[0]
   if(prior){
-    if(prior.action!==action||prior.target_type!==targetType||String(prior.target_id)!==targetId||String(prior.step_up_evidence_id)!==evidenceId||JSON.stringify(prior.transition)!==JSON.stringify(transition)) throw new Error("Idempotency key already records another privileged mutation.")
+    if(prior.action!==action||prior.target_type!==targetType||String(prior.target_id)!==targetId||String(prior.step_up_evidence_id)!==evidenceId||canonicalJson(prior.transition)!==canonicalJson(transition)) throw new Error("Idempotency key already records another privileged mutation.")
     return false
   }
   await db.query("INSERT INTO wcb_control_audit(audit_id,actor_user_id,actor_authority,action,target_type,target_id,transition,step_up_evidence_id,idempotency_key,created_at) VALUES($1,$2,'product_operator',$3,$4,$5,$6,$7,$8,clock_timestamp())",[crypto.randomUUID(),session.userId,action,targetType,targetId,JSON.stringify(transition),evidenceId,k])
@@ -236,7 +242,11 @@ export async function grantTestEntitlement(db,session,input,evidenceId){
     await audit(db,session,evidenceId,"entitlement.test.grant","release",releaseId,transition,auditKey)
     return byReference
   }
-  if(existing) throw new Error("A TEST entitlement for this user and release already exists.")
+  if(existing){
+    if(existing.status!=="active") throw new Error("A terminal TEST entitlement cannot be re-granted.")
+    await audit(db,session,evidenceId,"entitlement.test.grant","release",releaseId,{before:"active",after:"active",beneficiaryUserId:beneficiary,releaseId},auditKey)
+    return existing
+  }
   await audit(db,session,evidenceId,"entitlement.test.grant","release",releaseId,transition,auditKey)
   return (await db.query("INSERT INTO wcb_license_entitlements(entitlement_id,user_id,release_id,provider,provider_reference,status,granted_at) VALUES($1,$2,$3,'test',$4,'active',clock_timestamp()) RETURNING *",[crypto.randomUUID(),beneficiary,releaseId,providerReference])).rows[0]
 }
