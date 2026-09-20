@@ -1,3 +1,33 @@
+# PHASE 5 BIGPERSON MANDATORY THREE-FACTOR CHECKPOINT — 2026-09-20 KST
+
+- Bigperson Control now requires all three factors for every privileged Control read/operation:
+  1. current first-party session must have been created by the enrolled Google issuer+subject
+  2. separate privileged factor must verify server-side
+  3. registered WebAuthn/passkey assertion with user verification must verify
+- The allowlisted Google email is deployment configuration only; after bootstrap the authority is the enrolled Google issuer+subject, not an email string.
+- Bigperson ceremonies reject non-Google first-party sessions even if the same Webcanbe user has another linked identity.
+- Google-authenticated first-party session freshness is capped at 10 minutes for Bigperson ceremonies.
+- The privileged factor is never committed to Git, stored in Markdown, embedded in frontend code, or persisted as plaintext.
+- Stored factor verification uses PBKDF2-SHA256 (600,000 iterations) plus per-user salt and a server-only pepper.
+- WebAuthn registration/authentication uses pinned SimpleWebAuthn packages, requires user verification, and restricts generated credential algorithms to ES256/RS256.
+- First Bigperson enrollment requires allowlisted Google session + bootstrap factor + verified passkey registration before the role is provisioned.
+- Once an active Bigperson exists, bootstrap registration closes.
+- Every privileged operation gets a fresh 90-second WebAuthn challenge bound to:
+  - user
+  - exact first-party session
+  - HTTP method
+  - privileged path
+  - canonical request-body hash
+- Challenges are one-time and consumed transactionally; replay, another session, or a changed operation body is refused.
+- Passkey counters are persisted after successful authentication.
+- The Control UI clears the entered privileged factor before the passkey ceremony and does not retain it between operations.
+- Control data is not auto-loaded: each read requires a new three-factor ceremony.
+- Existing protections remain: CSRF/same-origin, rate limiting, server-side Bigperson role/epoch, last-Bigperson DB protection, no client role trust, private/noindex Control route.
+- Deployment migration: `deployment/hosted/postgres-bigperson-3factor.sql`.
+- Secrets/config still need to be provisioned in Cloudflare before production enrollment; no user credential values are stored in the repository.
+
+---
+
 # PHASE 5 BIGPERSON CONTROL FOUNDATION CHECKPOINT — 2026-09-20 KST
 
 - Restored the previously agreed platform-role hierarchy: `reviewer → admin → bigperson`.
