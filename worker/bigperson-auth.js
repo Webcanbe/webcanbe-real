@@ -121,7 +121,6 @@ export async function finishBigpersonRegistration(db, session, body, env, reques
   const verification = await verifyRegistrationResponse({ response: body?.response, expectedChallenge: String(row.challenge), expectedOrigin: origin, expectedRPID: rpID, requireUserVerification: true, supportedAlgorithmIDs: [-7, -257] })
   if (!verification.verified || !verification.registrationInfo) throw new Error("Passkey registration refused.")
   const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo
-  if (credentialDeviceType !== "singleDevice" || credentialBackedUp) throw new Error("Bigperson requires a device-bound passkey that is not cloud-synced.")
   await db.query("BEGIN")
   try {
     await db.query("UPDATE wcb_bigperson_challenges SET used_at=clock_timestamp() WHERE challenge_id=$1 AND used_at IS NULL", [row.challenge_id])
@@ -169,7 +168,6 @@ export async function consumeBigpersonOperation(db, session, body, env, request,
   const passkeyResult = await db.query("SELECT * FROM wcb_bigperson_passkeys WHERE credential_id=$1 AND user_id=$2 AND active FOR UPDATE", [body?.response?.id, session.userId])
   const passkey = passkeyResult.rows[0]
   if (!passkey) throw new Error("Passkey refused.")
-  if (String(passkey.device_type) !== "singleDevice" || passkey.backed_up === true) throw new Error("Bigperson requires the enrolled device-bound passkey.")
   const { rpID, origin } = rpOrigin(request)
   const verification = await verifyAuthenticationResponse({
     response: body.response,
