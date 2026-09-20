@@ -1,3 +1,20 @@
+# OPERATOR updated_at FIX VERIFIED ON MAIN — 2026-09-20 KST
+
+- Production migration `20260920103846 phase5_product_operator_updated_at` is applied.
+- `wcb_product_operators.updated_at` now exists in production.
+- Repository canonical schema, control-role migration, runtime operator transition, and schema regression are aligned.
+- Main checkpoint: `4aeeef50d92991b7c9d2c26b245796cb2097e922`.
+- Main verification:
+  - Phase 5 UI verify `35505810037`: PASS
+  - Phase 5 Bigperson checkpoint verify `35505809973`: PASS
+  - Phase 5 durable editor/export verify `35505809968`: PASS
+  - Phase 5 production smoke `35505848717`: PASS
+- The previous Bigperson registration SQL failure `column "updated_at" of relation "wcb_product_operators" does not exist` is therefore closed.
+- No partial Bigperson/security/passkey state was committed by the failed transaction.
+- Next action remains a fresh Google login (10-minute freshness), then factor → `First Bigperson: register passkey` → DB verification → first `Verify all 3 factors` Control read.
+
+---
+
 # PRODUCT OPERATOR updated_at SCHEMA FIX — 2026-09-20 KST
 
 - First Bigperson registration progressed through:
