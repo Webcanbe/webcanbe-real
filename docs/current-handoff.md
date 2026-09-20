@@ -1,3 +1,9 @@
+# CURRENT LIVE ISSUE — APPLE SYNCED PASSKEY — 2026-09-20 KST
+
+The first WebAuthn ceremony succeeded on macOS but the server rejected the resulting Apple/iCloud passkey because the old Bigperson policy required single-device/non-backed-up credentials. The policy is being corrected to accept synced Apple passkeys while retaining fresh Google + privileged factor + verified WebAuthn + one-time operation-bound challenge security. DB still has Bigperson 0 / security 0 / passkey 0.
+
+---
+
 # CURRENT NEXT ACTION — FRESH GOOGLE LOGIN THEN PASSKEY — 2026-09-20 KST
 
 The user reports the final 100k Bigperson KDF Secret set has been updated. Production DB still shows Bigperson 0 / security 0 / passkey 0 / no consumed challenge, and the only active Google session is ~38 minutes old. Next: sign out, sign in with Google again, return immediately to the Operations route, enter the factor, and click `First Bigperson: register passkey` within 10 minutes.
