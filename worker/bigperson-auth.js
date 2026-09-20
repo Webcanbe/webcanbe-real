@@ -41,7 +41,7 @@ function requireConfig(env) {
 function requireGoogleSession(session, allowedEmail) {
   if (!session || session.authProvider !== "google" || session.authIssuer !== GOOGLE_ISSUER || !session.authSubject) throw new Error("A fresh Google-authenticated Webcanbe session is required.")
   if (!Number.isFinite(session.createdAt) || Date.now() - session.createdAt > GOOGLE_SESSION_MAX_AGE_MS) throw new Error("Google authentication is older than the Bigperson freshness window. Sign in with Google again.")
-  if (String(session.profile?.email || "").trim().toLowerCase() !== allowedEmail || session.profile?.emailVerified !== true) throw new Error("Google identity is not authorized for Bigperson bootstrap.")
+  if (String(session.email || "").trim().toLowerCase() !== allowedEmail || session.emailVerified !== true) throw new Error("Google identity is not authorized for Bigperson bootstrap.")
 }
 async function activeBigperson(db, session) {
   const result = await db.query("SELECT role,active,epoch FROM wcb_product_operators WHERE user_id=$1", [session.userId])
