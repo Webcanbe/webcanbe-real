@@ -270,6 +270,123 @@ function AuthComplete() {
   return <main className="auth-complete" role="status"><Mark/><span className="signal">Account</span><h1>{message}</h1></main>
 }
 
+const GATE2_AUTH_SMOKE_PATH = "/_ops/gate2-auth-smoke"
+const GATE2_PROVIDER_KEY = "wcb-gate2-provider"
+const GATE2_BASELINE_KEY = "wcb-gate2-baseline"
+const GATE2_RELOAD_KEY = "wcb-gate2-reload-pending"
+
+type Gate2Check = Readonly<{ label: string; ok: boolean; detail: string }>
+
+function Gate2AuthSmoke() {
+  const auth=productionAuthMode(), live=productReadMode()
+  const [signedIn,setSignedIn]=useState(false), [busy,setBusy]=useState(false), [message,setMessage]=useState("")
+  const [checks,setChecks]=useState<Gate2Check[]>([]), [email,setEmail]=useState(""), [password,setPassword]=useState("")
+  const [provider,setProvider]=useState(()=>{try{return sessionStorage.getItem(GATE2_PROVIDER_KEY)||"existing session"}catch{return"existing session"}})
+
+  const rememberProvider=(value:string)=>{setProvider(value);try{sessionStorage.setItem(GATE2_PROVIDER_KEY,value)}catch{}}
+
+  const collectReads=async(afterReload=false)=>{
+    setBusy(true);setMessage("")
+    try{
+      if(!await hostedProductClient.authenticated())throw new Error("No first-party Webcanbe session is active.")
+      const [account,workspaces,purchases,copies,catalog]=await Promise.all([
+        hostedProductClient.account(),
+        hostedProductClient.workspaces(),
+        hostedProductClient.purchases(),
+        hostedProductClient.workspaceProjects(),
+        hostedProductClient.browse({limit:100}),
+      ])
+      const next:Gate2Check[]=[
+        {label:"First-party session",ok:true,detail:"Authenticated Webcanbe session accepted."},
+        {label:"Account",ok:Boolean(account.userId),detail:account.userId?"Account read succeeded.":"Account authority missing."},
+        {label:"Workspace",ok:Array.isArray(workspaces)&&workspaces.length>0,detail:`${workspaces.length} editable workspace${workspaces.length===1?"":"s"}.`},
+        {label:"Purchases",ok:Array.isArray(purchases),detail:`${purchases.length} entitlement${purchases.length===1?"":"s"}.`},
+        {label:"Working copies",ok:Array.isArray(copies),detail:`${copies.length} working cop${copies.length===1?"y":"ies"}.`},
+        {label:"Catalog",ok:Array.isArray(catalog),detail:`${catalog.length} published listing${catalog.length===1?"":"s"}.`},
+      ]
+      if(afterReload){
+        let baseline:{userId?:string}|undefined
+        try{baseline=JSON.parse(sessionStorage.getItem(GATE2_BASELINE_KEY)||"{}")}catch{}
+        next.push({label:"Refresh persistence",ok:Boolean(baseline?.userId&&baseline.userId===account.userId),detail:baseline?.userId===account.userId?"Same first-party account survived a full reload.":"Reload did not preserve the same account authority."})
+      }else{
+        try{sessionStorage.setItem(GATE2_BASELINE_KEY,JSON.stringify({userId:account.userId,provider}))}catch{}
+      }
+      setChecks(next)
+      setSignedIn(true)
+      setMessage(next.every(item=>item.ok)?"Gate 2 read checks passed.":"One or more Gate 2 checks failed.")
+    }catch(error){
+      setChecks([{label:"Authenticated private reads",ok:false,detail:error instanceof Error?error.message:"Gate 2 read smoke failed."}])
+      setMessage("Gate 2 read smoke failed.")
+    }finally{setBusy(false)}
+  }
+
+  useEffect(()=>{let current=true;void hostedProductClient.authenticated().then(ok=>{if(current)setSignedIn(ok)}).catch(()=>{if(current)setSignedIn(false)});return()=>{current=false}},[])
+
+  useEffect(()=>{
+    if(!signedIn)return
+    let pending=false
+    try{pending=sessionStorage.getItem(GATE2_RELOAD_KEY)==="1";if(pending)sessionStorage.removeItem(GATE2_RELOAD_KEY)}catch{}
+    if(pending)void collectReads(true)
+  },[signedIn])
+
+  const google=async()=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      rememberProvider("Google")
+      try{sessionStorage.setItem("wcb-auth-next",GATE2_AUTH_SMOKE_PATH)}catch{}
+      window.location.assign(await hostedProductClient.authStart())
+    }catch(error){setMessage(error instanceof Error?error.message:"Google sign-in could not start.");setBusy(false)}
+  }
+
+  const github=async()=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      rememberProvider("GitHub via Firebase")
+      const credential=await signInWithGithubFirebase()
+      await hostedProductClient.firebaseExchange(await credential.user.getIdToken(true))
+      setSignedIn(true);setMessage("GitHub sign-in exchanged into a first-party Webcanbe session.")
+    }catch(error){await signOutFirebase().catch(()=>{});setMessage(firebaseAuthErrorMessage(error))}
+    finally{setBusy(false)}
+  }
+
+  const emailAuth=async(signup:boolean)=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      rememberProvider(signup?"Email signup via Firebase":"Email login via Firebase")
+      const credential=signup?await createEmailAccountFirebase(email,password):await signInWithEmailFirebase(email,password)
+      await hostedProductClient.firebaseExchange(await credential.user.getIdToken(true))
+      setSignedIn(true);setPassword("");setMessage(signup?"Email signup exchanged into a first-party Webcanbe session.":"Email login exchanged into a first-party Webcanbe session.")
+    }catch(error){setMessage(firebaseAuthErrorMessage(error))}
+    finally{setBusy(false)}
+  }
+
+  const reloadCheck=()=>{
+    try{sessionStorage.setItem(GATE2_RELOAD_KEY,"1")}catch{}
+    window.location.reload()
+  }
+
+  const logoutCheck=async()=>{
+    if(busy)return;setBusy(true);setMessage("")
+    try{
+      await productionSignOut()
+      const remains=await hostedProductClient.authenticated().catch(()=>false)
+      setChecks(current=>[...current,{label:"Logout invalidation",ok:!remains,detail:remains?"First-party session still answered after logout.":"First-party session is no longer accepted after logout."}])
+      setSignedIn(remains)
+      setMessage(remains?"Logout verification failed.":"Logout verification passed.")
+    }finally{setBusy(false)}
+  }
+
+  return <PublicShell><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Launch diagnostics</span><h1>Gate 2 authenticated read smoke</h1><p>Temporary noindex launch diagnostic. It exercises only your own first-party session and read APIs; product mutations remain closed.</p></div><Link className="button" to="/dashboard">Back to dashboard</Link></header>
+    {!auth||!live?<section className="hub-section"><HubState kind="error" title="Production read boundary is not ready" body="This diagnostic requires production authentication and read-only product mode."/></section>:
+    <section className="hub-section"><div className="hub-section-head"><div><h2>Session</h2><p>Current path: {provider}. No password or token is stored by this diagnostic.</p></div><span>{signedIn?"Signed in":"Signed out"}</span></div>
+      {!signedIn?<div className="form-rows"><div className="settings-action-row"><div><b>Google</b><p>Runs the Worker OAuth flow and returns here.</p></div><button className="button" disabled={busy} onClick={()=>void google()}>Test Google</button></div><div className="settings-action-row"><div><b>GitHub</b><p>Uses Firebase GitHub popup, then exchanges the ID token into the first-party session.</p></div><button className="button" disabled={busy} onClick={()=>void github()}>Test GitHub</button></div><label>Email<input value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email"/></label><label>Password<input type="password" value={password} onChange={event=>setPassword(event.target.value)} autoComplete="current-password"/></label><div className="settings-action-row"><div><b>Email/password</b><p>Use an unused email for signup or an existing Firebase email account for login.</p></div><div><button className="button" disabled={busy||!email||!password} onClick={()=>void emailAuth(true)}>Test signup</button><button className="button" disabled={busy||!email||!password} onClick={()=>void emailAuth(false)}>Test login</button></div></div></div>:
+      <div className="settings-action-row"><div><b>Authenticated session ready</b><p>Run reads, then reload persistence, then logout invalidation in that order.</p></div><div><button className="button primary" disabled={busy} onClick={()=>void collectReads(false)}>Run private reads</button><button className="button" disabled={busy||!checks.some(item=>item.label==="Account"&&item.ok)} onClick={reloadCheck}>Verify refresh</button><button className="button" disabled={busy} onClick={()=>void logoutCheck()}>Verify logout</button></div></div>}
+      {message&&<p className="settings-save-status" role="status">{message}</p>}
+    </section>}
+    {checks.length>0&&<section className="hub-section"><div className="hub-section-head"><div><h2>Results</h2><p>Counts are shown; internal account identifiers are not rendered.</p></div></div><div className="hub-list">{checks.map(item=><article className="hub-row" key={item.label}><div className="hub-row-copy"><span>{item.ok?"PASS":"FAIL"}</span><h3>{item.label}</h3><p>{item.detail}</p></div></article>)}</div></section>}
+  </main></PublicShell>
+}
+
 function Checkout() {
   const params = new URLSearchParams(window.location.search), reference = params.get("project") ?? "", hosted = hostedProductMode()
   const fallback = projects.find(item => item.slug === reference)
@@ -936,6 +1053,7 @@ export default function App() {
   else if(basePath.startsWith("/docs"))page=<Documentation path={basePath}/>
   else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
   else if(basePath==="/auth/complete")page=<AuthComplete/>
+  else if(basePath===GATE2_AUTH_SMOKE_PATH)page=<Gate2AuthSmoke/>
   else if(basePath.startsWith("/checkout/"))page=<Protected><Checkout/></Protected>
   else if(basePath.startsWith("/workspace/"))page=<Protected><CompatibleWorkspace/></Protected>
   else if(basePath==="/projects")page=<Protected><Projects/></Protected>
