@@ -8,6 +8,8 @@ jobs:
   browser-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      HOME: /root
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
