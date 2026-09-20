@@ -1,3 +1,31 @@
+# LAUNCH TRUTHFULNESS CLEANUP LIVE — 2026-09-20 KST
+
+- Production code checkpoint: `cb1c168771b988a25b74d42902da29b36e04c190`.
+- Prelaunch UI contradictions removed:
+  - Phone sign-in is disabled everywhere and no longer maps to Google in the local/demo path.
+  - Dashboard Profile/Account copy now reflects the production account store instead of saying the backend will be connected later.
+  - Dashboard Billing explicitly states that paid billing is not active.
+  - Paid Pro/Studio plan buttons are disabled and show `Billing coming soon`; the old `Most chosen` claim is removed.
+  - Paid prices are labeled as launch pricing previews.
+  - Updates now describes current launch closure instead of old Phase 4 finalization.
+- Verification:
+  - branch UI `35514636527`: **PASS**
+  - main UI `35514696758`: **PASS**
+  - main durable editor/export `35514696790`: **PASS**
+  - main Bigperson `35514696759`: **PASS**
+  - production smoke `35514742329`: **PASS**
+- Live browser verification:
+  - Google button first child remains `svg.auth-provider-google`
+  - GitHub button first child remains `svg.auth-provider-github`
+  - phone button: `disabled=true`, title `Phone sign-in is not connected yet`
+  - live JS bundle observed as `/assets/index-_863RCiw.js`
+  - /plans shows paid billing inactive + disabled paid CTAs
+  - /updates shows current launch-closure copy
+- Rollback: `backup-main-before-launch-truthfulness-2026-09-20`.
+- Gate 2 interactive provider smoke remains the release blocker; this cleanup did not enable product mutations or payment.
+
+---
+
 # AUTH POLISH LIVE / GATE 3 V3 READY — 2026-09-20 KST
 
 - Production login polish remains live at main code checkpoint `f6e702960bfad13d33a97f071d217b7951ce2fc7`:
