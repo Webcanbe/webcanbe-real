@@ -1,3 +1,43 @@
+# ADMIN PANEL-ONLY UI DEPLOYED / ADMIN E2E CLOSED — 2026-09-20 KST
+
+- Production Admin/Bigperson E2E is complete:
+  - active Bigperson: 1
+  - Bigperson security row: 1
+  - active passkey: 1
+  - at least one consumed privileged operation challenge
+  - active step-up evidence confirmed after the first successful three-factor Control read.
+- User-requested Admin UI cleanup is complete.
+- Hidden route `/_ops/keystone-7f31` no longer renders the ordinary Webcanbe `AppShell`.
+- Removed from the Admin route:
+  - left product/workspace sidebar
+  - workspace switcher/navigation
+  - lower account menu
+  - top search/navigation
+  - notification/profile controls
+  - ordinary site footer.
+- Remaining UI is only the standalone Operations content/panel.
+- This is a presentation-only separation; security behavior is unchanged:
+  - route remains Protected
+  - server Control mode remains required
+  - Google/factor/passkey three-factor proof remains required
+  - privileged mutations still require new operation-bound proof.
+- Implementation:
+  - `Control()` uses `control-standalone` instead of `AppShell`
+  - production styling lives in `src/phase4-final-ui.css`
+  - regression asserts Control contains no `AppShell`, `RopeanDashboardShell`, or site footer.
+- Main checkpoint: `5a844f267ffc622eec6fe83e6698f32fdb4f3bfa`.
+- Main verification:
+  - Phase 5 UI verify `35506420844`: PASS
+  - Phase 5 Bigperson checkpoint verify `35506420826`: PASS
+  - Phase 5 durable editor/export verify `35506420823`: PASS
+  - production smoke `35506452936`: PASS
+- Backup before this UI separation:
+  - `backup-main-before-admin-panel-only-2026-09-20`
+
+Admin production work is now closed. The next Phase 5 work should proceed to staged product read activation rather than reopening Admin infrastructure.
+
+---
+
 # ADMIN PRODUCTION E2E CLOSED / PANEL-ONLY UI CLEANUP — 2026-09-20 KST
 
 - The first production Bigperson enrollment and first three-factor Control read have both succeeded.
