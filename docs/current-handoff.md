@@ -8,7 +8,7 @@ Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudfl
 - Bigperson ceremonies reject non-Google first-party sessions even if the same Webcanbe user has another linked identity.
 - Google-authenticated first-party session freshness is capped at 10 minutes for Bigperson ceremonies.
 - The privileged factor is never committed to Git, stored in Markdown, embedded in frontend code, or persisted as plaintext.
-- Stored factor verification uses PBKDF2-SHA256 (600,000 iterations) plus per-user salt and a server-only pepper.
+- Stored factor verification uses PBKDF2-SHA256 (600,000 iterations) plus per-user salt and a server-only pepper. During the one-time first bootstrap, a deployment salt is combined with the entered factor and pepper; only the derived digest is persisted. An optional pre-provisioned digest can additionally pin the bootstrap factor.
 - WebAuthn registration/authentication uses pinned SimpleWebAuthn packages, requires user verification, and restricts generated credential algorithms to ES256/RS256.
 - First Bigperson enrollment requires allowlisted Google session + bootstrap factor + verified passkey registration before the role is provisioned.
 - Once an active Bigperson exists, bootstrap registration closes.
