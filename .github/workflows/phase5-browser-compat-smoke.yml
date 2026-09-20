@@ -1,7 +1,7 @@
 name: Phase 5 browser compatibility smoke
 on:
   push:
-    branches: [main, phase5-launch-browser-hardening]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
