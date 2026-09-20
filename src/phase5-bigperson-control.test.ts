@@ -28,6 +28,14 @@ describe("Phase 5 bigperson Control foundation", () => {
     expect(headers).not.toContain('"/control"')
   })
 
+  it("renders the hidden Admin route as a standalone Operations panel", () => {
+    const control = app.slice(app.indexOf("function Control()"), app.indexOf("const BIGPERSON_CONTROL_PATH"))
+    expect(control).toContain('className="control-standalone"')
+    expect(control).not.toContain("<AppShell>")
+    expect(control).not.toContain("RopeanDashboardShell")
+    expect(control).not.toContain("site-footer")
+  })
+
   it("keeps obscurity separate from authorization", () => {
     expect(app).toContain("The path itself is not trusted as authorization")
     expect(worker).toContain('env.WEBCANBE_CONTROL_MODE !== "enabled"')
