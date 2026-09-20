@@ -3,7 +3,9 @@ import os from "node:os"
 import path from "node:path"
 import { randomUUID } from "node:crypto"
 import { afterEach, describe, expect, it } from "vitest"
+// @ts-expect-error launch fixture is a tested Node ESM runtime helper without a declaration file
 import { buildMaterializationSmokeFixture } from "../scripts/launch/materialization-smoke-fixture.mjs"
+// @ts-expect-error Worker materialization is a tested JavaScript runtime module without a declaration file
 import { buildMaterializedHistory, verifyReleaseSnapshot } from "../worker/materialization.js"
 import { MutationHistory } from "./webcanbe-engine/mutations/sourceMutations"
 import { DurableSource, contentHash, transactionEntry } from "./webcanbe-engine/mutations/durableSource"
