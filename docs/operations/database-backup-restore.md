@@ -163,3 +163,24 @@ Before cutover, confirm at minimum:
 ## Paid-plan transition
 
 Before material production usage, reconsider the database plan. Supabase Pro currently provides managed daily backups with seven-day retention; PITR is a separate paid add-on for lower RPO. The application backup procedure should remain useful even after upgrading because it provides an operator-controlled off-site logical copy.
+
+
+## Automated recovery preflight
+
+After restoring data into a separately migrated recovery database, set `RECOVERY_DATABASE_URL` in the private operator shell and run:
+
+```bash
+npm run db:recovery:preflight
+```
+
+The preflight is read-only. It verifies:
+
+- at least 40 `public.wcb_*` tables exist
+- `anon` and `authenticated` retain zero direct `wcb_*` table grants
+- `anon` and `authenticated` retain zero direct `wcb_*` routine grants
+- `webcanbe_runtime` remains a bounded non-login role
+- `webcanbe_hyperdrive` remains a bounded login role
+- immutable release, published-listing guard, and control-audit triggers exist
+- Supabase migration history contains the expected launch-era baseline
+
+The command never prints the database URL and performs only SELECT queries. A passing preflight does not replace application-level auth/catalog/workspace smoke.
