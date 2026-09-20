@@ -3,7 +3,7 @@ import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookO
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
-import { hostedProductClient, hostedProductMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
+import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
@@ -667,7 +667,7 @@ function ControlRows({ rows, columns }: { rows: Array<Record<string, unknown>>; 
 }
 
 function Control() {
-  const hosted = hostedProductMode(), [control, setControl] = useState<ControlData>(), [loading, setLoading] = useState(hosted), [error, setError] = useState("")
+  const hosted = controlMode(), [control, setControl] = useState<ControlData>(), [loading, setLoading] = useState(hosted), [error, setError] = useState("")
   useEffect(() => {
     if (!hosted) return
     let current = true
