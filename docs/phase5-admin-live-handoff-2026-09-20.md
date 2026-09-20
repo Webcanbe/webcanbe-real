@@ -1,3 +1,47 @@
+# PRODUCT OPERATOR updated_at SCHEMA FIX — 2026-09-20 KST
+
+- First Bigperson registration progressed through:
+  - fresh Google session
+  - privileged factor verification
+  - WebAuthn passkey creation/verification
+  - synced Apple/iCloud passkey policy
+- The final bootstrap transaction then failed with:
+  `column "updated_at" of relation "wcb_product_operators" does not exist`
+- Root cause:
+  - runtime bootstrap upsert already maintained `wcb_product_operators.updated_at`;
+  - production `wcb_product_operators` had only `user_id, active, epoch, role`;
+  - the Phase 5 role migration/canonical schema had never added `updated_at`.
+- The error occurred inside the registration transaction, so no partial Bigperson/security/passkey row was committed.
+- Production repair:
+  - rollback-only DDL dry run passed;
+  - migration `20260920103846 phase5_product_operator_updated_at` applied successfully;
+  - `updated_at timestamptz NOT NULL DEFAULT clock_timestamp()` is now present in production.
+- Repository repair on `phase5-product-operator-updated-at`:
+  - new `deployment/hosted/postgres-product-operator-updated-at.sql`
+  - canonical `deployment/hosted/postgres.sql` includes `updated_at`
+  - `deployment/hosted/postgres-control-roles.sql` upgrades existing DBs
+  - Control operator authority transitions refresh `updated_at`
+  - new `src/phase5-product-operator-schema.test.ts`
+  - UI/Bigperson CI explicitly run the schema regression.
+- Production DB state after migration:
+  - operator updated_at present: true
+  - active Bigperson: 0
+  - Bigperson security rows: 0
+  - active Bigperson passkeys: 0
+  - live registration challenge: 0
+  - active Google sessions: 1
+  - newest Google session age at check: ~621 seconds (~10m21s)
+- Immediate next retry after repository CI/deployment:
+  1. sign out and sign in again with Google because the current session is past the 10-minute Bigperson freshness window;
+  2. return immediately to `/_ops/keystone-7f31`;
+  3. enter the existing privileged factor;
+  4. click `First Bigperson: register passkey`;
+  5. complete Apple/WebAuthn;
+  6. verify operator/security/passkey rows;
+  7. then perform first `Verify all 3 factors` Control read.
+
+---
+
 # SYNCED APPLE PASSKEY POLICY DEPLOYED — RETRY NOW — 2026-09-20 KST
 
 - Synced/backed-up Apple/iCloud WebAuthn passkeys are now accepted for Bigperson enrollment and authentication.
