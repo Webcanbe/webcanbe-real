@@ -1,5 +1,11 @@
 # Webcanbe Launch Closure Plan — 2026-09-20 KST
 
+## Active continuation — 2026-09-21 KST
+
+Read `docs/launch-resume-2026-09-21.md` before resuming after an interruption. The latest verified implementation remains `0ad5747a89a01414b966ac8ceee82eb44c6c1768`; later documentation commits are not new production feature evidence. The existing hourly task resumes unfinished work automatically at its next invocation and checks whether lost-response writes already landed.
+
+Gate 3 v3 at `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e` lacks main's `db:recovery:preflight` package command. Do not promote it unchanged or treat ahead/behind counts as proof that all main changes are preserved. The live rollback/restore drills and authenticated provider E2E remain pending.
+
 ## Launch objective
 
 Ship the real production product quickly without reopening completed architecture or exposing unfinished mutations as if they were live.
@@ -138,7 +144,7 @@ Acceptance:
 
 ## Gate 3 — Materialization mutation activation
 
-Only after Gate 2 passes.
+Only after Gate 2 passes and the current staging/main integration has been reconciled without dropping existing main commands or test coverage.
 
 Activation:
 - enable Worker `WEBCANBE_PRODUCT_MUTATIONS=enabled`
@@ -189,6 +195,8 @@ Also verify:
 
 ## Gate 5 — Launch hardening
 
+The completed subchecks above do not close this entire gate. Remaining live drills and authenticated/editor coverage must be tracked separately.
+
 Before broad public traffic:
 - Chrome + Safari + Firefox smoke
 - desktop + mobile responsive pass
@@ -221,9 +229,9 @@ Additionally requires:
 
 ## Current next action
 
-1. Open `https://webcanbe.com/_ops/gate2-auth-smoke` in the user's real browser.
-2. Establish the Google baseline and run private reads + refresh persistence.
+1. Resume from `docs/launch-resume-2026-09-21.md`. First check whether the GitHub/Firebase login initiation reaches its official provider screen without submitting credentials; capture and fix any pre-authentication failure through permitted operations.
+2. For the remaining authenticated Gate 2 evidence, open `https://webcanbe.com/_ops/gate2-auth-smoke` in the user's real browser and establish the Google baseline with private reads and refresh persistence.
 3. While still on that Google-backed internal account, link GitHub and Email identities.
 4. Verify logout, then verify linked GitHub and linked Email logins return to the same Webcanbe account and pass the same reads.
-5. After Gate 2 is green, use `phase5-gate3-materialization-staging-v3` for activation. It is current-main based, includes the latest auth polish, and already passes UI/durable/Bigperson CI.
-6. Apply the private launch-smoke entitlement/release fixture, verify zero public Listing, activate materialization, then execute the production Gate 4 chain.
+5. Before Gate 3 activation, compare the actual latest main/staging files and reconcile the known package-command omission through permitted operations. Retain `db:recovery:preflight` alongside `launch:smoke-fixture`, preserve the corresponding regression coverage, and verify the resulting candidate. Do not use a synthetic merge or a different tool interface to bypass a denied write.
+6. Only after Gate 2 and the reconciled candidate are verified, apply the private launch-smoke entitlement/release fixture, verify zero public Listing, activate materialization, then execute the production Gate 4 chain.
