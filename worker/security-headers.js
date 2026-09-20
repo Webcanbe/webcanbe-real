@@ -34,7 +34,7 @@ const PRIVATE_EXACT = new Set([
   "/projects",
   "/purchases",
   "/settings",
-  "/control",
+  "/_ops/keystone-7f31",
   "/login",
   "/signup",
   "/auth/complete",
