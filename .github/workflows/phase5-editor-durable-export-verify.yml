@@ -17,7 +17,7 @@ jobs:
       - name: Secret scan
         run: npm run security:secrets
       - name: Durable save and standalone export regressions
-        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts src/phase5-materialization-activation.test.ts scripts/launch/materialization-smoke-fixture.test.js worker/materialization.test.js
+        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts src/phase5-production-read-mode.test.ts src/phase5-materialization-activation.test.ts src/phase5-gate4-launch-chain.test.ts scripts/launch/materialization-smoke-fixture.test.js worker/materialization.test.js
       - name: Production build
         run: npm run build
       - name: Worker bundle dry run
