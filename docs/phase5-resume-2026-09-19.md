@@ -1,3 +1,14 @@
+## Latest recovery delta — Admin closed, Hyperdrive activation next
+
+- Main and the completed Admin integration reached `417e4c11ef912e92e2ec3153ec6b3fcb6b653ddb`.
+- Full Phase 5 UI, durable editor/export, Bigperson/Admin CI and automatic public production smoke all pass at this checkpoint.
+- Admin is complete except for live production provisioning/E2E that depends on Hyperdrive.
+- Production DB privileged schema is already applied; `webcanbe_hyperdrive` remains NOLOGIN and no credential is stored in repository/chat.
+- Cloudflare Hyperdrive must use the Supabase Direct connection. After the configuration is created, add binding `HYPERDRIVE` with only the configuration ID, deploy, run readiness/session/catalog/private-read smoke, then enroll the first Bigperson device-bound passkey and exercise Control.
+- Continue on `phase5-hyperdrive-activation`; rollback branch `backup-main-before-hyperdrive-2026-09-20` preserves the pre-Hyperdrive main state.
+
+---
+
 ## Latest recovery delta — Admin + durable editor proof integrated
 
 - The six-commit `phase5-editor-durable-export` proof branch has been functionally integrated onto the newer Bigperson/Admin line.
