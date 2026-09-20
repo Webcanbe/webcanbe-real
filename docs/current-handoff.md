@@ -1,3 +1,9 @@
+# CURRENT NEXT ACTION — RETRY FIRST PASSKEY NOW — 2026-09-20 KST
+
+Synced Apple/iCloud passkeys are now accepted and the policy change is deployed. Main UI/Bigperson/durable verification and production smoke all pass. Current Google session age is ~5m53s, so it is still inside the 10-minute Bigperson freshness window. Enter the factor and click `First Bigperson: register passkey` again now. Bigperson/security/passkey rows remain 0 before retry.
+
+---
+
 # CURRENT LIVE ISSUE — APPLE SYNCED PASSKEY — 2026-09-20 KST
 
 The first WebAuthn ceremony succeeded on macOS but the server rejected the resulting Apple/iCloud passkey because the old Bigperson policy required single-device/non-backed-up credentials. The policy is being corrected to accept synced Apple passkeys while retaining fresh Google + privileged factor + verified WebAuthn + one-time operation-bound challenge security. DB still has Bigperson 0 / security 0 / passkey 0.
