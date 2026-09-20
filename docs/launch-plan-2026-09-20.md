@@ -178,6 +178,15 @@ Also verify:
 - Supabase Security Advisor: 0 findings
 - Performance Advisor currently reports unused-index INFO only; no index removal at low traffic
 
+## Gate 5 recovery / DR preflight: **CLOSED**
+
+- verified main checkpoint: `0ad5747a89a01414b966ac8ceee82eb44c6c1768`
+- UI `35517472985`, durable `35517473076`, Bigperson `35517473013`, production smoke `35517512404`, browser matrix `35517525373`: PASS
+- live DB recovery invariants checked: 40 Webcanbe tables, 11 migrations, zero direct browser-role Webcanbe table/routine grants, bounded runtime/Hyperdrive roles, required immutability triggers
+- read-only recovery preflight command added
+- backup and rollback wrappers behaviorally rehearsed without touching production
+- live Worker rollback and real off-site DB restore drill remain pending
+
 ## Gate 5 — Launch hardening
 
 Before broad public traffic:
