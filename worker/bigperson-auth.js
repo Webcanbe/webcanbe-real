@@ -56,11 +56,13 @@ async function verifyStoredFactor(row, password, pepper) {
   if (!row?.factor_salt || !row?.factor_digest) return false
   return equalText(await deriveFactor(password, String(row.factor_salt), pepper), String(row.factor_digest))
 }
-async function verifyBootstrapFactor(password, env, pepper) {
+async function bootstrapFactor(password, env, pepper) {
   const salt = String(env.WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_SALT || "")
-  const digest = String(env.WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST || "")
-  if (!salt || !digest) throw new Error("Bigperson bootstrap factor is not configured.")
-  return equalText(await deriveFactor(password, salt, pepper), digest)
+  if (!salt) throw new Error("Bigperson bootstrap factor salt is not configured.")
+  const digest = await deriveFactor(password, salt, pepper)
+  const expected = String(env.WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST || "")
+  if (expected && !equalText(digest, expected)) throw new Error("Privileged factor refused.")
+  return { salt, digest }
 }
 async function assertBoundGoogle(db, session, row) {
   if (!row || row.google_issuer !== session.authIssuer || row.google_subject !== session.authSubject) throw new Error("Current Google identity is not the enrolled Bigperson identity.")
@@ -81,7 +83,7 @@ export async function beginBigpersonRegistration(db, session, body, env, request
   requireGoogleSession(session, allowedEmail)
   const count = await db.query("SELECT count(*)::int AS total FROM wcb_product_operators WHERE active AND role='bigperson'")
   if (Number(count.rows[0]?.total ?? 0) > 0) throw new Error("Bigperson bootstrap is closed.")
-  if (!await verifyBootstrapFactor(body?.password, env, pepper)) throw new Error("Privileged factor refused.")
+  const bootstrap = await bootstrapFactor(body?.password, env, pepper)
   const existing = await db.query("SELECT credential_id,transports FROM wcb_bigperson_passkeys WHERE user_id=$1 AND active", [session.userId])
   const { rpID } = rpOrigin(request)
   const options = await generateRegistrationOptions({
@@ -95,8 +97,8 @@ export async function beginBigpersonRegistration(db, session, body, env, request
     preferredAuthenticatorType: "localDevice",
     supportedAlgorithmIDs: [-7, -257],
   })
-  const salt = b64url(crypto.getRandomValues(new Uint8Array(18)))
-  const pendingDigest = await deriveFactor(body.password, salt, pepper)
+  const salt = bootstrap.salt
+  const pendingDigest = bootstrap.digest
   const challengeId = crypto.randomUUID()
   await purgeChallenges(db, session)
   await db.query(
