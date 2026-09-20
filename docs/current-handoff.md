@@ -1,3 +1,21 @@
+# PHASE 5 BIGPERSON MUTATION UI CHECKPOINT — 2026-09-20 KST
+
+- Privileged Control now has real mutation paths for:
+  - reviewer/admin/bigperson role + active-state transitions
+  - seller application approval/rejection
+- Every mutation requires a new three-factor ceremony; a prior Control read does not authorize a mutation.
+- The passkey challenge is bound to the exact HTTP method, privileged path and canonical operation body.
+- Successful three-factor verification mints a short-lived `control_high_risk` evidence row bound to the exact Bigperson + first-party session; the mutation consumes that evidence through the existing audit boundary.
+- Operator changes write append-only `wcb_control_audit` evidence and increment operator epoch.
+- PostgreSQL final-Bigperson protection remains the final guard against disabling/demoting/removing the last active Bigperson.
+- Seller decisions write append-only audit evidence; rejected intake cannot be silently reopened.
+- The browser clears the privileged factor before invoking the passkey prompt.
+- The Operations UI exposes a single-use factor field, operator role/state form, and seller approve/reject controls.
+- No client role flag or hidden-route knowledge grants mutation authority.
+- Next checkpoint: privileged session/security controls + audit drill-down, then remaining review/publication mutation surfaces.
+
+---
+
 Bigperson ceremony rate limit: 5 per minute per user through a dedicated Cloudflare binding.\n\n# PHASE 5 BIGPERSON MANDATORY THREE-FACTOR CHECKPOINT — 2026-09-20 KST
 
 - Bigperson Control now requires all three factors for every privileged Control read/operation:
