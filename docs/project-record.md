@@ -1,3 +1,21 @@
+# CURRENT RELEASE BLOCKER / GATE 3 V2 READY — 2026-09-20 KST
+
+- Current main code baseline: `5a36af97c6b55f5854edc4430cc1668eb7436dfd` with safe Gate 2 provider-linking and all main verification green.
+- Remaining Gate 2 blocker is human browser interaction only: Google baseline → link GitHub → link Email → logout → linked GitHub login → linked Email login → same private reads/refresh/logout.
+- Production DB still shows 1 active Google identity, 0 Firebase identities, 1 active Google session, and 0 Firebase sessions, so GitHub/Email Gate 2 has not yet been executed.
+- Live Gate 2 URL: `https://webcanbe.com/_ops/gate2-auth-smoke` (noindex).
+- Gate 3 activation source: `phase5-gate3-materialization-staging-v2`.
+- Gate 3 v2 code verification:
+  - UI `35511923446`: PASS
+  - durable editor/export `35511923498`: PASS
+  - Bigperson `35511923419`: PASS
+- Gate 4 source chain is preverified on staging through independent export/build.
+- Supabase Security Advisor: 0 findings.
+- Performance Advisor: 24 unused-index INFO findings only; retain launch/FK/operational indexes pre-traffic.
+- Do not merge/deploy Gate 3 v2 until live browser Gate 2 is green.
+
+---
+
 # GATE 4 CHAIN PREVERIFIED ON STAGING — 2026-09-20 KST
 
 - Staging checkpoint: `75810cef69b3b43947029ccaf42f844f4e319ac6`.
