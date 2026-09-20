@@ -93,4 +93,4 @@ Once the root cause is fixed:
 
 ## Drill status
 
-The rollback wrapper and guardrails are CI-verified, but a live production rollback drill has **not** been intentionally executed yet. Do not mark the Phase 5 “rollback procedure tested” item complete until a controlled drill is performed against a safe known-good version.
+The rollback wrapper now has a behavioral subprocess rehearsal in CI: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
