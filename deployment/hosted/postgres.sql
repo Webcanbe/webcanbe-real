@@ -1,7 +1,11 @@
 -- PostgreSQL 17+; run as a schema owner during an explicit migration.
 -- The API role is server-only. Never expose this database or role to projects.
 CREATE TABLE IF NOT EXISTS wcb_sessions (
-  session_id uuid PRIMARY KEY, user_id uuid NOT NULL, expires_at timestamptz NOT NULL, active boolean NOT NULL DEFAULT true
+  session_id uuid PRIMARY KEY,
+  user_id uuid NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  expires_at timestamptz NOT NULL,
+  active boolean NOT NULL DEFAULT true
 );
 CREATE TABLE IF NOT EXISTS wcb_workspace_members (
   workspace_id uuid NOT NULL, user_id uuid NOT NULL, role text NOT NULL CHECK(role IN ('owner','editor','viewer')),
@@ -35,6 +39,10 @@ CREATE INDEX IF NOT EXISTS wcb_unsettled_leases ON wcb_runner_leases(state,lease
 CREATE TABLE IF NOT EXISTS wcb_disabled_users (user_id uuid PRIMARY KEY);
 ALTER TABLE wcb_sessions ADD COLUMN IF NOT EXISTS token_hash text UNIQUE;
 ALTER TABLE wcb_sessions ADD COLUMN IF NOT EXISTS csrf_hash text;
+ALTER TABLE wcb_sessions ADD COLUMN IF NOT EXISTS created_at timestamptz;
+UPDATE wcb_sessions SET created_at = expires_at - interval '7 days' WHERE created_at IS NULL;
+ALTER TABLE wcb_sessions ALTER COLUMN created_at SET DEFAULT clock_timestamp();
+ALTER TABLE wcb_sessions ALTER COLUMN created_at SET NOT NULL;
 CREATE TABLE IF NOT EXISTS wcb_user_profiles (
   user_id uuid PRIMARY KEY,
   display_name text NOT NULL CHECK(length(display_name) BETWEEN 1 AND 120),
