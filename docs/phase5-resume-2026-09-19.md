@@ -8,6 +8,18 @@ Production domain: `https://webcanbe.com`
 
 > This file exists so a new ChatGPT session can resume Phase 5 without re-deciding architecture or repeating finished work. Read this file first, then `docs/phase5.md`, `docs/current-handoff.md`, and `docs/project-record.md`.
 
+## Latest recovery delta — launch readiness
+
+- Free / limited public beta readiness: **~80–85%**.
+- Full commercial launch with payments + seller publishing: **~55–60%**.
+- Immediate blocker: create/bind Hyperdrive and pass live DB-session/catalog/private-read smoke.
+- After Hyperdrive: activate real read mode, run full provider smoke, activate materialization, and run clean-account edit/save/reload/export smoke.
+- Commercial launch additionally requires payment checkout/webhook/entitlement/refund/receipt and seller publication flows.
+- Current `phase5-editor-durable-export` proof has passed dedicated verification run `35450898867` but is not yet merged to `main`.
+- Keep payment/seller mutations disabled for any earlier limited beta.
+
+---
+
 ## Latest recovery delta — coherent reload / Refresh accepted
 
 - Initial Code workspace load accepts files + history only when both report the same accepted revision.
