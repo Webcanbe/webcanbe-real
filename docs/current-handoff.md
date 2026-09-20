@@ -9,7 +9,7 @@
 - Duplicate/conflicting assessment admission is refused; the first valid request remains authoritative.
 - Both review and assessment actions append bounded privileged Control audit transitions.
 - No source bodies or worker credentials are exposed to the Control UI.
-- Next Control slice: release promotion, Listing publication, Ready qualification, entitlement operations, then final provisioning/E2E.
+- Verification run `35486441911`: privileged authority/mutation regressions PASS, Worker syntax PASS, production build PASS, Wrangler dry-run PASS.\n- Next Control slice: release promotion, Listing publication, Ready qualification, entitlement operations, then final provisioning/E2E.
 
 ---
 
