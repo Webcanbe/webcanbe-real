@@ -54,5 +54,14 @@
       "binding": "HYPERDRIVE",
       "id": "7f537011fc1a4303aac7aff9601a1699"
     }
-  ]
+  ],
+  "secrets": {
+    "required": [
+      "GOOGLE_OAUTH_CLIENT_ID",
+      "GOOGLE_OAUTH_CLIENT_SECRET",
+      "WEBCANBE_BIGPERSON_FACTOR_PEPPER",
+      "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_SALT",
+      "WEBCANBE_BIGPERSON_BOOTSTRAP_FACTOR_DIGEST"
+    ]
+  }
 }
