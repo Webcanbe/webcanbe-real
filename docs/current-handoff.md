@@ -1,3 +1,9 @@
+# UNIFIED BIGPERSON OPERATIONS CONSOLE — 2026-09-20 KST
+
+Bigperson is explicitly locked as a superset of all Reviewer/Admin manager permissions. The standalone Admin UI is now organized as Overview / Sellers & Review / Publishing / Access & Roles / Audit, with seller approval, review, assessment, release/Listing/Ready, TEST entitlements, sessions, role management and audit in one console. Branch CI is green: UI `35506923400`, Bigperson `35506923474`, durable `35506923428`.
+
+---
+
 # PERMANENT ADMIN LINK
 
 `https://webcanbe.com/_ops/keystone-7f31`
