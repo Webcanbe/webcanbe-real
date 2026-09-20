@@ -258,6 +258,14 @@ export class HostedProductClient {
     return (await this.privilegedMutation<{ session: Record<string, unknown> }>(password, "/__webcanbe/api/ops/sessions/revoke", { sessionId, idempotencyKey: crypto.randomUUID() })).session
   }
 
+  async controlReviewDecision(password: string, input: { submissionId: string; snapshotHash: string; decision: "approved_for_next_stage" | "rejected" }) {
+    return (await this.privilegedMutation<{ review: Record<string, unknown> }>(password, "/__webcanbe/api/ops/reviews/decide", { ...input, idempotencyKey: crypto.randomUUID() })).review
+  }
+
+  async controlAdmitAssessment(password: string, input: { submissionId: string; sellerUserId: string; snapshotHash: string; reviewDecisionId: string }) {
+    return (await this.privilegedMutation<{ assessment: Record<string, unknown> }>(password, "/__webcanbe/api/ops/assessments/admit", { ...input, idempotencyKey: crypto.randomUUID() })).assessment
+  }
+
 }
 
 export const hostedProductMode = () => typeof document !== "undefined" && document.querySelector('meta[name="wcb-editor-mode"]')?.getAttribute("content") === "hosted"
