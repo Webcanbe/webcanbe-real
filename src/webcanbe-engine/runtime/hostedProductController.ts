@@ -175,7 +175,7 @@ export class HostedProductController {
       }
       if (action === "/control/read") { exact(body, []); return send(200, { control: await this.store.controlRead(session) }) }
       if (action === "/control/operators/transition") {
-        exact(body, ["stepUpEvidenceId", "targetUserId", "active", "idempotencyKey"], ["role"])
+        exact(body, ["stepUpEvidenceId", "targetUserId", "active", "idempotencyKey", "role"])
         if (typeof body.active !== "boolean") throw new Error("Invalid operator state.")
         const role = body.role === undefined ? undefined : text(body, "role")
         if (role !== undefined && !["reviewer","admin","bigperson"].includes(role)) throw new Error("Invalid platform role.")
