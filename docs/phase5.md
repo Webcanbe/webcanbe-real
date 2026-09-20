@@ -1,3 +1,21 @@
+## 2026-09-20 Admin closure / Hyperdrive activation checkpoint
+
+- [x] Admin/Bigperson code complete.
+- [x] Production privileged PostgreSQL schema complete.
+- [x] Full UI + durable editor + Bigperson CI PASS on `417e4c11ef912e92e2ec3153ec6b3fcb6b653ddb`.
+- [x] Automatic public production smoke PASS.
+- [ ] Privately enable LOGIN for `webcanbe_hyperdrive` with an operator-generated secret.
+- [ ] Create Cloudflare Hyperdrive from the Supabase Direct connection.
+- [ ] Add non-secret Hyperdrive configuration ID as `HYPERDRIVE` binding.
+- [ ] Deploy and require database readiness.
+- [ ] Run DB-backed Google/GitHub/Email session smoke.
+- [ ] Enroll first production Bigperson device passkey and run Control E2E.
+- [ ] Only after the smoke gates pass, activate production read mode and later mutation mode.
+
+Active continuation branch: `phase5-hyperdrive-activation`.
+
+---
+
 ## 2026-09-20 integrated Admin + durable editor checkpoint
 
 - [x] Bigperson/Admin authority, mandatory three-factor security, review/assessment, release promotion, Listing publication, canonical source-derived Ready qualification and TEST entitlement controls.
