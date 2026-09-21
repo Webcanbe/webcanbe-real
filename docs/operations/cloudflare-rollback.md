@@ -30,14 +30,14 @@ npm run deploy:deployments
 ```
 
 5. Select the exact known-good **Worker Version ID**. Do not guess.
-6. Verify a recent rollback target without changing production:
+6. Verify the target and current production deployment without changing production:
 
 ```bash
 WEBCANBE_ROLLBACK_PLAN_ONLY=1 \
 npm run deploy:rollback -- <WORKER_VERSION_ID>
 ```
 
-Plan mode runs only `wrangler versions list --json`, verifies that the exact UUID appears in the returned recent-version data, and exits without calling `wrangler rollback`. If the target is not present in that recent list, the wrapper refuses to approve the plan; inspect Cloudflare directly instead of guessing or substituting another version.
+Plan mode performs two read-only Wrangler queries: `wrangler versions list --json` and `wrangler deployments status --json`. It requires the exact target UUID to appear in recent-version data and requires current deployment status to expose at least one active Worker version ID. It prints the verified rollback target and the currently active version ID(s), then exits without calling `wrangler rollback` or changing traffic. If either source is unavailable, malformed, the target is missing, or current-version evidence cannot be identified, the wrapper fails closed. If the target is already present in the current deployment, inspect the traffic allocation before taking action.
 
 7. If the incident includes DB schema/data changes, take a fresh DB backup if possible and use `docs/operations/database-backup-restore.md` as the recovery plan.
 
@@ -102,4 +102,4 @@ Once the root cause is fixed:
 
 ## Drill status
 
-The rollback wrapper has behavioral subprocess rehearsal coverage: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. Non-mutating plan mode is also exercised against a fake `wrangler versions list --json`: an exact listed version passes without any rollback command, while an absent version fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
+The rollback wrapper has behavioral subprocess rehearsal coverage: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. Non-mutating plan mode is exercised against fake read-only Wrangler responses: an exact recent target must pass `versions list`, current deployment evidence must pass `deployments status`, both target and active version IDs are reported, a missing target fails before the status query, and missing active-version evidence fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
