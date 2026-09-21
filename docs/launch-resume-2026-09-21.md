@@ -1,3 +1,23 @@
+# CURRENT NON-PAYMENT RESUME POINT — 2026-09-21 KST
+
+Use actual GitHub history plus this block before older interruption snapshots below.
+
+- `main`: `456a23c9ab9879f89a68d0682a7e7fb3cc6daba1`
+- active branch: `phase5-preview-live-probe`, draft PR #60
+- main sync into PR #60: merge commit `996d621c930614f81aea227363e75bf4a8771afe`
+- PR #45 / Gate 3 v4 was already merged at `04a9eeee6c170dc46b735c99d91f10cbc1d5c457`; do not resume from v3/v4 staging branches
+- production working-copy materialization is already active from `43ead5bb879fa7e514cca8de072b8d0c4c0acb36`
+- production editor/source APIs and Browser Run preview are already in main
+- integrated PR #60 non-payment run `35593824866`: PASS
+- Cloudflare public live probe `35594890113` / `106317325809`: PASS for route/asset/DOM/runtime-network isolation
+- authenticated working-copy Visual/Code/reopen/export proof: PENDING / OPERATOR REQUIRED
+- same-account GitHub + Email authenticated E2E: PENDING / OPERATOR REQUIRED
+- keep PR #60 draft; do not merge on public-live evidence alone
+
+Resume details and exact live evidence are in `docs/checkpoints/gate4-live-materialization-editor-2026-09-21.md`.
+
+---
+
 # Webcanbe interruption-safe launch checkpoint
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
