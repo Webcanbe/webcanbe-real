@@ -1,3 +1,24 @@
+# CURRENT NON-PAYMENT SOURCE OF TRUTH — 2026-09-21 KST
+
+This block supersedes older launch-status statements below when they conflict; historical sections are retained for audit chronology.
+
+- production/default branch: `main` at `456a23c9ab9879f89a68d0682a7e7fb3cc6daba1`
+- active unfinished work: `phase5-preview-live-probe`, draft PR #60
+- current main was merged into the PR branch with ordinary merge commit `996d621c930614f81aea227363e75bf4a8771afe`; no rebase/force-push
+- Gate 3 v4 PR #45 was merged to main at `04a9eeee6c170dc46b735c99d91f10cbc1d5c457`; v3/v4 staging branches are historical rather than current activation source of truth
+- bounded production working-copy materialization was activated at `43ead5bb879fa7e514cca8de072b8d0c4c0acb36`
+- hosted production working-copy/editor boundary is live through `b1cdc782e7508ede0aa5f9462c810511767c0dc2` and the PostgreSQL-backed Worker source API at `a6e85e1dee2173755de953d45edbd29f422607d7`
+- managed Browser Run Visual preview is in main; SPA-host lazy runtime baseline is `f9876555c8d72d7c4e39e18ec42c989a757ad005`
+- PR #60 integrated non-payment verification `35593824866`: PASS
+- actual Cloudflare public preview probe `35594890113` / job `106317325809`: PASS for public route, lazy assets, DOM runtime markers and project network isolation
+- authenticated production working-copy Visual/Code/reopen/export acceptance remains **PENDING / OPERATOR REQUIRED**
+- same-account GitHub + Email authenticated private-read/refresh/logout evidence remains **PENDING / OPERATOR REQUIRED**
+- PR #60 must remain draft until those authenticated checks exist
+
+Current detailed evidence: `docs/checkpoints/gate4-live-materialization-editor-2026-09-21.md`.
+
+---
+
 # GATE 5 RECOVERY / DR PREFLIGHT CLOSED — 2026-09-20 KST
 
 # GATE 4 COMBINED VISUAL + CODE PROOF — 2026-09-21 KST
