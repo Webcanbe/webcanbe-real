@@ -409,3 +409,22 @@ Rewards should be chosen by the user and kept small enough not to damage company
 - If actual metrics improve, explicitly acknowledge that the 2-year KRW 1T path has become more credible.
 - If metrics are weak, frame the next test as a way to increase the odds rather than as a personal failure.
 - The objective is not to preserve the assistant's old plan; it is to maximize the user's real chance of building a large company.
+
+
+## 15. Why the 24-month KRW 1T target is hard / why Webcanbe is still a plausible vehicle — 2026-09-21
+
+Working judgment:
+- The 24-month KRW 1T target is hard less because the founder personally cannot execute and more because **market adoption must happen unusually fast**.
+- The limiting variables are PMF, distribution, seller/buyer liquidity, retention, timing, competitive response and the speed at which growth compounds.
+- “Luck” should not be treated as pure randomness. It includes timing, market shifts, distribution breaks, key hires/partners and sudden demand. The operating strategy is to increase the number of high-quality shots and iterations so favorable breaks are more likely to be captured.
+- Webcanbe is structurally more plausible for a very large valuation than a linear service/agency/local-business model because it can be:
+  - software-based
+  - global from day one
+  - two-sided marketplace
+  - low marginal-cost distribution
+  - capable of seller-led distribution / network effects
+  - capable of adding higher-margin software revenue around marketplace activity
+- This does **not** mean the current idea is proven or that Webcanbe is objectively “the best possible 1T idea.”
+- The strongest current claim is:
+  **Webcanbe is one of the more plausible kinds of businesses for the founder's extreme goal, provided the market proves that users actually want the source-owning visual+code workflow and marketplace loop.**
+- If real traction fails to appear, preserving the 1T goal is more important than preserving the exact current product shape; use evidence-driven pivots rather than identity attachment to the initial idea.
