@@ -45,6 +45,15 @@ function isOfficialGithubHost(value) {
   }
 }
 
+function redactedUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.origin + url.pathname
+  } catch {
+    return "[unparseable URL]"
+  }
+}
+
 async function firebaseBundleEvidence(page) {
   const scriptUrls = await page.evaluate(() =>
     [...document.querySelectorAll("script[src]")]
@@ -210,7 +219,7 @@ try {
   assert(
     "Firebase GitHub flow reaches the official GitHub provider boundary",
     Boolean(popup) && isOfficialGithubHost(providerUrl),
-    providerUrl || providerMessage || pageErrors.at(-1) || consoleErrors.at(-1) || "provider window never reached github.com",
+    providerUrl ? redactedUrl(providerUrl) : providerMessage || pageErrors.at(-1) || consoleErrors.at(-1) || "provider window never reached github.com",
   )
 
   // Stop at the provider boundary. Do not enter credentials and do not make an
