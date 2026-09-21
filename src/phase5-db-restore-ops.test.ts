@@ -62,6 +62,14 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     expect(source).toContain('"--data-only"')
     expect(source).toContain('"--exit-on-error"')
     expect(source).toContain('"--single-transaction"')
+    expect(source).toContain("guardedPreparationSql")
+    expect(source).toContain("Recovery target identity changed after approval")
+    expect(source).toContain("SET LOCAL lock_timeout = '30s'")
+    expect(source).toContain("SET LOCAL statement_timeout = '30s'")
+    expect(source).toContain('"--file", guardSql')
+    expect(source).toContain('"--file", restoreSql')
+    expect(source).not.toContain("connectionString: process.env.RECOVERY_DATABASE_URL")
+    expect(source).not.toContain('"--dbname", recovery.database')
     expect(source).toContain('"scripts/db/recovery-preflight.mjs"')
     expect(source).not.toContain("console.log(process.env.RECOVERY_DATABASE_URL")
   })
@@ -93,6 +101,22 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
     expect(result.status).toBe(1)
     expect(result.stderr).toContain("Refusing recovery restore without WEBCANBE_RESTORE_CONFIRM=RESTORE_RECOVERY_TARGET.")
+  })
+
+  it("rejects URL query parameters that could redirect a later database client",()=>{
+    const root=tempRoot(), backup=path.join(root,"backup.dump")
+    writeBackupFixture(backup)
+    const env:NodeJS.ProcessEnv={
+      ...process.env,
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test")+"&host=redirect.example.test",
+      WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
+    }
+    const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain("RECOVERY_DATABASE_URL contains unsupported connection parameters")
+    expect(result.stdout+result.stderr).not.toContain("prod-secret")
+    expect(result.stdout+result.stderr).not.toContain("recovery-secret")
   })
 
   it("refuses recovery when the connected target matches the identity recorded in the backup",()=>{
@@ -204,6 +228,70 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     expect(result.stdout).toContain("Recorded backup source identity verified")
     expect(result.stdout).toContain("distinct from the recorded backup source.")
     expect(result.stdout).toContain("Recovery restore plan verified")
+  })
+
+  it("binds identity assertion, truncation and restore to one rollback-safe psql session",()=>{
+    const root=tempRoot(), bin=path.join(root,"bin"), backup=path.join(root,"backup.dump"), capture=path.join(root,"capture")
+    fs.mkdirSync(bin)
+    fs.mkdirSync(capture)
+    writeBackupFixture(backup,"1111111111111111111")
+    executable(path.join(bin,"pg_restore"),[
+      "#!/bin/sh",
+      'if [ "$1" = "--list" ]; then',
+      '  i=1; while [ "$i" -le 20 ]; do echo "1; 0 0 TABLE DATA public wcb_fixture_$i owner"; i=$((i+1)); done',
+      "  exit 0",
+      "fi",
+      'printf "%s\\n" "$@" > "$WCB_CAPTURE_DIR/render-args"',
+      'previous=""',
+      'for argument in "$@"; do',
+      '  if [ "$previous" = "--file" ]; then printf "COPY public.wcb_fixture_1 FROM stdin;\\n\\\\.\\n" > "$argument"; fi',
+      '  previous="$argument"',
+      "done",
+      "exit 0",
+      "",
+    ].join("\n"))
+    fakeIdentityProbe(bin,[
+      'case " $* " in',
+      '  *" --command "*)',
+      '    if [ "$PGHOST" = "prod.example.test" ]; then printf "1111111111111111111\\tpostgres\\n"; else printf "2222222222222222222\\tpostgres\\n"; fi',
+      "    exit 0",
+      "    ;;",
+      "esac",
+      'printf "%s\\n" "$@" > "$WCB_CAPTURE_DIR/psql-args"',
+      'previous=""; index=0',
+      'for argument in "$@"; do',
+      '  if [ "$previous" = "--file" ]; then',
+      '    index=$((index+1))',
+      '    cp "$argument" "$WCB_CAPTURE_DIR/file-$index.sql"',
+      "  fi",
+      '  previous="$argument"',
+      "done",
+      "exit 23",
+    ].join("\n"))
+    const env={
+      ...process.env,
+      PATH:bin+path.delimiter+(process.env.PATH||""),
+      WCB_CAPTURE_DIR:capture,
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
+      WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
+    }
+    const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
+    expect(result.status).toBe(23)
+    const renderArgs=fs.readFileSync(path.join(capture,"render-args"),"utf8")
+    expect(renderArgs).toContain("--file")
+    expect(renderArgs).not.toContain("--dbname")
+    const psqlArgs=fs.readFileSync(path.join(capture,"psql-args"),"utf8")
+    expect(psqlArgs).toContain("--single-transaction")
+    expect(psqlArgs.match(/--file/g)).toHaveLength(2)
+    const guard=fs.readFileSync(path.join(capture,"file-1.sql"),"utf8")
+    expect(guard).toContain("pg_control_system()")
+    expect(guard).toContain("2222222222222222222")
+    expect(guard).toContain("1111111111111111111")
+    expect(guard).toContain("TRUNCATE TABLE")
+    expect(fs.readFileSync(path.join(capture,"file-2.sql"),"utf8")).toContain("COPY public.wcb_fixture_1")
+    expect(result.stdout+result.stderr).not.toContain("prod-secret")
+    expect(result.stdout+result.stderr).not.toContain("recovery-secret")
   })
 
   it("refuses offline recovery planning without explicit source-manifest confirmation",()=>{

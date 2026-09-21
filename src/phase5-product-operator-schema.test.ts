@@ -15,6 +15,12 @@ describe("Phase 5 product operator timestamp contract", () => {
     expect(roles).toContain("ALTER COLUMN updated_at SET NOT NULL")
   })
 
+  it("keeps canonical Bigperson guards valid for fresh PostgreSQL bootstrap", () => {
+    expect(schema).toContain("DO $$\nBEGIN")
+    expect(schema).toContain("wcb_protect_last_bigperson() RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$")
+    expect(schema).not.toMatch(/^\s*(?:DO|.*\bAS) \$\s*$/m)
+  })
+
   it("backfills existing operator rows without destructive DDL", () => {
     expect(migration).toContain("UPDATE wcb_product_operators")
     expect(migration).toContain("WHERE updated_at IS NULL")
