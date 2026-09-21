@@ -17,6 +17,9 @@ function executable(file:string,body:string){
   fs.writeFileSync(file,body,{mode:0o755})
   fs.chmodSync(file,0o755)
 }
+function dbUrl(user:string,password:string,host:string){
+  return "postgresql://"+user+":"+encodeURIComponent(password)+"@"+host+":5432/postgres?sslmode=require"
+}
 
 describe("Phase 5 recovery-target restore tooling",()=>{
   it("hard-codes the recovery-only safety boundary and transactional restore flags",()=>{
@@ -39,8 +42,8 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     fs.writeFileSync(backup,"fixture")
     const env={
       ...process.env,
-      WEBCANBE_DATABASE_URL:"postgresql://prod:prod-secret@db.example.test:5432/postgres?sslmode=require",
-      RECOVERY_DATABASE_URL:"postgresql://recovery:recovery-secret@db.example.test:5432/postgres?sslmode=require",
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","db.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","db.example.test"),
       WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
     }
     const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
@@ -55,8 +58,8 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     fs.writeFileSync(backup,"fixture")
     const env={
       ...process.env,
-      WEBCANBE_DATABASE_URL:"postgresql://prod:prod-secret@prod.example.test:5432/postgres",
-      RECOVERY_DATABASE_URL:"postgresql://recovery:recovery-secret@recovery.example.test:5432/postgres",
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
     }
     const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
     expect(result.status).toBe(1)
@@ -79,8 +82,8 @@ describe("Phase 5 recovery-target restore tooling",()=>{
       ...process.env,
       PATH:bin+path.delimiter+(process.env.PATH||""),
       WCB_RESTORE_CAPTURE:capture,
-      WEBCANBE_DATABASE_URL:"postgresql://prod:prod-secret@prod.example.test:5432/postgres?sslmode=require",
-      RECOVERY_DATABASE_URL:"postgresql://recovery:recovery-secret@recovery.example.test:5432/postgres?sslmode=require",
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
       WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
       WEBCANBE_RESTORE_PLAN_ONLY:"1",
     }
