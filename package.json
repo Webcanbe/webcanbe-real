@@ -22,7 +22,8 @@
     "security:secrets": "node scripts/security/scan-secrets.mjs",
     "smoke:production:public": "node scripts/production-smoke-public.mjs",
     "db:recovery:preflight": "node scripts/db/recovery-preflight.mjs",
-    "launch:smoke-fixture": "node scripts/launch/materialization-smoke-fixture.mjs"
+    "launch:smoke-fixture": "node scripts/launch/materialization-smoke-fixture.mjs",
+    "db:restore:recovery": "node scripts/db/restore-recovery.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
