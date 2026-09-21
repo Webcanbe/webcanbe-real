@@ -50,6 +50,47 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
     ])
   })
 
+  it("behaviorally proves rollback plan mode verifies an exact listed version without changing deployments",()=>{
+    const root=tempRoot(), capture=path.join(root,"plan-args.json"), fake=path.join(root,"npx")
+    executable(fake,[
+      "#!/usr/bin/env node",
+      'const fs=require("fs")',
+      'const args=process.argv.slice(2)',
+      'fs.writeFileSync(process.env.WCB_CAPTURE,JSON.stringify(args))',
+      'if(args.join(" ")!=="wrangler versions list --json")process.exit(3)',
+      'process.stdout.write(JSON.stringify([{id:process.env.WCB_VISIBLE_VERSION,created_on:"2026-09-21T00:00:00.000Z"}]))',
+      "",
+    ].join("\n"))
+
+    const version="12345678-1234-4234-8234-123456789abc"
+    const other="87654321-4321-4321-8321-cba987654321"
+    const baseEnv={
+      ...process.env,
+      PATH:root+path.delimiter+(process.env.PATH||""),
+      WCB_CAPTURE:capture,
+      WEBCANBE_ROLLBACK_PLAN_ONLY:"1",
+    }
+
+    const planned=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
+      cwd:process.cwd(),
+      env:{...baseEnv,WCB_VISIBLE_VERSION:version},
+      encoding:"utf8",
+    })
+    expect(planned.status).toBe(0)
+    expect(planned.stdout).toContain(`Rollback target verified in current Worker versions: ${version}`)
+    expect(planned.stdout).toContain("Plan only: no Worker deployment was changed.")
+    expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual(["wrangler","versions","list","--json"])
+
+    const missing=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
+      cwd:process.cwd(),
+      env:{...baseEnv,WCB_VISIBLE_VERSION:other},
+      encoding:"utf8",
+    })
+    expect(missing.status).toBe(1)
+    expect(missing.stderr).toContain("Rollback target was not found")
+    expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual(["wrangler","versions","list","--json"])
+  })
+
   it("behaviorally proves backup credentials stay in child env and the produced archive is verifiable",()=>{
     const root=tempRoot(), bin=path.join(root,"bin"), capture=path.join(root,"dump-capture.json"), target=path.join(root,"backup.dump")
     fs.mkdirSync(bin)
