@@ -58,9 +58,9 @@ export type StyleOrigin = {
   range?: SourceRange
   value?: string
   /** Optional parsed scalar metadata; value remains the authoritative source text. */
-  numericValue?: number
-  /** Unit for a parsed scalar (empty string for unitless); omit for tokens/expressions. */
-  unit?: string
+  numericValue?: number | null
+  /** Parsed unit, or "number" for unitless; null/absent for tokens and expressions. */
+  unit?: string | null
   reason?: string
   selector?: string
   prefix?: string
