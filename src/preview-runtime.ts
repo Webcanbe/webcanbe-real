@@ -3,7 +3,7 @@ import * as ReactModule from "react"
 import { jsx, jsxs, Fragment } from "react/jsx-runtime"
 import { createRoot } from "react-dom/client"
 
-type Payload = {
+document.documentElement.dataset.wcbPreviewRuntime = "loaded"\n\ntype Payload = {
   files: Record<string, string>
   entry?: string
   title?: string
