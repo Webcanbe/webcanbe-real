@@ -1159,7 +1159,7 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 
 
 /* 2026-09-18 unified UI pass */
-.landing-react-host{min-height:100vh;width:100%;max-width:100vw;min-width:0;overflow-x:hidden;background:#fff}
+.landing-react-host{min-height:100vh;width:100%;max-width:100vw;min-width:0;overflow-x:clip;background:#fff}
 .landing-load-error{min-height:70vh;display:grid;place-content:center;text-align:center;gap:10px;color:#17171b}
 .landing-load-error button{justify-self:center;padding:9px 14px;border:1px solid #dedee5;border-radius:8px;background:#fff}
 .site-footer{border-top:1px solid #ececf0;background:#fff;color:#3f3f46;padding:54px 28px 22px}
@@ -1489,3 +1489,10 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .control-standalone .hub-section-head p{margin:0;color:#777;font-size:11px;line-height:1.45}
 @media(max-width:900px){.control-console-head{display:block}.control-role-badge{display:inline-flex;margin:0 0 18px}.control-overview-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.control-overview-grid{grid-template-columns:1fr}.control-console-nav{margin-left:-4px;margin-right:-4px}}
+
+/* Loading placeholders must fit the same narrow viewport as loaded projects. */
+@media (max-width:720px) {
+  .hub-skeleton { grid-template-columns:80px minmax(0,1fr); gap:16px; }
+  .hub-skeleton i { grid-row:span 2; height:96px; }
+  .hub-skeleton b { grid-column:2; width:min(150px,100%); }
+}

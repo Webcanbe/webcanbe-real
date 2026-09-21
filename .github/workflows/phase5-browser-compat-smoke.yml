@@ -26,14 +26,4 @@ jobs:
       - name: Chrome Firefox WebKit production smoke
         env:
           WEBCANBE_BROWSER_SMOKE_ORIGIN: https://webcanbe.com
-        run: |
-          for attempt in 1 2 3; do
-            echo "Browser smoke attempt ${attempt}/3"
-            if node scripts/launch/browser-smoke.mjs; then
-              exit 0
-            fi
-            if [ "${attempt}" -eq 3 ]; then
-              exit 1
-            fi
-            sleep 20
-          done
+        run: node scripts/launch/browser-smoke.mjs

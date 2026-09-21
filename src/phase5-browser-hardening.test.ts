@@ -17,7 +17,7 @@ describe("Phase 5 browser launch hardening", () => {
 
   it("clips vendor carousel overflow at the landing host boundary", () => {
     const css = fs.readFileSync("src/phase4-final-ui.css", "utf8")
-    expect(css).toContain(".landing-react-host{min-height:100vh;width:100%;max-width:100vw;min-width:0;overflow-x:hidden;background:#fff}")
+    expect(css).toContain(".landing-react-host{min-height:100vh;width:100%;max-width:100vw;min-width:0;overflow-x:clip;background:#fff}")
   })
   it("repairs injected landing controls without rewriting the vendor document", () => {
     const home = fs.readFileSync("src/Home.tsx", "utf8")
@@ -76,8 +76,8 @@ describe("Phase 5 browser launch hardening", () => {
     expect(workflow).toContain("branches: [main]")
     expect(workflow).toContain("github.event.workflow_run.conclusion == 'success'")
     expect(workflow).toContain("github.event.workflow_run.head_sha || github.sha")
-    expect(workflow).toContain('Browser smoke attempt ${attempt}/3')
-    expect(workflow).toContain("sleep 20")
+    expect(workflow).not.toContain("for attempt")
+    expect(workflow).not.toContain("sleep 20")
     expect(workflow).toContain("node scripts/launch/browser-smoke.mjs")
   })
 })
