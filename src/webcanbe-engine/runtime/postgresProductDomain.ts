@@ -12,6 +12,7 @@ import { PostgresAccess, PostgresProjectStore, verifyHistory } from "./postgresS
 import { readSafeZip, safeArchivePath, stripSingleArchiveRoot, ZIP_LIMITS } from "./projectRegistry"
 import { GitHubSourceProvider, sourceReference, type ExternalSourceProvider } from "./externalSource"
 import { exportProjectFiles } from "./projectExport"
+import { releaseSnapshotHash } from "./snapshotIntegrity"
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex")
 const identifier = (value: string) => { requireOpaqueId(value); return value }
@@ -59,7 +60,7 @@ const cleanTags = (values: string[] | undefined) => {
 }
 const iso = (value: unknown) => new Date(String(value)).toISOString()
 const encodeFiles = (files: Map<string, Buffer>) => [...files].sort(([a], [b]) => a.localeCompare(b)).map(([file, bytes]) => [file, bytes.toString("base64")] as const)
-const snapshotHash = (snapshot: { projectId: string; revisionId: string; contentHash: string; files: Map<string, Buffer>; history: RevisionLedger }) => sha256(JSON.stringify({ projectId: snapshot.projectId, revisionId: snapshot.revisionId, contentHash: snapshot.contentHash, files: encodeFiles(snapshot.files), history: snapshot.history }))
+const snapshotHash = (snapshot: { projectId: string; revisionId: string; contentHash: string; files: Map<string, Buffer>; history: RevisionLedger }) => releaseSnapshotHash({ projectId: snapshot.projectId, revisionId: snapshot.revisionId, contentHash: snapshot.contentHash, files: encodeFiles(snapshot.files), history: snapshot.history })
 const filesFrom = (value: unknown) => {
   if (!Array.isArray(value)) throw new Error("Stored release files are invalid.")
   const files = new Map<string, Buffer>(), seen = new Set<string>(); let total = 0
