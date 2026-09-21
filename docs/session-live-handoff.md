@@ -300,3 +300,18 @@ If context is lost, do this before proposing a new plan:
 
 Current exact cross-cutting priority:
 **Finish launch-critical auth/mutation/payment closure, publicly expose a truthful usable beta by 9/24 at the latest, then immediately shift attention from building to real buyers, real sellers and measured usage.**
+
+
+## 12. ABSOLUTE PUBLIC-BETA DEADLINE — 2026-09-21 decision
+
+User explicitly tightened the launch rule:
+
+- **2026-09-24 21:00 KST is an absolute deadline.**
+- Do not describe 9/25 as “only one day late” or normalize slippage.
+- The operating assumption is: **the product must be publicly accessible within the deadline.**
+- Earlier is better: 9/22 excellent, 9/23 preferred, 9/24 allowed only as the final deadline.
+- 9/25 or later = missed launch commitment.
+- Do not use cosmetic polish, noncritical features, or “one more improvement” to justify delay.
+- If paid checkout is the only external blocker, public beta still opens within the deadline with truthful free/limited scope; payment can follow.
+- The public beta must still deliver the real core promise; a static waitlist/marketing page alone does not count as the target launch.
+- Exact launch checklist is preserved in `docs/public-beta-launch-checklist-2026-09-24.md`.
