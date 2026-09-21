@@ -1,0 +1,45 @@
+name: Phase 5 free Browser Run Visual preview verify
+on:
+  push:
+    branches: [phase5-browser-run-visual-preview]
+  pull_request:
+    branches: [main]
+    paths:
+      - preview-runtime.html
+      - vite.preview.config.ts
+      - vite.config.ts
+      - package.json
+      - wrangler.jsonc
+      - worker/editor-projects.js
+      - worker/editor-projects.test.js
+      - worker/index.js
+      - src/preview-runtime.ts
+      - src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx
+      - src/phase5-browser-run-visual-preview.test.ts
+      - scripts/launch/build-budget.mjs
+      - .github/workflows/phase5-browser-run-visual-preview-verify.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare runtime profile
+        run: npm run runtime:prepare
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Browser Run Visual regressions
+        run: npx vitest run src/phase5-browser-run-visual-preview.test.ts worker/editor-projects.test.js src/phase5-production-hosted-editor.test.ts src/phase5-editor-durable-export.test.ts src/phase5-gate4-launch-chain.test.ts
+      - name: Worker syntax
+        run: node --check worker/editor-projects.js && node --check worker/index.js
+      - name: Production build
+        run: npm run build
+      - name: Production build budget
+        run: node scripts/launch/build-budget.mjs
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run

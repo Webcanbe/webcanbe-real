@@ -442,7 +442,7 @@ async function privateProduct(request, env, path, traceId) {
         try { body = await smallJsonBody(request, 8 * 1024 * 1024) }
         catch { return json({ error: "Invalid editor request." }, 400) }
         try {
-          const result = await editorProjectRequest(db, databaseSession, path, body)
+          const result = await editorProjectRequest(db, databaseSession, path, body, env)
           return json(result.value, result.status)
         } catch (error) {
           if (error instanceof EditorProjectError) return json({ error: error.message }, error.status)

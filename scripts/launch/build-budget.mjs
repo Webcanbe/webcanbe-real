@@ -22,30 +22,43 @@ const max = predicate => files.filter(predicate).reduce((largest, item) => item.
 const mib = value => value / (1024 * 1024)
 const kib = value => value / 1024
 
+const isPreview = item => item.file === "preview-runtime.html" || item.file.startsWith("preview-assets/")
 const total = sum(() => true)
-const jsTotal = sum(item => item.file.endsWith(".js"))
-const cssTotal = sum(item => item.file.endsWith(".css"))
-const appCssTotal = sum(item => item.file.startsWith("assets/") && item.file.endsWith(".css"))
-const largestJs = max(item => item.file.endsWith(".js"))
-const largestCss = max(item => item.file.endsWith(".css"))
+const appTotal = sum(item => !isPreview(item))
+const jsTotal = sum(item => !isPreview(item) && item.file.endsWith(".js"))
+const cssTotal = sum(item => !isPreview(item) && item.file.endsWith(".css"))
+const appCssTotal = sum(item => !isPreview(item) && item.file.startsWith("assets/") && item.file.endsWith(".css"))
+const largestJs = max(item => !isPreview(item) && item.file.endsWith(".js"))
+const largestCss = max(item => !isPreview(item) && item.file.endsWith(".css"))
+const previewTotal = sum(isPreview)
+const previewJsTotal = sum(item => isPreview(item) && item.file.endsWith(".js"))
+const previewLargestJs = max(item => isPreview(item) && item.file.endsWith(".js"))
 const sourceMaps = files.filter(item => item.file.endsWith(".map"))
 
 const limits = {
-  total: 15 * 1024 * 1024,
+  total: 30 * 1024 * 1024,
+  appTotal: 15 * 1024 * 1024,
   jsTotal: 2 * 1024 * 1024,
   cssTotal: 500 * 1024,
   appCssTotal: 180 * 1024,
   largestJs: 700 * 1024,
   largestCss: 300 * 1024,
+  previewTotal: 14 * 1024 * 1024,
+  previewJsTotal: 13 * 1024 * 1024,
+  previewLargestJs: 13 * 1024 * 1024,
 }
 
 const checks = [
-  ["total dist", total <= limits.total, `${mib(total).toFixed(2)} MiB <= 15 MiB`],
+  ["total dist", total <= limits.total, `${mib(total).toFixed(2)} MiB <= 30 MiB`],
+  ["app dist", appTotal <= limits.appTotal, `${mib(appTotal).toFixed(2)} MiB <= 15 MiB`],
   ["total JS", jsTotal <= limits.jsTotal, `${kib(jsTotal).toFixed(1)} KiB <= 2048 KiB`],
   ["total CSS", cssTotal <= limits.cssTotal, `${kib(cssTotal).toFixed(1)} KiB <= 500 KiB`],
   ["app CSS", appCssTotal <= limits.appCssTotal, `${kib(appCssTotal).toFixed(1)} KiB <= 180 KiB`],
   ["largest JS chunk", largestJs.bytes <= limits.largestJs, `${largestJs.file} ${kib(largestJs.bytes).toFixed(1)} KiB <= 700 KiB`],
   ["largest CSS chunk", largestCss.bytes <= limits.largestCss, `${largestCss.file} ${kib(largestCss.bytes).toFixed(1)} KiB <= 300 KiB`],
+  ["preview runtime total", previewTotal <= limits.previewTotal, `${mib(previewTotal).toFixed(2)} MiB <= 14 MiB`],
+  ["preview runtime JS", previewJsTotal <= limits.previewJsTotal, `${mib(previewJsTotal).toFixed(2)} MiB <= 13 MiB`],
+  ["preview largest JS", previewLargestJs.bytes <= limits.previewLargestJs, `${previewLargestJs.file} ${mib(previewLargestJs.bytes).toFixed(2)} MiB <= 13 MiB`],
   ["production source maps", sourceMaps.length === 0, sourceMaps.length ? sourceMaps.map(item => item.file).join(", ") : "none"],
 ]
 

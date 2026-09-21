@@ -237,19 +237,19 @@ function applyTextMapToFiles(files, text, history) {
   return next
 }
 
-function transactionFor({projectId,userId,baseRevision,newRevision,idempotencyKey,requestHash,operations,changes,newContentHash}) {
+function transactionFor({projectId,userId,baseRevision,newRevision,idempotencyKey,requestHash,operations,changes,newContentHash,producer="code",editType="code",target,range,before,after,summary}) {
   const id="wcb_"+randomUUID(),timestamp=new Date().toISOString()
   const validation={level:"parse",passed:true,diagnostics:[]}
   const versions=Object.fromEntries(changes.map(change=>[change.file,{before:change.before===null?"absent":sha256(change.before),after:change.after===null?"absent":sha256(change.after)}]))
   const tx={
-    id,timestamp,file:changes[0]?.file??"",range:{start:0,end:changes[0]?.before?.length??0},editType:"code",
-    before:changes[0]?.before??"",after:changes[0]?.after??"",target:{file:changes[0]?.file??"",elementStart:0},
+    id,timestamp,file:changes[0]?.file??"",range:range??{start:0,end:changes[0]?.before?.length??0},editType,
+    before:before??changes[0]?.before??"",after:after??changes[0]?.after??"",target:target??{file:changes[0]?.file??"",elementStart:0},
     patches:changes.map(change=>({file:change.file,range:{start:0,end:change.before?.length??0},before:change.before??"",after:change.after??""})),
     versions,success:true,projectId,baseRevisionId:baseRevision,newRevisionId:newRevision,idempotencyKey,requestHash,
-    producer:"code",actor:userId,summary:operations.length===1?`Update ${changes[0]?.file??"source"}`:`Update ${operations.length} source files`,
+    producer,actor:userId,summary:(summary??(operations.length===1?`Update ${changes[0]?.file??"source"}`:`Update ${operations.length} source files`)).slice(0,200),
     status:"accepted",operations,fileStates:changes,validation,
   }
-  return {tx,revision:{revisionId:newRevision,parentRevisionId:baseRevision,projectId,createdAt:timestamp,producer:"code",actor:userId,contentHash:newContentHash,transactionId:id},validation}
+  return {tx,revision:{revisionId:newRevision,parentRevisionId:baseRevision,projectId,createdAt:timestamp,producer,actor:userId,contentHash:newContentHash,transactionId:id},validation}
 }
 
 async function saveCode(db, session, projectId, body) {
@@ -289,6 +289,146 @@ async function saveCode(db, session, projectId, body) {
     await db.query("ROLLBACK").catch(()=>{})
     throw error
   }
+}
+
+
+function simpleTarget(state, identity) {
+  if (!identity || typeof identity !== "object" || typeof identity.file !== "string" || !Number.isInteger(identity.elementStart)) fail(400, "Invalid source identity.")
+  if (!sourceMember(identity.file,state.history)) fail(404,"Source target is unavailable.")
+  const source=textFiles(state.files,state.history).get(identity.file)
+  if(source===undefined||identity.elementStart<0||identity.elementStart>=source.length)fail(404,"Source target is unavailable.")
+  const start=identity.elementStart
+  const opening=/^<([a-z][a-z0-9-]*)(?:\s[^<>]*?)?>/i.exec(source.slice(start,Math.min(source.length,start+4096)))
+  if(!opening)fail(409,"Source target no longer matches the accepted revision.")
+  const tag=opening[1].toLowerCase(),openingEnd=start+opening[0].length,close="</"+tag+">",closeIndex=source.indexOf(close,openingEnd)
+  let text,textRange
+  if(closeIndex>=openingEnd){
+    const between=source.slice(openingEnd,closeIndex)
+    if(between.length&&between.trim()===between&&!/[<>{}]/.test(between)){
+      text=between;textRange={start:openingEnd,end:closeIndex}
+    }
+  }
+  const sourceEnd=closeIndex>=0?closeIndex+close.length:openingEnd
+  const canText=Boolean(textRange)
+  return {
+    identity:{file:identity.file,elementStart:start,revisionId:state.revision,contentHash:sha256(source)},
+    elementName:tag,nodeKind:"native",sourceRange:{start,end:sourceEnd},
+    ...(textRange?{text,textRange,textFile:identity.file,textShared:false}:{}),
+    styleOrigins:[],effectScope:"identified source",
+    capabilities:{preview:true,codeEdit:true,visualEdit:canText,text:canText,spacing:false,color:false,typography:false,size:false,layout:false,reorder:false},
+    compatibility:canText?"partial":"code-only",
+    unavailableReasons:canText?{}:{visualEdit:"This production preview currently supports safe static-text Visual edits. Use Code for this element."},
+    reasonCodes:canText?[]:["production-preview-text-only"],
+  }
+}
+
+function simpleCompatibility(state){
+  const targets=[]
+  for(const [file,source] of textFiles(state.files,state.history)){
+    const regex=/<([a-z][a-z0-9-]*)(?:\s[^<>]*?)?>/gi
+    let match
+    while((match=regex.exec(source))&&targets.length<300){
+      try{targets.push(simpleTarget(state,{file,elementStart:match.index}))}catch{}
+      if(!match[0].length)regex.lastIndex++
+    }
+  }
+  const partial=targets.filter(target=>target.capabilities.visualEdit).length,codeOnly=targets.length-partial
+  return {summary:{total:targets.length,full:0,partial,codeOnly,score:targets.length?Math.round(partial/targets.length*70):0},targets,breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:["Production Browser Run preview currently enables safe static-text Visual edits; complex style/layout edits remain Code-first until the full hosted runner is attached."]}
+}
+
+function previewPayload(state,route="/"){
+  const files=Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,Buffer.from(bytes).toString("base64")]))
+  return {files,entry:["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file=>files[file]!==undefined),title:"Webcanbe isolated preview",route}
+}
+
+function parseBrowserObservation(content){
+  if(typeof content!=="string")fail(503,"Browser preview content is unavailable.")
+  const match=/<script[^>]*id=["']wcb-observation["'][^>]*>([\s\S]*?)<\/script>/i.exec(content)
+  if(!match)fail(503,"Browser preview did not return source observations.")
+  let value
+  try{value=JSON.parse(match[1].replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'))}catch{fail(503,"Browser preview observation was invalid.")}
+  if(!value||typeof value!=="object"||!Array.isArray(value.elements))fail(503,"Browser preview observation was invalid.")
+  if(value.error)fail(422,String(value.error).slice(0,1000))
+  return value
+}
+
+async function browserSnapshot(env,state,viewport,route){
+  if(!env?.BROWSER||typeof env.BROWSER.quickAction!=="function")fail(503,"Browser Run preview binding is unavailable.")
+  const width=viewport==="mobile"?390:viewport==="tablet"?768:1280
+  const payload=previewPayload(state,route)
+  const injection="globalThis.__WCB_PROJECT_PAYLOAD__="+JSON.stringify(payload).replace(/</g,"\\u003c")+";globalThis.dispatchEvent(new Event('wcb-project-payload'));"
+  let response
+  try{
+    response=await env.BROWSER.quickAction("snapshot",{
+      url:"https://webcanbe.com/preview-runtime.html",
+      formats:["content","screenshot"],
+      viewport:{width,height:900,deviceScaleFactor:1},
+      gotoOptions:{waitUntil:"domcontentloaded",timeout:15000},
+      waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000,visible:false},
+      addScriptTag:[{content:injection}],
+      allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|preview-assets\\/[^?#]+)$/"],
+    })
+  }catch(error){
+    const message=error instanceof Error?error.message:"Browser Run preview failed."
+    if(/429|limit|quota|time/i.test(message))fail(429,"Free preview capacity is cooling down. Wait about 10 seconds and refresh preview.")
+    fail(503,"Browser Run preview is temporarily unavailable.")
+  }
+  let body
+  try{
+    if(response instanceof Response){
+      if(!response.ok){
+        if(response.status===429)fail(429,"Free preview capacity is cooling down. Wait about 10 seconds and refresh preview.")
+        fail(503,"Browser Run preview request failed.")
+      }
+      body=await response.json()
+    }else body=response
+  }catch(error){
+    if(error instanceof EditorProjectError)throw error
+    fail(503,"Browser Run preview response was invalid.")
+  }
+  const result=body?.result??body
+  const png=result?.screenshot,content=result?.content
+  if(typeof png!=="string"||png.length<100||png.length>16*1024*1024||!/^[A-Za-z0-9+/]+={0,2}$/.test(png))fail(503,"Browser preview screenshot was invalid.")
+  const observation=parseBrowserObservation(content)
+  return {png,observation,width}
+}
+
+async function saveVisualText(db,session,projectId,body){
+  if(typeof body.expectedRevision!=="string"||!REVISION.test(body.expectedRevision)||typeof body.idempotencyKey!=="string"||!IDEMPOTENCY.test(body.idempotencyKey))fail(400,"A current revision and bounded idempotency key are required.")
+  if(!body.edit||body.edit.type!=="text"||typeof body.edit.value!=="string"||body.edit.value.includes("\0")||Buffer.byteLength(body.edit.value)>32*1024)fail(422,"Only bounded static-text Visual edits are enabled in the production preview.")
+  const requestHash=sha256(JSON.stringify({action:"visual-text",base:body.expectedRevision,identity:body.identity,value:body.edit.value}))
+  await db.query("BEGIN")
+  try{
+    await verifyCapability(db,session,projectId,body,true)
+    const row=(await db.query("SELECT revision,files,history,source_epoch,workspace_id FROM wcb_projects WHERE project_id=$1 AND NOT deleted FOR UPDATE",[projectId])).rows[0]
+    if(!row)fail(404,"Project is unavailable.")
+    const state=verifyProjectState(projectId,row)
+    const prior=state.history.transactions.find(item=>item.idempotencyKey===body.idempotencyKey)
+    if(prior){
+      if(prior.requestHash!==requestHash)fail(409,"Idempotency key was already used for a different Visual request.")
+      await verifyCapability(db,session,projectId,body,true);await db.query("COMMIT")
+      return {status:200,value:{transaction:prior,replayed:true,validation:prior.validation,revision:state.revision,diff:""}}
+    }
+    if(state.revision!==body.expectedRevision)fail(409,"Source or preview changed; reload and retry.")
+    const target=simpleTarget(state,body.identity)
+    if(!target.textRange||!target.capabilities.text)fail(422,"This element is not a safe static-text Visual target.")
+    const files=textFiles(state.files,state.history),source=files.get(target.identity.file)
+    const nextSource=source.slice(0,target.textRange.start)+body.edit.value+source.slice(target.textRange.end)
+    const operations=[{kind:"update",file:target.identity.file,expectedHash:sha256(source),content:nextSource}]
+    const prepared=operationChanges(state,operations)
+    const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history),nextContentHash=sourceContentHash(nextFiles,state.history),nextRevision="rev_"+randomUUID()
+    const {tx,revision,validation}=transactionFor({
+      projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,
+      producer:"visual",editType:"text",target:{...target.identity,revisionId:state.revision},range:target.textRange,before:target.text,after:body.edit.value,summary:"Visual text edit "+target.identity.file,
+    })
+    const history=structuredClone(state.history);history.transactions.push(tx);history.revisions.push(revision);history.past.push(tx.id);history.future=[]
+    if(history.transactions.length>5000||history.revisions.length>5000||Buffer.byteLength(JSON.stringify(history))>LIMITS.historyBytes)fail(409,"Project history capacity reached.")
+    const changed=await db.query("UPDATE wcb_projects SET revision=$2,files=$3,history=$4,source_epoch=source_epoch+1 WHERE project_id=$1 AND revision=$5 AND source_epoch=$6 RETURNING source_epoch",[projectId,nextRevision,JSON.stringify(encodePayload(nextFiles)),JSON.stringify(history),state.revision,state.epoch])
+    if(!changed.rowCount)fail(409,"Source or preview changed; reload and retry.")
+    await verifyCapability(db,session,projectId,body,true);await db.query("COMMIT")
+    const diff="--- "+target.identity.file+"\n+++ "+target.identity.file+"\n- "+target.text+"\n+ "+body.edit.value
+    return {status:200,value:{transaction:tx,replayed:false,validation,revision:nextRevision,diff}}
+  }catch(error){await db.query("ROLLBACK").catch(()=>{});throw error}
 }
 
 function crc32(bytes) {
@@ -350,7 +490,7 @@ async function finishRead(db,session,projectId,body,value){
   return value
 }
 
-export async function editorProjectRequest(db, session, path, body={}) {
+export async function editorProjectRequest(db, session, path, body={}, env) {
   if(path==="/__webcanbe/api/projects"){
     const rows=(await db.query(
       `SELECT p.project_id,p.name,p.revision,p.files,p.history,p.source_epoch
@@ -378,9 +518,9 @@ export async function editorProjectRequest(db, session, path, body={}) {
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
       project:detectProject({id:projectId,name:String(project.name||"Hosted project")},state.files),
-      runtime:{profile:"production-source-only",supported:false,dependencies:[],issues:[{message:"Controlled production preview runner is not attached to the Cloudflare Worker.",requiredCapability:"hosted-preview-runner"}],notes:["Code/source editing remains available through the durable PostgreSQL source boundary."]},
-      session:editorSession,role:String(project.role),hostedReadiness:"SOURCE_ONLY",
-      compatibilityDimensions:{runtimeExecution:{admitted:false,transport:"unavailable"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"SOURCE_ONLY",publicImportReady:false}},
+      runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Production Visual editing is currently limited to safe static-text source mutations."]},
+      session:editorSession,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
+      compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
     }}
   }
   if(action==="drafts") return drafts(db,session,projectId,body)
@@ -408,15 +548,23 @@ export async function editorProjectRequest(db, session, path, body={}) {
     return {status:200,value:await finishRead(db,session,projectId,body,{validation:{level:"parse",passed:true,diagnostics:[]},revision:state.revision})}
   }
   if(action==="compatibility"){
-    return {status:200,value:await finishRead(db,session,projectId,body,{summary:{total:0,full:0,partial:0,codeOnly:0,score:0},targets:[],breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:["Live Visual analysis requires the controlled production preview runner."],revision:state.revision})}
+    return {status:200,value:await finishRead(db,session,projectId,body,{...simpleCompatibility(state),revision:state.revision})}
   }
-  if(action==="inspect"||action==="mutate") fail(422,"Live Visual inspection requires the controlled production preview runner.")
+  if(action==="inspect"){
+    const target=simpleTarget(state,body.identity)
+    const source=textFiles(state.files,state.history).get(target.identity.file)
+    return {status:200,value:await finishRead(db,session,projectId,body,{target,source,breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:[],revision:state.revision})}
+  }
+  if(action==="mutate") return saveVisualText(db,session,projectId,body)
   if(action==="preview"){
     if(body.command==="stop") {
-      if(typeof body.previewId==="string"&&UUID.test(body.previewId)) await db.query("UPDATE wcb_editor_capabilities SET revoked=true WHERE project_id=$1 AND preview_id=$2",[projectId,body.previewId])
       return {status:200,value:{state:"stopped"}}
     }
-    fail(422,"Controlled production preview is not attached to this Worker. Source editing remains available.")
+    if(body.command&&body.command!=="update"&&body.command!=="capture")fail(422,"Snapshot preview does not accept interactive browser commands.")
+    if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before preview.")
+    const frame=await browserSnapshot(env,state,body.viewport,typeof body.route==="string"?body.route:"/")
+    const generation=randomUUID()
+    return {status:200,value:await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,snapshotElements:frame.observation.elements,snapshotViewport:frame.observation.viewport,snapshotRoute:frame.observation.route,state:"ready"})}
   }
   if(action==="export"){
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before export.")
