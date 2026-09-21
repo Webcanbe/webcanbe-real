@@ -5,11 +5,12 @@
 - Gate 2 credential-free GitHub provider boundary is verified. Gate 2 as a whole is still pending the user's authenticated Google baseline + same-account GitHub/Email link/login/read/refresh/logout sequence. Do not repeat the credential-free provider-boundary proof unless deployed auth configuration changes.
 - Production product mutation remains OFF.
 - Gate 5 recovery branch: `phase5-recovery-restore-rehearsal`, draft PR #46.
-- Latest verified recovery implementation/test checkpoint: `e47bc1ea2b66a1742592a14d2e166a8fdf9e41b4`.
-- Recovery CI `35561253913`, job `106214418473`: **PASS** across recovery regressions, syntax checks and secret scan.
-- Confirmed Worker rollback now requires target/current-deployment preflight before `wrangler rollback`, then requires `npm run smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready` after a successful rollback. A failed post-rollback smoke keeps the overall recovery command failed even though the rollback has already occurred.
+- Latest verified recovery implementation/test checkpoint: `faf4e5f66e83c9de1cd0e7991e56bdc382a1cf42`.
+- Recovery CI `35564722856`, job `106224184976`: **PASS** across recovery regressions, syntax checks and secret scan.
+- Confirmed Worker rollback now requires target/current-deployment preflight before `wrangler rollback`; after Wrangler returns success it re-reads `wrangler deployments status --json` and requires the exact requested target UUID to be present in the active deployment before any production smoke can run. A wrong-active-version outcome fails closed and skips the smoke, preventing a healthy unrelated deployment from being mistaken for a successful rollback.
+- Only after target convergence is proved does the wrapper run `npm run smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready`; a failed smoke keeps the overall recovery command failed even though the rollback has already occurred.
 - No live Worker rollback was executed and no production/recovery database was mutated by this checkpoint.
-- Next independent recovery action: after a simulated successful rollback, re-read `wrangler deployments status --json` and require the requested target to be active before accepting the smoke/result; prove a wrong-active-version outcome fails closed.
+- Next independent recovery action: harden recovery-target identity before `TRUNCATE` by adding a read-only connected-server identity check for production and recovery targets, so DNS aliases that resolve to the same PostgreSQL server/database cannot bypass the existing URL host/port/database comparison; prove the refusal path without touching a live DB.
 
 ---
 
@@ -62,8 +63,8 @@ At the next invocation after any interruption, inspect remote heads, this note, 
 
 Before each write, re-read affected branch/file state. On a non-fast-forward conflict, preserve concurrent changes and reconcile rather than force-pushing. Save a bounded checkpoint before a long test. Record pending tests as pending, and blocked work as blocked. A permission or safety denial is not permission to switch interfaces to bypass it.
 
-`docs/current-handoff.md` and the launch plan contain the latest recovery work; the legacy resume/project-record headers may still show the earlier browser checkpoint. Use this incremental record to avoid falling back to that older state. Do not repeatedly prepend unchanged status to all documents merely to create activity.
+`docs/current-handoff.md` and the launch plan contain historical recovery work; this incremental record is the newest continuity anchor. Use the latest section above when older blocks conflict, and do not repeatedly prepend unchanged status merely to create activity.
 
 ## Next autonomous action
 
-Check the existing production GitHub/Firebase sign-in initiation in an isolated browser without entering credentials or linking accounts, and capture any failure before the provider sign-in screen. This can distinguish a code/configuration blocker from the remaining user-only authenticated E2E. If the official provider sign-in screen is reached, record that limited result and keep the actual login/linking gate pending; do not impersonate the user or create accounts. Reconcile the staging integration delta only through permitted operations before any future activation.
+Continue the recovery branch with the connected-server identity guard described in the latest section above. Keep the human-authenticated Gate 2 same-account sequence pending without re-running the already-closed credential-free provider-boundary proof. Before any Gate 3 activation, re-read main and v4 and preserve v4 at zero-behind; do not enable production mutation until authenticated Gate 2 is genuinely green.

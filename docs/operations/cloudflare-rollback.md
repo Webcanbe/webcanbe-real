@@ -67,22 +67,32 @@ The script never automatically chooses “previous” because the immediately pr
 
 ## Required post-rollback verification
 
-A zero exit from `wrangler rollback` is not considered a successful Webcanbe recovery by the wrapper. Immediately after Wrangler succeeds, `scripts/cloudflare-rollback.mjs` automatically runs:
+A zero exit from `wrangler rollback` is not considered a successful Webcanbe recovery by the wrapper.
+
+First, immediately after Wrangler succeeds, `scripts/cloudflare-rollback.mjs` runs a fresh read-only:
+
+```bash
+npx wrangler deployments status --json
+```
+
+The exact requested rollback target UUID must now be present in the current Worker deployment. If deployment status is unavailable/malformed, exposes no version IDs, or shows a different active version instead of the requested target, the wrapper exits non-zero and **does not run the production smoke**. This prevents a healthy response from an unrelated still-active deployment from being accepted as rollback proof.
+
+Only after requested-target convergence is verified does the wrapper automatically run:
 
 ```bash
 WEBCANBE_EXPECT_DATABASE=ready npm run smoke:production:public
 ```
 
-This verifies the production root/security headers, hosted Control/read mode with mutations still closed, readiness, authoritative catalog access, anonymous private-read refusal, and anonymous materialization refusal against the live production origin. The wrapper exits 0 only when this production smoke/readiness check also passes.
+This verifies the production root/security headers, hosted Control/read mode with mutations still closed, readiness, authoritative catalog access, anonymous private-read refusal, and anonymous materialization refusal against the live production origin. The wrapper exits 0 only when both requested-target deployment evidence and this production smoke/readiness check pass.
 
-If the post-check fails, the wrapper exits non-zero and prints that recovery is incomplete. **The Worker rollback has already occurred at that point**; a failed smoke does not undo the rollback. Investigate the live deployment and choose either a forward fix or another explicitly verified rollback target rather than assuming the previous state was restored.
+If either post-check fails, the wrapper exits non-zero and prints that recovery is incomplete. **The Worker rollback command has already occurred at that point**; a failed convergence check or smoke does not undo it. Investigate the live deployment and choose either a forward fix or another explicitly verified rollback target rather than assuming the previous state was restored.
 
 After the automated post-check is green, verify incident-specific behavior as needed:
 
 1. Google login can begin.
 2. If Firebase login was involved, test Firebase exchange only with a real provider login.
 3. Check Cloudflare errors/logs for the incident window.
-4. Record the rollback version ID, cause, automated smoke result, and recovery result in `docs/current-handoff.md`.
+4. Record the rollback version ID, cause, deployment-convergence result, automated smoke result, and recovery result in `docs/current-handoff.md`.
 
 ## Important database warning
 
@@ -109,6 +119,10 @@ Once the root cause is fixed:
 
 ## Drill status
 
-Behavioral subprocess rehearsal covers planning, confirmed execution preflight, and the post-rollback success contract. Invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary. Plan mode proves the exact recent target and current deployment are read through `versions list` and `deployments status` without a rollback call. Confirmed execution proves those same two read-only checks run again before the exact approved UUID is forwarded to `wrangler rollback`; a stale target stops before status/rollback. Missing active-version evidence also fails closed. After a simulated successful rollback, the harness requires `smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready`, and a simulated smoke failure keeps the overall recovery command failed even though the rollback command itself succeeded.
+Behavioral subprocess rehearsal covers planning, confirmed execution preflight, requested-target convergence, and the post-rollback success contract. Invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary. Plan mode proves the exact recent target and current deployment are read through `versions list` and `deployments status` without a rollback call. Confirmed execution proves those same two read-only checks run again before the exact approved UUID is forwarded to `wrangler rollback`; a stale target stops before status/rollback. Missing active-version evidence also fails closed.
+
+After a simulated successful rollback, the harness performs a second `deployments status --json` read. A wrong post-rollback active version fails closed and proves the smoke is not invoked. Only when the requested target is present does the harness require `smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready`; a simulated smoke failure keeps the overall recovery command failed even though the rollback command itself succeeded.
+
+Verified implementation/test checkpoint: `faf4e5f66e83c9de1cd0e7991e56bdc382a1cf42`. Recovery CI `35564722856`, job `106224184976`: **PASS**.
 
 A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
