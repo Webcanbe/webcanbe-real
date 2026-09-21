@@ -45,6 +45,16 @@ describe("Phase 5 launch truthfulness cleanup", () => {
     expect(catalog.MARKETPLACE_POLICY).toEqual({ minimumPaidPriceUsd: 9, freeListingsAllowed: true })
   })
 
+  it("gives hosted marketplace failures and empty catalog results an actionable state", () => {
+    const browse = app.slice(app.indexOf("function Browse()"), app.indexOf("function projectStructure"))
+    const detail = app.slice(app.indexOf("function Detail("), app.indexOf("function ProjectPreviewPage"))
+    expect(browse).toContain("Marketplace is unavailable")
+    expect(browse).toContain("No matching projects")
+    expect(browse).toContain("Try again")
+    expect(detail).toContain("This project is unavailable")
+    expect(detail).toContain("Back to marketplace")
+  })
+
   it("keeps the public update page aligned with current launch closure", () => {
     expect(app).toContain("Launch closure is in progress: production reads are live")
     expect(app).not.toContain("Phase 4 UI finalization is in progress.")
