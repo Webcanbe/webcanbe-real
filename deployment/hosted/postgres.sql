@@ -518,3 +518,29 @@ CREATE INDEX IF NOT EXISTS wcb_release_promotions_review_idx ON wcb_seller_relea
 CREATE INDEX IF NOT EXISTS wcb_release_promotions_submission_idx ON wcb_seller_release_promotions(submission_id);
 CREATE INDEX IF NOT EXISTS wcb_seller_submissions_source_project_idx ON wcb_seller_submissions(source_project_id);
 CREATE INDEX IF NOT EXISTS wcb_zip_admissions_application_idx ON wcb_seller_zip_admissions(seller_application_id);
+
+-- Phase 5 release-rights verification.
+-- Publication requires immutable, operator-reviewed rights evidence.
+CREATE TABLE IF NOT EXISTS wcb_release_rights_verifications (
+  verification_id uuid PRIMARY KEY,
+  release_id uuid NOT NULL UNIQUE REFERENCES wcb_project_releases(release_id),
+  catalog_project_id uuid NOT NULL,
+  rights_basis text NOT NULL CHECK(rights_basis IN ('first_party_original','seller_rights_reviewed','open_source_compatible')),
+  license_expression text NOT NULL CHECK(length(license_expression) BETWEEN 1 AND 200),
+  source_evidence jsonb NOT NULL CHECK(jsonb_typeof(source_evidence)='object'),
+  dependency_evidence jsonb NOT NULL CHECK(jsonb_typeof(dependency_evidence)='object'),
+  asset_evidence jsonb NOT NULL CHECK(jsonb_typeof(asset_evidence)='object'),
+  verification_status text NOT NULL CHECK(verification_status='verified'),
+  verified_by uuid NOT NULL REFERENCES wcb_product_operators(user_id),
+  idempotency_key text NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$'),
+  verified_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  UNIQUE(verified_by,idempotency_key),
+  FOREIGN KEY(catalog_project_id,release_id) REFERENCES wcb_project_releases(catalog_project_id,release_id)
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_release_rights_verification_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'ReleaseRightsVerification is immutable'; END
+$$;
+DROP TRIGGER IF EXISTS wcb_immutable_release_rights_verification ON wcb_release_rights_verifications;
+CREATE TRIGGER wcb_immutable_release_rights_verification BEFORE UPDATE OR DELETE ON wcb_release_rights_verifications
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_release_rights_verification_mutation();
+
