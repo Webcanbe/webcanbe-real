@@ -1,5 +1,17 @@
 # GATE 5 RECOVERY / DR PREFLIGHT CLOSED — 2026-09-20 KST
 
+# GATE 4 COMBINED VISUAL + CODE PROOF — 2026-09-21 KST
+
+- Gate 3 v4 now proves the combined buyer/editor chain rather than Code-only durability.
+- Checkpoint `85c66326ae85ffe5065197ecd4272673b1021bf2`.
+- Integrated run `35546569409` / job `106173445526`: **PASS**.
+- Chain:
+  `immutable release → materialize → React analyzer → Visual text mutation → durable Visual revision → Code revision → reopen → standalone export/build`.
+- Reopened history contains accepted producers `visual` then `code`; release provenance survives; exported source contains both edits; Webcanbe runtime state remains absent.
+- Production mutation remains OFF. This proof does not replace authenticated Gate 2.
+
+---
+
 # GATE 3 V4 CURRENT-MAIN STAGING VERIFIED — 2026-09-21 KST
 
 - Current activation candidate is `phase5-gate3-materialization-staging-v4`; v3 is historical/backup only.
