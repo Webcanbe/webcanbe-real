@@ -7,6 +7,7 @@ on:
     paths:
       - worker/security-headers.js
       - worker/index.js
+      - worker/preview-runtime-headers.js
       - preview-runtime.html
       - src/phase5-preview-runtime-security.test.ts
       - .github/workflows/phase5-preview-runtime-security-verify.yml
@@ -26,7 +27,7 @@ jobs:
       - name: Preview runtime security regressions
         run: npx vitest run src/phase5-preview-runtime-security.test.ts src/phase5-browser-run-visual-preview.test.ts src/phase5-firebase-csp-popup.test.ts
       - name: Worker syntax
-        run: node --check worker/security-headers.js && node --check worker/index.js
+        run: node --check worker/security-headers.js && node --check worker/preview-runtime-headers.js && node --check worker/index.js
       - name: Production build
         run: npm run build
       - name: Production build budget
