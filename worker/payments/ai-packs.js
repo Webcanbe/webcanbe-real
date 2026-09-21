@@ -28,6 +28,7 @@ export async function createAiPackOrder(repo, provider, session, input, options)
 async function finalize(repo, aiPackOrderId, capture) {
   const candidate = await repo.aiPackOrderById(aiPackOrderId)
   return repo.atomic(async tx => {
+    await tx.lockPaymentCapture(capture.providerCaptureId)
     await tx.lockAiUsageUser(candidate.userId)
     const order = await tx.aiPackOrderForUpdate(aiPackOrderId)
     if (order.status === "completed") return order
@@ -65,10 +66,11 @@ export async function applyAiPackCaptureWebhook(repo, capture) {
 }
 
 async function applyAiPackReversal(repo, reversal) {
-  await repo.recordPaymentReversal({ provider: "paypal", kind: reversal.reason, providerId: reversal.providerId, providerCaptureId: reversal.providerCaptureId, currency: reversal.currency, occurredAt: reversal.occurredAt })
-  const candidate = await repo.aiPackOrderByCapture(reversal.providerCaptureId)
-  if (!candidate) return undefined
   return repo.atomic(async tx => {
+    await tx.lockPaymentCapture(reversal.providerCaptureId)
+    await tx.recordPaymentReversal({ provider: "paypal", kind: reversal.reason, providerId: reversal.providerId, providerCaptureId: reversal.providerCaptureId, currency: reversal.currency, occurredAt: reversal.occurredAt })
+    const candidate = await tx.aiPackOrderByCapture(reversal.providerCaptureId)
+    if (!candidate) return undefined
     await tx.lockAiUsageUser(candidate.userId)
     const order = await tx.aiPackOrderByCaptureForUpdate(reversal.providerCaptureId)
     if (!order) return undefined
