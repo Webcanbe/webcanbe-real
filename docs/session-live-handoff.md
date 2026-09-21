@@ -315,3 +315,31 @@ User explicitly tightened the launch rule:
 - If paid checkout is the only external blocker, public beta still opens within the deadline with truthful free/limited scope; payment can follow.
 - The public beta must still deliver the real core promise; a static waitlist/marketing page alone does not count as the target launch.
 - Exact launch checklist is preserved in `docs/public-beta-launch-checklist-2026-09-24.md`.
+
+
+## 13. Founder liquidity / exit-strategy working view — 2026-09-21
+
+Current working preference discussed:
+- If Webcanbe reaches ~KRW 1T valuation while growth is still very strong, do **not** default to selling the whole company.
+- Prefer keeping a large ownership stake and, if personal liquidity is actually needed, consider only a very small secondary sale rather than raising founder salary excessively.
+- Illustrative reasoning discussed:
+  - company value ~KRW 1T
+  - founder ownership still high (example used: ~80%)
+  - company pays company operating/development costs
+  - founder salary remains moderate relative to equity value
+  - personal liquidity can come from salary/dividends/very small secondary sale rather than treating company cash as personal cash
+- Do not lock numeric sale thresholds as permanent truth. Actual sell/hold decisions should depend on growth, expected future value, concentration risk, acquisition premium, control, taxes and what the founder wants to do next.
+- The user finds this area difficult and wants professional-style guidance rather than intuition alone.
+
+Relevant professional roles for future decisions:
+- **CFO / strategic finance lead:** company cash, runway, compensation, capital allocation, fundraising/secondary modeling.
+- **M&A advisor / investment banker:** whole-company sale, strategic bids, valuation, buyer process and negotiation.
+- **Corporate/M&A lawyer:** transaction structure, shareholder rights, sale documents, governance.
+- **Tax accountant / tax lawyer:** tax cost of salary, dividends, secondary sales, relocation and transaction structure.
+- **Private wealth advisor / family office:** founder's personal asset allocation after meaningful liquidity; diversification, cash management, long-term wealth.
+- **Secondary-market advisor/broker:** partial founder-share liquidity when appropriate.
+- At a very large scale, no single advisor should control all of these decisions; use multiple independent specialists and compare incentives.
+
+Operating preference:
+- Early stage: do not overbuild an advisor team before there is real value to manage.
+- When Webcanbe has meaningful revenue / institutional-scale value, bring in an experienced CFO or strong finance lead before making large founder-liquidity or M&A decisions.
