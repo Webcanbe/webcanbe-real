@@ -20,7 +20,10 @@ describe("Phase 5 release publication rights gate", () => {
       expect(source).toContain("wcb_immutable_release_rights_verification")
     }
     expect(migration).toContain("REVOKE ALL ON TABLE public.wcb_release_rights_verifications FROM PUBLIC, anon, authenticated, webcanbe_runtime")
-    expect(migration).toContain("GRANT SELECT, INSERT ON TABLE public.wcb_release_rights_verifications TO webcanbe_runtime")\n    const corrective = fs.readFileSync("deployment/hosted/migrations/202609211935_bound_release_rights_runtime_grants.sql","utf8")\n    expect(corrective).toContain("REVOKE ALL ON TABLE public.wcb_release_rights_verifications FROM PUBLIC, anon, authenticated, webcanbe_runtime")\n    expect(corrective).toContain("GRANT SELECT, INSERT ON TABLE public.wcb_release_rights_verifications TO webcanbe_runtime")
+    expect(migration).toContain("GRANT SELECT, INSERT ON TABLE public.wcb_release_rights_verifications TO webcanbe_runtime")
+    const corrective = fs.readFileSync("deployment/hosted/migrations/202609211935_bound_release_rights_runtime_grants.sql","utf8")
+    expect(corrective).toContain("REVOKE ALL ON TABLE public.wcb_release_rights_verifications FROM PUBLIC, anon, authenticated, webcanbe_runtime")
+    expect(corrective).toContain("GRANT SELECT, INSERT ON TABLE public.wcb_release_rights_verifications TO webcanbe_runtime")
   })
 
   it("requires a fresh admin-or-Bigperson operation and complete reviewed evidence", () => {
