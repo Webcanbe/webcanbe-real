@@ -1,8 +1,9 @@
-import { Component, useEffect, useMemo, useState, type ErrorInfo, type ReactNode } from "react"
+import { Component, Suspense, lazy, useEffect, useMemo, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
+const PreviewRuntimeHost = lazy(() => import("./PreviewRuntimeHost"))
 import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
@@ -1119,7 +1120,8 @@ export default function App() {
   useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
   useEffect(()=>{syncRouteMetadata(path)},[path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
-  if(basePath==="/")page=<Landing/>
+  if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
+  else if(basePath==="/")page=<Landing/>
   else if(basePath==="/browse"||basePath==="/templates")page=<Browse/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage reference={basePath.split("/")[2]||""}/>
   else if(basePath.startsWith("/project/"))page=<Detail reference={basePath.split("/").pop()??""}/>

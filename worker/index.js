@@ -629,7 +629,7 @@ export default {
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
-        if (path === "/preview-runtime.html") {
+        if (path === "/__wcb_preview_runtime") {
           response = applyPreviewRuntimeHeaders(asset)
         } else {
           const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
