@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
+import { AiRequestError, WorkersAiProvider, aiModel, runAiRequest } from "./ai.js"
 
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const REVISION = /^rev_[a-f0-9-]{36}$/i
@@ -291,6 +292,30 @@ async function saveCode(db, session, projectId, body) {
   }
 }
 
+async function aiProposal(db, session, projectId, body, env) {
+  if (!env?.AI_USAGE || typeof env.AI_USAGE.reserve !== "function" || typeof env.AI_USAGE.commit !== "function" || typeof env.AI_USAGE.release !== "function") fail(503, "AI usage entitlement adapter is not configured.")
+  const { state } = await readState(db, session, projectId, body, body.apply === true)
+  if (body.expectedRevision !== state.revision) fail(409, "Source changed; reload before requesting AI.")
+  const files = textFiles(state.files, state.history)
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15_000)
+  try {
+    return await runAiRequest({
+      provider: new WorkersAiProvider(env.AI, aiModel(env)), usage: env.AI_USAGE, request: body,
+      files, userId: session.userId, projectId, revision: state.revision,
+      apply: async proposal => {
+        if (body.apply !== true || proposal.operations.length === 0) return { applied: false, revision: state.revision }
+        const accepted = await saveCode(db, session, projectId, { ...body, operations: proposal.operations })
+        return { applied: true, ...accepted.value }
+      },
+    })
+  } catch (error) {
+    if (error instanceof AiRequestError) fail(error.status, error.message)
+    if (controller.signal.aborted) fail(504, "Workers AI timed out; no source changes were accepted.")
+    throw error
+  } finally { clearTimeout(timer) }
+}
+
 
 function simpleTarget(state, identity) {
   if (!identity || typeof identity !== "object" || typeof identity.file !== "string" || !Number.isInteger(identity.elementStart)) fail(400, "Invalid source identity.")
@@ -525,6 +550,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   }
   if(action==="drafts") return drafts(db,session,projectId,body)
   if(action==="code") return saveCode(db,session,projectId,body)
+  if(action==="ai") return {status:200,value:await aiProposal(db,session,projectId,body,env)}
   const {state}=await readState(db,session,projectId,body,false)
   if(action==="files"){
     const listing=publicFiles(state)
