@@ -27,9 +27,11 @@
 
 ## Active continuation — 2026-09-21 KST
 
-Read `docs/launch-resume-2026-09-21.md` before resuming after an interruption. The latest verified implementation remains `0ad5747a89a01414b966ac8ceee82eb44c6c1768`; later documentation commits are not new production feature evidence. The existing hourly task resumes unfinished work automatically at its next invocation and checks whether lost-response writes already landed.
+Read `docs/launch-resume-2026-09-21.md` first after any interruption. Production main is `c0889c867170219545c7f05662e7f0c744a83362`; active Gate 3 candidate `phase5-gate3-materialization-staging-v4` is `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`, current-main-based and **0 behind**, and must remain draft/staging-only until authenticated Gate 2 is green.
 
-Gate 3 v3 at `9f8b5d184682567bb7881af2a1f42ddc71bd5e1e` lacks main's `db:recovery:preflight` package command. Do not promote it unchanged or treat ahead/behind counts as proof that all main changes are preserved. The live rollback/restore drills and authenticated provider E2E remain pending.
+The credential-free GitHub provider boundary is already verified and should not be repeatedly re-proved. Gate 2 as a whole still requires the user's authenticated Google baseline plus same-account GitHub/Email linking/login/read/refresh/logout sequence. Production product mutation remains OFF.
+
+Independent Gate 5 recovery work continues on `phase5-recovery-restore-rehearsal`, draft PR #46. Latest verified recovery implementation/test checkpoint is `faf4e5f66e83c9de1cd0e7991e56bdc382a1cf42`; recovery CI `35564722856`, job `106224184976`: **PASS**. Confirmed rollback now verifies the exact requested Worker target both before and after the rollback command, and only runs production smoke after post-rollback deployment convergence is proved. No live rollback or DB restore was performed by this checkpoint.
 
 ## Launch objective
 
@@ -95,7 +97,7 @@ Acceptance:
 - UI / Bigperson / durable / production smoke all PASS
 - anonymous private reads and materialization fail closed in production
 - clean-account backend reads return truthful empty arrays
-- interactive provider-specific browser smoke remains
+- credential-free provider-boundary proof is complete; authenticated same-account E2E remains separate
 
 ## Gate 2 authenticated smoke UI: **LIVE**
 
@@ -117,59 +119,58 @@ Acceptance:
 
 ## Gate 2 — Interactive production auth + private-read smoke
 
-Run against a clean/new account and an existing account.
+Run against the existing Google-backed account, then verify linked providers return to that same internal account.
 
 Google:
 - login
-- dashboard
+- dashboard/private reads
 - refresh persistence
-- workspace read
-- purchases read
-- projects read
-- account read/update
-- logout and DB-session invalidation
 
 GitHub via Firebase:
-- popup
-- server exchange into first-party Webcanbe session
+- link to the current first-party account
+- logout
+- popup login
+- server exchange into the same first-party Webcanbe account
 - same private reads
 - refresh
 - logout
 
 Email/password:
-- signup
+- link Email identity to the current first-party account
+- logout
 - existing login
 - same first-party DB session/read path
+- refresh
+- logout
 
 Acceptance:
 - no local/demo fallback
 - no auth-provider-specific product authority
+- same internal account across Google/GitHub/Email
 - private requests require live DB session + CSRF
 - clear empty/error/loading states
 
-## Gate 3 v3 staging: **VERIFIED, NOT DEPLOYED**
+## Gate 3 v3 staging: **HISTORICAL / SUPERSEDED**
 
-- branch: `phase5-gate3-materialization-staging-v3`
-- code checkpoint: `67b0010bc17fb71cf8d71e31664585e0553166e6`
-- UI `35514261090`: PASS
-- durable `35514261052`: PASS
-- Bigperson `35514261054`: PASS
-- based on current main and includes the live auth-logo/spinner polish
-- Gate 4 materialize → durable edit → reopen → standalone export/build regression included
-- production activation remains blocked on interactive Gate 2
+- v3 remains historical evidence only
+- do not use it for activation
 
-## Gate 3 v3 current-production rebase: **VERIFIED**
+## Gate 3 v4 active staging: **VERIFIED, NOT DEPLOYED**
 
-- staging checkpoint: `d9d7b5be1f0334bb988f663e508c74cc7ddc0f81`
-- UI `35514962485`: PASS
-- durable `35514962469`: PASS
-- Bigperson `35514962482`: PASS
-- includes latest production auth/UI truthfulness changes plus Gate 3/4 regressions
-- still not deployed; interactive Gate 2 remains required first
+- branch: `phase5-gate3-materialization-staging-v4`
+- current docs head: `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`
+- combined Visual + Code launch-chain code checkpoint: `85c66326ae85ffe5065197ecd4272673b1021bf2`
+- integrated run `35546569409`, job `106173445526`: PASS
+- current main→v4 comparison: ahead-only / **0 behind**
+- preserves `db:recovery:preflight` and `launch:smoke-fixture`
+- includes latest Firebase build/CSP fixes and staged frontend/Worker materialization switches
+- Gate 4 regression proves immutable release → materialize → React source analysis → safe Visual mutation → durable Visual revision → Code revision → reopen → standalone export/build
+- verifies accepted history producer order visual→code, both edits survive reopen/export, release provenance survives, and no Webcanbe runtime state ships
+- keep PR #45 draft/staging-only until authenticated Gate 2 is green
 
 ## Gate 3 — Materialization mutation activation
 
-Only after Gate 2 passes and the current staging/main integration has been reconciled without dropping existing main commands or test coverage.
+Only after Gate 2 passes and the current v4/main relationship has been rechecked at activation time.
 
 Activation:
 - enable Worker `WEBCANBE_PRODUCT_MUTATIONS=enabled`
@@ -209,13 +210,16 @@ Also verify:
 - Supabase Security Advisor: 0 findings
 - Performance Advisor currently reports unused-index INFO only; no index removal at low traffic
 
-## Gate 5 recovery / DR preflight: **CLOSED**
+## Gate 5 recovery / DR preflight: **CLOSED; LIVE DRILLS STILL PENDING**
 
 - verified main checkpoint: `0ad5747a89a01414b966ac8ceee82eb44c6c1768`
 - UI `35517472985`, durable `35517473076`, Bigperson `35517473013`, production smoke `35517512404`, browser matrix `35517525373`: PASS
 - live DB recovery invariants checked: 40 Webcanbe tables, 11 migrations, zero direct browser-role Webcanbe table/routine grants, bounded runtime/Hyperdrive roles, required immutability triggers
 - read-only recovery preflight command added
-- backup and rollback wrappers behaviorally rehearsed without touching production
+- guarded recovery-target restore tooling and Worker rollback rehearsal live on draft PR #46
+- rollback implementation checkpoint `faf4e5f66e83c9de1cd0e7991e56bdc382a1cf42`, recovery CI `35564722856` / job `106224184976`: PASS
+- confirmed rollback requires preflight, exact target forwarding, post-rollback requested-target convergence from a fresh deployment-status read, and production smoke/readiness
+- a wrong post-rollback active version fails closed before production smoke
 - live Worker rollback and real off-site DB restore drill remain pending
 
 ## Gate 5 — Launch hardening
@@ -254,9 +258,8 @@ Additionally requires:
 
 ## Current next action
 
-1. Resume from `docs/launch-resume-2026-09-21.md`. First check whether the GitHub/Firebase login initiation reaches its official provider screen without submitting credentials; capture and fix any pre-authentication failure through permitted operations.
-2. For the remaining authenticated Gate 2 evidence, open `https://webcanbe.com/_ops/gate2-auth-smoke` in the user's real browser and establish the Google baseline with private reads and refresh persistence.
-3. While still on that Google-backed internal account, link GitHub and Email identities.
-4. Verify logout, then verify linked GitHub and linked Email logins return to the same Webcanbe account and pass the same reads.
-5. Before Gate 3 activation, compare the actual latest main/staging files and reconcile the known package-command omission through permitted operations. Retain `db:recovery:preflight` alongside `launch:smoke-fixture`, preserve the corresponding regression coverage, and verify the resulting candidate. Do not use a synthetic merge or a different tool interface to bypass a denied write.
-6. Only after Gate 2 and the reconciled candidate are verified, apply the private launch-smoke entitlement/release fixture, verify zero public Listing, activate materialization, then execute the production Gate 4 chain.
+1. Keep authenticated Gate 2 pending for the user's Google baseline plus same-account GitHub/Email link/login/read/refresh/logout sequence; do not spend independent runs re-proving the unchanged credential-free provider boundary.
+2. Continue Gate 5 recovery preparation on draft PR #46. Next engineering slice: before any recovery-target `TRUNCATE`, add a read-only connected-server identity comparison for production and recovery targets so alternate DNS names cannot make the same PostgreSQL server/database look distinct; prove the refusal path without a live DB.
+3. Re-read main and Gate 3 v4 before every consequential write; keep v4 **0 behind** and draft/staging-only.
+4. Only after authenticated Gate 2 is green, use v4 (or rebuild from newer main if needed) for the private fixture, deliberate materialization activation, and production Gate 4 chain.
+5. Then execute the controlled live Worker rollback drill, real off-site DB restore drill, and finally the separately gated commercial payment/seller work.

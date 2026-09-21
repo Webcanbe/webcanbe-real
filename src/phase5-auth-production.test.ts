@@ -53,4 +53,19 @@ describe("Phase 5 production authentication", () => {
     expect(app).toContain("Google, GitHub, and email sign-in are available.")
     expect(app).toContain("Phone sign-in is not connected yet")
   })
+
+  it("keeps direct-route sign-in recoverable and installs its listener before passive effects", () => {
+    expect(app).toContain('useLayoutEffect(')
+    expect(app).toContain('setState(allowed ? "allowed" : "denied")')
+    expect(app).toContain('onClick={requestSignIn}')
+    expect(app).toContain('next:authNext(d?.next)')
+    expect(app).toContain('directNext=authNext()')
+  })
+
+  it("preserves modal keyboard focus and closes only idle auth on Escape", () => {
+    expect(app).toContain('event.key === "Escape" && !busy && onClose')
+    expect(app).toContain('window.addEventListener("keydown", keyboard)')
+    expect(app).toContain('ref={dialogRef}')
+    expect(app).toContain('previous?.isConnected')
+  })
 })

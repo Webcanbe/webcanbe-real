@@ -1,6 +1,7 @@
 import { Component, Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
+import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
 const PreviewRuntimeHost = lazy(() => import("./PreviewRuntimeHost"))
@@ -37,7 +38,7 @@ function go(to: string) {
   const current = window.location.pathname + window.location.search
   if (to.startsWith("/login") || to.startsWith("/signup")) {
     const nextUrl = new URL(to, window.location.origin)
-    const next = nextUrl.searchParams.get("next") || (current.startsWith("/login") || current.startsWith("/signup") ? "/dashboard" : current)
+    const next = authNext(nextUrl.searchParams.get("next") || (current.startsWith("/login") || current.startsWith("/signup") ? "/dashboard" : current))
     window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup"), next } }))
     return
   }
@@ -169,9 +170,8 @@ function ProjectPreviewPage({reference}:{reference:string}) {
   if(!project)return <PublicShell active="/browse"><main className="project-preview-page"><div className="project-preview-toolbar"><Link to={`/project/${reference}`}>← Back to project</Link><span>{message}</span></div></main></PublicShell>
   return <PublicShell active="/browse"><main className="project-preview-page"><div className="project-preview-toolbar"><Link to={`/project/${reference}`}>← Back to project</Link><span>Public preview</span></div><Preview project={project} large/><section className="project-preview-meta"><div><span>{project.category}</span><h1>{project.title}</h1><p>{project.tagline}</p></div><div><b>{project.stack.join(" · ")}</b><small>Editing stays inside an authenticated working copy.</small></div></section></main></PublicShell>
 }
-function authNext() {
-  const value = new URLSearchParams(window.location.search).get("next")
-  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard"
+function authNext(raw: unknown = new URLSearchParams(window.location.search).get("next")) {
+  return safeAuthReturn(raw, window.location.origin)
 }
 
 function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:string;onClose?:()=>void}) {
@@ -1152,7 +1152,7 @@ export default function App() {
   const path=usePath(),directAuth=path==="/login"||path==="/signup",directNext=authNext()
   const [authIntent,setAuthIntent]=useState<{signup:boolean;next:string}|null>(directAuth?{signup:path==="/signup",next:directNext}:null)
   // Install before protected children run passive effects on direct navigation.
-  useLayoutEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:string}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:d?.next?.startsWith("/")&&!d.next.startsWith("//")?d.next:"/dashboard"})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
+  useLayoutEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:unknown}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:authNext(d?.next)})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
   useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
   useEffect(()=>{syncRouteMetadata(path)},[path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
