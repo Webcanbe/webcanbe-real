@@ -1,0 +1,37 @@
+name: Phase 5 canonical snapshot integrity verify
+on:
+  push:
+    branches: [phase5-canonical-release-snapshot-hash]
+  pull_request:
+    branches: [main]
+    paths:
+      - worker/snapshot-integrity.js
+      - worker/materialization.js
+      - worker/materialization.test.js
+      - scripts/launch/materialization-smoke-fixture.mjs
+      - scripts/launch/materialization-smoke-fixture.test.js
+      - src/webcanbe-engine/runtime/snapshotIntegrity.ts
+      - src/webcanbe-engine/runtime/productDomain.ts
+      - src/phase5-snapshot-integrity.test.ts
+      - .github/workflows/phase5-snapshot-integrity-verify.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Snapshot integrity regressions
+        run: npx vitest run src/phase5-snapshot-integrity.test.ts scripts/launch/materialization-smoke-fixture.test.js worker/materialization.test.js src/webcanbe-engine/phase3-hosted-product.test.ts
+      - name: Syntax
+        run: node --check worker/snapshot-integrity.js && node --check worker/materialization.js && node --check scripts/launch/materialization-smoke-fixture.mjs
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
