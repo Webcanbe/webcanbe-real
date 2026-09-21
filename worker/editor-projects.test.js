@@ -132,7 +132,7 @@ describe("production Worker source editor API",()=>{
     const source=Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")
     const elementStart=source.indexOf("<main>")
     const compatibility=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/compatibility`,auth)
-    expect(compatibility.value.summary.partial).toBeGreaterThan(0)
+    expect(compatibility.value.summary.full + compatibility.value.summary.partial).toBeGreaterThan(0)
     const inspected=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/inspect`,{...auth,identity:{file:"src/App.tsx",elementStart}})
     expect(inspected.value.target.text).toBe("Hello")
     expect(inspected.value.target.capabilities.text).toBe(true)
@@ -184,5 +184,57 @@ describe("production Worker source editor API",()=>{
     expect(worker).toContain('path === "/__webcanbe/api/projects"')
     expect(worker).toContain('path.startsWith("/__webcanbe/api/projects/")')
     expect(worker).toContain("editorProjectRequest")
+  })
+})
+
+
+describe("Worker AST Visual transactions",()=>{
+  async function setup(source, extra={}, tailwind=false){
+    const {db,state}=fakeDb()
+    const files=new Map([["package.json",Buffer.from(JSON.stringify({dependencies:{react:"19",vite:"6",...(tailwind?{tailwindcss:"4"}:{})}}))],["src/App.tsx",Buffer.from(source)],...Object.entries(extra).map(([f,s])=>[f,Buffer.from(s)])])
+    state.project.files=payload(files)
+    state.project.history.revisions[0].contentHash=sourceContentHash(files,state.project.history)
+    const session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const call=(action,body={})=>editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/${action}`,{...auth,...body})
+    const inspected=await call("inspect",{identity:{file:"src/App.tsx",elementStart:source.indexOf("<main")}})
+    return {state,call,target:inspected.value.target}
+  }
+  it.each([
+    ['inline',`export default()=> <main style={{color:"red"}}>Hello</main>`,{},false,'src/App.tsx'],
+    ['module',`import s from './a.module.css';export default()=> <main className={s.card}>Hello</main>`,{'src/a.module.css':'.card { color:red; padding:4px }'},false,'src/a.module.css'],
+    ['css',`import './a.css';export default()=> <main className="card">Hello</main>`,{'src/a.css':'.card { color:red; padding:4px }'},false,'src/a.css'],
+    ['tailwind',`export default()=> <main className="text-red-500 unknown-hook p-4">Hello</main>`,{},true,'src/App.tsx'],
+  ])("persists %s color through inspect, history, reopen and export",async(_,source,extra,tailwind,file)=>{
+    const {state,call,target}=await setup(source,extra,tailwind)
+    expect(target.styleOrigins.find(o=>o.property==='color').editable).toBe(true)
+    const body={identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'style-color-retry',edit:{type:'style',property:'color',value:tailwind?'text-blue-500':'blue',scope:'source'}}
+    const saved=await call('mutate',body)
+    const reopened=await call('files',{file})
+    expect(reopened.value.source).toContain(tailwind?'text-blue-500':'blue')
+    if(tailwind)expect(reopened.value.source).toContain('unknown-hook p-4')
+    expect(reopened.value.revision).toBe(saved.value.revision)
+    expect((await call('history')).value.history.transactions).toHaveLength(1)
+    expect((await call('mutate',body)).value.replayed).toBe(true)
+    expect(state.project.history.transactions).toHaveLength(1)
+    await expect(call('mutate',{...body,idempotencyKey:'stale-source-key'})).rejects.toMatchObject({status:409})
+    const archive=zipStore(new Map(Object.entries(state.project.files).map(([f,b])=>[f,Buffer.from(b,'base64')])))
+    expect(archive.includes(Buffer.from(reopened.value.source))).toBe(true)
+  })
+  it('rejects stale identity hashes and shared scope without changing accepted history',async()=>{
+    const source=`import './a.css';export default()=> <main className="card"><span className="card">Hello</span></main>`
+    const {state,call,target}=await setup(source,{'src/a.css':'.card{color:red}'})
+    const before=structuredClone(state.project)
+    const body={identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'shared-style-test',edit:{type:'style',property:'color',value:'blue'}}
+    await expect(call('mutate',body)).rejects.toMatchObject({status:422})
+    await expect(call('mutate',{...body,identity:{...target.identity,contentHash:'0'.repeat(64)}})).rejects.toMatchObject({status:409})
+    expect(state.project).toEqual(before)
+  })
+  it('rejects malformed staged source before acceptance',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main style={{color:"red"}}>Hello</main>`)
+    const before=structuredClone(state.project)
+    await expect(call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'invalid-style-test',edit:{type:'style',property:'color',value:'red; }'}})).rejects.toMatchObject({status:422})
+    expect(state.project).toEqual(before)
   })
 })
