@@ -10,6 +10,16 @@ on:
       - worker/editor-projects.js
       - worker/preview-runtime-headers.js
       - worker/index.js
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/launch/preview-live-public-probe.mjs
+      - .github/workflows/phase5-preview-live-public-probe.yml
+      - src/preview-runtime.ts
+      - src/PreviewRuntimeHost.tsx
+      - worker/editor-projects.js
+      - worker/preview-runtime-headers.js
+      - worker/index.js
   workflow_dispatch:
 
 jobs:
