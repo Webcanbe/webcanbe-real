@@ -13,7 +13,7 @@ import {
   reconcileMonthlySubscriptionGrant,
   recordVerifiedWebhook,
 } from "./domain.js"
-import { handlePayPalWebhook } from "./webhook.js"
+import { handlePayPalWebhook, processPayPalEvent } from "./webhook.js"
 import { captureAiPackOrder, createAiPackOrder } from "./ai-packs.js"
 
 const buyer = "11111111-1111-4111-8111-111111111111"
@@ -26,7 +26,7 @@ class MemoryRepository {
   constructor(priceMinor = 900) {
     this.sequence = 100
     this.orders = []; this.entitlements = []; this.identities = []; this.ledger = []; this.refunds = []
-    this.subscriptions = []; this.subscriptionPayments = []; this.grants = []; this.aiPackOrders = []; this.purchasedCredits = []; this.events = []; this.reconciliation = []; this.batches = []
+    this.subscriptions = []; this.subscriptionPayments = []; this.grants = []; this.aiPackOrders = []; this.purchasedCredits = []; this.events = []; this.reconciliation = []; this.reversals = []; this.batches = []
     this.listing = { listingId, releaseId, sellerUserId: seller, title: "Launch kit", priceMinor, currency: PAYMENT_CURRENCY, status: "published", availability: "available", releaseStatus: "published", creatorTerms: { founding: false } }
     this.uuid = () => `00000000-0000-4000-8000-${String(++this.sequence).padStart(12, "0")}`
   }
@@ -40,19 +40,27 @@ class MemoryRepository {
   orderForUpdate(id) { return this.orderById(id) }
   orderByProviderOrder(id) { return structuredClone(this.orders.find(row => row.providerOrderId === id)) }
   orderByCapture(id) { return structuredClone(this.orders.find(row => row.providerCaptureId === id)) }
+  orderByCaptureForUpdate(id) { return this.orderByCapture(id) }
   updateOrder(id, patch) { const row = this.orders.find(item => item.orderId === id); Object.assign(row, structuredClone(patch)); return structuredClone(row) }
   aiPackOrderByUserKey(userId,key) { return structuredClone(this.aiPackOrders.find(row=>row.userId===userId&&row.idempotencyKey===key)) }
   aiPackOrderById(id) { return structuredClone(this.aiPackOrders.find(row=>row.aiPackOrderId===id)) }
   aiPackOrderForUpdate(id) { return this.aiPackOrderById(id) }
   aiPackOrderByProviderOrder(id) { return structuredClone(this.aiPackOrders.find(row=>row.providerOrderId===id)) }
+  aiPackOrderByCapture(id) { return structuredClone(this.aiPackOrders.find(row=>row.providerCaptureId===id)) }
+  aiPackOrderByCaptureForUpdate(id) { return this.aiPackOrderByCapture(id) }
   insertAiPackOrder(row) { this.aiPackOrders.push(structuredClone(row)); return structuredClone(row) }
   updateAiPackOrder(id,patch) { const row=this.aiPackOrders.find(item=>item.aiPackOrderId===id); Object.assign(row,structuredClone(patch)); return structuredClone(row) }
   ensurePurchasedAiCredit(row) { const existing=this.purchasedCredits.find(item=>item.aiPackOrderId===row.aiPackOrderId); if(existing)return structuredClone(existing); this.purchasedCredits.push(structuredClone(row)); return structuredClone(row) }
+  lockAiUsageUser() {}
+  recordPaymentReversal(row) { if(this.reversals.some(item=>item.provider===row.provider&&item.kind===row.kind&&item.providerId===row.providerId))return false; this.reversals.push(structuredClone(row)); return true }
+  paymentReversalForCaptureForUpdate(providerCaptureId,currency) { return structuredClone(this.reversals.filter(row=>row.providerCaptureId===providerCaptureId&&(!row.currency||row.currency===currency)).sort((a,b)=>(a.kind==="refund"?-1:1)-(b.kind==="refund"?-1:1)||a.occurredAt.localeCompare(b.occurredAt))[0]) }
+  revokePurchasedAiCredit(aiPackOrderId, revokedAt, revocationReason) { const row=this.purchasedCredits.find(item=>item.aiPackOrderId===aiPackOrderId); if(row&&!row.revokedAt)Object.assign(row,{revokedAt,revocationReason}); return structuredClone(row) }
   insertPaymentIdentity(row) { if (this.identities.some(item => item.provider === row.provider && item.kind === row.kind && item.providerId === row.providerId)) return false; this.identities.push(structuredClone(row)); return true }
   ensureEntitlement(row) { const existing = this.entitlements.find(item => item.orderId === row.orderId); if (existing) return structuredClone(existing); this.entitlements.push(structuredClone(row)); return structuredClone(row) }
   revokeEntitlementForOrder(orderId, revokedAt, reason) { const row = this.entitlements.find(item => item.orderId === orderId); if (row && row.status === "active") Object.assign(row, { status: "revoked", revokedAt, reason }); return structuredClone(row) }
   insertLedgerEntry(row) { const existing = this.ledger.find(item => item.idempotencyKey === row.idempotencyKey); if (existing) return structuredClone(existing); this.ledger.push(structuredClone(row)); return structuredClone(row) }
   creatorReversedMinor(orderId) { return -this.ledger.filter(row => row.orderId === orderId && row.creatorAmountMinor < 0).reduce((sum, row) => sum + row.creatorAmountMinor, 0) }
+  platformReversedMinor(orderId) { return -this.ledger.filter(row => row.orderId === orderId && row.platformFeeMinor < 0).reduce((sum, row) => sum + row.platformFeeMinor, 0) }
   refundedMinor(orderId) { return this.refunds.filter(row => row.orderId === orderId).reduce((sum, row) => sum + row.refundMinor, 0) }
   refundByKey(key) { return structuredClone(this.refunds.find(row => row.idempotencyKey === key)) }
   refundByProviderId(id) { return structuredClone(this.refunds.find(row => row.providerRefundId === id)) }
@@ -61,6 +69,7 @@ class MemoryRepository {
   subscriptionByUserKey(userId, key) { return structuredClone(this.subscriptions.find(row => row.userId === userId && row.idempotencyKey === key)) }
   currentSubscriptionForUser(userId) { return structuredClone(this.subscriptions.find(row => row.userId === userId && ["creating","approval_pending","active","past_due","cancelled"].includes(row.status))) }
   subscriptionByProviderId(id) { return structuredClone(this.subscriptions.find(row => row.providerSubscriptionId === id)) }
+  subscriptionByProviderIdForUpdate(id) { return this.subscriptionByProviderId(id) }
   subscriptionForUpdate(id) { return structuredClone(this.subscriptions.find(row => row.subscriptionId === id)) }
   insertSubscription(row) { this.subscriptions.push(structuredClone(row)); return structuredClone(row) }
   updateSubscription(id, patch) { const row = this.subscriptions.find(item => item.subscriptionId === id); Object.assign(row, structuredClone(patch)); return structuredClone(row) }
@@ -182,7 +191,9 @@ describe("subscription entitlement and monthly AI grants", () => {
     const renewal = { ...base, kind: "renewed", providerEventId: "EV-RENEW", providerPaymentId: "SALE-1", occurredAt: "2027-09-10T00:00:00.000Z", grossMinor: 12000, currency: "USD", currentPeriodEnd: "2028-09-10T00:00:00.000Z" }
     await applySubscriptionEvent(repo, renewal)
     expect((await applySubscriptionEvent(repo, renewal)).state).toBe("duplicate")
+    expect((await applySubscriptionEvent(repo, { ...renewal, providerEventId: "EV-RENEW-ALIAS", occurredAt: "2027-09-11T00:00:00.000Z" })).state).toBe("duplicate")
     expect(repo.subscriptionPayments).toHaveLength(1)
+    expect(repo.subscriptions[0].lastProviderEventAt).toBe("2027-09-10T00:00:00.000Z")
   })
 
   it("handles cancellation, failed renewal, recovery and stale state events", async () => {
@@ -199,6 +210,28 @@ describe("subscription entitlement and monthly AI grants", () => {
     await applySubscriptionEvent(repo, { kind: "cancelled", providerEventId: "5", providerSubscriptionId: id, occurredAt: "2026-09-20T00:00:00.000Z" })
     expect(repo.subscriptions[0].status).toBe("cancelled")
   })
+
+  it("never lets stale or fresh activation events reactivate a terminal subscription", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const created = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "studio_monthly", idempotencyKey: "terminal" }, { ...options, planIds: { studio_monthly: "P-MONTHLY" } })
+    const base = { providerSubscriptionId: created.providerSubscriptionId, grossMinor: 2900, currency: "USD", currentPeriodEnd: "2026-11-01T00:00:00.000Z" }
+    await applySubscriptionEvent(repo, { ...base, kind: "activated", providerEventId: "T1", occurredAt: "2026-09-01T00:00:00.000Z" })
+    await applySubscriptionEvent(repo, { ...base, kind: "expired", providerEventId: "T3", occurredAt: "2026-10-01T00:00:00.000Z" })
+    const stale = await applySubscriptionEvent(repo, { ...base, kind: "renewed", providerEventId: "T2", providerPaymentId: "SALE-STALE", occurredAt: "2026-09-15T00:00:00.000Z" })
+    expect(stale.state).toBe("stale")
+    expect(repo.subscriptions[0]).toMatchObject({ status: "expired", lastProviderEventAt: "2026-10-01T00:00:00.000Z" })
+    expect(repo.subscriptionPayments).toHaveLength(0)
+    const failed = await applySubscriptionEvent(repo, { ...base, kind: "payment_failed", providerEventId: "T5", occurredAt: "2026-10-03T00:00:00.000Z" })
+    expect(failed.state).toBe("terminal")
+    expect(repo.subscriptions[0].status).toBe("expired")
+    const laundered = await applySubscriptionEvent(repo, { ...base, kind: "activated", providerEventId: "T6", occurredAt: "2026-10-04T00:00:00.000Z" })
+    expect(laundered.state).toBe("reconciliation_required")
+    expect(repo.subscriptions[0].status).toBe("expired")
+    const fresh = await applySubscriptionEvent(repo, { ...base, kind: "renewed", providerEventId: "T4", providerPaymentId: "SALE-FRESH", occurredAt: "2026-10-02T00:00:00.000Z" })
+    expect(fresh.state).toBe("reconciliation_required")
+    expect(repo.subscriptions[0].status).toBe("expired")
+    expect(repo.subscriptionPayments).toHaveLength(0)
+  })
 })
 
 describe("purchased AI Action packs", () => {
@@ -212,6 +245,34 @@ describe("purchased AI Action packs", () => {
     expect(repo.purchasedCredits).toHaveLength(1)
     expect(repo.purchasedCredits[0]).not.toHaveProperty("expiresAt")
     expect(repo.ledger).toHaveLength(0)
+  })
+
+  it.each([
+    ["refund", "PAYMENT.CAPTURE.REFUNDED", "refund"],
+    ["dispute", "CUSTOMER.DISPUTE.CREATED", "dispute"],
+  ])("revokes purchased credits replay-safely after a %s", async (_label, eventType, reason) => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_500", idempotencyKey: `pack-${reason}` }, options)
+    await captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })
+    const captureId = repo.aiPackOrders[0].providerCaptureId
+    const event = eventType === "PAYMENT.CAPTURE.REFUNDED"
+      ? { id: "WH-PACK-REFUND", event_type: eventType, create_time: "2026-09-20T00:00:00.000Z", resource: { id: "REF-PACK-1", amount: { value: "15.00", currency_code: "USD" }, supplementary_data: { related_ids: { capture_id: captureId } } } }
+      : { id: "WH-PACK-DISPUTE", event_type: eventType, create_time: "2026-09-20T00:00:00.000Z", resource: { id: "DSP-PACK-1", disputed_transactions: [{ seller_transaction_id: captureId }] } }
+    expect((await processPayPalEvent(repo, event)).state).toBe("applied")
+    expect((await processPayPalEvent(repo, event)).state).toBe("duplicate")
+    expect(repo.purchasedCredits).toHaveLength(1)
+    expect(repo.purchasedCredits[0]).toMatchObject({ revocationReason: reason, revokedAt: event.create_time })
+  })
+
+  it("applies a refund that arrives before the matching pack capture", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_500", idempotencyKey: "pack-out-of-order" }, options)
+    const captureId = `CAP-${order.aiPackOrderId}`
+    const refund = { id: "WH-EARLY-REFUND", event_type: "PAYMENT.CAPTURE.REFUNDED", create_time: "2026-09-20T00:00:00.000Z", resource: { id: "REF-EARLY", amount: { value: "15.00", currency_code: "USD" }, supplementary_data: { related_ids: { capture_id: captureId } } } }
+    expect((await processPayPalEvent(repo, refund)).state).toBe("reconciliation_required")
+    await captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })
+    expect(repo.aiPackOrders[0].status).toBe("refunded")
+    expect(repo.purchasedCredits[0]).toMatchObject({ revocationReason: "refund", revokedAt: refund.create_time })
   })
 })
 
@@ -236,6 +297,18 @@ describe("refund, dispute and creator payout accounting", () => {
     const unpaidBalance = repo.ledger.filter(row => !row.payoutBatchId).reduce((sum, row) => sum + row.creatorAmountMinor, 0)
     expect(unpaidBalance).toBeLessThan(0)
     expect(repo.entitlements[0].status).toBe("revoked")
+  })
+
+  it("does not reverse creator or platform earnings twice when a refund follows a dispute", async () => {
+    const { repo, order } = await completedSale()
+    await applyDispute(repo, { providerDisputeId: "DSP-THEN-REFUND", providerCaptureId: order.providerCaptureId, occurredAt: "2026-09-10T00:00:00.000Z" })
+    await applyRefund(repo, { orderId: order.orderId, providerRefundId: "REF-AFTER-DISPUTE", refundMinor: 900, currency: "USD", occurredAt: "2026-09-11T00:00:00.000Z" })
+    await applyRefund(repo, { orderId: order.orderId, providerRefundId: "REF-AFTER-DISPUTE", refundMinor: 900, currency: "USD", occurredAt: "2026-09-11T00:00:00.000Z" })
+    expect(repo.refunds).toHaveLength(1)
+    expect(repo.ledger.reduce((sum, row) => sum + row.creatorAmountMinor, 0)).toBe(0)
+    expect(repo.ledger.reduce((sum, row) => sum + row.platformFeeMinor, 0)).toBe(0)
+    expect(repo.entitlements[0]).toMatchObject({ status: "revoked", reason: "dispute" })
+    expect(repo.orders[0].status).toBe("disputed")
   })
 
   it("builds deterministic idempotent batches and requires provider reconciliation to mark paid", async () => {

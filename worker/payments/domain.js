@@ -169,30 +169,31 @@ export async function applyRefund(repo, refund) {
     const previousMinor = await tx.refundedMinor(order.orderId)
     const cumulative = previousMinor + refund.refundMinor
     if (cumulative > order.grossMinor) throw new PaymentError(409, "refund_total_mismatch", "Refund total exceeds the captured payment.")
-    const previousFee = Math.floor(order.platformFeeMinor * previousMinor / order.grossMinor)
     const targetFee = Math.floor(order.platformFeeMinor * cumulative / order.grossMinor)
-    const feeReversal = targetFee - previousFee
-    const creatorReversal = refund.refundMinor - feeReversal
+    const targetCreator = cumulative - targetFee
+    const feeReversal = Math.max(0, targetFee - await tx.platformReversedMinor(order.orderId))
+    const creatorReversal = Math.max(0, targetCreator - await tx.creatorReversedMinor(order.orderId))
     const row = await tx.insertRefund({ refundId: uuid(repo.uuid), orderId: order.orderId, providerRefundId: refund.providerRefundId, refundMinor: refund.refundMinor, currency: order.currency, idempotencyKey: refund.idempotencyKey || `webhook:${refund.providerRefundId}`, status: "completed", occurredAt: refund.occurredAt })
-    await tx.insertLedgerEntry({ entryId: uuid(repo.uuid), idempotencyKey: `refund:${refund.providerRefundId}`, orderId: order.orderId, sellerUserId: order.sellerUserId, kind: "refund", grossMinor: -refund.refundMinor, platformFeeMinor: -feeReversal, creatorAmountMinor: -creatorReversal, currency: order.currency, provider: "paypal", providerReference: refund.providerRefundId, holdUntil: refund.occurredAt, state: "available", occurredAt: refund.occurredAt })
-    if (cumulative === order.grossMinor) {
+    const ledgerReversal = feeReversal + creatorReversal
+    if (ledgerReversal > 0) await tx.insertLedgerEntry({ entryId: uuid(repo.uuid), idempotencyKey: `refund:${refund.providerRefundId}`, orderId: order.orderId, sellerUserId: order.sellerUserId, kind: "refund", grossMinor: -ledgerReversal, platformFeeMinor: -feeReversal, creatorAmountMinor: -creatorReversal, currency: order.currency, provider: "paypal", providerReference: refund.providerRefundId, holdUntil: refund.occurredAt, state: "available", occurredAt: refund.occurredAt })
+    if (cumulative === order.grossMinor && order.status !== "disputed") {
       await tx.updateOrder(order.orderId, { status: "refunded", refundedAt: refund.occurredAt })
       await tx.revokeEntitlementForOrder(order.orderId, refund.occurredAt, "refund")
-    } else await tx.updateOrder(order.orderId, { status: "partially_refunded" })
+    } else if (order.status !== "disputed") await tx.updateOrder(order.orderId, { status: "partially_refunded" })
     return row
   })
 }
 
 export async function applyDispute(repo, dispute) {
   return repo.atomic(async tx => {
-    const order = await tx.orderByCapture(dispute.providerCaptureId)
+    const order = await tx.orderByCaptureForUpdate(dispute.providerCaptureId)
     if (!order) { await tx.flagReconciliation({ kind: "dispute_without_order", providerId: dispute.providerDisputeId, payload: dispute }); return { state: "reconciliation_required" } }
     const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: "dispute", providerId: dispute.providerDisputeId, orderId: order.orderId, occurredAt: dispute.occurredAt })
     if (!first) return { state: "duplicate" }
-    const reversed = await tx.creatorReversedMinor(order.orderId)
-    const remaining = Math.max(0, order.creatorEarningMinor - reversed)
-    const grossRemaining = Math.max(0, order.grossMinor - await tx.refundedMinor(order.orderId))
-    await tx.insertLedgerEntry({ entryId: uuid(repo.uuid), idempotencyKey: `dispute:${dispute.providerDisputeId}`, orderId: order.orderId, sellerUserId: order.sellerUserId, kind: "dispute", grossMinor: -grossRemaining, platformFeeMinor: -(grossRemaining - remaining), creatorAmountMinor: -remaining, currency: order.currency, provider: "paypal", providerReference: dispute.providerDisputeId, holdUntil: dispute.occurredAt, state: "available", occurredAt: dispute.occurredAt })
+    const creatorReversal = Math.max(0, order.creatorEarningMinor - await tx.creatorReversedMinor(order.orderId))
+    const feeReversal = Math.max(0, order.platformFeeMinor - await tx.platformReversedMinor(order.orderId))
+    const grossReversal = creatorReversal + feeReversal
+    if (grossReversal > 0) await tx.insertLedgerEntry({ entryId: uuid(repo.uuid), idempotencyKey: `dispute:${dispute.providerDisputeId}`, orderId: order.orderId, sellerUserId: order.sellerUserId, kind: "dispute", grossMinor: -grossReversal, platformFeeMinor: -feeReversal, creatorAmountMinor: -creatorReversal, currency: order.currency, provider: "paypal", providerReference: dispute.providerDisputeId, holdUntil: dispute.occurredAt, state: "available", occurredAt: dispute.occurredAt })
     await tx.updateOrder(order.orderId, { status: "disputed" })
     await tx.revokeEntitlementForOrder(order.orderId, dispute.occurredAt, "dispute")
     return { state: "applied" }
@@ -228,17 +229,25 @@ export async function createPlanSubscription(repo, provider, session, input, opt
 
 export async function applySubscriptionEvent(repo, event, clock = Date.now) {
   return repo.atomic(async tx => {
-    const subscription = await tx.subscriptionByProviderId(event.providerSubscriptionId)
+    const subscription = await tx.subscriptionByProviderIdForUpdate(event.providerSubscriptionId)
     if (!subscription) { await tx.flagReconciliation({ kind: "subscription_without_record", providerId: event.providerSubscriptionId, payload: event }); return { state: "reconciliation_required" } }
     const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: event.kind, providerId: event.providerEventId, subscriptionId: subscription.subscriptionId, occurredAt: event.occurredAt })
     if (!first) return { state: "duplicate", subscription }
-    if (subscription.lastProviderEventAt && new Date(event.occurredAt) < new Date(subscription.lastProviderEventAt) && event.kind !== "renewed") return { state: "stale", subscription }
+    if (subscription.lastProviderEventAt && new Date(event.occurredAt) < new Date(subscription.lastProviderEventAt)) return { state: "stale", subscription }
+    if (["cancelled", "expired"].includes(subscription.status) && !["cancelled", "expired"].includes(event.kind)) {
+      if (["activated", "recovered", "renewed"].includes(event.kind)) {
+        await tx.flagReconciliation({ kind: "subscription_activation_after_terminal", providerId: event.providerPaymentId || event.providerEventId, payload: event })
+        return { state: "reconciliation_required", subscription }
+      }
+      return { state: "terminal", subscription }
+    }
     const patch = { lastProviderEventAt: event.occurredAt }
     if (event.kind === "activated" || event.kind === "recovered") Object.assign(patch, { status: "active", activeAt: subscription.activeAt || event.occurredAt, currentPeriodEnd: event.currentPeriodEnd || subscription.currentPeriodEnd })
     else if (event.kind === "renewed") {
       const plan = WEB_CAN_BE_PLANS[subscription.planKey]
       if (event.grossMinor !== plan.priceMinor || event.currency !== PAYMENT_CURRENCY) throw new PaymentError(409, "subscription_payment_mismatch", "Subscription payment does not match the Webcanbe plan.")
-      await tx.insertSubscriptionPayment({ subscriptionId: subscription.subscriptionId, providerPaymentId: event.providerPaymentId, grossMinor: event.grossMinor, currency: event.currency, occurredAt: event.occurredAt })
+      const inserted = await tx.insertSubscriptionPayment({ subscriptionId: subscription.subscriptionId, providerPaymentId: event.providerPaymentId, grossMinor: event.grossMinor, currency: event.currency, occurredAt: event.occurredAt })
+      if (!inserted) return { state: "duplicate", subscription }
       Object.assign(patch, { status: "active", currentPeriodEnd: event.currentPeriodEnd || subscription.currentPeriodEnd })
     } else if (event.kind === "cancelled") Object.assign(patch, { status: "cancelled", cancelledAt: event.occurredAt })
     else if (event.kind === "expired") Object.assign(patch, { status: "expired", expiredAt: event.occurredAt })

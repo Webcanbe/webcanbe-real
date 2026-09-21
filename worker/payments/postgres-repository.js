@@ -44,13 +44,32 @@ export class PostgresPaymentRepository {
   async orderForUpdate(id) { return camelOrder((await this.db.query("SELECT * FROM wcb_orders WHERE order_id=$1 FOR UPDATE", [id])).rows[0]) }
   async orderByProviderOrder(id) { return camelOrder((await this.db.query("SELECT * FROM wcb_orders WHERE provider='paypal' AND provider_order_id=$1", [id])).rows[0]) }
   async orderByCapture(id) { return camelOrder((await this.db.query("SELECT * FROM wcb_orders WHERE provider='paypal' AND provider_capture_id=$1", [id])).rows[0]) }
+  async orderByCaptureForUpdate(id) { return camelOrder((await this.db.query("SELECT * FROM wcb_orders WHERE provider='paypal' AND provider_capture_id=$1 FOR UPDATE", [id])).rows[0]) }
   async aiPackOrderByUserKey(userId,key) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE user_id=$1 AND idempotency_key=$2",[userId,key])).rows[0]) }
   async aiPackOrderById(id) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE ai_pack_order_id=$1",[id])).rows[0]) }
   async aiPackOrderForUpdate(id) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE ai_pack_order_id=$1 FOR UPDATE",[id])).rows[0]) }
   async aiPackOrderByProviderOrder(id) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE provider='paypal' AND provider_order_id=$1",[id])).rows[0]) }
+  async aiPackOrderByCapture(id) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE provider='paypal' AND provider_capture_id=$1",[id])).rows[0]) }
+  async aiPackOrderByCaptureForUpdate(id) { return camelAiPackOrder((await this.db.query("SELECT * FROM wcb_ai_pack_orders WHERE provider='paypal' AND provider_capture_id=$1 FOR UPDATE",[id])).rows[0]) }
   async insertAiPackOrder(row) { return camelAiPackOrder((await this.db.query(`INSERT INTO wcb_ai_pack_orders(ai_pack_order_id,user_id,pack_key,actions,gross_minor,currency,provider,provider_request_id,idempotency_key,status,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,[row.aiPackOrderId,row.userId,row.packKey,row.actions,row.grossMinor,row.currency,row.provider,row.providerRequestId,row.idempotencyKey,row.status,row.createdAt])).rows[0]) }
   async updateAiPackOrder(id,patch) { const columns={providerOrderId:"provider_order_id",providerCaptureId:"provider_capture_id",approvalUrl:"approval_url",status:"status",completedAt:"completed_at"}, entries=Object.entries(patch).filter(([key])=>columns[key]), params=[id,...entries.map(([,value])=>value)], sets=entries.map(([key],index)=>`${columns[key]}=$${index+2}`).join(","); return camelAiPackOrder((await this.db.query(`UPDATE wcb_ai_pack_orders SET ${sets},updated_at=clock_timestamp() WHERE ai_pack_order_id=$1 RETURNING *`,params)).rows[0]) }
   async ensurePurchasedAiCredit(row) { return (await this.db.query(`INSERT INTO wcb_ai_purchased_credits(credit_id,user_id,ai_pack_order_id,purchased_actions,provider_reference,idempotency_key,created_at) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(ai_pack_order_id) DO UPDATE SET ai_pack_order_id=EXCLUDED.ai_pack_order_id RETURNING *`,[row.creditId,row.userId,row.aiPackOrderId,row.purchasedActions,row.providerReference,row.idempotencyKey,row.createdAt])).rows[0] }
+  async lockAiUsageUser(userId) { await this.db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,3))", [String(userId)]) }
+  async recordPaymentReversal(row) { return (await this.db.query(`INSERT INTO wcb_payment_reversals(provider,kind,provider_id,provider_capture_id,currency,occurred_at)
+    VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(provider,kind,provider_id) DO NOTHING RETURNING provider_id`, [row.provider,row.kind,row.providerId,row.providerCaptureId,row.currency||null,row.occurredAt])).rowCount === 1 }
+  async paymentReversalForCaptureForUpdate(providerCaptureId, currency) { const row=(await this.db.query(`SELECT kind,occurred_at FROM wcb_payment_reversals
+    WHERE provider='paypal' AND provider_capture_id=$1 AND (currency IS NULL OR currency=$2)
+    ORDER BY CASE kind WHEN 'refund' THEN 0 ELSE 1 END,occurred_at LIMIT 1 FOR UPDATE`,[providerCaptureId,currency])).rows[0]; return row&&{kind:String(row.kind),occurredAt:iso(row.occurred_at)} }
+  async revokePurchasedAiCredit(aiPackOrderId, revokedAt, reason) {
+    const credit = (await this.db.query("UPDATE wcb_ai_purchased_credits SET revoked_at=$2,revocation_reason=$3 WHERE ai_pack_order_id=$1 AND revoked_at IS NULL RETURNING *",[aiPackOrderId,revokedAt,reason])).rows[0]
+    if (credit) await this.db.query(`UPDATE wcb_ai_usage_reservations
+      SET status='released',settled_at=$2
+      WHERE user_id=$1 AND status='reserved' AND EXISTS (
+        SELECT 1 FROM jsonb_array_elements(allocations) allocation
+        WHERE allocation->>'kind'='purchased' AND allocation->>'sourceId'=$3
+      )`, [String(credit.user_id), revokedAt, String(credit.credit_id)])
+    return credit
+  }
   async insertOrder(row) {
     const result = await this.db.query(`INSERT INTO wcb_orders(order_id,buyer_user_id,seller_user_id,listing_id,release_id,title,gross_minor,platform_fee_minor,creator_earning_minor,fee_rate_basis_points,currency,provider,provider_request_id,idempotency_key,status,created_at)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`, [row.orderId,row.buyerUserId,row.sellerUserId,row.listingId,row.releaseId,row.title,row.grossMinor,row.platformFeeMinor,row.creatorEarningMinor,row.feeRateBasisPoints,row.currency,row.provider,row.providerRequestId,row.idempotencyKey,row.status,row.createdAt])
@@ -63,7 +82,7 @@ export class PostgresPaymentRepository {
     const sets = entries.map(([key], index) => `${columns[key]}=$${index + 2}`).join(",")
     return camelOrder((await this.db.query(`UPDATE wcb_orders SET ${sets},updated_at=clock_timestamp() WHERE order_id=$1 RETURNING *`, params)).rows[0])
   }
-  async insertPaymentIdentity(row) { return (await this.db.query(`INSERT INTO wcb_payment_identities(provider,kind,provider_id,order_id,subscription_id,occurred_at) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(provider,kind,provider_id) DO NOTHING RETURNING provider_id`, [row.provider,row.kind,row.providerId,row.orderId||null,row.subscriptionId||null,row.occurredAt])).rowCount === 1 }
+  async insertPaymentIdentity(row) { return (await this.db.query(`INSERT INTO wcb_payment_identities(provider,kind,provider_id,order_id,subscription_id,ai_pack_order_id,occurred_at) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(provider,kind,provider_id) DO NOTHING RETURNING provider_id`, [row.provider,row.kind,row.providerId,row.orderId||null,row.subscriptionId||null,row.aiPackOrderId||null,row.occurredAt])).rowCount === 1 }
   async ensureEntitlement(row) {
     const result = await this.db.query(`INSERT INTO wcb_license_entitlements(entitlement_id,user_id,release_id,provider,provider_reference,status,granted_at,order_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
       ON CONFLICT(order_id) DO UPDATE SET order_id=EXCLUDED.order_id RETURNING *`, [row.entitlementId,row.userId,row.releaseId,row.provider,row.providerReference,row.status,row.grantedAt,row.orderId])
@@ -76,6 +95,7 @@ export class PostgresPaymentRepository {
     return camelLedger(result.rows[0])
   }
   async creatorReversedMinor(orderId) { return Number((await this.db.query("SELECT COALESCE(-sum(creator_amount_minor),0) AS total FROM wcb_creator_ledger WHERE order_id=$1 AND creator_amount_minor<0", [orderId])).rows[0].total) }
+  async platformReversedMinor(orderId) { return Number((await this.db.query("SELECT COALESCE(-sum(platform_fee_minor),0) AS total FROM wcb_creator_ledger WHERE order_id=$1 AND platform_fee_minor<0", [orderId])).rows[0].total) }
   async refundedMinor(orderId) { return Number((await this.db.query("SELECT COALESCE(sum(refund_minor),0) AS total FROM wcb_refunds WHERE order_id=$1 AND status='completed'", [orderId])).rows[0].total) }
   async refundByKey(key) { return camelRefund((await this.db.query("SELECT * FROM wcb_refunds WHERE idempotency_key=$1", [key])).rows[0]) }
   async refundByProviderId(id) { return camelRefund((await this.db.query("SELECT * FROM wcb_refunds WHERE provider_refund_id=$1", [id])).rows[0]) }
@@ -84,6 +104,7 @@ export class PostgresPaymentRepository {
   async subscriptionByUserKey(userId, key) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE user_id=$1 AND idempotency_key=$2", [userId,key])).rows[0]) }
   async currentSubscriptionForUser(userId) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE user_id=$1 AND status IN ('creating','approval_pending','active','past_due','cancelled') ORDER BY created_at DESC LIMIT 1", [userId])).rows[0]) }
   async subscriptionByProviderId(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1", [id])).rows[0]) }
+  async subscriptionByProviderIdForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1 FOR UPDATE", [id])).rows[0]) }
   async subscriptionForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE subscription_id=$1 FOR UPDATE", [id])).rows[0]) }
   async insertSubscription(row) { return camelSubscription((await this.db.query(`INSERT INTO wcb_subscriptions(subscription_id,user_id,plan_key,provider,provider_plan_id,idempotency_key,status,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [row.subscriptionId,row.userId,row.planKey,row.provider,row.providerPlanId,row.idempotencyKey,row.status,row.createdAt])).rows[0]) }
   async updateSubscription(id, patch) {
