@@ -2,6 +2,7 @@ import { Buffer } from "node:buffer"
 import { createHash } from "node:crypto"
 import { describe, expect, it } from "vitest"
 import { buildMaterializedHistory, materializeDatabaseWorkspaceProject, verifyReleaseSnapshot } from "./materialization.js"
+import { releaseSnapshotHash } from "./snapshot-integrity.js"
 import fs from "node:fs"
 
 const sha256 = value => createHash("sha256").update(value).digest("hex")
@@ -36,7 +37,7 @@ function releaseFixture() {
     future: [],
   }
   const snapshotFiles = [...files].sort(([a], [b]) => a.localeCompare(b))
-  const snapshotHash = sha256(JSON.stringify({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files: snapshotFiles, history }))
+  const snapshotHash = releaseSnapshotHash({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files: snapshotFiles, history })
   return {
     entitlement_id: entitlementId,
     user_id: userId,
@@ -134,6 +135,30 @@ describe("Workers working-copy materialization", () => {
     release.files = [...release.files]
     release.files[0] = [release.files[0][0], Buffer.from("tampered").toString("base64")]
     expect(() => verifyReleaseSnapshot(release)).toThrow(/integrity/i)
+  })
+
+  it("accepts the same release after JSONB-style object key reordering", () => {
+    const release = releaseFixture()
+    const h = release.history
+    const head = h.revisions[0]
+    release.history = {
+      past: h.past,
+      future: h.future,
+      schema: h.schema,
+      projectId: h.projectId,
+      revisions: [{
+        actor: head.actor,
+        producer: head.producer,
+        createdAt: head.createdAt,
+        projectId: head.projectId,
+        revisionId: head.revisionId,
+        contentHash: head.contentHash,
+        parentRevisionId: head.parentRevisionId,
+      }],
+      sourceScope: h.sourceScope,
+      transactions: h.transactions,
+    }
+    expect(() => verifyReleaseSnapshot(release)).not.toThrow()
   })
 
   it("atomically creates one workspace project and replays the same idempotent request", async () => {
