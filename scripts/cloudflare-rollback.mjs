@@ -65,6 +65,20 @@ function readWranglerJson(args, failureMessage, invalidJsonMessage) {
   }
 }
 
+function readCurrentDeploymentVersionIds(context) {
+  const deploymentStatus = readWranglerJson(
+    ["deployments", "status"],
+    `Unable to read the current Worker deployment status ${context}.`,
+    `Wrangler deployments status did not return valid JSON ${context}.`,
+  )
+  const activeVersionIds = collectVersionIds(deploymentStatus)
+  if (activeVersionIds.length === 0) {
+    console.error(`Current Worker deployment status did not expose any version IDs ${context}. Do not continue without current-deployment evidence.`)
+    process.exit(1)
+  }
+  return activeVersionIds
+}
+
 function verifyRollbackTarget() {
   const versions = readWranglerJson(
     ["versions", "list"],
@@ -77,16 +91,7 @@ function verifyRollbackTarget() {
     process.exit(1)
   }
 
-  const deploymentStatus = readWranglerJson(
-    ["deployments", "status"],
-    "Unable to read the current Worker deployment status for rollback planning.",
-    "Wrangler deployments status did not return valid JSON.",
-  )
-  const activeVersionIds = collectVersionIds(deploymentStatus)
-  if (activeVersionIds.length === 0) {
-    console.error("Current Worker deployment status did not expose any version IDs. Do not execute the rollback without current-deployment evidence.")
-    process.exit(1)
-  }
+  const activeVersionIds = readCurrentDeploymentVersionIds("for rollback planning")
 
   console.log(`Rollback target verified in current Worker versions: ${versionId}`)
   console.log(`Current active Worker version ID(s): ${activeVersionIds.join(", ")}`)
@@ -126,9 +131,19 @@ if ((result.status ?? 1) !== 0) {
   process.exit(result.status ?? 1)
 }
 
-// A successful Wrangler command is not yet a successful recovery. The live deployment must
-// also satisfy the ordinary production smoke with a ready database before this wrapper exits 0.
-console.log("Rollback command completed; verifying production smoke/readiness...")
+// Do not trust only the rollback subprocess exit code. Re-read the live deployment and require
+// evidence that the exact requested target is now part of the active deployment before smoke.
+console.log("Rollback command completed; verifying active Worker deployment...")
+const postRollbackVersionIds = readCurrentDeploymentVersionIds("after rollback")
+if (!postRollbackVersionIds.includes(versionId.toLowerCase())) {
+  console.error("Rollback command completed, but the requested target is not present in the current Worker deployment. Treat recovery as incomplete and do not rely on a passing smoke from another active version.")
+  process.exit(1)
+}
+console.log(`Rollback deployment verified at requested target: ${versionId}`)
+
+// A successful Wrangler command and target convergence are still not a successful recovery. The
+// live deployment must also satisfy the ordinary production smoke with a ready database.
+console.log("Verifying production smoke/readiness...")
 const smoke = spawnSync(npm, ["run", "smoke:production:public"], {
   stdio: "inherit",
   env: {
@@ -145,5 +160,5 @@ if ((smoke.status ?? 1) !== 0) {
   process.exit(1)
 }
 
-console.log("Rollback post-check passed: production smoke/readiness is green.")
+console.log("Rollback post-check passed: requested deployment target is active and production smoke/readiness is green.")
 process.exitCode = 0
