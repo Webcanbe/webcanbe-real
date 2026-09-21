@@ -18,8 +18,8 @@ function executable(file:string,source:string){
 }
 
 describe("Phase 5 disaster-recovery tool rehearsal",()=>{
-  it("behaviorally proves confirmed rollback revalidates target/current deployment before forwarding the exact version",()=>{
-    const root=tempRoot(), capture=path.join(root,"npx-args.json"), fake=path.join(root,"npx")
+  it("behaviorally proves confirmed rollback revalidates target/current deployment and requires a green production post-check",()=>{
+    const root=tempRoot(), capture=path.join(root,"npx-args.json"), smokeCapture=path.join(root,"smoke-args.json"), fake=path.join(root,"npx"), fakeNpm=path.join(root,"npm")
     executable(fake,[
       "#!/usr/bin/env node",
       'const fs=require("fs")',
@@ -34,6 +34,13 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
       'process.exit(3)',
       "",
     ].join("\n"))
+    executable(fakeNpm,[
+      "#!/usr/bin/env node",
+      'const fs=require("fs")',
+      'fs.writeFileSync(process.env.WCB_SMOKE_CAPTURE,JSON.stringify({args:process.argv.slice(2),expectedDatabase:process.env.WEBCANBE_EXPECT_DATABASE||null}))',
+      'process.exit(Number(process.env.WCB_SMOKE_EXIT||0))',
+      "",
+    ].join("\n"))
 
     const version="12345678-1234-4234-8234-123456789abc"
     const other="87654321-4321-4321-8321-cba987654321"
@@ -42,6 +49,7 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
       ...process.env,
       PATH:root+path.delimiter+(process.env.PATH||""),
       WCB_CAPTURE:capture,
+      WCB_SMOKE_CAPTURE:smokeCapture,
       WCB_VISIBLE_VERSION:version,
       WCB_ACTIVE_VERSION:active,
     }
@@ -49,11 +57,13 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
     const noConfirm=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{cwd:process.cwd(),env:baseEnv,encoding:"utf8"})
     expect(noConfirm.status).toBe(1)
     expect(fs.existsSync(capture)).toBe(false)
+    expect(fs.existsSync(smokeCapture)).toBe(false)
     expect(noConfirm.stderr).toContain("Refusing production rollback")
 
     const badId=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs","not-a-version"],{cwd:process.cwd(),env:{...baseEnv,WEBCANBE_ROLLBACK_CONFIRM:"ROLLBACK_PRODUCTION"},encoding:"utf8"})
     expect(badId.status).toBe(1)
     expect(fs.existsSync(capture)).toBe(false)
+    expect(fs.existsSync(smokeCapture)).toBe(false)
 
     const approved=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
       cwd:process.cwd(),
@@ -63,13 +73,38 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
     expect(approved.status).toBe(0)
     expect(approved.stdout).toContain(`Rollback target verified in current Worker versions: ${version}`)
     expect(approved.stdout).toContain(`Current active Worker version ID(s): ${active}`)
+    expect(approved.stdout).toContain("Rollback post-check passed: production smoke/readiness is green.")
     expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual([
       ["wrangler","versions","list","--json"],
       ["wrangler","deployments","status","--json"],
       ["wrangler","rollback",version,"--message","controlled rehearsal"],
     ])
+    expect(JSON.parse(fs.readFileSync(smokeCapture,"utf8"))).toEqual({
+      args:["run","smoke:production:public"],
+      expectedDatabase:"ready",
+    })
 
     fs.rmSync(capture,{force:true})
+    fs.rmSync(smokeCapture,{force:true})
+    const smokeFailure=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
+      cwd:process.cwd(),
+      env:{...baseEnv,WEBCANBE_ROLLBACK_CONFIRM:"ROLLBACK_PRODUCTION",WCB_SMOKE_EXIT:"9"},
+      encoding:"utf8",
+    })
+    expect(smokeFailure.status).toBe(1)
+    expect(smokeFailure.stderr).toContain("Rollback was applied, but production smoke/readiness failed")
+    expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual([
+      ["wrangler","versions","list","--json"],
+      ["wrangler","deployments","status","--json"],
+      ["wrangler","rollback",version,"--message",`Webcanbe operator rollback to ${version}`],
+    ])
+    expect(JSON.parse(fs.readFileSync(smokeCapture,"utf8"))).toEqual({
+      args:["run","smoke:production:public"],
+      expectedDatabase:"ready",
+    })
+
+    fs.rmSync(capture,{force:true})
+    fs.rmSync(smokeCapture,{force:true})
     const staleTarget=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
       cwd:process.cwd(),
       env:{...baseEnv,WEBCANBE_ROLLBACK_CONFIRM:"ROLLBACK_PRODUCTION",WCB_VISIBLE_VERSION:other},
@@ -80,6 +115,7 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
     expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual([
       ["wrangler","versions","list","--json"],
     ])
+    expect(fs.existsSync(smokeCapture)).toBe(false)
   })
 
   it("behaviorally proves rollback plan mode verifies target and current deployment without changing deployments",()=>{
