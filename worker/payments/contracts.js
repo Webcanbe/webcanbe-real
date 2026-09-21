@@ -1,11 +1,11 @@
 export const PAYMENT_CURRENCY = "USD"
 
 export const WEB_CAN_BE_PLANS = Object.freeze({
-  free: Object.freeze({ key: "free", priceMinor: 0, cadence: "none", activeProjects: 3, monthlyAiActions: 20 }),
-  pro_monthly: Object.freeze({ key: "pro_monthly", tier: "pro", priceMinor: 1200, cadence: "month", activeProjects: 20, monthlyAiActions: 300 }),
-  pro_annual: Object.freeze({ key: "pro_annual", tier: "pro", priceMinor: 12000, cadence: "year", activeProjects: 20, monthlyAiActions: 300 }),
-  studio_monthly: Object.freeze({ key: "studio_monthly", tier: "studio", priceMinor: 2900, cadence: "month", activeProjects: 100, monthlyAiActions: 1000 }),
-  studio_annual: Object.freeze({ key: "studio_annual", tier: "studio", priceMinor: 29000, cadence: "year", activeProjects: 100, monthlyAiActions: 1000 }),
+  free: Object.freeze({ key: "free", priceMinor: 0, cadence: "none", activeProjects: 3, monthlyAiActions: 20, aiConcurrency: 1, deploySlots: 1 }),
+  pro_monthly: Object.freeze({ key: "pro_monthly", tier: "pro", priceMinor: 1200, cadence: "month", activeProjects: 20, monthlyAiActions: 300, aiConcurrency: 2, deploySlots: 5 }),
+  pro_annual: Object.freeze({ key: "pro_annual", tier: "pro", priceMinor: 12000, cadence: "year", activeProjects: 20, monthlyAiActions: 300, aiConcurrency: 2, deploySlots: 5 }),
+  studio_monthly: Object.freeze({ key: "studio_monthly", tier: "studio", priceMinor: 2900, cadence: "month", activeProjects: 100, monthlyAiActions: 1000, aiConcurrency: 4, deploySlots: 20 }),
+  studio_annual: Object.freeze({ key: "studio_annual", tier: "studio", priceMinor: 29000, cadence: "year", activeProjects: 100, monthlyAiActions: 1000, aiConcurrency: 4, deploySlots: 20 }),
 })
 
 export const AI_ACTION_PACKS = Object.freeze({

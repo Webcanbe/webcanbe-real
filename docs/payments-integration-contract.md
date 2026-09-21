@@ -249,12 +249,14 @@ REVOKE ALL ON public.wcb_creator_terms, public.wcb_orders, public.wcb_payment_id
 
 ## AI contract
 
-The AI workstream reads grants; it does not mutate payment state.
+The AI workstream reads grants; it does not mutate payment state. Payment owns the source-of-truth grant and purchased-credit rows. AI owns its separate reservation and usage records.
 
 - Included balance: sum unexpired `wcb_ai_included_grants` for the user minus AI-owned usage. Annual plans get a new row every calendar month, never one annual grant.
 - Purchased balance: a separate AI-owned durable balance sourced from verified completed pack orders. It never expires.
 - Standard edit costs 1 Action; deep edit costs 3 Actions.
-- Consumption order and overdraft behavior belong to the AI implementation, but it must never merge included and purchased source rows.
+- The payment-to-AI adapter exposes atomic `reserveActions({ userId, actions, idempotencyKey })`, `commitReservation({ reservationId, idempotencyKey })`, and `releaseReservation({ reservationId, idempotencyKey })` operations. Reservations must return their allocation broken down by payment source row.
+- Included source fields are `grant_id`, `user_id`, `grant_month`, `included_actions`, and `expires_at`. Purchased source fields are `credit_id`, `user_id`, `ai_pack_order_id`, `purchased_actions`, and `created_at`.
+- Consumption order and overdraft behavior belong to the AI implementation, but it must be deterministic and must never merge included and purchased source rows. A retry with the same idempotency key must return the same reservation/commit/release result.
 
 ## Reconciliation invariants
 
