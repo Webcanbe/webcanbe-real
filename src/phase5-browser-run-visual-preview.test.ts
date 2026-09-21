@@ -33,11 +33,9 @@ describe("Phase 5 free managed Browser Run Visual preview", () => {
     expect(runtime).not.toContain("X-WCB-CSRF")
   })
 
-  it("keeps Visual production edits source-first and explicitly limited to safe static text", () => {
+  it("keeps Visual production edits on canonical CAS source and history", () => {
     const worker = fs.readFileSync("worker/editor-projects.js","utf8")
-    expect(worker).toContain('body.edit.type!=="text"')
     expect(worker).toContain('producer:"visual"')
-    expect(worker).toContain('editType:"text"')
     expect(worker).toContain('UPDATE wcb_projects SET revision=$2,files=$3,history=$4,source_epoch=source_epoch+1')
     expect(worker).toContain("const history=structuredClone(state.history)")
     expect(worker).toContain("history.transactions.push(tx)")

@@ -1,3 +1,4 @@
+import { historyInverse } from "./historyInverse"
 import { assertSourceDirectory, sourceDirectory, sourceMember } from "../runtime/sourceDirectory"
 import { compactHistory, historyParts, historyTransactions, historyRevisions } from "./historyArchive"
 import fs from "node:fs"
@@ -233,21 +234,8 @@ export class DurableSource {
    * any affected file conflicts. Never restore a project-wide old snapshot. */
   revertOperations(id?: string, redo = false) {
     this.reload()
-    const transactionId = id ?? (redo ? this.ledger.future.at(-1) : this.ledger.past.at(-1))
-    if (!transactionId || !(redo ? this.ledger.future : this.ledger.past).includes(transactionId)) throw new SourceConflict(`Nothing safe to ${redo ? "redo" : "revert"}.`)
-    const entry = historyTransactions(this.ledger).find(item => item.id === transactionId)!
-    const current = this.files(), operations: FileOperation[] = []
-    for (const patch of entry.fileStates ?? []) {
-      const version = entry.versions?.[patch.file]
-      if (!version) throw new SourceConflict("Transaction has no safe inverse.")
-      const expected = redo ? version.before : version.after
-      const actual = current.get(patch.file)
-      if ((actual === undefined ? "absent" : contentHash(actual)) !== expected) throw new SourceConflict(`Revert conflicts with later work in ${patch.file}.`)
-      const desired = (redo ? patch.after : patch.before) ?? ""
-      const desiredHash = redo ? version.after : version.before
-      operations.push(desiredHash === "absent" ? { kind: "delete", file: patch.file, expectedHash: contentHash(actual!) } : actual === undefined ? { kind: "create", file: patch.file, expectedHash: null, content: desired } : { kind: "update", file: patch.file, expectedHash: contentHash(actual), content: desired })
-    }
-    return { operations, transactionId }
+    try { return historyInverse(this.ledger, historyTransactions(this.ledger), this.files(), id, redo) }
+    catch (error) { throw new SourceConflict(error instanceof Error ? error.message : String(error)) }
   }
   private writeChanges(changes: Change[], direction: "before" | "after", fault?: (index: number) => void) {
     // Validate the entire recovery set before changing any bytes.

@@ -132,7 +132,7 @@ describe("production Worker source editor API",()=>{
     const source=Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")
     const elementStart=source.indexOf("<main>")
     const compatibility=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/compatibility`,auth)
-    expect(compatibility.value.summary.partial).toBeGreaterThan(0)
+    expect(compatibility.value.summary.full + compatibility.value.summary.partial).toBeGreaterThan(0)
     const inspected=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/inspect`,{...auth,identity:{file:"src/App.tsx",elementStart}})
     expect(inspected.value.target.text).toBe("Hello")
     expect(inspected.value.target.capabilities.text).toBe(true)
@@ -185,5 +185,164 @@ describe("production Worker source editor API",()=>{
     expect(worker).toContain('path === "/__webcanbe/api/projects"')
     expect(worker).toContain('path.startsWith("/__webcanbe/api/projects/")')
     expect(worker).toContain("editorProjectRequest")
+  })
+})
+
+
+describe("Worker AST Visual transactions",()=>{
+  async function setup(source, extra={}, tailwind=false){
+    const {db,state}=fakeDb()
+    const files=new Map([["package.json",Buffer.from(JSON.stringify({dependencies:{react:"19",vite:"6",...(tailwind?{tailwindcss:"4"}:{})}}))],["src/App.tsx",Buffer.from(source)],...Object.entries(extra).map(([f,s])=>[f,Buffer.from(s)])])
+    state.project.files=payload(files)
+    state.project.history.revisions[0].contentHash=sourceContentHash(files,state.project.history)
+    const session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const call=(action,body={},env)=>editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/${action}`,{...auth,...body},env)
+    const inspected=await call("inspect",{identity:{file:"src/App.tsx",elementStart:source.indexOf("<main")}})
+    return {state,call,target:inspected.value.target}
+  }
+  it.each([
+    ['inline',`export default()=> <main style={{color:"red"}}>Hello</main>`,{},false,'src/App.tsx'],
+    ['module',`import s from './a.module.css';export default()=> <main className={s.card}>Hello</main>`,{'src/a.module.css':'.card { color:red; padding:4px }'},false,'src/a.module.css'],
+    ['css',`import './a.css';export default()=> <main className="card">Hello</main>`,{'src/a.css':'.card { color:red; padding:4px }'},false,'src/a.css'],
+    ['tailwind',`export default()=> <main className="text-red-500 unknown-hook p-4">Hello</main>`,{},true,'src/App.tsx'],
+  ])("persists %s color through inspect, history, reopen and export",async(_,source,extra,tailwind,file)=>{
+    const {state,call,target}=await setup(source,extra,tailwind)
+    expect(target.styleOrigins.find(o=>o.property==='color').editable).toBe(true)
+    const body={identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'style-color-retry',edit:{type:'style',property:'color',value:tailwind?'text-blue-500':'blue',scope:'source'}}
+    const saved=await call('mutate',body)
+    const reopened=await call('files',{file})
+    expect(reopened.value.source).toContain(tailwind?'text-blue-500':'blue')
+    if(tailwind)expect(reopened.value.source).toContain('unknown-hook p-4')
+    expect(reopened.value.revision).toBe(saved.value.revision)
+    expect((await call('history')).value.history.transactions).toHaveLength(1)
+    expect((await call('mutate',body)).value.replayed).toBe(true)
+    expect(state.project.history.transactions).toHaveLength(1)
+    await expect(call('mutate',{...body,idempotencyKey:'stale-source-key'})).rejects.toMatchObject({status:409})
+    const archive=zipStore(new Map(Object.entries(state.project.files).map(([f,b])=>[f,Buffer.from(b,'base64')])))
+    expect(archive.includes(Buffer.from(reopened.value.source))).toBe(true)
+  })
+  it('shares Visual and Code revisions with conflict-safe undo and redo',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main style={{color:"red"}}>Hello</main>`)
+    const original=state.project.files['src/App.tsx']
+    const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'undo-style-test',edit:{type:'style',property:'color',value:'blue'}})
+    const changed=state.project.files['src/App.tsx']
+    const undone=await call('revert',{expectedRevision:saved.value.revision,idempotencyKey:'undo-action-test'})
+    expect(state.project.files['src/App.tsx']).toBe(original)
+    expect(state.project.history.future).toEqual([saved.value.transaction.id])
+    const redone=await call('redo',{expectedRevision:undone.value.revision,idempotencyKey:'redo-action-test'})
+    expect(state.project.files['src/App.tsx']).toBe(changed)
+    expect(state.project.history.past).toEqual([saved.value.transaction.id])
+    const source=Buffer.from(changed,'base64').toString()+'\n// Code after Visual'
+    const {createHash}=await import('node:crypto')
+    await call('code',{expectedRevision:redone.value.revision,idempotencyKey:'code-after-visual',operations:[{kind:'update',file:'src/App.tsx',expectedHash:createHash('sha256').update(Buffer.from(changed,'base64')).digest('hex'),content:source}]})
+    const before=structuredClone(state.project)
+    await expect(call('revert',{expectedRevision:state.project.revision,idempotencyKey:'selective-conflict',transactionId:saved.value.transaction.id})).rejects.toMatchObject({status:409})
+    expect(state.project).toEqual(before)
+  })
+  const cssCases=[['backgroundColor','red','blue'],['fontSize','16px','24px'],['fontWeight','400','700'],['padding','4px','12px'],['margin','4px','12px'],['gap','4px','12px'],['width','40px','80px'],['height','40px','80px'],['border','1px solid red','2px solid blue'],['borderRadius','4px','12px'],['display','flex','grid'],['flexDirection','row','column'],['alignItems','start','center'],['justifyContent','start','center'],['alignSelf','start','center'],['justifySelf','start','center'],['order','1','2'],['flexGrow','0','1'],['flexShrink','1','0'],['flexBasis','40px','80px'],['gridTemplateColumns','1fr','1fr 1fr'],['gridTemplateRows','1fr','1fr 1fr'],['gridColumn','1','2'],['gridRow','1','2'],['maxWidth','40px','80px'],['minWidth','40px','80px'],['minHeight','40px','80px'],['maxHeight','40px','80px'],['lineHeight','1','1.5'],['letterSpacing','0em','0.1em']]
+  it.each(cssCases)('mutates %s through inline and CSS Module source origins',async(property,before,after)=>{
+    for(const inline of [true,false]){
+      const cssName=property.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())
+      const source=inline?`export default()=> <main style={{${property}:${JSON.stringify(before)}}}>Text</main>`:`import s from './x.module.css';export default()=> <main className={s.card}>Text</main>`
+      const {state,call,target}=await setup(source,inline?{}:{'src/x.module.css':`.card{${cssName}:${before};--unrelated:keep}`})
+      const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'property-matrix-key',edit:{type:'style',property,value:after,scope:'source'}})
+      const inspected=await call('inspect',{identity:{file:target.identity.file,elementStart:target.identity.elementStart,revisionId:saved.value.revision}})
+      const origin=inspected.value.target.styleOrigins.find(o=>o.property===property)
+      expect(origin.value.replace(/^"|"$/g,'')).toBe(after)
+      if(!inline)expect(Buffer.from(state.project.files['src/x.module.css'],'base64').toString()).toContain('--unrelated:keep')
+      const undone=await call('revert',{expectedRevision:saved.value.revision,idempotencyKey:'matrix-undo-key'})
+      expect(undone.value.transaction.editType).toBe('revert')
+    }
+  })
+  it('returns source units without inventing units for Tailwind tokens',async()=>{
+    const a=await setup(`export default()=> <main style={{padding:16,lineHeight:1.5,width:"50%"}}>Text</main>`)
+    expect(a.target.styleOrigins.find(o=>o.property==='padding')).toMatchObject({numericValue:16,unit:'px'})
+    expect(a.target.styleOrigins.find(o=>o.property==='lineHeight')).toMatchObject({numericValue:1.5,unit:'number'})
+    expect(a.target.styleOrigins.find(o=>o.property==='width')).toMatchObject({numericValue:50,unit:'%'})
+    const b=await setup(`export default()=> <main className="p-4">Text</main>`,{},true)
+    expect(b.target.styleOrigins[0]).toMatchObject({numericValue:null,unit:null})
+  })
+  it('preserves escaped literal text and rejects executable JSX text injection',async()=>{
+    const a=await setup(`export default()=> <main>{"Hello"}</main>`)
+    const value='Quotes " and & <script> {expression} 한글'
+    const saved=await a.call('mutate',{identity:a.target.identity,expectedRevision:baseRevision,idempotencyKey:'escaped-text-test',edit:{type:'text',value}})
+    const read=await a.call('inspect',{identity:{file:'src/App.tsx',elementStart:a.target.identity.elementStart,revisionId:saved.value.revision}})
+    expect(read.value.target.text).toBe(value)
+    const b=await setup(`export default()=> <main>Hello</main>`)
+    const before=structuredClone(b.state.project)
+    await expect(b.call('mutate',{identity:b.target.identity,expectedRevision:baseRevision,idempotencyKey:'jsx-injection-test',edit:{type:'text',value:'</main><script />'}})).rejects.toMatchObject({status:422})
+    expect(b.state.project).toEqual(before)
+  })
+  it('updates only the selected responsive origin',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main className="p-4 md:p-8 unknown">Hello</main>`,{},true)
+    await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'responsive-test-key',edit:{type:'style',property:'padding',value:'48px',breakpoint:'tw:md'}})
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).toContain('p-4 md:p-12 unknown')
+  })
+  it.each(['reorder','responsive-create'])('validates staged %s before acceptance and rolls back provider failures',async(type)=>{
+    const source=type==='reorder'?`export default()=> <main style={{display:"flex"}}><p>One</p><p>Two</p></main>`:`export default()=> <main className="p-4 unknown">Text</main>`
+    const {state,call,target}=await setup(source,{},type!=='reorder')
+    const identity=type==='reorder'?(await call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<p>')}})).value.target.identity:target.identity
+    const edit=type==='reorder'?{type,value:'next',scope:'source'}:{type,property:'padding',value:'32px',breakpoint:'tw:md',scope:'source'}
+    const body={identity,edit,expectedRevision:baseRevision,idempotencyKey:'structural-save-test'}
+    const before=structuredClone(state.project)
+    await expect(call('mutate',body,{BROWSER:{quickAction:async()=>{throw new Error('provider unavailable')}}})).rejects.toMatchObject({status:503})
+    expect(state.project).toEqual(before)
+    let candidate
+    const env={BROWSER:{quickAction:async(_,options)=>{
+      expect(state.project).toEqual(before)
+      const script=options.addScriptTag[0].content
+      candidate=JSON.parse(script.slice(script.indexOf('=')+1,script.indexOf(';globalThis.dispatchEvent')))
+      return {screenshot:Buffer.alloc(120,7).toString('base64'),content:'<script id="wcb-observation">'+JSON.stringify({elements:[],viewport:{width:1280,height:900},route:'/'})+'</script>'}
+    }}}
+    const saved=await call('mutate',body,env)
+    const next=Buffer.from(candidate.files['src/App.tsx'],'base64').toString()
+    expect(next).toContain(type==='reorder'?'<p>Two</p><p>One</p>':'p-4 md:p-8 unknown')
+    expect(state.project.files['src/App.tsx']).toBe(candidate.files['src/App.tsx'])
+    await call('revert',{expectedRevision:saved.value.revision,idempotencyKey:'structural-undo-test'})
+    expect(state.project.files['src/App.tsx']).toBe(before.files['src/App.tsx'])
+  })
+  it('builds the actual API export independently from an existing fixture',async()=>{
+    const path=await import('node:path')
+    const fixtureRoot=path.resolve('fixtures/compatible-react-vite')
+    const extra=Object.fromEntries(fs.readdirSync(fixtureRoot,{recursive:true,withFileTypes:true}).filter(e=>e.isFile()).map(e=>[path.relative(fixtureRoot,path.join(e.parentPath,e.name)),fs.readFileSync(path.join(e.parentPath,e.name),'utf8')]))
+    const source=extra['src/App.tsx'].replace('<main>','<main style={{color:"red"}}>')
+    extra['src/App.tsx']=source
+    const {state,call,target}=await setup(source,extra)
+    await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'independent-build-test',edit:{type:'style',property:'color',value:'blue'}})
+    const codeView=await call('files',{file:'src/App.tsx'})
+    expect(codeView.value.source).toContain('color:"blue"')
+    const {createHash}=await import('node:crypto')
+    const code=codeView.value.source+'\n// Accepted Code after Visual'
+    await call('code',{expectedRevision:codeView.value.revision,idempotencyKey:'vertical-code-test',operations:[{kind:'update',file:'src/App.tsx',content:code,expectedHash:createHash('sha256').update(codeView.value.source).digest('hex')}]})
+    expect((await call('files',{file:'src/App.tsx'})).value.source).toBe(code)
+    expect((await call('history')).value.history.transactions.map(t=>t.producer)).toEqual(['visual','code'])
+    const exported=await call('export',{expectedRevision:state.project.revision})
+    const {buildIndependentExport}=await import('../src/webcanbe-engine/runtime/independentExport.ts')
+    const artifact=await buildIndependentExport(Buffer.from(exported.value.archive,'base64'),process.cwd())
+    expect(artifact.sourceUnchanged).toBe(true)
+    expect(artifact.html).toContain('assets/app.js')
+    expect(artifact.files.size).toBeGreaterThan(0)
+    if(process.env.WCB_VISUAL_ARTIFACT_DIR){
+      const root=path.resolve(process.env.WCB_VISUAL_ARTIFACT_DIR)
+      fs.mkdirSync(root,{recursive:true});fs.writeFileSync(path.join(root,'index.html'),artifact.html)
+      for(const [file,value] of artifact.files){const dest=path.join(root,file.replace(/^\//,''));fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,value.body)}
+    }
+  })
+  it('rejects stale identity hashes and shared scope without changing accepted history',async()=>{
+    const source=`import './a.css';export default()=> <main className="card"><span className="card">Hello</span></main>`
+    const {state,call,target}=await setup(source,{'src/a.css':'.card{color:red}'})
+    const before=structuredClone(state.project)
+    const body={identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'shared-style-test',edit:{type:'style',property:'color',value:'blue'}}
+    await expect(call('mutate',body)).rejects.toMatchObject({status:422})
+    await expect(call('mutate',{...body,identity:{...target.identity,contentHash:'0'.repeat(64)}})).rejects.toMatchObject({status:409})
+    expect(state.project).toEqual(before)
+  })
+  it('rejects malformed staged source before acceptance',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main style={{color:"red"}}>Hello</main>`)
+    const before=structuredClone(state.project)
+    await expect(call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'invalid-style-test',edit:{type:'style',property:'color',value:'red; }'}})).rejects.toMatchObject({status:422})
+    expect(state.project).toEqual(before)
   })
 })
