@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { deriveReleaseReadiness } from "../worker/ready-qualification.js"
 import { analyzeReactSource } from "./webcanbe-engine/adapters/react/reactSourceAdapter"
 import { summarizeCompatibility } from "./webcanbe-engine/core/compatibility"
+import { releaseSnapshotHash } from "./webcanbe-engine/runtime/snapshotIntegrity"
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex")
 
@@ -22,8 +23,8 @@ function releaseRow(filesInput: Record<string, string>) {
     past: [],
     future: [],
   }
-  const encodedFiles = files.map(([file, text]) => [file, Buffer.from(text).toString("base64")])
-  const snapshotHash = sha256(JSON.stringify({ projectId, revisionId, contentHash, files: encodedFiles, history }))
+  const encodedFiles = files.map(([file, text]) => [file, Buffer.from(text).toString("base64")] as const)
+  const snapshotHash = releaseSnapshotHash({ projectId, revisionId, contentHash, files: encodedFiles, history })
   return {
     source_project_id: projectId,
     source_revision_id: revisionId,

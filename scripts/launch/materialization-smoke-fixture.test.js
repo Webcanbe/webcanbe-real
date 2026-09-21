@@ -31,6 +31,37 @@ describe("launch materialization smoke fixture", () => {
     expect(verified.snapshotHash).toBe(a.snapshotHash)
   })
 
+  it("survives PostgreSQL JSONB-style history key reordering", () => {
+    const a = buildMaterializationSmokeFixture({ userId, workspaceId, version: "v1" })
+    const head = a.history.revisions[0]
+    const dbHistory = {
+      past: a.history.past,
+      future: a.history.future,
+      schema: a.history.schema,
+      projectId: a.history.projectId,
+      revisions: [{
+        actor: head.actor,
+        producer: head.producer,
+        createdAt: head.createdAt,
+        projectId: head.projectId,
+        revisionId: head.revisionId,
+        contentHash: head.contentHash,
+        parentRevisionId: head.parentRevisionId,
+      }],
+      sourceScope: a.history.sourceScope,
+      transactions: a.history.transactions,
+      sourceDirectory: a.history.sourceDirectory,
+    }
+    expect(() => verifyReleaseSnapshot({
+      source_project_id: a.sourceProjectId,
+      source_revision_id: a.revisionId,
+      source_content_hash: a.sourceContentHash,
+      snapshot_hash: a.snapshotHash,
+      files: a.files,
+      history: dbHistory,
+    })).not.toThrow()
+  })
+
   it("changes identity when the target user/workspace changes", () => {
     const a = buildMaterializationSmokeFixture({ userId, workspaceId, version: "v1" })
     const b = buildMaterializationSmokeFixture({

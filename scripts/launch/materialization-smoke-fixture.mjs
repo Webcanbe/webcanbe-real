@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { createHash } from "node:crypto"
 import { fileURLToPath } from "node:url"
+import { releaseSnapshotHash } from "../../worker/snapshot-integrity.js"
 
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const VERSION = /^[A-Za-z0-9._-]{1,40}$/
@@ -85,13 +86,13 @@ export function buildMaterializationSmokeFixture({ userId, workspaceId, version 
     past: [],
     future: [],
   }
-  const snapshotHash = sha256(JSON.stringify({
+  const snapshotHash = releaseSnapshotHash({
     projectId: sourceProjectId,
     revisionId,
     contentHash: sourceContentHash,
     files: encodedFiles,
     history,
-  }))
+  })
   const providerReference = `launch-smoke:${version}:${userId}`
   const slug = `__launch-smoke-${version.toLowerCase()}`
   const publicMetadata = {

@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer"
 import { createHash, randomUUID } from "node:crypto"
+import { releaseSnapshotHash } from "./snapshot-integrity.js"
 
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const REVISION = /^rev_[a-f0-9-]{36}$/i
@@ -101,7 +102,7 @@ export function verifyReleaseSnapshot(row) {
     throw new MaterializationError(409, "Release source integrity check failed.")
   }
   if (sha256(JSON.stringify(editable)) !== sourceContentHash) throw new MaterializationError(409, "Release source integrity check failed.")
-  const calculatedSnapshot = sha256(JSON.stringify({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files: encodedFiles(files), history }))
+  const calculatedSnapshot = releaseSnapshotHash({ projectId: sourceProjectId, revisionId: sourceRevisionId, contentHash: sourceContentHash, files: encodedFiles(files), history })
   if (calculatedSnapshot !== snapshotHash) throw new MaterializationError(409, "Release source integrity check failed.")
   return Object.freeze({ files, history, sourceProjectId, sourceRevisionId, sourceContentHash, snapshotHash })
 }
