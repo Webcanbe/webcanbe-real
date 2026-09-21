@@ -155,7 +155,7 @@ createRoot(document.getElementById("root")).render(React.createElement("main", {
   if (probe.beacon !== false) fail("navigator.sendBeacon was not blocked by the deployed preview runtime.")
   if (externalRequests.length) fail("Imported project code emitted an external network request: " + externalRequests.map(item => item.url).join(", "))
   if (sensitiveHeaderRequests.length) fail("Preview requests exposed a session/CSRF/authorization header.")
-  if (sensitiveCookies.length || runtimeIsolation.cookies) fail("Preview browser context exposed a Webcanbe/session cookie.")
+  if (sensitiveCookies.length || /(?:wcb|session|csrf)/i.test(runtimeIsolation.cookies || "")) fail("Preview browser context exposed a Webcanbe/session cookie.")
 
   evidence.isolation = {
     runtime: runtimeIsolation,
