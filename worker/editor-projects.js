@@ -364,7 +364,7 @@ async function browserSnapshot(env,state,viewport,route){
       formats:["content","screenshot"],
       viewport:{width,height:900,deviceScaleFactor:1},
       gotoOptions:{waitUntil:"domcontentloaded",timeout:15000},
-      waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000,visible:false},
+      waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000},
       addScriptTag:[{content:injection}],
       allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"],
     })

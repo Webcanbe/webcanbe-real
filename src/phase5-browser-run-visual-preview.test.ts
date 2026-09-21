@@ -45,9 +45,12 @@ describe("Phase 5 free managed Browser Run Visual preview", () => {
 
   it("renders snapshot pixels in the editor and maps clicks back to source observations", () => {
     const workspace = fs.readFileSync("src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx","utf8")
+    const worker = fs.readFileSync("worker/editor-projects.js","utf8")
     expect(workspace).toContain('transport?: "blob" | "http" | "raster" | "snapshot"')
     expect(workspace).toContain("function selectSnapshot")
     expect(workspace).toContain('preview?.transport === "snapshot" ? <img')
     expect(workspace).toContain('Managed Browser Run preview is ready')
+    expect(worker).toContain('waitForSelector:{selector:"html[data-wcb-ready=\'1\']",timeout:12000}')
+    expect(worker).not.toContain("visible:false")
   })
 })
