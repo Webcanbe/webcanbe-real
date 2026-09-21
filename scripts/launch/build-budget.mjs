@@ -22,7 +22,7 @@ const max = predicate => files.filter(predicate).reduce((largest, item) => item.
 const mib = value => value / (1024 * 1024)
 const kib = value => value / 1024
 
-const isPreview = item => item.file === "preview-runtime.html" || item.file.startsWith("preview-assets/")
+const isPreview = item => /^assets\/(?:preview-runtime|PreviewRuntimeHost)-[^/]+\.js$/.test(item.file)
 const total = sum(() => true)
 const appTotal = sum(item => !isPreview(item))
 const jsTotal = sum(item => !isPreview(item) && item.file.endsWith(".js"))
