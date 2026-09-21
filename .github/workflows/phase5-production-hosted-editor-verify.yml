@@ -1,0 +1,32 @@
+name: Phase 5 production hosted editor verify
+on:
+  push:
+    branches: [phase5-production-hosted-editor-boundary]
+  pull_request:
+    branches: [main]
+    paths:
+      - src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx
+      - src/webcanbe-engine/visual-editor/editorMode.ts
+      - src/phase5-production-hosted-editor.test.ts
+      - .github/workflows/phase5-production-hosted-editor-verify.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare runtime profile
+        run: npm run runtime:prepare
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Hosted editor regressions
+        run: npx vitest run src/phase5-production-hosted-editor.test.ts src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-gate4-launch-chain.test.ts
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
