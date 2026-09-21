@@ -53,4 +53,21 @@ describe("Phase 5 production authentication", () => {
     expect(app).toContain("Google, GitHub, and email sign-in are available.")
     expect(app).toContain("Phone sign-in is not connected yet")
   })
+
+  it("replaces a rejected protected URL with a validated login return target", () => {
+    expect(app).toContain("function replaceWithLogin(next: string)")
+    expect(app).toContain('const target = "/login?next=" + encodeURIComponent(next)')
+    expect(app).toContain("window.location.replace(target)")
+    expect(app).toContain("else replaceWithLogin(window.location.pathname+window.location.search)")
+    expect(app).toContain('raw.startsWith("//") || raw.includes("\\\\")')
+    expect(app).toContain("target.origin === window.location.origin")
+  })
+
+  it("lets Escape close an idle sign-in dialog without interrupting an active provider flow", () => {
+    expect(app).toContain('if(event.key!=="Escape"||busy)return')
+    expect(app).toContain("onClose?.()")
+    expect(app).toContain('window.addEventListener("keydown",closeOnEscape)')
+    expect(app).toContain('input autoFocus className="auth-demo-email"')
+    expect(app).toContain("directNext=authNext()")
+  })
 })

@@ -69,7 +69,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
   it("refuses the production database even when recovery uses different credentials",()=>{
     const root=tempRoot(), backup=path.join(root,"backup.dump")
     writeBackupFixture(backup)
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","db.example.test"),
       RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","db.example.test"),
@@ -85,7 +85,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
   it("requires explicit confirmation before invoking backup verification",()=>{
     const root=tempRoot(), backup=path.join(root,"backup.dump")
     writeBackupFixture(backup)
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
       RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
@@ -101,7 +101,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     writeBackupFixture(backup,"7777777777777777777")
     fakeArchiveVerifier(bin)
     fakeIdentityProbe(bin,'printf "7777777777777777777\\tpostgres\\n"')
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       PATH:bin+path.delimiter+(process.env.PATH||""),
       WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","current-prod.example.test"),
@@ -121,7 +121,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     writeBackupFixture(backup,"1111111111111111111")
     fakeArchiveVerifier(bin)
     fakeIdentityProbe(bin,'if [ "$PGHOST" = "recovery-alias.example.test" ]; then printf "2222222222222222222\\tpostgres\\n"; else printf "2222222222222222222\\tpostgres\\n"; fi')
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       PATH:bin+path.delimiter+(process.env.PATH||""),
       WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","primary-alias.example.test"),
@@ -190,7 +190,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     writeBackupFixture(backup,"1111111111111111111")
     fakeArchiveVerifier(bin)
     fakeIdentityProbe(bin,'printf "2222222222222222222\\tpostgres\\n"')
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       PATH:bin+path.delimiter+(process.env.PATH||""),
       RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
@@ -209,7 +209,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
   it("refuses offline recovery planning without explicit source-manifest confirmation",()=>{
     const root=tempRoot(), backup=path.join(root,"backup.dump")
     writeBackupFixture(backup)
-    const env={
+    const env:NodeJS.ProcessEnv={
       ...process.env,
       RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
       WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",

@@ -4,6 +4,7 @@ import os from "node:os"
 import path from "node:path"
 import { spawnSync } from "node:child_process"
 import { afterEach, describe, expect, it } from "vitest"
+// @ts-expect-error The executable ESM helper is intentionally shared with the backup command.
 import { readSourceManifest } from "../scripts/db/backup-source-manifest.mjs"
 
 const roots:string[]=[]
