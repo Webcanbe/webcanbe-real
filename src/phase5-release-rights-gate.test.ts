@@ -33,6 +33,8 @@ describe("Phase 5 release publication rights gate", () => {
     expect(slice).toContain("openSourceCompatible")
     expect(slice).toContain("release.rights.verify")
     expect(slice).toContain("INSERT INTO wcb_release_rights_verifications")
+    expect(slice).toContain("releaseSnapshotHash:String(release.snapshot_hash)")
+    expect(slice).toContain("sourceContentHash:String(release.source_content_hash)")
   })
 
   it("blocks Listing publication unless the promoted release has verified rights evidence", () => {
