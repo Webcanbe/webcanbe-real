@@ -1,3 +1,18 @@
+# Latest recovery continuation — 2026-09-21 KST
+
+- Production/main: `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
+- Active Gate 3 activation candidate: `phase5-gate3-materialization-staging-v4` at `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`, draft PR #45; exact main→v4 comparison is ahead-only / **0 behind**. Keep it staging-only until authenticated Gate 2 is green.
+- Gate 2 credential-free GitHub provider boundary is verified. Gate 2 as a whole is still pending the user's authenticated Google baseline + same-account GitHub/Email link/login/read/refresh/logout sequence. Do not repeat the credential-free provider-boundary proof unless deployed auth configuration changes.
+- Production product mutation remains OFF.
+- Gate 5 recovery branch: `phase5-recovery-restore-rehearsal`, draft PR #46.
+- Latest verified recovery implementation/test checkpoint: `e47bc1ea2b66a1742592a14d2e166a8fdf9e41b4`.
+- Recovery CI `35561253913`, job `106214418473`: **PASS** across recovery regressions, syntax checks and secret scan.
+- Confirmed Worker rollback now requires target/current-deployment preflight before `wrangler rollback`, then requires `npm run smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready` after a successful rollback. A failed post-rollback smoke keeps the overall recovery command failed even though the rollback has already occurred.
+- No live Worker rollback was executed and no production/recovery database was mutated by this checkpoint.
+- Next independent recovery action: after a simulated successful rollback, re-read `wrangler deployments status --json` and require the requested target to be active before accepting the smoke/result; prove a wrong-active-version outcome fails closed.
+
+---
+
 # Webcanbe interruption-safe launch checkpoint
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
