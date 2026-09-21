@@ -326,8 +326,10 @@ function projectStyles(state, viewport = "desktop") {
         if(initializer && typeof initializer.text==="string") { implicit=/^-?\d/.test(value);value=initializer.text }
       }
       const numeric=origin.kind!=="tailwind" && /^(-?\d+(?:\.\d+)?)(px|rem|em|%|vh|vw|ch)?$/.exec(value)
-      origin.numericValue=numeric?Number(numeric[1]):null
-      origin.unit=numeric?(numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"number")):null
+      if(numeric){
+        origin.numericValue=Number(numeric[1])
+        origin.unit=numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"")
+      }
     }
   }
   return { ...analysis, files, tailwind }

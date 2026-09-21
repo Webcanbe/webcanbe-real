@@ -241,7 +241,7 @@ describe("Worker AST Visual transactions",()=>{
     await expect(call('revert',{expectedRevision:state.project.revision,idempotencyKey:'selective-conflict',transactionId:saved.value.transaction.id})).rejects.toMatchObject({status:409})
     expect(state.project).toEqual(before)
   })
-  const cssCases=[['backgroundColor','red','blue'],['fontSize','16px','24px'],['fontWeight','400','700'],['padding','4px','12px'],['margin','4px','12px'],['gap','4px','12px'],['width','40px','80px'],['height','40px','80px'],['border','1px solid red','2px solid blue'],['borderRadius','4px','12px'],['display','flex','grid'],['flexDirection','row','column'],['alignItems','start','center'],['justifyContent','start','center'],['alignSelf','start','center'],['justifySelf','start','center'],['order','1','2'],['flexGrow','0','1'],['flexShrink','1','0'],['flexBasis','40px','80px'],['gridTemplateColumns','1fr','1fr 1fr'],['gridTemplateRows','1fr','1fr 1fr'],['gridColumn','1','2'],['gridRow','1','2'],['maxWidth','40px','80px'],['minWidth','40px','80px'],['minHeight','40px','80px'],['maxHeight','40px','80px'],['lineHeight','1','1.5'],['letterSpacing','0em','0.1em']]
+  const cssCases=[['boxShadow','0 1px 2px black','0 4px 12px rgba(0,0,0,0.2)'],['backgroundColor','red','blue'],['fontSize','16px','24px'],['fontWeight','400','700'],['padding','4px','12px'],['margin','4px','12px'],['gap','4px','12px'],['width','40px','80px'],['height','40px','80px'],['border','1px solid red','2px solid blue'],['borderRadius','4px','12px'],['display','flex','grid'],['flexDirection','row','column'],['alignItems','start','center'],['justifyContent','start','center'],['alignSelf','start','center'],['justifySelf','start','center'],['order','1','2'],['flexGrow','0','1'],['flexShrink','1','0'],['flexBasis','40px','80px'],['gridTemplateColumns','1fr','1fr 1fr'],['gridTemplateRows','1fr','1fr 1fr'],['gridColumn','1','2'],['gridRow','1','2'],['maxWidth','40px','80px'],['minWidth','40px','80px'],['minHeight','40px','80px'],['maxHeight','40px','80px'],['lineHeight','1','1.5'],['letterSpacing','0em','0.1em']]
   it.each(cssCases)('mutates %s through inline and CSS Module source origins',async(property,before,after)=>{
     for(const inline of [true,false]){
       const cssName=property.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())
@@ -256,13 +256,62 @@ describe("Worker AST Visual transactions",()=>{
       expect(undone.value.transaction.editType).toBe('revert')
     }
   })
+  it.each([
+    ['padding','p-4','p-8'],['paddingX','px-4','px-8'],['paddingY','py-4','py-8'],['margin','m-4','m-8'],['gap','gap-4','gap-8'],['backgroundColor','bg-red-500','bg-blue-500'],['color','text-red-500','text-blue-500'],['fontSize','text-sm','text-lg'],['fontWeight','font-normal','font-bold'],['width','w-4','w-8'],['height','h-4','h-8'],['border','border','border-2'],['borderRadius','rounded-sm','rounded-lg'],['boxShadow','shadow-sm','shadow-lg'],['display','flex','grid'],['flexDirection','flex-row','flex-col'],['alignItems','items-start','items-center'],['justifyContent','justify-start','justify-center'],['alignSelf','self-start','self-center'],['justifySelf','justify-self-start','justify-self-center'],['order','order-1','order-2'],['flexGrow','grow-0','grow'],['flexShrink','shrink','shrink-0'],['flexBasis','basis-4','basis-8'],['gridTemplateColumns','grid-cols-1','grid-cols-2'],['gridTemplateRows','grid-rows-1','grid-rows-2'],['gridColumn','col-start-1','col-start-2'],['gridRow','row-start-1','row-start-2'],['maxWidth','max-w-sm','max-w-lg'],['minWidth','min-w-4','min-w-8'],['minHeight','min-h-4','min-h-8'],['maxHeight','max-h-4','max-h-8'],['lineHeight','leading-tight','leading-loose'],['letterSpacing','tracking-tight','tracking-wide'],
+  ])('changes the %s Tailwind token and preserves unrelated classes',async(property,before,after)=>{
+    const source=`export default()=> <main className="${before} md:${before} unknown-hook">Text</main>`
+    const {state,call,target}=await setup(source,{},true)
+    const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'tailwind-matrix-key',edit:{type:'style',property,value:after}})
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).toContain(`className="${after} md:${before} unknown-hook"`)
+    const inspected=await call('inspect',{identity:{file:'src/App.tsx',elementStart:target.identity.elementStart,revisionId:saved.value.revision}})
+    expect(inspected.value.target.styleOrigins.some(o=>o.property===property&&o.value===after)).toBe(true)
+  })
+  it('fails closed for unknown overlapping shadow utilities',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main className="shadow-sm shadow-brand">Text</main>`,{},true)
+    const before=structuredClone(state.project)
+    expect(target.styleOrigins.find(o=>o.property==='boxShadow').editable).toBe(false)
+    await expect(call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'shadow-ambiguity-key',edit:{type:'style',property:'boxShadow',value:'shadow-lg'}})).rejects.toMatchObject({status:422})
+    expect(state.project).toEqual(before)
+  })
+  it('does not advertise blocked cascade edits and retains the blocking source location',async()=>{
+    const {target}=await setup(`import './a.css';export default()=> <main className="card"><span /></main>`,{'src/a.css':'.card { color:red } main { color:blue !important }'})
+    expect(target.capabilities.color).toBe(false)
+    expect(target.capabilities.visualEdit).toBe(false)
+    expect(target.compatibility).toBe('code-only')
+    expect(target.styleOrigins.find(o=>o.property==='color').reason).toContain('src/a.css:1:')
+  })
+  it('inspects important declarations as read-only source evidence',async()=>{
+    const {target}=await setup(`import './a.css';export default()=> <main className="card"><span /></main>`,{'src/a.css':'.card { color:red !important }'})
+    expect(target.styleOrigins.find(o=>o.property==='color')).toMatchObject({file:'src/a.css',value:'red',editable:false})
+    expect(target.capabilities.color).toBe(false)
+  })
+  it('does not advertise structural reorder from an order declaration or a lone child',async()=>{
+    const a=await setup(`export default()=> <main style={{order:1}}>Text</main>`)
+    expect(a.target.capabilities.reorder).toBe(false)
+    const source=`export default()=> <main style={{display:"flex"}}><span>Only</span></main>`
+    const b=await setup(source)
+    const inspected=await b.call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<span>')}})
+    expect(inspected.value.target.capabilities.reorder).toBe(false)
+  })
   it('returns source units without inventing units for Tailwind tokens',async()=>{
     const a=await setup(`export default()=> <main style={{padding:16,lineHeight:1.5,width:"50%"}}>Text</main>`)
     expect(a.target.styleOrigins.find(o=>o.property==='padding')).toMatchObject({numericValue:16,unit:'px'})
-    expect(a.target.styleOrigins.find(o=>o.property==='lineHeight')).toMatchObject({numericValue:1.5,unit:'number'})
+    expect(a.target.styleOrigins.find(o=>o.property==='lineHeight')).toMatchObject({numericValue:1.5,unit:''})
     expect(a.target.styleOrigins.find(o=>o.property==='width')).toMatchObject({numericValue:50,unit:'%'})
     const b=await setup(`export default()=> <main className="p-4">Text</main>`,{},true)
-    expect(b.target.styleOrigins[0]).toMatchObject({numericValue:null,unit:null})
+    expect(b.target.styleOrigins[0].numericValue).toBeUndefined()
+    expect(b.target.styleOrigins[0].unit).toBeUndefined()
+  })
+  it('reopens JSX entities as rendered text without double-escaping subsequent edits',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main>Hello</main>`)
+    const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'text-entity-first',edit:{type:'text',value:'A & B'}})
+    const inspected=await call('inspect',{identity:{file:'src/App.tsx',elementStart:target.identity.elementStart,revisionId:saved.value.revision}})
+    expect(inspected.value.target.text).toBe('A & B')
+    await call('mutate',{identity:inspected.value.target.identity,expectedRevision:saved.value.revision,idempotencyKey:'text-entity-second',edit:{type:'text',value:inspected.value.target.text+'!'}})
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).toContain('A &amp; B!')
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).not.toContain('&amp;amp;')
+    const encoded=await setup(`export default()=> <main>&quot;Hi&quot; &#65; &copy;</main>`)
+    expect(encoded.target.text).toBe('"Hi" A ©')
   })
   it('preserves escaped literal text and rejects executable JSX text injection',async()=>{
     const a=await setup(`export default()=> <main>{"Hello"}</main>`)
@@ -307,19 +356,43 @@ describe("Worker AST Visual transactions",()=>{
     const path=await import('node:path')
     const fixtureRoot=path.resolve('fixtures/compatible-react-vite')
     const extra=Object.fromEntries(fs.readdirSync(fixtureRoot,{recursive:true,withFileTypes:true}).filter(e=>e.isFile()).map(e=>[path.relative(fixtureRoot,path.join(e.parentPath,e.name)),fs.readFileSync(path.join(e.parentPath,e.name),'utf8')]))
-    const source=extra['src/App.tsx'].replace('<main>','<main style={{color:"red"}}>')
+    const source=extra['src/App.tsx'].replace('<main>','<main style={{color:"red",boxShadow:"none"}}>')
     extra['src/App.tsx']=source
     const {state,call,target}=await setup(source,extra)
     await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'independent-build-test',edit:{type:'style',property:'color',value:'blue'}})
+    for(const [file,tag,property,value,breakpoint] of [
+      ['src/App.tsx','<main','boxShadow','0 4px 12px rgba(0,0,0,0.2)','base'],
+      ['src/components/Hero.tsx','<section','gap','52px','css:(max-width: 720px)'],
+      ['src/components/TailwindPanel.tsx','<p','fontSize','text-xl','base'],
+      ['src/components/FeatureGrid.tsx','<article','borderRadius','20px','base'],
+    ]){
+      const current=await call('files',{file})
+      const inspected=await call('inspect',{identity:{file,elementStart:current.value.source.indexOf(tag)}})
+      await call('mutate',{identity:inspected.value.target.identity,expectedRevision:state.project.revision,idempotencyKey:'fixture-'+property,edit:{type:'style',property,value,breakpoint,scope:'source'}})
+    }
+    const {buildIndependentExport}=await import('../src/webcanbe-engine/runtime/independentExport.ts')
+    const compilingProvider={BROWSER:{quickAction:async(_,options)=>{
+      const script=options.addScriptTag[0].content
+      const candidate=JSON.parse(script.slice(script.indexOf('=')+1,script.indexOf(';globalThis.dispatchEvent')))
+      await buildIndependentExport(zipStore(new Map(Object.entries(candidate.files).map(([f,b])=>[f,Buffer.from(b,'base64')]))),process.cwd())
+      return {screenshot:Buffer.alloc(120,7).toString('base64'),content:'<script id="wcb-observation">'+JSON.stringify({elements:[],viewport:{width:1280,height:900},route:'/'})+'</script>'}
+    }}}
+    for(const [tag,edit] of [
+      ['<div>',{type:'reorder',value:'next',scope:'source'}],
+      ['<section',{type:'responsive-create',property:'gap',value:'64px',breakpoint:'new:tablet',scope:'source'}],
+    ]){
+      const file='src/components/Hero.tsx',current=await call('files',{file})
+      const inspected=await call('inspect',{identity:{file,elementStart:current.value.source.indexOf(tag)}})
+      await call('mutate',{identity:inspected.value.target.identity,expectedRevision:state.project.revision,idempotencyKey:'fixture-'+edit.type,edit},compilingProvider)
+    }
     const codeView=await call('files',{file:'src/App.tsx'})
     expect(codeView.value.source).toContain('color:"blue"')
     const {createHash}=await import('node:crypto')
     const code=codeView.value.source+'\n// Accepted Code after Visual'
     await call('code',{expectedRevision:codeView.value.revision,idempotencyKey:'vertical-code-test',operations:[{kind:'update',file:'src/App.tsx',content:code,expectedHash:createHash('sha256').update(codeView.value.source).digest('hex')}]})
     expect((await call('files',{file:'src/App.tsx'})).value.source).toBe(code)
-    expect((await call('history')).value.history.transactions.map(t=>t.producer)).toEqual(['visual','code'])
+    expect((await call('history')).value.history.transactions.map(t=>t.producer)).toEqual(['visual','visual','visual','visual','visual','visual','visual','code'])
     const exported=await call('export',{expectedRevision:state.project.revision})
-    const {buildIndependentExport}=await import('../src/webcanbe-engine/runtime/independentExport.ts')
     const artifact=await buildIndependentExport(Buffer.from(exported.value.archive,'base64'),process.cwd())
     expect(artifact.sourceUnchanged).toBe(true)
     expect(artifact.html).toContain('assets/app.js')
@@ -329,7 +402,34 @@ describe("Worker AST Visual transactions",()=>{
       fs.mkdirSync(root,{recursive:true});fs.writeFileSync(path.join(root,'index.html'),artifact.html)
       for(const [file,value] of artifact.files){const dest=path.join(root,file.replace(/^\//,''));fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,value.body)}
     }
-  })
+  },20000)
+  if(process.env.WCB_VISUAL_DEMO_ROOT) it('preserves the pinned original E2E demo through Visual, Code, undo/redo and independent export',async()=>{
+    const path=await import('node:path'),{execFileSync}=await import('node:child_process')
+    const root=path.resolve(process.env.WCB_VISUAL_DEMO_ROOT)
+    expect(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim()).toBe('00b47131c23785b607c2d3b459c331316dad5767')
+    const names=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean)
+    const extra=Object.fromEntries(names.map(file=>[file,fs.readFileSync(path.join(root,file),'utf8')]))
+    const source=extra['src/App.tsx'],{state,call}=await setup(source,extra)
+    const grid=(await call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<div className="project-grid"')}})).value.target
+    const saved=await call('mutate',{identity:grid.identity,expectedRevision:baseRevision,idempotencyKey:'demo-grid-gap-edit',edit:{type:'style',property:'gap',value:'40px',scope:'source'}})
+    const heading=(await call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<h2>Selected work')}})).value.target
+    await call('mutate',{identity:heading.identity,expectedRevision:state.project.revision,idempotencyKey:'demo-heading-edit',edit:{type:'text',value:'Selected studies'}})
+    const current=(await call('files',{file:'src/App.tsx'})).value.source,{createHash}=await import('node:crypto')
+    await call('code',{expectedRevision:state.project.revision,idempotencyKey:'demo-code-edit-key',operations:[{kind:'update',file:'src/App.tsx',expectedHash:createHash('sha256').update(current).digest('hex'),content:current+'\n// Code and Visual share this accepted source'}]})
+    await call('revert',{expectedRevision:state.project.revision,idempotencyKey:'demo-gap-undo-key',transactionId:saved.value.transaction.id})
+    expect((await call('files',{file:'src/styles.css'})).value.source).toBe(extra['src/styles.css'])
+    await call('redo',{expectedRevision:state.project.revision,idempotencyKey:'demo-gap-redo-key'})
+    expect((await call('files',{file:'src/App.tsx'})).value.source).toContain('Selected studies')
+    const exported=await call('export',{expectedRevision:state.project.revision})
+    const {buildIndependentExport}=await import('../src/webcanbe-engine/runtime/independentExport.ts')
+    const artifact=await buildIndependentExport(Buffer.from(exported.value.archive,'base64'),process.cwd())
+    expect(artifact.sourceUnchanged).toBe(true)
+    if(process.env.WCB_VISUAL_DEMO_ARTIFACT_DIR){
+      const destination=path.resolve(process.env.WCB_VISUAL_DEMO_ARTIFACT_DIR)
+      fs.mkdirSync(destination,{recursive:true});fs.writeFileSync(path.join(destination,'index.html'),artifact.html)
+      for(const [file,value] of artifact.files){const dest=path.join(destination,file.replace(/^\//,''));fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,value.body)}
+    }
+  },20000)
   it('rejects stale identity hashes and shared scope without changing accepted history',async()=>{
     const source=`import './a.css';export default()=> <main className="card"><span className="card">Hello</span></main>`
     const {state,call,target}=await setup(source,{'src/a.css':'.card{color:red}'})
