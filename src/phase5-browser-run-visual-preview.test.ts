@@ -29,6 +29,7 @@ describe("Phase 5 free managed Browser Run Visual preview", () => {
     expect(runtime).toContain('Object.defineProperty(globalThis, "RTCPeerConnection"')
     expect(runtime).toContain("data-wcb-id")
     expect(runtime).toContain("__WCB_PROJECT_PAYLOAD__")
+    expect(runtime).toContain('dataset.wcbPreviewRuntime = "loaded"')
     expect(runtime).not.toContain("__Host-wcb-session")
     expect(runtime).not.toContain("X-WCB-CSRF")
   })
