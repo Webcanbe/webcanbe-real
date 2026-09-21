@@ -2,6 +2,97 @@
 
 Recorded: 2026-09-21 KST. This is an incremental continuation record, not a replacement for historical handoffs.
 
+## Gate 2 provider boundary verified — 2026-09-21 KST
+
+- Credential-free production smoke run `35546047348` reached the official `github.com` OAuth/login boundary successfully.
+- Verified before stopping:
+  - diagnostic route HTTP 200
+  - noindex/nofollow
+  - GitHub provider control enabled
+  - Firebase GitHub popup opened
+  - official GitHub OAuth boundary reached
+  - no `/__webcanbe/auth/firebase-exchange` request
+  - no identity-link request
+  - no Webcanbe first-party session cookie
+  - no credentials entered and no OAuth authorization decision made
+- The Firebase Hosting helper `/__/firebase/init.json` currently returns 404, but this did not block the configured Firebase popup from reaching GitHub and is retained as diagnostic evidence only.
+- Gate 2 as a whole is **NOT PASS**: same-account GitHub + Email linking/login, private reads, reload persistence and logout invalidation still require the operator's authenticated browser session.
+- Do not repeatedly stop on this human-only blocker. Continue independent Gate 3/4/5 launch work while production product mutation stays OFF.
+
+---
+
+## Gate 4 Visual + Code chain verified — 2026-09-21 KST
+
+- v4 checkpoint `85c66326ae85ffe5065197ecd4272673b1021bf2` upgraded the launch-chain regression from Code-only durability to the real combined edit path.
+- The test now executes:
+  `immutable materialized release → React source analysis → safe Visual text mutation → durable Visual commit → Code commit → reopen → standalone export/build`.
+- It verifies the last two accepted history transactions are producers `visual` then `code`, both source changes survive reopen, immutable release provenance is retained, exported source contains both edits, Webcanbe runtime state is absent, and the independent build passes.
+- Integrated Gate 3 v4 run `35546569409`, job `106173445526`: **PASS** across launch-chain, durable editor/export, Bigperson authority, production build, build budget, and Worker dry-run.
+- This is staging evidence only; production mutation remains OFF.
+
+---
+
+## Gate 3 v4 verification closed — 2026-09-21 KST
+
+- Active staging branch: `phase5-gate3-materialization-staging-v4`.
+- Verified tree/code checkpoint: `bd03d69726b31a70e2a981b35b609fe3ac69e33f`.
+- Integrated workflow run `35545791365`, job `106171321936`: **PASS**.
+- Passed:
+  - runtime-profile preparation + secret scan
+  - Gate 3 activation / private fixture / Gate 4 launch-chain regressions
+  - durable editor/export regressions
+  - Bigperson / privileged-authority regressions
+  - Worker + fixture syntax
+  - production build
+  - production build budget
+  - Wrangler Worker bundle dry-run
+- Firebase/CSP focused verification on the same PR/tree, run `35545791377`: **PASS**.
+- Main → v4 was ahead-only / 0 behind before the documentation-only checkpoint.
+- v4 remains staging-only. Production mutation is still OFF and the private fixture has not been applied.
+- Draft PR #45 must remain unmerged until authenticated Gate 2 is green.
+
+## Latest continuation — Firebase/CSP + Gate 3 v4
+
+- Production/main code HEAD: `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
+- The operator added and saved all six `VITE_FIREBASE_*` values under Cloudflare Builds → Variables and secrets and triggered a fresh production build.
+- After that rebuild, the old `Firebase Authentication is not configured.` failure disappeared. The next real browser failure was `auth/internal-error` caused by production CSP blocking `https://apis.google.com/js/api.js`.
+- Minimal CSP fix was verified on branch/PR #43 and squash-merged to main:
+  - `script-src 'self' https://apis.google.com https://www.gstatic.com`
+  - script `unsafe-inline` remains forbidden
+  - `unsafe-eval` remains forbidden
+  - focused Firebase/CSP tests, production build, and Wrangler dry-run: run `35545390283` **PASS**
+- A provider-boundary smoke rerun immediately after the merge still observed the old live CSP (`script-src 'self'`), so Cloudflare propagation of `c0889c8` was **not yet proven** at that instant. Do not interpret that rerun as a failure of the merged CSP code.
+- Actual authenticated GitHub/Email same-account E2E remains **NOT PASS**. Product mutation remains OFF on production.
+- Diagnostic branch/PR #42 remains a no-credential provider-boundary probe; it must never enter credentials, approve OAuth, link an identity, or create a first-party session during the boundary-only check.
+
+### Gate 3 v4 staging
+
+- Old v3 was backed up at `backup/gate3-v3-before-firebase-sync-20260921`.
+- The conflicted main→v3 sync PR #44 was closed without merge.
+- New branch: `phase5-gate3-materialization-staging-v4`, rebuilt directly from current main `c0889c8`.
+- Draft PR: #45.
+- v4 carries forward:
+  - private source-backed launch-smoke fixture/runbook
+  - `launch:smoke-fixture` while retaining `db:recovery:preflight`
+  - explicit staged frontend + Worker materialization switches
+  - Gate 3 mutation-authority regression
+  - Gate 4 immutable release → materialize → durable Code edit → reopen → standalone export/build regression
+  - durable-editor and Bigperson verification coverage
+  - the latest Firebase project-ID fallback and popup CSP fix from main
+- Exact main→v4 relationship before this documentation commit: **ahead 15 / behind 0**.
+- Integrated v4 verification workflow has been added; its final result is **pending** at this checkpoint.
+- v4 is staging-only. Do **not** merge/deploy its mutation switches to production until authenticated Gate 2 is green.
+
+### Exact next actions
+
+1. Re-run the credential-free Gate 2 provider-boundary smoke once live Cloudflare production serves the new CSP; require an official `github.com` provider page with zero exchange/link/session side effects.
+2. Finish/read the Gate 3 v4 integrated CI and repair only genuine regressions.
+3. If provider boundary passes but actual login/linking needs the operator, record that human-only Gate 2 blocker once and continue independent Gate 3/4/5 work.
+4. Never enable production materialization mutation before same-account GitHub/Email login + private reads + refresh + logout evidence is green.
+5. After Gate 2, use v4—not v3—as the activation candidate.
+
+---
+
 ## Verified starting point
 
 - Repository: `Webcanbe/webcanbe-real`.

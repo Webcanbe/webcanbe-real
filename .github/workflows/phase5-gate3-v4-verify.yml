@@ -1,0 +1,36 @@
+name: Phase 5 Gate 3 v4 verify
+on:
+  push:
+    branches: [phase5-gate3-materialization-staging-v4]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  gate3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare runtime profile
+        run: npm run runtime:prepare
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Gate 3 activation and launch-chain regressions
+        run: npx vitest run src/phase5-materialization-activation.test.ts scripts/launch/materialization-smoke-fixture.test.js src/phase5-gate4-launch-chain.test.ts src/phase5-production-read-mode.test.ts src/phase5-production-public-smoke.test.ts src/phase5-firebase-auth.test.ts src/phase5-csp-compat.test.ts worker/security-headers.test.js worker/materialization.test.js
+      - name: Durable editor/export regressions
+        run: npx vitest run src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts src/phase5-project-search.test.ts src/phase5-editor-navigation.test.ts src/phase5-editor-shortcuts.test.ts
+      - name: Bigperson and privileged-authority regressions
+        run: npx vitest run src/phase5-bigperson-control.test.ts src/phase5-bigperson-three-factor.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-ready-qualification.test.ts src/phase5-product-operator-schema.test.ts src/webcanbe-engine/phase3-hosted-product.test.ts
+      - name: Worker and fixture syntax
+        run: node --check scripts/launch/materialization-smoke-fixture.mjs && node --check worker/index.js && node --check worker/materialization.js && node --check worker/security-headers.js && node --check worker/bigperson-auth.js && node --check worker/control-mutations.js && node --check worker/ready-qualification.js
+      - name: Production build
+        run: npm run build
+      - name: Production build budget
+        run: node scripts/launch/build-budget.mjs
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run

@@ -21,7 +21,8 @@
     "deploy:rollback": "node scripts/cloudflare-rollback.mjs",
     "security:secrets": "node scripts/security/scan-secrets.mjs",
     "smoke:production:public": "node scripts/production-smoke-public.mjs",
-    "db:recovery:preflight": "node scripts/db/recovery-preflight.mjs"
+    "db:recovery:preflight": "node scripts/db/recovery-preflight.mjs",
+    "launch:smoke-fixture": "node scripts/launch/materialization-smoke-fixture.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
