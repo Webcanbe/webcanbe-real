@@ -1,3 +1,4 @@
+import { boundedRequestBody } from './request-body.js'
 import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
@@ -174,8 +175,7 @@ async function readDatabaseSession(request, env) {
 async function smallJsonBody(request, maximum = 32 * 1024) {
   const declared = Number(request.headers.get("Content-Length") || "0")
   if (Number.isFinite(declared) && declared > maximum) throw new Error("Request too large.")
-  const text = await request.text()
-  if (text.length > maximum) throw new Error("Request too large.")
+  const text = request.body ? new TextDecoder().decode(await boundedRequestBody(request, maximum)) : ""
   const value = JSON.parse(text || "{}")
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid request.")
   return value

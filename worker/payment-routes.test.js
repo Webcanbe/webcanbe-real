@@ -28,3 +28,16 @@ it('cancels an oversized streaming body before consuming the remaining stream', 
  await expect(boundedPaymentBody(req,16 * 1024)).rejects.toThrow('Request too large.')
  expect(cancel).toHaveBeenCalledOnce()
 })
+
+describe('public catalog body streaming limit', () => {
+ it.each([undefined, '1'])('cancels oversized lengthless or understated bodies (%s)', async declared => {
+  const cancel = vi.fn()
+  const stream = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(32 * 1024 + 1)) }, cancel })
+  const headers = { Origin:'https://webcanbe.com', 'Content-Type':'application/json', ...(declared ? {'Content-Length':declared} : {}) }
+  const req = new Request('https://webcanbe.com/__webcanbe/api/product/catalog/browse', {method:'POST',headers,body:stream,duplex:'half'})
+  const response = await worker.fetch(req,env)
+  expect(response.status).toBe(400)
+  expect(cancel).toHaveBeenCalledOnce()
+  expect(mocks.resolve).not.toHaveBeenCalled()
+ })
+})
