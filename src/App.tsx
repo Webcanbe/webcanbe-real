@@ -842,6 +842,8 @@ function Control() {
   const [controlView,setControlView]=useState<"overview"|"sellers"|"publishing"|"access"|"audit">("overview")
   const [mutationFactor,setMutationFactor]=useState(""), [mutationStatus,setMutationStatus]=useState(""), [targetUserId,setTargetUserId]=useState(""), [targetRole,setTargetRole]=useState<"reviewer"|"admin"|"bigperson">("reviewer"), [targetActive,setTargetActive]=useState(true)
   const [promotionResultId,setPromotionResultId]=useState(""), [promotionCatalogProjectId,setPromotionCatalogProjectId]=useState(""), [promotionVersion,setPromotionVersion]=useState("1.0.0")
+  const [rightsReleaseId,setRightsReleaseId]=useState(""), [rightsBasis,setRightsBasis]=useState<"first_party_original"|"seller_rights_reviewed"|"open_source_compatible">("first_party_original"), [rightsLicenseExpression,setRightsLicenseExpression]=useState("MIT")
+  const [rightsSourceReference,setRightsSourceReference]=useState(""), [rightsDependencyReference,setRightsDependencyReference]=useState(""), [rightsAssetReference,setRightsAssetReference]=useState("")
   const [publicationPromotionId,setPublicationPromotionId]=useState(""), [publicationSlug,setPublicationSlug]=useState(""), [publicationTitle,setPublicationTitle]=useState(""), [publicationSummary,setPublicationSummary]=useState("")
   const [entitlementUserId,setEntitlementUserId]=useState(""), [entitlementReleaseId,setEntitlementReleaseId]=useState("")
   const [readyReleaseId,setReadyReleaseId]=useState(""), [readyAssessmentResultId,setReadyAssessmentResultId]=useState(""), [readyVersion,setReadyVersion]=useState("ready-v1")
@@ -923,10 +925,32 @@ function Control() {
       const result=await hostedProductClient.controlPromoteAssessmentRelease(factor,{resultId:promotionResultId.trim(),catalogProjectId:promotionCatalogProjectId.trim(),version:promotionVersion.trim()})
       setControl(current=>current?{...current,promotions:[result.promotion,...current.promotions.filter(row=>String(field(row,"promotion_id"))!==String(field(result.promotion,"promotion_id")))],releases:[result.release,...current.releases.filter(row=>String(field(row,"release_id"))!==String(field(result.release,"release_id")))]}:current)
       setPublicationPromotionId(String(field(result.promotion,"promotion_id")??""))
+      setRightsReleaseId(String(field(result.release,"release_id")??""))
       setReadyReleaseId(String(field(result.release,"release_id")??""))
       setReadyAssessmentResultId(promotionResultId.trim())
       setMutationStatus("Passed assessment promoted to an immutable release and audited.")
     }catch(reason){setMutationStatus(reason instanceof Error?reason.message:"Release promotion refused.")}
+    finally{setBusy(false)}
+  }
+  const verifyControlRights = async () => {
+    if(!mutationFactor||busy||!control||!rightsReleaseId||!rightsLicenseExpression||!rightsSourceReference||!rightsDependencyReference||!rightsAssetReference)return
+    const factor=mutationFactor;setMutationFactor("");setBusy(true);setMutationStatus("")
+    const sourceEvidence:Record<string,unknown>={reviewed:true,unresolvedCount:0,reference:rightsSourceReference.trim()}
+    if(rightsBasis==="first_party_original")Object.assign(sourceEvidence,{origin:"first_party_repo",original:true})
+    else if(rightsBasis==="seller_rights_reviewed")Object.assign(sourceEvidence,{sellerAttested:true,reviewerApproved:true})
+    else Object.assign(sourceEvidence,{openSourceCompatible:true})
+    try{
+      const verification=await hostedProductClient.controlVerifyReleaseRights(factor,{
+        releaseId:rightsReleaseId.trim(),
+        rightsBasis,
+        licenseExpression:rightsLicenseExpression.trim(),
+        sourceEvidence,
+        dependencyEvidence:{reviewed:true,unresolvedCount:0,reference:rightsDependencyReference.trim()},
+        assetEvidence:{reviewed:true,unresolvedCount:0,reference:rightsAssetReference.trim()},
+      })
+      setControl(current=>current?{...current,rights:[verification,...current.rights.filter(row=>String(field(row,"release_id"))!==rightsReleaseId.trim())]}:current)
+      setMutationStatus("Release publication/distribution rights verified and audited.")
+    }catch(reason){setMutationStatus(reason instanceof Error?reason.message:"Release rights verification refused.")}
     finally{setBusy(false)}
   }
   const publishControlListing = async () => {
