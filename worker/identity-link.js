@@ -40,7 +40,7 @@ export async function linkDatabaseIdentity(db, session, identity) {
           AND s.expires_at=to_timestamp($3/1000.0)
           AND s.expires_at>clock_timestamp()
           AND d.user_id IS NULL
-        FOR SHARE`,
+        FOR SHARE OF s`,
       [session.sessionId, session.userId, session.expiresAt],
     )
     if (!current.rowCount) throw new IdentityLinkDenied()

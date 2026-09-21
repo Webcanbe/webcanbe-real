@@ -19,7 +19,10 @@ function dbFor(existing) {
       async query(sql, params) {
         calls.push({ sql, params })
         if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return { rows: [], rowCount: null }
-        if (sql.includes("FROM wcb_sessions")) return { rows: [{ session_id: session.sessionId }], rowCount: 1 }
+        if (sql.includes("FROM wcb_sessions")) {
+          if (!sql.includes("FOR SHARE OF s")) throw new Error("session row lock must not target nullable outer-join rows")
+          return { rows: [{ session_id: session.sessionId }], rowCount: 1 }
+        }
         if (sql.includes("wcb_identity_lock")) return { rows: [{ id: 1 }], rowCount: 1 }
         if (sql.startsWith("SELECT user_id,active FROM wcb_identity_accounts")) return { rows: existing ? [existing] : [], rowCount: existing ? 1 : 0 }
         if (sql.startsWith("INSERT INTO wcb_identity_accounts")) return { rows: [], rowCount: 1 }
@@ -31,7 +34,7 @@ function dbFor(existing) {
 }
 
 describe("explicit identity linking", () => {
-  it("links only after a live first-party session is rechecked", async () => {
+  it("locks only the concrete session row while rechecking a live first-party session", async () => {
     const { db, calls } = dbFor(undefined)
     const result = await linkDatabaseIdentity(db, session, identity)
     expect(result).toMatchObject({ linked: true, userId: session.userId, alreadyLinked: false })
