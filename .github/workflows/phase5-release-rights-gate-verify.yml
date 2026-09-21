@@ -7,6 +7,7 @@ on:
     paths:
       - deployment/hosted/postgres.sql
       - deployment/hosted/migrations/202609211920_release_rights_verification.sql
+      - deployment/hosted/migrations/202609211935_bound_release_rights_runtime_grants.sql
       - worker/control-mutations.js
       - worker/control-read.js
       - worker/index.js
