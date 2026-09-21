@@ -165,3 +165,34 @@ Live acceptance for this probe:
 4. no Webcanbe session cookie, CSRF token or platform secret is passed into imported project code.
 5. then repeat the authenticated production workspace smoke: preview pixels → source-mapped click → Visual text edit → durable PostgreSQL revision.
 
+
+
+## Open draft PR disposition snapshot — non-destructive review only
+
+### PR #42 — Gate 2 provider-boundary smoke
+
+- state: open draft
+- branch: `phase5-gate2-provider-boundary-smoke`
+- head: `2b2a4651d231575bdf0b7fee1c7cab8bb409002f`
+- current main comparison: **16 ahead / 19 behind**, merge base `381fdc7e300d05e6f4b22cf46e2e7715614e7d01`
+- provider-boundary workflow `35546616879` / job `106173568010`: PASS, including credential-free GitHub provider-boundary browser smoke
+- current main contains later Firebase/CSP and identity-link fixes and the provider boundary has already been established
+- disposition: **superseded as a merge candidate; retain as historical diagnostic evidence**
+- if deployed auth configuration materially changes, rebuild/rerun the provider-boundary probe from current main rather than merging this diverged branch unchanged
+- authenticated same-account E2E remains separate and is not replaced by PR #42
+
+### PR #46 — guarded recovery-target restore tooling
+
+- state: open draft
+- branch: `phase5-recovery-restore-rehearsal`
+- current comparison: **37 ahead / 15 behind**, merge base `c0889c867170219545c7f05662e7f0c744a83362`
+- recovery workflow `35564722856` / job `106224184976`: PASS
+  - recovery restore regressions: PASS
+  - recovery tooling syntax: PASS
+  - secret scan: PASS
+- current main comparison still shows recovery-only scripts/tests/runbook changes that are not present on main
+- disposition: **still needed if recovery tooling is to be retained, but not mergeable as-is without current-main reconciliation**
+- before any future merge: reconcile current main without history rewrite, rerun recovery regressions and current non-payment build/security checks
+- no live Worker rollback and no live database restore are authorized by this checkpoint
+
+No close/merge action was taken on PR #42 or PR #46.
