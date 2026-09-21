@@ -68,5 +68,8 @@
   "define": {
     "__filename": "\"/worker/index.js\"",
     "__dirname": "\"/worker\""
+  },
+  "browser": {
+    "binding": "BROWSER"
   }
 }
