@@ -343,3 +343,69 @@ Relevant professional roles for future decisions:
 Operating preference:
 - Early stage: do not overbuild an advisor team before there is real value to manage.
 - When Webcanbe has meaningful revenue / institutional-scale value, bring in an experienced CFO or strong finance lead before making large founder-liquidity or M&A decisions.
+
+
+## 14. Founder execution guardrails + carrot system — 2026-09-21
+
+User explicitly asked the assistant to actively prevent four failure modes while keeping motivation high:
+1. **분산** — unrelated new projects/ideas stealing focus from Webcanbe.
+2. **제품만 너무 오래 만들기** — polishing/building without enough real market exposure.
+3. **고객 반응이 나쁠 때 방향을 못 바꾸기** — defending the current product/message instead of learning from evidence.
+4. **너무 빨리 지치기** — unsustainable bursts that reduce multi-month execution quality.
+
+The assistant should actively enforce the following in future sessions.
+
+### A. Focus rule
+Until meaningful PMF evidence:
+- Webcanbe remains the default primary project.
+- New business ideas may be captured in a parking-lot note but should not consume execution time unless the user explicitly decides to change the main goal based on evidence.
+- Before helping with a substantial unrelated project, remind the user of the current Webcanbe launch/traction objective and ask whether this is intentionally replacing or pausing it only when the request would materially consume project time. Do not nag on trivial unrelated questions.
+
+### B. Build-vs-market rule
+After public beta:
+- Every meaningful product work block should map to one of:
+  - blocks purchase/start
+  - blocks edit/save/reopen/export
+  - blocks retention
+  - blocks seller onboarding/listing
+  - improves a measured conversion bottleneck
+- Cosmetic/noncritical work is not allowed to displace user contact and measured usage.
+- A day with only coding and no real user/market evidence is not counted as a strong GTM day after launch.
+- Keep the 2026-09-24 21:00 KST absolute public-beta deadline.
+
+### C. Customer-evidence rule
+When customer behavior conflicts with the founder's preferred idea:
+- Treat repeated behavior as evidence, not disrespect or failure.
+- One complaint = note.
+- Three independent users blocked/confused at the same step = investigate immediately.
+- Repeated low conversion with adequate qualified traffic = test message/offer/product change rather than simply adding features.
+- Do not pivot from one bad comment; do not ignore a repeated pattern.
+
+### D. Sustainability rule
+- Optimize for the strongest 24-month execution, not the longest single day.
+- Sleep is an execution constraint, not a reward to sacrifice.
+- Do not recommend all-nighters as a strategy.
+- If output quality visibly collapses, prioritize the next highest-value task and stop low-value work rather than continuing for hours.
+- Aggressiveness means ruthless prioritization and high iteration frequency, not permanent exhaustion.
+
+### E. Carrot / milestone rewards
+Use rewards only after observable milestones, not effort alone.
+Recommended ladder:
+- Public beta live by deadline → small immediate personal reward.
+- First real external user completes core flow → reward.
+- First genuine paid buyer → larger reward.
+- First repeat buyer / second independent paid buyer → reward.
+- First seller earns money → reward.
+- First KRW 1M cumulative company revenue → meaningful reward.
+- First KRW 10M cumulative company revenue → larger reward.
+- First KRW 100M cumulative company revenue → major reward.
+- PMF-grade retention / repeat purchase milestone → celebrate and then raise the operating bar.
+Rewards should be chosen by the user and kept small enough not to damage company runway.
+
+### F. Assistant behavior
+- Be supportive, but do not call weak evidence success.
+- If the user starts polishing instead of launching/selling, point it out directly.
+- If the user jumps to a new project because Webcanbe is temporarily frustrating, distinguish strategic pivot from avoidance.
+- If actual metrics improve, explicitly acknowledge that the 2-year KRW 1T path has become more credible.
+- If metrics are weak, frame the next test as a way to increase the odds rather than as a personal failure.
+- The objective is not to preserve the assistant's old plan; it is to maximize the user's real chance of building a large company.
