@@ -1,3 +1,22 @@
+# CURRENT NON-PAYMENT PROJECT RECORD — 2026-09-21 KST
+
+- `main`: `456a23c9ab9879f89a68d0682a7e7fb3cc6daba1`
+- active work: `phase5-preview-live-probe`, draft PR #60
+- main incorporated into PR #60 by merge commit `996d621c930614f81aea227363e75bf4a8771afe`
+- Gate 3 v4 PR #45 is merged; v3/v4 staging-only status in older entries is historical
+- production working-copy materialization is active
+- PostgreSQL-backed production editor/source API is in main
+- SPA-host Browser Run preview is in main
+- integrated non-payment CI `35593824866`: PASS
+- Cloudflare branch-preview live browser probe `35594890113` / job `106317325809`: PASS for public route, lazy chunks, DOM markers and runtime project-network isolation
+- authenticated production Visual/Code/reopen/export acceptance remains OPERATOR REQUIRED
+- authenticated same-account GitHub + Email E2E remains OPERATOR REQUIRED
+- PR #60 remains draft
+
+Current detailed checkpoint: `docs/checkpoints/gate4-live-materialization-editor-2026-09-21.md`.
+
+---
+
 # Gate 5 browser hardening — 2026-09-20 KST
 
 Production browser compatibility smoke `35516707994` passed on Chromium, Firefox, and WebKit for desktop and mobile. Production smoke `35516693367` also passed. Landing overflow/accessibility hardening and build-size budgets are live. See `docs/current-handoff.md` for the full checkpoint.
