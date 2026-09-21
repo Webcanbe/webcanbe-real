@@ -4,6 +4,7 @@ import type { ReleaseOrigin, RevisionLedger } from "../core/types"
 import { boundedHistory } from "../mutations/durableSource"
 import { AuthorityDenied, requireOpaqueId, type ServerSession, type SqliteAuthorityStore } from "./hostedAuthority"
 import { type ImmutableProjectSnapshot, ProjectRegistry } from "./projectRegistry"
+import { releaseSnapshotHash } from "./snapshotIntegrity"
 
 export type CatalogProject = Readonly<{
   catalogProjectId: string
@@ -350,13 +351,13 @@ const cleanTags = (values: string[] | undefined) => {
   return tags.sort()
 }
 const encodeFiles = (files: Map<string, Buffer>) => [...files].sort(([a], [b]) => a.localeCompare(b)).map(([file, bytes]) => [file, bytes.toString("base64")] as const)
-const immutableSnapshotHash = (snapshot: ImmutableProjectSnapshot) => sha256(JSON.stringify({
+const immutableSnapshotHash = (snapshot: ImmutableProjectSnapshot) => releaseSnapshotHash({
   projectId: snapshot.projectId,
   revisionId: snapshot.revisionId,
   contentHash: snapshot.contentHash,
   files: encodeFiles(snapshot.files),
-  history: snapshot.history
-}))
+  history: snapshot.history,
+})
 
 type ReleaseRow = Record<string, unknown> & {
   release_id: string; catalog_project_id: string; version: string; status: "published"; source_project_id: string
