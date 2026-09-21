@@ -55,6 +55,15 @@ export async function currentFirebaseIdToken(forceRefresh = false) {
   return auth.currentUser ? auth.currentUser.getIdToken(forceRefresh) : undefined
 }
 
+export async function currentFirebaseProviderIds() {
+  if (!firebaseAuthConfigured()) return []
+  const auth = firebaseAuth()
+  await auth.authStateReady()
+  return auth.currentUser?.providerData
+    .map(item => item.providerId)
+    .filter((value): value is string => typeof value === "string" && value.length > 0) ?? []
+}
+
 export function signInWithGithubFirebase(): Promise<UserCredential> {
   return signInWithPopup(firebaseAuth(), new GithubAuthProvider())
 }
