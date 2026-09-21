@@ -31,6 +31,6 @@ jobs:
       - name: Production build
         run: npm run build
       - name: Production build budget
-        run: node scripts/phase5/build-budget.mjs
+        run: node scripts/launch/build-budget.mjs
       - name: Worker bundle dry run
         run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
