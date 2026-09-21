@@ -123,6 +123,7 @@ export function tailwindToken(property: StyleProperty, value: string) {
   if (property === "color") return colorScale[normalized] ? `text-${colorScale[normalized]}` : undefined
   if (property === "fontSize") return ({ "12px": "text-xs", "14px": "text-sm", "16px": "text-base", "18px": "text-lg", "20px": "text-xl", "24px": "text-2xl" } as Record<string, string>)[normalized]
   if (property === "fontWeight") return ({ "400": "font-normal", "500": "font-medium", "600": "font-semibold", "700": "font-bold" } as Record<string, string>)[normalized]
+  if (property === "boxShadow") return normalized === "none" ? "shadow-none" : undefined
   if (property === "border") return ({ "0px": "border-0", "1px": "border", "2px": "border-2", "4px": "border-4", "8px": "border-8" } as Record<string, string>)[normalized]
   if (property === "borderRadius") return ({ "0px": "rounded-none", "4px": "rounded-sm", "6px": "rounded-md", "8px": "rounded-lg", "12px": "rounded-xl", "9999px": "rounded-full" } as Record<string, string>)[normalized]
   if (property === "alignItems") return ({ center: "items-center", start: "items-start", end: "items-end", stretch: "items-stretch" } as Record<string, string>)[normalized]
@@ -220,7 +221,10 @@ export function patchProjectStyle(store: SourceStore, files: Map<string, string>
     }
   }
   const origin = mutationOrigin(target, property, breakpoint, analysis.breakpoints)
-  if (!origin?.range || !origin.file) return failed(identity, "responsive", "No unambiguous existing declaration at this breakpoint; use Code.")
+  if (!origin?.range || !origin.file) {
+    const unavailable=target.styleOrigins.find(item=>item.property===property&&!item.editable)
+    return failed(identity,"responsive",unavailable?.reason ?? `No unique editable ${property} declaration at breakpoint ${breakpoint} in ${identity.file}:${identity.elementStart}.`)
+  }
   if (origin.kind !== "tailwind" && !safeStyleValue(value)) return failed(identity, "style", "Invalid CSS or inline value.")
   if ((origin.shared || target.repeated) && options.scope !== "source") return failed(identity, "style", `Choose source scope before editing: ${origin.scope}.`)
   if (options.semantic && !["display", "flexDirection", "gap", "padding", "paddingX", "paddingY", "margin", "width", "minWidth", "maxWidth", "height", "alignItems", "justifyContent", "alignSelf", "justifySelf", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow"].includes(property)) return failed(identity, "layout", "Unsupported semantic layout property.")

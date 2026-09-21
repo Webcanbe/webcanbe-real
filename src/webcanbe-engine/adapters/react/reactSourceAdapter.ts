@@ -6,7 +6,7 @@ import { encodeSourceIdentity } from "../../core/sourceIdentity"
 import type { ElementCapabilities, SourceIdentity, SourceRange, SourceTarget, StyleOrigin, StyleProperty } from "../../core/types"
 
 export const supportedProperties: StyleProperty[] = [
-  "backgroundColor", "color", "fontSize", "fontWeight", "padding", "paddingX", "paddingY", "margin", "gap", "width", "height", "border", "borderRadius", "alignItems", "justifyContent", "alignSelf", "justifySelf", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow", "maxWidth", "minWidth", "minHeight", "maxHeight", "flexDirection", "display", "lineHeight", "letterSpacing",
+  "backgroundColor", "color", "fontSize", "fontWeight", "padding", "paddingX", "paddingY", "margin", "gap", "width", "height", "border", "borderRadius", "boxShadow", "alignItems", "justifyContent", "alignSelf", "justifySelf", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow", "maxWidth", "minWidth", "minHeight", "maxHeight", "flexDirection", "display", "lineHeight", "letterSpacing",
 ]
 
 const astCache = new Map<string, ts.SourceFile>()
@@ -187,6 +187,23 @@ export function cssDeclaration(source: string, selector: string, property: Style
   } catch { return undefined }
 }
 
+/** Read-only evidence for declarations which cannot satisfy the mutation proof. */
+export function readonlyCSSOrigins(code: string, file: string, selector: string, property: StyleProperty, kind: "css" | "css-module"): StyleOrigin[] {
+  const result: StyleOrigin[] = []
+  try { parsedCSS(code).walkRules(rule => {
+    if (rule.selector !== selector) return
+    rule.walkDecls(cssName(property), declaration => {
+      const offset=declaration.source?.start?.offset
+      if(offset===undefined)return
+      const start=offset+declaration.prop.length+(declaration.raws.between??":").length
+      const media=rule.parent?.type==="atrule"&&rule.parent.name==="media"?rule.parent.params:undefined
+      result.push({property,kind,file,selector,media,range:{start,end:start+declaration.value.length},value:declaration.value,editable:false,
+        reason:`${file}:${declaration.source?.start?.line ?? 1}:${declaration.source?.start?.column ?? 1}: ${declaration.important?"Important declaration": "Ambiguous, conditional or non-literal declaration"} requires an explicit source change.`})
+    })
+  }) } catch { /* Invalid CSS is diagnosed by project analysis. */ }
+  return result
+}
+
 export function tailwindProperty(token: string): StyleProperty | undefined {
   const bare = token.split(":").at(-1)!
   if (/[:!\[\]]/.test(bare)) return undefined
@@ -210,6 +227,7 @@ export function tailwindProperty(token: string): StyleProperty | undefined {
   if (/^leading-(none|tight|snug|normal|relaxed|loose|\d+)$/.test(bare)) return "lineHeight"
   if (/^tracking-(tighter|tight|normal|wide|wider|widest)$/.test(bare)) return "letterSpacing"
   if (/^rounded(?:-(?:none|sm|md|lg|xl|2xl|3xl|full))?$/.test(bare)) return "borderRadius"
+  if (/^shadow(?:-(?:sm|md|lg|xl|2xl|inner|none))?$/.test(bare)) return "boxShadow"
   if (/^border(?:-\d+)?$/.test(bare)) return "border"
   // Border color/style and directional radius remain separate unsupported origins.
   if (/^items-(?:start|end|center|baseline|stretch)$/.test(bare)) return "alignItems"
@@ -227,6 +245,23 @@ export function tailwindProperty(token: string): StyleProperty | undefined {
   return undefined
 }
 
+const jsxTextValues = new Map<string, string>()
+function jsxTextValue(raw: string) {
+  if (!raw.includes("&")) return raw
+  const cached=jsxTextValues.get(raw)
+  if(cached!==undefined)return cached
+  // Ask the existing JSX compiler to decode exactly its supported entity grammar.
+  // The isolated static text node is compiled as data; generated code is never run.
+  const emitted=ts.transpileModule(`const value=<span>${raw}</span>`,{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2020}}).outputText
+  const statement=parsedSource("jsx-text.ts",emitted).statements[0]
+  const initializer=statement&&ts.isVariableStatement(statement)?statement.declarationList.declarations[0].initializer:undefined
+  const argument=initializer&&ts.isCallExpression(initializer)?initializer.arguments[2]:undefined
+  const value=argument&&ts.isStringLiteral(argument)?argument.text:raw
+  if(jsxTextValues.size>=64)jsxTextValues.delete(jsxTextValues.keys().next().value!)
+  jsxTextValues.set(raw,value)
+  return value
+}
+
 function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile, readSource?: ReadSource) {
   const element = node.parent
   if (!ts.isJsxElement(element)) return undefined
@@ -240,8 +275,8 @@ function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile, read
   const child = texts[0]
   const raw = child.getText(source)
   const leading = raw.length - raw.trimStart().length
-  const text = raw.trim()
-  return { text, range: { start: child.getStart(source) + leading, end: child.getStart(source) + leading + text.length } }
+  const spelling = raw.trim(), text = jsxTextValue(spelling)
+  return { text, range: { start: child.getStart(source) + leading, end: child.getStart(source) + leading + spelling.length } }
 }
 
 function inlineStyleOrigins(node: ts.JsxOpeningLikeElement, source: ts.SourceFile): StyleOrigin[] {
@@ -273,6 +308,7 @@ function stylesheetOrigins(file: string, source: string, classInfo: ClassInfo, r
         const range = cssDeclaration(css, `.${className}`, property, media)
         if (range) origins.push({ property, kind: classInfo.cssModule ? "css-module" : "css", editable: true, file: cssFile, selector: `.${className}`, range, media, value: css.slice(range.start, range.end).trim() })
       }
+      if (!origins.some(origin=>origin.file===cssFile&&origin.selector===`.${className}`&&origin.property===property)) origins.push(...readonlyCSSOrigins(css,cssFile,`.${className}`,property,classInfo.cssModule?"css-module":"css"))
     }
   }
   return origins
@@ -296,9 +332,9 @@ function tailwindOrigins(node: ts.JsxOpeningLikeElement, source: ts.SourceFile, 
   })
 }
 
-function capabilitySet(origins: StyleOrigin[], text: boolean, nodeKind: SourceTarget["nodeKind"], dynamicClass: boolean): ElementCapabilities {
+export function capabilitySet(origins: StyleOrigin[], text: boolean, nodeKind: SourceTarget["nodeKind"], dynamicClass: boolean): ElementCapabilities {
   const editable = origins.filter((origin) => origin.editable).map((origin) => origin.property)
-  const layoutProperties = ["alignItems", "justifyContent", "alignSelf", "justifySelf", "gap", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow"]
+  const layoutProperties = ["display", "flexDirection", "alignItems", "justifyContent", "alignSelf", "justifySelf", "gap", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow"]
   return {
     preview: true,
     codeEdit: nodeKind !== "unknown",
@@ -306,10 +342,10 @@ function capabilitySet(origins: StyleOrigin[], text: boolean, nodeKind: SourceTa
     text: nodeKind === "native" && text,
     spacing: editable.some((property) => ["padding", "paddingX", "paddingY", "margin", "gap"].includes(property)),
     color: editable.some((property) => ["backgroundColor", "color", "border"].includes(property)),
-    typography: editable.some((property) => ["fontSize", "fontWeight"].includes(property)),
-    size: editable.some((property) => ["width", "height", "maxWidth", "borderRadius"].includes(property)),
+    typography: editable.some((property) => ["fontSize", "fontWeight", "lineHeight", "letterSpacing"].includes(property)),
+    size: editable.some((property) => ["width", "height", "minWidth", "maxWidth", "minHeight", "maxHeight", "borderRadius"].includes(property)),
     layout: editable.some((property) => layoutProperties.includes(property)),
-    reorder: editable.includes("order"),
+    reorder: false,
   }
 }
 
