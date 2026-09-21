@@ -1,4 +1,4 @@
-import { AI_ACTION_COST, AI_ACTION_PACKS, PAYMENT_CURRENCY, PAYPAL_WEBHOOK_EVENTS, WEB_CAN_BE_PLANS, PaymentError, domainId, paypalPlanMapping } from "./contracts.js"
+import { AI_ACTION_COST, AI_ACTION_PACKS, MINIMUM_PAID_LISTING_MINOR, PAYMENT_CURRENCY, PAYPAL_WEBHOOK_EVENTS, WEB_CAN_BE_PLANS, PaymentError, domainId, paypalPlanMapping } from "./contracts.js"
 import { captureMarketplaceOrder, createMarketplaceOrder, createPlanSubscription } from "./domain.js"
 import { captureAiPackOrder, createAiPackOrder } from "./ai-packs.js"
 
@@ -28,6 +28,7 @@ export function publicPaymentConfiguration() {
     plans: Object.values(WEB_CAN_BE_PLANS),
     aiActionPacks: Object.values(AI_ACTION_PACKS),
     aiActionCost: AI_ACTION_COST,
+    marketplace: Object.freeze({ minimumPaidListingMinor: MINIMUM_PAID_LISTING_MINOR, freeListingsAllowed: true }),
   })
 }
 

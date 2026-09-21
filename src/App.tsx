@@ -8,7 +8,7 @@ const PreviewRuntimeHost = lazy(() => import("./PreviewRuntimeHost"))
 import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
-import { AI_ACTION_ADD_ONS, MARKETPLACE_POLICY, PUBLIC_PLAN_CATALOG } from "./webcanbe-engine/runtime/planCatalog"
+import { loadPublicPaymentConfiguration, type PublicPaymentConfiguration, type PublicPaymentPlan } from "./webcanbe-engine/runtime/planCatalog"
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
 
@@ -808,14 +808,27 @@ function Settings() {
 }
 function Plans() {
   const [annual, setAnnual] = useState(false)
-  const price = (plan: typeof PUBLIC_PLAN_CATALOG[number]) => annual ? `$${plan.annualPriceUsd}` : `$${plan.monthlyPriceUsd}`
-  const limits = (plan: typeof PUBLIC_PLAN_CATALOG[number]) => [
+  const [configuration, setConfiguration] = useState<PublicPaymentConfiguration>()
+  const [configurationError, setConfigurationError] = useState("")
+  const [retry, setRetry] = useState(0)
+  useEffect(() => { let current = true; setConfigurationError(""); void loadPublicPaymentConfiguration().then(value => { if (current) setConfiguration(value) }, error => { if (current) setConfigurationError(error instanceof Error ? error.message : "Billing configuration is unavailable.") }); return () => { current = false } }, [retry])
+  if (configurationError) return <PublicShell active="/plans"><main className="plans"><HubState kind="error" title="Plans are unavailable" body={configurationError} action={<button className="button" onClick={() => setRetry(value => value + 1)}>Try again</button>}/></main></PublicShell>
+  if (!configuration) return <PublicShell active="/plans"><main className="plans"><HubState kind="loading" title="Loading plans" body=""/></main></PublicShell>
+  const indexed = new Map(configuration.plans.map(plan => [plan.key, plan]))
+  const rows = [
+    { id: "free", name: "Free", monthly: indexed.get("free"), annual: indexed.get("free") },
+    { id: "pro", name: "Pro", monthly: indexed.get("pro_monthly"), annual: indexed.get("pro_annual") },
+    { id: "studio", name: "Studio", monthly: indexed.get("studio_monthly"), annual: indexed.get("studio_annual") },
+  ].filter((row): row is { id: string; name: string; monthly: PublicPaymentPlan; annual: PublicPaymentPlan } => Boolean(row.monthly && row.annual))
+  const limits = (plan: PublicPaymentPlan) => [
     `${plan.activeProjects} active projects`,
-    `${plan.includedAiActionsMonthly} included AI Actions / month`,
+    `${plan.monthlyAiActions} included AI Actions / month`,
     `${plan.aiConcurrency} AI ${plan.aiConcurrency === 1 ? "concurrent action" : "concurrent actions"}`,
     `${plan.deploySlots} deploy ${plan.deploySlots === 1 ? "slot" : "slots"}`,
   ]
-  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. Paid billing is not active yet; these are the configured launch prices and limits, not a checkout offer.</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual preview</button></div></div><section className="plan-grid">{PUBLIC_PLAN_CATALOG.map((plan, index) => <article className={index === 1 ? "featured" : ""} key={plan.id}>{index === 1 && <span className="popular">Coming soon</span>}<h2>{plan.name}</h2><p>{plan.id === "free" ? "For opening a project, changing it, and taking it with you." : "Configured capacity for source-first project work when paid billing opens."}</p><strong>{price(plan)}<small>{plan.monthlyPriceUsd > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={plan.id !== "free"} onClick={() => { if (plan.id === "free") go("/browse") }}>{plan.id === "free" ? "Start for free" : "Billing coming soon"}{plan.id === "free" && <> <Arrow/></>}</button></article>)}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses 1 Action; Deep AI uses 3 Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {AI_ACTION_ADD_ONS.map(addOn => `${addOn.actions} for $${addOn.priceUsd}`).join(" · ")}. Marketplace listings may be free; paid listings start at ${MARKETPLACE_POLICY.minimumPaidPriceUsd}.</p></section></main></PublicShell> }
+  const money = (minor: number) => `$${minor / 100}`
+  const billingStatus = configuration.checkoutAvailable ? "Payment service is configured; subscription checkout is not exposed in this screen yet." : "Paid billing is not active yet; prices and limits come from the payment service."
+  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual preview</button></div></div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && <span className="popular">Coming soon</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "Configured capacity for source-first project work when paid billing opens."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={row.id !== "free"} onClick={() => { if (row.id === "free") go("/browse") }}>{row.id === "free" ? "Start for free" : "Billing coming soon"}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section></main></PublicShell> }
 
 function CreatorListingEditor({ listing, onSaved }: { listing: CreatorStudioData["listings"][number]; onSaved: (listing: CreatorStudioData["listings"][number]) => void }) {
   const [title, setTitle] = useState(listing.title), [summary, setSummary] = useState(listing.summary), [availability, setAvailability] = useState(listing.availability), [tags, setTags] = useState(listing.tags.join(", "))
