@@ -1,11 +1,10 @@
 import { createHash } from "node:crypto"
-import { existsSync, readFileSync } from "node:fs"
-import { basename, resolve } from "node:path"
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { basename, join, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
-import pg from "pg"
 import { readSourceManifest } from "./backup-source-manifest.mjs"
 
-const { Client } = pg
 const UUIDISH = /^[A-Za-z0-9._-]+$/
 const SYSTEM_IDENTIFIER = /^\d+$/
 const IDENTITY_SQL = "select system_identifier::text || E'\\t' || current_database() from pg_control_system()"
@@ -16,6 +15,9 @@ function parseDatabaseUrl(raw, label) {
   try { value = new URL(raw) } catch { throw new Error(`${label} is invalid.`) }
   if (!["postgres:", "postgresql:"].includes(value.protocol) || !value.hostname || !value.username || !value.password) {
     throw new Error(`${label} must be a password-authenticated PostgreSQL URL.`)
+  }
+  if ([...value.searchParams.keys()].some(key => key !== "sslmode")) {
+    throw new Error(`${label} contains unsupported connection parameters.`)
   }
   const database = decodeURIComponent(value.pathname.replace(/^\//, "") || "postgres")
   if (!UUIDISH.test(database)) throw new Error(`${label} database name is invalid.`)
@@ -81,8 +83,51 @@ function sameDatabaseIdentity(left, right) {
     left.database === right.database
 }
 
-function quoteIdent(value) {
-  return '"' + String(value).replaceAll('"', '""') + '"'
+function guardedPreparationSql(recoveryIdentity, recordedSourceIdentity, liveSourceIdentity) {
+  const forbidden = [recordedSourceIdentity, liveSourceIdentity].filter(Boolean)
+  const forbiddenChecks = forbidden.map(identity =>
+    `(actual_system_identifier = '${identity.systemIdentifier}' AND actual_database = '${identity.database}')`,
+  ).join(" OR ") || "FALSE"
+
+  return `SET LOCAL lock_timeout = '30s';
+SET LOCAL statement_timeout = '30s';
+
+DO $$
+DECLARE
+  actual_system_identifier text;
+  actual_database text;
+  table_count integer;
+  table_list text;
+BEGIN
+  SELECT system_identifier::text, current_database()
+    INTO actual_system_identifier, actual_database
+    FROM pg_control_system();
+
+  IF actual_system_identifier <> '${recoveryIdentity.systemIdentifier}'
+     OR actual_database <> '${recoveryIdentity.database}' THEN
+    RAISE EXCEPTION 'Recovery target identity changed after approval.';
+  END IF;
+
+  IF ${forbiddenChecks} THEN
+    RAISE EXCEPTION 'Recovery target matches a protected source identity.';
+  END IF;
+
+  SELECT count(*), string_agg(format('public.%I', table_name), ', ' ORDER BY table_name)
+    INTO table_count, table_list
+    FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name LIKE 'wcb\\_%' ESCAPE '\\';
+
+  IF table_count < 40 OR table_list IS NULL THEN
+    RAISE EXCEPTION 'Recovery target does not contain the canonical schema.';
+  END IF;
+
+  EXECUTE 'TRUNCATE TABLE ' || table_list || ' RESTART IDENTITY CASCADE';
+END
+$$;
+
+SET LOCAL lock_timeout = 0;
+SET LOCAL statement_timeout = 0;
+`
 }
 
 const backup = process.argv[2] ? resolve(process.argv[2]) : ""
@@ -169,54 +214,56 @@ if (process.env.WEBCANBE_RESTORE_PLAN_ONLY === "1") {
   process.exit(0)
 }
 
-const client = new Client({
-  connectionString: process.env.RECOVERY_DATABASE_URL,
-  application_name: "webcanbe_recovery_restore",
-  statement_timeout: 30_000,
-  query_timeout: 30_000,
-})
+const restoreDirectory = mkdtempSync(join(tmpdir(), "wcb-recovery-restore-"))
+chmodSync(restoreDirectory, 0o700)
+const guardSql = join(restoreDirectory, "guard.sql")
+const restoreSql = join(restoreDirectory, "restore.sql")
+let restoreExitCode = 0
 
 try {
-  await client.connect()
-  const rows = (await client.query(
-    "select table_name from information_schema.tables where table_schema='public' and table_name like 'wcb_%' order by table_name",
-  )).rows
-  const tables = rows.map(row => String(row.table_name))
-  if (tables.length < 40) throw new Error(`Recovery target has only ${tables.length} wcb_* tables; apply the canonical schema first.`)
+  writeFileSync(
+    guardSql,
+    guardedPreparationSql(recoveryIdentity, recordedSourceIdentity, liveSourceIdentity),
+    { mode: 0o600 },
+  )
+  writeFileSync(restoreSql, "", { mode: 0o600 })
 
-  const tableList = tables.map(table => `public.${quoteIdent(table)}`).join(", ")
-  await client.query("BEGIN")
-  try {
-    await client.query(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`)
-    await client.query("COMMIT")
-  } catch (error) {
-    await client.query("ROLLBACK").catch(() => {})
-    throw error
+  const render = spawnSync("pg_restore", [
+    "--data-only",
+    "--no-owner",
+    "--no-acl",
+    "--exit-on-error",
+    "--file", restoreSql,
+    backup,
+  ], { stdio: "inherit", env: pgEnvironment(recovery) })
+
+  if (render.error?.code === "ENOENT") {
+    throw new Error("pg_restore is not installed or is not on PATH.")
+  }
+  if (render.status !== 0) {
+    restoreExitCode = render.status ?? 1
+  } else {
+    const restore = spawnSync("psql", [
+      "--no-psqlrc",
+      "--set", "ON_ERROR_STOP=1",
+      "--single-transaction",
+      "--file", guardSql,
+      "--file", restoreSql,
+    ], { stdio: "inherit", env: pgEnvironment(recovery) })
+
+    if (restore.error?.code === "ENOENT") {
+      throw new Error("psql is required to apply a guarded PostgreSQL recovery restore.")
+    }
+    if (restore.status !== 0) restoreExitCode = restore.status ?? 1
   }
 } catch (error) {
-  console.error("Recovery target preparation failed: " + (error instanceof Error ? error.message : String(error)))
-  process.exitCode = 1
+  console.error("Recovery restore failed: " + (error instanceof Error ? error.message : String(error)))
+  restoreExitCode = 1
 } finally {
-  await client.end().catch(() => {})
+  rmSync(restoreDirectory, { recursive: true, force: true })
 }
 
-if (process.exitCode) process.exit(process.exitCode)
-
-const restore = spawnSync("pg_restore", [
-  "--data-only",
-  "--no-owner",
-  "--no-acl",
-  "--exit-on-error",
-  "--single-transaction",
-  "--dbname", recovery.database,
-  backup,
-], { stdio: "inherit", env: pgEnvironment(recovery) })
-
-if (restore.error?.code === "ENOENT") {
-  console.error("pg_restore is not installed or is not on PATH.")
-  process.exit(1)
-}
-if (restore.status !== 0) process.exit(restore.status ?? 1)
+if (restoreExitCode) process.exit(restoreExitCode)
 
 const preflightEnv = { ...process.env, RECOVERY_DATABASE_URL: process.env.RECOVERY_DATABASE_URL }
 delete preflightEnv.WEBCANBE_DATABASE_URL

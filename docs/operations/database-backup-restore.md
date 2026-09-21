@@ -126,24 +126,16 @@ Preferred recovery flow:
 9. Only after verification, switch Hyperdrive/application traffic to the recovered database.
 10. Rotate DB credentials after the incident and update the Hyperdrive origin configuration.
 
-Example data restore into an already migrated **recovery** DB:
+Restore into an already migrated **recovery** DB only through the guarded wrapper. It verifies the archive and source manifest, proves the recovery target is not the recorded or current production identity, and performs the identity assertion, truncate, and restore in one rollback-safe database session:
 
 ```bash
-PGHOST=RECOVERY_HOST \
-PGPORT=5432 \
-PGDATABASE=postgres \
-PGUSER=RECOVERY_USER \
-PGPASSWORD='PRIVATE_RECOVERY_PASSWORD' \
-PGSSLMODE=require \
-pg_restore \
-  --data-only \
-  --no-owner \
-  --no-acl \
-  --dbname=postgres \
-  backups/webcanbe-data-YYYY.dump
+WEBCANBE_DATABASE_URL='postgresql://PRODUCTION_REFERENCE_URL' \
+RECOVERY_DATABASE_URL='postgresql://RECOVERY_TARGET_URL' \
+WEBCANBE_RESTORE_CONFIRM=RESTORE_RECOVERY_TARGET \
+npm run db:restore:recovery -- backups/webcanbe-data-YYYY.dump
 ```
 
-Never run the example blindly against the production host.
+Do not bypass this wrapper with a direct networked `pg_restore`; that separates target verification from the destructive restore connection.
 
 ## Recovery validation
 
