@@ -32,6 +32,12 @@ describe("Phase 5 Firebase Authentication", () => {
     expect(firebaseAuth).not.toContain("clientSecret")
   })
 
+  it("can inspect an already authenticated Firebase provider before opening another popup", () => {
+    expect(firebaseAuth).toContain("currentFirebaseProviderIds")
+    expect(firebaseAuth).toContain("auth.currentUser?.providerData")
+    expect(firebaseAuth).toContain("item.providerId")
+  })
+
   it("connects email signup and login to the Firebase password APIs", () => {
     expect(firebaseAuth).toContain("createUserWithEmailAndPassword(firebaseAuth(), email, password)")
     expect(firebaseAuth).toContain("signInWithEmailAndPassword(firebaseAuth(), email, password)")
