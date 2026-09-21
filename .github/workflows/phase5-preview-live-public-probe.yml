@@ -34,16 +34,21 @@ jobs:
         with:
           node-version: '26'
           cache: npm
-      - run: npm ci --ignore-scripts
-      - name: Install pinned Playwright package
-        run: npm install --no-save --ignore-scripts --package-lock=false playwright@1.56.1
+      - name: Prepare isolated live-probe runner
+        run: |
+          rm -rf /tmp/wcb-preview-probe
+          mkdir -p /tmp/wcb-preview-probe
+          cp scripts/launch/preview-live-public-probe.mjs /tmp/wcb-preview-probe/probe.mjs
+          cd /tmp/wcb-preview-probe
+          npm init -y >/dev/null
+          npm install --ignore-scripts --package-lock=false playwright@1.56.1
       - name: Wait for Cloudflare branch deployment propagation
         run: sleep 45
       - name: Probe actual Cloudflare branch preview DOM and network
         env:
           WCB_PREVIEW_LIVE_URL: https://phase5-preview-live-probe-webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime
-          WCB_PREVIEW_LIVE_EVIDENCE: preview-live-evidence.json
-        run: node scripts/launch/preview-live-public-probe.mjs
+          WCB_PREVIEW_LIVE_EVIDENCE: ${{ github.workspace }}/preview-live-evidence.json
+        run: node /tmp/wcb-preview-probe/probe.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
