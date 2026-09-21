@@ -5,15 +5,15 @@ const app = fs.readFileSync("src/App.tsx", "utf8")
 const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const index = fs.readFileSync("index.html", "utf8")
 
-describe("Phase 5 staged production product mode", () => {
-  it("stages production reads plus the explicit materialization mutation switch", () => {
+describe("Phase 5 production read-only product mode", () => {
+  it("activates production reads while keeping product mutations closed", () => {
     expect(client).toContain("productionReadProductMode")
     expect(client).toContain('meta[name="wcb-product-read-mode"]')
     expect(client).toContain("productReadMode")
     expect(client).toContain("productionMutationProductMode")
     expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     expect(index).toContain('<meta name="wcb-product-read-mode" content="hosted" />')
-    expect(index).toContain('<meta name="wcb-product-mutation-mode" content="hosted" />')
+    expect(index).not.toContain('name="wcb-product-mutation-mode"')
     expect(index).toContain('<meta name="wcb-control-mode" content="hosted" />')
   })
 
