@@ -2,13 +2,17 @@ import fs from "node:fs"
 import { describe, expect, it } from "vitest"
 
 describe("Phase 5 free managed Browser Run Visual preview", () => {
-  it("builds the preview runtime separately from the main application", () => {
+  it("lazy-loads the preview runtime through the primary SPA build", () => {
     const pkg = JSON.parse(fs.readFileSync("package.json","utf8"))
-    const previewConfig = fs.readFileSync("vite.preview.config.ts","utf8")
-    expect(pkg.scripts.build).toContain("vite build --config vite.preview.config.ts")
-    expect(previewConfig).toContain('emptyOutDir: false')
-    expect(previewConfig).toContain('"preview-assets/')
-    expect(fs.readFileSync("vite.config.ts","utf8")).not.toContain("preview-runtime.html")
+    const app = fs.readFileSync("src/App.tsx","utf8")
+    const host = fs.readFileSync("src/PreviewRuntimeHost.tsx","utf8")
+    expect(pkg.scripts.build).toBe("tsc -b && vite build")
+    expect(app).toContain('lazy(() => import("./PreviewRuntimeHost"))')
+    expect(app).toContain('basePath==="/__wcb_preview_runtime"')
+    expect(host).toContain('import("./preview-runtime")')
+    expect(host).toContain('hostRoot.id = "wcb-preview-host-root"')
+    expect(fs.existsSync("vite.preview.config.ts")).toBe(false)
+    expect(fs.existsSync("preview-runtime.html")).toBe(false)
   })
 
   it("binds Browser Run without adding a provider API secret", () => {
