@@ -51,6 +51,7 @@ class MemoryRepository {
   insertAiPackOrder(row) { this.aiPackOrders.push(structuredClone(row)); return structuredClone(row) }
   updateAiPackOrder(id,patch) { const row=this.aiPackOrders.find(item=>item.aiPackOrderId===id); Object.assign(row,structuredClone(patch)); return structuredClone(row) }
   ensurePurchasedAiCredit(row) { const existing=this.purchasedCredits.find(item=>item.aiPackOrderId===row.aiPackOrderId); if(existing)return structuredClone(existing); this.purchasedCredits.push(structuredClone(row)); return structuredClone(row) }
+  lockPaymentCapture() {}
   lockAiUsageUser() {}
   recordPaymentReversal(row) { if(this.reversals.some(item=>item.provider===row.provider&&item.kind===row.kind&&item.providerId===row.providerId))return false; this.reversals.push(structuredClone(row)); return true }
   paymentReversalForCaptureForUpdate(providerCaptureId,currency) { return structuredClone(this.reversals.filter(row=>row.providerCaptureId===providerCaptureId&&(!row.currency||row.currency===currency)).sort((a,b)=>(a.kind==="refund"?-1:1)-(b.kind==="refund"?-1:1)||a.occurredAt.localeCompare(b.occurredAt))[0]) }
@@ -273,6 +274,53 @@ describe("purchased AI Action packs", () => {
     await captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })
     expect(repo.aiPackOrders[0].status).toBe("refunded")
     expect(repo.purchasedCredits[0]).toMatchObject({ revocationReason: "refund", revokedAt: refund.create_time })
+  })
+
+  it("serializes an overlapping capture and refund on the provider capture ID", async () => {
+    class InterleavingRepository extends MemoryRepository {
+      constructor() {
+        super()
+        this.captureLocks = new Map()
+        this.captureAtPending = new Promise(resolve => { this.markCaptureAtPending = resolve })
+        this.continueCapture = new Promise(resolve => { this.releaseCapture = resolve })
+        this.pausePendingOnce = true
+      }
+      async atomic(action) {
+        const tx = Object.create(this); tx.lockReleases = []
+        try { return await action(tx) }
+        finally { for (const release of tx.lockReleases.reverse()) release() }
+      }
+      async lockPaymentCapture(id) {
+        const previous = this.captureLocks.get(id) || Promise.resolve()
+        let release
+        const current = previous.then(() => new Promise(resolve => { release = resolve }))
+        this.captureLocks.set(id, current)
+        await previous
+        this.lockReleases.push(() => release())
+      }
+      async paymentReversalForCaptureForUpdate(providerCaptureId, currency) {
+        if (this.pausePendingOnce) {
+          this.pausePendingOnce = false
+          this.markCaptureAtPending()
+          await this.continueCapture
+        }
+        return super.paymentReversalForCaptureForUpdate(providerCaptureId, currency)
+      }
+    }
+    const repo = new InterleavingRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_500", idempotencyKey: "pack-overlap" }, options)
+    const capture = captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })
+    await repo.captureAtPending
+    const captureId = `CAP-${order.aiPackOrderId}`
+    const refundEvent = { id: "WH-OVERLAP", event_type: "PAYMENT.CAPTURE.REFUNDED", create_time: "2026-09-20T00:00:00.000Z", resource: { id: "REF-OVERLAP", amount: { value: "15.00", currency_code: "USD" }, supplementary_data: { related_ids: { capture_id: captureId } } } }
+    const refund = processPayPalEvent(repo, refundEvent)
+    await Promise.resolve()
+    expect(repo.reversals).toHaveLength(0)
+    repo.releaseCapture()
+    await capture
+    expect((await refund).state).toBe("applied")
+    expect(repo.aiPackOrders[0].status).toBe("refunded")
+    expect(repo.purchasedCredits[0]).toMatchObject({ revocationReason: "refund", revokedAt: refundEvent.create_time })
   })
 })
 
