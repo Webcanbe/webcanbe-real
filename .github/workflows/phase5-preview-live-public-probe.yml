@@ -26,6 +26,8 @@ jobs:
   live-probe:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,10 +35,8 @@ jobs:
           node-version: '26'
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Install ephemeral Chromium probe dependency
-        run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
-          npx playwright install --with-deps chromium
+      - name: Install pinned Playwright package
+        run: npm install --no-save --ignore-scripts --package-lock=false playwright@1.56.1
       - name: Wait for Cloudflare branch deployment propagation
         run: sleep 45
       - name: Probe actual Cloudflare branch preview DOM and network
