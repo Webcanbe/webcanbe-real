@@ -1,4 +1,4 @@
-import { Component, Suspense, lazy, useEffect, useMemo, useState, type ErrorInfo, type ReactNode } from "react"
+import { Component, Suspense, lazy, useEffect, useLayoutEffect, useMemo, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
 import "./app.css"
@@ -118,9 +118,23 @@ function AppShell({ children, active, footer=true }:{children:React.ReactNode;ac
   </div>
 }
 function Protected({ children }: { children: React.ReactNode }) {
-  const auth=productionAuthMode(), [state,setState]=useState<"checking"|"allowed">(()=>auth?"checking":localSignedIn()?"allowed":"checking")
-  useEffect(()=>{let current=true;const refresh=()=>{if(!current)return;if(auth){void productionSignedIn().then(ok=>{if(!current)return;if(ok)setState("allowed");else go("/login?next="+encodeURIComponent(window.location.pathname+window.location.search))})}else if(localSignedIn())setState("allowed");else go("/login?next="+encodeURIComponent(window.location.pathname+window.location.search))};refresh();window.addEventListener("wcb:auth-changed",refresh);return()=>{current=false;window.removeEventListener("wcb:auth-changed",refresh)}},[auth])
-  if(state!=="allowed")return <main className="route-gate" role="status" aria-live="polite" aria-busy="true"><LoadingSpinner/><span className="signal">Account</span><p>Checking your session…</p></main>
+  const auth = productionAuthMode()
+  const [state, setState] = useState<"checking" | "allowed" | "denied">(() => auth ? "checking" : localSignedIn() ? "allowed" : "checking")
+  const requestSignIn = () => go("/login?next=" + encodeURIComponent(window.location.pathname + window.location.search))
+  useEffect(() => {
+    let current = true
+    const refresh = async () => {
+      const allowed = auth ? await productionSignedIn() : localSignedIn()
+      if (!current) return
+      setState(allowed ? "allowed" : "denied")
+      if (!allowed) requestSignIn()
+    }
+    void refresh()
+    window.addEventListener("wcb:auth-changed", refresh)
+    return () => { current = false; window.removeEventListener("wcb:auth-changed", refresh) }
+  }, [auth])
+  if (state === "denied") return <main className="route-gate"><span className="signal">Account</span><h1>Sign in to continue.</h1><p>Your workspace will open after you sign in.</p><button type="button" className="button primary" onClick={requestSignIn}>Sign in</button></main>
+  if (state === "checking") return <main className="route-gate" role="status" aria-live="polite" aria-busy="true"><LoadingSpinner/><span className="signal">Account</span><p>Checking your session…</p></main>
   return <>{children}</>
 }
 function Preview({ project, large = false }: { project: Project; large?: boolean }) {
@@ -162,6 +176,13 @@ function authNext() {
 
 function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:string;onClose?:()=>void}) {
   const auth=productionAuthMode(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[emailStep,setEmailStep]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState("")
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !busy && onClose) { event.preventDefault(); onClose() }
+    }
+    window.addEventListener("keydown", closeOnEscape)
+    return () => window.removeEventListener("keydown", closeOnEscape)
+  }, [busy, onClose])
   const finish=()=>{window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(next)}
   const establishFirebaseSession=async(credential:Awaited<ReturnType<typeof signInWithGithubFirebase>>)=>{
     const idToken=await credential.user.getIdToken(true)
@@ -1114,9 +1135,10 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { failed: bool
   }
 }
 export default function App() {
-  const path=usePath(),directAuth=path==="/login"||path==="/signup",directNext=new URLSearchParams(window.location.search).get("next")||"/dashboard"
+  const path=usePath(),directAuth=path==="/login"||path==="/signup",directNext=authNext()
   const [authIntent,setAuthIntent]=useState<{signup:boolean;next:string}|null>(directAuth?{signup:path==="/signup",next:directNext}:null)
-  useEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:string}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:d?.next?.startsWith("/")&&!d.next.startsWith("//")?d.next:"/dashboard"})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
+  // Install before protected children run passive effects on direct navigation.
+  useLayoutEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:string}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:d?.next?.startsWith("/")&&!d.next.startsWith("//")?d.next:"/dashboard"})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
   useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
   useEffect(()=>{syncRouteMetadata(path)},[path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
