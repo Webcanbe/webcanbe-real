@@ -564,7 +564,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before preview.")
     const frame=await browserSnapshot(env,state,body.viewport,typeof body.route==="string"?body.route:"/")
     const generation=randomUUID()
-    return {status:200,value:await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,observation:frame.observation,viewerUrl:"",state:"ready"})}
+    return {status:200,value:await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,snapshotElements:frame.observation.elements,snapshotViewport:frame.observation.viewport,snapshotRoute:frame.observation.route,state:"ready"})}
   }
   if(action==="export"){
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before export.")
