@@ -1,3 +1,4 @@
+import { historyInverse } from "../src/webcanbe-engine/mutations/historyInverse.ts"
 import { analyzeProjectStyles, viewportWidths } from "../src/webcanbe-engine/adapters/react/projectStyles.ts"
 import { parsedSource, parsedCSS, supportedProperties } from "../src/webcanbe-engine/adapters/react/reactSourceAdapter.ts"
 import { summarizeCompatibility } from "../src/webcanbe-engine/core/compatibility.ts"
@@ -256,9 +257,9 @@ function transactionFor({projectId,userId,baseRevision,newRevision,idempotencyKe
   return {tx,revision:{revisionId:newRevision,parentRevisionId:baseRevision,projectId,createdAt:timestamp,producer,actor:userId,contentHash:newContentHash,transactionId:id},validation}
 }
 
-async function saveCode(db, session, projectId, body) {
+async function saveCode(db, session, projectId, body, action = "code") {
   if (typeof body.expectedRevision !== "string" || !REVISION.test(body.expectedRevision) || typeof body.idempotencyKey !== "string" || !IDEMPOTENCY.test(body.idempotencyKey)) fail(400, "A current revision and bounded idempotency key are required.")
-  const requestHash=sha256(JSON.stringify({action:"code",base:body.expectedRevision,operations:body.operations,rewriteImports:body.rewriteImports===true}))
+  const requestHash=sha256(JSON.stringify({action,base:body.expectedRevision,operations:body.operations,transactionId:body.transactionId,rewriteImports:body.rewriteImports===true}))
   await db.query("BEGIN")
   try {
     await verifyCapability(db,session,projectId,body,true)
@@ -274,13 +275,25 @@ async function saveCode(db, session, projectId, body) {
     }
     if(state.revision!==body.expectedRevision) fail(409,"Source or preview changed; reload and retry.")
     if(body.rewriteImports===true && body.operations?.some(op=>op?.kind==="rename")) fail(422,"Automatic import rewriting is not enabled on the production Worker yet.")
-    const prepared=operationChanges(state,body.operations)
+    let inverse
+    if (action !== "code") {
+      try { inverse=historyInverse(state.history,state.history.transactions,textFiles(state.files,state.history),body.transactionId,action==="redo") }
+      catch(error) { fail(409,error.message) }
+    }
+    const operations=inverse?.operations??body.operations
+    const prepared=operationChanges(state,operations)
+    validateVisualSource(new Map(prepared.changes.filter(change=>change.after!==null).map(change=>[change.file,change.after])))
     const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history)
     const nextContentHash=sourceContentHash(nextFiles,state.history)
     const nextRevision="rev_"+randomUUID()
-    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations:body.operations,changes:prepared.changes,newContentHash:nextContentHash})
+    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,producer:action==="code"?"code":"system",editType:action==="code"?"code":action==="redo"?"redo":"revert"})
     const history=structuredClone(state.history)
-    history.transactions.push(tx);history.revisions.push(revision);history.past.push(tx.id);history.future=[]
+    history.transactions.push(tx);history.revisions.push(revision)
+    if(inverse){
+      tx.reverts=inverse.transactionId
+      if(action==="redo"){history.future=history.future.filter(id=>id!==inverse.transactionId);history.past.push(inverse.transactionId)}
+      else {history.past=history.past.filter(id=>id!==inverse.transactionId);history.future.push(inverse.transactionId)}
+    }else {history.past.push(tx.id);history.future=[]}
     if(history.transactions.length>5000||history.revisions.length>5000||Buffer.byteLength(JSON.stringify(history))>LIMITS.historyBytes) fail(409,"Project history capacity reached.")
     const payload=encodePayload(nextFiles)
     await verifyCapability(db,session,projectId,body,true)
@@ -303,7 +316,20 @@ function projectStyles(state, viewport = "desktop") {
   for (const [file, bytes] of state.files) if (/^tailwind\.config\.[cm]?[jt]s$/.test(file)) files.set(file, bytes.toString("utf8"))
   const tailwind = detectProject({}, state.files).detection.tailwind
   const analysis = analyzeProjectStyles(files, tailwind, viewportWidths[viewport])
-  for (const target of analysis.targets) target.identity = { ...target.identity, revisionId: state.revision, contentHash: sha256(files.get(target.identity.file)) }
+  for (const target of analysis.targets) {
+    target.identity = { ...target.identity, revisionId: state.revision, contentHash: sha256(files.get(target.identity.file)) }
+    for (const origin of target.styleOrigins) {
+      // Add presentation metadata without changing the raw canonical source value.
+      let value=origin.value??"", implicit=false
+      if(origin.kind==="inline") {
+        const initializer=parsedSource("value.ts",`const value=${value}`).statements[0]?.declarationList?.declarations[0]?.initializer
+        if(initializer && typeof initializer.text==="string") { implicit=/^-?\d/.test(value);value=initializer.text }
+      }
+      const numeric=origin.kind!=="tailwind" && /^(-?\d+(?:\.\d+)?)(px|rem|em|%|vh|vw|ch)?$/.exec(value)
+      origin.numericValue=numeric?Number(numeric[1]):null
+      origin.unit=numeric?(numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"number")):null
+    }
+  }
   return { ...analysis, files, tailwind }
 }
 
@@ -403,7 +429,7 @@ async function saveVisual(db,session,projectId,body,env){
     }
     if(state.revision!==body.expectedRevision)fail(409,"Source or preview changed; reload and retry.")
     const analysis=projectStyles(state,body.viewport),target=sourceTarget(state,body.identity,analysis),edit=body.edit
-    if(edit.type==="text"&&(target.textShared||target.repeated)&&edit.scope!=="source")fail(422,"This text has shared/repeated uses; choose explicit source scope.")
+    if(edit.type==="text"&&(target.textShared||target.repeated||/; (?:[2-9]|[1-9]\d+) statically/.test(target.effectScope??""))&&edit.scope!=="source")fail(422,"This text has shared/repeated uses; choose explicit source scope.")
     const staged=new Map(analysis.files)
     const store={tailwind:analysis.tailwind,read:file=>staged.get(file),write:(file,content,expected)=>{
       if(!sourceMember(file,state.history))fail(422,"Mutation is outside editable source scope.")
@@ -414,7 +440,7 @@ async function saveVisual(db,session,projectId,body,env){
       :edit.type==="reorder"?patchSiblingReorder(store,analysis.files,target.identity,edit.value,body.viewport,edit.scope)
       :edit.type==="responsive-create"?patchResponsiveConstruct(store,analysis.files,target.identity,edit.property,edit.value,edit.breakpoint,edit.scope)
       :patchProjectStyle(store,analysis.files,target.identity,edit.property,edit.value,{breakpoint:edit.breakpoint,viewport:edit.type==="responsive"?edit.viewport:undefined,scope:edit.scope,semantic:edit.type==="layout"})
-    if(!mutation.success)fail(422,mutation.error || "Source mutation is unsupported.")
+    if(!mutation.success)fail(422,`${mutation.error || "Source mutation is unsupported."} (${target.identity.file}:${target.sourceRange.start}-${target.sourceRange.end})`)
     const operations=[...staged].filter(([file,content])=>content!==analysis.files.get(file)).map(([file,content])=>({kind:"update",file,expectedHash:sha256(analysis.files.get(file)),content}))
     validateVisualSource(new Map(operations.map(op=>[op.file,op.content])))
     const prepared=operationChanges(state,operations)
@@ -426,6 +452,7 @@ async function saveVisual(db,session,projectId,body,env){
     if (["reorder","responsive-create"].includes(edit.type)) await browserSnapshot(env,{...state,files:nextFiles},body.viewport,"/")
     const history=structuredClone(state.history);history.transactions.push(tx);history.revisions.push(revision);history.past.push(tx.id);history.future=[]
     if(history.transactions.length>5000||history.revisions.length>5000||Buffer.byteLength(JSON.stringify(history))>LIMITS.historyBytes)fail(409,"Project history capacity reached.")
+    await verifyCapability(db,session,projectId,body,true)
     const changed=await db.query("UPDATE wcb_projects SET revision=$2,files=$3,history=$4,source_epoch=source_epoch+1 WHERE project_id=$1 AND revision=$5 AND source_epoch=$6 RETURNING source_epoch",[projectId,nextRevision,JSON.stringify(encodePayload(nextFiles)),JSON.stringify(history),state.revision,state.epoch])
     if(!changed.rowCount)fail(409,"Source or preview changed; reload and retry.")
     await verifyCapability(db,session,projectId,body,true);await db.query("COMMIT")
@@ -521,13 +548,13 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
       project:detectProject({id:projectId,name:String(project.name||"Hosted project")},state.files),
-      runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Production Visual editing is currently limited to safe static-text source mutations."]},
+      runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Visual edits use AST source mutations; shared definitions require explicit source scope. Snapshot preview does not support live interaction."]},
       session:editorSession,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
       compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
     }}
   }
   if(action==="drafts") return drafts(db,session,projectId,body)
-  if(action==="code") return saveCode(db,session,projectId,body)
+  if(["code","revert","undo","redo"].includes(action)) return saveCode(db,session,projectId,body,action)
   const {state}=await readState(db,session,projectId,body,false)
   if(action==="files"){
     const listing=publicFiles(state)
