@@ -5,6 +5,7 @@ const index = fs.readFileSync("index.html", "utf8")
 const wrangler = JSON.parse(fs.readFileSync("wrangler.jsonc", "utf8")) as { vars?: Record<string,string> }
 const worker = fs.readFileSync("worker/index.js", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
+const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const fixture = fs.readFileSync("scripts/launch/materialization-smoke-fixture.mjs", "utf8")
 
 describe("Phase 5 Gate 3 prepared materialization activation", () => {
@@ -16,8 +17,8 @@ describe("Phase 5 Gate 3 prepared materialization activation", () => {
   })
 
   it("has the exact two bounded activation seams ready without opening Seller or payment mutation routes", () => {
-    expect(app).toContain("productionMutationProductMode")
-    expect(app).toContain('meta[name="wcb-product-mutation-mode"]')
+    expect(client).toContain("productionMutationProductMode")
+    expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("type DashboardView"))
     const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     expect(purchases).toContain("productMutationMode()")
