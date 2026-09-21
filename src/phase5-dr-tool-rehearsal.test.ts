@@ -206,9 +206,19 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
     ])
   })
 
-  it("behaviorally proves backup credentials stay in child env and the produced archive is verifiable",()=>{
-    const root=tempRoot(), bin=path.join(root,"bin"), capture=path.join(root,"dump-capture.json"), target=path.join(root,"backup.dump")
+  it("behaviorally proves backup credentials stay in child env and the produced archive is source-bound and verifiable",()=>{
+    const root=tempRoot(), bin=path.join(root,"bin"), capture=path.join(root,"dump-capture.json"), psqlCapture=path.join(root,"psql-capture.json"), target=path.join(root,"backup.dump")
     fs.mkdirSync(bin)
+
+    executable(path.join(bin,"psql"),[
+      "#!/usr/bin/env node",
+      'const fs=require("fs")',
+      'const calls=fs.existsSync(process.env.WCB_PSQL_CAPTURE)?JSON.parse(fs.readFileSync(process.env.WCB_PSQL_CAPTURE,"utf8")):[]',
+      'calls.push({args:process.argv.slice(2),password:process.env.PGPASSWORD,raw:process.env.WEBCANBE_DATABASE_URL||null,database:process.env.PGDATABASE})',
+      'fs.writeFileSync(process.env.WCB_PSQL_CAPTURE,JSON.stringify(calls))',
+      'process.stdout.write("7777777777777777777\\t"+process.env.PGDATABASE+"\\n")',
+      "",
+    ].join("\n"))
 
     executable(path.join(bin,"pg_dump"),[
       "#!/usr/bin/env node",
@@ -229,18 +239,36 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
 
     const password=["fixture","value"].join("-")
     const url="postgresql://operator:"+encodeURIComponent(password)+"@localhost:5432/postgres?sslmode=require"
-    const env={...process.env,PATH:bin+path.delimiter+(process.env.PATH||""),WEBCANBE_DATABASE_URL:url,WCB_DUMP_CAPTURE:capture}
+    const env={...process.env,PATH:bin+path.delimiter+(process.env.PATH||""),WEBCANBE_DATABASE_URL:url,WCB_DUMP_CAPTURE:capture,WCB_PSQL_CAPTURE:psqlCapture}
 
     const backup=spawnSync(process.execPath,["scripts/db/backup.mjs",target],{cwd:process.cwd(),env,encoding:"utf8"})
     expect(backup.status).toBe(0)
     expect(fs.existsSync(target)).toBe(true)
     expect(fs.existsSync(target+".sha256")).toBe(true)
+    expect(fs.existsSync(target+".source.json")).toBe(true)
 
     const seen=JSON.parse(fs.readFileSync(capture,"utf8"))
     expect(seen.password).toBe(password)
     expect(seen.raw).toBeNull()
     expect(seen.args.join(" ")).not.toContain(password)
     expect(seen.args.join(" ")).not.toContain("postgresql://")
+
+    const probes=JSON.parse(fs.readFileSync(psqlCapture,"utf8"))
+    expect(probes).toHaveLength(2)
+    expect(probes.every((probe:any)=>probe.password===password)).toBe(true)
+    expect(probes.every((probe:any)=>probe.raw===null)).toBe(true)
+    expect(probes.flatMap((probe:any)=>probe.args).join(" ")).not.toContain(password)
+    expect(probes.flatMap((probe:any)=>probe.args).join(" ")).not.toContain("postgresql://")
+
+    const manifestText=fs.readFileSync(target+".source.json","utf8")
+    const manifest=JSON.parse(manifestText)
+    expect(manifest.format).toBe("webcanbe-postgres-backup-source-v1")
+    expect(manifest.systemIdentifier).toBe("7777777777777777777")
+    expect(manifest.database).toBe("postgres")
+    expect(manifest.archiveSha256).toMatch(/^[a-f0-9]{64}$/)
+    expect(manifestText).not.toContain(password)
+    expect(manifestText).not.toContain("operator")
+    expect(manifestText).not.toContain("localhost")
 
     const verify=spawnSync(process.execPath,["scripts/db/verify-backup.mjs",target],{
       cwd:process.cwd(),
