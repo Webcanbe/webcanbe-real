@@ -425,7 +425,12 @@ async function saveVisual(db,session,projectId,body,env){
     const state=verifyProjectState(projectId,row)
     const prior=state.history.transactions.find(item=>item.idempotencyKey===body.idempotencyKey)
     if(prior){
-      if(prior.requestHash!==requestHash)fail(409,"Idempotency key was already used for a different Visual request.")
+      // Accepted text-only Worker requests used a narrower fingerprint before
+      // style mutations were connected. Replaying that exact operation is safe;
+      // new requests still fingerprint every edit option and viewport.
+      const legacyTextHash=body.edit.type==="text"?sha256(JSON.stringify({action:"visual-text",base:body.expectedRevision,identity:body.identity,value:body.edit.value})):undefined
+      const legacyReplay=prior.producer==="visual"&&prior.editType==="text"&&prior.requestHash===legacyTextHash
+      if(prior.requestHash!==requestHash&&!legacyReplay)fail(409,"Idempotency key was already used for a different Visual request.")
       await verifyCapability(db,session,projectId,body,true);await db.query("COMMIT")
       return {status:200,value:{transaction:prior,replayed:true,validation:prior.validation,revision:state.revision,diff:""}}
     }

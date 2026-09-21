@@ -302,6 +302,20 @@ describe("Worker AST Visual transactions",()=>{
     expect(b.target.styleOrigins[0].numericValue).toBeUndefined()
     expect(b.target.styleOrigins[0].unit).toBeUndefined()
   })
+  it('replays accepted pre-style Worker text fingerprints across the engine upgrade',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main>Hello</main>`)
+    const body={identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'legacy-text-retry',edit:{type:'text',value:'Previously accepted',scope:'instance'}}
+    const saved=await call('mutate',body)
+    const {createHash}=await import('node:crypto')
+    state.project.history.transactions[0].requestHash=createHash('sha256').update(JSON.stringify({action:'visual-text',base:body.expectedRevision,identity:body.identity,value:body.edit.value})).digest('hex')
+    const before=structuredClone(state.project)
+    const replay=await call('mutate',body)
+    expect(replay.value.replayed).toBe(true)
+    expect(replay.value.transaction.id).toBe(saved.value.transaction.id)
+    expect(state.project).toEqual(before)
+    await expect(call('mutate',{...body,edit:{...body.edit,value:'Different request'}})).rejects.toMatchObject({status:409})
+    expect(state.project).toEqual(before)
+  })
   it('reopens JSX entities as rendered text without double-escaping subsequent edits',async()=>{
     const {state,call,target}=await setup(`export default()=> <main>Hello</main>`)
     const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'text-entity-first',edit:{type:'text',value:'A & B'}})
