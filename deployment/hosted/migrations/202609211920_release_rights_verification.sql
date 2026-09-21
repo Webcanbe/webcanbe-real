@@ -32,5 +32,5 @@ CREATE TRIGGER wcb_immutable_release_rights_verification
 BEFORE UPDATE OR DELETE ON public.wcb_release_rights_verifications
 FOR EACH ROW EXECUTE FUNCTION public.wcb_refuse_release_rights_verification_mutation();
 
-REVOKE ALL ON TABLE public.wcb_release_rights_verifications FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON TABLE public.wcb_release_rights_verifications FROM PUBLIC, anon, authenticated, webcanbe_runtime;
 GRANT SELECT, INSERT ON TABLE public.wcb_release_rights_verifications TO webcanbe_runtime;
