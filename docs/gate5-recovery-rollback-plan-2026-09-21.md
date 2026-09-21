@@ -3,14 +3,14 @@
 ## Verified checkpoint
 
 - Production/main remains `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
-- Gate 3 activation candidate remains `phase5-gate3-materialization-staging-v4` at `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`; exact main→v4 comparison is still ahead-only / 0 behind.
+- Gate 3 activation candidate remains `phase5-gate3-materialization-staging-v4` at `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`; exact main→v4 comparison remains ahead-only / **0 behind**.
 - Gate 5 recovery branch: `phase5-recovery-restore-rehearsal`, draft PR #46.
-- Latest verified Gate 5 code/test checkpoint: `a417e10c083578cf58abfc36fc8c9e46bb38e869`.
-- Recovery verification run `35551013662`, job `106185647363`: **PASS**.
+- Latest verified Gate 5 implementation/test checkpoint: `4a6d33ec35f20cd1c8ac2cba21133165f08961ac`.
+- Recovery verification run `35554572340`, job `106195587316`: **PASS**.
   - recovery/restore regressions: PASS
   - recovery tooling syntax: PASS
   - secret scan: PASS
-- Later commits in this branch may be documentation-only `[skip ci]`; do not treat them as new implementation evidence without a new verification run.
+- Later `[skip ci]` documentation commits do not represent newer implementation evidence.
 
 ## Worker rollback hardening completed
 
@@ -19,14 +19,20 @@
   - `wrangler versions list --json`
   - `wrangler deployments status --json`
 - The exact rollback target must exist in the current recent-version data.
-- Current deployment status must expose at least one Worker version ID; otherwise planning fails closed rather than executing with unknown active state.
-- Plan output records both the verified rollback target and the current active Worker version ID(s).
-- If the rollback target is already present in the current deployment, the plan explicitly tells the operator to inspect traffic allocation before taking action.
-- Plan mode never invokes `wrangler rollback`, requires no destructive confirmation flag, and makes no deployment/traffic change.
+- Current deployment status must expose at least one Worker version ID; otherwise planning fails closed rather than operating with unknown active state.
+- Plan output records both the verified rollback target and current active Worker version ID(s).
+- If the rollback target is already present in the current deployment, the plan tells the operator to inspect traffic allocation before taking action.
+- Plan mode never invokes `wrangler rollback` and makes no deployment/traffic change.
 - A missing target fails before the deployment-status query. Missing active-version evidence also fails closed.
-- Existing destructive rollback protections remain unchanged: an actual rollback requires `WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION` and forwards only the exact operator-supplied version ID.
-- Behavioral subprocess coverage proves the read-only target/status queries, active-version reporting, fail-closed paths, and exact destructive forwarding against a fake Wrangler boundary.
-- `docs/operations/cloudflare-rollback.md` documents this preflight before any controlled rollback.
+
+### Confirmed execution now repeats the preflight
+
+- Actual rollback still requires `WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION`; missing confirmation fails **before any Wrangler subprocess is invoked**.
+- After confirmation and before `wrangler rollback`, the wrapper now repeats the same two read-only checks used by plan mode.
+- A stale/missing target, failed/malformed `versions list`, failed/malformed `deployments status`, or missing active-version evidence stops execution before the destructive command.
+- Only after that preflight passes is the exact operator-supplied UUID forwarded to `wrangler rollback`; the wrapper never chooses a previous version automatically.
+- Behavioral subprocess coverage proves this sequence against a fake Wrangler boundary and proves a stale target cannot reach either the status query or rollback command.
+- Operational runbook `docs/operations/cloudflare-rollback.md` records the same execution contract.
 
 ## Recovery restore tooling already prepared
 
@@ -41,9 +47,10 @@
 - No production database or recovery database was mutated.
 - Production product mutation remains OFF.
 - Draft PR #46 remains recovery-preparation only and is not merged into Gate 3 v4.
-- Gate 2 provider initiation is already closed; do not repeat it. Gate 2 as a whole still requires the human-authenticated same-account GitHub/Email link/login/private-read/refresh/logout sequence before Gate 3 production activation.
+- Gate 2 credential-free provider boundary remains closed. Gate 2 as a whole still requires the human-authenticated same-account GitHub/Email link/login/private-read/refresh/logout sequence before Gate 3 production activation.
+- Gate 3 v4 remains draft/staging only; no launch fixture or materialization switch was enabled in production.
 - The controlled live Worker rollback drill and a real off-site recovery-database restore remain pending Gate 5 drills.
 
 ## One next autonomous action
 
-Continue Gate 5 without touching production by extending the recovery rehearsal to verify the *post-rollback* verification contract against fixtures: after a simulated rollback command, require a production-smoke/readiness verification step in the runbook/test harness before the drill can be considered complete. Keep the real rollback itself pending until a controlled production drill is explicitly safe.
+Continue Gate 5 without touching production by enforcing the **post-rollback verification contract** in the rehearsal harness: after a simulated successful rollback, require a production smoke/readiness verification step before the drill can be considered successful, and prove that verification failure leaves the drill failed. Keep the real rollback itself pending until a controlled production drill is explicitly safe.
