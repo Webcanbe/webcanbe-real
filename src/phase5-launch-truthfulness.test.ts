@@ -22,16 +22,15 @@ describe("Phase 5 launch truthfulness cleanup", () => {
     expect(dashboard).not.toContain("Google sign-in is active.")
   })
 
-  it("does not present paid plans as purchasable before billing activation", () => {
+  it("enables paid plans only when the payment service says checkout is available", () => {
     const plans = app.slice(app.indexOf("function Plans()"), app.indexOf("function CreatorListingEditor"))
-    expect(plans).toContain("Paid billing is not active yet")
-    expect(plans).toContain("prices and limits come from the payment service")
-    expect(plans).toContain("Annual preview")
-    expect(plans).toContain("Coming soon")
-    expect(plans).toContain('disabled={row.id !== "free"}')
-    expect(plans).toContain("Billing coming soon")
+    expect(plans).toContain("Paid checkout is currently unavailable")
+    expect(plans).toContain("configuration.checkoutAvailable")
+    expect(plans).toContain(">Annual<")
+    expect(plans).toContain("Checkout unavailable")
+    expect(plans).toContain("hostedProductClient.createSubscription")
     expect(plans).not.toContain("Most chosen")
-    expect(plans).not.toContain("Choose ${p.name}")
+    expect(plans).toContain("Choose ${row.name}")
   })
 
   it("reads public plan values from the authoritative payment endpoint", () => {

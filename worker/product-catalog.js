@@ -30,6 +30,8 @@ function publicListing(row) {
     releaseVersion: String(row.version),
     sourceRevisionId: String(row.source_revision_id),
     snapshotHash: String(row.snapshot_hash),
+    priceMinor: Number(row.price_minor),
+    currency: String(row.currency),
   }
   if (row.qualification_status) {
     listing.ready = {

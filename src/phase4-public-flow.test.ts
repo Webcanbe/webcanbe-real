@@ -10,8 +10,9 @@ describe("Phase 4 public/auth/purchase flow", () => {
     expect(home).toContain("DOMParser")
     expect(home).not.toContain("<iframe")
   })
-  it("keeps real payment explicitly deferred instead of claiming success", () => {
-    expect(app).toContain("The real card-first provider connection belongs to Phase 5")
-    expect(app).toContain("Successful payment → entitlement → Dashboard")
+  it("connects checkout to server-created and server-captured orders", () => {
+    expect(app).toContain("hostedProductClient.createPaymentOrder")
+    expect(app).toContain("hostedProductClient.capturePaymentOrder")
+    expect(app).toContain("Refreshing this return page cannot create a second entitlement")
   })
 })

@@ -5,11 +5,15 @@ import { PayPalProvider } from './payments/paypal-provider.js'
 import { PostgresPaymentRepository } from './payments/postgres-repository.js'
 import { handlePrivatePaymentRequest, publicPaymentConfiguration } from './payments/http.js'
 import { handlePayPalWebhook } from './payments/webhook.js'
+import { PaymentError } from './payments/contracts.js'
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), {status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})
-export const paymentPaths = new Set(['orders/create','orders/capture','subscriptions/create','subscriptions/cancel','ai-packs/create','ai-packs/capture'].map(path=>'/__webcanbe/api/payments/'+path))
-export function paymentConfigured(env) {
+export const paymentPaths = new Set(['status','orders/create','orders/capture','subscriptions/create','subscriptions/cancel','ai-packs/create','ai-packs/capture'].map(path=>'/__webcanbe/api/payments/'+path))
+function paypalConfigured(env) {
   return env?.WEBCANBE_PAYMENTS === 'enabled' && ['sandbox','live'].includes(env.PAYPAL_ENVIRONMENT) && ['PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_WEBHOOK_ID'].every(key=>typeof env[key] === 'string' && env[key].length > 0)
+}
+export function paymentConfigured(env) {
+  return paypalConfigured(env) && ['PAYPAL_PLAN_PRO_MONTHLY','PAYPAL_PLAN_PRO_ANNUAL','PAYPAL_PLAN_STUDIO_MONTHLY','PAYPAL_PLAN_STUDIO_ANNUAL'].every(key=>typeof env[key] === 'string' && env[key].length > 0)
 }
 export function paymentConfiguration(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
@@ -18,12 +22,14 @@ export function paymentConfiguration(request, env) {
 // Caller has already resolved the database session, checked CSRF/origin and bounded JSON.
 export async function privatePayment(request, path, db, session, env) {
   if (!paymentPaths.has(path)) return json({error:'Payment operation is unavailable.'},404)
-  if (!paymentConfigured(env)) return json({error:'Payment checkout is not configured.'},503)
-  return handlePrivatePaymentRequest(request,path,{repo:new PostgresPaymentRepository(db),provider:new PayPalProvider(env),session,env})
+  const configured=paypalConfigured(env)
+  if (!configured && !['/__webcanbe/api/payments/status','/__webcanbe/api/payments/orders/create'].includes(path)) return json({error:'Payment checkout is not configured.'},503)
+  const provider=configured?new PayPalProvider(env):{createOrder(){throw new PaymentError(503,'payment_checkout_unavailable','Paid checkout is not configured.')}}
+  return handlePrivatePaymentRequest(request,path,{repo:new PostgresPaymentRepository(db),provider,session,env})
 }
 export async function paypalWebhook(request, env) {
   if(request.method !== 'POST') return new Response(null,{status:405,headers:{Allow:'POST'}})
-  if(!paymentConfigured(env)) return json({error:'Payment webhook is not configured.'},503)
+  if(!paypalConfigured(env)) return json({error:'Payment webhook is not configured.'},503)
   let body
   try { body = await boundedPaymentBody(request, 256 * 1024) }
   catch { return json({error:'Invalid or oversized webhook body.'},413) }

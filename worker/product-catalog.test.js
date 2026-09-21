@@ -13,6 +13,8 @@ const row = {
   availability: "available",
   tags: ["react", "marketing"],
   demo_metadata: { price: 79 },
+  price_minor: 7900,
+  currency: "USD",
   updated_at: "2026-09-19T00:00:00.000Z",
   version: "1.0.0",
   source_project_id: "44444444-4444-4444-8444-444444444444",
@@ -40,6 +42,8 @@ describe("Workers public catalog adapter", () => {
       releaseVersion: "1.0.0",
       sourceRevisionId: "rev_1",
       snapshotHash: "snapshot-hash",
+      priceMinor: 7900,
+      currency: "USD",
       ready: { status: "ready" },
     })
     expect(calls[0].sql).toContain("l.status='published'")
