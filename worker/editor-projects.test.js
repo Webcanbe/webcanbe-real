@@ -176,7 +176,7 @@ describe("production Worker source editor API",()=>{
     expect(received.options.url).toBe("https://webcanbe.com/preview-runtime.html")
     expect(received.options.addScriptTag[0].content).toContain("__WCB_PROJECT_PAYLOAD__")
     expect(received.options.addScriptTag[0].content).not.toContain("__Host-wcb-session")
-    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|assets\\/[^?#]+)$/"])
+    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|preview-assets\\/[^?#]+)$/"])
   })
 
   it("routes production project APIs before the static SPA fallback",()=>{
