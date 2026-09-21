@@ -21,6 +21,17 @@ Recorded: 2026-09-21 KST. This is an incremental continuation record, not a repl
 
 ---
 
+## Gate 4 Visual + Code chain verified — 2026-09-21 KST
+
+- v4 checkpoint `85c66326ae85ffe5065197ecd4272673b1021bf2` upgraded the launch-chain regression from Code-only durability to the real combined edit path.
+- The test now executes:
+  `immutable materialized release → React source analysis → safe Visual text mutation → durable Visual commit → Code commit → reopen → standalone export/build`.
+- It verifies the last two accepted history transactions are producers `visual` then `code`, both source changes survive reopen, immutable release provenance is retained, exported source contains both edits, Webcanbe runtime state is absent, and the independent build passes.
+- Integrated Gate 3 v4 run `35546569409`, job `106173445526`: **PASS** across launch-chain, durable editor/export, Bigperson authority, production build, build budget, and Worker dry-run.
+- This is staging evidence only; production mutation remains OFF.
+
+---
+
 ## Gate 3 v4 verification closed — 2026-09-21 KST
 
 - Active staging branch: `phase5-gate3-materialization-staging-v4`.
