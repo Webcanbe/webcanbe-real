@@ -187,6 +187,69 @@ export async function promoteAssessmentRelease(db,session,input,evidenceId){
   return {promotion,release}
 }
 
+export async function verifyReleaseRights(db,session,input,evidenceId){
+  const releaseId=id(input?.releaseId,"release"), auditKey=key(input?.idempotencyKey)
+  const basis=String(input?.rightsBasis||""), licenseExpression=cleanText(input?.licenseExpression,"license expression",200)
+  if(!["first_party_original","seller_rights_reviewed","open_source_compatible"].includes(basis)) throw new Error("Invalid rights basis.")
+  if(!/^[A-Za-z0-9][A-Za-z0-9 ._+()/:,-]{0,199}$/.test(licenseExpression)) throw new Error("Invalid license expression.")
+  const sourceEvidence=jsonObject(input?.sourceEvidence,"source rights evidence")
+  const dependencyEvidence=jsonObject(input?.dependencyEvidence,"dependency rights evidence")
+  const assetEvidence=jsonObject(input?.assetEvidence,"asset rights evidence")
+  for(const [label,value] of [["source",sourceEvidence],["dependency",dependencyEvidence],["asset",assetEvidence]]){
+    if(value.reviewed!==true||value.unresolvedCount!==0) throw new Error(label+" rights evidence is not fully reviewed.")
+  }
+  if(basis==="first_party_original"&&(sourceEvidence.origin!=="first_party_repo"||sourceEvidence.original!==true)) throw new Error("First-party rights basis requires original repository evidence.")
+  if(basis==="seller_rights_reviewed"&&(sourceEvidence.sellerAttested!==true||sourceEvidence.reviewerApproved!==true)) throw new Error("Seller rights basis requires reviewed seller attestation.")
+  if(basis==="open_source_compatible"&&sourceEvidence.openSourceCompatible!==true) throw new Error("Open-source rights basis requires compatible source-license evidence.")
+
+  await role(db,session,"admin")
+  await evidence(db,session,evidenceId)
+  await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,98))",[releaseId])
+  const release=(await db.query(`SELECT r.release_id,r.catalog_project_id,r.status,r.source_project_id,r.source_revision_id,r.source_content_hash,r.snapshot_hash,
+    c.status AS catalog_status,c.created_by,c.owner_workspace_id
+    FROM wcb_project_releases r
+    JOIN wcb_catalog_projects c ON c.catalog_project_id=r.catalog_project_id
+    WHERE r.release_id=$1 FOR SHARE`,[releaseId])).rows[0]
+  if(!release||release.status!=="published"||release.catalog_status!=="active") throw new Error("Release is not eligible for rights verification.")
+
+  const byKey=(await db.query("SELECT * FROM wcb_release_rights_verifications WHERE verified_by=$1 AND idempotency_key=$2 FOR SHARE",[session.userId,auditKey])).rows[0]
+  const existing=(await db.query("SELECT * FROM wcb_release_rights_verifications WHERE release_id=$1 FOR SHARE",[releaseId])).rows[0]
+  const boundSourceEvidence={
+    ...sourceEvidence,
+    releaseSnapshotHash:String(release.snapshot_hash),
+    sourceContentHash:String(release.source_content_hash),
+    sourceRevisionId:String(release.source_revision_id),
+    sourceProjectId:String(release.source_project_id),
+  }
+  const normalized={
+    rightsBasis:basis,
+    licenseExpression,
+    sourceEvidence:boundSourceEvidence,
+    dependencyEvidence,
+    assetEvidence,
+  }
+  if(byKey||existing){
+    if(!byKey||!existing||String(byKey.verification_id)!==String(existing.verification_id)
+      ||String(existing.catalog_project_id)!==String(release.catalog_project_id)
+      ||existing.rights_basis!==basis||existing.license_expression!==licenseExpression
+      ||canonicalJson(existing.source_evidence)!==canonicalJson(boundSourceEvidence)
+      ||canonicalJson(existing.dependency_evidence)!==canonicalJson(dependencyEvidence)
+      ||canonicalJson(existing.asset_evidence)!==canonicalJson(assetEvidence)
+      ||existing.verification_status!=="verified") throw new Error("Release already has conflicting rights evidence.")
+    await audit(db,session,evidenceId,"release.rights.verify","release",releaseId,{before:null,after:"verified",...normalized},auditKey)
+    return existing
+  }
+
+  await audit(db,session,evidenceId,"release.rights.verify","release",releaseId,{before:null,after:"verified",...normalized},auditKey)
+  return (await db.query(`INSERT INTO wcb_release_rights_verifications(
+    verification_id,release_id,catalog_project_id,rights_basis,license_expression,
+    source_evidence,dependency_evidence,asset_evidence,verification_status,verified_by,idempotency_key,verified_at
+  ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'verified',$9,$10,clock_timestamp()) RETURNING *`,[
+    crypto.randomUUID(),releaseId,release.catalog_project_id,basis,licenseExpression,
+    JSON.stringify(boundSourceEvidence),JSON.stringify(dependencyEvidence),JSON.stringify(assetEvidence),session.userId,auditKey,
+  ])).rows[0]
+}
+
 export async function publishPromotedListing(db,session,input,evidenceId){
   const promotionId=id(input?.promotionId,"release promotion"), auditKey=key(input?.idempotencyKey)
   const listing={slug:cleanSlug(input?.slug),title:cleanText(input?.title,"listing title",200),summary:cleanText(input?.summary,"listing summary",2000),tags:cleanTags(input?.tags),demoMetadata:jsonObject(input?.demoMetadata,"demo metadata")}
@@ -194,19 +257,22 @@ export async function publishPromotedListing(db,session,input,evidenceId){
   await evidence(db,session,evidenceId)
   await db.query("SELECT pg_advisory_xact_lock(hashtextextended($1,97))",[promotionId])
   const lineage=(await db.query(`SELECT p.*,r.status AS release_status,r.source_project_id AS release_source_project_id,r.source_revision_id AS release_source_revision_id,
-    r.source_content_hash AS release_source_content_hash,r.snapshot_hash AS release_snapshot_hash,c.source_project_id AS catalog_source_project_id,c.created_by,c.status AS catalog_status
+    r.source_content_hash AS release_source_content_hash,r.snapshot_hash AS release_snapshot_hash,c.source_project_id AS catalog_source_project_id,c.created_by,c.status AS catalog_status,
+    rv.verification_id AS rights_verification_id,rv.verification_status AS rights_status,rv.rights_basis,rv.license_expression
     FROM wcb_seller_release_promotions p
     JOIN wcb_project_releases r ON r.release_id=p.release_id AND r.catalog_project_id=p.catalog_project_id
     JOIN wcb_catalog_projects c ON c.catalog_project_id=p.catalog_project_id
+    JOIN wcb_release_rights_verifications rv ON rv.release_id=p.release_id AND rv.catalog_project_id=p.catalog_project_id
     WHERE p.promotion_id=$1 FOR SHARE`,[promotionId])).rows[0]
   const exact=lineage&&lineage.release_status==="published"&&lineage.catalog_status==="active"
     &&String(lineage.release_source_project_id)===String(lineage.source_project_id)&&String(lineage.release_source_revision_id)===String(lineage.source_revision_id)
     &&String(lineage.release_source_content_hash)===String(lineage.source_content_hash)&&String(lineage.release_snapshot_hash)===String(lineage.submission_snapshot_hash)
     &&String(lineage.catalog_source_project_id)===String(lineage.source_project_id)&&String(lineage.created_by)===String(lineage.seller_user_id)
+    &&lineage.rights_status==="verified"&&Boolean(lineage.rights_verification_id)&&Boolean(lineage.rights_basis)&&Boolean(lineage.license_expression)
   if(!exact) throw new Error("Listing publication does not match one promoted immutable release.")
   const byKey=(await db.query("SELECT * FROM wcb_listing_publications WHERE published_by=$1 AND idempotency_key=$2 FOR SHARE",[session.userId,auditKey])).rows[0]
   const existing=(await db.query("SELECT * FROM wcb_listing_publications WHERE promotion_id=$1 FOR SHARE",[promotionId])).rows[0]
-  const transition={before:"release_promoted",after:"listing_published",promotionId,releaseId:String(lineage.release_id),catalogProjectId:String(lineage.catalog_project_id)}
+  const transition={before:"release_promoted",after:"listing_published",promotionId,releaseId:String(lineage.release_id),catalogProjectId:String(lineage.catalog_project_id),rightsVerificationId:String(lineage.rights_verification_id)}
   if(byKey||existing){
     if(!byKey||!existing||String(byKey.publication_id)!==String(existing.publication_id)||String(existing.idempotency_key)!==auditKey) throw new Error("Promoted release already has a conflicting Listing publication.")
     const row=(await db.query("SELECT * FROM wcb_listings WHERE listing_id=$1 AND release_id=$2 AND catalog_project_id=$3 AND status='published' FOR SHARE",[existing.listing_id,lineage.release_id,lineage.catalog_project_id])).rows[0]

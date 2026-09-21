@@ -13,7 +13,7 @@ export async function databaseControlRead(db, session) {
 
   const [
     sellerApplications, submissions, reviews, assessments, results, catalogProjects,
-    promotions, releases, publications, listings, ready, deployIntents, users,
+    promotions, releases, rights, publications, listings, ready, deployIntents, users,
     sessions, workspaces, operators, entitlements, audit,
   ] = await Promise.all([
     rows(db, "SELECT application_id,user_id,status,decision_by,decided_at,created_at,updated_at FROM wcb_seller_applications ORDER BY created_at DESC LIMIT 200"),
@@ -24,6 +24,7 @@ export async function databaseControlRead(db, session) {
     rows(db, "SELECT catalog_project_id,source_project_id,owner_workspace_id,created_by,slug,title,summary,status,created_at FROM wcb_catalog_projects ORDER BY created_at DESC LIMIT 200"),
     rows(db, "SELECT promotion_id,result_id,assessment_request_id,submission_id,seller_user_id,source_project_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,catalog_project_id,release_id,version,promoted_by,created_at FROM wcb_seller_release_promotions ORDER BY created_at DESC LIMIT 200"),
     rows(db, "SELECT release_id,catalog_project_id,version,status,source_project_id,source_revision_id,source_content_hash,snapshot_hash,created_by,created_at FROM wcb_project_releases ORDER BY created_at DESC LIMIT 200"),
+    rows(db, "SELECT verification_id,release_id,catalog_project_id,rights_basis,license_expression,source_evidence,dependency_evidence,asset_evidence,verification_status,verified_by,verified_at FROM wcb_release_rights_verifications ORDER BY verified_at DESC LIMIT 200"),
     rows(db, "SELECT publication_id,promotion_id,result_id,seller_user_id,catalog_project_id,release_id,listing_id,status,published_by,published_at FROM wcb_listing_publications ORDER BY published_at DESC LIMIT 200"),
     rows(db, "SELECT listing_id,catalog_project_id,release_id,slug,title,summary,status,availability,tags,demo_metadata,updated_at FROM wcb_listings ORDER BY updated_at DESC LIMIT 200"),
     rows(db, "SELECT qualification_id,release_id,catalog_project_id,promotion_id,assessment_result_id,source_revision_id,source_content_hash,snapshot_hash,qualification_status,compatibility_evidence,reasons,qualification_version,qualified_by,qualified_at FROM wcb_ready_qualifications ORDER BY qualified_at DESC LIMIT 200"),
@@ -44,7 +45,7 @@ export async function databaseControlRead(db, session) {
   return Object.freeze({
     authority: Object.freeze({ role: String(operator.role), epoch: Number(operator.epoch) }),
     sellerApplications, submissions, reviews, assessments, results, catalogProjects,
-    promotions, releases, publications, listings, ready, deployIntents, users,
+    promotions, releases, rights, publications, listings, ready, deployIntents, users,
     sessions, workspaces, operators, entitlements, audit,
   })
 }

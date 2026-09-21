@@ -72,6 +72,16 @@ describe("Phase 5 privileged Control mutations",()=>{
     expect(client).toContain("controlPromoteAssessmentRelease")
     expect(app).toContain("Promote release")
   })
+  it("requires immutable reviewed publication/distribution rights before Listing publication",()=>{
+    expect(mutations).toContain("verifyReleaseRights")
+    expect(mutations).toContain("release.rights.verify")
+    expect(mutations).toContain("wcb_release_rights_verifications")
+    expect(mutations).toContain('lineage.rights_status==="verified"')
+    expect(worker).toContain("/__webcanbe/api/ops/releases/rights/verify")
+    expect(client).toContain("controlVerifyReleaseRights")
+    expect(app).toContain("Verify release rights")
+    expect(app).toContain("Listing publication is blocked")
+  })
   it("publishes one promoted immutable release as one audited Listing",()=>{
     expect(mutations).toContain("publishPromotedListing")
     expect(mutations).toContain("release.listing.publish")
