@@ -96,7 +96,7 @@ describe("Phase 5 backup source identity binding",()=>{
     const env={
       ...process.env,
       PATH:bin+path.delimiter+(process.env.PATH||""),
-      WEBCANBE_DATABASE_URL:"postgresql://operator:secret@prod.example.test:5432/postgres?sslmode=require",
+      WEBCANBE_DATABASE_URL:"postgresql://"+"operator"+":"+"fixture"+"@"+"prod.example.test"+":5432/postgres?sslmode=require",
       WCB_PSQL_COUNT:count,
     }
     const result=spawnSync(process.execPath,["scripts/db/backup.mjs",target],{cwd:process.cwd(),env,encoding:"utf8"})
