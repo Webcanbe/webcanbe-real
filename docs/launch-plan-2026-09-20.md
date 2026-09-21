@@ -1,3 +1,24 @@
+# CURRENT NON-PAYMENT LAUNCH STATUS — 2026-09-21 KST
+
+Where older sections below still describe pre-activation staging, this block is authoritative.
+
+- current main: `456a23c9ab9879f89a68d0682a7e7fb3cc6daba1`
+- Gate 3 v4 PR #45: merged at `04a9eeee6c170dc46b735c99d91f10cbc1d5c457`
+- bounded production materialization: active since `43ead5bb879fa7e514cca8de072b8d0c4c0acb36`
+- hosted editor boundary: main `b1cdc782e7508ede0aa5f9462c810511767c0dc2`
+- production Worker source API: main `a6e85e1dee2173755de953d45edbd29f422607d7`
+- SPA-host Browser Run runtime: main `f9876555c8d72d7c4e39e18ec42c989a757ad005`
+- active validation branch: `phase5-preview-live-probe`, draft PR #60
+- integrated non-payment verification `35593824866`: PASS
+- actual Cloudflare public runtime probe `35594890113`: PASS for live route, lazy chunks, DOM markers and project network isolation
+- remaining Gate 4 closure is authenticated production working-copy acceptance: OPERATOR REQUIRED
+- remaining same-account GitHub + Email authenticated E2E: OPERATOR REQUIRED
+- PR #60 stays draft until authenticated evidence exists
+
+See `docs/checkpoints/gate4-live-materialization-editor-2026-09-21.md` for current evidence.
+
+---
+
 # Webcanbe Launch Closure Plan — 2026-09-20 KST
 
 ## Gate 4 combined Visual + Code staging proof: **PASS**
