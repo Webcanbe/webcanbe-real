@@ -114,14 +114,14 @@ ALTER TABLE wcb_product_operators ADD COLUMN IF NOT EXISTS updated_at timestampt
 UPDATE wcb_product_operators SET updated_at=clock_timestamp() WHERE updated_at IS NULL;
 ALTER TABLE wcb_product_operators ALTER COLUMN updated_at SET DEFAULT clock_timestamp();
 ALTER TABLE wcb_product_operators ALTER COLUMN updated_at SET NOT NULL;
-DO $
+DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='wcb_product_operators_role_check' AND conrelid='wcb_product_operators'::regclass) THEN
     ALTER TABLE wcb_product_operators ADD CONSTRAINT wcb_product_operators_role_check CHECK(role IN ('reviewer','admin','bigperson'));
   END IF;
 END
-$;
-CREATE OR REPLACE FUNCTION wcb_protect_last_bigperson() RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $
+$$;
+CREATE OR REPLACE FUNCTION wcb_protect_last_bigperson() RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
 BEGIN
   IF OLD.active AND OLD.role='bigperson' AND (TG_OP='DELETE' OR NOT NEW.active OR NEW.role<>'bigperson') THEN
     IF NOT EXISTS (SELECT 1 FROM public.wcb_product_operators WHERE active AND role='bigperson' AND user_id<>OLD.user_id) THEN
@@ -130,7 +130,7 @@ BEGIN
   END IF;
   RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
 END
-$;
+$$;
 DROP TRIGGER IF EXISTS wcb_protect_last_bigperson_trigger ON wcb_product_operators;
 CREATE TRIGGER wcb_protect_last_bigperson_trigger BEFORE UPDATE OR DELETE ON wcb_product_operators
   FOR EACH ROW EXECUTE FUNCTION wcb_protect_last_bigperson();
@@ -543,4 +543,3 @@ $$;
 DROP TRIGGER IF EXISTS wcb_immutable_release_rights_verification ON wcb_release_rights_verifications;
 CREATE TRIGGER wcb_immutable_release_rights_verification BEFORE UPDATE OR DELETE ON wcb_release_rights_verifications
   FOR EACH ROW EXECUTE FUNCTION wcb_refuse_release_rights_verification_mutation();
-
