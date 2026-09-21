@@ -65,19 +65,24 @@ After explicit confirmation but **before** `wrangler rollback`, the execution pa
 
 The script never automatically chooses “previous” because the immediately previous version may itself be bad.
 
-## After rollback
+## Required post-rollback verification
 
-Verify in order:
+A zero exit from `wrangler rollback` is not considered a successful Webcanbe recovery by the wrapper. Immediately after Wrangler succeeds, `scripts/cloudflare-rollback.mjs` automatically runs:
 
-1. `https://webcanbe.com/` returns normally.
-2. `POST /__webcanbe/auth/session` still refuses unauthenticated requests normally rather than 500.
-3. Google login can begin.
-4. If Firebase login was involved, test Firebase exchange only with a real provider login.
-5. Public Marketplace/catalog route returns the expected state.
-6. If Hyperdrive is active, run `POST /__webcanbe/ops/readiness`.
-7. Verify dashboard protected-route behavior.
-8. Check Cloudflare errors/logs for the incident window.
-9. Record the rollback version ID, cause, and recovery result in `docs/current-handoff.md`.
+```bash
+WEBCANBE_EXPECT_DATABASE=ready npm run smoke:production:public
+```
+
+This verifies the production root/security headers, hosted Control/read mode with mutations still closed, readiness, authoritative catalog access, anonymous private-read refusal, and anonymous materialization refusal against the live production origin. The wrapper exits 0 only when this production smoke/readiness check also passes.
+
+If the post-check fails, the wrapper exits non-zero and prints that recovery is incomplete. **The Worker rollback has already occurred at that point**; a failed smoke does not undo the rollback. Investigate the live deployment and choose either a forward fix or another explicitly verified rollback target rather than assuming the previous state was restored.
+
+After the automated post-check is green, verify incident-specific behavior as needed:
+
+1. Google login can begin.
+2. If Firebase login was involved, test Firebase exchange only with a real provider login.
+3. Check Cloudflare errors/logs for the incident window.
+4. Record the rollback version ID, cause, automated smoke result, and recovery result in `docs/current-handoff.md`.
 
 ## Important database warning
 
@@ -104,4 +109,6 @@ Once the root cause is fixed:
 
 ## Drill status
 
-Behavioral subprocess rehearsal now covers both planning and confirmed execution. Invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary. Plan mode proves the exact recent target and current deployment are read through `versions list` and `deployments status` without a rollback call. Confirmed execution proves those same two read-only checks run again before the exact approved UUID is forwarded to `wrangler rollback`; a stale target stops before status/rollback. Missing active-version evidence also fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
+Behavioral subprocess rehearsal covers planning, confirmed execution preflight, and the post-rollback success contract. Invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary. Plan mode proves the exact recent target and current deployment are read through `versions list` and `deployments status` without a rollback call. Confirmed execution proves those same two read-only checks run again before the exact approved UUID is forwarded to `wrangler rollback`; a stale target stops before status/rollback. Missing active-version evidence also fails closed. After a simulated successful rollback, the harness requires `smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready`, and a simulated smoke failure keeps the overall recovery command failed even though the rollback command itself succeeded.
+
+A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
