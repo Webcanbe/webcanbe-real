@@ -366,7 +366,7 @@ async function browserSnapshot(env,state,viewport,route){
       gotoOptions:{waitUntil:"domcontentloaded",timeout:15000},
       waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000,visible:false},
       addScriptTag:[{content:injection}],
-      allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|assets\\/[^?#]+)$/"],
+      allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|preview-assets\\/[^?#]+)$/"],
     })
   }catch(error){
     const message=error instanceof Error?error.message:"Browser Run preview failed."
