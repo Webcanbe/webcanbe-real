@@ -9,6 +9,7 @@ type Payload = {
   files: Record<string, string>
   entry?: string
   title?: string
+  route?: string
 }
 
 type Identity = { file: string; elementStart: number }
@@ -278,6 +279,7 @@ function bootstrap(payload: Payload) {
   try { Object.defineProperty(globalThis, "RTCPeerConnection", { value: class { constructor(){ throw new Error("Preview networking is disabled.") } }, configurable: false }) } catch {}
 
   if (payload.title) document.title = payload.title
+  if (typeof payload.route === "string" && payload.route.startsWith("/") && payload.route.length <= 2048) location.hash = "#" + payload.route
   const entry = payload.entry && files[payload.entry] !== undefined
     ? payload.entry
     : ["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file => files[file] !== undefined)
