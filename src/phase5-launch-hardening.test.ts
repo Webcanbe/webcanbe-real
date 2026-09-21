@@ -15,7 +15,10 @@ describe("Phase 5 launch hardening", () => {
     expect(security).toContain('"Cross-Origin-Opener-Policy": "same-origin-allow-popups"')
     expect(security).toContain('"Permissions-Policy": "camera=(), microphone=(), geolocation=()"')
     expect(security).toContain('"Content-Security-Policy": CONTENT_SECURITY_POLICY')
-    expect(security).toContain('"script-src \'self\'"')
+    expect(security).toContain('"script-src \'self\' https://apis.google.com https://www.gstatic.com"')
+    expect(security).toContain('"script-src-attr \'none\'"')
+    expect(security).not.toContain('"script-src \'self\' \'unsafe-inline\'"')
+    expect(security).not.toContain("'unsafe-eval'")
     expect(security).toContain('"style-src \'self\' \'unsafe-inline\'"')
   })
 
