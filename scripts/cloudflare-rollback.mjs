@@ -7,6 +7,7 @@ if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(vers
 }
 
 const npx = process.platform === "win32" ? "npx.cmd" : "npx"
+const npm = process.platform === "win32" ? "npm.cmd" : "npm"
 const planOnly = process.env.WEBCANBE_ROLLBACK_PLAN_ONLY === "1"
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -121,4 +122,28 @@ if (result.error?.code === "ENOENT") {
   console.error("npx/wrangler is not available.")
   process.exit(1)
 }
-process.exitCode = result.status ?? 1
+if ((result.status ?? 1) !== 0) {
+  process.exit(result.status ?? 1)
+}
+
+// A successful Wrangler command is not yet a successful recovery. The live deployment must
+// also satisfy the ordinary production smoke with a ready database before this wrapper exits 0.
+console.log("Rollback command completed; verifying production smoke/readiness...")
+const smoke = spawnSync(npm, ["run", "smoke:production:public"], {
+  stdio: "inherit",
+  env: {
+    ...process.env,
+    WEBCANBE_EXPECT_DATABASE: "ready",
+  },
+})
+if (smoke.error?.code === "ENOENT") {
+  console.error("npm is not available for the required post-rollback production smoke.")
+  process.exit(1)
+}
+if ((smoke.status ?? 1) !== 0) {
+  console.error("Rollback was applied, but production smoke/readiness failed. Treat recovery as incomplete and investigate before declaring success.")
+  process.exit(1)
+}
+
+console.log("Rollback post-check passed: production smoke/readiness is green.")
+process.exitCode = 0
