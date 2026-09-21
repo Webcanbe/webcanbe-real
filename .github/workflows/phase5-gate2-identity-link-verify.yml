@@ -1,0 +1,37 @@
+name: Phase 5 Gate 2 identity-link verify
+on:
+  push:
+    branches: [phase5-gate2-identity-link-lock-fix, phase5-gate2-reuse-github-session]
+  pull_request:
+    branches: [main]
+    paths:
+      - worker/identity-link.js
+      - worker/identity-link.test.js
+      - worker/postgres-session.js
+      - worker/index.js
+      - src/hostedProductClient.ts
+      - src/App.tsx
+      - src/firebaseAuth.ts
+      - src/phase5-gate2-auth-smoke.test.ts
+      - .github/workflows/phase5-gate2-identity-link-verify.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Identity-link regressions
+        run: npx vitest run worker/identity-link.test.js worker/postgres-session.test.js src/phase5-gate2-auth-smoke.test.ts src/phase5-firebase-auth.test.ts src/hostedProductClient.test.ts
+      - name: Worker syntax
+        run: node --check worker/identity-link.js && node --check worker/postgres-session.js && node --check worker/index.js
+      - name: Production build
+        run: npm run build
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
