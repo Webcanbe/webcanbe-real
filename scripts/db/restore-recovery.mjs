@@ -5,6 +5,8 @@ import pg from "pg"
 
 const { Client } = pg
 const UUIDISH = /^[A-Za-z0-9._-]+$/
+const SYSTEM_IDENTIFIER = /^\d+$/
+const IDENTITY_SQL = "select system_identifier::text || E'\\t' || current_database() from pg_control_system()"
 
 function parseDatabaseUrl(raw, label) {
   if (!raw) throw new Error(`${label} is required.`)
@@ -39,6 +41,36 @@ function pgEnvironment(parsed) {
   delete env.WEBCANBE_DATABASE_URL
   delete env.RECOVERY_DATABASE_URL
   return env
+}
+
+function probeDatabaseIdentity(parsed, label) {
+  const result = spawnSync("psql", [
+    "--no-psqlrc",
+    "--tuples-only",
+    "--no-align",
+    "--set", "ON_ERROR_STOP=1",
+    "--command", IDENTITY_SQL,
+  ], {
+    env: pgEnvironment(parsed),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  })
+  if (result.error?.code === "ENOENT") {
+    throw new Error("psql is required to verify PostgreSQL recovery-target identity.")
+  }
+  if (result.status !== 0) {
+    throw new Error(`${label} PostgreSQL identity probe failed.`)
+  }
+  const lines = String(result.stdout || "").trim().split(/\r?\n/).filter(Boolean)
+  if (lines.length !== 1) throw new Error(`${label} PostgreSQL identity probe returned malformed output.`)
+  const parts = lines[0].split("\t")
+  if (parts.length !== 2 || !SYSTEM_IDENTIFIER.test(parts[0]) || !UUIDISH.test(parts[1])) {
+    throw new Error(`${label} PostgreSQL identity probe returned malformed output.`)
+  }
+  if (parts[1] !== parsed.database) {
+    throw new Error(`${label} connected database identity does not match the configured database name.`)
+  }
+  return { systemIdentifier: parts[0], database: parts[1] }
 }
 
 function quoteIdent(value) {
@@ -80,6 +112,24 @@ if (verify.status !== 0) {
   if (verify.stderr) process.stderr.write(verify.stderr)
   process.exit(verify.status ?? 1)
 }
+
+let sourceIdentity
+let recoveryIdentity
+try {
+  sourceIdentity = probeDatabaseIdentity(source, "Production")
+  recoveryIdentity = probeDatabaseIdentity(recovery, "Recovery")
+} catch (error) {
+  console.error("Recovery target identity verification failed: " + (error instanceof Error ? error.message : String(error)))
+  process.exit(1)
+}
+if (
+  sourceIdentity.systemIdentifier === recoveryIdentity.systemIdentifier &&
+  sourceIdentity.database === recoveryIdentity.database
+) {
+  console.error("Refusing restore because production and recovery connect to the same PostgreSQL cluster/database identity.")
+  process.exit(1)
+}
+console.log("PostgreSQL recovery target identity verified as distinct from production.")
 
 if (process.env.WEBCANBE_RESTORE_PLAN_ONLY === "1") {
   console.log(`Recovery restore plan verified: ${basename(backup)} → separate recovery target.`)

@@ -20,12 +20,27 @@ function executable(file:string,body:string){
 function dbUrl(user:string,password:string,host:string){
   return "postgresql://"+user+":"+encodeURIComponent(password)+"@"+host+":5432/postgres?sslmode=require"
 }
+function fakeArchiveVerifier(bin:string,capture?:string){
+  executable(path.join(bin,"pg_restore"),[
+    "#!/bin/sh",
+    ...(capture ? ['printf "%s\\n" "$@" > "$WCB_RESTORE_CAPTURE"'] : []),
+    'i=1; while [ "$i" -le 20 ]; do echo "1; 0 0 TABLE DATA public wcb_fixture_$i owner"; i=$((i+1)); done',
+    "exit 0",
+    "",
+  ].join("\n"))
+}
+function fakeIdentityProbe(bin:string,body:string){
+  executable(path.join(bin,"psql"),"#!/bin/sh\n"+body+"\n")
+}
 
 describe("Phase 5 recovery-target restore tooling",()=>{
   it("hard-codes the recovery-only safety boundary and transactional restore flags",()=>{
     expect(source).toContain("WEBCANBE_DATABASE_URL")
     expect(source).toContain("RECOVERY_DATABASE_URL")
     expect(source).toContain("Refusing restore because recovery target resolves to the production database target.")
+    expect(source).toContain("pg_control_system()")
+    expect(source).toContain("systemIdentifier")
+    expect(source).toContain("same PostgreSQL cluster/database identity")
     expect(source).toContain("WEBCANBE_RESTORE_CONFIRM")
     expect(source).toContain("RESTORE_RECOVERY_TARGET")
     expect(source).toContain("TRUNCATE TABLE")
@@ -66,16 +81,55 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     expect(result.stderr).toContain("Refusing recovery restore without WEBCANBE_RESTORE_CONFIRM=RESTORE_RECOVERY_TARGET.")
   })
 
-  it("supports a non-mutating plan rehearsal after archive integrity verification",()=>{
+  it("refuses DNS aliases that connect to the same PostgreSQL cluster/database before any target mutation",()=>{
+    const root=tempRoot(), bin=path.join(root,"bin"), backup=path.join(root,"backup.dump")
+    fs.mkdirSync(bin)
+    fs.writeFileSync(backup,"fixture-archive")
+    fakeArchiveVerifier(bin)
+    fakeIdentityProbe(bin,'printf "7777777777777777777\\tpostgres\\n"')
+    const env={
+      ...process.env,
+      PATH:bin+path.delimiter+(process.env.PATH||""),
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","primary-alias.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery-alias.example.test"),
+      WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
+    }
+    const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain("same PostgreSQL cluster/database identity")
+    expect(result.stdout+result.stderr).not.toContain("prod-secret")
+    expect(result.stdout+result.stderr).not.toContain("recovery-secret")
+  })
+
+  it("fails closed when PostgreSQL identity evidence is malformed",()=>{
+    const root=tempRoot(), bin=path.join(root,"bin"), backup=path.join(root,"backup.dump")
+    fs.mkdirSync(bin)
+    fs.writeFileSync(backup,"fixture-archive")
+    fakeArchiveVerifier(bin)
+    fakeIdentityProbe(bin,'printf "unknown\\n"')
+    const env={
+      ...process.env,
+      PATH:bin+path.delimiter+(process.env.PATH||""),
+      WEBCANBE_DATABASE_URL:dbUrl("prod","prod-secret","prod.example.test"),
+      RECOVERY_DATABASE_URL:dbUrl("recovery","recovery-secret","recovery.example.test"),
+      WEBCANBE_RESTORE_CONFIRM:"RESTORE_RECOVERY_TARGET",
+    }
+    const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain("PostgreSQL identity probe returned malformed output")
+  })
+
+  it("supports a non-mutating plan rehearsal after archive and distinct database identity verification",()=>{
     const root=tempRoot(), bin=path.join(root,"bin"), backup=path.join(root,"backup.dump"), capture=path.join(root,"restore-args.txt")
     fs.mkdirSync(bin)
     fs.writeFileSync(backup,"fixture-archive")
-    executable(path.join(bin,"pg_restore"),[
-      "#!/bin/sh",
-      'printf "%s\\n" "$@" > "$WCB_RESTORE_CAPTURE"',
-      'i=1; while [ "$i" -le 20 ]; do echo "1; 0 0 TABLE DATA public wcb_fixture_$i owner"; i=$((i+1)); done',
-      "exit 0",
-      "",
+    fakeArchiveVerifier(bin,capture)
+    fakeIdentityProbe(bin,[
+      'if [ "$PGHOST" = "prod.example.test" ]; then',
+      '  printf "1111111111111111111\\tpostgres\\n"',
+      "else",
+      '  printf "2222222222222222222\\tpostgres\\n"',
+      "fi",
     ].join("\n"))
 
     const env={
@@ -90,6 +144,7 @@ describe("Phase 5 recovery-target restore tooling",()=>{
     const result=spawnSync(process.execPath,["scripts/db/restore-recovery.mjs",backup],{cwd:process.cwd(),env,encoding:"utf8"})
     expect(result.status).toBe(0)
     expect(result.stdout).toContain("Backup verified")
+    expect(result.stdout).toContain("PostgreSQL recovery target identity verified as distinct from production")
     expect(result.stdout).toContain("Recovery restore plan verified")
     expect(fs.readFileSync(capture,"utf8").trim().split("\n")).toEqual(["--list",backup])
     expect(result.stdout+result.stderr).not.toContain("prod-secret")
