@@ -27,7 +27,7 @@ export function allocateAiActions({ includedGrants, purchasedCredits, consumed, 
   // Included actions expire, so consume the nearest-expiring grant first.
   available.sort((a, b) => a.expiresAt.localeCompare(b.expiresAt) || a.sourceId.localeCompare(b.sourceId))
   for (const credit of purchasedCredits ?? []) {
-    if (typeof credit?.creditId !== "string") continue
+    if (typeof credit?.creditId !== "string" || credit.revokedAt) continue
     const remaining = actions({ actions: credit.purchasedActions }) - (used.get(`purchased:${credit.creditId}`) ?? 0)
     if (remaining > 0) available.push({ kind: "purchased", sourceId: credit.creditId, actions: remaining })
   }
@@ -111,7 +111,7 @@ export class PostgresAiUsageRepository {
     return result.rows.map(row => ({ grantId: String(row.grant_id), includedActions: Number(row.included_actions), expiresAt: new Date(row.expires_at).toISOString() }))
   }
   async purchasedCreditsForUserForUpdate(userId) {
-    const result = await this.db.query("SELECT credit_id,purchased_actions FROM wcb_ai_purchased_credits WHERE user_id=$1 ORDER BY created_at,credit_id FOR UPDATE", [userId])
+    const result = await this.db.query("SELECT credit_id,purchased_actions FROM wcb_ai_purchased_credits WHERE user_id=$1 AND revoked_at IS NULL ORDER BY created_at,credit_id FOR UPDATE", [userId])
     return result.rows.map(row => ({ creditId: String(row.credit_id), purchasedActions: Number(row.purchased_actions) }))
   }
   async activeReservationsForUserForUpdate(userId) {
@@ -127,6 +127,23 @@ export class PostgresAiUsageRepository {
     return reservation(result.rows[0])
   }
   async settleReservation(id, status, settledAt, outcome) {
+    const owner = await this.db.query("SELECT user_id FROM wcb_ai_usage_reservations WHERE reservation_id=$1", [id])
+    if (!owner.rowCount) fail(409, "AI reservation is unavailable.")
+    return this.atomic(String(owner.rows[0].user_id), tx => tx.settleReservationForUpdate(id, status, settledAt, outcome))
+  }
+  async settleReservationForUpdate(id, status, settledAt, outcome) {
+    const currentResult = await this.db.query("SELECT * FROM wcb_ai_usage_reservations WHERE reservation_id=$1 FOR UPDATE", [id])
+    if (!currentResult.rowCount) fail(409, "AI reservation is unavailable.")
+    const current = reservation(currentResult.rows[0])
+    if (status === "committed" && current.status === "released") fail(409, "AI reservation was released.")
+    if (status === "committed" && current.status === "reserved") {
+      const revoked = await this.db.query(`SELECT 1
+        FROM jsonb_array_elements($1::jsonb) allocation
+        JOIN wcb_ai_purchased_credits credit ON credit.credit_id=(allocation->>'sourceId')::uuid
+        WHERE allocation->>'kind'='purchased' AND credit.revoked_at IS NOT NULL
+        LIMIT 1`, [JSON.stringify(current.allocations)])
+      if (revoked.rowCount) fail(409, "AI Action source was revoked.")
+    }
     const result = await this.db.query(
       `UPDATE wcb_ai_usage_reservations
           SET status=CASE WHEN status='reserved' THEN $2 ELSE status END,
@@ -136,7 +153,6 @@ export class PostgresAiUsageRepository {
         RETURNING *`,
       [id, status, settledAt, outcome === undefined ? null : JSON.stringify(outcome)],
     )
-    if (!result.rowCount) fail(409, "AI reservation is unavailable.")
     return reservation(result.rows[0])
   }
 }

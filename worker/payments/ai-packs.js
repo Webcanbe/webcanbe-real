@@ -26,17 +26,25 @@ export async function createAiPackOrder(repo, provider, session, input, options)
 }
 
 async function finalize(repo, aiPackOrderId, capture) {
+  const candidate = await repo.aiPackOrderById(aiPackOrderId)
   return repo.atomic(async tx => {
+    await tx.lockPaymentCapture(capture.providerCaptureId)
+    await tx.lockAiUsageUser(candidate.userId)
     const order = await tx.aiPackOrderForUpdate(aiPackOrderId)
     if (order.status === "completed") return order
     if (capture.status !== "COMPLETED" || capture.providerOrderId !== order.providerOrderId || capture.customId !== order.aiPackOrderId || capture.grossMinor !== order.grossMinor || capture.currency !== order.currency) {
       await tx.updateAiPackOrder(aiPackOrderId, { status: "reconciliation_required" })
       throw new PaymentError(409, "capture_mismatch", "Captured payment does not match the Webcanbe AI pack order.")
     }
-    const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: "ai_pack_capture", providerId: capture.providerCaptureId, occurredAt: capture.capturedAt })
+    const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: "ai_pack_capture", providerId: capture.providerCaptureId, aiPackOrderId, occurredAt: capture.capturedAt })
     if (!first) return tx.aiPackOrderForUpdate(aiPackOrderId)
-    const completed = await tx.updateAiPackOrder(aiPackOrderId, { status: "completed", providerCaptureId: capture.providerCaptureId, completedAt: capture.capturedAt })
+    let completed = await tx.updateAiPackOrder(aiPackOrderId, { status: "completed", providerCaptureId: capture.providerCaptureId, completedAt: capture.capturedAt })
     await tx.ensurePurchasedAiCredit({ creditId: uuid(repo.uuid), userId: order.userId, aiPackOrderId, purchasedActions: order.actions, providerReference: capture.providerCaptureId, idempotencyKey: `ai-pack:${aiPackOrderId}`, createdAt: capture.capturedAt })
+    const pending = await tx.paymentReversalForCaptureForUpdate(capture.providerCaptureId, order.currency)
+    if (pending) {
+      await tx.revokePurchasedAiCredit(aiPackOrderId, pending.occurredAt, pending.kind)
+      completed = await tx.updateAiPackOrder(aiPackOrderId, { status: pending.kind === "refund" ? "refunded" : "reconciliation_required" })
+    }
     return completed
   })
 }
@@ -55,4 +63,31 @@ export async function applyAiPackCaptureWebhook(repo, capture) {
   const order = await repo.aiPackOrderByProviderOrder(capture.providerOrderId)
   if (!order) return undefined
   return { state: "applied", aiPackOrder: output(await finalize(repo, order.aiPackOrderId, capture)) }
+}
+
+async function applyAiPackReversal(repo, reversal) {
+  return repo.atomic(async tx => {
+    await tx.lockPaymentCapture(reversal.providerCaptureId)
+    await tx.recordPaymentReversal({ provider: "paypal", kind: reversal.reason, providerId: reversal.providerId, providerCaptureId: reversal.providerCaptureId, currency: reversal.currency, occurredAt: reversal.occurredAt })
+    const candidate = await tx.aiPackOrderByCapture(reversal.providerCaptureId)
+    if (!candidate) return undefined
+    await tx.lockAiUsageUser(candidate.userId)
+    const order = await tx.aiPackOrderByCaptureForUpdate(reversal.providerCaptureId)
+    if (!order) return undefined
+    if (reversal.currency && reversal.currency !== order.currency) throw new PaymentError(409, "ai_pack_reversal_mismatch", "AI pack reversal does not match the captured order.")
+    const kind = reversal.reason === "refund" ? "ai_pack_refund" : "ai_pack_dispute"
+    const first = await tx.insertPaymentIdentity({ provider: "paypal", kind, providerId: reversal.providerId, aiPackOrderId: order.aiPackOrderId, occurredAt: reversal.occurredAt })
+    if (!first) return { state: "duplicate", aiPackOrder: output(order) }
+    await tx.revokePurchasedAiCredit(order.aiPackOrderId, reversal.occurredAt, reversal.reason)
+    const status = order.status === "refunded" || reversal.reason === "refund" ? "refunded" : "reconciliation_required"
+    return { state: "applied", aiPackOrder: output(await tx.updateAiPackOrder(order.aiPackOrderId, { status })) }
+  })
+}
+
+export function applyAiPackRefund(repo, refund) {
+  return applyAiPackReversal(repo, { ...refund, providerId: refund.providerRefundId, reason: "refund" })
+}
+
+export function applyAiPackDispute(repo, dispute) {
+  return applyAiPackReversal(repo, { ...dispute, providerId: dispute.providerDisputeId, reason: "dispute" })
 }

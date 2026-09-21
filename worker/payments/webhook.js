@@ -1,6 +1,6 @@
 import { PaymentError, parseMoney } from "./contracts.js"
 import { applyCaptureWebhook, applyDispute, applyRefund, applySubscriptionEvent, recordVerifiedWebhook } from "./domain.js"
-import { applyAiPackCaptureWebhook } from "./ai-packs.js"
+import { applyAiPackCaptureWebhook, applyAiPackDispute, applyAiPackRefund } from "./ai-packs.js"
 
 const time = event => String(event.create_time || event.resource?.update_time || event.resource?.create_time || new Date().toISOString())
 
@@ -45,6 +45,8 @@ export async function processPayPalEvent(repo, event) {
     case "PAYMENT.CAPTURE.REFUNDED": {
       const resource = event.resource || {}
       const providerCaptureId = String(related(resource, "capture_id") || "")
+      const pack = await applyAiPackRefund(repo, { providerCaptureId, providerRefundId: String(resource.id || ""), currency: String(resource.amount?.currency_code || ""), occurredAt: time(event) })
+      if (pack) return pack
       const order = await repo.orderByCapture(providerCaptureId)
       if (!order) { await repo.flagReconciliation({ kind: "refund_without_order", providerId: String(resource.id || ""), payload: event }); return { state: "reconciliation_required" } }
       return { state: "applied", refund: await applyRefund(repo, { orderId: order.orderId, providerRefundId: String(resource.id), refundMinor: parseMoney(resource.amount?.value), currency: String(resource.amount?.currency_code || ""), occurredAt: time(event) }) }
@@ -52,7 +54,9 @@ export async function processPayPalEvent(repo, event) {
     case "PAYMENT.CAPTURE.REVERSED":
     case "CUSTOMER.DISPUTE.CREATED": {
       const resource = event.resource || {}
-      return applyDispute(repo, { providerDisputeId: String(resource.dispute_id || resource.id || event.id), providerCaptureId: String(related(resource, "capture_id") || resource.disputed_transactions?.[0]?.seller_transaction_id || ""), occurredAt: time(event) })
+      const dispute = { providerDisputeId: String(resource.dispute_id || resource.id || event.id), providerCaptureId: String(related(resource, "capture_id") || resource.disputed_transactions?.[0]?.seller_transaction_id || ""), occurredAt: time(event) }
+      const pack = await applyAiPackDispute(repo, dispute)
+      return pack || applyDispute(repo, dispute)
     }
     case "BILLING.SUBSCRIPTION.ACTIVATED": return applySubscriptionEvent(repo, subscriptionEvent(event, "activated"))
     case "BILLING.SUBSCRIPTION.CANCELLED": return applySubscriptionEvent(repo, subscriptionEvent(event, "cancelled"))
