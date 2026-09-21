@@ -124,6 +124,61 @@ describe("production Worker source editor API",()=>{
     expect(state.rolledBack).toBe(0)
   })
 
+  it("inspects a safe static JSX text target and commits it as a Visual source transaction",async()=>{
+    const {db,state}=fakeDb()
+    const session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const source=Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")
+    const elementStart=source.indexOf("<main>")
+    const compatibility=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/compatibility`,auth)
+    expect(compatibility.value.summary.partial).toBeGreaterThan(0)
+    const inspected=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/inspect`,{...auth,identity:{file:"src/App.tsx",elementStart}})
+    expect(inspected.value.target.text).toBe("Hello")
+    expect(inspected.value.target.capabilities.text).toBe(true)
+
+    const saved=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/mutate`,{
+      ...auth,
+      expectedRevision:baseRevision,
+      idempotencyKey:"visual-text-1",
+      identity:{file:"src/App.tsx",elementStart},
+      edit:{type:"text",value:"Visual verified"},
+    })
+    expect(saved.status).toBe(200)
+    expect(saved.value.transaction.producer).toBe("visual")
+    expect(saved.value.transaction.editType).toBe("text")
+    expect(saved.value.transaction.before).toBe("Hello")
+    expect(saved.value.transaction.after).toBe("Visual verified")
+    expect(state.project.history.releaseOrigin).toEqual(fixture().history.releaseOrigin)
+    const reopened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,{...auth,file:"src/App.tsx"})
+    expect(reopened.value.source).toContain("<main>Visual verified</main>")
+    expect(reopened.value.revision).toBe(saved.value.revision)
+  })
+
+  it("renders a managed Browser Run snapshot without passing Webcanbe credentials to the browser",async()=>{
+    const {db}=fakeDb()
+    const session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const source='export default function App(){return <main>Hello</main>}'
+    const elementStart=source.indexOf("<main>")
+    let received
+    const env={BROWSER:{quickAction:async(action,options)=>{
+      received={action,options}
+      const observation={route:"/",viewport:{width:1280,height:900},elements:[{identity:{file:"src/App.tsx",elementStart},tagName:"main",rect:{top:10,left:20,width:300,height:80},computed:{display:"block"},layoutContext:"block"}]}
+      return new Response(JSON.stringify({success:true,result:{screenshot:Buffer.alloc(120,7).toString("base64"),content:`<!doctype html><script id="wcb-observation" type="application/json">${JSON.stringify(observation)}</script>`}}),{status:200,headers:{"content-type":"application/json"}})
+    }}}
+    const preview=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision,viewport:"desktop",route:"/"},env)
+    expect(preview.status).toBe(200)
+    expect(preview.value.transport).toBe("snapshot")
+    expect(preview.value.snapshotElements[0].identity).toEqual({file:"src/App.tsx",elementStart})
+    expect(received.action).toBe("snapshot")
+    expect(received.options.url).toBe("https://webcanbe.com/preview-runtime.html")
+    expect(received.options.addScriptTag[0].content).toContain("__WCB_PROJECT_PAYLOAD__")
+    expect(received.options.addScriptTag[0].content).not.toContain("__Host-wcb-session")
+    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|assets\\/[^?#]+)$/"])
+  })
+
   it("routes production project APIs before the static SPA fallback",()=>{
     const worker=fs.readFileSync("worker/index.js","utf8")
     expect(worker).toContain('path === "/__webcanbe/api/projects"')
