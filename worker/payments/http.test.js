@@ -31,6 +31,17 @@ describe("payment HTTP contract", () => {
       aiActionBalanceForUser: async () => ({ purchased: 487 }),
     }
     const response = await handlePrivatePaymentRequest(new Request("https://webcanbe.com/__webcanbe/api/payments/status", { method: "POST" }), "/__webcanbe/api/payments/status", { repo, provider: {}, session: { userId: "buyer" }, env: {} })
-    expect(await response.json()).toEqual({ billing: { currentPlanKey: "pro_annual", subscription: { subscriptionId: "11111111-1111-4111-8111-111111111111", planKey: "pro_annual", status: "past_due", createdAt: "2026-09-01T00:00:00.000Z", failedAt: "2026-09-21T00:00:00.000Z" }, aiActions: { purchased: 487 } } })
+    expect(await response.json()).toEqual({ billing: { currentPlanKey: "free", subscription: { subscriptionId: "11111111-1111-4111-8111-111111111111", planKey: "pro_annual", status: "past_due", createdAt: "2026-09-01T00:00:00.000Z", failedAt: "2026-09-21T00:00:00.000Z" }, aiActions: { purchased: 487 } } })
+  })
+  it.each(["creating", "approval_pending", "past_due", "cancelled", "expired", "active"])("reports the authoritative current plan for %s", async status => {
+    const repo = {
+      currentSubscriptionForUser: async () => ({ subscriptionId: "11111111-1111-4111-8111-111111111111", planKey: "studio_annual", status, createdAt: "2026-09-01T00:00:00Z" }),
+      aiActionBalanceForUser: async () => ({ purchased: 100 }),
+    }
+    const response = await handlePrivatePaymentRequest(new Request("https://webcanbe.com/__webcanbe/api/payments/status", { method: "POST" }), "/__webcanbe/api/payments/status", { repo, provider: {}, session: { userId: "buyer" }, env: {} })
+    const { billing } = await response.json()
+    expect(billing.currentPlanKey).toBe(status === "active" ? "studio_annual" : "free")
+    expect(billing.subscription).toMatchObject({ planKey: "studio_annual", status })
+    expect(billing.aiActions.purchased).toBe(100)
   })
 })

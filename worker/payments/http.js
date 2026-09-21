@@ -41,7 +41,7 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
         repo.aiActionBalanceForUser(session.userId),
       ])
       return json({ billing: {
-        currentPlanKey: subscription?.planKey || "free",
+        currentPlanKey: subscription?.status === "active" ? subscription.planKey : "free",
         subscription: subscription ? {
           subscriptionId: subscription.subscriptionId,
           planKey: subscription.planKey,
