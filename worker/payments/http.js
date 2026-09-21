@@ -5,6 +5,15 @@ import { captureAiPackOrder, createAiPackOrder } from "./ai-packs.js"
 const headers = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
 const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers })
 
+export const PAYMENT_RETURN_URLS = Object.freeze({
+  marketplaceReturn: "https://webcanbe.com/purchases?payment=return",
+  marketplaceCancel: "https://webcanbe.com/browse?payment=cancelled",
+  subscriptionReturn: "https://webcanbe.com/settings?subscription=return",
+  subscriptionCancel: "https://webcanbe.com/settings?subscription=cancelled",
+  aiPackReturn: "https://webcanbe.com/settings?ai-pack=return",
+  aiPackCancel: "https://webcanbe.com/settings?ai-pack=cancelled",
+})
+
 async function body(request) {
   const type = request.headers.get("Content-Type") || ""
   if (!type.toLowerCase().startsWith("application/json")) throw new PaymentError(415, "content_type_invalid", "Payment requests must use JSON.")
@@ -29,8 +38,8 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       const order = await createMarketplaceOrder(repo, provider, session, await body(request), {
         clock,
         publicPaidLaunchAt: env.WEBCANBE_PAID_MARKET_LAUNCH_AT,
-        returnUrl: "https://webcanbe.com/purchases?payment=return",
-        cancelUrl: "https://webcanbe.com/marketplace?payment=cancelled",
+        returnUrl: PAYMENT_RETURN_URLS.marketplaceReturn,
+        cancelUrl: PAYMENT_RETURN_URLS.marketplaceCancel,
       })
       return json({ order }, 201)
     }
@@ -41,13 +50,13 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       const subscription = await createPlanSubscription(repo, provider, session, await body(request), {
         clock,
         planIds: paypalPlanMapping(env),
-        returnUrl: "https://webcanbe.com/dashboard/billing?subscription=return",
-        cancelUrl: "https://webcanbe.com/plans?subscription=cancelled",
+        returnUrl: PAYMENT_RETURN_URLS.subscriptionReturn,
+        cancelUrl: PAYMENT_RETURN_URLS.subscriptionCancel,
       })
       return json({ subscription }, 201)
     }
     if (path === "/__webcanbe/api/payments/ai-packs/create") {
-      return json({ order: await createAiPackOrder(repo, provider, session, await body(request), { clock, returnUrl: "https://webcanbe.com/dashboard/billing?ai-pack=return", cancelUrl: "https://webcanbe.com/dashboard/billing?ai-pack=cancelled" }) }, 201)
+      return json({ order: await createAiPackOrder(repo, provider, session, await body(request), { clock, returnUrl: PAYMENT_RETURN_URLS.aiPackReturn, cancelUrl: PAYMENT_RETURN_URLS.aiPackCancel }) }, 201)
     }
     if (path === "/__webcanbe/api/payments/ai-packs/capture") {
       return json({ order: await captureAiPackOrder(repo, provider, session, await body(request)) })
