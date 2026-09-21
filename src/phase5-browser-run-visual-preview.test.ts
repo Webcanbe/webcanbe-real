@@ -35,7 +35,8 @@ describe("Phase 5 free managed Browser Run Visual preview", () => {
     expect(worker).toContain('producer:"visual"')
     expect(worker).toContain('editType:"text"')
     expect(worker).toContain('UPDATE wcb_projects SET revision=$2,files=$3,history=$4,source_epoch=source_epoch+1')
-    expect(worker).toContain("releaseOrigin")
+    expect(worker).toContain("const history=structuredClone(state.history)")
+    expect(worker).toContain("history.transactions.push(tx)")
   })
 
   it("renders snapshot pixels in the editor and maps clicks back to source observations", () => {
