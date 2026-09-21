@@ -1,0 +1,24 @@
+name: Phase 5 recovery restore verify
+on:
+  push:
+    branches: [phase5-recovery-restore-rehearsal]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Recovery restore regressions
+        run: npx vitest run src/phase5-db-restore-ops.test.ts src/phase5-dr-tool-rehearsal.test.ts src/phase5-recovery-preflight.test.ts src/phase5-db-backup-ops.test.ts
+      - name: Recovery tooling syntax
+        run: node --check scripts/db/restore-recovery.mjs && node --check scripts/db/backup.mjs && node --check scripts/db/verify-backup.mjs && node --check scripts/db/recovery-preflight.mjs
+      - name: Secret scan
+        run: npm run security:secrets
