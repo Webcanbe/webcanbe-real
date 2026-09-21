@@ -173,10 +173,10 @@ describe("production Worker source editor API",()=>{
     expect(preview.value.transport).toBe("snapshot")
     expect(preview.value.snapshotElements[0].identity).toEqual({file:"src/App.tsx",elementStart})
     expect(received.action).toBe("snapshot")
-    expect(received.options.url).toBe("https://webcanbe.com/preview-runtime.html")
+    expect(received.options.url).toBe("https://webcanbe.com/__wcb_preview_runtime")
     expect(received.options.addScriptTag[0].content).toContain("__WCB_PROJECT_PAYLOAD__")
     expect(received.options.addScriptTag[0].content).not.toContain("__Host-wcb-session")
-    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:preview-runtime\\.html|preview-assets\\/[^?#]+)$/"])
+    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"])
   })
 
   it("routes production project APIs before the static SPA fallback",()=>{
