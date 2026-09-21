@@ -1,6 +1,6 @@
 # Webcanbe Cloudflare Worker rollback
 
-Status: 2026-09-19 KST
+Status: 2026-09-21 KST
 
 ## Purpose
 
@@ -30,7 +30,16 @@ npm run deploy:deployments
 ```
 
 5. Select the exact known-good **Worker Version ID**. Do not guess.
-6. If the incident includes DB schema/data changes, take a fresh DB backup if possible and use `docs/operations/database-backup-restore.md` as the recovery plan.
+6. Verify a recent rollback target without changing production:
+
+```bash
+WEBCANBE_ROLLBACK_PLAN_ONLY=1 \
+npm run deploy:rollback -- <WORKER_VERSION_ID>
+```
+
+Plan mode runs only `wrangler versions list --json`, verifies that the exact UUID appears in the returned recent-version data, and exits without calling `wrangler rollback`. If the target is not present in that recent list, the wrapper refuses to approve the plan; inspect Cloudflare directly instead of guessing or substituting another version.
+
+7. If the incident includes DB schema/data changes, take a fresh DB backup if possible and use `docs/operations/database-backup-restore.md` as the recovery plan.
 
 ## Execute rollback
 
@@ -93,4 +102,4 @@ Once the root cause is fixed:
 
 ## Drill status
 
-The rollback wrapper now has a behavioral subprocess rehearsal in CI: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
+The rollback wrapper has behavioral subprocess rehearsal coverage: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. Non-mutating plan mode is also exercised against a fake `wrangler versions list --json`: an exact listed version passes without any rollback command, while an absent version fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
