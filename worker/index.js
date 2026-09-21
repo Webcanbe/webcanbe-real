@@ -13,6 +13,7 @@ import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
 import { transitionOperator, transitionSellerApplication, revokeSession, decideSubmissionReview, admitAssessment, promoteAssessmentRelease, publishPromotedListing, qualifyReleaseReady, grantTestEntitlement, transitionTestEntitlement } from "./control-mutations.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
+import { applyPreviewRuntimeHeaders } from "./preview-runtime-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
 
@@ -625,12 +626,16 @@ export default {
       else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
-        const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
-        const unknownAppPath = acceptsHtml && !isKnownAppPath(path)
-        const secured = applySecurityHeaders(asset, { noIndex: shouldNoIndexPath(path) || unknownAppPath })
-        response = unknownAppPath && secured.status === 200
-          ? new Response(secured.body, { status: 404, headers: secured.headers })
-          : secured
+        if (path === "/preview-runtime.html") {
+          response = applyPreviewRuntimeHeaders(asset)
+        } else {
+          const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
+          const unknownAppPath = acceptsHtml && !isKnownAppPath(path)
+          const secured = applySecurityHeaders(asset, { noIndex: shouldNoIndexPath(path) || unknownAppPath })
+          response = unknownAppPath && secured.status === 200
+            ? new Response(secured.body, { status: 404, headers: secured.headers })
+            : secured
+        }
       }
       return withRequestId(response, traceId)
     } catch {
