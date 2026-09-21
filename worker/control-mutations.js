@@ -214,10 +214,17 @@ export async function verifyReleaseRights(db,session,input,evidenceId){
 
   const byKey=(await db.query("SELECT * FROM wcb_release_rights_verifications WHERE verified_by=$1 AND idempotency_key=$2 FOR SHARE",[session.userId,auditKey])).rows[0]
   const existing=(await db.query("SELECT * FROM wcb_release_rights_verifications WHERE release_id=$1 FOR SHARE",[releaseId])).rows[0]
+  const boundSourceEvidence={
+    ...sourceEvidence,
+    releaseSnapshotHash:String(release.snapshot_hash),
+    sourceContentHash:String(release.source_content_hash),
+    sourceRevisionId:String(release.source_revision_id),
+    sourceProjectId:String(release.source_project_id),
+  }
   const normalized={
     rightsBasis:basis,
     licenseExpression,
-    sourceEvidence,
+    sourceEvidence:boundSourceEvidence,
     dependencyEvidence,
     assetEvidence,
   }
@@ -225,7 +232,7 @@ export async function verifyReleaseRights(db,session,input,evidenceId){
     if(!byKey||!existing||String(byKey.verification_id)!==String(existing.verification_id)
       ||String(existing.catalog_project_id)!==String(release.catalog_project_id)
       ||existing.rights_basis!==basis||existing.license_expression!==licenseExpression
-      ||canonicalJson(existing.source_evidence)!==canonicalJson(sourceEvidence)
+      ||canonicalJson(existing.source_evidence)!==canonicalJson(boundSourceEvidence)
       ||canonicalJson(existing.dependency_evidence)!==canonicalJson(dependencyEvidence)
       ||canonicalJson(existing.asset_evidence)!==canonicalJson(assetEvidence)
       ||existing.verification_status!=="verified") throw new Error("Release already has conflicting rights evidence.")
@@ -239,7 +246,7 @@ export async function verifyReleaseRights(db,session,input,evidenceId){
     source_evidence,dependency_evidence,asset_evidence,verification_status,verified_by,idempotency_key,verified_at
   ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'verified',$9,$10,clock_timestamp()) RETURNING *`,[
     crypto.randomUUID(),releaseId,release.catalog_project_id,basis,licenseExpression,
-    JSON.stringify(sourceEvidence),JSON.stringify(dependencyEvidence),JSON.stringify(assetEvidence),session.userId,auditKey,
+    JSON.stringify(boundSourceEvidence),JSON.stringify(dependencyEvidence),JSON.stringify(assetEvidence),session.userId,auditKey,
   ])).rows[0]
 }
 
