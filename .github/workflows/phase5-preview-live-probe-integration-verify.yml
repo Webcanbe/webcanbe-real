@@ -1,0 +1,48 @@
+name: Phase 5 preview live-probe integration verify
+on:
+  push:
+    branches: [phase5-preview-live-probe]
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/phase5-preview-live-probe-integration-verify.yml
+      - src/preview-runtime.ts
+      - src/phase5-browser-run-visual-preview.test.ts
+      - docs/checkpoints/gate4-live-materialization-editor-2026-09-21.md
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare runtime profile
+        run: npm run runtime:prepare
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Browser Run Visual regressions
+        run: npx vitest run src/phase5-browser-run-visual-preview.test.ts
+      - name: Preview runtime security regressions
+        run: npx vitest run src/phase5-preview-runtime-security.test.ts src/phase5-browser-run-visual-preview.test.ts src/phase5-firebase-csp-popup.test.ts
+      - name: Production editor source regressions
+        run: npx vitest run worker/editor-projects.test.js worker/materialization.test.js src/phase5-production-hosted-editor.test.ts src/phase5-gate4-launch-chain.test.ts src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts
+      - name: Gate 2 identity-link regressions
+        run: npx vitest run worker/identity-link.test.js worker/postgres-session.test.js src/phase5-gate2-auth-smoke.test.ts src/phase5-firebase-auth.test.ts src/hostedProductClient.test.ts
+      - name: Gate 3 launch-chain regressions
+        run: npx vitest run src/phase5-materialization-activation.test.ts scripts/launch/materialization-smoke-fixture.test.js src/phase5-gate4-launch-chain.test.ts src/phase5-production-read-mode.test.ts src/phase5-production-public-smoke.test.ts src/phase5-firebase-auth.test.ts src/phase5-csp-compat.test.ts worker/security-headers.test.js worker/materialization.test.js
+      - name: Firebase popup CSP regressions
+        run: npx vitest run src/phase5-firebase-csp-popup.test.ts src/phase5-firebase-auth.test.ts src/phase5-csp-compat.test.ts worker/security-headers.test.js
+      - name: Release-rights gate regressions
+        run: npx vitest run src/phase5-release-rights-gate.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-product-operator-schema.test.ts src/phase5-ready-qualification.test.ts
+      - name: Worker syntax
+        run: node --check worker/editor-projects.js && node --check worker/identity-link.js && node --check worker/postgres-session.js && node --check worker/security-headers.js && node --check worker/preview-runtime-headers.js && node --check worker/control-mutations.js && node --check worker/control-read.js && node --check worker/readiness.js && node --check worker/index.js
+      - name: Production build
+        run: npm run build
+      - name: Production build budget
+        run: node scripts/launch/build-budget.mjs
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
