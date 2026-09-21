@@ -23,7 +23,7 @@ function releaseRow(filesInput: Record<string, string>) {
     past: [],
     future: [],
   }
-  const encodedFiles = files.map(([file, text]) => [file, Buffer.from(text).toString("base64")])
+  const encodedFiles = files.map(([file, text]) => [file, Buffer.from(text).toString("base64")] as const)
   const snapshotHash = releaseSnapshotHash({ projectId, revisionId, contentHash, files: encodedFiles, history })
   return {
     source_project_id: projectId,
