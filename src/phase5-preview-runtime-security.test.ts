@@ -2,10 +2,10 @@ import fs from "node:fs"
 import { describe, expect, it } from "vitest"
 import {
   CONTENT_SECURITY_POLICY,
-  PREVIEW_RUNTIME_SECURITY_HEADERS,
   isKnownAppPath,
   shouldNoIndexPath,
 } from "../worker/security-headers.js"
+import { PREVIEW_RUNTIME_SECURITY_HEADERS } from "../worker/preview-runtime-headers.js"
 
 describe("Phase 5 preview runtime security boundary", () => {
   it("keeps unsafe-eval out of the ordinary Webcanbe CSP", () => {
