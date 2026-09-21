@@ -322,6 +322,7 @@ async function drafts(db,session,projectId,body) {
   if(body.command!==undefined && body.command!=="save") fail(400,"Unknown draft operation.")
   if(!write){
     const row=(await db.query("SELECT version,payload FROM wcb_drafts WHERE project_id=$1 AND user_id=$2",[projectId,session.userId])).rows[0]
+    await verifyCapability(db,session,projectId,body,false)
     return {status:200,value:{draftState:draftState(row)}}
   }
   const nextDrafts=validateDrafts(body.drafts)
@@ -344,6 +345,10 @@ async function readState(db,session,projectId,body,write=false){
   const project=await verifyCapability(db,session,projectId,body,write)
   return {project,state:verifyProjectState(projectId,project)}
 }
+async function finishRead(db,session,projectId,body,value){
+  await verifyCapability(db,session,projectId,body,false)
+  return value
+}
 
 export async function editorProjectRequest(db, session, path, body={}) {
   if(path==="/__webcanbe/api/projects"){
@@ -352,8 +357,11 @@ export async function editorProjectRequest(db, session, path, body={}) {
          FROM wcb_projects p
          JOIN wcb_project_members pm ON pm.project_id=p.project_id AND pm.user_id=$1 AND pm.active
          JOIN wcb_workspace_members wm ON wm.workspace_id=p.workspace_id AND wm.user_id=$1 AND wm.active
+         JOIN wcb_sessions s ON s.session_id=$2 AND s.user_id=$1 AND s.active
         WHERE NOT p.deleted
-        ORDER BY p.project_id`,[session.userId])).rows
+          AND s.expires_at=to_timestamp($3/1000.0) AND s.expires_at>clock_timestamp()
+          AND NOT EXISTS(SELECT 1 FROM wcb_disabled_users d WHERE d.user_id=$1)
+        ORDER BY p.project_id`,[session.userId,session.sessionId,session.expiresAt])).rows
     const projects=[]
     for(const row of rows){
       const state=verifyProjectState(String(row.project_id),row)
@@ -384,23 +392,23 @@ export async function editorProjectRequest(db, session, path, body={}) {
       if(typeof body.file!=="string"||!sourceMember(body.file,state.history))fail(404,"Source file is unavailable.")
       const source=textFiles(state.files,state.history).get(body.file)
       if(source===undefined)fail(404,"Source file is unavailable.")
-      return {status:200,value:{files:listing,source,revision:state.revision}}
+      return {status:200,value:await finishRead(db,session,projectId,body,{files:listing,source,revision:state.revision})}
     }
-    return {status:200,value:{files:listing,revision:state.revision}}
+    return {status:200,value:await finishRead(db,session,projectId,body,{files:listing,revision:state.revision})}
   }
   if(action==="history"){
     if(body.archiveId!==undefined||body.restoreRevisionId!==undefined)fail(422,"Archived history restore is not enabled on the production Worker yet.")
-    return {status:200,value:{history:state.history,revision:state.revision}}
+    return {status:200,value:await finishRead(db,session,projectId,body,{history:state.history,revision:state.revision})}
   }
-  if(action==="search") return {status:200,value:searchSource(state,body.query,body.caseSensitive,body.limit)}
+  if(action==="search") return {status:200,value:await finishRead(db,session,projectId,body,searchSource(state,body.query,body.caseSensitive,body.limit))}
   if(action==="validate"){
     if(body.mode==="semantic")fail(422,"The isolated semantic checker is not attached to the production Worker yet.")
     if(typeof body.file!=="string"||typeof body.content!=="string"||!sourceMember(body.file,state.history)||!textFiles(state.files,state.history).has(body.file))fail(400,"Select an authorized source file.")
     if(body.content.includes("\0")||Buffer.byteLength(body.content)>LIMITS.fileBytes)fail(422,"Source file exceeds limits.")
-    return {status:200,value:{validation:{level:"parse",passed:true,diagnostics:[]},revision:state.revision}}
+    return {status:200,value:await finishRead(db,session,projectId,body,{validation:{level:"parse",passed:true,diagnostics:[]},revision:state.revision})}
   }
   if(action==="compatibility"){
-    return {status:200,value:{summary:{total:0,full:0,partial:0,codeOnly:0,score:0},targets:[],breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:["Live Visual analysis requires the controlled production preview runner."],revision:state.revision}}
+    return {status:200,value:await finishRead(db,session,projectId,body,{summary:{total:0,full:0,partial:0,codeOnly:0,score:0},targets:[],breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:["Live Visual analysis requires the controlled production preview runner."],revision:state.revision})}
   }
   if(action==="inspect"||action==="mutate") fail(422,"Live Visual inspection requires the controlled production preview runner.")
   if(action==="preview"){
@@ -413,7 +421,7 @@ export async function editorProjectRequest(db, session, path, body={}) {
   if(action==="export"){
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before export.")
     const archive=zipStore(state.files)
-    return {status:200,value:{archive:archive.toString("base64"),revision:state.revision,validation:{level:"checkpoint",passed:true,diagnostics:[]},independentBuild:"UNVERIFIED_AT_EXPORT"}}
+    return {status:200,value:await finishRead(db,session,projectId,body,{archive:archive.toString("base64"),revision:state.revision,validation:{level:"checkpoint",passed:true,diagnostics:[]},independentBuild:"UNVERIFIED_AT_EXPORT"})}
   }
   fail(404,"Editor operation is unavailable.")
 }
