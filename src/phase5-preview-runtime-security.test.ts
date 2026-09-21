@@ -24,13 +24,13 @@ describe("Phase 5 preview runtime security boundary", () => {
   })
 
   it("treats the preview runtime as an intentional noindex asset, not an unknown SPA path", () => {
-    expect(isKnownAppPath("/preview-runtime.html")).toBe(true)
-    expect(shouldNoIndexPath("/preview-runtime.html")).toBe(true)
+    expect(isKnownAppPath("/__wcb_preview_runtime")).toBe(true)
+    expect(shouldNoIndexPath("/__wcb_preview_runtime")).toBe(true)
   })
 
   it("routes only the preview document through the special response headers", () => {
     const worker = fs.readFileSync("worker/index.js", "utf8")
-    expect(worker).toContain('if (path === "/preview-runtime.html")')
+    expect(worker).toContain('if (path === "/__wcb_preview_runtime")')
     expect(worker).toContain("applyPreviewRuntimeHeaders(asset)")
     expect(worker).toContain("applySecurityHeaders(asset")
   })
