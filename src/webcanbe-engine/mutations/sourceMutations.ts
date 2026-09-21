@@ -221,7 +221,10 @@ export function patchProjectStyle(store: SourceStore, files: Map<string, string>
     }
   }
   const origin = mutationOrigin(target, property, breakpoint, analysis.breakpoints)
-  if (!origin?.range || !origin.file) return failed(identity, "responsive", "No unambiguous existing declaration at this breakpoint; use Code.")
+  if (!origin?.range || !origin.file) {
+    const unavailable=target.styleOrigins.find(item=>item.property===property&&!item.editable)
+    return failed(identity,"responsive",unavailable?.reason ?? `No unique editable ${property} declaration at breakpoint ${breakpoint} in ${identity.file}:${identity.elementStart}.`)
+  }
   if (origin.kind !== "tailwind" && !safeStyleValue(value)) return failed(identity, "style", "Invalid CSS or inline value.")
   if ((origin.shared || target.repeated) && options.scope !== "source") return failed(identity, "style", `Choose source scope before editing: ${origin.scope}.`)
   if (options.semantic && !["display", "flexDirection", "gap", "padding", "paddingX", "paddingY", "margin", "width", "minWidth", "maxWidth", "height", "alignItems", "justifyContent", "alignSelf", "justifySelf", "order", "flexGrow", "flexShrink", "flexBasis", "gridTemplateColumns", "gridTemplateRows", "gridColumn", "gridRow"].includes(property)) return failed(identity, "layout", "Unsupported semantic layout property.")

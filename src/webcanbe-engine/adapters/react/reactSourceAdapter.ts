@@ -245,6 +245,23 @@ export function tailwindProperty(token: string): StyleProperty | undefined {
   return undefined
 }
 
+const jsxTextValues = new Map<string, string>()
+function jsxTextValue(raw: string) {
+  if (!raw.includes("&")) return raw
+  const cached=jsxTextValues.get(raw)
+  if(cached!==undefined)return cached
+  // Ask the existing JSX compiler to decode exactly its supported entity grammar.
+  // The isolated static text node is compiled as data; generated code is never run.
+  const emitted=ts.transpileModule(`const value=<span>${raw}</span>`,{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2020}}).outputText
+  const statement=parsedSource("jsx-text.ts",emitted).statements[0]
+  const initializer=statement&&ts.isVariableStatement(statement)?statement.declarationList.declarations[0].initializer:undefined
+  const argument=initializer&&ts.isCallExpression(initializer)?initializer.arguments[2]:undefined
+  const value=argument&&ts.isStringLiteral(argument)?argument.text:raw
+  if(jsxTextValues.size>=64)jsxTextValues.delete(jsxTextValues.keys().next().value!)
+  jsxTextValues.set(raw,value)
+  return value
+}
+
 function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile, readSource?: ReadSource) {
   const element = node.parent
   if (!ts.isJsxElement(element)) return undefined
@@ -258,8 +275,8 @@ function staticTextRange(node: ts.JsxOpeningElement, source: ts.SourceFile, read
   const child = texts[0]
   const raw = child.getText(source)
   const leading = raw.length - raw.trimStart().length
-  const text = raw.trim()
-  return { text, range: { start: child.getStart(source) + leading, end: child.getStart(source) + leading + text.length } }
+  const spelling = raw.trim(), text = jsxTextValue(spelling)
+  return { text, range: { start: child.getStart(source) + leading, end: child.getStart(source) + leading + spelling.length } }
 }
 
 function inlineStyleOrigins(node: ts.JsxOpeningLikeElement, source: ts.SourceFile): StyleOrigin[] {

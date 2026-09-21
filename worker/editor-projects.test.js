@@ -302,6 +302,17 @@ describe("Worker AST Visual transactions",()=>{
     expect(b.target.styleOrigins[0].numericValue).toBeUndefined()
     expect(b.target.styleOrigins[0].unit).toBeUndefined()
   })
+  it('reopens JSX entities as rendered text without double-escaping subsequent edits',async()=>{
+    const {state,call,target}=await setup(`export default()=> <main>Hello</main>`)
+    const saved=await call('mutate',{identity:target.identity,expectedRevision:baseRevision,idempotencyKey:'text-entity-first',edit:{type:'text',value:'A & B'}})
+    const inspected=await call('inspect',{identity:{file:'src/App.tsx',elementStart:target.identity.elementStart,revisionId:saved.value.revision}})
+    expect(inspected.value.target.text).toBe('A & B')
+    await call('mutate',{identity:inspected.value.target.identity,expectedRevision:saved.value.revision,idempotencyKey:'text-entity-second',edit:{type:'text',value:inspected.value.target.text+'!'}})
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).toContain('A &amp; B!')
+    expect(Buffer.from(state.project.files['src/App.tsx'],'base64').toString()).not.toContain('&amp;amp;')
+    const encoded=await setup(`export default()=> <main>&quot;Hi&quot; &#65; &copy;</main>`)
+    expect(encoded.target.text).toBe('"Hi" A ©')
+  })
   it('preserves escaped literal text and rejects executable JSX text injection',async()=>{
     const a=await setup(`export default()=> <main>{"Hello"}</main>`)
     const value='Quotes " and & <script> {expression} 한글'
@@ -390,6 +401,33 @@ describe("Worker AST Visual transactions",()=>{
       const root=path.resolve(process.env.WCB_VISUAL_ARTIFACT_DIR)
       fs.mkdirSync(root,{recursive:true});fs.writeFileSync(path.join(root,'index.html'),artifact.html)
       for(const [file,value] of artifact.files){const dest=path.join(root,file.replace(/^\//,''));fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,value.body)}
+    }
+  },20000)
+  if(process.env.WCB_VISUAL_DEMO_ROOT) it('preserves the pinned original E2E demo through Visual, Code, undo/redo and independent export',async()=>{
+    const path=await import('node:path'),{execFileSync}=await import('node:child_process')
+    const root=path.resolve(process.env.WCB_VISUAL_DEMO_ROOT)
+    expect(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim()).toBe('00b47131c23785b607c2d3b459c331316dad5767')
+    const names=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean)
+    const extra=Object.fromEntries(names.map(file=>[file,fs.readFileSync(path.join(root,file),'utf8')]))
+    const source=extra['src/App.tsx'],{state,call}=await setup(source,extra)
+    const grid=(await call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<div className="project-grid"')}})).value.target
+    const saved=await call('mutate',{identity:grid.identity,expectedRevision:baseRevision,idempotencyKey:'demo-grid-gap-edit',edit:{type:'style',property:'gap',value:'40px',scope:'source'}})
+    const heading=(await call('inspect',{identity:{file:'src/App.tsx',elementStart:source.indexOf('<h2>Selected work')}})).value.target
+    await call('mutate',{identity:heading.identity,expectedRevision:state.project.revision,idempotencyKey:'demo-heading-edit',edit:{type:'text',value:'Selected studies'}})
+    const current=(await call('files',{file:'src/App.tsx'})).value.source,{createHash}=await import('node:crypto')
+    await call('code',{expectedRevision:state.project.revision,idempotencyKey:'demo-code-edit-key',operations:[{kind:'update',file:'src/App.tsx',expectedHash:createHash('sha256').update(current).digest('hex'),content:current+'\n// Code and Visual share this accepted source'}]})
+    await call('revert',{expectedRevision:state.project.revision,idempotencyKey:'demo-gap-undo-key',transactionId:saved.value.transaction.id})
+    expect((await call('files',{file:'src/styles.css'})).value.source).toBe(extra['src/styles.css'])
+    await call('redo',{expectedRevision:state.project.revision,idempotencyKey:'demo-gap-redo-key'})
+    expect((await call('files',{file:'src/App.tsx'})).value.source).toContain('Selected studies')
+    const exported=await call('export',{expectedRevision:state.project.revision})
+    const {buildIndependentExport}=await import('../src/webcanbe-engine/runtime/independentExport.ts')
+    const artifact=await buildIndependentExport(Buffer.from(exported.value.archive,'base64'),process.cwd())
+    expect(artifact.sourceUnchanged).toBe(true)
+    if(process.env.WCB_VISUAL_DEMO_ARTIFACT_DIR){
+      const destination=path.resolve(process.env.WCB_VISUAL_DEMO_ARTIFACT_DIR)
+      fs.mkdirSync(destination,{recursive:true});fs.writeFileSync(path.join(destination,'index.html'),artifact.html)
+      for(const [file,value] of artifact.files){const dest=path.join(destination,file.replace(/^\//,''));fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,value.body)}
     }
   },20000)
   it('rejects stale identity hashes and shared scope without changing accepted history',async()=>{
