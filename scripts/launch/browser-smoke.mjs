@@ -53,7 +53,8 @@ for (const [browserName, browserType] of browsers) {
           try {
             response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25_000 })
             await page.waitForSelector("h1", { state: "attached", timeout: 7_000 }).catch(() => {})
-            await page.waitForTimeout(120)
+            if (route === "/") await page.locator(".landing-react-host a[href]").first().waitFor({ state: "visible", timeout: 7_000 })
+            if (route === "/plans") await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
           } catch (error) {
             fail(`${browserName}/${viewportName} ${route} loads`, error instanceof Error ? error.message : String(error))
             continue
@@ -149,7 +150,7 @@ for (const [browserName, browserType] of browsers) {
         assert(`${browserName}/${viewportName} auth close control has a name`, login.closeName === "Close sign-in", `label ${login.closeName || "missing"}`)
 
         await page.goto(new URL("/plans", origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
-        await page.waitForTimeout(250)
+        await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
         const plans = await page.evaluate(() => {
           const buttons = [...document.querySelectorAll("button")]
           const paid = buttons.filter(button => (button.textContent || "").includes("Billing coming soon"))
@@ -163,6 +164,14 @@ for (const [browserName, browserType] of browsers) {
         assert(`${browserName}/${viewportName} paid plans stay disabled`, plans.paidAllDisabled, `paid buttons ${plans.paidCount}`)
         assert(`${browserName}/${viewportName} free plan remains actionable`, plans.free, "free plan CTA missing")
         assert(`${browserName}/${viewportName} plans explain billing state`, plans.truth, "billing truth copy missing")
+
+        for (const path of ["/project/not-a-real-project", "/project/not-a-real-project/preview"]) {
+          await page.goto(new URL(path, origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
+          await page.getByRole("link", { name: "Back to marketplace", exact: true }).waitFor({ timeout: 7_000 })
+          const text = await page.locator("main").innerText()
+          assert(`${browserName}/${viewportName} ${path} is truthfully unavailable`, /unavailable/i.test(text) && !/Northstar|Buy project|Public preview/.test(text), text.slice(0,200))
+        }
+
       } finally {
         await context.close()
       }
