@@ -61,7 +61,9 @@ WEBCANBE_ROLLBACK_MESSAGE='Rollback after production auth regression' \
 npm run deploy:rollback -- <WORKER_VERSION_ID>
 ```
 
-The script passes the exact version ID to `wrangler rollback`. It never automatically chooses “previous” because the immediately previous version may itself be bad.
+After explicit confirmation but **before** `wrangler rollback`, the execution path repeats the same read-only target/current-deployment preflight used by plan mode. A stale or missing target, malformed Wrangler JSON, failed version/status query, or missing current-deployment version evidence stops the command before any rollback. Only after those checks pass does the wrapper forward the exact operator-supplied version ID to `wrangler rollback`.
+
+The script never automatically chooses “previous” because the immediately previous version may itself be bad.
 
 ## After rollback
 
@@ -102,4 +104,4 @@ Once the root cause is fixed:
 
 ## Drill status
 
-The rollback wrapper has behavioral subprocess rehearsal coverage: invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary, while an explicitly approved UUID-shaped version is forwarded exactly to `wrangler rollback`. Non-mutating plan mode is exercised against fake read-only Wrangler responses: an exact recent target must pass `versions list`, current deployment evidence must pass `deployments status`, both target and active version IDs are reported, a missing target fails before the status query, and missing active-version evidence fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
+Behavioral subprocess rehearsal now covers both planning and confirmed execution. Invalid version IDs and missing production confirmation are refused before the fake Wrangler boundary. Plan mode proves the exact recent target and current deployment are read through `versions list` and `deployments status` without a rollback call. Confirmed execution proves those same two read-only checks run again before the exact approved UUID is forwarded to `wrangler rollback`; a stale target stops before status/rollback. Missing active-version evidence also fails closed. A live production rollback drill has **not** been intentionally executed yet, so do not mark the live rollback procedure fully tested until a controlled drill is performed against a safe known-good version.
