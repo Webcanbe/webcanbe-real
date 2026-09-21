@@ -174,6 +174,7 @@ describe("production Worker source editor API",()=>{
     expect(preview.value.snapshotElements[0].identity).toEqual({file:"src/App.tsx",elementStart})
     expect(received.action).toBe("snapshot")
     expect(received.options.url).toBe("https://webcanbe.com/__wcb_preview_runtime")
+    expect(received.options.waitForSelector).toEqual({selector:"html[data-wcb-ready='1']",timeout:12000})
     expect(received.options.addScriptTag[0].content).toContain("__WCB_PROJECT_PAYLOAD__")
     expect(received.options.addScriptTag[0].content).not.toContain("__Host-wcb-session")
     expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe\\.com\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"])
@@ -295,10 +296,11 @@ describe("Worker AST Visual transactions",()=>{
   it('returns source units without inventing units for Tailwind tokens',async()=>{
     const a=await setup(`export default()=> <main style={{padding:16,lineHeight:1.5,width:"50%"}}>Text</main>`)
     expect(a.target.styleOrigins.find(o=>o.property==='padding')).toMatchObject({numericValue:16,unit:'px'})
-    expect(a.target.styleOrigins.find(o=>o.property==='lineHeight')).toMatchObject({numericValue:1.5,unit:'number'})
+    expect(a.target.styleOrigins.find(o=>o.property==='lineHeight')).toMatchObject({numericValue:1.5,unit:''})
     expect(a.target.styleOrigins.find(o=>o.property==='width')).toMatchObject({numericValue:50,unit:'%'})
     const b=await setup(`export default()=> <main className="p-4">Text</main>`,{},true)
-    expect(b.target.styleOrigins[0]).toMatchObject({numericValue:null,unit:null})
+    expect(b.target.styleOrigins[0].numericValue).toBeUndefined()
+    expect(b.target.styleOrigins[0].unit).toBeUndefined()
   })
   it('preserves escaped literal text and rejects executable JSX text injection',async()=>{
     const a=await setup(`export default()=> <main>{"Hello"}</main>`)

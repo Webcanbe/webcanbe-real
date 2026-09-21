@@ -57,9 +57,10 @@ export type StyleOrigin = {
   file?: string
   range?: SourceRange
   value?: string
-  /** Optional Inspector metadata; value retains the exact source spelling. */
-  numericValue?: number | null
-  unit?: string | null
+  /** Optional parsed scalar metadata; value remains the authoritative source text. */
+  numericValue?: number
+  /** Unit for a parsed scalar (empty string for unitless); omit for tokens/expressions. */
+  unit?: string
   reason?: string
   selector?: string
   prefix?: string

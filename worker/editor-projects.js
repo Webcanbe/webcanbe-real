@@ -326,8 +326,10 @@ function projectStyles(state, viewport = "desktop") {
         if(initializer && typeof initializer.text==="string") { implicit=/^-?\d/.test(value);value=initializer.text }
       }
       const numeric=origin.kind!=="tailwind" && /^(-?\d+(?:\.\d+)?)(px|rem|em|%|vh|vw|ch)?$/.exec(value)
-      origin.numericValue=numeric?Number(numeric[1]):null
-      origin.unit=numeric?(numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"number")):null
+      if(numeric){
+        origin.numericValue=Number(numeric[1])
+        origin.unit=numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"")
+      }
     }
   }
   return { ...analysis, files, tailwind }
@@ -381,7 +383,7 @@ async function browserSnapshot(env,state,viewport,route){
       formats:["content","screenshot"],
       viewport:{width,height:900,deviceScaleFactor:1},
       gotoOptions:{waitUntil:"domcontentloaded",timeout:15000},
-      waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000,visible:false},
+      waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:12000},
       addScriptTag:[{content:injection}],
       allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"],
     })
