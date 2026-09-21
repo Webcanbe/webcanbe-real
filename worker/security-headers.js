@@ -28,6 +28,31 @@ export const SECURITY_HEADERS = Object.freeze({
   "Content-Security-Policy": CONTENT_SECURITY_POLICY,
 })
 
+export const PREVIEW_RUNTIME_SECURITY_HEADERS = Object.freeze({
+  "Strict-Transport-Security": "max-age=31536000",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), bluetooth=()",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-origin",
+  "Cache-Control": "no-store",
+  "X-Robots-Tag": "noindex, nofollow",
+  "Content-Security-Policy": [
+    "default-src 'none'",
+    "base-uri 'none'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'unsafe-inline'",
+    "img-src data: blob:",
+    "font-src data:",
+    "connect-src 'none'",
+    "media-src data: blob:",
+    "form-action 'none'",
+  ].join("; "),
+})
+
 const PRIVATE_EXACT = new Set([
   "/dashboard",
   "/dashboard-preview",
@@ -57,6 +82,7 @@ const PUBLIC_EXACT = new Set([
   "/privacy",
   "/plans",
   "/pricing",
+  "/preview-runtime.html",
 ])
 
 export function isKnownAppPath(path) {
@@ -69,7 +95,7 @@ export function isKnownAppPath(path) {
 
 export function shouldNoIndexPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return true
-  if (PRIVATE_EXACT.has(path) || path === "/seller") return true
+  if (PRIVATE_EXACT.has(path) || path === "/seller" || path === "/preview-runtime.html") return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 
@@ -77,6 +103,16 @@ export function applySecurityHeaders(response, options = {}) {
   const headers = new Headers(response.headers)
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) headers.set(name, value)
   if (options.noIndex === true) headers.set("X-Robots-Tag", "noindex, nofollow")
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
+
+export function applyPreviewRuntimeHeaders(response) {
+  const headers = new Headers(response.headers)
+  for (const [name, value] of Object.entries(PREVIEW_RUNTIME_SECURITY_HEADERS)) headers.set(name, value)
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
