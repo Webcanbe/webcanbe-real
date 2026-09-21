@@ -1,6 +1,6 @@
 import type { Breakpoint } from "../adapters/react/projectStyles"
 import type { RunnerObservation, PreviewInput } from "../runtime/controlledPreview"
-import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useEffect, useRef, useState, type MouseEvent } from "react"
 import { isPreviewMessage, PREVIEW_CHANNEL } from "../bridge/previewProtocol"
 import { safePreviewRoute } from "../bridge/previewRoute"
 import { PREVIEW_SECURITY_NOTICE } from "../bridge/previewSecurity"
@@ -453,7 +453,7 @@ export default function CompatibleWorkspace() {
   const viewportWidth = { mobile: 390, tablet: 768, desktop: 1280 }[viewport]
   const scale = Math.max(0.1, Math.min(1, availableWidth / viewportWidth))
   const frameStyle = { width: viewportWidth, height: preview?.transport === "raster" || preview?.transport === "snapshot" ? 900 : `${100 / scale}%`, transform: `scale(${scale})`, marginLeft: Math.max(0, (availableWidth - viewportWidth * scale) / 2) }
-  function selectSnapshot(event: React.MouseEvent<HTMLImageElement>) {
+  function selectSnapshot(event: MouseEvent<HTMLImageElement>) {
     if (!selectMode || preview?.transport !== "snapshot") return
     const rect = event.currentTarget.getBoundingClientRect()
     if (!rect.width || !rect.height) return
