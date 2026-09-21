@@ -1,0 +1,42 @@
+name: Phase 5 Cloudflare public preview live probe
+on:
+  push:
+    branches: [phase5-preview-live-probe]
+    paths:
+      - scripts/launch/preview-live-public-probe.mjs
+      - .github/workflows/phase5-preview-live-public-probe.yml
+      - src/preview-runtime.ts
+      - src/PreviewRuntimeHost.tsx
+      - worker/editor-projects.js
+      - worker/preview-runtime-headers.js
+      - worker/index.js
+  workflow_dispatch:
+
+jobs:
+  live-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install ephemeral Chromium probe dependency
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Wait for Cloudflare branch deployment propagation
+        run: sleep 45
+      - name: Probe actual Cloudflare branch preview DOM and network
+        env:
+          WCB_PREVIEW_LIVE_URL: https://phase5-preview-live-probe-webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime
+          WCB_PREVIEW_LIVE_EVIDENCE: preview-live-evidence.json
+        run: node scripts/launch/preview-live-public-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase5-preview-live-evidence
+          path: preview-live-evidence.json
+          if-no-files-found: ignore
