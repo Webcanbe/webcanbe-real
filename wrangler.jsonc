@@ -47,8 +47,7 @@
   ],
   "vars": {
     "WEBCANBE_BIGPERSON_GOOGLE_EMAIL": "sihumin196@gmail.com",
-    "WEBCANBE_CONTROL_MODE": "enabled",
-    "WEBCANBE_PRODUCT_MUTATIONS": "enabled"
+    "WEBCANBE_CONTROL_MODE": "enabled"
   },
   "hyperdrive": [
     {
