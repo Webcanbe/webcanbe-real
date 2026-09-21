@@ -33,6 +33,10 @@ jobs:
         run: npm run security:secrets
       - name: Rights + privileged authority regressions
         run: npx vitest run src/phase5-release-rights-gate.test.ts src/phase5-bigperson-mutations.test.ts src/phase5-product-operator-schema.test.ts src/phase5-ready-qualification.test.ts
+      - name: Generate first-party fixture rights evidence
+        run: |
+          node scripts/launch/rights-evidence-fixture.mjs > /tmp/rights.json
+          node -e 'const v=require("/tmp/rights.json"); if(!v.source.reviewed||v.source.unresolvedCount!==0||!v.dependencies.reviewed||v.dependencies.unresolvedCount!==0||!v.assets.reviewed||v.assets.unresolvedCount!==0) process.exit(1); console.log(JSON.stringify(v,null,2))'
       - name: Worker syntax
         run: node --check worker/control-mutations.js && node --check worker/control-read.js && node --check worker/readiness.js && node --check worker/index.js
       - name: Production build
