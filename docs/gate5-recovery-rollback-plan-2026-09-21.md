@@ -5,8 +5,8 @@
 - Production/main remains `c0889c867170219545c7f05662e7f0c744a83362` (`Fix Firebase popup CSP`).
 - Gate 3 activation candidate remains `phase5-gate3-materialization-staging-v4` at `aa1cf8571ae6a95aff653d7385fdf883d9ea50e3`; exact main→v4 comparison remains ahead-only / **0 behind**.
 - Gate 5 recovery branch: `phase5-recovery-restore-rehearsal`, draft PR #46.
-- Latest verified Gate 5 implementation/test checkpoint: `4a6d33ec35f20cd1c8ac2cba21133165f08961ac`.
-- Recovery verification run `35554572340`, job `106195587316`: **PASS**.
+- Latest verified Gate 5 implementation/test checkpoint: `e47bc1ea2b66a1742592a14d2e166a8fdf9e41b4`.
+- Recovery verification run `35561253913`, job `106214418473`: **PASS**.
   - recovery/restore regressions: PASS
   - recovery tooling syntax: PASS
   - secret scan: PASS
@@ -25,14 +25,25 @@
 - Plan mode never invokes `wrangler rollback` and makes no deployment/traffic change.
 - A missing target fails before the deployment-status query. Missing active-version evidence also fails closed.
 
-### Confirmed execution now repeats the preflight
+### Confirmed execution repeats the preflight
 
 - Actual rollback still requires `WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION`; missing confirmation fails **before any Wrangler subprocess is invoked**.
-- After confirmation and before `wrangler rollback`, the wrapper now repeats the same two read-only checks used by plan mode.
+- After confirmation and before `wrangler rollback`, the wrapper repeats the same two read-only checks used by plan mode.
 - A stale/missing target, failed/malformed `versions list`, failed/malformed `deployments status`, or missing active-version evidence stops execution before the destructive command.
 - Only after that preflight passes is the exact operator-supplied UUID forwarded to `wrangler rollback`; the wrapper never chooses a previous version automatically.
 - Behavioral subprocess coverage proves this sequence against a fake Wrangler boundary and proves a stale target cannot reach either the status query or rollback command.
-- Operational runbook `docs/operations/cloudflare-rollback.md` records the same execution contract.
+
+### Post-rollback success now requires live smoke/readiness
+
+- A zero exit from `wrangler rollback` no longer makes the Webcanbe wrapper return success by itself.
+- After simulated/real Wrangler success, the wrapper automatically runs `npm run smoke:production:public` with `WEBCANBE_EXPECT_DATABASE=ready`.
+- The smoke contract verifies live production root/security headers, hosted Control/read mode with product mutation still closed, database/schema readiness, authoritative catalog access, anonymous private-read refusal, and anonymous materialization refusal.
+- The wrapper exits 0 only when this post-rollback production smoke/readiness step also succeeds.
+- If smoke fails, the overall wrapper exits non-zero and explicitly reports recovery incomplete. The rollback has already occurred at that point; the failure is not represented as an automatic undo.
+- Behavioral subprocess coverage proves both outcomes:
+  - rollback + green smoke → recovery command succeeds;
+  - rollback + failed smoke → recovery command remains failed.
+- Operational runbook `docs/operations/cloudflare-rollback.md` records the same contract.
 
 ## Recovery restore tooling already prepared
 
@@ -53,4 +64,4 @@
 
 ## One next autonomous action
 
-Continue Gate 5 without touching production by enforcing the **post-rollback verification contract** in the rehearsal harness: after a simulated successful rollback, require a production smoke/readiness verification step before the drill can be considered successful, and prove that verification failure leaves the drill failed. Keep the real rollback itself pending until a controlled production drill is explicitly safe.
+Keep production unchanged and tighten the rollback rehearsal one step further: after a simulated successful `wrangler rollback`, re-read `wrangler deployments status --json` and require the requested rollback target to appear in the resulting active deployment before running/accepting the production smoke. Prove that a zero rollback exit with the wrong active version still fails the drill.
