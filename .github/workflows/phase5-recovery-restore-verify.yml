@@ -17,8 +17,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Recovery restore regressions
-        run: npx vitest run src/phase5-db-restore-ops.test.ts src/phase5-dr-tool-rehearsal.test.ts src/phase5-recovery-preflight.test.ts src/phase5-db-backup-ops.test.ts
+        run: npx vitest run src/phase5-db-restore-ops.test.ts src/phase5-dr-tool-rehearsal.test.ts src/phase5-recovery-preflight.test.ts src/phase5-db-backup-ops.test.ts src/phase5-backup-source-identity.test.ts
       - name: Recovery tooling syntax
-        run: node --check scripts/db/restore-recovery.mjs && node --check scripts/db/backup.mjs && node --check scripts/db/verify-backup.mjs && node --check scripts/db/recovery-preflight.mjs
+        run: node --check scripts/db/restore-recovery.mjs && node --check scripts/db/backup.mjs && node --check scripts/db/backup-source-manifest.mjs && node --check scripts/db/verify-backup.mjs && node --check scripts/db/recovery-preflight.mjs
       - name: Secret scan
         run: npm run security:secrets
