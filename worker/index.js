@@ -1,3 +1,4 @@
+import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
@@ -416,6 +417,13 @@ async function privateProduct(request, env, path, traceId) {
       if (!await verifyDatabaseCsrf(db, databaseSession, csrf)) return json({ error: "Product request refused." }, 403)
       if (!await rateLimitAllowed(env.PRIVATE_API_RATE_LIMITER, "user:" + databaseSession.userId)) return rateLimitedResponse()
 
+      if (paymentPaths.has(path)) {
+        let body
+        try { body = await smallJsonBody(request, 16 * 1024) }
+        catch { return json({ error: "Invalid or oversized payment request." }, 400) }
+        const bounded = new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify(body) })
+        return privatePayment(bounded, path, db, databaseSession, env)
+      }
       if (path === "/__webcanbe/api/workspaces") {
         return json({ workspaces: await databaseWorkspaces(db, databaseSession) })
       }
@@ -616,6 +624,9 @@ export default {
         else if (path === "/__webcanbe/auth/callback") response = await callback(request, env)
         else response = await firebaseExchange(request, env)
       }
+      else if (path === "/__webcanbe/api/payments/config") response = paymentConfiguration(request, env)
+      else if (path === "/__webcanbe/api/payments/webhooks/paypal") response = await paypalWebhook(request, env)
+      else if (paymentPaths.has(path)) response = await privateProduct(request, env, path, traceId)
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
       else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
       else if (path === "/__webcanbe/ops/readiness") {
