@@ -6,6 +6,7 @@ vi.mock('./payments/paypal-provider.js',()=>({PayPalProvider:class {constructor(
 vi.mock('./payments/http.js',async importOriginal=>({...await importOriginal(),handlePrivatePaymentRequest:mocks.private}))
 vi.mock('./payments/webhook.js',()=>({handlePayPalWebhook:mocks.webhook}))
 import worker from './index.js'
+import { boundedPaymentBody } from './payment-routes.js'
 const env={HYPERDRIVE:{connectionString:'test-only'},WEBCANBE_PAYMENTS:'enabled',PAYPAL_ENVIRONMENT:'sandbox',PAYPAL_CLIENT_ID:'test-client',PAYPAL_CLIENT_SECRET:'test-secret',PAYPAL_WEBHOOK_ID:'test-webhook'}
 const path='/__webcanbe/api/payments/orders/create'
 const request=(body='{}',headers={})=>new Request('https://webcanbe.com'+path,{method:'POST',headers:{Origin:'https://webcanbe.com','Content-Type':'application/json',Cookie:'__Host-wcb-session=test-session','X-WCB-CSRF':'test-csrf',...headers},body})
@@ -18,4 +19,12 @@ describe('payment routing preserves server authority',()=>{
  it('passes the resolved session only after the existing gates',async()=>{expect((await worker.fetch(request(),env)).status).toBe(201);expect(mocks.private.mock.calls[0][2].session.userId).toBe('test-user')})
  it('fails closed when sandbox configuration is incomplete',async()=>{expect((await worker.fetch(request(),{...env,PAYPAL_CLIENT_SECRET:''})).status).toBe(503);expect(mocks.provider).not.toHaveBeenCalled()})
  it('permits provider webhook verification without browser CSRF while bounding its body',async()=>{const url='https://webcanbe.com/__webcanbe/api/payments/webhooks/paypal';expect((await worker.fetch(new Request(url,{method:'POST',body:'{}'}),env)).status).toBe(200);expect(mocks.webhook).toHaveBeenCalledOnce();expect(mocks.resolve).not.toHaveBeenCalled();expect((await worker.fetch(new Request(url,{method:'POST',body:'x'.repeat(256*1024+1)}),env)).status).toBe(413);expect(mocks.webhook).toHaveBeenCalledOnce()})
+})
+
+it('cancels an oversized streaming body before consuming the remaining stream', async () => {
+ const cancel = vi.fn()
+ const stream = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(17 * 1024)) }, cancel })
+ const req = new Request('https://webcanbe.com/test', {method:'POST', body:stream, duplex:'half'})
+ await expect(boundedPaymentBody(req,16 * 1024)).rejects.toThrow('Request too large.')
+ expect(cancel).toHaveBeenCalledOnce()
 })

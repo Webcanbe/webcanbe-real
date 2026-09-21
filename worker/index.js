@@ -1,4 +1,4 @@
-import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook } from "./payment-routes.js"
+import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
@@ -419,7 +419,7 @@ async function privateProduct(request, env, path, traceId) {
 
       if (paymentPaths.has(path)) {
         let body
-        try { body = await smallJsonBody(request, 16 * 1024) }
+        try { body = JSON.parse(new TextDecoder().decode(await boundedPaymentBody(request, 16 * 1024))) }
         catch { return json({ error: "Invalid or oversized payment request." }, 400) }
         const bounded = new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify(body) })
         return privatePayment(bounded, path, db, databaseSession, env)

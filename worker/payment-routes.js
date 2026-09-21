@@ -13,6 +13,25 @@ export function paymentConfiguration(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
   return json({...publicPaymentConfiguration(), checkoutAvailable:paymentConfigured(env), environment:paymentConfigured(env)?env.PAYPAL_ENVIRONMENT:null})
 }
+export async function boundedPaymentBody(request, maximum) {
+  const reader = request.body?.getReader()
+  if (!reader) throw new Error('Request body is required.')
+  const chunks = []
+  let length = 0
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      length += value.byteLength
+      if (length > maximum) { await reader.cancel(); throw new Error('Request too large.') }
+      chunks.push(value)
+    }
+  } finally { reader.releaseLock() }
+  const body = new Uint8Array(length)
+  let offset = 0
+  for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.length }
+  return body
+}
 // Caller has already resolved the database session, checked CSRF/origin and bounded JSON.
 export async function privatePayment(request, path, db, session, env) {
   if (!paymentPaths.has(path)) return json({error:'Payment operation is unavailable.'},404)
@@ -22,12 +41,9 @@ export async function privatePayment(request, path, db, session, env) {
 export async function paypalWebhook(request, env) {
   if(request.method !== 'POST') return new Response(null,{status:405,headers:{Allow:'POST'}})
   if(!paymentConfigured(env)) return json({error:'Payment webhook is not configured.'},503)
-  // Bounded streaming read: never trust an optional Content-Length header.
-  const reader=request.body?.getReader(); if(!reader)return json({error:'Webhook body is required.'},400)
-  const chunks=[];let length=0
-  try { while(true){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;if(length>256*1024){await reader.cancel();return json({error:'Webhook is too large.'},413)}chunks.push(value)} }
-  finally {reader.releaseLock()}
-  const body=new Uint8Array(length);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.length}
+  let body
+  try { body = await boundedPaymentBody(request, 256 * 1024) }
+  catch { return json({error:'Invalid or oversized webhook body.'},413) }
   const bounded=new Request(request.url,{method:'POST',headers:request.headers,body})
   try{return await withHyperdrive(env,db=>handlePayPalWebhook(bounded,new PostgresPaymentRepository(db),new PayPalProvider(env)))}
   catch{return json({error:'Payment webhook is temporarily unavailable.'},503)}
