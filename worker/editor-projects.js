@@ -1,3 +1,8 @@
+import { historyInverse } from "../src/webcanbe-engine/mutations/historyInverse.ts"
+import { analyzeProjectStyles, viewportWidths } from "../src/webcanbe-engine/adapters/react/projectStyles.ts"
+import { parsedSource, parsedCSS, supportedProperties } from "../src/webcanbe-engine/adapters/react/reactSourceAdapter.ts"
+import { summarizeCompatibility } from "../src/webcanbe-engine/core/compatibility.ts"
+import { patchText, patchProjectStyle, patchResponsiveConstruct, patchSiblingReorder, formatTransactionDiff } from "../src/webcanbe-engine/mutations/sourceMutations.ts"
 import { Buffer } from "node:buffer"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
 
@@ -252,9 +257,9 @@ function transactionFor({projectId,userId,baseRevision,newRevision,idempotencyKe
   return {tx,revision:{revisionId:newRevision,parentRevisionId:baseRevision,projectId,createdAt:timestamp,producer,actor:userId,contentHash:newContentHash,transactionId:id},validation}
 }
 
-async function saveCode(db, session, projectId, body) {
+async function saveCode(db, session, projectId, body, action = "code") {
   if (typeof body.expectedRevision !== "string" || !REVISION.test(body.expectedRevision) || typeof body.idempotencyKey !== "string" || !IDEMPOTENCY.test(body.idempotencyKey)) fail(400, "A current revision and bounded idempotency key are required.")
-  const requestHash=sha256(JSON.stringify({action:"code",base:body.expectedRevision,operations:body.operations,rewriteImports:body.rewriteImports===true}))
+  const requestHash=sha256(JSON.stringify({action,base:body.expectedRevision,operations:body.operations,transactionId:body.transactionId,rewriteImports:body.rewriteImports===true}))
   await db.query("BEGIN")
   try {
     await verifyCapability(db,session,projectId,body,true)
@@ -270,13 +275,25 @@ async function saveCode(db, session, projectId, body) {
     }
     if(state.revision!==body.expectedRevision) fail(409,"Source or preview changed; reload and retry.")
     if(body.rewriteImports===true && body.operations?.some(op=>op?.kind==="rename")) fail(422,"Automatic import rewriting is not enabled on the production Worker yet.")
-    const prepared=operationChanges(state,body.operations)
+    let inverse
+    if (action !== "code") {
+      try { inverse=historyInverse(state.history,state.history.transactions,textFiles(state.files,state.history),body.transactionId,action==="redo") }
+      catch(error) { fail(409,error.message) }
+    }
+    const operations=inverse?.operations??body.operations
+    const prepared=operationChanges(state,operations)
+    validateVisualSource(new Map(prepared.changes.filter(change=>change.after!==null).map(change=>[change.file,change.after])))
     const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history)
     const nextContentHash=sourceContentHash(nextFiles,state.history)
     const nextRevision="rev_"+randomUUID()
-    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations:body.operations,changes:prepared.changes,newContentHash:nextContentHash})
+    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,producer:action==="code"?"code":"system",editType:action==="code"?"code":action==="redo"?"redo":"revert"})
     const history=structuredClone(state.history)
-    history.transactions.push(tx);history.revisions.push(revision);history.past.push(tx.id);history.future=[]
+    history.transactions.push(tx);history.revisions.push(revision)
+    if(inverse){
+      tx.reverts=inverse.transactionId
+      if(action==="redo"){history.future=history.future.filter(id=>id!==inverse.transactionId);history.past.push(inverse.transactionId)}
+      else {history.past=history.past.filter(id=>id!==inverse.transactionId);history.future.push(inverse.transactionId)}
+    }else {history.past.push(tx.id);history.future=[]}
     if(history.transactions.length>5000||history.revisions.length>5000||Buffer.byteLength(JSON.stringify(history))>LIMITS.historyBytes) fail(409,"Project history capacity reached.")
     const payload=encodePayload(nextFiles)
     await verifyCapability(db,session,projectId,body,true)
@@ -292,48 +309,48 @@ async function saveCode(db, session, projectId, body) {
 }
 
 
-function simpleTarget(state, identity) {
-  if (!identity || typeof identity !== "object" || typeof identity.file !== "string" || !Number.isInteger(identity.elementStart)) fail(400, "Invalid source identity.")
-  if (!sourceMember(identity.file,state.history)) fail(404,"Source target is unavailable.")
-  const source=textFiles(state.files,state.history).get(identity.file)
-  if(source===undefined||identity.elementStart<0||identity.elementStart>=source.length)fail(404,"Source target is unavailable.")
-  const start=identity.elementStart
-  const opening=/^<([a-z][a-z0-9-]*)(?:\s[^<>]*?)?>/i.exec(source.slice(start,Math.min(source.length,start+4096)))
-  if(!opening)fail(409,"Source target no longer matches the accepted revision.")
-  const tag=opening[1].toLowerCase(),openingEnd=start+opening[0].length,close="</"+tag+">",closeIndex=source.indexOf(close,openingEnd)
-  let text,textRange
-  if(closeIndex>=openingEnd){
-    const between=source.slice(openingEnd,closeIndex)
-    if(between.length&&between.trim()===between&&!/[<>{}]/.test(between)){
-      text=between;textRange={start:openingEnd,end:closeIndex}
+function projectStyles(state, viewport = "desktop") {
+  if (!Object.hasOwn(viewportWidths, viewport)) fail(400, "Unsupported viewport.")
+  const files = textFiles(state.files, state.history)
+  // Static configuration participates in scope/variant safety; it is never evaluated.
+  for (const [file, bytes] of state.files) if (/^tailwind\.config\.[cm]?[jt]s$/.test(file)) files.set(file, bytes.toString("utf8"))
+  const tailwind = detectProject({}, state.files).detection.tailwind
+  const analysis = analyzeProjectStyles(files, tailwind, viewportWidths[viewport])
+  for (const target of analysis.targets) {
+    target.identity = { ...target.identity, revisionId: state.revision, contentHash: sha256(files.get(target.identity.file)) }
+    for (const origin of target.styleOrigins) {
+      // Add presentation metadata without changing the raw canonical source value.
+      let value=origin.value??"", implicit=false
+      if(origin.kind==="inline") {
+        const initializer=parsedSource("value.ts",`const value=${value}`).statements[0]?.declarationList?.declarations[0]?.initializer
+        if(initializer && typeof initializer.text==="string") { implicit=/^-?\d/.test(value);value=initializer.text }
+      }
+      const numeric=origin.kind!=="tailwind" && /^(-?\d+(?:\.\d+)?)(px|rem|em|%|vh|vw|ch)?$/.exec(value)
+      origin.numericValue=numeric?Number(numeric[1]):null
+      origin.unit=numeric?(numeric[2]??(implicit&&!["fontWeight","lineHeight","order","flexGrow","flexShrink"].includes(origin.property)?"px":"number")):null
     }
   }
-  const sourceEnd=closeIndex>=0?closeIndex+close.length:openingEnd
-  const canText=Boolean(textRange)
-  return {
-    identity:{file:identity.file,elementStart:start,revisionId:state.revision,contentHash:sha256(source)},
-    elementName:tag,nodeKind:"native",sourceRange:{start,end:sourceEnd},
-    ...(textRange?{text,textRange,textFile:identity.file,textShared:false}:{}),
-    styleOrigins:[],effectScope:"identified source",
-    capabilities:{preview:true,codeEdit:true,visualEdit:canText,text:canText,spacing:false,color:false,typography:false,size:false,layout:false,reorder:false},
-    compatibility:canText?"partial":"code-only",
-    unavailableReasons:canText?{}:{visualEdit:"This production preview currently supports safe static-text Visual edits. Use Code for this element."},
-    reasonCodes:canText?[]:["production-preview-text-only"],
-  }
+  return { ...analysis, files, tailwind }
 }
 
-function simpleCompatibility(state){
-  const targets=[]
-  for(const [file,source] of textFiles(state.files,state.history)){
-    const regex=/<([a-z][a-z0-9-]*)(?:\s[^<>]*?)?>/gi
-    let match
-    while((match=regex.exec(source))&&targets.length<300){
-      try{targets.push(simpleTarget(state,{file,elementStart:match.index}))}catch{}
-      if(!match[0].length)regex.lastIndex++
-    }
+function sourceTarget(state, identity, analysis = projectStyles(state)) {
+  if (!identity || typeof identity.file !== "string" || !Number.isInteger(identity.elementStart)) fail(400, "Invalid source identity.")
+  if (!sourceMember(identity.file, state.history)) fail(404, "Source target is unavailable.")
+  if ((identity.revisionId !== undefined && identity.revisionId !== state.revision) ||
+      (identity.contentHash !== undefined && identity.contentHash !== sha256(analysis.files.get(identity.file) ?? ""))) fail(409, "Stale SourceAnchor. Rebuild and select again.")
+  const target = analysis.targets.find(item => item.identity.file === identity.file && item.identity.elementStart === identity.elementStart)
+  if (!target) fail(404, "Unknown AST source identity.")
+  return target
+}
+
+function validateVisualSource(files) {
+  for (const [file, source] of files) {
+    try {
+      if (file.endsWith(".css")) parsedCSS(source)
+      else if (file.endsWith(".json")) JSON.parse(source)
+      else if (parsedSource(file, source).parseDiagnostics?.length) fail(422, `Source syntax validation failed: ${file}`)
+    } catch (error) { if (error instanceof EditorProjectError) throw error; fail(422, `Source syntax validation failed: ${file}`) }
   }
-  const partial=targets.filter(target=>target.capabilities.visualEdit).length,codeOnly=targets.length-partial
-  return {summary:{total:targets.length,full:0,partial,codeOnly,score:targets.length?Math.round(partial/targets.length*70):0},targets,breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:["Production Browser Run preview currently enables safe static-text Visual edits; complex style/layout edits remain Code-first until the full hosted runner is attached."]}
 }
 
 function previewPayload(state,route="/"){
@@ -393,10 +410,11 @@ async function browserSnapshot(env,state,viewport,route){
   return {png,observation,width}
 }
 
-async function saveVisualText(db,session,projectId,body){
+async function saveVisual(db,session,projectId,body,env){
   if(typeof body.expectedRevision!=="string"||!REVISION.test(body.expectedRevision)||typeof body.idempotencyKey!=="string"||!IDEMPOTENCY.test(body.idempotencyKey))fail(400,"A current revision and bounded idempotency key are required.")
-  if(!body.edit||body.edit.type!=="text"||typeof body.edit.value!=="string"||body.edit.value.includes("\0")||Buffer.byteLength(body.edit.value)>32*1024)fail(422,"Only bounded static-text Visual edits are enabled in the production preview.")
-  const requestHash=sha256(JSON.stringify({action:"visual-text",base:body.expectedRevision,identity:body.identity,value:body.edit.value}))
+  if(!body.edit||!["text","style","layout","responsive","responsive-create","reorder"].includes(body.edit.type)||typeof body.edit.value!=="string"||body.edit.value.includes("\0")||Buffer.byteLength(body.edit.value)>32*1024)fail(422,"A supported bounded Visual edit is required.")
+  if (!["text","reorder"].includes(body.edit.type) && !supportedProperties.includes(body.edit.property)) fail(422,"Unsupported style property.")
+  const requestHash=sha256(JSON.stringify({action:"visual",base:body.expectedRevision,identity:body.identity,edit:body.edit,viewport:body.viewport}))
   await db.query("BEGIN")
   try{
     await verifyCapability(db,session,projectId,body,true)
@@ -410,23 +428,35 @@ async function saveVisualText(db,session,projectId,body){
       return {status:200,value:{transaction:prior,replayed:true,validation:prior.validation,revision:state.revision,diff:""}}
     }
     if(state.revision!==body.expectedRevision)fail(409,"Source or preview changed; reload and retry.")
-    const target=simpleTarget(state,body.identity)
-    if(!target.textRange||!target.capabilities.text)fail(422,"This element is not a safe static-text Visual target.")
-    const files=textFiles(state.files,state.history),source=files.get(target.identity.file)
-    const nextSource=source.slice(0,target.textRange.start)+body.edit.value+source.slice(target.textRange.end)
-    const operations=[{kind:"update",file:target.identity.file,expectedHash:sha256(source),content:nextSource}]
+    const analysis=projectStyles(state,body.viewport),target=sourceTarget(state,body.identity,analysis),edit=body.edit
+    if(edit.type==="text"&&(target.textShared||target.repeated||/; (?:[2-9]|[1-9]\d+) statically/.test(target.effectScope??""))&&edit.scope!=="source")fail(422,"This text has shared/repeated uses; choose explicit source scope.")
+    const staged=new Map(analysis.files)
+    const store={tailwind:analysis.tailwind,read:file=>staged.get(file),write:(file,content,expected)=>{
+      if(!sourceMember(file,state.history))fail(422,"Mutation is outside editable source scope.")
+      if(expected!==undefined&&staged.get(file)!==expected)fail(409,"Source changed while preparing mutation.")
+      staged.set(file,content)
+    }}
+    const mutation=edit.type==="text"?patchText(store,target.identity,edit.value)
+      :edit.type==="reorder"?patchSiblingReorder(store,analysis.files,target.identity,edit.value,body.viewport,edit.scope)
+      :edit.type==="responsive-create"?patchResponsiveConstruct(store,analysis.files,target.identity,edit.property,edit.value,edit.breakpoint,edit.scope)
+      :patchProjectStyle(store,analysis.files,target.identity,edit.property,edit.value,{breakpoint:edit.breakpoint,viewport:edit.type==="responsive"?edit.viewport:undefined,scope:edit.scope,semantic:edit.type==="layout"})
+    if(!mutation.success)fail(422,`${mutation.error || "Source mutation is unsupported."} (${target.identity.file}:${target.sourceRange.start}-${target.sourceRange.end})`)
+    const operations=[...staged].filter(([file,content])=>content!==analysis.files.get(file)).map(([file,content])=>({kind:"update",file,expectedHash:sha256(analysis.files.get(file)),content}))
+    validateVisualSource(new Map(operations.map(op=>[op.file,op.content])))
     const prepared=operationChanges(state,operations)
     const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history),nextContentHash=sourceContentHash(nextFiles,state.history),nextRevision="rev_"+randomUUID()
     const {tx,revision,validation}=transactionFor({
       projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,
-      producer:"visual",editType:"text",target:{...target.identity,revisionId:state.revision},range:target.textRange,before:target.text,after:body.edit.value,summary:"Visual text edit "+target.identity.file,
+      producer:"visual",editType:mutation.editType,target:target.identity,range:mutation.range,before:mutation.before,after:mutation.after,summary:"Visual "+edit.type+" edit "+mutation.file,
     })
+    if (["reorder","responsive-create"].includes(edit.type)) await browserSnapshot(env,{...state,files:nextFiles},body.viewport,"/")
     const history=structuredClone(state.history);history.transactions.push(tx);history.revisions.push(revision);history.past.push(tx.id);history.future=[]
     if(history.transactions.length>5000||history.revisions.length>5000||Buffer.byteLength(JSON.stringify(history))>LIMITS.historyBytes)fail(409,"Project history capacity reached.")
+    await verifyCapability(db,session,projectId,body,true)
     const changed=await db.query("UPDATE wcb_projects SET revision=$2,files=$3,history=$4,source_epoch=source_epoch+1 WHERE project_id=$1 AND revision=$5 AND source_epoch=$6 RETURNING source_epoch",[projectId,nextRevision,JSON.stringify(encodePayload(nextFiles)),JSON.stringify(history),state.revision,state.epoch])
     if(!changed.rowCount)fail(409,"Source or preview changed; reload and retry.")
     await verifyCapability(db,session,projectId,body,true);await db.query("COMMIT")
-    const diff="--- "+target.identity.file+"\n+++ "+target.identity.file+"\n- "+target.text+"\n+ "+body.edit.value
+    const diff=formatTransactionDiff(mutation)
     return {status:200,value:{transaction:tx,replayed:false,validation,revision:nextRevision,diff}}
   }catch(error){await db.query("ROLLBACK").catch(()=>{});throw error}
 }
@@ -518,13 +548,13 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
       project:detectProject({id:projectId,name:String(project.name||"Hosted project")},state.files),
-      runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Production Visual editing is currently limited to safe static-text source mutations."]},
+      runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Visual edits use AST source mutations; shared definitions require explicit source scope. Snapshot preview does not support live interaction."]},
       session:editorSession,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
       compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
     }}
   }
   if(action==="drafts") return drafts(db,session,projectId,body)
-  if(action==="code") return saveCode(db,session,projectId,body)
+  if(["code","revert","undo","redo"].includes(action)) return saveCode(db,session,projectId,body,action)
   const {state}=await readState(db,session,projectId,body,false)
   if(action==="files"){
     const listing=publicFiles(state)
@@ -548,14 +578,14 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     return {status:200,value:await finishRead(db,session,projectId,body,{validation:{level:"parse",passed:true,diagnostics:[]},revision:state.revision})}
   }
   if(action==="compatibility"){
-    return {status:200,value:await finishRead(db,session,projectId,body,{...simpleCompatibility(state),revision:state.revision})}
+    return {status:200,value:await finishRead(db,session,projectId,body,{...(()=>{const a=projectStyles(state,body.viewport);return {targets:a.targets,summary:summarizeCompatibility(a.targets),breakpoints:a.breakpoints,styleDiagnostics:a.diagnostics}})(),revision:state.revision})}
   }
   if(action==="inspect"){
-    const target=simpleTarget(state,body.identity)
+    const analysis=projectStyles(state,body.viewport),target=sourceTarget(state,body.identity,analysis)
     const source=textFiles(state.files,state.history).get(target.identity.file)
-    return {status:200,value:await finishRead(db,session,projectId,body,{target,source,breakpoints:[{id:"base",label:"Base"}],styleDiagnostics:[],revision:state.revision})}
+    return {status:200,value:await finishRead(db,session,projectId,body,{target,source,breakpoints:analysis.breakpoints,styleDiagnostics:analysis.diagnostics,revision:state.revision})}
   }
-  if(action==="mutate") return saveVisualText(db,session,projectId,body)
+  if(action==="mutate") return saveVisual(db,session,projectId,body,env)
   if(action==="preview"){
     if(body.command==="stop") {
       return {status:200,value:{state:"stopped"}}
