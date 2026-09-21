@@ -44,7 +44,11 @@ const dependencyInventorySha256 = sha256(JSON.stringify(dependencies))
 
 const assetMembers = files.filter(item => /^src\/assets\//.test(item.file))
   .map(item => [item.file, sha256(item.bytes)])
-const sourceText = files.filter(item => /\.(?:tsx?|jsx?|css|json|html|md|svg)$/i.test(item.file))
+const runtimeReferenceFiles = files.filter(item =>
+  item.file.startsWith("src/") || item.file === "index.html" || item.file === "README.md"
+)
+const sourceText = runtimeReferenceFiles
+  .filter(item => /\.(?:tsx?|jsx?|css|json|html|md|svg)$/i.test(item.file))
   .map(item => item.bytes.toString("utf8")).join("\n")
 const externalUrls = [...new Set([...sourceText.matchAll(/https?:\/\/[^\s"'<>)}]+/g)].map(match => match[0])
   .filter(url => !/^http:\/\/www\.w3\.org\/(?:2000\/svg|1999\/xhtml|1999\/xlink)$/.test(url)))].sort()
