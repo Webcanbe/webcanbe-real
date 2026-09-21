@@ -11,7 +11,7 @@ import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
-import { transitionOperator, transitionSellerApplication, revokeSession, decideSubmissionReview, admitAssessment, promoteAssessmentRelease, publishPromotedListing, qualifyReleaseReady, grantTestEntitlement, transitionTestEntitlement } from "./control-mutations.js"
+import { transitionOperator, transitionSellerApplication, revokeSession, decideSubmissionReview, admitAssessment, promoteAssessmentRelease, verifyReleaseRights, publishPromotedListing, qualifyReleaseReady, grantTestEntitlement, transitionTestEntitlement } from "./control-mutations.js"
 import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -478,7 +478,7 @@ async function privateProduct(request, env, path, traceId) {
               throw error
             }
           }
-          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition" || path === "/__webcanbe/api/ops/sessions/revoke" || path === "/__webcanbe/api/ops/reviews/decide" || path === "/__webcanbe/api/ops/assessments/admit" || path === "/__webcanbe/api/ops/releases/promote" || path === "/__webcanbe/api/ops/listings/publish" || path === "/__webcanbe/api/ops/releases/ready/qualify" || path === "/__webcanbe/api/ops/entitlements/test/grant" || path === "/__webcanbe/api/ops/entitlements/test/transition") {
+          if (path === "/__webcanbe/api/ops/operators/transition" || path === "/__webcanbe/api/ops/seller-applications/transition" || path === "/__webcanbe/api/ops/sessions/revoke" || path === "/__webcanbe/api/ops/reviews/decide" || path === "/__webcanbe/api/ops/assessments/admit" || path === "/__webcanbe/api/ops/releases/promote" || path === "/__webcanbe/api/ops/releases/rights/verify" || path === "/__webcanbe/api/ops/listings/publish" || path === "/__webcanbe/api/ops/releases/ready/qualify" || path === "/__webcanbe/api/ops/entitlements/test/grant" || path === "/__webcanbe/api/ops/entitlements/test/transition") {
             const operationBody = body?.operationBody ?? {}
             await db.query("BEGIN")
             try {
@@ -495,8 +495,10 @@ async function privateProduct(request, env, path, traceId) {
                         ? await admitAssessment(db, databaseSession, operationBody, proof.evidenceId)
                         : path.endsWith("/releases/promote")
                           ? await promoteAssessmentRelease(db, databaseSession, operationBody, proof.evidenceId)
-                          : path.endsWith("/listings/publish")
-                            ? await publishPromotedListing(db, databaseSession, operationBody, proof.evidenceId)
+                          : path.endsWith("/releases/rights/verify")
+                            ? await verifyReleaseRights(db, databaseSession, operationBody, proof.evidenceId)
+                            : path.endsWith("/listings/publish")
+                              ? await publishPromotedListing(db, databaseSession, operationBody, proof.evidenceId)
                             : path.endsWith("/releases/ready/qualify")
                               ? await qualifyReleaseReady(db, databaseSession, operationBody, proof.evidenceId)
                               : path.endsWith("/entitlements/test/grant")
@@ -510,10 +512,11 @@ async function privateProduct(request, env, path, traceId) {
                       : path.endsWith("/reviews/decide") ? { review: result }
                         : path.endsWith("/assessments/admit") ? { assessment: result }
                           : path.endsWith("/releases/promote") ? result
-                            : path.endsWith("/listings/publish") ? result
-                              : path.endsWith("/releases/ready/qualify") ? { qualification: result }
+                            : path.endsWith("/releases/rights/verify") ? { rightsVerification: result }
+                              : path.endsWith("/listings/publish") ? result
+                                : path.endsWith("/releases/ready/qualify") ? { qualification: result }
                                 : { entitlement: result },
-                path.endsWith("/releases/promote") || path.endsWith("/listings/publish") || path.endsWith("/releases/ready/qualify") || path.endsWith("/entitlements/test/grant") ? 201 : 200,
+                path.endsWith("/releases/promote") || path.endsWith("/releases/rights/verify") || path.endsWith("/listings/publish") || path.endsWith("/releases/ready/qualify") || path.endsWith("/entitlements/test/grant") ? 201 : 200,
               )
             } catch (error) {
               await db.query("ROLLBACK")
