@@ -1,0 +1,35 @@
+name: Phase 5 preview runtime security verify
+on:
+  push:
+    branches: [phase5-preview-runtime-security-boundary]
+  pull_request:
+    branches: [main]
+    paths:
+      - worker/security-headers.js
+      - worker/index.js
+      - preview-runtime.html
+      - src/phase5-preview-runtime-security.test.ts
+      - .github/workflows/phase5-preview-runtime-security-verify.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Secret scan
+        run: npm run security:secrets
+      - name: Preview runtime security regressions
+        run: npx vitest run src/phase5-preview-runtime-security.test.ts src/phase5-browser-run-visual-preview.test.ts src/phase5-firebase-csp-popup.test.ts
+      - name: Worker syntax
+        run: node --check worker/security-headers.js && node --check worker/index.js
+      - name: Production build
+        run: npm run build
+      - name: Production build budget
+        run: node scripts/launch/build-budget.mjs
+      - name: Worker bundle dry run
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
