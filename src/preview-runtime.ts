@@ -2,8 +2,6 @@ import * as ts from "typescript"
 import * as ReactModule from "react"
 import { jsx, jsxs, Fragment } from "react/jsx-runtime"
 import { createRoot } from "react-dom/client"
-import * as RouterDom from "react-router-dom"
-import { clsx } from "clsx"
 
 type Payload = {
   files: Record<string, string>
@@ -21,12 +19,70 @@ declare global {
   }
 }
 
+const PreviewRouteContext = ReactModule.createContext(
+  typeof location === "undefined" ? "/" : (location.hash.replace(/^#/, "") || "/"),
+)
+
+function currentHashRoute() {
+  const value = location.hash.replace(/^#/, "") || "/"
+  return value.startsWith("/") ? value : "/" + value
+}
+
+function HashRouterCompat({ children }: { children?: ReactModule.ReactNode }) {
+  const [route, setRoute] = ReactModule.useState(currentHashRoute)
+  ReactModule.useEffect(() => {
+    const update = () => setRoute(currentHashRoute())
+    addEventListener("hashchange", update)
+    return () => removeEventListener("hashchange", update)
+  }, [])
+  return ReactModule.createElement(PreviewRouteContext.Provider, { value: route }, children)
+}
+
+function RouteCompat() { return null }
+
+function RoutesCompat({ children }: { children?: ReactModule.ReactNode }) {
+  const route = ReactModule.useContext(PreviewRouteContext)
+  const entries = ReactModule.Children.toArray(children).filter(ReactModule.isValidElement) as Array<ReactModule.ReactElement<Record<string, unknown>>>
+  const exact = entries.find(child => child.type === RouteCompat && child.props.path === route)
+    ?? entries.find(child => child.type === RouteCompat && child.props.path === "*")
+    ?? entries.find(child => child.type === RouteCompat && child.props.path === "/")
+  return (exact?.props.element as ReactModule.ReactNode) ?? null
+}
+
+function NavLinkCompat(props: { to: string; children?: ReactModule.ReactNode; className?: string | ((value: { isActive: boolean }) => string) }) {
+  const route = ReactModule.useContext(PreviewRouteContext)
+  const active = route === props.to
+  const className = typeof props.className === "function" ? props.className({ isActive: active }) : props.className
+  return ReactModule.createElement("a", { href: "#" + props.to, className, "aria-current": active ? "page" : undefined }, props.children)
+}
+
+function clsxCompat(...values: unknown[]): string {
+  const out: string[] = []
+  const visit = (value: unknown) => {
+    if (!value) return
+    if (typeof value === "string" || typeof value === "number") { out.push(String(value)); return }
+    if (Array.isArray(value)) { for (const item of value) visit(item); return }
+    if (typeof value === "object") for (const [key, enabled] of Object.entries(value as Record<string, unknown>)) if (enabled) out.push(key)
+  }
+  for (const value of values) visit(value)
+  return out.join(" ")
+}
+
+const RouterDomCompat = {
+  HashRouter: HashRouterCompat,
+  BrowserRouter: HashRouterCompat,
+  Routes: RoutesCompat,
+  Route: RouteCompat,
+  NavLink: NavLinkCompat,
+  Link: NavLinkCompat,
+}
+
 const packageModules: Record<string, unknown> = {
   react: { __esModule: true, default: ReactModule, ...ReactModule },
   "react/jsx-runtime": { __esModule: true, jsx, jsxs, Fragment },
   "react-dom/client": { __esModule: true, createRoot },
-  "react-router-dom": { __esModule: true, ...RouterDom },
-  clsx: { __esModule: true, default: clsx, clsx },
+  "react-router-dom": { __esModule: true, ...RouterDomCompat },
+  clsx: { __esModule: true, default: clsxCompat, clsx: clsxCompat },
 }
 
 const assetExt = /\.(?:svg|png|jpe?g|gif|webp|ico|woff2?|ttf|otf)$/i
@@ -261,8 +317,9 @@ function bootstrap(payload: Payload) {
 
     const localRequire = (request: string) => {
       const resolved = resolveRequest(request, file, files)
-      if ("package" in resolved) return packageModules[resolved.package]
-      return load(resolved.file)
+      if ("package" in resolved && resolved.package) return packageModules[resolved.package]
+      if ("file" in resolved && resolved.file) return load(resolved.file)
+      throw new Error("Preview dependency resolution failed: " + request)
     }
     const fn = new Function("require", "module", "exports", "__filename", "__dirname", output)
     fn(localRequire, module, module.exports, file, dirname(file))
