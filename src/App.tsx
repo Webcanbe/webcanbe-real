@@ -4,7 +4,7 @@ import Home from "./Home"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
 import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
-import { createEmailAccountFirebase, currentFirebaseIdToken, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
+import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
@@ -300,12 +300,18 @@ function Gate2AuthSmoke() {
     if(busy)return;setBusy(true);setMessage("")
     try{
       if(!await hostedProductClient.authenticated())throw new Error("Sign in with Google first before linking GitHub.")
-      const credential=await signInWithGithubFirebase()
-      const result=await hostedProductClient.linkFirebaseIdentity(await credential.user.getIdToken(true))
+      const providers=await currentFirebaseProviderIds()
+      let idToken=providers.includes("github.com")?await currentFirebaseIdToken(true):undefined
+      if(!idToken){
+        await signOutFirebase().catch(()=>{})
+        const credential=await signInWithGithubFirebase()
+        idToken=await credential.user.getIdToken(true)
+      }
+      const result=await hostedProductClient.linkFirebaseIdentity(idToken)
       markLinked("GitHub")
       setMessage(result.alreadyLinked?"GitHub identity was already linked to this Webcanbe account.":"GitHub identity is now linked to this Webcanbe account.")
     }catch(error){
-      setMessage(error instanceof Error?error.message:firebaseAuthErrorMessage(error))
+      setMessage(firebaseAuthErrorMessage(error))
     }finally{setBusy(false)}
   }
 
