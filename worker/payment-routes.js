@@ -1,3 +1,5 @@
+import { boundedRequestBody as boundedPaymentBody } from './request-body.js'
+export { boundedRequestBody as boundedPaymentBody } from './request-body.js'
 import { withHyperdrive } from './hyperdrive.js'
 import { PayPalProvider } from './payments/paypal-provider.js'
 import { PostgresPaymentRepository } from './payments/postgres-repository.js'
@@ -12,25 +14,6 @@ export function paymentConfigured(env) {
 export function paymentConfiguration(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
   return json({...publicPaymentConfiguration(), checkoutAvailable:paymentConfigured(env), environment:paymentConfigured(env)?env.PAYPAL_ENVIRONMENT:null})
-}
-export async function boundedPaymentBody(request, maximum) {
-  const reader = request.body?.getReader()
-  if (!reader) throw new Error('Request body is required.')
-  const chunks = []
-  let length = 0
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      length += value.byteLength
-      if (length > maximum) { await reader.cancel(); throw new Error('Request too large.') }
-      chunks.push(value)
-    }
-  } finally { reader.releaseLock() }
-  const body = new Uint8Array(length)
-  let offset = 0
-  for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.length }
-  return body
 }
 // Caller has already resolved the database session, checked CSRF/origin and bounded JSON.
 export async function privatePayment(request, path, db, session, env) {
