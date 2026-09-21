@@ -1,5 +1,16 @@
 # Webcanbe Launch Closure Plan — 2026-09-20 KST
 
+## Gate 4 combined Visual + Code staging proof: **PASS**
+
+- v4 checkpoint: `85c66326ae85ffe5065197ecd4272673b1021bf2`
+- integrated verification: `35546569409` **PASS**
+- chain: immutable release → materialize → safe Visual source mutation → durable Visual revision → Code revision → reopen → standalone export/build
+- history ordering verified as `visual` then `code`
+- both edits survive reopen and export
+- immutable release provenance retained
+- no Webcanbe runtime state in standalone export
+- staging evidence only; production mutation remains OFF until authenticated Gate 2 passes
+
 ## Gate 3 v4 current-main staging: **VERIFIED, NOT DEPLOYED**
 
 - branch: `phase5-gate3-materialization-staging-v4`
