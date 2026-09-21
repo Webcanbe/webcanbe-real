@@ -16,11 +16,15 @@ describe("Phase 5 database backup operations", () => {
     expect(backup).toContain("delete pgEnv.WEBCANBE_DATABASE_URL")
   })
 
-  it("creates a data-only archive for Webcanbe tables with a checksum", () => {
+  it("creates a data-only archive with checksum plus non-secret source identity binding", () => {
     expect(backup).toContain('"--data-only"')
     expect(backup).toContain('"--table=public.wcb_*"')
     expect(backup).toContain('createHash("sha256")')
     expect(backup).toContain('target + ".sha256"')
+    expect(backup).toContain("pg_control_system()")
+    expect(backup).toContain("writeSourceManifest")
+    expect(backup).toContain("systemIdentifier")
+    expect(backup).toContain("source identity changed while the backup was being created")
   })
 
   it("verifies archive readability, checksum, and Webcanbe table data entries", () => {
