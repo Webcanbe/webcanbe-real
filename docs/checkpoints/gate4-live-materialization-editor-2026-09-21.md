@@ -1,3 +1,91 @@
+# PR #60 current live-probe status — 2026-09-21 KST
+
+## Source of truth
+
+- repository: `Webcanbe/webcanbe-real`
+- branch: `phase5-preview-live-probe`
+- current main incorporated by ordinary merge commit `996d621c930614f81aea227363e75bf4a8771afe`; no rebase or force-push
+- main at incorporation: `456a23c9ab9879f89a68d0682a7e7fb3cc6daba1`
+- PR #60 remains **draft**
+- payment-related implementation/documentation is explicitly out of scope for this continuation
+
+## Automated regression — PASS
+
+Integrated non-payment verification run `35593824866` / job `106313997667`: **PASS**.
+
+Passed in that one run:
+- Browser Run Visual regressions
+- preview runtime security regressions
+- production editor/source regressions
+- Gate 2 identity-link regressions
+- Gate 3 launch-chain regressions
+- Firebase popup CSP regressions
+- release-rights gate regressions
+- Worker syntax
+- production build (`tsc -b && vite build`)
+- production build budget
+- Wrangler Worker dry-run
+
+Companion checks on the same integrated checkpoint also passed:
+- Gate 3 v4 `35593824815`
+- Firebase popup CSP `35593824861`
+- Browser Run Visual `35593824862`
+
+## Cloudflare public live probe — PASS for public runtime/asset/network-isolation scope
+
+Actual Cloudflare branch-preview browser run:
+- workflow `35594890113`
+- job `106317325809`
+- artifact `phase5-preview-live-evidence`, artifact ID `10636014422`
+- URL: `https://phase5-preview-live-probe-webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime`
+
+Observed from the deployed page, not inferred from unit tests:
+- preview document: HTTP **200**
+- final route remained `/__wcb_preview_runtime`
+- isolated CSP present: `default-src 'none'`, `connect-src 'none'`, `form-action 'none'`
+- `X-Robots-Tag: noindex`
+- `Cache-Control: no-store`
+- DOM `data-wcb-preview-host="1"`: **present**
+- DOM `data-wcb-preview-runtime="loaded"`: **present**
+- `PreviewRuntimeHost` lazy chunk: `/assets/PreviewRuntimeHost-GVNUJF_C.js` → **200**
+- `preview-runtime` lazy chunk: `/assets/preview-runtime-BfrnznKC.js` → **200**
+
+A malicious synthetic project payload was then injected into the live deployed runtime:
+- `fetch`: blocked with `Preview networking is disabled.`
+- `XMLHttpRequest`: blocked
+- `WebSocket`: blocked
+- `EventSource`: blocked
+- `navigator.sendBeacon`: returned `false`
+- `RTCPeerConnection`: blocked
+- external requests emitted after project payload: **0**
+- sensitive Authorization / `X-WCB-CSRF` / Webcanbe-session request headers observed: **0**
+- browser-context cookies: **0**
+- `document.cookie`: empty
+- localStorage/sessionStorage keys: empty
+- source observation payload was produced and `data-wcb-ready="1"` was reached
+
+The Worker-side Browser Run call still has the explicit service-level request allowlist:
+`https://webcanbe.com/(?:__wcb_preview_runtime|assets/...)`.
+The public probe above proves the deployed runtime itself cannot emit project network traffic. An actual Browser Run service invocation with a real authenticated workspace is still required to close the service-level navigation acceptance; that is not represented as a public-live PASS.
+
+## Authenticated operator acceptance — PENDING / OPERATOR REQUIRED
+
+Still not proven without the user's real authenticated production account:
+- actual production working-copy hosted source load
+- Browser Run pixels from that working copy
+- source-mapped click against that authenticated project
+- durable Visual edit written to PostgreSQL
+- reload/reopen preserving that revision
+- Code save after the Visual revision
+- export of the accepted source
+- independent build of the exported source
+- same-account GitHub + Email login/link/private-read/refresh/logout evidence
+- actual Browser Run service-level navigation allowlist while rendering the authenticated working copy
+
+Do not merge PR #60 or mark the authenticated Gate 4 acceptance complete until those operator-authenticated checks exist.
+
+---
+
 # Gate 4 live materialization/editor checkpoint — 2026-09-21 KST
 
 ## Live production evidence
