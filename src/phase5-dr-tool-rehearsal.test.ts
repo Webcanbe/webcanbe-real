@@ -18,17 +18,33 @@ function executable(file:string,source:string){
 }
 
 describe("Phase 5 disaster-recovery tool rehearsal",()=>{
-  it("behaviorally proves the rollback wrapper refuses unsafe calls and forwards an exact approved version",()=>{
-    const root=tempRoot(), capture=path.join(root,"npx-args.txt"), fake=path.join(root,"npx")
+  it("behaviorally proves confirmed rollback revalidates target/current deployment before forwarding the exact version",()=>{
+    const root=tempRoot(), capture=path.join(root,"npx-args.json"), fake=path.join(root,"npx")
     executable(fake,[
-      "#!/bin/sh",
-      'printf "%s\\n" "$@" > "$WCB_CAPTURE"',
-      "exit 0",
+      "#!/usr/bin/env node",
+      'const fs=require("fs")',
+      'const args=process.argv.slice(2)',
+      'const previous=fs.existsSync(process.env.WCB_CAPTURE)?JSON.parse(fs.readFileSync(process.env.WCB_CAPTURE,"utf8")):[]',
+      'previous.push(args)',
+      'fs.writeFileSync(process.env.WCB_CAPTURE,JSON.stringify(previous))',
+      'const command=args.join(" ")',
+      'if(command==="wrangler versions list --json"){process.stdout.write(JSON.stringify([{id:process.env.WCB_VISIBLE_VERSION,created_on:"2026-09-21T00:00:00.000Z"}]));process.exit(0)}',
+      'if(command==="wrangler deployments status --json"){process.stdout.write(JSON.stringify({versions:[{version_id:process.env.WCB_ACTIVE_VERSION,percentage:100}]}));process.exit(0)}',
+      'if(command.startsWith("wrangler rollback "))process.exit(0)',
+      'process.exit(3)',
       "",
     ].join("\n"))
 
     const version="12345678-1234-4234-8234-123456789abc"
-    const baseEnv={...process.env,PATH:root+path.delimiter+(process.env.PATH||""),WCB_CAPTURE:capture}
+    const other="87654321-4321-4321-8321-cba987654321"
+    const active="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+    const baseEnv={
+      ...process.env,
+      PATH:root+path.delimiter+(process.env.PATH||""),
+      WCB_CAPTURE:capture,
+      WCB_VISIBLE_VERSION:version,
+      WCB_ACTIVE_VERSION:active,
+    }
 
     const noConfirm=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{cwd:process.cwd(),env:baseEnv,encoding:"utf8"})
     expect(noConfirm.status).toBe(1)
@@ -45,8 +61,24 @@ describe("Phase 5 disaster-recovery tool rehearsal",()=>{
       encoding:"utf8",
     })
     expect(approved.status).toBe(0)
-    expect(fs.readFileSync(capture,"utf8").trim().split("\n")).toEqual([
-      "wrangler","rollback",version,"--message","controlled rehearsal",
+    expect(approved.stdout).toContain(`Rollback target verified in current Worker versions: ${version}`)
+    expect(approved.stdout).toContain(`Current active Worker version ID(s): ${active}`)
+    expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual([
+      ["wrangler","versions","list","--json"],
+      ["wrangler","deployments","status","--json"],
+      ["wrangler","rollback",version,"--message","controlled rehearsal"],
+    ])
+
+    fs.rmSync(capture,{force:true})
+    const staleTarget=spawnSync(process.execPath,["scripts/cloudflare-rollback.mjs",version],{
+      cwd:process.cwd(),
+      env:{...baseEnv,WEBCANBE_ROLLBACK_CONFIRM:"ROLLBACK_PRODUCTION",WCB_VISIBLE_VERSION:other},
+      encoding:"utf8",
+    })
+    expect(staleTarget.status).toBe(1)
+    expect(staleTarget.stderr).toContain("Rollback target was not found")
+    expect(JSON.parse(fs.readFileSync(capture,"utf8"))).toEqual([
+      ["wrangler","versions","list","--json"],
     ])
   })
 
