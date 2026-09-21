@@ -1,6 +1,7 @@
+import { deriveCompatibility } from "../../core/compatibility"
 import { isDefaultTailwindConfig } from "./defaultTailwindConfig"
 import ts from "typescript"
-import { analyzeReactSource, cssDeclaration, parsedCSS, parsedSource, supportedProperties } from "./reactSourceAdapter"
+import { analyzeReactSource, cssDeclaration, parsedCSS, parsedSource, supportedProperties, tailwindProperty, capabilitySet, readonlyCSSOrigins } from "./reactSourceAdapter"
 import type { SourceTarget, StyleOrigin, StyleProperty, ViewportPreset } from "../../core/types"
 
 export type Breakpoint = { id: string; label: string; min?: number; max?: number; prefix?: string; media?: string; source: string }
@@ -100,6 +101,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
           const range = cssDeclaration(code, `.${name}`, property, media)
           if (range) target.styleOrigins.push({ file, range, selector: `.${name}`, media, property, kind: "css", value: code.slice(range.start, range.end), editable: true })
         }
+        if (!target.styleOrigins.some(origin=>origin.file===file&&origin.selector===`.${name}`&&origin.property===property)) target.styleOrigins.push(...readonlyCSSOrigins(code,file,`.${name}`,property,"css"))
       }
     }
     for (const origin of target.styleOrigins) {
@@ -114,7 +116,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
       if (target.reasonCodes?.some(reason => ["jsx-spread-props", "dynamic-class-expression"].includes(reason))) { origin.editable = false; origin.reason = "Dynamic or spread attributes can override the source value; use Code." }
       const unsupportedOverlap = (target.classNames ?? []).some(token => {
         const bare = token.split(":").at(-1)!
-        return ["padding", "paddingX", "paddingY"].includes(origin.property) && /^p[trblse]-/.test(bare) || origin.property === "margin" && /^m[xytrblse]-/.test(bare) || origin.property === "gap" && /^gap-[xy]-/.test(bare) || ["flexGrow", "flexShrink", "flexBasis"].includes(origin.property) && /^flex-(1|auto|initial|none)$/.test(bare)
+        return origin.property === "boxShadow" && /^shadow(?:-|$)/.test(bare) && tailwindProperty(bare) !== "boxShadow" || ["padding", "paddingX", "paddingY"].includes(origin.property) && /^p[trblse]-/.test(bare) || origin.property === "margin" && /^m[xytrblse]-/.test(bare) || origin.property === "gap" && /^gap-[xy]-/.test(bare) || ["flexGrow", "flexShrink", "flexBasis"].includes(origin.property) && /^flex-(1|auto|initial|none)$/.test(bare)
       })
       if (unsupportedOverlap) { origin.editable = false; origin.reason = "An unsupported directional/shorthand utility overlaps this property; use Code." }
       const peers = target.styleOrigins.filter(other => other !== origin && overlap(other.property, origin.property) && (other.prefix ?? "") === (origin.prefix ?? "") && other.media === origin.media)
@@ -133,7 +135,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
             const parent = rule.parent
             const simple = parent?.type === "root" || parent?.type === "atrule" && parent.name === "media" && parent.parent?.type === "root" && mediaBounds(parent.params)
             const lowerSpecificity = ["*", "html", "body", target.elementName].includes(rule.selector)
-            if (decl.prop !== prop || decl.important || !simple || !exact && !lowerSpecificity && origin.kind !== "inline" || rule.selector !== origin.selector && origin.kind === "tailwind" && decl.prop === prop) { origin.editable = false; origin.reason = "Potential global, conditional, important or complex selector override; use Code." }
+            if (decl.prop !== prop || decl.important || !simple || !exact && !lowerSpecificity && origin.kind !== "inline" || rule.selector !== origin.selector && origin.kind === "tailwind" && decl.prop === prop) { origin.editable = false; origin.reason = `Potential override at ${file}:${decl.source?.start?.line ?? 1}:${decl.source?.start?.column ?? 1} (${rule.selector}, ${decl.prop}); cascade cannot be proven.` }
           })
         }) } catch { origin.editable = false; origin.reason = "Invalid project CSS." }
       }
@@ -146,7 +148,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
       else if (candidates.every(item => item.kind === "tailwind")) effective = candidates.sort((a, b) => (registry.breakpoints.find(item => item.prefix === a.prefix)?.min ?? 0) - (registry.breakpoints.find(item => item.prefix === b.prefix)?.min ?? 0)).at(-1)
       else if (new Set(candidates.map(item => `${item.file}:${item.selector}`)).size === 1) effective = candidates.sort((a, b) => (a.range?.start ?? 0) - (b.range?.start ?? 0)).at(-1)
       if (effective && effective.editable) effective.effective = true
-      else for (const item of candidates) { item.editable = false; item.reason = "Effective cascade origin cannot be proven." }
+      else for (const item of candidates) { item.editable = false; item.reason ??= "Effective cascade origin cannot be proven." }
     }
   }
   for (const target of targets) {
@@ -159,9 +161,12 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
       origin.shared = (origin.valueOrigin?.startsWith("local const") || origin.valueOrigin?.startsWith("imported immutable")) || origin.kind === "css" || origin.usageCount > 1 || matches.some(other => other.repeated)
       origin.scope = origin.kind === "css" ? `Global class rule; ${origin.usageCount} known source use(s), additional runtime matches possible` : `${origin.usageCount} known source use(s)${matches.some(other => other.repeated) ? "; runtime repetition unknown" : ""}; all rendered instances of these source locations`
     }
+    target.capabilities = capabilitySet(target.styleOrigins, target.capabilities.text, target.nodeKind, false)
+    if (!target.capabilities.visualEdit) target.unavailableReasons.visualEdit ??= target.styleOrigins.find(item => item.reason)?.reason ?? "No editable source origin was proven."
     if (target.styleOrigins.some(item => !item.editable)) { target.compatibility = "partial"; target.reasonCodes = [...new Set([...(target.reasonCodes ?? []), "style-analysis-partial"])] }
   }
   attachReorder(files, targets)
+  for (const target of targets) target.compatibility = target.capabilities.visualEdit && target.styleOrigins.some(item => !item.editable) ? "partial" : deriveCompatibility(target.capabilities)
   return { targets, ...registry }
 }
 
@@ -184,10 +189,10 @@ function attachReorder(files: Map<string, string>, targets: SourceTarget[]) {
         const parent = targets.find(item => item.identity.file === file && item.identity.elementStart === node.openingElement.getStart(source))
         const display = parent?.styleOrigins.find(item => item.property === "display" && item.effective && item.editable)?.value?.replace(/^['"]|['"]$/g, "").split(":").at(-1)
         const children = node.children.filter(child => !ts.isJsxText(child) || child.getText(source).trim())
-        if (parent && ["flex", "grid", "inline-flex", "inline-grid"].includes(display ?? "") && children.every(child => ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) && !parent.repeated) {
+        if (parent && ["flex", "grid", "inline-flex", "inline-grid"].includes(display ?? "") && children.length > 1 && children.every(child => ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) && !parent.repeated) {
           children.forEach((child, index) => {
             const start = child.getStart(source), target = targets.find(item => item.identity.file === file && item.identity.elementStart === start)
-            if (target?.nodeKind === "native" && !target.repeated && !target.reasonCodes?.includes("jsx-spread-props")) { target.reorder = { previous: children[index - 1]?.getStart(source), next: children[index + 1]?.getStart(source), parentStart: parent.identity.elementStart }; target.capabilities.reorder = true }
+            if (target?.nodeKind === "native" && !target.repeated && !target.reasonCodes?.includes("jsx-spread-props")) { target.reorder = { previous: children[index - 1]?.getStart(source), next: children[index + 1]?.getStart(source), parentStart: parent.identity.elementStart }; target.capabilities.reorder = true; target.capabilities.visualEdit = true }
           })
         }
       }

@@ -123,6 +123,7 @@ export function tailwindToken(property: StyleProperty, value: string) {
   if (property === "color") return colorScale[normalized] ? `text-${colorScale[normalized]}` : undefined
   if (property === "fontSize") return ({ "12px": "text-xs", "14px": "text-sm", "16px": "text-base", "18px": "text-lg", "20px": "text-xl", "24px": "text-2xl" } as Record<string, string>)[normalized]
   if (property === "fontWeight") return ({ "400": "font-normal", "500": "font-medium", "600": "font-semibold", "700": "font-bold" } as Record<string, string>)[normalized]
+  if (property === "boxShadow") return normalized === "none" ? "shadow-none" : undefined
   if (property === "border") return ({ "0px": "border-0", "1px": "border", "2px": "border-2", "4px": "border-4", "8px": "border-8" } as Record<string, string>)[normalized]
   if (property === "borderRadius") return ({ "0px": "rounded-none", "4px": "rounded-sm", "6px": "rounded-md", "8px": "rounded-lg", "12px": "rounded-xl", "9999px": "rounded-full" } as Record<string, string>)[normalized]
   if (property === "alignItems") return ({ center: "items-center", start: "items-start", end: "items-end", stretch: "items-stretch" } as Record<string, string>)[normalized]

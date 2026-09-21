@@ -26,6 +26,7 @@ export type StyleProperty =
   | "height"
   | "border"
   | "borderRadius"
+  | "boxShadow"
   | "alignItems"
   | "justifyContent"
   | "alignSelf"
@@ -56,6 +57,9 @@ export type StyleOrigin = {
   file?: string
   range?: SourceRange
   value?: string
+  /** Optional Inspector metadata; value retains the exact source spelling. */
+  numericValue?: number | null
+  unit?: string | null
   reason?: string
   selector?: string
   prefix?: string
