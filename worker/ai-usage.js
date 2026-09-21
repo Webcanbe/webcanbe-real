@@ -65,6 +65,7 @@ export class AiUsageService {
   }
   async commit(id, outcome) { return this.repository.settleReservation(id, "committed", this.clock(), outcome) }
   async release(id) { return this.repository.settleReservation(id, "released", this.clock()) }
+  async recordPending(id, outcome) { return this.repository.recordPendingReservation(id, outcome) }
 }
 
 const reservation = row => row && ({
@@ -130,6 +131,15 @@ export class PostgresAiUsageRepository {
     const owner = await this.db.query("SELECT user_id FROM wcb_ai_usage_reservations WHERE reservation_id=$1", [id])
     if (!owner.rowCount) fail(409, "AI reservation is unavailable.")
     return this.atomic(String(owner.rows[0].user_id), tx => tx.settleReservationForUpdate(id, status, settledAt, outcome))
+  }
+  async recordPendingReservation(id, outcome) {
+    const owner = await this.db.query("SELECT user_id FROM wcb_ai_usage_reservations WHERE reservation_id=$1", [id])
+    if (!owner.rowCount) fail(409, "AI reservation is unavailable.")
+    return this.atomic(String(owner.rows[0].user_id), async () => {
+      const result = await this.db.query("UPDATE wcb_ai_usage_reservations SET outcome=$2::jsonb WHERE reservation_id=$1 AND status='reserved' RETURNING *", [id, JSON.stringify(outcome)])
+      if (!result.rowCount) fail(409, "AI reservation is no longer pending.")
+      return reservation(result.rows[0])
+    })
   }
   async settleReservationForUpdate(id, status, settledAt, outcome) {
     const currentResult = await this.db.query("SELECT * FROM wcb_ai_usage_reservations WHERE reservation_id=$1 FOR UPDATE", [id])

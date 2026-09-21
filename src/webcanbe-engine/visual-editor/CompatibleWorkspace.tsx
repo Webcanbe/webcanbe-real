@@ -11,6 +11,7 @@ import "./compatibleWorkspace.css"
 import { samePointerFrame } from "./rasterFrame"
 import SourceGestures from "./SourceGestures"
 import { hostedEditorMode } from "./editorMode"
+import AiWorkspacePanel from "./AiWorkspacePanel"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -112,6 +113,8 @@ export default function CompatibleWorkspace() {
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
+  const [currentRevision, setCurrentRevision] = useState("")
+  function updateRevision(value?: string) { if (value) { revision.current = value; setCurrentRevision(value) } }
   const [preview, setPreview] = useState<{ url: string; transport: "blob" | "http" | "raster" | "snapshot"; generation: string }>()
   const [snapshotElements, setSnapshotElements] = useState<PreviewElement[]>([])
   const [snapshotViewport, setSnapshotViewport] = useState({ width: 1280, height: 900 })
@@ -122,6 +125,9 @@ export default function CompatibleWorkspace() {
   const [pending, setPending] = useState(false)
   const [surface, setSurface] = useState<"canvas" | "code" | "split" | "history">("canvas")
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
+  const aiButton = useRef<HTMLButtonElement>(null)
+  function closeAi() { setAiOpen(false); window.setTimeout(() => aiButton.current?.focus(), 0) }
   const [sourceUIOpened, setSourceUIOpened] = useState(false)
   function openSurface(value: "canvas" | "code" | "split" | "history") { if (value !== "canvas") setSourceUIOpened(true); setSurface(value) }
   const [sourceEpoch, setSourceEpoch] = useState(0)
@@ -132,8 +138,8 @@ export default function CompatibleWorkspace() {
     openSurface("code")
   }
 
-  async function request(path: string, body: Record<string, unknown> = {}) {
-    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: headers(), body: JSON.stringify({ ...(revision.current ? { expectedRevision: revision.current } : {}), viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
+  async function request(path: string, body: Record<string, unknown> = {}, signal?: AbortSignal) {
+    const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: headers(), signal, body: JSON.stringify({ ...(revision.current ? { expectedRevision: revision.current } : {}), viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
     return { ok: response.ok, status: response.status, data: await response.json() as ApiResponse }
   }
 
@@ -141,7 +147,7 @@ export default function CompatibleWorkspace() {
     const epoch = connectionEpoch.current, expectedRevision = revision.current
     const response = await request("compatibility")
     if (epoch !== connectionEpoch.current || expectedRevision !== revision.current) return
-    if (response.ok) { setSummary(response.data.summary); setTargets(response.data.targets ?? []); setBreakpoints(response.data.breakpoints ?? []); setStyleDiagnostics(response.data.styleDiagnostics ?? []) }
+    if (response.ok) { updateRevision(response.data.revision); setSummary(response.data.summary); setTargets(response.data.targets ?? []); setBreakpoints(response.data.breakpoints ?? []); setStyleDiagnostics(response.data.styleDiagnostics ?? []) }
   }
 
   async function inspect(element: PreviewElement) {
@@ -150,7 +156,7 @@ export default function CompatibleWorkspace() {
     const response = await request("inspect", { identity: element.identity })
     if (sequence !== inspectSequence.current || generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
     if (!response.ok || !response.data.target) { setTarget(undefined); setSelected(undefined); inspected.current = ""; setMessage(response.data.error ?? "This element is preview-only."); return }
-    revision.current = response.data.revision ?? ""
+    updateRevision(response.data.revision)
     setSource(response.data.source ?? "")
     setTarget(response.data.target)
     setBreakpoints(response.data.breakpoints ?? [])
@@ -164,7 +170,7 @@ export default function CompatibleWorkspace() {
     if (hostedMode ? !csrf || projectId === "phase1-fixture" : !accessKey) { setMessage(hostedMode ? "Sign in, then choose or import a project." : "Enter the local editor access key printed by the development server."); return }
     routeHash.current = "#/"; routePath.current = "/"
     try { const saved = sessionStorage.getItem('wcb-preview-route:' + projectId); if (safePreviewRoute(saved)) routePath.current = saved! } catch { /* Route persistence is optional; credentials never enter storage. */ }
-    setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""; revision.current = ""; rasterQueued.current = []
+    setRouteInput(routePath.current); setRuntime(undefined); activeGeneration.current = ""; revision.current = ""; setCurrentRevision(""); rasterQueued.current = []
     setSession(undefined); setPreview(undefined); setTarget(undefined); setSelected(undefined); setHovered(undefined)
     let cancelled = false, connected: PreviewSession | undefined
     const stop = (old: PreviewSession) => { cleanupPending.current = fetch('/__webcanbe/api/projects/' + projectId + '/preview', { method: 'POST', keepalive: true, headers: headers(), body: JSON.stringify({ previewId: old.previewId, capability: old.capability, command: 'stop' }) }).then(() => {}, () => {}) }
@@ -200,7 +206,7 @@ export default function CompatibleWorkspace() {
     if (!response.ok && incremental && preview?.transport !== "snapshot") response = await request("preview", { route: routePath.current, ...(expectedRevision ? { expectedRevision } : {}) })
     if (!current()) return
     if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "react-fast-refresh" ? "React component refreshed inside the controlled runner; compatible component state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
-    revision.current = response.data.revision ?? revision.current
+    updateRevision(response.data.revision)
     if (response.ok && response.data.transport === "snapshot" && response.data.png && response.data.generation) {
       activeGeneration.current = response.data.generation
       setSnapshotElements(response.data.snapshotElements ?? [])
@@ -350,7 +356,7 @@ export default function CompatibleWorkspace() {
 
   async function sourceAccepted(data: SourceResponse) {
     activeGeneration.current = ""; rasterQueued.current = []
-    revision.current = data.revision ?? revision.current
+    updateRevision(data.revision)
     setDiff(data.diff ?? "")
     inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
@@ -481,7 +487,7 @@ export default function CompatibleWorkspace() {
     <header className="compatible-topbar">
       <a href="/projects" className="compatible-brand">WebCanBe <span>/ Compatible</span></a>
       <div className="compatible-project-status"><i/> {project?.name ?? "Loading project"} <small>{project?.detection.tailwind ? "Tailwind detected" : "Actual source files"}</small></div>
-      <div className="compatible-mode-tabs" aria-label="Workspace mode"><button type="button" aria-pressed={surface === "canvas"} title="Visual surface (Shift+V)" onClick={() => openSurface("canvas")}>Visual</button><button type="button" aria-pressed={surface === "code"} title="Code surface (Shift+C)" onClick={() => openSurface("code")}>Code</button><button type="button" aria-pressed={surface === "split"} title="Split surface (Shift+S)" onClick={() => openSurface("split")}>Split</button><button type="button" aria-pressed={surface === "history"} title="Source history (Shift+H)" onClick={() => openSurface("history")}>History</button></div><div className="compatible-top-actions"><button type="button" aria-keyshortcuts="Meta+Z Control+Z" title="Undo last accepted source transaction (⌘Z / Ctrl+Z)" onClick={() => void history("undo")}>Undo</button><button type="button" aria-keyshortcuts="Meta+Shift+Z Control+Shift+Z Control+Y" title="Redo source transaction (⇧⌘Z / Ctrl+Shift+Z / Ctrl+Y)" onClick={() => void history("redo")}>Redo</button><button type="button" aria-keyshortcuts="Meta+Shift+E Control+Shift+E" title="Export accepted source only; unsaved Code drafts are excluded (⇧⌘E / Ctrl+Shift+E)" onClick={() => void exportProject()} disabled={!session}>Export</button><button type="button" aria-keyshortcuts="?" title="Keyboard shortcuts (?)" onClick={() => setShortcutsOpen(true)}>Shortcuts</button></div>
+      <div className="compatible-mode-tabs" aria-label="Workspace mode"><button type="button" aria-pressed={surface === "canvas"} title="Visual surface (Shift+V)" onClick={() => openSurface("canvas")}>Visual</button><button type="button" aria-pressed={surface === "code"} title="Code surface (Shift+C)" onClick={() => openSurface("code")}>Code</button><button type="button" aria-pressed={surface === "split"} title="Split surface (Shift+S)" onClick={() => openSurface("split")}>Split</button><button type="button" aria-pressed={surface === "history"} title="Source history (Shift+H)" onClick={() => openSurface("history")}>History</button></div><div className="compatible-top-actions"><button ref={aiButton} type="button" aria-expanded={aiOpen} aria-controls="ai-workspace-panel" onClick={() => setAiOpen(value => !value)}>AI</button><button type="button" aria-keyshortcuts="Meta+Z Control+Z" title="Undo last accepted source transaction (⌘Z / Ctrl+Z)" onClick={() => void history("undo")}>Undo</button><button type="button" aria-keyshortcuts="Meta+Shift+Z Control+Shift+Z Control+Y" title="Redo source transaction (⇧⌘Z / Ctrl+Shift+Z / Ctrl+Y)" onClick={() => void history("redo")}>Redo</button><button type="button" aria-keyshortcuts="Meta+Shift+E Control+Shift+E" title="Export accepted source only; unsaved Code drafts are excluded (⇧⌘E / Ctrl+Shift+E)" onClick={() => void exportProject()} disabled={!session}>Export</button><button type="button" aria-keyshortcuts="?" title="Keyboard shortcuts (?)" onClick={() => setShortcutsOpen(true)}>Shortcuts</button></div>
     </header>
     {shortcutsOpen && <div className="compatible-shortcuts-backdrop" onMouseDown={() => setShortcutsOpen(false)}><section className="compatible-shortcuts" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onMouseDown={event => event.stopPropagation()}><header><div><small>Keyboard shortcuts</small><h2>Move through the editor without leaving the source boundary.</h2></div><button type="button" onClick={() => setShortcutsOpen(false)} aria-label="Close shortcuts">Esc</button></header><div className="compatible-shortcut-grid"><div><span>Undo accepted source change</span><kbd>⌘/Ctrl Z</kbd></div><div><span>Redo accepted source change</span><kbd>⇧⌘Z / Ctrl Y</kbd></div><div><span>Save current code file</span><kbd>⌘/Ctrl S</kbd></div><div><span>Save all code drafts</span><kbd>⇧⌘/Ctrl S</kbd></div><div><span>Quick open source file</span><kbd>⌘/Ctrl P</kbd></div><div><span>Find / replace current file</span><kbd>⌘/Ctrl F</kbd></div><div><span>Search accepted project source</span><kbd>⇧⌘/Ctrl F</kbd></div><div><span>Visual surface</span><kbd>Shift V</kbd></div><div><span>Code surface</span><kbd>Shift C</kbd></div><div><span>Split surface</span><kbd>Shift S</kbd></div><div><span>Source history</span><kbd>Shift H</kbd></div><div><span>Select elements</span><kbd>V</kbd></div><div><span>Interact with preview</span><kbd>I</kbd></div><div><span>Mobile / Tablet / Desktop</span><kbd>Shift M / T / D</kbd></div><div><span>Export accepted source</span><kbd>⇧⌘/Ctrl E</kbd></div><div><span>Clear selection / return to Select</span><kbd>Esc</kbd></div><div><span>Open this shortcut guide</span><kbd>?</kbd></div></div><p>While a text field or the code editor is focused, typing and CodeMirror’s own undo/redo take priority. Project-level undo/redo is intentionally not triggered there. Draft backup is recovery-only; preview, history, project search and export use accepted source until Save succeeds.</p></section></div>}
     <div className="compatible-layout">
@@ -498,6 +504,7 @@ export default function CompatibleWorkspace() {
         <p>Source targets</p>{targets.map(item => <button key={`${item.identity.file}:${item.identity.elementStart}`} onClick={() => { selectionSource.current = "source"; const element: PreviewElement = { identity: item.identity, tagName: item.elementName, rect: { top: 0, left: 0, width: 0, height: 0 }, computed: {}, layoutContext: "unknown" }; setSelected(element); void inspect(element) }}>{item.elementName} · {item.compatibility}</button>)}
       </aside>
       <section className={`compatible-preview-shell ${surface === "split" ? "split-mode" : ""}`}>
+        <div id="ai-workspace-panel"><AiWorkspacePanel open={aiOpen} onClose={closeAi} connected={Boolean(session && currentRevision)} currentRevision={currentRevision} target={target} request={request} onApplied={sourceAccepted} /></div>
         <div className="compatible-preview-head"><span><i/> Sandboxed source preview <small data-preview-state={previewState}>{previewState}</small></span>{(preview?.transport === "http" || preview?.transport === "raster") && <form onSubmit={event => { event.preventDefault(); if (!safePreviewRoute(routeInput)) { setMessage("Enter a local preview path such as /projects/42?view=detail#notes."); return } if (preview?.transport === "raster") void rasterOperation({ type: "navigate", route: routeInput }); else { routePath.current = routeInput; void refreshPreview() } }}><input aria-label="Preview path" value={routeInput} onChange={event => setRouteInput(event.target.value)} /><button type="submit">Open route</button></form>}{preview?.transport === "raster" && <><button type="button" onClick={() => void rasterOperation({ type: "history", action: "back" })}>Back</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "forward" })}>Forward</button><button type="button" onClick={() => void rasterOperation({ type: "history", action: "reload" })}>Refresh preview</button></>}<button type="button" disabled={!session} onClick={() => { invalidateRaster(); ++connectionEpoch.current; activeGeneration.current = ""; ++inspectSequence.current; void request("preview", { command: "stop" }).then(response => { if (response.ok) { setPreview(undefined); setSession(undefined); activeGeneration.current = ""; setPreviewState("stopped"); setSelected(undefined); setHovered(undefined); setTarget(undefined); setMessage("Preview stopped. Connect to start a new session.") } else setMessage(response.data.error ?? "Stop rejected.") }) }}>Stop preview</button><button ref={previewModeButton} type="button" aria-pressed={!selectMode} disabled={preview?.transport === "snapshot"} title={preview?.transport === "snapshot" ? "Managed snapshot preview supports source-mapped selection; live interaction requires the persistent hosted runner." : selectMode ? "Interact with preview (I)" : "Select elements (V)"} onClick={() => setSelectMode(value => !value)}>{preview?.transport === "snapshot" ? "Select elements" : selectMode ? "Interact with preview" : "Select elements"}</button><label>Viewport <select aria-label="Viewport" value={viewport} onChange={(event) => setViewport(event.target.value as ViewportPreset)}><option value="mobile">Mobile</option><option value="tablet">Tablet</option><option value="desktop">Desktop</option></select></label></div>
         {sourceUIOpened && <Suspense fallback={<p>Loading source editor…</p>}><CodeWorkspace key={projectId} projectId={projectId} request={request} epoch={sourceEpoch} connected={Boolean(session)} visible={surface} openLocation={codeLocation} onAccepted={sourceAccepted} /></Suspense>}
         <div hidden={surface !== "canvas" && surface !== "split"} ref={previewContainer} className={`compatible-frame-wrap ${viewport}`}><div className="preview-device" style={frameStyle}>{preview?.transport === "snapshot" ? <img key={preview.generation} src={preview.url} alt="Managed production project preview" draggable={false} onClick={selectSnapshot} style={{width:"100%",height:"900px",objectFit:"fill",display:"block",cursor:selectMode?"crosshair":"default"}} /> : <iframe key={preview?.generation ?? "unavailable"} ref={frame} referrerPolicy="no-referrer" onLoad={configurePreview} title="Running imported React/Vite project" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : "<p>Preview unavailable. Source inspection remains available.</p>"} sandbox="allow-scripts" />}{activeBox && <div className={`canvas-outline ${selected ? "selected" : ""}`} style={{ left: activeBox.rect.left, top: activeBox.rect.top, width: activeBox.rect.width, height: activeBox.rect.height }}>{selected && <span>{selected.tagName} · {selected.identity.file.replace("src/", "")}</span>}{selected && target && selectionSource.current === "runtime" && target.identity.elementStart === selected.identity.elementStart && target.identity.file === selected.identity.file && <SourceGestures key={JSON.stringify([projectId, preview?.generation, revision.current, selected.identity, selected.rect, viewport, authoringBreakpoint, effectScope, scale, routeInput, previewState])} target={target} origins={effectScope === "source" ? styleOrigins : target.repeated ? [] : styleOrigins.filter(origin => !origin.shared)} scale={scale} breakpoint={authoringBreakpoint} disabled={pending || !session || !selectMode || previewState !== "ready"} onEdit={edit => void mutate(edit)} />}</div>}</div></div>

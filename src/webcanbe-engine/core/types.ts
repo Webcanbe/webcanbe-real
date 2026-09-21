@@ -135,7 +135,7 @@ export type MutationTransaction = {
   timestamp: string
   file: string
   range: SourceRange
-  editType: "text" | "style" | "layout" | "responsive" | "code" | "revert" | "redo" | "checkpoint"
+  editType: "text" | "style" | "layout" | "responsive" | "code" | "ai" | "revert" | "redo" | "checkpoint"
   before: string
   after: string
   target: SourceIdentity
@@ -150,7 +150,7 @@ export type MutationTransaction = {
   newRevisionId?: string
   idempotencyKey?: string
   requestHash?: string
-  producer?: "visual" | "code" | "system"
+  producer?: "visual" | "code" | "ai" | "system"
   actor?: string
   summary?: string
   status?: "accepted" | "rejected"
@@ -168,7 +168,7 @@ export type FileOperation =
   | { kind: "rename"; file: string; to: string; expectedHash: string; content?: string }
 
 export type SourceValidation = { level: "parse" | "compile" | "checkpoint" | "semantic"; passed: boolean; diagnostics: Array<{ file: string; message: string; line?: number; column?: number }> }
-export type SourceRevision = { revisionId: string; projectId: string; parentRevisionId: string | null; createdAt: string; actor: string; producer: "visual" | "code" | "system"; contentHash: string; transactionId?: string }
+export type SourceRevision = { revisionId: string; projectId: string; parentRevisionId: string | null; createdAt: string; actor: string; producer: "visual" | "code" | "ai" | "system"; contentHash: string; transactionId?: string }
 export type SourceImportOrigin = Readonly<{ provider: "github"; repository: string; commit: string; archiveSha256: string }>
 export type ReleaseOrigin = Readonly<{
   entitlementId: string

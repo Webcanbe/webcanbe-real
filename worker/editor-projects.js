@@ -278,7 +278,7 @@ async function saveCode(db, session, projectId, body, action = "code") {
     if(state.revision!==body.expectedRevision) fail(409,"Source or preview changed; reload and retry.")
     if(body.rewriteImports===true && body.operations?.some(op=>op?.kind==="rename")) fail(422,"Automatic import rewriting is not enabled on the production Worker yet.")
     let inverse
-    if (action !== "code") {
+    if (["revert", "undo", "redo"].includes(action)) {
       try { inverse=historyInverse(state.history,state.history.transactions,textFiles(state.files,state.history),body.transactionId,action==="redo") }
       catch(error) { fail(409,error.message) }
     }
@@ -288,7 +288,7 @@ async function saveCode(db, session, projectId, body, action = "code") {
     const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history)
     const nextContentHash=sourceContentHash(nextFiles,state.history)
     const nextRevision="rev_"+randomUUID()
-    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,producer:action==="code"?"code":"system",editType:action==="code"?"code":action==="redo"?"redo":"revert"})
+    const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,producer:action==="ai"?"ai":action==="code"?"code":"system",editType:action==="ai"?"ai":action==="code"?"code":action==="redo"?"redo":"revert",summary:action==="ai"?body.summary:undefined})
     const history=structuredClone(state.history)
     history.transactions.push(tx);history.revisions.push(revision)
     if(inverse){
@@ -322,7 +322,7 @@ async function aiProposal(db, session, projectId, body, env) {
       files, userId: session.userId, projectId, revision: state.revision,
       apply: async proposal => {
         if (body.apply !== true || proposal.operations.length === 0) return { applied: false, revision: state.revision }
-        const accepted = await saveCode(db, session, projectId, { ...body, operations: proposal.operations })
+        const accepted = await saveCode(db, session, projectId, { ...body, summary: proposal.summary, operations: proposal.operations }, "ai")
         return { applied: true, ...accepted.value }
       },
     })
