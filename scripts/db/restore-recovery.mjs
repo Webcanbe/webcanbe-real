@@ -1,7 +1,9 @@
-import { existsSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { existsSync, readFileSync } from "node:fs"
 import { basename, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 import pg from "pg"
+import { readSourceManifest } from "./backup-source-manifest.mjs"
 
 const { Client } = pg
 const UUIDISH = /^[A-Za-z0-9._-]+$/
@@ -73,6 +75,12 @@ function probeDatabaseIdentity(parsed, label) {
   return { systemIdentifier: parts[0], database: parts[1] }
 }
 
+function sameDatabaseIdentity(left, right) {
+  return Boolean(left && right) &&
+    left.systemIdentifier === right.systemIdentifier &&
+    left.database === right.database
+}
+
 function quoteIdent(value) {
   return '"' + String(value).replaceAll('"', '""') + '"'
 }
@@ -83,22 +91,28 @@ if (!backup || !existsSync(backup)) {
   process.exit(1)
 }
 
-let source
 let recovery
+let liveSource
 try {
-  source = parseDatabaseUrl(process.env.WEBCANBE_DATABASE_URL, "WEBCANBE_DATABASE_URL")
   recovery = parseDatabaseUrl(process.env.RECOVERY_DATABASE_URL, "RECOVERY_DATABASE_URL")
+  liveSource = process.env.WEBCANBE_DATABASE_URL
+    ? parseDatabaseUrl(process.env.WEBCANBE_DATABASE_URL, "WEBCANBE_DATABASE_URL")
+    : undefined
 } catch (error) {
   console.error(error instanceof Error ? error.message : "Database configuration is invalid.")
   process.exit(1)
 }
 
-if (targetIdentity(source) === targetIdentity(recovery)) {
+if (liveSource && targetIdentity(liveSource) === targetIdentity(recovery)) {
   console.error("Refusing restore because recovery target resolves to the production database target.")
   process.exit(1)
 }
 if (process.env.WEBCANBE_RESTORE_CONFIRM !== "RESTORE_RECOVERY_TARGET") {
   console.error("Refusing recovery restore without WEBCANBE_RESTORE_CONFIRM=RESTORE_RECOVERY_TARGET.")
+  process.exit(1)
+}
+if (!liveSource && process.env.WEBCANBE_RESTORE_OFFLINE_SOURCE_CONFIRM !== "USE_BACKUP_SOURCE_IDENTITY") {
+  console.error("WEBCANBE_DATABASE_URL is unavailable; offline restore requires WEBCANBE_RESTORE_OFFLINE_SOURCE_CONFIRM=USE_BACKUP_SOURCE_IDENTITY.")
   process.exit(1)
 }
 
@@ -113,23 +127,42 @@ if (verify.status !== 0) {
   process.exit(verify.status ?? 1)
 }
 
-let sourceIdentity
-let recoveryIdentity
+let recordedSourceIdentity
 try {
-  sourceIdentity = probeDatabaseIdentity(source, "Production")
+  const digest = createHash("sha256").update(readFileSync(backup)).digest("hex")
+  const manifest = readSourceManifest(backup, digest)
+  recordedSourceIdentity = {
+    systemIdentifier: manifest.systemIdentifier,
+    database: manifest.database,
+  }
+  console.log(`Recorded backup source identity verified: ${manifest.systemIdentifier}/${manifest.database}.`)
+} catch (error) {
+  console.error("Backup source identity verification failed: " + (error instanceof Error ? error.message : String(error)))
+  process.exit(1)
+}
+
+let recoveryIdentity
+let liveSourceIdentity
+try {
   recoveryIdentity = probeDatabaseIdentity(recovery, "Recovery")
+  if (sameDatabaseIdentity(recordedSourceIdentity, recoveryIdentity)) {
+    throw new Error("Recovery target matches the PostgreSQL cluster/database identity recorded in the backup.")
+  }
+  if (liveSource) {
+    liveSourceIdentity = probeDatabaseIdentity(liveSource, "Production")
+    if (sameDatabaseIdentity(liveSourceIdentity, recoveryIdentity)) {
+      throw new Error("Production and recovery connect to the same PostgreSQL cluster/database identity.")
+    }
+  }
 } catch (error) {
   console.error("Recovery target identity verification failed: " + (error instanceof Error ? error.message : String(error)))
   process.exit(1)
 }
-if (
-  sourceIdentity.systemIdentifier === recoveryIdentity.systemIdentifier &&
-  sourceIdentity.database === recoveryIdentity.database
-) {
-  console.error("Refusing restore because production and recovery connect to the same PostgreSQL cluster/database identity.")
-  process.exit(1)
+
+if (liveSourceIdentity && !sameDatabaseIdentity(liveSourceIdentity, recordedSourceIdentity)) {
+  console.log("Current production identity differs from the backup source identity; recovery remains guarded against both identities.")
 }
-console.log("PostgreSQL recovery target identity verified as distinct from production.")
+console.log("PostgreSQL recovery target identity verified as distinct from the recorded backup source" + (liveSourceIdentity ? " and current production." : "."))
 
 if (process.env.WEBCANBE_RESTORE_PLAN_ONLY === "1") {
   console.log(`Recovery restore plan verified: ${basename(backup)} → separate recovery target.`)
