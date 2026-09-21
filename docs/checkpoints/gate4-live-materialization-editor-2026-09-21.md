@@ -1,3 +1,21 @@
+# FINAL REMOTE VERIFICATION SNAPSHOT — 2026-09-21 KST
+
+Verified code/document checkpoint before this documentation-only record: `f40ff98b0cd5b4516de0b4749b828d3089f157cc`.
+
+All final-head non-payment checks completed successfully:
+- integrated live-probe verification `35595325804` / job `106318687185`: **PASS**
+- Gate 3 v4 verification `35595325918` / job `106318687698`: **PASS**
+- Browser Run Visual verification `35595325848` / job `106318687555`: **PASS**
+- Firebase popup CSP verification `35595325963` / job `106318687974`: **PASS**
+- actual Cloudflare public preview live probe `35595325746` / job `106318687197`: **PASS**
+- final live evidence artifact ID: `10636595830`, digest `sha256:d4d5f0b15584ddf7dcb26b575494851b8256f5c210bf9f0bf92a9a0bf365d58b`
+
+The integrated final-head run again passed Browser Run Visual, preview runtime security, production editor/source, Gate 2 identity-link, Gate 3 launch-chain, Firebase popup CSP, release-rights, Worker syntax, `npm run build` (`tsc -b && vite build`), build budget, and Worker dry-run.
+
+PR #60 remains draft because authenticated production working-copy acceptance and same-account GitHub/Email E2E are still **OPERATOR REQUIRED**.
+
+---
+
 # PR #60 current live-probe status — 2026-09-21 KST
 
 ## Source of truth
