@@ -3,13 +3,15 @@ import { PAYMENT_RETURN_URLS, publicPaymentConfiguration } from "./http.js"
 
 describe("payment HTTP contract", () => {
   it("publishes the locked concurrency and deploy-slot entitlements", () => {
-    const plans = Object.fromEntries(publicPaymentConfiguration().plans.map(plan => [plan.key, plan]))
+    const configuration = publicPaymentConfiguration()
+    const plans = Object.fromEntries(configuration.plans.map(plan => [plan.key, plan]))
 
     expect(plans.free).toMatchObject({ aiConcurrency: 1, deploySlots: 1 })
     expect(plans.pro_monthly).toMatchObject({ aiConcurrency: 2, deploySlots: 5 })
     expect(plans.pro_annual).toMatchObject({ aiConcurrency: 2, deploySlots: 5 })
     expect(plans.studio_monthly).toMatchObject({ aiConcurrency: 4, deploySlots: 20 })
     expect(plans.studio_annual).toMatchObject({ aiConcurrency: 4, deploySlots: 20 })
+    expect(configuration.marketplace).toEqual({ minimumPaidListingMinor: 900, freeListingsAllowed: true })
   })
 
   it("only redirects PayPal flows to routes present in the application", () => {

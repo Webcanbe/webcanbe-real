@@ -5,6 +5,8 @@ import { summarizeCompatibility } from "../src/webcanbe-engine/core/compatibilit
 import { patchText, patchProjectStyle, patchResponsiveConstruct, patchSiblingReorder, formatTransactionDiff } from "../src/webcanbe-engine/mutations/sourceMutations.ts"
 import { Buffer } from "node:buffer"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
+import { AiRequestError, WorkersAiProvider, aiModel, runAiRequest } from "./ai.js"
+import { AiUsageService, PostgresAiUsageRepository } from "./ai-usage.js"
 
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const REVISION = /^rev_[a-f0-9-]{36}$/i
@@ -308,6 +310,29 @@ async function saveCode(db, session, projectId, body, action = "code") {
   }
 }
 
+async function aiProposal(db, session, projectId, body, env) {
+  const { state } = await readState(db, session, projectId, body, body.apply === true)
+  if (body.expectedRevision !== state.revision) fail(409, "Source changed; reload before requesting AI.")
+  const files = textFiles(state.files, state.history)
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 15_000)
+  try {
+    return await runAiRequest({
+      provider: new WorkersAiProvider(env?.AI, aiModel(env)), usage: new AiUsageService(new PostgresAiUsageRepository(db)), request: body, signal: controller.signal,
+      files, userId: session.userId, projectId, revision: state.revision,
+      apply: async proposal => {
+        if (body.apply !== true || proposal.operations.length === 0) return { applied: false, revision: state.revision }
+        const accepted = await saveCode(db, session, projectId, { ...body, operations: proposal.operations })
+        return { applied: true, ...accepted.value }
+      },
+    })
+  } catch (error) {
+    if (error instanceof AiRequestError) fail(error.status, error.message)
+    if (controller.signal.aborted) fail(504, "Workers AI timed out; no source changes were accepted.")
+    throw error
+  } finally { clearTimeout(timer) }
+}
+
 
 function projectStyles(state, viewport = "desktop") {
   if (!Object.hasOwn(viewportWidths, viewport)) fail(400, "Unsupported viewport.")
@@ -562,6 +587,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   }
   if(action==="drafts") return drafts(db,session,projectId,body)
   if(["code","revert","undo","redo"].includes(action)) return saveCode(db,session,projectId,body,action)
+  if(action==="ai") return {status:200,value:await aiProposal(db,session,projectId,body,env)}
   const {state}=await readState(db,session,projectId,body,false)
   if(action==="files"){
     const listing=publicFiles(state)

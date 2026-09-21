@@ -25,13 +25,31 @@ describe("Phase 5 launch truthfulness cleanup", () => {
   it("does not present paid plans as purchasable before billing activation", () => {
     const plans = app.slice(app.indexOf("function Plans()"), app.indexOf("function CreatorListingEditor"))
     expect(plans).toContain("Paid billing is not active yet")
-    expect(plans).toContain("launch pricing previews")
-    expect(plans).toContain("Yearly preview")
+    expect(plans).toContain("prices and limits come from the payment service")
+    expect(plans).toContain("Annual preview")
     expect(plans).toContain("Coming soon")
-    expect(plans).toContain("disabled={i > 0}")
+    expect(plans).toContain('disabled={row.id !== "free"}')
     expect(plans).toContain("Billing coming soon")
     expect(plans).not.toContain("Most chosen")
     expect(plans).not.toContain("Choose ${p.name}")
+  })
+
+  it("reads public plan values from the authoritative payment endpoint", () => {
+    const catalog = fs.readFileSync("src/webcanbe-engine/runtime/planCatalog.ts", "utf8")
+    expect(catalog).toContain('fetcher("/__webcanbe/api/payments/config"')
+    expect(app).toContain("loadPublicPaymentConfiguration()")
+    expect(catalog).not.toContain("PUBLIC_PLAN_CATALOG")
+    expect(catalog).not.toContain("AI_ACTION_ADD_ONS")
+  })
+
+  it("gives hosted marketplace failures and empty catalog results an actionable state", () => {
+    const browse = app.slice(app.indexOf("function Browse()"), app.indexOf("function projectStructure"))
+    const detail = app.slice(app.indexOf("function Detail("), app.indexOf("function ProjectPreviewPage"))
+    expect(browse).toContain("Marketplace is unavailable")
+    expect(browse).toContain("No matching projects")
+    expect(browse).toContain("Try again")
+    expect(detail).toContain("This project is unavailable")
+    expect(detail).toContain("Back to marketplace")
   })
 
   it("keeps the public update page aligned with current launch closure", () => {

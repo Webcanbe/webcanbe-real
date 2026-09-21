@@ -50,4 +50,9 @@ describe("Phase 5 editor keyboard shortcuts", () => {
     expect(styles).toContain(".compatible-shortcut-grid")
     expect(styles).toContain("@media(max-width:680px)")
   })
+
+  it("keeps project actions and source files reachable on mobile", () => {
+    expect(styles).toContain(".compatible-top-actions button:last-child{display:inline-flex")
+    expect(styles).toContain(".compatible-files{display:flex;max-height:38vh")
+  })
 })
