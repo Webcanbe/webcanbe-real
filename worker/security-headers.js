@@ -57,7 +57,7 @@ const PUBLIC_EXACT = new Set([
   "/privacy",
   "/plans",
   "/pricing",
-  "/preview-runtime.html",
+  "/__wcb_preview_runtime",
 ])
 
 export function isKnownAppPath(path) {
@@ -70,7 +70,7 @@ export function isKnownAppPath(path) {
 
 export function shouldNoIndexPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return true
-  if (PRIVATE_EXACT.has(path) || path === "/seller" || path === "/preview-runtime.html") return true
+  if (PRIVATE_EXACT.has(path) || path === "/seller" || path === "/__wcb_preview_runtime") return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 
