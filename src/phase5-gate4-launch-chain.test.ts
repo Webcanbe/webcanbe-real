@@ -7,7 +7,8 @@ import { afterEach, describe, expect, it } from "vitest"
 import { buildMaterializationSmokeFixture } from "../scripts/launch/materialization-smoke-fixture.mjs"
 // @ts-expect-error Worker materialization is a tested JavaScript runtime module without a declaration file
 import { buildMaterializedHistory, verifyReleaseSnapshot } from "../worker/materialization.js"
-import { MutationHistory } from "./webcanbe-engine/mutations/sourceMutations"
+import { MutationHistory, patchText } from "./webcanbe-engine/mutations/sourceMutations"
+import { analyzeReactSource } from "./webcanbe-engine/adapters/react/reactSourceAdapter"
 import { DurableSource, contentHash, transactionEntry } from "./webcanbe-engine/mutations/durableSource"
 import { buildIndependentExport } from "./webcanbe-engine/runtime/independentExport"
 import { detectProject, extractSafeZip, type ProjectRecord } from "./webcanbe-engine/runtime/projectRegistry"
@@ -64,7 +65,7 @@ function materializedFixture(){
   return{fixture,built,project,historyRoot,parent}
 }
 
-describe("Gate 4 launch chain: materialize → durable edit → reload → export",()=>{
+describe("Gate 4 launch chain: materialize → Visual → Code → reload → export",()=>{
   it("carries immutable release provenance through accepted source and independent export",async()=>{
     const d=materializedFixture()
     const source=new DurableSource(d.project,d.historyRoot)
@@ -80,28 +81,75 @@ describe("Gate 4 launch chain: materialize → durable edit → reload → expor
     })
 
     const file="src/App.tsx"
-    const before=source.files().get(file)
-    if(!before)throw new Error("Gate 4 fixture App.tsx is unavailable.")
-    const baseRevision=source.revision()
-    const marker="// gate4 materialized accepted edit"
-    const content=before+"\n"+marker
+    const canonicalBeforeVisual=source.files()
+    const beforeVisual=canonicalBeforeVisual.get(file)
+    if(!beforeVisual)throw new Error("Gate 4 fixture App.tsx is unavailable.")
+
+    const visualFiles=new Map(canonicalBeforeVisual)
+    const visualStore={
+      tailwind:true,
+      read:(target:string)=>visualFiles.get(target),
+      write:(target:string,content:string,expected?:string)=>{
+        const current=visualFiles.get(target)
+        if(expected!==undefined&&current!==expected)throw new Error("Visual staging source changed.")
+        visualFiles.set(target,content)
+      },
+    }
+    const visualTarget=analyzeReactSource(file,beforeVisual,visualStore.read.bind(visualStore),{tailwind:true})
+      .find(candidate=>candidate.capabilities.text&&candidate.text==="Studio Ledger")
+    if(!visualTarget)throw new Error("Gate 4 fixture has no safe Visual text target.")
+
+    const visualMutation=patchText(visualStore,visualTarget.identity,"Studio Ledger Launch")
+    expect(visualMutation.success).toBe(true)
+    expect(visualMutation.editType).toBe("text")
+    const visualFilesTouched=[...new Set(visualMutation.patches.map(patch=>patch.file))]
+    const visualOperations=visualFilesTouched.map(target=>{
+      const before=canonicalBeforeVisual.get(target),after=visualFiles.get(target)
+      if(before===undefined||after===undefined)throw new Error("Visual mutation did not preserve an editable source file.")
+      return {kind:"update" as const,file:target,expectedHash:contentHash(before),content:after}
+    })
+    const visualBase=source.revision(),visualKey=randomUUID()
+    const visualEntry=transactionEntry(
+      d.project.id,visualBase,"visual",visualKey,
+      contentHash(JSON.stringify({visualKey,visualBase,files:visualFilesTouched})),
+      "Gate 4 accepted Visual text edit",
+      {level:"compile",passed:true,diagnostics:[]},
+      visualMutation,
+    )
+    visualEntry.actor=userId
+    visualEntry.operations=visualOperations
+    const visualAccepted=source.commit({expectedRevision:visualBase,operations:visualOperations,entry:visualEntry,authorize:()=>{}})
+    expect(visualAccepted.success).toBe(true)
+    expect(visualAccepted.producer).toBe("visual")
+    expect(visualAccepted.editType).toBe("text")
+    expect(source.files().get(file)).toContain("Studio Ledger Launch")
+
+    const beforeCode=source.files().get(file)
+    if(!beforeCode)throw new Error("Gate 4 Visual-accepted App.tsx is unavailable.")
+    const codeBase=source.revision()
+    expect(codeBase).toBe(visualAccepted.newRevisionId)
+    const marker="// gate4 materialized accepted code edit"
+    const content=beforeCode+"\n"+marker
     const key=randomUUID()
-    const entry=transactionEntry(d.project.id,baseRevision,"code",key,contentHash(key),"Gate 4 accepted Code save",{level:"compile",passed:true,diagnostics:[]})
+    const entry=transactionEntry(d.project.id,codeBase,"code",key,contentHash(key),"Gate 4 accepted Code save",{level:"compile",passed:true,diagnostics:[]})
     entry.actor=userId
     entry.editType="code"
     entry.file=file
-    const operation={kind:"update" as const,file,expectedHash:contentHash(before),content}
+    const operation={kind:"update" as const,file,expectedHash:contentHash(beforeCode),content}
     entry.operations=[operation]
 
-    const accepted=source.commit({expectedRevision:baseRevision,operations:[operation],entry,authorize:()=>{}})
+    const accepted=source.commit({expectedRevision:codeBase,operations:[operation],entry,authorize:()=>{}})
     expect(accepted.success).toBe(true)
-    expect(accepted.newRevisionId).not.toBe(baseRevision)
+    expect(accepted.newRevisionId).not.toBe(codeBase)
 
     const reopened=new DurableSource(d.project,d.historyRoot)
     expect(reopened.revision()).toBe(accepted.newRevisionId)
+    expect(reopened.files().get(file)).toContain("Studio Ledger Launch")
     expect(reopened.files().get(file)).toContain(marker)
     expect(reopened.history().releaseOrigin).toEqual(source.history().releaseOrigin)
-    expect(reopened.history().revisions.at(-1)?.parentRevisionId).toBe(baseRevision)
+    expect(reopened.history().revisions.at(-1)?.parentRevisionId).toBe(codeBase)
+    expect(reopened.history().transactions.slice(-2).map(item=>item.producer)).toEqual(["visual","code"])
+    expect(reopened.history().transactions.slice(-2).map(item=>item.editType)).toEqual(["text","code"])
 
     const archive=await exportProjectZip(d.project)
     const independent=await buildIndependentExport(archive,process.cwd())
@@ -110,7 +158,9 @@ describe("Gate 4 launch chain: materialize → durable edit → reload → expor
 
     const extracted=path.join(d.parent,"exported")
     await extractSafeZip(archive,extracted)
-    expect(fs.readFileSync(path.join(extracted,file),"utf8")).toContain(marker)
+    const exportedApp=fs.readFileSync(path.join(extracted,file),"utf8")
+    expect(exportedApp).toContain("Studio Ledger Launch")
+    expect(exportedApp).toContain(marker)
     expect(fs.existsSync(path.join(extracted,".webcanbe"))).toBe(false)
   })
 })
