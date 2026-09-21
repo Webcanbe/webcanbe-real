@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { AiRequestError, WorkersAiProvider, actionCost, parseProposal, runAiRequest, selectAiContext } from "./ai.js"
+import { AiRequestError, WorkersAiProvider, actionCost, parseProposal, proposalPrompt, runAiRequest, selectAiContext } from "./ai.js"
 
 const files = new Map([["src/App.tsx", "export const App=()=> <h1>Hello</h1>"], ["src/theme.css", "h1{color:blue}"], [".env", "TOKEN=do-not-send"], ["secrets/key.ts", "never-send"]])
 const request = { feature: "modify", prompt: "Change heading", idempotencyKey: "request_123", selection: { file: "src/App.tsx" }, mode: "standard" }
@@ -12,6 +12,19 @@ describe("AI proposal domain", () => {
     const selected = selectAiContext(files, { ...request, files: [".env", "secrets/key.ts", "../../outside.ts", "src/theme.css"] })
     expect(selected.map(item => item.file)).toEqual(expect.arrayContaining(["src/App.tsx", "src/theme.css"]))
     expect(selected.map(item => item.file)).not.toEqual(expect.arrayContaining([".env", "secrets/key.ts"]))
+  })
+
+  it("resolves relative imports from their importer and never includes credential-like source", () => {
+    const nested = new Map([
+      ["src/public/App.tsx", "import { config } from './config'; export const App=()=>config"],
+      ["src/public/config.ts", "export const config='public'"],
+      ["src/private/config.ts", "export const token='FAKE_SECRET_MARKER_123456789'"],
+    ])
+    const context = selectAiContext(nested, { ...request, selection: { file: "src/public/App.tsx" }, files: [] })
+    const prompt = proposalPrompt(request, context)
+    expect(context.map(item => item.file)).toEqual(["src/public/App.tsx", "src/public/config.ts"])
+    expect(prompt).not.toContain("FAKE_SECRET_MARKER")
+    expect(() => selectAiContext(new Map([["src/App.tsx", "const apiKey='FAKE_SECRET_MARKER_123456789'" ]]), request)).toThrow("credential")
   })
 
   it("returns a reviewable single-file proposal and commits one action", async () => {
@@ -38,6 +51,21 @@ describe("AI proposal domain", () => {
     const rejected = usage()
     await expect(runAiRequest({ provider: provider(good), usage: rejected, request, files, userId: "u", projectId: "p", revision: "rev_1", apply: async () => { throw new AiRequestError(409, "Source changed") } })).rejects.toThrow("Source changed")
     expect(rejected.release).toHaveBeenCalledWith("reserve-1")
+  })
+
+  it("rejects an operation outside selected context before apply and releases its reservation", async () => {
+    const meter = usage(), apply = vi.fn(async () => ({ applied: true }))
+    const injected = JSON.stringify({ summary: "inject", operations: [{ kind: "create", file: "src/Injected.ts", expectedHash: null, content: "export {}" }] })
+    const model = provider(injected)
+    await expect(runAiRequest({ provider: model, usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toThrow("unselected")
+    expect(apply).not.toHaveBeenCalled(); expect(meter.release).toHaveBeenCalledWith("reserve-1")
+    expect(model.generate).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps a pending reservation if settlement fails after an accepted source apply", async () => {
+    const meter = usage(); meter.commit.mockRejectedValueOnce(new Error("ledger offline")); const apply = vi.fn(async () => ({ applied: true, revision: "rev_2" }))
+    await expect(runAiRequest({ provider: provider(good), usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toThrow("settlement is pending")
+    expect(apply).toHaveBeenCalledTimes(1); expect(meter.release).not.toHaveBeenCalled()
   })
 
   it("rejects malformed paths and uses locked action costs", () => {
