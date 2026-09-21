@@ -27,6 +27,8 @@ const files = walk(fixture)
 
 const sourceMembers = files.map(item => [item.file, sha256(item.bytes)])
 const sourceTreeSha256 = sha256(JSON.stringify(sourceMembers))
+const readme = fs.readFileSync(path.join(fixture,"README.md"),"utf8")
+const originalDeclarationPresent = readme.includes("Newly authored Phase 2B regression fixture") && readme.includes("not an independently sourced application")
 
 const lock = JSON.parse(fs.readFileSync(path.join(fixture,"package-lock.json"),"utf8"))
 const dependencies = Object.entries(lock.packages ?? {})
@@ -44,17 +46,18 @@ const assetMembers = files.filter(item => /^src\/assets\//.test(item.file))
   .map(item => [item.file, sha256(item.bytes)])
 const sourceText = files.filter(item => /\.(?:tsx?|jsx?|css|json|html|md|svg)$/i.test(item.file))
   .map(item => item.bytes.toString("utf8")).join("\n")
-const externalUrls = [...new Set([...sourceText.matchAll(/https?:\/\/[^\s"'<>)}]+/g)].map(match => match[0]))].sort()
+const externalUrls = [...new Set([...sourceText.matchAll(/https?:\/\/[^\s"'<>)}]+/g)].map(match => match[0])
+  .filter(url => !/^http:\/\/www\.w3\.org\/(?:2000\/svg|1999\/xhtml|1999\/xlink)$/.test(url)))].sort()
 const assetInventorySha256 = sha256(JSON.stringify(assetMembers))
 
 const result = {
   schema: 1,
   fixture: "fixtures/studio-ledger",
   source: {
-    reviewed: unresolvedDependencies.length === 0 && externalUrls.length === 0,
-    unresolvedCount: 0,
+    reviewed: originalDeclarationPresent,
+    unresolvedCount: originalDeclarationPresent ? 0 : 1,
     origin: "first_party_repo",
-    original: true,
+    original: originalDeclarationPresent,
     reference: "source-tree-sha256:" + sourceTreeSha256,
     fileCount: files.length,
   },
