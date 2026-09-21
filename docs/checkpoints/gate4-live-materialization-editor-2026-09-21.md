@@ -50,3 +50,30 @@ Verification:
 ## Next action
 
 After the main Cloudflare deployment propagates, reload the existing production workspace. It must no longer show Local editor access. Verify hosted session/project source loads, then complete live Code/Visual save → reload/reopen → export and independent build.
+
+## Browser Run live probe — SPA-host checkpoint
+
+Current main code checkpoint: `f9876555c8d72d7c4e39e18ec42c989a757ad005`.
+
+The separate second Vite preview artifact build was removed after Cloudflare branch deploys proved that `preview-runtime.html` and `preview-assets/*` were not served even though Wrangler dry-run included them.
+
+The current no-cost production preview path is:
+
+`/__wcb_preview_runtime` → normal SPA `index.html` → lazy `PreviewRuntimeHost` → lazy `preview-runtime` chunk under `/assets/*`.
+
+Verified CI build from PR #59:
+- ordinary app dist: 8.82 MiB
+- ordinary JS: 1.12 MiB
+- PreviewRuntimeHost chunk: 0.79 KiB
+- preview-runtime lazy chunk: 3.44 MiB
+- Wrangler Static Assets inventory: 124 files
+- production editor / Browser Run Visual / Gate 2 / Gate 3/4 / preview security / Firebase CSP: PASS
+- Worker dry-run: PASS
+
+Live acceptance for this probe:
+1. Cloudflare branch preview returns the SPA on `/__wcb_preview_runtime`.
+2. the lazy `PreviewRuntimeHost` and `preview-runtime` chunks under `/assets/*` are present.
+3. Browser Run can navigate only to the preview route and allowed assets.
+4. no Webcanbe session cookie, CSRF token or platform secret is passed into imported project code.
+5. then repeat the authenticated production workspace smoke: preview pixels → source-mapped click → Visual text edit → durable PostgreSQL revision.
+
