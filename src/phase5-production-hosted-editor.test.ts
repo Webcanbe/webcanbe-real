@@ -22,7 +22,7 @@ describe("Phase 5 production hosted editor boundary", () => {
     expect(source).toContain("const hostedMode = hostedEditorMode()")
     expect(source).toContain('fetch("/__webcanbe/auth/session"')
     expect(source).toContain('fetch("/__webcanbe/api/projects"')
-    expect(source).toContain('fetch(\`/__webcanbe/api/projects/\${projectId}/session\`')
+    expect(source).toContain("/__webcanbe/api/projects/${projectId}/session")
     expect(source).toContain('"X-WCB-CSRF"')
   })
 })
