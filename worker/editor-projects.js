@@ -229,10 +229,10 @@ function operationChanges(state, operations) {
   }
   return { before, after, changes }
 }
-function applyTextMapToFiles(files, text) {
+function applyTextMapToFiles(files, text, history) {
   const next=new Map(files)
   for(const [file,value] of text) next.set(file,Buffer.from(value,"utf8"))
-  for(const file of [...next.keys()]) if(SOURCE_FILE.test(file) && !text.has(file) && file.startsWith("src/")) next.delete(file)
+  for(const file of [...next.keys()]) if(sourceMember(file, history) && !text.has(file)) next.delete(file)
   encodePayload(next)
   return next
 }
@@ -271,7 +271,7 @@ async function saveCode(db, session, projectId, body) {
     if(state.revision!==body.expectedRevision) fail(409,"Source or preview changed; reload and retry.")
     if(body.rewriteImports===true && body.operations?.some(op=>op?.kind==="rename")) fail(422,"Automatic import rewriting is not enabled on the production Worker yet.")
     const prepared=operationChanges(state,body.operations)
-    const nextFiles=applyTextMapToFiles(state.files,prepared.after)
+    const nextFiles=applyTextMapToFiles(state.files,prepared.after,state.history)
     const nextContentHash=sourceContentHash(nextFiles,state.history)
     const nextRevision="rev_"+randomUUID()
     const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations:body.operations,changes:prepared.changes,newContentHash:nextContentHash})
@@ -348,7 +348,7 @@ async function readState(db,session,projectId,body,write=false){
 export async function editorProjectRequest(db, session, path, body={}) {
   if(path==="/__webcanbe/api/projects"){
     const rows=(await db.query(
-      `SELECT p.project_id,p.name,p.files,p.history
+      `SELECT p.project_id,p.name,p.revision,p.files,p.history,p.source_epoch
          FROM wcb_projects p
          JOIN wcb_project_members pm ON pm.project_id=p.project_id AND pm.user_id=$1 AND pm.active
          JOIN wcb_workspace_members wm ON wm.workspace_id=p.workspace_id AND wm.user_id=$1 AND wm.active
