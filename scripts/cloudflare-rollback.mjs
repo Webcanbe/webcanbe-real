@@ -64,7 +64,7 @@ function readWranglerJson(args, failureMessage, invalidJsonMessage) {
   }
 }
 
-if (planOnly) {
+function verifyRollbackTarget() {
   const versions = readWranglerJson(
     ["versions", "list"],
     "Unable to read recent Worker versions for rollback planning.",
@@ -92,6 +92,10 @@ if (planOnly) {
   if (activeVersionIds.includes(versionId.toLowerCase())) {
     console.log("Rollback target is already present in the current deployment; inspect traffic allocation before taking action.")
   }
+}
+
+if (planOnly) {
+  verifyRollbackTarget()
   console.log("Plan only: no Worker deployment was changed.")
   process.exit(0)
 }
@@ -100,6 +104,10 @@ if (process.env.WEBCANBE_ROLLBACK_CONFIRM !== "ROLLBACK_PRODUCTION") {
   console.error("Refusing production rollback without WEBCANBE_ROLLBACK_CONFIRM=ROLLBACK_PRODUCTION.")
   process.exit(1)
 }
+
+// Even an explicitly confirmed rollback must pass the same read-only target/current-deployment
+// preflight as plan mode. This prevents a stale or mistyped version from reaching Wrangler rollback.
+verifyRollbackTarget()
 
 const message = (process.env.WEBCANBE_ROLLBACK_MESSAGE || `Webcanbe operator rollback to ${versionId}`).slice(0, 500)
 
