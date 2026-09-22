@@ -1438,3 +1438,87 @@ Reason for only a tiny increase:
 - authenticated production core-flow acceptance remains the main launch proof gap in stored evidence.
 
 Do not materially move this estimate again for plans, polish, or internal implementation alone. Next meaningful move should come from actual market data.
+
+
+## 28. Master plan after public beta — 2026-09-23
+
+This is the overall operating plan beyond finishing code.
+
+### Phase 1 — Launch + first real market evidence (now → first 2 weeks)
+Objective: prove strangers can discover, activate, and finish the core Webcanbe loop.
+- Public beta stays live and truthful.
+- PostHog tracks visitor → signup → project/materialize → edit/save → reopen/export → purchase.
+- Customer acquisition starts with Build League + Founding Prize Vault and external build-sharing.
+- Seller/developer acquisition is separate: targeted direct outreach, roughly 100 high-fit creators/developers as the first serious supply campaign.
+- Keep 1–3 excellent flagship projects rather than waiting for broad inventory.
+- Founder/product work only fixes measured blockers; cosmetic backlog waits.
+Primary proof: first external core-flow completions, first paid buyer, first repeat/returning user, first seller interest/submission.
+
+### Phase 2 — Find the strongest wedge (weeks 2–8)
+Objective: identify where Webcanbe has the strongest pull.
+Measure by segment, channel and project category:
+- visitor → signup
+- signup → materialize
+- materialize → edit/save
+- edit → export
+- export → pay
+- D7 / D14 return
+- referral-qualified builders
+- seller submission → published → first sale
+Cut weak channels/messages quickly.
+If users love one part more than the full marketplace (e.g. source-owned workspace, visual+code editor, specific project categories), lean into the evidence.
+Do not preserve the original product shape at the expense of traction.
+
+### Phase 3 — PMF evidence + repeatable acquisition (months 2–6)
+Objective: turn one-off interest into repeatable behavior.
+Need:
+- growing paid-buyer count
+- repeat purchase / retention
+- seller first-sale and seller retention
+- measurable marketplace liquidity
+- at least one repeatable acquisition channel
+- improving CAC / organic share
+- contribution-margin visibility
+Build only what improves these metrics.
+Introduce stronger seller tools, buyer retention loops, referral incentives, new high-performing categories, and paid acquisition only after organic activation is proven.
+
+### Phase 4 — Scale the marketplace + software revenue (months 6–12)
+Objective: compound both sides.
+- increase high-quality creator supply
+- expand buyer demand and repeat usage
+- strengthen seller-led distribution
+- add software revenue around marketplace activity where users prove demand: AI, collaboration, deployment, team workflows, subscriptions, etc.
+- improve international distribution and localization only where data supports it
+- hire only when a bottleneck cannot be solved efficiently by the founder/automation
+Primary metrics: GMV, recognized revenue, take rate, paid cohorts, retention, seller liquidity, contribution margin, organic/referral share, growth durability.
+
+### Phase 5 — Hypergrowth attempt (months 12–24)
+Objective: pursue the extreme KRW 1T target only if the evidence supports a hypergrowth path.
+- double down on the strongest market/category/channel
+- expand internationally
+- deepen network effects and product moat
+- increase supply and demand density
+- consider institutional capital only if it materially accelerates an already-proven engine
+- keep founder equity/control high unless dilution clearly increases expected outcome
+If the current model cannot plausibly compound fast enough, pivot the product/business shape while preserving the larger goal.
+
+### Decision discipline
+- No major strategy change from one bad comment.
+- Repeated qualified-user behavior beats founder preference.
+- New unrelated businesses go to a parking lot unless Webcanbe evidence justifies replacing the main goal.
+- Product work must map to acquisition, activation, retention, monetization, seller liquidity, trust/security, or measured conversion.
+- Track the 24-month KRW 1T probability from the fixed 0.0500% baseline; move it materially only with real market evidence.
+
+### Milestone ladder
+1. public beta live
+2. first external full core-flow completion
+3. first genuine paid buyer
+4. second independent paid buyer / first repeat buyer
+5. first Creator earns money
+6. first KRW 1M cumulative recognized company revenue
+7. first KRW 10M
+8. first KRW 100M
+9. repeatable channel + PMF-grade retention
+10. sustained multi-month compounding growth
+
+The plan is not “finish code, then think about business.” From this point, the company is managed by market evidence.
