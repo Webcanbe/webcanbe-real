@@ -654,3 +654,89 @@ Working promotion idea:
 - Track promo traffic separately in PostHog with campaign/referrer properties so giveaway-driven users can be compared against ordinary launch traffic.
 - Do not let domain procurement, copy polish, or giveaway mechanics delay the core public-beta launch.
 - Before announcing, confirm actual availability, total first-year cost, renewal responsibility, transfer/registrar mechanics, and clear terms for who receives ownership.
+
+
+## 21. Founding Domain Drop launch campaign — 2026-09-22
+
+User plans to acquire a small pool of short 3-letter domains (.bz/.cx candidates) and use them as an early Webcanbe acquisition/activation incentive.
+
+### Strategic purpose
+Do **not** treat this as a generic giveaway for signups. The domains are an activation engine:
+- acquisition hook: short 3-letter domain is visually memorable and unusually tangible
+- activation gate: reward only after the user completes the real Webcanbe core flow
+- scarcity: a finite visible pool creates urgency
+- social proof: claimed domains can become public proof of real early users
+- learning: PostHog measures whether incentive traffic actually activates or is just freebie traffic
+
+### Recommended launch mechanic
+Working name: **Founding Domain Drop**.
+
+Initial wave should be deliberately small: **10–15 domains**, not 50–100 upfront.
+- First qualified users get to choose one available domain from a visible curated pool.
+- First qualified, first choice. No random drawing.
+- One domain per real person/account.
+- Qualification should require a **real project + successful edit/save + successful export** (or equivalent final core-flow completion), not merely signup.
+- Paid purchase is not required while paid beta is not fully proven.
+- Webcanbe covers the first registration year only; renewal responsibility and transfer timing/rail must be stated before claim.
+- Keep the highest-value names (e.g. ink.bz / way.bz / she.cx / may.cx / xml.cx) out of the first test pool unless deliberately used as one headline reward. Prefer mid-tier but still attractive names for the first experiment.
+- Do not buy a large inventory before the first cohort proves incremental activation.
+
+### Recommended public copy direction
+Core line:
+**Build something real. Keep the source. Claim a 3-letter domain.**
+
+Supporting concept:
+**The first N beta builders who complete a real Webcanbe project and export the source can claim one short 3-letter domain from the live pool. First qualified, first choice. No lottery.**
+
+Avoid vague “win a rare domain” language. The point is guaranteed, earned scarcity tied to using the product.
+
+### Scarcity / UX
+- Public live domain pool page or section.
+- Show each available domain as a card.
+- Show an N-left counter.
+- Claimed names remain visible as Claimed rather than disappearing, producing social proof.
+- With consent, show claimant handle / project thumbnail later.
+- Domain claim unlocks only after the backend has evidence that the qualifying core-flow events completed.
+- Do not fake scarcity or manually inflate claim counts.
+
+### PostHog instrumentation
+Minimum campaign events/properties:
+- domain_drop_view
+- domain_drop_cta_clicked
+- domain_eligibility_started
+- domain_eligibility_completed
+- domain_claim_opened
+- domain_claimed
+- domain_share_clicked
+Properties: campaign=founding_domain_drop, referrer, country, chosen_domain, project_id where safe, and funnel stage.
+
+Primary question:
+**Does domain-incentive traffic complete materialize/edit/save/export at a higher rate than ordinary launch traffic?**
+Do not optimize for raw signups.
+
+### Distribution
+Launch asset should be one strong visual showing the actual domain pool and the product:
+- X company post first
+- founder/personal repost only if useful
+- short product demo + domain pool
+- communities only where self-promotion is allowed and relevant
+- seller/creator outreach can use a separate later creator-domain reward; do not mix both audiences in the first test
+
+### Growth loop
+After a user claims a domain:
+- generate a clean share card: “Built on Webcanbe · Claimed <domain>”
+- sharing is optional, not a condition for the domain
+- optional referral reward should be product credit / AI Actions / future perk, not another scarce domain initially
+
+### Success / kill criteria
+This campaign is good only if it improves qualified activation economically.
+Watch:
+- landing → signup
+- signup → project/materialize
+- project → edit/save
+- edit → export
+- later export → paid conversion
+- cost per activated user and cost per paid user
+- freebie-abuse / duplicate-account rate
+
+If it creates signups but not core-flow completion, tighten qualification or stop it. If it materially lifts activation and produces share/referral behavior, expand the pool.
