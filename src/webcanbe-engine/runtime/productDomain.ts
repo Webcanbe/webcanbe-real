@@ -40,6 +40,8 @@ export type Listing = Readonly<{
   availability: "available" | "unavailable"
   tags: string[]
   demoMetadata: Record<string, unknown>
+  priceMinor?: number
+  currency?: "USD"
   updatedAt: string
 }>
 

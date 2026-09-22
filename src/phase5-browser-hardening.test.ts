@@ -49,12 +49,14 @@ describe("Phase 5 browser launch hardening", () => {
     expect(script).toContain("DCL stays within launch budget")
   })
 
-  it("locks the truthful auth and pre-payment UI in real browsers", () => {
+  it("locks truthful auth and server-authoritative payment availability in real browsers", () => {
     expect(script).toContain("login uses Google SVG mark")
     expect(script).toContain("login uses GitHub SVG mark")
     expect(script).toContain("unavailable phone login is disabled")
-    expect(script).toContain("paid plans stay disabled")
-    expect(script).toContain("plans explain billing state")
+    expect(script).toContain("paid plan CTAs match server availability")
+    expect(script).toContain("configuration.checkoutAvailable === true")
+    expect(script).toContain("button.disabled === !available")
+    expect(script).toContain("plans explain authoritative billing state")
   })
 
   it("enforces deterministic production build-size budgets", () => {

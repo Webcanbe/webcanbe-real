@@ -14,7 +14,7 @@ const viewports = [
   ["mobile", { width: 390, height: 844 }],
 ]
 
-const routes = ["/", "/browse", "/plans", "/login", "/updates", "/docs/security"]
+const routes = ["/", "/browse", "/plans", "/login", "/dashboard", "/projects", "/purchases", "/workspace/00000000-0000-4000-8000-000000000001", "/checkout/return?payment=return", "/checkout/return?payment=cancelled", "/updates", "/docs/security"]
 const failures = []
 let checks = 0
 
@@ -124,6 +124,16 @@ for (const [browserName, browserType] of browsers) {
             return { interactive: ["a","button","input","select","textarea"].includes(tag), tag }
           })
           assert(`${browserName}/${viewportName} ${route} accepts keyboard focus`, focus.interactive, `active tag ${focus.tag || "none"}`)
+          if (["/browse", "/login", "/checkout/return?payment=cancelled"].includes(route)) {
+            await page.reload({ waitUntil: "domcontentloaded" })
+            await page.locator("h1").first().waitFor({ state: "visible" })
+            await page.goto(new URL("/docs/security", origin).href, { waitUntil: "domcontentloaded" })
+            await page.goBack({ waitUntil: "domcontentloaded" })
+            await page.locator("h1").first().waitFor({ state: "visible" })
+            assert(`${browserName}/${viewportName} ${route} refresh/back restores route`, page.url() === url, page.url())
+            await page.goForward({ waitUntil: "domcontentloaded" })
+            assert(`${browserName}/${viewportName} ${route} forward restores route`, new URL(page.url()).pathname === "/docs/security", page.url())
+          }
         }
 
         await page.goto(new URL("/login", origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
@@ -151,19 +161,22 @@ for (const [browserName, browserType] of browsers) {
 
         await page.goto(new URL("/plans", origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
         await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
+        const configurationResponse = await page.request.get(new URL("/__webcanbe/api/payments/config", origin).href)
+        if (!configurationResponse.ok()) throw new Error("Payment configuration is unavailable during browser verification.")
+        const configuration = await configurationResponse.json()
         const plans = await page.evaluate(() => {
-          const buttons = [...document.querySelectorAll("button")]
-          const paid = buttons.filter(button => (button.textContent || "").includes("Billing coming soon"))
+          const cards = [...document.querySelectorAll(".plan-grid article")]
           return {
-            paidCount: paid.length,
-            paidAllDisabled: paid.length === 2 && paid.every(button => button.disabled),
-            free: buttons.some(button => (button.textContent || "").includes("Start for free") && !button.disabled),
-            truth: document.body.innerText.includes("Paid billing is not active yet"),
+            paid: cards.slice(1).map(card => ({ label: card.querySelector("button")?.textContent?.trim(), disabled: card.querySelector("button")?.disabled })),
+            free: cards[0]?.querySelector("button")?.textContent?.includes("Start for free") && !cards[0]?.querySelector("button")?.disabled,
+            available: document.body.innerText.includes("PayPal subscription checkout is available."),
+            unavailable: document.body.innerText.includes("Paid checkout is currently unavailable"),
           }
         })
-        assert(`${browserName}/${viewportName} paid plans stay disabled`, plans.paidAllDisabled, `paid buttons ${plans.paidCount}`)
+        const available = configuration.checkoutAvailable === true
+        assert(`${browserName}/${viewportName} paid plan CTAs match server availability`, plans.paid.length === 2 && plans.paid.every((button, index) => button.disabled === !available && button.label === (available ? ["Choose Pro", "Choose Studio"][index] : "Checkout unavailable")), JSON.stringify(plans.paid))
         assert(`${browserName}/${viewportName} free plan remains actionable`, plans.free, "free plan CTA missing")
-        assert(`${browserName}/${viewportName} plans explain billing state`, plans.truth, "billing truth copy missing")
+        assert(`${browserName}/${viewportName} plans explain authoritative billing state`, available ? plans.available && !plans.unavailable : plans.unavailable && !plans.available, "billing state differs from payment configuration")
 
         for (const path of ["/project/not-a-real-project", "/project/not-a-real-project/preview"]) {
           await page.goto(new URL(path, origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })

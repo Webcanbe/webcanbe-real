@@ -104,6 +104,16 @@ export class PostgresPaymentRepository {
   async flagReconciliation(row) { await this.db.query("INSERT INTO wcb_payment_reconciliation(item_id,kind,provider_id,payload,status,created_at) VALUES($1,$2,$3,$4,'pending',clock_timestamp()) ON CONFLICT(kind,provider_id) DO UPDATE SET payload=EXCLUDED.payload", [(this.uuid || randomUUID)(),row.kind,row.providerId,JSON.stringify(row.payload)]); return row }
   async subscriptionByUserKey(userId, key) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE user_id=$1 AND idempotency_key=$2", [userId,key])).rows[0]) }
   async currentSubscriptionForUser(userId) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE user_id=$1 AND status IN ('creating','approval_pending','active','past_due','cancelled') ORDER BY created_at DESC LIMIT 1", [userId])).rows[0]) }
+  async aiActionBalanceForUser(userId) {
+    const purchased = await this.db.query(`SELECT COALESCE(sum(credit.purchased_actions),0) AS granted,
+      COALESCE((SELECT sum((allocation->>'actions')::integer) FROM wcb_ai_usage_reservations usage
+        CROSS JOIN LATERAL jsonb_array_elements(usage.allocations) allocation
+        JOIN wcb_ai_purchased_credits source ON source.credit_id=(allocation->>'sourceId')::uuid
+        WHERE usage.user_id=$1 AND usage.status IN ('reserved','committed') AND allocation->>'kind'='purchased' AND source.revoked_at IS NULL),0) AS used
+      FROM wcb_ai_purchased_credits credit WHERE credit.user_id=$1 AND credit.revoked_at IS NULL`, [userId])
+    const row=purchased.rows[0]
+    return { purchased: Math.max(0,Number(row.granted)-Number(row.used)) }
+  }
   async subscriptionByProviderId(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1", [id])).rows[0]) }
   async subscriptionByProviderIdForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1 FOR UPDATE", [id])).rows[0]) }
   async subscriptionForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE subscription_id=$1 FOR UPDATE", [id])).rows[0]) }

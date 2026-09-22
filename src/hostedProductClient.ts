@@ -7,6 +7,11 @@ export type HostedListing = Listing & Readonly<{
   snapshotHash: string
 }>
 
+export type PaymentOrder = Readonly<{ orderId: string; listingId: string; releaseId: string; status: string; grossMinor: number; currency: "USD"; approvalUrl?: string; createdAt: string }>
+export type PaymentSubscription = Readonly<{ subscriptionId: string; planKey: string; status: string; approvalUrl?: string; createdAt: string; currentPeriodEnd?: string; cancelledAt?: string; failedAt?: string }>
+export type PaymentBilling = Readonly<{ currentPlanKey: string; subscription: PaymentSubscription | null; aiActions: Readonly<{ purchased: number }> }>
+export type AiPackOrder = Readonly<{ aiPackOrderId: string; packKey: string; actions: number; grossMinor: number; currency: "USD"; status: string; approvalUrl?: string }>
+
 export type HostedListingDetail = HostedListing & Readonly<{
   release: ProjectRelease
   publicMetadata: Record<string, unknown>
@@ -110,6 +115,34 @@ export class HostedProductClient {
 
   async purchases() {
     return (await this.post<{ entitlements: LicenseEntitlement[] }>("/__webcanbe/api/product/purchases", {})).entitlements
+  }
+
+  async paymentStatus() {
+    return (await this.post<{ billing: PaymentBilling }>("/__webcanbe/api/payments/status", {})).billing
+  }
+
+  async createPaymentOrder(listingId: string, idempotencyKey: string) {
+    return (await this.post<{ order: PaymentOrder }>("/__webcanbe/api/payments/orders/create", { listingId, idempotencyKey })).order
+  }
+
+  async capturePaymentOrder(providerOrderId: string) {
+    return (await this.post<{ order: PaymentOrder }>("/__webcanbe/api/payments/orders/capture", { providerOrderId })).order
+  }
+
+  async createSubscription(planKey: string, idempotencyKey: string) {
+    return (await this.post<{ subscription: PaymentSubscription }>("/__webcanbe/api/payments/subscriptions/create", { planKey, idempotencyKey })).subscription
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    return (await this.post<{ subscription: PaymentSubscription }>("/__webcanbe/api/payments/subscriptions/cancel", { subscriptionId })).subscription
+  }
+
+  async createAiPack(packKey: string, idempotencyKey: string) {
+    return (await this.post<{ order: AiPackOrder }>("/__webcanbe/api/payments/ai-packs/create", { packKey, idempotencyKey })).order
+  }
+
+  async captureAiPack(providerOrderId: string) {
+    return (await this.post<{ order: AiPackOrder }>("/__webcanbe/api/payments/ai-packs/capture", { providerOrderId })).order
   }
 
   async workspaceProjects() {

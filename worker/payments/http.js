@@ -6,8 +6,8 @@ const headers = { "Content-Type": "application/json; charset=utf-8", "Cache-Cont
 const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers })
 
 export const PAYMENT_RETURN_URLS = Object.freeze({
-  marketplaceReturn: "https://webcanbe.com/purchases?payment=return",
-  marketplaceCancel: "https://webcanbe.com/browse?payment=cancelled",
+  marketplaceReturn: "https://webcanbe.com/checkout/return?payment=return",
+  marketplaceCancel: "https://webcanbe.com/checkout/return?payment=cancelled",
   subscriptionReturn: "https://webcanbe.com/settings?subscription=return",
   subscriptionCancel: "https://webcanbe.com/settings?subscription=cancelled",
   aiPackReturn: "https://webcanbe.com/settings?ai-pack=return",
@@ -35,6 +35,25 @@ export function publicPaymentConfiguration() {
 export async function handlePrivatePaymentRequest(request, path, { repo, provider, session, env, clock = Date.now }) {
   if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } })
   try {
+    if (path === "/__webcanbe/api/payments/status") {
+      const [subscription, aiActions] = await Promise.all([
+        repo.currentSubscriptionForUser(session.userId),
+        repo.aiActionBalanceForUser(session.userId),
+      ])
+      return json({ billing: {
+        currentPlanKey: subscription?.status === "active" ? subscription.planKey : "free",
+        subscription: subscription ? {
+          subscriptionId: subscription.subscriptionId,
+          planKey: subscription.planKey,
+          status: subscription.status,
+          createdAt: subscription.createdAt,
+          ...(subscription.currentPeriodEnd ? { currentPeriodEnd: subscription.currentPeriodEnd } : {}),
+          ...(subscription.cancelledAt ? { cancelledAt: subscription.cancelledAt } : {}),
+          ...(subscription.failedAt ? { failedAt: subscription.failedAt } : {}),
+        } : null,
+        aiActions,
+      } })
+    }
     if (path === "/__webcanbe/api/payments/orders/create") {
       const order = await createMarketplaceOrder(repo, provider, session, await body(request), {
         clock,

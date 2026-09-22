@@ -25,7 +25,7 @@ jobs:
       - name: Secret scan
         run: npm run security:secrets
       - name: Preview runtime security regressions
-        run: npx vitest run src/phase5-preview-runtime-security.test.ts src/phase5-browser-run-visual-preview.test.ts src/phase5-firebase-csp-popup.test.ts
+        run: npx vitest run src/phase5-preview-runtime-security.test.ts src/phase5-browser-run-visual-preview.test.ts src/phase5-csp-compat.test.ts src/phase5-firebase-auth.test.ts worker/security-headers.test.js
       - name: Worker syntax
         run: node --check worker/security-headers.js && node --check worker/preview-runtime-headers.js && node --check worker/index.js
       - name: Production build
