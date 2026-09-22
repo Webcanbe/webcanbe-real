@@ -6,5 +6,6 @@ export {docPages,articles,docFamilies,docsNav} from '../src/public/docs-content'
 export {infoPages,supportChannels} from '../src/public/content/public-pages'
 export {categories} from '../src/public/categories'
 export const render=(path:string,build:string)=>renderToStaticMarkup(<PublicSite path={path} build={build}/>)
-export const footer=()=>renderToStaticMarkup(<SharedFooter/>)
+// React emits image preloads before the fragment; replace only the footer element.
+export const footer=()=>{const html=renderToStaticMarkup(<SharedFooter/>);return html.slice(html.indexOf("<footer"))}
 export const cta=()=>renderToStaticMarkup(<SharedCTA/>)

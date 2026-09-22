@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import { describe, expect, it } from "vitest"
 
+const shell = fs.readFileSync("src/app-shell.tsx", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const landing = fs.readFileSync("public/wcb-landing/index.html", "utf8")
 const index = fs.readFileSync("index.html", "utf8")
@@ -17,12 +18,12 @@ describe("Phase 5 brand pass", () => {
   })
 
   it("keeps the dashboard brand as the official mark plus Webcanbe text", () => {
-    expect(app).toContain("rd-team-official-logo")
-    expect(app).toContain("<b>Webcanbe</b><small>Source-first workspace</small>")
+    expect(shell).toContain('src="/brand/webcanbe-mark.svg"')
+    expect(shell).toContain("<span>WebCanBe</span>")
   })
 
   it("restores Ropean-style dashboard account dropdown structures instead of removing them", () => {
-    const dashboard = app.slice(app.indexOf("function RopeanDashboardShell"), app.indexOf("function Settings()"))
+    const dashboard = shell
     expect(dashboard).toContain("rd-account-dropdown")
     expect(dashboard).toContain("rd-profile-dropdown")
     expect(dashboard).toContain("rd-team-dropdown")

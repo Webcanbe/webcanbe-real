@@ -14,7 +14,7 @@ export function publicSitePlugin(){
   if(manifest.routes[p])file=p==='/'?'/__public/home.html':'/__public'+p+'.html'
   else if(['/docs/','/browse/','/contact/','/legal/'].some(prefix=>p.startsWith(prefix))){file='/__public/404.html';status=404}
   else if(['/docs-search.json','/robots.txt','/sitemap.xml','/sitemap-public.xml','/llms.txt','/llms-full.txt'].includes(p))file=p
-  else if(preview&&!path.extname(p)&&!p.startsWith('/__webcanbe/')){if(/^\/(login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project)(\/|$)/.test(p))file='/app-shell.html';else{file='/__public/404.html';status=404}}
+  else if(preview&&!path.extname(p)&&!p.startsWith('/__webcanbe/')){if(/^\/(login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app\/docs|profile|account|billing|notifications|help)(\/|$)/.test(p))file='/app-shell.html';else{file='/__public/404.html';status=404}}
   if(!file)return next()
   const target=path.join(root,file);if(!fs.existsSync(target))return next()
   res.statusCode=status;res.setHeader('Content-Type',file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.json')?'application/json':file.endsWith('.xml')?'application/xml':'text/plain; charset=utf-8');if(status===404||file==='/app-shell.html')res.setHeader('X-Robots-Tag','noindex, nofollow');res.end(req.method==='HEAD'?'':fs.readFileSync(target))

@@ -19,7 +19,7 @@ describe("Phase 5 editor keyboard shortcuts", () => {
     expect(workspace).toContain('history(event.shiftKey ? "redo" : "undo")')
     expect(workspace).toContain('key === "y"')
     expect(workspace).toContain('history("redo")')
-    expect(workspace).toContain('aria-keyshortcuts="Meta+Z Control+Z"')
+    expect(fs.readFileSync("src/webcanbe-engine/visual-editor/EditorChrome.tsx", "utf8")).toContain('aria-keyshortcuts="Meta+Z Control+Z"')
   })
 
   it("adds source surface, preview-mode, viewport, export, and help shortcuts", () => {
@@ -52,7 +52,7 @@ describe("Phase 5 editor keyboard shortcuts", () => {
   })
 
   it("keeps project actions and source files reachable on mobile", () => {
-    expect(styles).toContain(".compatible-top-actions button:last-child{display:inline-flex")
+    expect(fs.readFileSync("src/editor-shell.css", "utf8")).toContain(".editor-top-right{gap:3px}")
     expect(styles).toContain(".compatible-files{display:flex;max-height:38vh")
   })
 })

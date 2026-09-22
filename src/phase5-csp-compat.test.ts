@@ -22,6 +22,17 @@ describe("Phase 5 CSP compatibility inventory", () => {
     expect(landing).not.toMatch(/new\s+Function\s*\(/)
   })
 
+  it("serves every app font locally under the self-only font CSP", () => {
+    const css = fs.readFileSync("src/globals.css", "utf8")
+    const urls = [...css.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(match => match[1])
+    expect(urls.length).toBeGreaterThan(0)
+    for (const url of urls) {
+      expect(url).toMatch(/^\/fonts\/[^/]+\.woff2$/)
+      expect(fs.readFileSync("public" + url).subarray(0, 4).toString()).toBe("wOF2")
+    }
+    expect(security).toContain("font-src 'self' data:")
+  })
+
   it("keeps the React root free of inline scripts", () => {
     expect(root.match(inlineScriptPattern) ?? []).toHaveLength(0)
     expect(root).toContain('<script type="module" src="/src/main.tsx"></script>')

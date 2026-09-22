@@ -185,6 +185,10 @@ export class HostedProductClient {
     return result
   }
 
+  async createWorkspace(workspaceId: string) {
+    return (await this.post<{ workspaceId: string }>("/__webcanbe/api/workspaces/create", { workspaceId })).workspaceId
+  }
+
   async workspaces() {
     return (await this.post<{ workspaces: string[] }>("/__webcanbe/api/workspaces", {})).workspaces
   }

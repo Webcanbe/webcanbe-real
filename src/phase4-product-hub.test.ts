@@ -5,7 +5,7 @@ describe("Phase 4 product hub", () => {
   it("keeps projects and purchases separate and uses a native dashboard", () => {
     expect(app).toContain("function Projects()")
     expect(app).toContain("function Purchases()")
-    expect(app).toContain("function Dashboard()")
+    expect(app).toContain("function Dashboard(")
     expect(app).toContain("Continue building")
     expect(app).toContain("Needs attention")
     expect(app).toContain("Recent activity")

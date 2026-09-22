@@ -34,7 +34,7 @@ describe("Phase 5 launch hardening", () => {
   })
 
   it("keeps private and authenticated routes out of crawler discovery", () => {
-    for (const path of ["/__webcanbe/","/dashboard","/dashboard-preview","/workspace/","/settings","/checkout/","/seller","/_ops/","/login","/signup"]) {
+    for (const path of ["/__webcanbe/","/dashboard","/dashboard-preview","/workspace","/marketplace","/editor/","/app/","/profile","/account","/billing","/notifications","/help","/settings","/checkout/","/seller","/_ops/","/login","/signup"]) {
       expect(robots).toContain("Disallow: " + path)
     }
     expect(robots).toContain("Sitemap: https://webcanbe.com/sitemap.xml")

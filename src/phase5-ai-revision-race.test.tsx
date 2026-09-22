@@ -8,6 +8,7 @@ import CompatibleWorkspace from './webcanbe-engine/visual-editor/CompatibleWorks
 afterEach(() => vi.unstubAllGlobals())
 
 it.each(['after Code response', 'before Code response'])('keeps rendered Code rev_2 and Export rev_2 when delayed AI rev_1 arrives %s and follow-up reads fail', async order => {
+  window.history.replaceState({}, '', '/workspace/northstar?mode=canvas')
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0))
@@ -57,9 +58,12 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
     (host.querySelector('[aria-label="Local editor access key"]') as HTMLInputElement).value = 'fixture-key'
     await click('Connect / renew session')
     await flushUntil(() => expect(host.querySelector('main')?.getAttribute('data-source-revision')).toBe('rev_0'))
+    expect(host.querySelector('iframe')?.getAttribute('sandbox')).toBe('allow-scripts')
+    expect(host.querySelector('iframe')?.getAttribute('srcdoc')).toBe('<main>preview</main>')
+    await click('Canvas')
     await click('Code')
     await flushUntil(() => expect(host.querySelector('.cm-content')?.textContent).toContain('Original'))
-    await click('AI')
+    await click('Agent')
     await act(async () => {
       const prompt = host.querySelector('.ai-prompt textarea') as HTMLTextAreaElement
       Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(prompt, 'Change heading')
@@ -85,6 +89,7 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
     expect(host.querySelector('.cm-content')?.textContent).toContain('Code rev_2')
     expect(host.querySelector('main')?.getAttribute('data-source-revision')).toBe('rev_2')
     await click('Export')
+    await click('Download ZIP')
     expect(exportRevision).toBe('rev_2')
     expect(transactions).toEqual([{ producer: 'ai', revision: 'rev_1' }, { producer: 'code', revision: 'rev_2' }])
   } finally { await act(async () => root.unmount()); host.remove() }

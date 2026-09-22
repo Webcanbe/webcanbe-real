@@ -767,7 +767,6 @@
     }
   },
   "aliases": {
-    "/marketplace": "/browse",
     "/templates": "/browse",
     "/pricing": "/plans",
     "/terms": "/legal/terms",

@@ -14,9 +14,10 @@ describe("Phase 5 launch truthfulness cleanup", () => {
   })
 
   it("removes stale account-backend copy from the dashboard", () => {
-    const dashboard = app.slice(app.indexOf("function Dashboard()"), app.indexOf("function Settings()"))
-    expect(dashboard).toContain("Profile data is backed by the production account store.")
-    expect(dashboard).toContain("Verified sign-in methods and active Webcanbe sessions are backed by the production account store")
+    const dashboard = app.slice(app.indexOf("function Dashboard("), app.indexOf("function Settings()"))
+    expect(app).toContain("hostedProductClient.updateAccount(name.trim())")
+    expect(app).toContain("account.providers?.join")
+    expect(app).toContain("account.activeSessions")
     expect(dashboard).not.toContain("Full editable profile fields will use the account backend when that phase is connected.")
     expect(dashboard).not.toContain("Additional account controls will connect to the production account store.")
     expect(dashboard).not.toContain("Google sign-in is active.")
@@ -42,7 +43,7 @@ describe("Phase 5 launch truthfulness cleanup", () => {
   })
 
   it("gives hosted marketplace failures and empty catalog results an actionable state", () => {
-    const browse = app.slice(app.indexOf("function Browse()"), app.indexOf("function projectStructure"))
+    const browse = app.slice(app.indexOf("function Browse("), app.indexOf("function projectStructure"))
     const detail = app.slice(app.indexOf("function Detail("), app.indexOf("function ProjectPreviewPage"))
     expect(browse).toContain("Marketplace is unavailable")
     expect(browse).toContain("No matching projects")

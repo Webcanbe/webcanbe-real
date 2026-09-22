@@ -1,13 +1,6 @@
 {
   "routes": [
     {
-      "src": "^/marketplace/?$",
-      "status": 308,
-      "headers": {
-        "Location": "/browse"
-      }
-    },
-    {
       "src": "^/templates/?$",
       "status": 308,
       "headers": {
@@ -673,7 +666,7 @@
       "handle": "filesystem"
     },
     {
-      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project)(?:/.*)?$",
+      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
       "dest": "/app-shell.html",
       "headers": {
         "X-Robots-Tag": "noindex, nofollow"

@@ -1,0 +1,1293 @@
+{
+  "summary": {
+    "originalFailures": 109,
+    "groups": {
+      "stale historical string/snapshot assertion": 2,
+      "superseded Phase 4 expectation": 4,
+      "maintained runtime validation": 7,
+      "optional historical fixture/runtime test": 96
+    },
+    "newExclusions": [],
+    "maintainedCodeRegressions": 0,
+    "preexistingOptInSkipped": 61
+  },
+  "originalFailures": [
+    {
+      "file": "src/phase3-landing.test.ts",
+      "test": "Phase 4 WebCanBe landing > uses the local editable landing and preserves product routes",
+      "category": "stale historical string/snapshot assertion",
+      "resolution": "Landing uses same-origin HTML injection and generated static HTML, not the retired iframe.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase4-operations.test.ts",
+      "test": "Phase 4 authenticated operations surfaces > adds an operator-only read surface without inventing client-side authority",
+      "category": "superseded Phase 4 expectation",
+      "resolution": "Email Firebase auth, server-verified /_ops control authority, and consolidated styles supersede disabled email, /control and retired CSS imports. Original real-auth/authority/cascade invariants retained in updated assertions.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase4-operations.test.ts",
+      "test": "Phase 4 authenticated operations surfaces > loads the Phase 4 operations style layer after the product hub styles",
+      "category": "superseded Phase 4 expectation",
+      "resolution": "Email Firebase auth, server-verified /_ops control authority, and consolidated styles supersede disabled email, /control and retired CSS imports. Original real-auth/authority/cascade invariants retained in updated assertions.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase4-operations.test.ts",
+      "test": "Phase 4 authenticated operations surfaces > uses the real hosted sign-in start boundary instead of a fake successful login",
+      "category": "superseded Phase 4 expectation",
+      "resolution": "Email Firebase auth, server-verified /_ops control authority, and consolidated styles supersede disabled email, /control and retired CSS imports. Original real-auth/authority/cascade invariants retained in updated assertions.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase4-public-production.test.ts",
+      "test": "Phase 4 public production seams > finishes OIDC on a fixed same-origin completion route and resumes safe browser intent",
+      "category": "stale historical string/snapshot assertion",
+      "resolution": "AuthComplete is dispatched through basePath/page; fixed completion route and safe saved intent remain.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase4-ux-foundation.test.ts",
+      "test": "Phase 4 product UX foundation > loads the Phase 4 layer after the existing application module",
+      "category": "superseded Phase 4 expectation",
+      "resolution": "Email Firebase auth, server-verified /_ops control authority, and consolidated styles supersede disabled email, /control and retired CSS imports. Original real-auth/authority/cascade invariants retained in updated assertions.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase5-editor-durable-export.test.ts",
+      "test": "Phase 5 durable save, canonical revision and standalone export > exports the accepted bytes and builds them in a fresh checkout without Webcanbe runtime state",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/phase5-gate4-launch-chain.test.ts",
+      "test": "Gate 4 launch chain: materialize \u2192 Visual \u2192 Code \u2192 reload \u2192 export > carries immutable release provenance through accepted source and independent export",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-config.test.ts",
+      "test": "compiles constant nested aliases, same-directory config inheritance and a confined custom publicDir without altering source",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-css.test.ts",
+      "test": "compiles unchanged finite tailwind3 configuration through a dedicated profile",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-css.test.ts",
+      "test": "compiles unchanged finite unocss configuration through a dedicated profile",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-html.test.ts",
+      "test": "admits only a confined inert local manifest and strips it from controlled preview HTML without changing canonical source",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-html.test.ts",
+      "test": "preserves alternate mount, body attributes, local stylesheet and canonical HTML in HTTP and Blob compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "selects the existing dedicated profile and compiles an authored project from a complete bun graph",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-locks.test.ts",
+      "test": "selects the existing dedicated profile and compiles an authored project from a complete yarn graph",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-breadth-values.test.ts",
+      "test": "compiles granted public values without editing canonical source or reading example values",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "admits only lock-verified client transitives and rejects tampered transitive locks",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "preserves CSS resource URLs without fetching or admitting remote JavaScript",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "selects a complete versioned profile and compiles declared Lucide in confinement",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "skips absent optional peers but verifies present optional peer locks",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "statically interprets path.resolve('./src') without changing configuration",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "statically interprets path.resolve(__dirname, './src') without changing configuration",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "statically interprets resolve('./src') without changing configuration",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-common-applications.test.ts",
+      "test": "verifies required peer locks even when the peer is not directly declared",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "applies Rollup minimum chunk size to an eligible independent export graph",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "compiles forms, directives, variant groups and responsive media dark with canonical export preservation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "derives a non-root Vite HTML entry and public directory while keeping aliases config-relative",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "rebuilds Uno snapshots after source edits and applies HTML groups and admitted module extensions",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "refuses export graph imports outside immutable inputs and leaves module side effects unexecuted",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "represents finite build options independently and applies them in the pinned Rollup worker",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-compatibility-edge.test.ts",
+      "test": "supports the same finite transformers on the retained pinned Uno66 graph",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "does not silently claim support for unknown semantic options or a missing dedicated profile",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "keeps transpilation distinct from semantics and never runs config or changes source",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses tooling as a static Vite plugin and through a source symlink",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .pnp.cjs in Blob, HTTP and independent export compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .pnp.loader.mjs in Blob, HTTP and independent export compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .yarn/plugins/uploaded.cjs in Blob, HTTP and independent export compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling .yarn/releases/yarn-4.2.2.cjs in Blob, HTTP and independent export compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-boundaries.test.ts",
+      "test": "refuses uploaded tooling src/.yarn/plugins/uploaded.cjs in Blob, HTTP and independent export compilation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-forms-adapter.test.ts",
+      "test": "reproduces the forms1 checkbox, radio and file-input semantics under UnoCSS 66",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-forms-adapter.test.ts",
+      "test": "reproduces the forms1 input, textarea, select and placeholder preflight semantics under UnoCSS 66",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-inert-tooling.test.ts",
+      "test": "preserves inert tooling as source-owned bytes but refuses importing it into the controlled browser graph",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 Visual, Code, undo and redo share one nested canonical history before exact export",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 actual independent application exports preserve external imports and apply chunk merging",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 builds lazy application exports with base ./ and inert scripts",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 builds lazy application exports with base /nested/ and inert scripts",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for . / src",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for apps/web / apps/web/src",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for client / client/src",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 derives canonical source and mapping for frontend / frontend/source",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 exports the retained Vite8 application graph through the fixed pinned Rollup compiler",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 real export API returns exact ZIP only after the independent production gate passes",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 refuses changed root identity, traversal writes and a hidden second source tree",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 uses matching static Vite and referenced TS aliases in a nested source tree",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p39.test.ts",
+      "test": "P39 broker consumes a numbered input frame once and retires replay before delivery",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2.test.ts",
+      "test": "controlled preview compiler > bundles React/CSS Modules without evaluating uploaded configuration",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2.test.ts",
+      "test": "controlled preview compiler > compiles the existing realistic Tailwind fixture with only installed defaults",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2.test.ts",
+      "test": "project capability boundary > enforces auth and stale revisions at the HTTP mutation boundary, including history",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2b.test.ts",
+      "test": "explicit runtime profiles > does not silently substitute BrowserRouter or custom Tailwind configuration",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2b.test.ts",
+      "test": "explicit runtime profiles > imports, resolves, maps, edits and exports studio-ledger without changing dependency declarations",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2b.test.ts",
+      "test": "explicit runtime profiles > imports, resolves, maps, edits and exports trail-atlas without changing dependency declarations",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "HTTP compiler transport and unchanged source > compiles coast-paths, retaining its router/config and real text/style/history/export",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "HTTP compiler transport and unchanged source > compiles harbor-desk, retaining its router/config and real text/style/history/export",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "HTTP compiler transport and unchanged source > never publishes source maps, config, private files or linked public assets",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "HTTP compiler transport and unchanged source > recognizes nested and aliased router imports without weakening the Blob guard",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "authorized HTTP artifacts, isolation and lifecycle > cleans failed starts and limits active resources",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "authorized HTTP artifacts, isolation and lifecycle > denies preview A's credential at B and rejects forged hosts, methods and duplicate cookies",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "authorized HTTP artifacts, isolation and lifecycle > expires, revokes, stops and rebuilds without retaining readable stale artifacts",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "authorized HTTP artifacts, isolation and lifecycle > requires a live server session; bootstrap is single-use, host-only and read-only",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "authorized HTTP artifacts, isolation and lifecycle > serves permitted HTML navigation but returns typed 404s for missing resources and reserved paths",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "fail-closed editor admission > expires unused bootstrap tickets before the underlying source session",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "fail-closed editor admission > refuses HTTP even with client-supplied enable flags, while keeping revision-bound source inspection and export",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c.test.ts",
+      "test": "fail-closed editor admission > reserves compiler capacity before asynchronous startup and cannot restart a closed registry",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > closes a late startup after shutdown; an abort is never counted as a running preview",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > copies validated routes before asynchronous boundaries and sweeps revocation without a browser callback",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > denies wrong/inspect-only capabilities and cross-project or sibling-session generation access",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > discards a revoked in-flight raster and serializes runner operations",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > invalidates expire independently of browser cleanup and rejects subsequent reads",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > invalidates revoke independently of browser cleanup and rejects subsequent reads",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > invalidates source independently of browser cleanup and rejects subsequent reads",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > keeps capabilities and executable artifacts out of the display descriptor; input confers no source authority",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > quarantines after failed cleanup and rejects executable/malformed output",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > rejects stale source before launch and failed startup never returns an HTML fallback",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c1.test.ts",
+      "test": "controlled preview foundation (not a network isolation proof) > retires old generations on replacement, stop and transport restart",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "projects observations and binds input to the delivered frame sequence",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "quarantines startup when the provider cannot verify stop/reap, before reusing capacity",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "rejects malformed geometry across the worker JSON boundary",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "rejects malformed identity across the worker JSON boundary",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "rejects malformed logs across the worker JSON boundary",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "rejects malformed route across the worker JSON boundary",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2c2.test.ts",
+      "test": "requires observed source identity to resolve in the current authorized project",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2de.test.ts",
+      "test": "shared code/visual HTTP acceptance > keeps an invalid draft outside canonical source/history and records failed save validation",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2de.test.ts",
+      "test": "shared code/visual HTTP acceptance > records a validated checkpoint without changing source or losing redo",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2de.test.ts",
+      "test": "shared code/visual HTTP acceptance > serializes concurrent requests and replays only identical idempotency keys",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2de.test.ts",
+      "test": "shared code/visual HTTP acceptance > shares canonical changes and rejects stale SourceAnchors after structural code edits",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2de.test.ts",
+      "test": "shared code/visual HTTP acceptance > validates and commits a rename with its importing code, plus create/delete, as one revision",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2f.test.ts",
+      "test": "Phase 2F authorized Code / Visual / durable revision integration > reanalyzes Code responsive source, rejects stale anchors, and persists responsive history/undo across restart",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-authority.test.ts",
+      "test": "hosted actual API source/history boundary > enforces viewer writes through HTTP and records the authenticated actor on real source transactions",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "test": "versioned runtime/configuration profile expansion > compiles unchanged independent vite-react18-ts and verifies every upstream file hash",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "test": "versioned runtime/configuration profile expansion > compiles unchanged independent vite-react19-ts and verifies every upstream file hash",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "test": "versioned runtime/configuration profile expansion > statically translates local base, jsconfig aliases and standard environment constants",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "test": "versioned runtime/configuration profile expansion > translates literal CSS theme only in an expanded versioned profile",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g-runtime.test.ts",
+      "test": "versioned runtime/configuration profile expansion > uses incremental contexts without stale transformed modules and distinguishes CSS from module reloads",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "confined React refresh compiler > classifies an existing component boundary, CSS and a non-component entry accurately",
+      "category": "optional historical fixture/runtime test",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "test": "Phase 3 isolated seller assessment worker > fails closed without the hosted isolation marker and bounds checker timeout as an errored immutable result",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "test": "Phase 3 isolated seller assessment worker > rejects cancelled and stale-worker delivery even after isolated work returns",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "test": "Phase 3 isolated seller assessment worker > runs the exact frozen snapshot out of process under the live lease and accepts only through the result boundary",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "src/webcanbe-engine/phase3-hosted-product.test.ts",
+      "test": "Phase 3 isolated seller assessment worker > survives a pre-result worker loss by reclaiming the same snapshot under a newer fence",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    },
+    {
+      "file": "worker/editor-projects.test.js",
+      "test": "Worker AST Visual transactions > builds the actual API export independently from an existing fixture",
+      "category": "maintained runtime validation",
+      "resolution": "Failed with absent dedicated locked runtime profiles; passes with all 13 profiles prepared via npm ci --ignore-scripts. Retained, not excluded; no product change.",
+      "excluded": false
+    }
+  ],
+  "existingOptionalSkips": [
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "production fixed capture in actual no-egress native-sandbox Linux captures dom, input and viewport changes within 4000 ms",
+      "gates": [
+        "WCB_CAPTURE_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "production fixed capture in actual no-egress native-sandbox Linux captures webgl, input and viewport changes within 4000 ms",
+      "gates": [
+        "WCB_CAPTURE_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-capture.test.ts",
+      "test": "production fixed capture in actual no-egress native-sandbox Linux skips absent selection work but still returns a later selected source identity",
+      "gates": [
+        "WCB_CAPTURE_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-history.test.ts",
+      "test": "commits source plus compaction atomically in PG and refuses rewritten archived ancestry, stale restore and revocation",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-ingestion.test.ts",
+      "test": "shares intake slots across registries, releases on failure and refuses revocation before atomic acceptance",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-migration.test.ts",
+      "test": "migrates legacy PostgreSQL source atomically; rollback, stale writer, downgrade and revocation stay refused",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "native cross-file refresh preserves React18 state through a helper and barrel, and labels graph replacement as reload",
+      "gates": [
+        "WCB_REFRESH_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-refresh.test.ts",
+      "test": "native cross-file refresh preserves React19 state through a helper and barrel, and labels graph replacement as reload",
+      "gates": [
+        "WCB_REFRESH_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-secrets.test.ts",
+      "test": "delivers and rotates generated TEST values through real fenced mTLS and native sandbox without source or log exposure",
+      "gates": [
+        "WCB_HOSTED_RUNNER_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React18 cross-file types and diagnoses a transpiling type error",
+      "gates": [
+        "WCB_SEMANTIC_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-final-semantic.test.ts",
+      "test": "isolated pinned semantic compiler checks real React19 cross-file types and diagnoses a transpiling type error",
+      "gates": [
+        "WCB_SEMANTIC_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-bun-binary.test.ts",
+      "test": "decodes the exact Todo Bun 1.1.42 graph as bounded data",
+      "gates": [
+        "WCB_TODO_BUN_LOCK"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-bun-binary.test.ts",
+      "test": "refuses malformed Bun ranges, lengths, indices, protocols, integrity and extension data",
+      "gates": [
+        "WCB_TODO_BUN_LOCK"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-forms-adapter.test.ts",
+      "test": "admits, compiles and byte-preserves the exact frozen Todo app without running preinstall",
+      "gates": [
+        "WCB_P05_TODO"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-forms-adapter.test.ts",
+      "test": "refuses missing, substituted and unsupported-version forms markers",
+      "gates": [
+        "WCB_P05_TODO"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "test": "round-trips every exact frozen Redux file, including its 2742928-byte Yarn release, and retains missing-graph refusal",
+      "gates": [
+        "WCB_REDUX_ARCHIVE",
+        "WCB_TODO_BUN_LOCK"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-frozen-admission.test.ts",
+      "test": "preserves the retained Todo binary Bun lock as opaque bytes and refuses graph admission",
+      "gates": [
+        "WCB_REDUX_ARCHIVE",
+        "WCB_TODO_BUN_LOCK"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-nested-root.test.ts",
+      "test": "selects apps/react-vite from the exact retained Bulletproof archive",
+      "gates": [
+        "WCB_BULLETPROOF_ARCHIVE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-redux-real.test.ts",
+      "test": "parses the exact frozen reduxjs Yarn 4.2.2 lock without executing package-manager code",
+      "gates": [
+        "WCB_REDUX_BERRY_LOCK",
+        "WCB_REDUX_PACKAGE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-retained-graphs.test.ts",
+      "test": "normalizes the exact reachable Redux browser graph against operator npm integrity",
+      "gates": [
+        "WCB_P05_APPS",
+        "WCB_P05_PROFILES"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-retained-graphs.test.ts",
+      "test": "normalizes the exact reachable Bulletproof Vite graph and excludes unrelated tooling records",
+      "gates": [
+        "WCB_P05_APPS",
+        "WCB_P05_PROFILES"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-retained-graphs.test.ts",
+      "test": "retains the exact Todo peer mismatch as a strict admission failure",
+      "gates": [
+        "WCB_P05_APPS",
+        "WCB_P05_PROFILES"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-retained-graphs.test.ts",
+      "test": "admits only the statically reachable exact Redux and Bulletproof runtime graphs",
+      "gates": [
+        "WCB_P05_APPS",
+        "WCB_P05_PROFILES"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p05-retained-graphs.test.ts",
+      "test": "builds the exact Redux and Bulletproof browser entries through confined profiles",
+      "gates": [
+        "WCB_P05_APPS",
+        "WCB_P05_PROFILES"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 native semantic worker checks the real nested source directory",
+      "gates": [
+        "ROOT",
+        "WCB_PG_TEST",
+        "WCB_SEMANTIC_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2-p06.test.ts",
+      "test": "P06 real PostgreSQL preserves nested source authority across edits and refuses root rebinding",
+      "gates": [
+        "ROOT",
+        "WCB_PG_TEST",
+        "WCB_SEMANTIC_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) A and B each read, Code edit, select/Visual edit, history, preview, refresh and export their own project",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) rejects cross-tenant references, stolen capabilities, forged identity fields and origin/CSRF/session attacks",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) supports owner/editor/viewer and revokes project/workspace membership during live capabilities",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) accepts source/history coherently, rejects stale simultaneous edits and replays idempotency after restart",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) durable personal multi-file drafts survive editor restart without changing source and use CAS",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) hosted responsive construction writes real CSS and reload/restart fallbacks remain accurately classified",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) database transaction/history failures never report success or split durable source/history",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) SIGKILL during an HTTP source transaction rolls back and a new editor reconnects to exact accepted bytes",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) artifacts fail closed, runner references/fences/expiry are checked and admission remains PostgreSQL-owned",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) discards an actual delayed mTLS runner result after membership change and quarantines missing cleanup acknowledgement",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) the production-built editor uses cookie/CSRF HTTP for rendered Code/Canvas/history and separate-site viewer",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-editor.test.ts",
+      "test": "composed hosted editor: real HTTPS + signed TEST OIDC + PostgreSQL + mTLS Linux (local evidence) revoked login session denies source/history/preview and cannot use still-known project IDs",
+      "gates": [
+        "WCB_HOSTED_EDITOR_TEST",
+        "WCB_PLAYWRIGHT_MODULE"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) executes native-sandbox Chromium, renders/input/updates and verifies explicit cleanup",
+      "gates": [
+        "WCB_HOSTED_RUNNER_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) rejects missing mTLS credentials and a forged fencing token",
+      "gates": [
+        "WCB_HOSTED_RUNNER_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-hosted-runner.test.ts",
+      "test": "real Linux hosted-protocol provider through local TEST mTLS (not cloud isolation) A owns a real runner, A is SIGKILLed, B retires it and A's late message cannot regain authority",
+      "gates": [
+        "WCB_HOSTED_RUNNER_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses one durable PostgreSQL login/session authority and cannot reissue a revoked user",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud denies an artifact put already queued behind a project-delete transaction",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=disable",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslmode=no-verify",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud cannot override verified PostgreSQL TLS through a connection URL: sslrootcert=untrusted",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud commits canonical source/history atomically and rejects stale CAS/digest/revision reuse",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses the existing source transaction/history/export interfaces through a private checkout",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud durably appends rejected history receipts without changing source, and refuses old-history rewrites",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rolls back a storage error and permits an exact retry after a new client starts",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rolls back an actual source transaction when its client is SIGKILLed",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud serializes concurrent acceptance from two clients without losing a revision",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud denies tenant prefix/project/session/epoch forgery, viewer writes and revoked grants",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud keeps digest-bound artifacts tenant-scoped and tombstones revoke/delete against late puts",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud requires TLS for a production pool configuration",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud uses epochs to reject late controller A after B takes over; uncertain cleanup retains capacity",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud enforces per-host capacity across project/session allocations",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud prevents concurrent duplicate starts and admission races, never resurrects stopped generations",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-postgres.test.ts",
+      "test": "real PostgreSQL integration \u2014 local VM, not managed cloud rejects a result whose lease expired during the operation",
+      "gates": [
+        "WCB_PG_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "real native-sandbox React Fast Refresh preserves React18 counter state through a changed component and CSS without document reload",
+      "gates": [
+        "WCB_REFRESH_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    },
+    {
+      "file": "src/webcanbe-engine/phase2g2-refresh.test.ts",
+      "test": "real native-sandbox React Fast Refresh preserves React19 counter state through a changed component and CSS without document reload",
+      "gates": [
+        "WCB_REFRESH_TEST"
+      ],
+      "reason": "Existing opt-in native sandbox / hosted PostgreSQL / fixed external archive or profile fixture; environment not provisioned for this local UI RC."
+    }
+  ]
+}

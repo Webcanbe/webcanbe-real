@@ -8,10 +8,10 @@ describe("Phase 4 authenticated operations surfaces", () => {
 
   it("uses the real hosted sign-in start boundary instead of a fake successful login", () => {
     expect(client).toContain('this.request("/__webcanbe/auth/start"')
-    expect(app).toContain("Email/password is not enabled")
+    expect(app).toContain("signInWithEmailFirebase(email.trim(),password)")
+    expect(app).toContain("await establishFirebaseSession(credential)")
     expect(app).toContain("Continue with Google")
     expect(app).toContain("Continue with GitHub")
-    expect(app).not.toContain('type="password"')
   })
 
   it("connects Creator Studio to seller-scoped application, studio, listing and submission APIs", () => {
@@ -23,13 +23,16 @@ describe("Phase 4 authenticated operations surfaces", () => {
   })
 
   it("adds an operator-only read surface without inventing client-side authority", () => {
-    expect(client).toContain('"/__webcanbe/api/product/control/read"')
-    expect(app).toContain('else if (basePath === "/control") page = <Protected><Control/></Protected>')
-    expect(app).toContain("High-risk changes require fresh step-up")
-    expect(app).toContain("does not fake a passkey ceremony")
+    expect(client).toContain('"/__webcanbe/api/ops/control/read"')
+    expect(app).toContain('basePath===BIGPERSON_CONTROL_PATH)page=<Protected><Control/></Protected>')
+    expect(client).toContain("this.privilegedMutation<{ control: ControlData }>(password,")
+    expect(app).toContain("The route and ordinary login session are never sufficient.")
   })
 
-  it("loads the Phase 4 operations style layer after the product hub styles", () => {
-    expect(main.indexOf('import "./phase4-product-hub.css"')).toBeLessThan(main.indexOf('import "./phase4-operations.css"'))
+  it("loads current shell and editor styles after the consolidated product styles", () => {
+    const base=main.indexOf('import "./phase4-final-ui.css"'), shell=main.indexOf('import "./app-shell.css"'), editor=main.indexOf('import "./editor-shell.css"')
+    expect(base).toBeGreaterThan(-1)
+    expect(shell).toBeGreaterThan(base)
+    expect(editor).toBeGreaterThan(shell)
   })
 })

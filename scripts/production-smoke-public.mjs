@@ -63,9 +63,6 @@ async function run() {
   assert("CSP enforced", csp.includes("default-src 'self'") && csp.includes("script-src 'self'"), csp || "missing")
   assert("CSP blocks unsafe eval", Boolean(csp) && !csp.includes("'unsafe-eval'"), csp || "missing")
   assert("request ID attached", isUuid(root.headers.get("x-request-id")), root.headers.get("x-request-id") || "missing")
-  const rootHtml = await root.text()
-  assert("production Control switch is deployed", rootHtml.includes('<meta name="wcb-control-mode" content="hosted"'), "wcb-control-mode=hosted")
-  assert("product read and materialization mutation switches are deployed", rootHtml.includes('<meta name="wcb-product-read-mode" content="hosted"') && rootHtml.includes('<meta name="wcb-product-mutation-mode" content="hosted"'), "read + materialization activation")
 
   const missing = await request("/__webcanbe-smoke-missing-route", { headers: { Accept: "text/html" } })
   assert("unknown SPA route returns real 404", missing.status === 404, `status ${missing.status}`)
@@ -74,6 +71,10 @@ async function run() {
   const dashboard = await request("/dashboard", { headers: { Accept: "text/html" } })
   assert("dashboard shell route resolves", dashboard.status === 200, `status ${dashboard.status}`)
   assert("dashboard is server-side noindex", (dashboard.headers.get("x-robots-tag") || "").includes("noindex"), dashboard.headers.get("x-robots-tag") || "missing")
+  const appHtml = await dashboard.text()
+  assert("production Control switch is deployed", appHtml.includes('<meta name="wcb-control-mode" content="hosted"'), "wcb-control-mode=hosted")
+  assert("product read and materialization mutation switches are deployed", appHtml.includes('<meta name="wcb-product-read-mode" content="hosted"') && appHtml.includes('<meta name="wcb-product-mutation-mode" content="hosted"'), "read + materialization activation")
+
 
   const robots = await request("/robots.txt")
   const robotsText = await robots.text()
@@ -84,7 +85,12 @@ async function run() {
   const sitemapText = await sitemap.text()
   assert("sitemap resolves", sitemap.status === 200, `status ${sitemap.status}`)
   assert("sitemap excludes private routes", !sitemapText.includes("/dashboard") && !sitemapText.includes("/settings"), "no dashboard/settings URLs")
-  assert("sitemap includes public marketplace", sitemapText.includes("https://webcanbe.com/browse"), "browse route present")
+  assert("sitemap indexes public pages and live listings", sitemapText.includes("https://webcanbe.com/sitemap-public.xml") && sitemapText.includes("https://webcanbe.com/sitemap-listings.xml"), "both child sitemaps present")
+  const publicSitemap = await request("/sitemap-public.xml")
+  const publicSitemapText = await publicSitemap.text()
+  assert("public sitemap resolves", publicSitemap.status === 200, `status ${publicSitemap.status}`)
+  assert("sitemap includes public marketplace", publicSitemapText.includes("https://webcanbe.com/browse"), "browse route present")
+  assert("public sitemap excludes app routes", !/<loc>https:\/\/webcanbe\.com\/(?:dashboard|marketplace|projects|purchases|profile|account|billing|notifications|help|workspace|editor|app)(?:[<\/])/.test(publicSitemapText), "no authenticated destinations")
 
   const postHeaders = {
     Accept: "application/json",

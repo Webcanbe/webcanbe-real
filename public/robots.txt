@@ -5,7 +5,7 @@ Disallow: /__webcanbe/
 Disallow: /__wcb
 Disallow: /dashboard
 Disallow: /dashboard-preview
-Disallow: /workspace/
+Disallow: /workspace
 Disallow: /projects
 Disallow: /purchases
 Disallow: /settings
@@ -15,6 +15,14 @@ Disallow: /_ops/
 Disallow: /login
 Disallow: /signup
 Disallow: /auth/
+Disallow: /marketplace
+Disallow: /editor/
+Disallow: /app/
+Disallow: /profile
+Disallow: /account
+Disallow: /billing
+Disallow: /notifications
+Disallow: /help
 
 User-agent: OAI-SearchBot
 Allow: /
@@ -22,7 +30,7 @@ Disallow: /__webcanbe/
 Disallow: /__wcb
 Disallow: /dashboard
 Disallow: /dashboard-preview
-Disallow: /workspace/
+Disallow: /workspace
 Disallow: /projects
 Disallow: /purchases
 Disallow: /settings
@@ -32,6 +40,14 @@ Disallow: /_ops/
 Disallow: /login
 Disallow: /signup
 Disallow: /auth/
+Disallow: /marketplace
+Disallow: /editor/
+Disallow: /app/
+Disallow: /profile
+Disallow: /account
+Disallow: /billing
+Disallow: /notifications
+Disallow: /help
 
 # No separate GPTBot override; the general public-access policy applies.
 Sitemap: https://webcanbe.com/sitemap.xml
