@@ -858,3 +858,87 @@ Do not judge campaign by raw signups.
 - If domain traffic signs up but does not edit/export: stop or tighten message/qualification.
 - If 2–3 domain cohorts fill quickly and qualified activation is materially better than ordinary traffic: buy more only then.
 - If campaign attracts mostly domain hunters with no retention/product interest: do not scale even if signup count looks good.
+
+
+## 23. Domain campaign v3 — premium-domain UGC/referral strategy — 2026-09-22
+
+User proposed using one of the strongest domains previously intended to be kept (e.g. a headline-quality 3-letter domain) as a prize for people who publicly spread Webcanbe.
+
+### Decision
+This can be higher-leverage than giving every domain directly to users, but only if it is structured as a **Build + Share challenge**, not “say something nice about Webcanbe.”
+
+### Hybrid allocation for a 2–3 domain budget
+Recommended:
+- **1 premium/headline domain** = acquisition/UGC grand prize.
+- **1–2 mid-tier domains** = activation micro-drops tied to completing the product core flow.
+This gives each scarce domain a different job:
+- premium domain buys reach and user-generated launch content;
+- mid-tier domains buy product activation and completion.
+
+### Premium-domain challenge
+Working framing: **Founding Builder Challenge** / **3-Letter Domain Challenge**.
+
+Eligibility:
+1. use Webcanbe and complete the real core flow (project/materialize → edit/save → export);
+2. publish one original post/video showing what they actually built or did with Webcanbe;
+3. tag @Webcanbe and clearly state that the post is an entry for the Webcanbe domain contest;
+4. one entry per real person/account; no duplicate-post spam or multi-account entries.
+
+Do **not** require positive praise, a 5-star review, or specific complimentary language. Require authentic demonstration/content, not endorsement copy.
+
+### Solve “I probably won’t win”
+Cap the cohort rather than running an unlimited raffle.
+Recommended first premium-domain test:
+- **first 10 verified Build + Share entries**
+- exactly one premium-domain winner
+- displayed maximum odds: **1 in 10**
+- close when 10 valid entries fill or at a predeclared deadline; if the deadline arrives first, draw from the valid entries under the published rules
+- show live `N / 10 qualified posts` progress
+
+Alternative if participation is weak: cap at 5 for a 20% chance, but only when the prize economics justify it.
+
+### Do not choose by likes/views
+Likes and views are bot-able and heavily favor pre-existing audience size.
+The domain draw should remain one verified entry per person.
+Track referrals separately and reward them with low-cost product credit / AI Actions / status rather than extra scarce-domain entries.
+
+### Launch UI
+Headline example:
+**Build it. Share it. Win [domain].**
+Supporting:
+**The first 10 verified builders who ship a real Webcanbe project and share what they built enter a capped 1-in-10 domain drop.**
+
+Show:
+- headline domain card
+- current `N / 10` qualified posts
+- qualification checklist
+- real submitted posts as they arrive
+- eventual winner + project
+- official terms link
+
+### Distribution loop
+- Webcanbe launch post reveals the premium domain and real product demo.
+- entrants create distributed UGC instead of simply reposting the same ad.
+- Webcanbe quotes/highlights strong entries during the campaign.
+- when the cohort fills, publish the frozen entry list and draw/result.
+- winner reveal includes the actual project/content, returning attention to Webcanbe rather than to the prize alone.
+
+### Measurement
+PostHog campaign/referral properties:
+- campaign=founding_builder_domain
+- entry_source / creator handle or referral code where appropriate
+- build_share_view
+- build_share_cta
+- qualified_core_flow
+- qualifying_post_submitted
+- qualifying_post_verified
+- referral_visit
+- referral_signup
+- referral_materialize
+- referral_export
+- winner_selected
+
+Primary business metric is **cost per qualified activated user / referred activated user**, not number of posts or likes.
+
+### Disclosure / platform-operating requirement
+Because entry offers a chance to win something of value in exchange for a public post, treat the post as incentivized. For U.S.-facing promotion, entrants should clearly disclose the contest relationship in the post itself, e.g. `Entry for @Webcanbe's #WebcanbeDomainContest`, rather than hiding it. X allows post/tag/hashtag-based contests but advises against multiple-account entries and duplicate-post mechanics. Publish short official rules before launch.
