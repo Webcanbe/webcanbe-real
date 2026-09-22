@@ -5,7 +5,7 @@ const app = fs.readFileSync("src/App.tsx", "utf8")
 
 describe("Phase 5 launch truthfulness cleanup", () => {
   it("never maps unavailable phone sign-in to another provider", () => {
-    const auth = app.slice(app.indexOf("function Auth("), app.indexOf("const docPages"))
+    const auth = app.slice(app.indexOf("function Auth("), app.indexOf("function Documentation("))
     expect(auth).toContain('title="Phone sign-in is not connected yet"')
     expect(auth).toContain('<button className="auth-demo-provider" disabled title="Phone sign-in is not connected yet">')
     expect(auth).not.toContain("phonePending")

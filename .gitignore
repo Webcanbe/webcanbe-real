@@ -13,3 +13,5 @@ dist
 # Local production backup archives
 backups/
 *.pem\n*.p12\n*.pfx\n*.dump\n
+.public-site/
+work/

@@ -12,9 +12,10 @@ describe("Phase 5 Google OAuth public legal pages", () => {
   })
 
   it("links the homepage to the canonical privacy URL", () => {
-    expect(landing).toContain('href="/policy"')
+    expect(landing).toContain('href="/legal/privacy"')
     expect(landing).not.toContain('href="/privacy"')
-    expect(app).toContain('<Link to="/policy">Privacy</Link>')
+    const manifest = JSON.parse(fs.readFileSync('src/public/route-manifest.json','utf8'))
+    expect(manifest.aliases['/policy']).toBe('/legal/privacy')
   })
 
   it("discloses Google user-data handling for the requested sign-in scopes", () => {

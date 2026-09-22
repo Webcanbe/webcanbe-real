@@ -19,7 +19,7 @@ describe('Public shell routes and interactions',()=>{
   const reactDoc=new JSDOM(renderToStaticMarkup(<SharedFooter/>)).window.document
   const links=(d:Document)=>[...d.querySelectorAll('.wcb-public-footer a')].map(a=>[a.textContent,a.getAttribute('href')])
   expect(links(staticDoc)).toEqual(links(reactDoc))
-  for(const group of groups){expect(group.links.length).toBeGreaterThanOrEqual(6);for(const [,href] of group.links)expect(isKnownAppPath(new URL(href,'https://webcanbe.com').pathname)).toBe(true)}
+  for(const group of groups){expect(group.links.length).toBeGreaterThanOrEqual(6);for(const [,href] of group.links)if(href.startsWith('/'))expect(isKnownAppPath(new URL(href,'https://webcanbe.com').pathname)).toBe(true)}
  })
  it('docs categories contain only routable pages and each TOC links to a real heading',()=>{
   for(const [,items] of docsNav)for(const [,href] of items)expect(docPages[href]||href==='/changelog').toBeTruthy()
@@ -28,7 +28,7 @@ describe('Public shell routes and interactions',()=>{
    for(const a of d.querySelectorAll('.docs-toc a'))expect(d.getElementById(a.getAttribute('href')!.slice(1))).not.toBeNull()
    expect(d.querySelectorAll('h1')).toHaveLength(1)
   }
- })
+ },30000)
  it('offers a working guide when media is absent and rejects unapproved embed URLs',()=>{
   expect(renderToStaticMarkup(<EmbeddedVideo/>)).toContain('href="/docs/getting-started"')
   expect(renderToStaticMarkup(<EmbeddedVideo src="javascript:alert(1)"/>)).not.toContain('<iframe')

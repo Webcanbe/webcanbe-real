@@ -1,0 +1,808 @@
+{
+  "routes": {
+    "/docs": {
+      "title": "Documentation — Webcanbe Docs",
+      "description": "Find a project, make it your own, and keep the source. Practical guides to marketplace releases, visual and code editing, AI proposals, history and export.",
+      "kind": "docs"
+    },
+    "/docs/index": {
+      "title": "All documentation — Webcanbe Docs",
+      "description": "A complete, browsable index of Webcanbe documentation. Choose a task or use documentation search to find an exact topic.",
+      "kind": "docs"
+    },
+    "/docs/what-is-webcanbe": {
+      "title": "What is Webcanbe? — Webcanbe Docs",
+      "description": "Webcanbe is a source-first web project marketplace with a browser workspace for visual and code editing. Start with a published project, create a working copy, and keep the real source code as you change it.",
+      "kind": "docs"
+    },
+    "/docs/getting-started": {
+      "title": "Getting started — Webcanbe Docs",
+      "description": "Complete a small edit before making a large redesign. This guide takes you from a marketplace release to a saved working copy and a source export.",
+      "kind": "docs"
+    },
+    "/docs/create-account": {
+      "title": "Create an account — Webcanbe Docs",
+      "description": "Create or access your Webcanbe account through the sign-in flow before acquiring projects or opening a private workspace.",
+      "kind": "docs"
+    },
+    "/docs/sign-in": {
+      "title": "Sign in to Webcanbe — Webcanbe Docs",
+      "description": "Sign in with the account that owns your projects and purchases. A successful provider login must return to Webcanbe before the workspace session is ready.",
+      "kind": "docs"
+    },
+    "/docs/first-project": {
+      "title": "Choose your first project — Webcanbe Docs",
+      "description": "Choose a first project by its source, license and compatibility, not by its preview alone. A small project makes it easier to understand the complete editing and export workflow.",
+      "kind": "docs"
+    },
+    "/docs/releases-introduction": {
+      "title": "Understand project releases — Webcanbe Docs",
+      "description": "A release is a versioned source snapshot associated with a marketplace listing. It separates the project you acquired from later changes a creator may publish.",
+      "kind": "docs"
+    },
+    "/docs/first-edit": {
+      "title": "Make your first edit — Webcanbe Docs",
+      "description": "Start with one visible text or style change and verify that it becomes accepted source. This makes the relationship between Visual, Code and the preview concrete.",
+      "kind": "docs"
+    },
+    "/docs/first-export": {
+      "title": "Export your first project — Webcanbe Docs",
+      "description": "Export the accepted source after your first successful edit so you can inspect exactly what leaves Webcanbe.",
+      "kind": "docs"
+    },
+    "/docs/marketplace": {
+      "title": "Browse marketplace projects — Webcanbe Docs",
+      "description": "Marketplace organizes published web projects so you can compare a release before creating an editable copy. Browsing is public; acquiring and editing a project require the relevant account access.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/search": {
+      "title": "Search projects — Webcanbe Docs",
+      "description": "Use project search to find published listings whose names or descriptions match the task you want to build. Search narrows discovery; it does not inspect private project source.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/categories": {
+      "title": "Filter by category — Webcanbe Docs",
+      "description": "Categories group projects by their intended presentation or use, such as marketing websites, commerce, directories and editorial experiences. They help you explore without prescribing a technical stack.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/project-details": {
+      "title": "Read a project detail page — Webcanbe Docs",
+      "description": "A project detail page is the place to verify what a listing offers before acquiring its release. Treat the preview, source release and license as related but distinct information.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/previews": {
+      "title": "Use public previews — Webcanbe Docs",
+      "description": "Public previews help you evaluate a project’s interface before acquisition. They are a view of a published project, not your own editable workspace.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/releases": {
+      "title": "Compare release versions — Webcanbe Docs",
+      "description": "Release versions identify published source snapshots. Compare the release you own with the version currently offered before starting new work or requesting support.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/free-and-paid": {
+      "title": "Free and paid projects — Webcanbe Docs",
+      "description": "A project’s displayed acquisition terms determine whether payment is needed. Free acquisition and paid checkout can both lead to an entitlement; neither should be confused with creating a working copy.",
+      "kind": "docs"
+    },
+    "/docs/marketplace/licenses": {
+      "title": "Check a project license — Webcanbe Docs",
+      "description": "Read the license attached to the release before using, modifying or distributing its source. Export provides files; it does not replace the terms governing those files.",
+      "kind": "docs"
+    },
+    "/docs/purchases/acquire": {
+      "title": "Acquire a project — Webcanbe Docs",
+      "description": "Acquisition associates a marketplace release with your account. Create an editable working copy only after the product confirms the entitlement.",
+      "kind": "docs"
+    },
+    "/docs/purchases/entitlements": {
+      "title": "Understand entitlements — Webcanbe Docs",
+      "description": "An entitlement records your account’s access to an acquired release. It is different from the downloaded files, the public listing and the editable project you create from it.",
+      "kind": "docs"
+    },
+    "/docs/purchases/checkout-return": {
+      "title": "Return from checkout — Webcanbe Docs",
+      "description": "After checkout, verify the purchase in Webcanbe rather than relying solely on the payment provider’s return screen. Payment confirmation and entitlement creation may not be visible at exactly the same moment.",
+      "kind": "docs"
+    },
+    "/docs/purchases/missing": {
+      "title": "Find a missing purchase — Webcanbe Docs",
+      "description": "First check account identity and order status when a purchased project is not listed. Creating another account or paying again can make the investigation harder.",
+      "kind": "docs"
+    },
+    "/docs/purchases/working-copy": {
+      "title": "Turn a purchase into a working copy — Webcanbe Docs",
+      "description": "A purchase supplies access to a release; a working copy supplies the editable source and revision history. Creating the copy is a distinct operation.",
+      "kind": "docs"
+    },
+    "/docs/purchases/receipts": {
+      "title": "Keep purchase references — Webcanbe Docs",
+      "description": "Keep enough transaction context to identify an order without storing or sharing payment secrets. Purchase references are useful for billing investigations and project provenance.",
+      "kind": "docs"
+    },
+    "/docs/purchases/refunds": {
+      "title": "Request help with a refund — Webcanbe Docs",
+      "description": "Use Billing Help for a refund question and identify the exact purchase and problem. Eligibility must be assessed under the applicable terms and mandatory consumer protections.",
+      "kind": "docs"
+    },
+    "/docs/purchases/access": {
+      "title": "Use acquired source responsibly — Webcanbe Docs",
+      "description": "Access to a release and the right to use its source depend on the account entitlement and applicable license. Keep those records together as the project moves into your own development workflow.",
+      "kind": "docs"
+    },
+    "/docs/working-copies": {
+      "title": "Working copies — Webcanbe Docs",
+      "description": "A working copy is the editable project created from an acquired release. It holds your source and accepted revisions separately from the creator’s immutable publication.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/open": {
+      "title": "Open your workspace — Webcanbe Docs",
+      "description": "Open a working project from your account’s project list, then wait for its source and preview state to become clear. A public project preview is not an editable workspace.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/source-release": {
+      "title": "Trace the source release — Webcanbe Docs",
+      "description": "The source-release reference explains where a working copy began. The working revision explains what you have changed since then. Keep both when diagnosing project-specific behavior.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/capacity": {
+      "title": "Understand project capacity — Webcanbe Docs",
+      "description": "Project capacity determines whether your account can create another active working project. Use the live plan configuration and account state rather than relying on an old numerical limit.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/missing": {
+      "title": "Find a missing working copy — Webcanbe Docs",
+      "description": "When a project is missing, check account identity and creation status before assuming the source was deleted. Purchases and editable projects are separate lists.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/modes": {
+      "title": "Choose Visual, Code or Split — Webcanbe Docs",
+      "description": "Visual, Code and Split are workspace views over the same project source. Choose the view that makes the intended change easiest to inspect.",
+      "kind": "docs"
+    },
+    "/docs/working-copies/preview": {
+      "title": "Connect and inspect the preview — Webcanbe Docs",
+      "description": "The preview renders your working source in a controlled runtime. Its connection state is separate from whether the source has been saved successfully.",
+      "kind": "docs"
+    },
+    "/docs/customization": {
+      "title": "Plan a project customization — Webcanbe Docs",
+      "description": "Customize a working copy in small, reviewable steps so source changes remain understandable. Separate content edits, visual styling and application logic rather than changing all three at once.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor": {
+      "title": "Visual editor — Webcanbe Docs",
+      "description": "Visual editing changes supported source definitions through the rendered interface. It preserves the project’s source rather than replacing it with a separate canvas format.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/select-elements": {
+      "title": "Select elements — Webcanbe Docs",
+      "description": "Element selection connects a rendered target to a source definition that the inspector can understand. Use the selection mode before trying to change text or styles.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/text": {
+      "title": "Edit visible text — Webcanbe Docs",
+      "description": "Use Visual text editing when the selected element exposes a supported text capability. Use Code for text generated by logic, translations or data that the visual inspector cannot safely rewrite.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/spacing": {
+      "title": "Change spacing and layout — Webcanbe Docs",
+      "description": "Spacing controls change supported source style properties such as padding, margin and gaps. Inspect the layout context before changing values, because a child’s position can be controlled by its parent.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/typography-colors": {
+      "title": "Edit typography and colors — Webcanbe Docs",
+      "description": "Use supported typography and color controls to refine a project while keeping its source styles understandable. Check readability and shared design definitions before changing an isolated value.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/responsive": {
+      "title": "Edit responsive styles — Webcanbe Docs",
+      "description": "Preview width and authoring breakpoint serve different purposes. Preview width shows a layout; the authoring breakpoint determines which supported source rule receives a style change.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/shared-source": {
+      "title": "Understand shared source definitions — Webcanbe Docs",
+      "description": "A rendered component can appear many times while sharing one source definition. Visual edits to that definition can affect all matching instances.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/style-origins": {
+      "title": "Inspect style origins — Webcanbe Docs",
+      "description": "Style origins explain why a selected element has its current appearance and whether a declaration can be edited safely. Effective, inactive and inherited values can come from different source locations.",
+      "kind": "docs"
+    },
+    "/docs/visual-editor/unsupported": {
+      "title": "When to use Code — Webcanbe Docs",
+      "description": "Use Code when Visual cannot safely identify or update the source pattern you need. Partial visual compatibility is compatible with a useful editable project.",
+      "kind": "docs"
+    },
+    "/docs/code-editor": {
+      "title": "Code editor — Webcanbe Docs",
+      "description": "Code mode edits the actual files in your working copy. Save a draft to make it part of the accepted source used by preview, history and export.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/files": {
+      "title": "Navigate project files — Webcanbe Docs",
+      "description": "Use the source tree to understand a project before editing it. File names, imports and component definitions provide more reliable context than a preview screenshot alone.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/saving": {
+      "title": "Save code changes — Webcanbe Docs",
+      "description": "Saving submits a Code draft against the current project revision. Only an accepted save becomes the source used by history and export.",
+      "kind": "docs"
+    },
+    "/docs/split-view": {
+      "title": "Split view — Webcanbe Docs",
+      "description": "Split keeps source and preview visible together so you can connect a file edit with its rendered result. It uses the same working revision as Visual and Code.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/styles": {
+      "title": "Edit CSS and layout in Code — Webcanbe Docs",
+      "description": "Use Code for style rules that need broader context than the visual inspector can safely expose. Inspect selectors, shared classes and responsive conditions together.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/drafts": {
+      "title": "Work safely with drafts — Webcanbe Docs",
+      "description": "A Code draft is text you are editing before it has been accepted as a source revision. Treat draft recovery as assistance, not as proof that a save completed.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/errors": {
+      "title": "Resolve source errors — Webcanbe Docs",
+      "description": "When a code change fails, identify whether the error is in source validation, preview compilation or the save operation itself. These states require different fixes.",
+      "kind": "docs"
+    },
+    "/docs/code-editor/shortcuts": {
+      "title": "Workspace keyboard shortcuts — Webcanbe Docs",
+      "description": "Keyboard shortcuts provide quick access to workspace views and source actions. Their effect depends on focus, so text inputs and the code editor may handle keys differently from the workspace chrome.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing": {
+      "title": "AI editing — Webcanbe Docs",
+      "description": "AI editing proposes changes to the working project’s source. Review the proposal and its diff before applying it; generation and source acceptance are separate steps.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/modes": {
+      "title": "Standard and Deep modes — Webcanbe Docs",
+      "description": "Standard and Deep are AI generation modes with different displayed Action costs. Choose based on the task and the cost shown before generation, not an assumption that one mode guarantees correctness.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/actions": {
+      "title": "AI Action costs and settlement — Webcanbe Docs",
+      "description": "AI Actions account for generation work. A successful proposal and an accepted source edit are different events, so review the request status before interpreting a balance change.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/context": {
+      "title": "Provide useful source context — Webcanbe Docs",
+      "description": "Give AI a bounded source task with relevant context so the proposal can be evaluated against a clear goal. Avoid sending credentials or unrelated private data in the prompt.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/review-diffs": {
+      "title": "Review AI diffs — Webcanbe Docs",
+      "description": "Review every proposed file operation before applying AI edits. A plausible summary is not a substitute for checking the source changes and their scope.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/apply": {
+      "title": "Apply an AI proposal — Webcanbe Docs",
+      "description": "Applying a proposal submits reviewed operations against the source revision used to generate them. Wait for a confirmed outcome before making another source change.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/stale-revisions": {
+      "title": "Resolve stale AI proposals — Webcanbe Docs",
+      "description": "A proposal becomes stale when accepted source changes after the revision it was generated against. Revision protection prevents old operations from silently overwriting newer work.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/failures": {
+      "title": "Handle failed AI generations — Webcanbe Docs",
+      "description": "When generation fails, use the reported request state to distinguish unavailable service, insufficient balance, validation failure and an uncertain network outcome.",
+      "kind": "docs"
+    },
+    "/docs/ai-editing/security": {
+      "title": "AI editing security boundaries — Webcanbe Docs",
+      "description": "AI output is proposed source, not authority to bypass project, revision or account checks. Review generated changes with the same care as code from another contributor.",
+      "kind": "docs"
+    },
+    "/docs/history": {
+      "title": "History — Webcanbe Docs",
+      "description": "History records accepted changes to a working project. Use it to understand how Visual, Code and applied AI edits changed the same source over time.",
+      "kind": "docs"
+    },
+    "/docs/history/inspect": {
+      "title": "Inspect a source revision — Webcanbe Docs",
+      "description": "Inspect a revision to understand what changed and whether it explains a visible behavior. Start from the source difference rather than only the operation’s label.",
+      "kind": "docs"
+    },
+    "/docs/history/undo-redo": {
+      "title": "Undo and redo source changes — Webcanbe Docs",
+      "description": "Use workspace Undo and Redo to move deliberately through supported source changes. Distinguish project-level operations from undoing text inside an unsaved editor draft.",
+      "kind": "docs"
+    },
+    "/docs/history/drafts": {
+      "title": "Drafts versus accepted source — Webcanbe Docs",
+      "description": "Accepted source drives project history and export. Draft text can be visible in Code while the preview and other operations still use the previous accepted revision.",
+      "kind": "docs"
+    },
+    "/docs/history/conflicts": {
+      "title": "Resolve save conflicts — Webcanbe Docs",
+      "description": "A save conflict means your edit was based on a source revision that is no longer current. Resolve the difference against accepted source instead of repeatedly submitting the old revision.",
+      "kind": "docs"
+    },
+    "/docs/history/recovery": {
+      "title": "Recover after an interruption — Webcanbe Docs",
+      "description": "After a connection loss or browser interruption, establish the accepted project state before recovering unsaved work. A lost response can leave the operation outcome uncertain.",
+      "kind": "docs"
+    },
+    "/docs/history/ai-changes": {
+      "title": "Find AI changes in History — Webcanbe Docs",
+      "description": "Applied AI edits enter source history as accepted project changes. Generated proposals that were never applied are not equivalent to source revisions.",
+      "kind": "docs"
+    },
+    "/docs/history/multiple-tabs": {
+      "title": "Work across browser tabs — Webcanbe Docs",
+      "description": "Multiple tabs can observe the same working project at different revisions. Keep one active editing context when possible to reduce stale saves and proposals.",
+      "kind": "docs"
+    },
+    "/docs/export": {
+      "title": "Export source code — Webcanbe Docs",
+      "description": "Export downloads the working project’s accepted source so you can continue outside Webcanbe. It is a source handoff, not a deployment or a transfer of every third-party right.",
+      "kind": "docs"
+    },
+    "/docs/export/accepted-source": {
+      "title": "What an export includes — Webcanbe Docs",
+      "description": "An export represents accepted working source. Drafts, unaccepted AI proposals and temporary preview state are not the same source state and should be checked before downloading.",
+      "kind": "docs"
+    },
+    "/docs/export/local-setup": {
+      "title": "Run exported source locally — Webcanbe Docs",
+      "description": "Treat the exported project as a codebase you inspect before running. Follow its manifest and instructions in your own development environment rather than assuming every release uses identical commands.",
+      "kind": "docs"
+    },
+    "/docs/export/environment": {
+      "title": "Configure external services — Webcanbe Docs",
+      "description": "Exported source may reference services that you must configure independently. A marketplace preview is not a transfer of the creator’s accounts, API keys or production infrastructure.",
+      "kind": "docs"
+    },
+    "/docs/export/ownership": {
+      "title": "Source ownership and permissions — Webcanbe Docs",
+      "description": "Keeping real source gives you a portable development artifact. Your rights to use or redistribute the original release still come from its applicable license and third-party terms.",
+      "kind": "docs"
+    },
+    "/docs/export/review": {
+      "title": "Review an archive before sharing — Webcanbe Docs",
+      "description": "Inspect an exported archive before handing it to a client, colleague or public repository. A successful download verifies packaging, not readiness for every audience.",
+      "kind": "docs"
+    },
+    "/docs/export/troubleshooting": {
+      "title": "Troubleshoot export failures — Webcanbe Docs",
+      "description": "If export fails, preserve the accepted source state and identify whether the problem is the request, the download or local extraction. Repeated source edits are not a useful way to fix a packaging error.",
+      "kind": "docs"
+    },
+    "/docs/export/version-control": {
+      "title": "Continue in version control — Webcanbe Docs",
+      "description": "After export, place the source in your own version-control workflow to track development outside Webcanbe. Keep release provenance and license notices with the initial import.",
+      "kind": "docs"
+    },
+    "/docs/compatibility": {
+      "title": "React & Vite compatibility — Webcanbe Docs",
+      "description": "Webcanbe currently focuses on admitted React/Vite projects. Runtime rendering, visual editability, source export and hosted readiness are separate capabilities, so inspect the project’s report instead of assuming universal support.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/runtime": {
+      "title": "Understand the controlled runtime — Webcanbe Docs",
+      "description": "The runtime renders admitted source through a controlled preview path. It does not simply run every command or configuration file uploaded with a project.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/visual-support": {
+      "title": "Understand partial visual support — Webcanbe Docs",
+      "description": "Visual compatibility is assessed at the source-pattern and target level. A page can render successfully while some elements remain read-only or require Code.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/styling": {
+      "title": "Supported styling patterns — Webcanbe Docs",
+      "description": "Styling support depends on how declarations are represented in source. Webcanbe targets common CSS, CSS Modules, inline styles and supported utility-class patterns without promising every dynamic styling system.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/dependencies": {
+      "title": "Dependencies and project tooling — Webcanbe Docs",
+      "description": "Project dependencies and scripts are source information that must be evaluated against the supported runtime. Webcanbe does not grant uploaded package configuration authority to execute arbitrary code in the editor process.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/preview-modes": {
+      "title": "Interactive and snapshot previews — Webcanbe Docs",
+      "description": "Preview modes differ in what they can demonstrate. An interactive runtime can exercise supported behavior, while a snapshot is primarily a rendered inspection surface.",
+      "kind": "docs"
+    },
+    "/docs/compatibility/admission": {
+      "title": "Project admission and safety — Webcanbe Docs",
+      "description": "Admission checks determine whether a source package can enter the supported workflow. They are separate from marketplace licensing and from whether every element is visually editable.",
+      "kind": "docs"
+    },
+    "/docs/integrations": {
+      "title": "API and integrations overview — Webcanbe Docs",
+      "description": "Webcanbe projects can contain integration code, but a project interface does not provision the external services it references. This overview separates project integrations from Webcanbe’s own internal service endpoints.",
+      "kind": "docs"
+    },
+    "/docs/creators": {
+      "title": "Creator documentation — Webcanbe Docs",
+      "description": "Creators publish versioned source projects through a submission and release workflow. Prepare a useful, rights-cleared project whose description matches what buyers actually receive.",
+      "kind": "docs"
+    },
+    "/docs/creators/studio": {
+      "title": "Creator Studio — Webcanbe Docs",
+      "description": "Creator Studio is the account area for managing project submissions, listings and releases. Use its reported state to understand the next available action.",
+      "kind": "docs"
+    },
+    "/docs/creators/submissions": {
+      "title": "Create a project submission — Webcanbe Docs",
+      "description": "A submission packages source and listing information for validation and review. Prepare it as a reproducible source project rather than a set of attractive screenshots.",
+      "kind": "docs"
+    },
+    "/docs/creators/review": {
+      "title": "Understand the review process — Webcanbe Docs",
+      "description": "Review checks whether a submission is ready for the available marketplace publication workflow. Treat review feedback as actionable state rather than assuming a saved submission is approved.",
+      "kind": "docs"
+    },
+    "/docs/creators/releases": {
+      "title": "Create and publish releases — Webcanbe Docs",
+      "description": "A release identifies a version of the source you distribute. Publish a new release when source changes instead of implying that existing buyers’ working copies have been rewritten.",
+      "kind": "docs"
+    },
+    "/docs/creators/immutable-releases": {
+      "title": "Immutable releases — Webcanbe Docs",
+      "description": "An immutable release is a fixed source snapshot. It gives buyers and support a stable reference while allowing the creator to publish later versions separately.",
+      "kind": "docs"
+    },
+    "/docs/creators/rules": {
+      "title": "Marketplace rules for creators — Webcanbe Docs",
+      "description": "Publish projects whose source, rights and descriptions can be understood by buyers. Marketplace presentation should accurately distinguish included functionality from integrations the buyer must configure.",
+      "kind": "docs"
+    },
+    "/docs/creators/fees-payouts": {
+      "title": "Fees and payouts — Webcanbe Docs",
+      "description": "Creator earnings depend on the applicable fee arrangement, payment processing and payout eligibility. Read the current creator terms and account information before relying on a net amount or payout date.",
+      "kind": "docs"
+    },
+    "/docs/creators/pricing": {
+      "title": "Set project pricing — Webcanbe Docs",
+      "description": "Set a project price using the constraints and currency shown in Creator Studio. Consider the release’s scope and your applicable fees rather than copying a price from another listing.",
+      "kind": "docs"
+    },
+    "/docs/creators/licensing": {
+      "title": "Creator licensing guide — Webcanbe Docs",
+      "description": "Only distribute source and assets you have the right to include. Make the release’s buyer permissions clear without claiming rights over third-party material you do not own.",
+      "kind": "docs"
+    },
+    "/docs/creators/listing-updates": {
+      "title": "Update listing information — Webcanbe Docs",
+      "description": "Keep a listing’s public description aligned with its published release. Metadata corrections and source releases are different operations and should be communicated clearly.",
+      "kind": "docs"
+    },
+    "/docs/account/identity": {
+      "title": "Confirm your account identity — Webcanbe Docs",
+      "description": "Check the signed-in account before investigating missing projects, purchases or plan access. Different provider identities can lead you to different account contexts.",
+      "kind": "docs"
+    },
+    "/docs/account/providers": {
+      "title": "Sign-in providers — Webcanbe Docs",
+      "description": "Use the authentication methods offered by the current Webcanbe sign-in screen. Provider availability depends on live configuration and should not be inferred from old documentation or screenshots.",
+      "kind": "docs"
+    },
+    "/docs/account/google": {
+      "title": "Google sign-in — Webcanbe Docs",
+      "description": "For Google sign-in, choose the Google account associated with your Webcanbe work and allow the flow to return to the site.",
+      "kind": "docs"
+    },
+    "/docs/account/github": {
+      "title": "GitHub sign-in — Webcanbe Docs",
+      "description": "GitHub sign-in establishes an account session through the supported provider flow. It does not by itself import repositories or authorize every repository operation.",
+      "kind": "docs"
+    },
+    "/docs/account/email": {
+      "title": "Email and password sign-in — Webcanbe Docs",
+      "description": "The current email sign-in flow asks for your email address and then your password. Enter credentials only in the authentication screen, never in a support form.",
+      "kind": "docs"
+    },
+    "/docs/account/sessions": {
+      "title": "Manage account sessions — Webcanbe Docs",
+      "description": "Account sessions allow access to private Webcanbe surfaces after sign-in. Use the account controls offered in Settings and sign out when working on a shared device.",
+      "kind": "docs"
+    },
+    "/docs/account/profile": {
+      "title": "Account profile information — Webcanbe Docs",
+      "description": "Use Settings to inspect and update profile information that the product allows you to change. Keep presentation details separate from authentication identity and purchase ownership.",
+      "kind": "docs"
+    },
+    "/docs/account/workspaces": {
+      "title": "Account access and workspaces — Webcanbe Docs",
+      "description": "Private working projects are accessed through an authenticated account. Keep account identity, plan capacity and the project’s source revision distinct when diagnosing workspace access.",
+      "kind": "docs"
+    },
+    "/docs/billing/plans": {
+      "title": "Choose a plan — Webcanbe Docs",
+      "description": "Compare plans using the current Plans page and your account’s actual subscription state. Project capacity, AI allowance and other limits come from live configuration rather than fixed numbers in this guide.",
+      "kind": "docs"
+    },
+    "/docs/billing/checkout": {
+      "title": "Plan and credit checkout — Webcanbe Docs",
+      "description": "Checkout is the provider flow for an offered subscription or AI credit purchase. The return URL is not itself proof that the payment and account update are complete.",
+      "kind": "docs"
+    },
+    "/docs/billing/subscription-state": {
+      "title": "Understand subscription state — Webcanbe Docs",
+      "description": "Use the account’s reported subscription state to understand current plan access. Provider approval, webhook processing and the visible account view can represent different stages of a change.",
+      "kind": "docs"
+    },
+    "/docs/billing/ai-allowance": {
+      "title": "AI allowances and balances — Webcanbe Docs",
+      "description": "AI availability depends on the account’s usable Action balance and request limits. Included plan allocations and purchased credits can have different lifecycle rules.",
+      "kind": "docs"
+    },
+    "/docs/billing/credits": {
+      "title": "Purchase AI credits — Webcanbe Docs",
+      "description": "Purchase an AI credit pack only through the available account flow and review its current terms. A configured pack is not evidence that checkout is active in every environment.",
+      "kind": "docs"
+    },
+    "/docs/billing/changes": {
+      "title": "Change or cancel a plan — Webcanbe Docs",
+      "description": "Use the subscription-management actions actually offered by the account UI. Review their effect before confirming a plan change or cancellation.",
+      "kind": "docs"
+    },
+    "/docs/billing/orders": {
+      "title": "Report a billing discrepancy — Webcanbe Docs",
+      "description": "Give Billing Help a specific transaction reference and the state you expected. Separate a marketplace purchase, subscription and AI usage request so the right record can be investigated.",
+      "kind": "docs"
+    },
+    "/docs/billing/limits": {
+      "title": "When a plan limit blocks an action — Webcanbe Docs",
+      "description": "A limit message should identify the operation your current account cannot perform. Distinguish active-project capacity, AI balance and concurrent-request limits before choosing a remedy.",
+      "kind": "docs"
+    },
+    "/docs/security": {
+      "title": "Security overview — Webcanbe Docs",
+      "description": "Webcanbe separates public discovery from authenticated source operations and runs project previews through controlled boundaries. Use the supported account and editing flows rather than sharing credentials or replaying private requests.",
+      "kind": "docs"
+    },
+    "/docs/security/runtime-isolation": {
+      "title": "Preview isolation and source admission — Webcanbe Docs",
+      "description": "Project source is untrusted input to the editor and preview system. Uploaded configuration, scripts and dependencies are not automatically granted authority to execute inside the editor process.",
+      "kind": "docs"
+    },
+    "/docs/security/secrets": {
+      "title": "Keep credentials out of source — Webcanbe Docs",
+      "description": "Do not put credentials in marketplace submissions, browser-bundled source, AI prompts or support reports. A secret exposed in a file remains compromised even after the visible text is removed.",
+      "kind": "docs"
+    },
+    "/docs/security/privacy": {
+      "title": "Privacy and account data — Webcanbe Docs",
+      "description": "Use the Privacy Policy to understand Webcanbe’s published data practices and the Privacy Requests route for account-specific questions. Keep private source and sensitive identifiers out of public reports.",
+      "kind": "docs"
+    },
+    "/docs/security/disclosure": {
+      "title": "Report a security issue — Webcanbe Docs",
+      "description": "Report suspected security vulnerabilities privately through /contact/security. Provide enough information to reproduce the issue safely without accessing another person’s data.",
+      "kind": "docs"
+    },
+    "/docs/security/support-data": {
+      "title": "What to include in support requests — Webcanbe Docs",
+      "description": "Send the minimum context needed to investigate your issue. Safe references and a clear sequence are usually more useful than a full source archive or raw browser storage.",
+      "kind": "docs"
+    },
+    "/docs/troubleshooting/login": {
+      "title": "Troubleshoot sign-in — Webcanbe Docs",
+      "description": "Identify where sign-in fails: choosing a provider, completing verification, returning to Webcanbe or accessing the intended account. Each stage points to a different next step.",
+      "kind": "docs"
+    },
+    "/docs/troubleshooting/preview": {
+      "title": "Troubleshoot an unavailable preview — Webcanbe Docs",
+      "description": "Check preview connection and compatibility independently of source save state. A failed render does not automatically mean your accepted source was lost.",
+      "kind": "docs"
+    },
+    "/docs/troubleshooting/visual-target": {
+      "title": "Troubleshoot an unavailable visual target — Webcanbe Docs",
+      "description": "A missing visual target can mean disconnected selection, a stale source mapping or a source pattern that is not safely editable. Test those possibilities separately.",
+      "kind": "docs"
+    },
+    "/docs/troubleshooting/contact": {
+      "title": "Choose the right support channel — Webcanbe Docs",
+      "description": "Choose a support channel by the operation that needs help. Distinct categories make it easier to provide relevant context without exposing unnecessary account or source data.",
+      "kind": "docs"
+    },
+    "/legal/terms": {
+      "title": "Terms of Service — Webcanbe",
+      "description": "Effective September 18, 2026. These Terms govern access to and use of Webcanbe.",
+      "kind": "information"
+    },
+    "/legal/privacy": {
+      "title": "Privacy Policy — Webcanbe",
+      "description": "Effective September 19, 2026. This policy explains how Webcanbe handles information when you use the service.",
+      "kind": "information"
+    },
+    "/legal": {
+      "title": "Legal overview — Webcanbe",
+      "description": "Policies and release-specific agreements that govern accounts, source projects and marketplace transactions.",
+      "kind": "information"
+    },
+    "/legal/buyer-license": {
+      "title": "Buyer License — Webcanbe",
+      "description": "Understand which permissions accompany a marketplace release before acquiring, exporting or distributing it.",
+      "kind": "information"
+    },
+    "/legal/creator-distribution": {
+      "title": "Creator Distribution Agreement — Webcanbe",
+      "description": "Review the rights, source and commercial terms required to distribute a project through Webcanbe.",
+      "kind": "information"
+    },
+    "/legal/refunds": {
+      "title": "Refund Policy — Webcanbe",
+      "description": "Ask for a transaction-specific review through Billing Help. Eligibility depends on the applicable purchase terms and mandatory consumer protections.",
+      "kind": "information"
+    },
+    "/legal/acceptable-use": {
+      "title": "Acceptable Use — Webcanbe",
+      "description": "Use Webcanbe only for projects and activities you are authorized to undertake.",
+      "kind": "information"
+    },
+    "/legal/licenses": {
+      "title": "Licenses and notices — Webcanbe",
+      "description": "Webcanbe and marketplace projects use software and assets with their own license obligations.",
+      "kind": "information"
+    },
+    "/legal/privacy-requests": {
+      "title": "Privacy Requests — Webcanbe",
+      "description": "Contact Webcanbe about access, correction, deletion or other applicable rights relating to your personal information.",
+      "kind": "information"
+    },
+    "/about": {
+      "title": "About Webcanbe — Webcanbe",
+      "description": "Webcanbe is a source-first web project marketplace for people who want a useful starting point and real code they can keep.",
+      "kind": "information"
+    },
+    "/updates": {
+      "title": "Product updates — Webcanbe",
+      "description": "Follow the public product and its source. Read the changelog for current changes and use documentation for supported workflows.",
+      "kind": "information"
+    },
+    "/changelog": {
+      "title": "Changelog — Webcanbe",
+      "description": "Changes to the public Webcanbe experience. These notes describe this interface without inventing release dates or implying that account features are enabled for everyone.",
+      "kind": "information"
+    },
+    "/contact": {
+      "title": "Contact Webcanbe — Webcanbe",
+      "description": "Choose the channel that fits your question. Each prepares a categorized email to hello@webcanbe.com with relevant, reviewable context.",
+      "kind": "information"
+    },
+    "/brand": {
+      "title": "Webcanbe brand assets — Webcanbe",
+      "description": "Use the Webcanbe name and supplied marks consistently when referring to the product.",
+      "kind": "information"
+    },
+    "/contact/support": {
+      "title": "General Support — Webcanbe",
+      "description": "Get help choosing the right workflow, finding a project or understanding an unexpected product state.",
+      "kind": "support"
+    },
+    "/contact/account": {
+      "title": "Account Help — Webcanbe",
+      "description": "Get help with sign-in, account identity, provider linking or access to an existing account.",
+      "kind": "support"
+    },
+    "/contact/sellers": {
+      "title": "Seller Support — Webcanbe",
+      "description": "Ask about a creator submission, listing, source release, review status or payout record.",
+      "kind": "support"
+    },
+    "/contact/billing": {
+      "title": "Billing Help — Webcanbe",
+      "description": "Resolve questions about orders, missing purchases, subscriptions, AI usage or refund review.",
+      "kind": "support"
+    },
+    "/contact/issues": {
+      "title": "Report an Issue — Webcanbe",
+      "description": "Report a reproducible product error with enough context to help us investigate the right route and build.",
+      "kind": "support"
+    },
+    "/contact/sales": {
+      "title": "Talk to Sales — Webcanbe",
+      "description": "Discuss your intended Webcanbe use, project volume and requirements before choosing a plan or commercial arrangement.",
+      "kind": "support"
+    },
+    "/contact/partnerships": {
+      "title": "Partnerships — Webcanbe",
+      "description": "Propose a concrete collaboration involving projects, education, distribution or an integration.",
+      "kind": "support"
+    },
+    "/contact/security": {
+      "title": "Security Report — Webcanbe",
+      "description": "Privately report a suspected vulnerability or exposure affecting Webcanbe. Use only accounts and projects you control for a minimal reproduction.",
+      "kind": "support"
+    },
+    "/": {
+      "title": "Webcanbe — Build with real source code",
+      "description": "Browse working web projects, create your editable copy, edit visually or in code, keep history, and export the source.",
+      "kind": "home"
+    },
+    "/browse": {
+      "title": "Browse Web Projects — Webcanbe Marketplace",
+      "description": "Discover published web projects. Review releases, previews, licenses and compatibility before creating an editable working copy.",
+      "kind": "marketplace"
+    },
+    "/browse/marketing": {
+      "title": "Marketing websites — Webcanbe Marketplace",
+      "description": "Compare product sites and marketing pages. Inspect sections, responsive navigation and the source used for content before choosing a starting point.",
+      "kind": "marketplace"
+    },
+    "/browse/saas": {
+      "title": "SaaS projects — Webcanbe Marketplace",
+      "description": "Explore software product interfaces. Check which screens and states are included, and which authentication, data or external services you will configure yourself.",
+      "kind": "marketplace"
+    },
+    "/browse/commerce": {
+      "title": "Commerce projects — Webcanbe Marketplace",
+      "description": "Find shopping interfaces and storefront foundations. A commerce category does not provision payments, inventory or a merchant account; review each release’s setup requirements.",
+      "kind": "marketplace"
+    },
+    "/browse/directories": {
+      "title": "Directories — Webcanbe Marketplace",
+      "description": "Browse projects for organizing collections and resources. Inspect search, filters, content structure and how the source expects data to be supplied.",
+      "kind": "marketplace"
+    },
+    "/browse/editorial": {
+      "title": "Editorial / Blog — Webcanbe Marketplace",
+      "description": "Discover publishing layouts for articles, journals and guides. Check content formats, archive pages and any CMS or external publishing requirements.",
+      "kind": "marketplace"
+    },
+    "/browse/portfolio": {
+      "title": "Portfolio / Agency — Webcanbe Marketplace",
+      "description": "Explore projects for presenting a practice, portfolio or team. Check project-detail layouts, image rights and the source definitions shared across case studies.",
+      "kind": "marketplace"
+    },
+    "/browse/dashboards": {
+      "title": "Dashboard / Admin — Webcanbe Marketplace",
+      "description": "Compare application dashboards and administration interfaces. Previewed data and controls do not establish a production backend; inspect the release’s actual integration requirements.",
+      "kind": "marketplace"
+    },
+    "/plans": {
+      "title": "Plans and AI allowances — Webcanbe",
+      "description": "Compare current Webcanbe plans, active-project capacity and AI Action allowances. Review live pricing and checkout availability.",
+      "kind": "plans"
+    }
+  },
+  "aliases": {
+    "/marketplace": "/browse",
+    "/templates": "/browse",
+    "/pricing": "/plans",
+    "/terms": "/legal/terms",
+    "/privacy": "/legal/privacy",
+    "/policy": "/legal/privacy",
+    "/licenses": "/legal/licenses"
+  },
+  "categories": [
+    {
+      "slug": "marketing",
+      "tag": "Marketing"
+    },
+    {
+      "slug": "saas",
+      "tag": "SaaS"
+    },
+    {
+      "slug": "commerce",
+      "tag": "Commerce"
+    },
+    {
+      "slug": "directories",
+      "tag": "Directory"
+    },
+    {
+      "slug": "editorial",
+      "tag": "Editorial"
+    },
+    {
+      "slug": "portfolio",
+      "tag": "Portfolio"
+    },
+    {
+      "slug": "dashboards",
+      "tag": "Dashboard"
+    }
+  ]
+}

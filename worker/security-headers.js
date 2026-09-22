@@ -1,3 +1,4 @@
+import publicManifest from "../src/public/route-manifest.json"
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -41,7 +42,7 @@ const PRIVATE_EXACT = new Set([
   "/auth/complete",
 ])
 
-const PRIVATE_PREFIXES = ["/workspace/", "/checkout/", "/seller/"]
+const PRIVATE_PREFIXES = ["/__webcanbe/", "/__public/", "/_ops/", "/auth/", "/workspace/", "/checkout/", "/seller/"]
 
 const PUBLIC_EXACT = new Set([
   "/",
@@ -76,13 +77,14 @@ const PUBLIC_EXACT = new Set([
 export function isKnownAppPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return false
   if (PUBLIC_EXACT.has(path) || PRIVATE_EXACT.has(path) || path === "/seller") return true
-  if (path === "/docs" || path.startsWith("/docs/")) return true
-  if (path.startsWith("/project/")) return true
+  if (Object.hasOwn(publicManifest.routes,path) || Object.hasOwn(publicManifest.aliases,path)) return true
+  if (/^\/project\/[^/]+(?:\/(?:preview|acquire))?$/.test(path)) return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 
 export function shouldNoIndexPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return true
+  if (/^\/project\/[^/]+\/(preview|acquire)$/.test(path)) return true
   if (PRIVATE_EXACT.has(path) || path === "/seller" || path === "/__wcb_preview_runtime") return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }

@@ -2,8 +2,9 @@ import { Component, Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef,
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
 import { SharedCTA, SharedFooter } from "./public/SharedFooter"
-import { DocsShell } from "./public/DocsShell"
-import { docPages } from "./public/docs-content"
+const DocsShell = lazy(() => import("./public/DocsShell").then(m=>({default:m.DocsShell})))
+import publicManifest from "./public/route-manifest.json"
+const docPages = publicManifest.routes as Record<string,{title:string;description:string}>
 import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -49,6 +50,7 @@ function go(to: string) {
     return
   }
   if (to === current) return
+  if (publicManifest.routes[to as keyof typeof publicManifest.routes] || to.startsWith("/docs/") || to.startsWith("/contact/") || to.startsWith("/legal/")) { window.location.assign(to); return }
   if (routeTimer) window.clearTimeout(routeTimer)
   document.documentElement.classList.add("wcb-route-leaving")
   routeTimer = window.setTimeout(() => {
@@ -1233,9 +1235,10 @@ function routeMetadata(path: string): RouteMetadata {
   if (path === "/docs" || path.startsWith("/docs/")) {
     if(!docPages[path]) return {title:"Page not found — Webcanbe",description:"This documentation page does not exist.",noIndex:true}
     const title = docPages[path].title
-    return { title: title + " — Webcanbe", description: "Webcanbe documentation for source-first projects, editing, compatibility, export, and security.", canonical: path }
+    return { title, description: docPages[path].description, canonical: path }
   }
   if (path.startsWith("/project/")) {
+    if(path.endsWith("/acquire")) return {title:"Acquire project — Webcanbe",description:"Review acquisition for the selected release.",noIndex:true}
     const preview = path.endsWith("/preview")
     return { title: (preview ? "Project preview" : "Project") + " — Webcanbe", description: "Inspect a real source-backed Webcanbe project and its release details.", canonical: path }
   }
@@ -1303,7 +1306,7 @@ export default function App() {
   else if(basePath==="/")page=<Landing/>
   else if(basePath==="/browse"||basePath==="/templates"||basePath==="/marketplace")page=<Browse key={window.location.search}/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage key={basePath} reference={basePath.split("/")[2]||""}/>
-  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/").pop()??""}/>
+  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/")[2]??""}/>
   else if(basePath==="/docs"||basePath.startsWith("/docs/"))page=<Documentation path={basePath}/>
   else if(basePath==="/legal"||basePath.startsWith("/legal/")||basePath.startsWith("/contact/"))page=<PublicInfo path={basePath}/>
   else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
