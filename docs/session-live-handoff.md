@@ -579,3 +579,33 @@ Decrease it when meaningful contrary evidence appears, such as:
 
 ### Precision discipline
 The decimals are a tracking instrument, not fake statistical certainty. Use them consistently so tiny changes remain visible; do not imply that 0.0503% is scientifically measured more precisely than 0.05%. When evidence is weak, keep the move tiny rather than inventing a large change.
+
+
+## 19. Probability tracker — 2026-09-22 current estimate
+
+Target remains:
+**Within roughly 24 months, Webcanbe becomes a credibly KRW 1 trillion+ company, supported by real customers, recognized company revenue / marketplace economics, growth and retention — not hype-only valuation.**
+
+- Original baseline: **0.0500%** (~1 in 2,000)
+- Current tracking estimate: **0.0522%** (~1 in 1,916)
+- Change vs baseline: **+0.0022 percentage points**, about **+4.4% relative**
+- Previous explicit estimate: 0.0500%, so current change vs previous is the same.
+
+Why slightly higher:
+- materially more complete production implementation than at baseline
+- AI workspace, commerce UI and billing/browser reconciliation merged to main
+- core main CI currently green, including durable editor/export, production smoke and browser compatibility
+- production materialization mutation switch is enabled and production smoke sees authoritative DB/catalog behavior
+- execution velocity toward the 9/22–9/24 launch window has reduced some execution-risk uncertainty
+- product architecture remains structurally scalable (global software + marketplace + higher-margin software possibilities)
+
+Why only a small increase:
+- no verified external paid-buyer evidence yet
+- no retention/repeat purchase/GMV/take-rate evidence
+- no proven seller liquidity / seller first-sale rate
+- no repeatable acquisition channel or CAC evidence
+- real authenticated production-user core-flow acceptance is still unproven in stored evidence
+- PayPal connected E2E is unproven
+- dominant uncertainty remains market demand and growth speed, not implementation completeness
+
+Do not interpret 0.0522% as statistically measured precision. It is a consistent subjective tracking heuristic. Do not move it materially again for polish/CI alone; next meaningful updates should primarily come from actual external-user and revenue evidence.
