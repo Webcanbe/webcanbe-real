@@ -10,7 +10,7 @@ describe("Phase 4 landing retention contract", () => {
       "Getting started",
       "Customization",
       "Visual editor",
-      "Working Projects",
+      "Marketplace projects",
       "Questions about ownership",
       "Choose how you want to work",
       "Everything edits the same source.",

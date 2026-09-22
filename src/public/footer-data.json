@@ -1,0 +1,7 @@
+[
+ {"title":"Product","links":[["Marketplace","/browse"],["Visual editor","/docs/visual-editor"],["Code editor","/docs/code-editor"],["History","/docs/history"],["Export source","/docs/export"],["Plans","/plans"]]},
+ {"title":"Marketplace projects","links":[["All projects","/browse"],["Marketing websites","/browse?category=Marketing"],["Editorial & journals","/browse?category=Editorial"],["SaaS projects","/browse?category=SaaS"],["Commerce projects","/browse?category=Commerce"],["Directories","/browse?category=Directory"]]},
+ {"title":"Resources","links":[["Documentation","/docs"],["Getting started","/docs/getting-started"],["Customization","/docs/customization"],["Compatibility","/docs/compatibility"],["Security","/docs/security"],["Changelog","/changelog"]]},
+ {"title":"Contact","links":[["General Support","/contact/support"],["Seller Support","/contact/sellers"],["Talk to Sales","/contact/sales"],["Partnerships","/contact/partnerships"],["Report an issue","/contact/issues"],["Account help","/contact/account"]]},
+ {"title":"Legal","links":[["Legal overview","/legal"],["Terms of Service","/legal/terms"],["Privacy Policy","/legal/privacy"],["Licenses","/legal/licenses"],["Acceptable use","/legal/acceptable-use"],["Privacy requests","/legal/privacy-requests"]]}
+]

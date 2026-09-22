@@ -1,0 +1,38 @@
+[
+  {
+    "category": "Marketing",
+    "title": "Marketing websites",
+    "description": "A clear starting point for your next product or creative practice.",
+    "image": "/wcb-landing/vendor/images/saturn-light-640-cb8f8dd48efc.webp"
+  },
+  {
+    "category": "Editorial",
+    "title": "Editorial & journals",
+    "description": "Give stories, guides, and ideas a considered home.",
+    "image": "/wcb-landing/vendor/images/luna-light-640-30447149423c.webp"
+  },
+  {
+    "category": "SaaS",
+    "title": "SaaS projects",
+    "description": "Explore interfaces built around useful product workflows.",
+    "image": "/wcb-landing/vendor/images/neptune-light-640-2edd00f09476.webp"
+  },
+  {
+    "category": "Commerce",
+    "title": "Commerce projects",
+    "description": "Find a foundation for a thoughtful shopping experience.",
+    "image": "/wcb-landing/vendor/images/pluto-light-640-a9e4bfeb4106.webp"
+  },
+  {
+    "category": "Directory",
+    "title": "Directories",
+    "description": "Bring collections and useful resources together.",
+    "image": "/wcb-landing/vendor/images/calendar-app-light-640-dc4398b60a85.webp"
+  },
+  {
+    "category": "",
+    "title": "All projects",
+    "description": "Explore the full collection of published project releases.",
+    "image": "/wcb-landing/vendor/images/jupiter-light-640-798854269fad.webp"
+  }
+]
