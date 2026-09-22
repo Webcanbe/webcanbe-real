@@ -1402,3 +1402,39 @@ Use external skepticism as energy, not as the decision-maker.
 - Do not argue with family about whether the project is important.
 - Convert the feeling into measurable proof: shipped product, external users, activation, revenue, retention.
 - The strongest answer is not “I told you so”; it is a product that real people choose to use.
+
+
+## 27. First marketing strategy assessment + probability update — 2026-09-23
+
+### First marketing strategy assessment
+Current first customer-acquisition strategy is the always-on **Webcanbe Build League + Founding Prize Vault**:
+- users build/customize/export a real Webcanbe project;
+- publish the finished result externally;
+- Webcanbe tracks/validates the entry and referral path;
+- rewards scale with participation;
+- headline domain rewards (preferred candidates include may.cx / she.cx / way.bz) are milestone accelerants;
+- competition lanes include Most Viewed, Random Builder and Impact/referral;
+- seasons reset while cumulative community progress, gallery and prize-vault progress persist.
+
+Judgment before launch data:
+- This is **more likely to produce initial qualified traffic and UGC than a generic “we launched” post**, because the reward is tied to real product use and external distribution.
+- It is **not yet proven as a durable acquisition engine**.
+- Main risks: no initial distribution seed, excessive qualification friction, domain hunters with weak product intent, the prize overshadowing the product, and weak D7/D14 return after the first build.
+- Treat the first 20–50 qualified participants as the validation cohort. Success means strong signup→materialize→edit/export conversion plus meaningful return/referral behavior, not raw reach alone.
+
+### 24-month KRW 1T tracker
+Target unchanged: within roughly 24 months, Webcanbe becomes a credibly KRW 1T+ company backed by real customers, recognized revenue/marketplace economics, growth and retention.
+
+- Original baseline: **0.0500%**
+- Previous estimate: **0.0522%**
+- Current estimate: **0.0523%**
+- Change vs original: **+0.0023 percentage points**, about **+4.6% relative**
+- Change vs previous: **+0.0001 percentage points**, about **+0.19% relative**
+
+Reason for only a tiny increase:
+- launch/marketing execution system is clearer and more measurable;
+- payment diagnostic merged and overnight launch plan is recorded;
+- no new real external-user traction, revenue, retention, GMV, CAC or referral-loop evidence exists yet;
+- authenticated production core-flow acceptance remains the main launch proof gap in stored evidence.
+
+Do not materially move this estimate again for plans, polish, or internal implementation alone. Next meaningful move should come from actual market data.
