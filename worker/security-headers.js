@@ -1,3 +1,4 @@
+import publicManifest from "../src/public/route-manifest.json"
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -10,7 +11,7 @@ export const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com",
-  "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
+  "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://www.youtube-nocookie.com https://player.vimeo.com",
   "worker-src 'self' blob:",
   "media-src 'self' blob: https:",
   "manifest-src 'self'",
@@ -41,12 +42,25 @@ const PRIVATE_EXACT = new Set([
   "/auth/complete",
 ])
 
-const PRIVATE_PREFIXES = ["/workspace/", "/checkout/", "/seller/"]
+const PRIVATE_PREFIXES = ["/__webcanbe/", "/__public/", "/_ops/", "/auth/", "/workspace/", "/checkout/", "/seller/"]
 
 const PUBLIC_EXACT = new Set([
   "/",
   "/browse",
   "/templates",
+  "/marketplace",
+  "/legal",
+  "/legal/terms",
+  "/legal/privacy",
+  "/legal/licenses",
+  "/legal/acceptable-use",
+  "/legal/privacy-requests",
+  "/contact/support",
+  "/contact/sellers",
+  "/contact/sales",
+  "/contact/partnerships",
+  "/contact/issues",
+  "/contact/account",
   "/changelog",
   "/about",
   "/contact",
@@ -63,13 +77,14 @@ const PUBLIC_EXACT = new Set([
 export function isKnownAppPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return false
   if (PUBLIC_EXACT.has(path) || PRIVATE_EXACT.has(path) || path === "/seller") return true
-  if (path === "/docs" || path.startsWith("/docs/")) return true
-  if (path.startsWith("/project/")) return true
+  if (Object.hasOwn(publicManifest.routes,path) || Object.hasOwn(publicManifest.aliases,path)) return true
+  if (/^\/project\/[^/]+(?:\/(?:preview|acquire))?$/.test(path)) return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 
 export function shouldNoIndexPath(path) {
   if (typeof path !== "string" || !path.startsWith("/")) return true
+  if (/^\/project\/[^/]+\/(preview|acquire)$/.test(path)) return true
   if (PRIVATE_EXACT.has(path) || path === "/seller" || path === "/__wcb_preview_runtime") return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }

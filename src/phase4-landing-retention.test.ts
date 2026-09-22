@@ -8,9 +8,9 @@ describe("Phase 4 landing retention contract", () => {
     for (const kept of [
       "Documentation",
       "Getting started",
-      "Customization",
+      "AI editing",
       "Visual editor",
-      "Working Projects",
+      "Marketplace projects",
       "Questions about ownership",
       "Choose how you want to work",
       "Everything edits the same source.",

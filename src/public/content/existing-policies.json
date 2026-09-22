@@ -1,0 +1,94 @@
+{
+  "/legal/terms": {
+    "title": "Terms of Service",
+    "intro": "Effective September 18, 2026. These Terms govern access to and use of Webcanbe.",
+    "sections": [
+      {
+        "title": "1. The service",
+        "body": "Webcanbe is a source-first web project marketplace and browser workspace. The service may include project browsing, source-backed editing, export, creator tools, deployment integrations, AI-assisted changes, and purchase features as they become available. Pre-release features may change, be limited, or be unavailable."
+      },
+      {
+        "title": "2. Accounts",
+        "body": "You are responsible for activity under your account and for keeping access to your sign-in provider secure. You must provide accurate information when the service asks for it and use Webcanbe only where you are legally permitted to do so."
+      },
+      {
+        "title": "3. Your projects and content",
+        "body": "You retain ownership of source code, files, text, images, and other content you submit to Webcanbe. You grant Webcanbe a limited right to host, process, reproduce, and transmit that content only as needed to operate, secure, troubleshoot, and provide the service you request."
+      },
+      {
+        "title": "4. Marketplace and creator content",
+        "body": "Creators must have the rights needed to publish and license projects they submit. A published project release may be offered under the license and purchase terms shown with that release. Webcanbe does not silently replace the immutable release associated with a completed purchase."
+      },
+      {
+        "title": "5. Payments",
+        "body": "A charge occurs only when a checkout flow explicitly confirms a transaction through the enabled payment provider. Payment, refund, tax, and payout features may be unavailable during pre-release. Additional provider terms may apply when those features are enabled."
+      },
+      {
+        "title": "6. Acceptable use",
+        "body": "Do not use Webcanbe to violate law, infringe intellectual property, distribute malware, attack or probe systems without authorization, bypass access controls, interfere with the service, or upload content you do not have the right to use."
+      },
+      {
+        "title": "7. Availability and changes",
+        "body": "We may change, suspend, or discontinue features as the product develops. We may also restrict access when needed for security, abuse prevention, legal compliance, or maintenance."
+      },
+      {
+        "title": "8. Disclaimers and liability",
+        "body": "To the extent permitted by applicable law, Webcanbe is provided without a guarantee that every feature will be uninterrupted or error-free. Nothing in these Terms excludes rights or liabilities that cannot legally be excluded."
+      },
+      {
+        "title": "9. Contact",
+        "body": "Questions about these Terms can be sent to hello@webcanbe.com."
+      }
+    ]
+  },
+  "/legal/privacy": {
+    "title": "Privacy Policy",
+    "intro": "Effective September 19, 2026. This policy explains how Webcanbe handles information when you use the service.",
+    "sections": [
+      {
+        "title": "1. Account sign-in",
+        "body": "Webcanbe currently supports Google sign-in and Firebase Authentication for GitHub and Email/Password sign-in. Google sign-in requests only the standard OpenID Connect scopes openid, email, and profile and does not request access to Gmail, Google Drive, Google Calendar, or other Google product data. GitHub identity is handled through the GitHub provider configured in Firebase Authentication."
+      },
+      {
+        "title": "2. Passwords, identity tokens, and Webcanbe sessions",
+        "body": "Email/Password credentials are handled by Firebase Authentication; Webcanbe does not send your plaintext password to its Cloudflare Worker. Firebase ID tokens are sent to the Webcanbe backend over HTTPS for verification and exchange into a first-party Webcanbe session. Google ID tokens are verified server-side. Webcanbe's Google sign-in flow does not persist Google access tokens or refresh tokens. First-party hosted sessions use Secure HttpOnly cookies rather than exposing the session token to application JavaScript."
+      },
+      {
+        "title": "3. Account profile information",
+        "body": "Verified identity providers may supply account identifiers and profile information such as email address, verification state, name, and profile picture. Webcanbe may store an internal account profile so your settings and workspace can persist across sessions. Provider email addresses are not treated by themselves as authority to silently merge otherwise separate provider identities."
+      },
+      {
+        "title": "4. Projects and product records",
+        "body": "Depending on the features you use, Webcanbe may process workspace and project source files, revision history, exported or imported project metadata, marketplace listings and releases, purchase or entitlement records when enabled, creator submissions and review state, and settings you choose to save."
+      },
+      {
+        "title": "5. How information is used",
+        "body": "We use information to authenticate users, operate workspaces and product features, preserve project and account state, enforce access controls, secure the service, prevent abuse, diagnose failures, provide support, and comply with legal obligations."
+      },
+      {
+        "title": "6. Infrastructure and service providers",
+        "body": "Webcanbe uses service providers to operate the service. Current infrastructure includes Cloudflare for web delivery and Worker execution, Firebase Authentication for GitHub and Email/Password authentication, and Supabase-hosted PostgreSQL for server-side Webcanbe data. Other providers, such as payment or deployment services, may process information only when the corresponding feature is enabled and used."
+      },
+      {
+        "title": "7. Sharing and advertising",
+        "body": "Webcanbe does not sell personal information or use sign-in data for third-party advertising. Information may be shared with infrastructure, authentication, payment, deployment, or other service providers only as needed to provide the feature you request, or when disclosure is required by law or necessary to protect users and the service."
+      },
+      {
+        "title": "8. Storage and security",
+        "body": "Hosted account and product operations use server-side authorization boundaries, secure transport, same-origin and CSRF checks where applicable, and first-party session controls. Production Webcanbe PostgreSQL tables are intended for server-side access; browser-facing Supabase roles are not granted direct Webcanbe table access."
+      },
+      {
+        "title": "9. Retention and deletion",
+        "body": "We retain information for as long as reasonably needed to provide the service, preserve legitimate project or transaction records, maintain security, and meet legal obligations. You may request deletion of your Webcanbe account or associated personal information by contacting hello@webcanbe.com. Some records may be retained when legally required or necessary to resolve security, fraud, payment, or ownership disputes."
+      },
+      {
+        "title": "10. Your choices",
+        "body": "You can sign out of Webcanbe and manage or revoke provider access through the relevant Google, GitHub, or Firebase-supported account controls. Revoking a provider authorization does not automatically delete information already stored by Webcanbe; use the deletion request process for that."
+      },
+      {
+        "title": "11. Changes and contact",
+        "body": "We may update this policy as Webcanbe adds or changes features. The effective date will be updated when the policy changes materially. Privacy questions and deletion requests can be sent to hello@webcanbe.com."
+      }
+    ]
+  }
+}

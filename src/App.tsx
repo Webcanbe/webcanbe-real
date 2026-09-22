@@ -1,6 +1,10 @@
 import { Component, Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
+import { SharedCTA, SharedFooter } from "./public/SharedFooter"
+const DocsShell = lazy(() => import("./public/DocsShell").then(m=>({default:m.DocsShell})))
+import publicManifest from "./public/route-manifest.json"
+const docPages = publicManifest.routes as Record<string,{title:string;description:string}>
 import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -31,9 +35,9 @@ function hostedProject(listing: HostedListing | HostedListingDetail, index = 0):
 }
 
 function usePath() {
-  const [path, setPath] = useState(window.location.pathname)
-  useEffect(() => { const update = () => setPath(window.location.pathname); window.addEventListener("popstate", update); return () => window.removeEventListener("popstate", update) }, [])
-  return path
+  const [path, setPath] = useState(window.location.pathname + window.location.search)
+  useEffect(() => { const update = () => setPath(window.location.pathname + window.location.search); window.addEventListener("popstate", update); return () => window.removeEventListener("popstate", update) }, [])
+  return path.split("?")[0]
 }
 
 let routeTimer: number | undefined
@@ -46,6 +50,7 @@ function go(to: string) {
     return
   }
   if (to === current) return
+  if (publicManifest.routes[to as keyof typeof publicManifest.routes] || to.startsWith("/docs/") || to.startsWith("/contact/") || to.startsWith("/legal/")) { window.location.assign(to); return }
   if (routeTimer) window.clearTimeout(routeTimer)
   document.documentElement.classList.add("wcb-route-leaving")
   routeTimer = window.setTimeout(() => {
@@ -57,7 +62,7 @@ function go(to: string) {
   }, 120)
 }
 function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
-function Mark() { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src="/favicon.png" alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
+function Mark({publicBrand=false}:{publicBrand?:boolean}={}) { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src={publicBrand?"/brand/webcanbe-mark.svg":"/favicon.png"} alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
 function Arrow() { return <span className="arrow">↗</span> }
 function GoogleBrandMark() {
   return <svg className="auth-provider-brand auth-provider-google" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.482h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.909c1.702-1.567 2.683-3.875 2.683-6.615Z"/><path fill="#34A853" d="M9 18c2.43 0 4.468-.806 5.957-2.18l-2.909-2.258c-.806.54-1.835.859-3.048.859-2.344 0-4.328-1.585-5.037-3.715H.956v2.332A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.963 10.706A5.41 5.41 0 0 1 3.682 9c0-.592.102-1.168.281-1.706V4.962H.956A9 9 0 0 0 0 9c0 1.452.347 2.827.956 4.038l3.007-2.332Z"/><path fill="#EA4335" d="M9 3.579c1.321 0 2.508.454 3.441 1.346l2.581-2.581C13.464.892 11.425 0 9 0A9 9 0 0 0 .956 4.962l3.007 2.332C4.672 5.164 6.656 3.579 9 3.579Z"/></svg>
@@ -74,9 +79,7 @@ function Landing() { return <Home onNavigate={go} /> }
 const publicNav = [["Product", "/docs/visual-editor"], ["Marketplace", "/browse"], ["Learn", "/docs"], ["Resources", "/changelog"]] as const
 
 
-function SiteFooter() {
-  return <footer className="site-footer"><div className="site-footer-grid"><div className="site-footer-brand"><Link to="/" className="brand"><Mark/></Link><p>Edit visually. Leave with real code you own.</p><a href="mailto:hello@webcanbe.com">hello@webcanbe.com</a></div><div><b>Product</b><Link to="/browse">Marketplace</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/export">Export</Link></div><div><b>Learn</b><Link to="/docs">Documentation</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/docs/security">Security</Link><Link to="/changelog">Changelog</Link></div><div><b>Company</b><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/updates">Updates</Link><a href="https://github.com/Webcanbe/webcanbe-real" target="_blank" rel="noreferrer">GitHub</a></div><div><b>Legal</b><Link to="/terms">Terms</Link><Link to="/policy">Privacy</Link><Link to="/licenses">Licenses</Link></div></div><div className="site-footer-bottom"><span>© 2026 Webcanbe</span><span>The source is the product.</span></div></footer>
-}
+function SiteFooter() { return <SharedFooter/> }
 function localSignedIn(){try{return sessionStorage.getItem("wcb-demo-auth")==="1"}catch{return false}}
 async function productionSignedIn(){
   if(await hostedProductClient.authenticated().catch(()=>false))return true
@@ -98,7 +101,7 @@ async function productionSignOut(){
 function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
   const auth=productionAuthMode(), [menu,setMenu]=useState(false), [signedIn,setSignedIn]=useState(auth?false:localSignedIn())
   useEffect(()=>{let current=true;const refresh=()=>{if(!current)return;if(auth)void productionSignedIn().then(v=>{if(current)setSignedIn(v)});else setSignedIn(localSignedIn())};refresh();window.addEventListener("wcb:auth-changed",refresh);return()=>{current=false;window.removeEventListener("wcb:auth-changed",refresh)}},[auth])
-  return <div className="product public-product"><header className="product-header public-header"><Link to="/" className="brand"><Mark/></Link><nav>{publicNav.map(([n,p])=><Link key={p} to={p} className={active===p?"active":""}>{n}</Link>)}</nav><div className="header-actions">{signedIn?<Link to="/settings" className="quiet-link">Account</Link>:<><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" onClick={()=>setMenu(!menu)}>Menu</button></div>{menu&&<div className="mobile-nav">{publicNav.map(([n,p])=><Link key={p} to={p}>{n}</Link>)}{signedIn?<Link to="/settings">Account</Link>:<><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}<SiteFooter/></div>
+  return <div className={"product public-product"+(active==="/docs"?" docs-public-page":"")}><header className="product-header public-header"><Link to="/" className="brand"><Mark publicBrand/></Link><nav>{publicNav.map(([n,p])=><Link key={p} to={p} className={active===p?"active":""}>{n}</Link>)}</nav><div className="header-actions">{signedIn?<Link to="/settings" className="quiet-link">Account</Link>:<><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" aria-expanded={menu} aria-label="Toggle navigation" onClick={()=>setMenu(!menu)}>Menu</button></div>{menu&&<div className="mobile-nav">{publicNav.map(([n,p])=><Link key={p} to={p}>{n}</Link>)}{signedIn?<Link to="/settings">Account</Link>:<><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}<SharedCTA/><SiteFooter/></div>
 }
 function AppShell({ children, active, footer=true }:{children:React.ReactNode;active?:string;footer?:boolean}) {
   const hosted=productReadMode(), auth=productionAuthMode(), [menu,setMenu]=useState(false), [collapsed,setCollapsed]=useState(false), [palette,setPalette]=useState(false), [q,setQ]=useState(""), [notices,setNotices]=useState(false), [sidebarAccount,setSidebarAccount]=useState(false), [topAccount,setTopAccount]=useState(false)
@@ -147,7 +150,7 @@ function Preview({ project, large = false }: { project: Project; large?: boolean
 function ProjectCard({ project }: { project: Project }) { return <article className="project-card"><Link to={`/project/${project.slug}`}><Preview project={project}/></Link><div className="card-meta"><div><Link className="project-title" to={`/project/${project.slug}`}>{project.title}</Link><p>{project.tagline}</p></div><strong>${project.price}</strong></div><div className="stacks">{project.stack.map(x => <span key={x}>{x}</span>)}</div></article> }
 
 function Browse() {
-  const [query,setQuery]=useState(""), [category,setCategory]=useState("All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
+  const [query,setQuery]=useState(""), [category,setCategory]=useState(()=>new URLSearchParams(window.location.search).get("category")||"All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
   const hosted=productReadMode(), [catalog,setCatalog]=useState<Project[]>([]), [catalogMessage,setCatalogMessage]=useState(hosted?"Loading projects…":""), [catalogFailed,setCatalogFailed]=useState(false), [retry,setRetry]=useState(0)
   const categories=["All projects","Marketing","Commerce","SaaS","Editorial","Directory"]
   const local=useMemo(()=>projects.filter(p=>(category==="All projects"||p.category===category)&&(`${p.title} ${p.tagline} ${p.stack.join(" ")}`).toLowerCase().includes(query.toLowerCase())),[query,category])
@@ -211,56 +214,9 @@ function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:st
   const runEmail=async()=>{if(busy)return;setError("");if(!emailStep){if(!email.trim()){setError("Enter your email address.");return}setEmailStep(true);return}if(!password){setError("Enter your password.");return}setBusy(true);try{if(auth){const credential=signup?await createEmailAccountFirebase(email.trim(),password):await signInWithEmailFirebase(email.trim(),password);await establishFirebaseSession(credential);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
   return <div className="auth-demo-layer"><div className="auth-demo-backdrop"/><section ref={dialogRef} className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="wcb-auth-title" aria-busy={busy}><button className="auth-demo-close" aria-label="Close sign-in" onClick={onClose}><X/></button><h1 id="wcb-auth-title">{signup?"Create your Webcanbe account":"Log in to Webcanbe"}</h1><p>Open projects, keep source history, and continue from any workspace.</p><div className="auth-demo-actions"><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGoogle()}><GoogleBrandMark/><span>Continue with Google</span></button><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGithub()}><GitHubBrandMark/><span>Continue with GitHub</span></button><button className="auth-demo-provider" disabled title="Phone sign-in is not connected yet"><Phone/><span>Continue with phone</span></button></div><div className="auth-demo-divider"><span>OR</span></div><input className="auth-demo-email" aria-label={emailStep?"Password":"Email address"} type={emailStep?"password":"email"} placeholder={emailStep?"Password":"Email address"} value={emailStep?password:email} autoComplete={emailStep?(signup?"new-password":"current-password"):"email"} onChange={event=>emailStep?setPassword(event.target.value):setEmail(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void runEmail()}}/><button className="auth-demo-continue" disabled={busy} onClick={()=>void runEmail()}>{busy?<><LoadingSpinner small/><span>Continuing…</span></>:"Continue"}</button>{auth&&<p className="auth-demo-provider-note">Google, GitHub, and email sign-in are available.</p>}{error&&<p className="auth-demo-error" role="alert">{error}</p>}</section></div>
 }
-const docPages: Record<string, { title: string; eyebrow: string; intro: string; sections: { title: string; body: string }[] }> = {
-  "/docs": { title: "Introduction", eyebrow: "Getting Started", intro: "Webcanbe is a source-first marketplace and browser workspace for real web projects.", sections: [
-    { title: "The source is the product", body: "Visual, Code, Split, history, export, and future AI edits stay attached to the same working project source and revision." },
-    { title: "Start from something real", body: "Marketplace listings point to versioned project releases. A purchase can become your own editable working copy without mutating the published release." },
-    { title: "Own the code", body: "Export stays part of the product contract. The project should continue as a normal codebase outside Webcanbe." },
-  ]},
-  "/docs/getting-started": { title: "Getting started", eyebrow: "Getting Started", intro: "Move from marketplace release to editable project without introducing a second source of truth.", sections: [
-    { title: "1. Browse", body: "Open Marketplace and inspect a working project release." },
-    { title: "2. Create a working copy", body: "Your editable copy is created from the immutable release you selected." },
-    { title: "3. Edit", body: "Use Visual, Code, or Split. Changes operate against the same project source." },
-  ]},
-  "/docs/customization": { title: "Customization", eyebrow: "Getting Started", intro: "Change appearance and structure while the project source remains authoritative.", sections: [
-    { title: "Visual edits", body: "Use the visual workspace for layout, spacing, type, and supported style changes." },
-    { title: "Code edits", body: "Open source directly when the visual layer is not the right tool for the change." },
-  ]},
-  "/docs/marketplace": { title: "Marketplace", eyebrow: "Product", intro: "Browse immutable releases of working web projects.", sections: [
-    { title: "Listings", body: "Listings expose bounded public metadata and point to a specific release." },
-    { title: "Release integrity", body: "A published release does not silently change underneath a purchase." },
-  ]},
-  "/docs/visual-editor": { title: "Visual editor", eyebrow: "Workspace", intro: "Edit the interface without replacing the underlying source with a proprietary canvas.", sections: [
-    { title: "Source-backed selection", body: "Visual selections resolve to source-backed targets in the working revision." },
-    { title: "Minimal patches", body: "Visual changes should produce minimal source edits and then reparse the project." },
-  ]},
-  "/docs/code-editor": { title: "Code editor", eyebrow: "Workspace", intro: "Open and edit the actual source in the same workspace.", sections: [
-    { title: "Same project", body: "Code mode is not a generated copy of the visual project. It is the same working source." },
-    { title: "Split mode", body: "Preview and source can stay side by side without introducing another canonical representation." },
-  ]},
-  "/docs/export": { title: "Export", eyebrow: "Ownership", intro: "Leave with the project source you have been editing.", sections: [
-    { title: "Portable by design", body: "The exported project should continue in a normal local development workflow." },
-    { title: "No runtime lock-in", body: "Webcanbe is not meant to remain in the runtime for the exported project to work." },
-  ]},
-  "/docs/compatibility": { title: "Compatibility", eyebrow: "Reference", intro: "Compatibility is explicit instead of being hidden behind conversion.", sections: [
-    { title: "Current focus", body: "React/Vite projects with JSX or TSX, CSS, CSS Modules, inline styles, Flex, Grid, and Tailwind are the main target." },
-    { title: "Separate dimensions", body: "Runtime support, visual editability, verification, security admission, export, and hosted readiness are tracked separately." },
-  ]},
-  "/docs/security": { title: "Security", eyebrow: "Reference", intro: "Uploaded projects and hosted operations stay behind explicit authority boundaries.", sections: [
-    { title: "Admission", body: "Uploaded package scripts, plugins, lifecycle hooks, and arbitrary installs are not executed during admission." },
-    { title: "Authority", body: "Session, project, revision, and privileged operation boundaries are enforced server-side." },
-  ]},
-}
-
-const docsNav = [
-  ["Getting Started", [["Introduction","/docs"],["Getting started","/docs/getting-started"],["Customization","/docs/customization"]]],
-  ["Product", [["Marketplace","/docs/marketplace"],["Visual editor","/docs/visual-editor"],["Code editor","/docs/code-editor"],["Export","/docs/export"]]],
-  ["Reference", [["Compatibility","/docs/compatibility"],["Security","/docs/security"],["Changelog","/changelog"]]],
-] as const
-
-function Documentation({path}:{path:string}){const page=docPages[path]??docPages["/docs"];return <PublicShell active="/docs"><main className="docs-page"><div className="docs-layout"><aside className="docs-sidebar">{docsNav.map(([g,items])=><section key={g}><h3>{g}</h3>{items.map(([l,h])=><Link key={h} to={h} className={path===h?"active":""}>{l}</Link>)}</section>)}</aside><article className="docs-content"><div className="docs-breadcrumb">Docs <span>/</span> {page.eyebrow}</div><h1>{page.title}</h1><p className="docs-lead">{page.intro}</p>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <section id={id} key={sec.title}><h2>{sec.title}</h2><p>{sec.body}</p></section>})}</article><aside className="docs-toc"><span>On this page</span>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <a key={sec.title} href={"#"+id}>{sec.title}</a>})}</aside></div></main></PublicShell>}
+function Documentation({path}:{path:string}) { return docPages[path] ? <PublicShell active="/docs"><DocsShell path={path}/></PublicShell> : <NotFound path={path}/> }
 const infoPages: Record<string, { eyebrow: string; title: string; intro: string; items: { title: string; body: string }[] }> = {
-  "/changelog": { eyebrow:"Resources", title:"Changelog", intro:"Product UI and platform changes for Webcanbe.", items:[{title:"Phase 4",body:"Final product UX, landing, auth demo, dashboard shell, documentation, and app-wide UI polish."},{title:"Phase 3",body:"Hosted product domain, marketplace, purchases, Creator Studio, releases, and control surfaces."}] },
+  "/changelog": { eyebrow:"Resources", title:"Changelog", intro:"Product UI and platform changes for Webcanbe.", items:[{title:"Public experience",body:"Marketplace browsing, account sign-in, documentation, and source-first project workflows."},{title:"Phase 3",body:"Hosted product domain, marketplace, purchases, Creator Studio, releases, and control surfaces."}] },
   "/about": { eyebrow:"Company", title:"About Webcanbe", intro:"A source-first way to start from working web projects and keep the code.", items:[{title:"Principle",body:"Do not hide the code. Edit the code visually."},{title:"Ownership",body:"The source remains the product, not a proprietary canvas."}] },
   "/contact": { eyebrow:"Company", title:"Contact", intro:"Questions about Webcanbe, creator publishing, or the product.", items:[{title:"Email",body:"hello@webcanbe.com"},{title:"Repository",body:"github.com/Webcanbe/webcanbe-real"}] },
   "/updates": { eyebrow:"Resources", title:"Updates", intro:"Product changes and release notes.", items:[{title:"Current",body:"Launch closure is in progress: production reads are live, authentication is under final provider smoke, and materialization is staged behind an explicit production gate."}] },
@@ -295,6 +251,17 @@ function InfoPage({ path }: { path: string }) {
   const canonicalPath = path === "/privacy" ? "/policy" : path
   const page = infoPages[canonicalPath] ?? infoPages["/about"]
   return <PublicShell><main className="info-page"><span className="signal">{page.eyebrow}</span><h1>{page.title}</h1><p className="info-lead">{page.intro}</p><section className="info-grid">{page.items.map(item => <article key={item.title}><h2>{item.title}</h2><p>{item.body}</p></article>)}</section></main></PublicShell>
+}
+
+const contactTopics: Record<string,string> = {support:"General Support",sellers:"Seller Support",sales:"Talk to Sales",partnerships:"Partnerships",issues:"Report an issue",account:"Account help"}
+function PublicInfo({path}:{path:string}) {
+  const legalAliases:Record<string,string>={"/legal/terms":"/terms","/legal/privacy":"/policy","/legal/licenses":"/licenses"}
+  if(legalAliases[path])return <InfoPage path={legalAliases[path]}/>
+  const topic=contactTopics[path.split("/")[2]]
+  if(path.startsWith("/contact/")&&topic)return <PublicShell><main className="info-page"><span className="signal">Contact</span><h1>{topic}</h1><p className="info-lead">Tell us what you need help with. Include the project link and relevant steps when reporting an issue. Never include passwords or access tokens.</p><a className="wcb-public-button" href={"mailto:hello@webcanbe.com?subject="+encodeURIComponent("Webcanbe — "+topic)}>Email {topic.toLowerCase()}</a><p className="contact-note">hello@webcanbe.com</p><a href="/docs">Explore the documentation</a></main></PublicShell>
+  if(path==="/legal")return <PublicShell><main className="info-page"><span className="signal">Legal</span><h1>Clear terms. Real ownership.</h1><p className="info-lead">Read how Webcanbe handles your account, projects, and information.</p><div className="legal-links">{[["Terms of Service","terms"],["Privacy Policy","privacy"],["Licenses","licenses"],["Acceptable use","acceptable-use"],["Privacy requests","privacy-requests"]].map(([name,slug])=><a key={slug} href={"/legal/"+slug}>{name}<ChevronRight/></a>)}</div></main></PublicShell>
+  if(path==="/legal/acceptable-use"||path==="/legal/privacy-requests")return <PublicShell><main className="info-page"><span className="signal">Legal</span><h1>{path.endsWith("acceptable-use")?"Acceptable use":"Privacy requests"}</h1><p className="info-lead">{path.endsWith("acceptable-use")?infoPages["/terms"].items[5].body:infoPages["/policy"].items[8].body}</p><a href={path.endsWith("acceptable-use")?"/legal/terms":"/legal/privacy"}>Read the full policy</a><p><a href="mailto:hello@webcanbe.com?subject=Privacy%20or%20policy%20question">Contact Webcanbe</a></p></main></PublicShell>
+  return <NotFound path={path}/>
 }
 
 function AuthComplete() {
@@ -1260,11 +1227,18 @@ function routeMetadata(path: string): RouteMetadata {
     "/privacy": { title: "Privacy Policy — Webcanbe", description: "How Webcanbe handles account and product data.", canonical: "/policy" },
   }
   if (exact[path]) return exact[path]
+  if(path==="/marketplace") return {...exact["/browse"]}
+  const legalMetadata:Record<string,string>={"/legal/terms":"/terms","/legal/privacy":"/policy","/legal/licenses":"/licenses"}
+  if(legalMetadata[path]) return {...exact[legalMetadata[path]]}
+  if(["/legal","/legal/acceptable-use","/legal/privacy-requests"].includes(path))return {title:"Legal — Webcanbe",description:"Webcanbe policies, acceptable use, and privacy requests.",canonical:path}
+  if(path.startsWith("/contact/")&&contactTopics[path.split("/")[2]])return {title:contactTopics[path.split("/")[2]]+" — Webcanbe",description:"Contact Webcanbe for help with your account, projects, or business.",canonical:path}
   if (path === "/docs" || path.startsWith("/docs/")) {
-    const title = docPages[path]?.title ?? "Documentation"
-    return { title: title + " — Webcanbe", description: "Webcanbe documentation for source-first projects, editing, compatibility, export, and security.", canonical: path }
+    if(!docPages[path]) return {title:"Page not found — Webcanbe",description:"This documentation page does not exist.",noIndex:true}
+    const title = docPages[path].title
+    return { title, description: docPages[path].description, canonical: path }
   }
   if (path.startsWith("/project/")) {
+    if(path.endsWith("/acquire")) return {title:"Acquire project — Webcanbe",description:"Review acquisition for the selected release.",noIndex:true}
     const preview = path.endsWith("/preview")
     return { title: (preview ? "Project preview" : "Project") + " — Webcanbe", description: "Inspect a real source-backed Webcanbe project and its release details.", canonical: path }
   }
@@ -1330,10 +1304,11 @@ export default function App() {
   const basePath=directAuth?"/":path;let page:React.ReactNode
   if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
   else if(basePath==="/")page=<Landing/>
-  else if(basePath==="/browse"||basePath==="/templates")page=<Browse/>
+  else if(basePath==="/browse"||basePath==="/templates"||basePath==="/marketplace")page=<Browse key={window.location.search}/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage key={basePath} reference={basePath.split("/")[2]||""}/>
-  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/").pop()??""}/>
-  else if(basePath.startsWith("/docs"))page=<Documentation path={basePath}/>
+  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/")[2]??""}/>
+  else if(basePath==="/docs"||basePath.startsWith("/docs/"))page=<Documentation path={basePath}/>
+  else if(basePath==="/legal"||basePath.startsWith("/legal/")||basePath.startsWith("/contact/"))page=<PublicInfo path={basePath}/>
   else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
   else if(basePath==="/auth/complete")page=<AuthComplete/>
   else if(basePath===GATE2_AUTH_SMOKE_PATH)page=<Gate2AuthSmoke/>

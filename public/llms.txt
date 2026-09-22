@@ -1,0 +1,21 @@
+# Webcanbe
+
+> Webcanbe is a source-first web project marketplace with visual and code editing. Published releases become separate working copies. Accepted source can be reviewed in History and exported. Compatibility is explicit.
+
+This index is an optional convenience, not a ranking requirement.
+
+- [What is Webcanbe?](https://webcanbe.com/docs/what-is-webcanbe)
+- [All documentation](https://webcanbe.com/docs/index)
+- [Marketplace](https://webcanbe.com/browse)
+- [Getting started](https://webcanbe.com/docs/getting-started)
+- [Visual editor](https://webcanbe.com/docs/visual-editor)
+- [Code and Split](https://webcanbe.com/docs/split-view)
+- [AI editing](https://webcanbe.com/docs/ai-editing)
+- [Export](https://webcanbe.com/docs/export)
+- [Plans](https://webcanbe.com/plans)
+- [Compatibility](https://webcanbe.com/docs/compatibility)
+- [Security](https://webcanbe.com/docs/security)
+- [Creator docs](https://webcanbe.com/docs/creators)
+- [Support](https://webcanbe.com/contact)
+- [Legal](https://webcanbe.com/legal)
+- [Sitemap](https://webcanbe.com/sitemap.xml)

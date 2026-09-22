@@ -7,13 +7,13 @@ const index = fs.readFileSync("index.html", "utf8")
 
 describe("Phase 5 brand pass", () => {
   it("uses the official transparent three-stroke favicon with Webcanbe casing in app chrome", () => {
-    expect(app).toContain('src="/favicon.png"')
+    expect(app).toContain('publicBrand?"/brand/webcanbe-mark.svg":"/favicon.png"')
     expect(app).toContain('<span className="wcb-wordmark">Webcanbe</span>')
     expect(index).toContain('href="/favicon.png"')
   })
 
-  it("does not rewrite the retained landing brand implementation", () => {
-    expect(landing.split("/brand/webcanbe-logo.svg").length - 1).toBeGreaterThanOrEqual(3)
+  it("keeps the landing header and footer on the official brand asset", () => {
+    expect(landing.split("/brand/webcanbe-logo.svg").length - 1).toBeGreaterThanOrEqual(2)
   })
 
   it("keeps the dashboard brand as the official mark plus Webcanbe text", () => {
