@@ -9,15 +9,29 @@ import { PaymentError } from './payments/contracts.js'
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), {status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})
 export const paymentPaths = new Set(['status','orders/create','orders/capture','subscriptions/create','subscriptions/cancel','ai-packs/create','ai-packs/capture'].map(path=>'/__webcanbe/api/payments/'+path))
+const PAYPAL_CORE_KEYS = ['PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_WEBHOOK_ID']
+const PAYPAL_PLAN_KEYS = ['PAYPAL_PLAN_PRO_MONTHLY','PAYPAL_PLAN_PRO_ANNUAL','PAYPAL_PLAN_STUDIO_MONTHLY','PAYPAL_PLAN_STUDIO_ANNUAL']
+const present = value => typeof value === 'string' && value.length > 0
 function paypalConfigured(env) {
-  return env?.WEBCANBE_PAYMENTS === 'enabled' && ['sandbox','live'].includes(env.PAYPAL_ENVIRONMENT) && ['PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_WEBHOOK_ID'].every(key=>typeof env[key] === 'string' && env[key].length > 0)
+  return env?.WEBCANBE_PAYMENTS === 'enabled' && ['sandbox','live'].includes(env.PAYPAL_ENVIRONMENT) && PAYPAL_CORE_KEYS.every(key=>present(env?.[key]))
 }
 export function paymentConfigured(env) {
-  return paypalConfigured(env) && ['PAYPAL_PLAN_PRO_MONTHLY','PAYPAL_PLAN_PRO_ANNUAL','PAYPAL_PLAN_STUDIO_MONTHLY','PAYPAL_PLAN_STUDIO_ANNUAL'].every(key=>typeof env[key] === 'string' && env[key].length > 0)
+  return paypalConfigured(env) && PAYPAL_PLAN_KEYS.every(key=>present(env?.[key]))
 }
 export function paymentConfiguration(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
   return json({...publicPaymentConfiguration(), checkoutAvailable:paymentConfigured(env), environment:paymentConfigured(env)?env.PAYPAL_ENVIRONMENT:null})
+}
+export function paymentDiagnostic(request, env) {
+  if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
+  const environment = ['sandbox','live'].includes(env?.PAYPAL_ENVIRONMENT) ? env.PAYPAL_ENVIRONMENT : null
+  return json({
+    WEBCANBE_PAYMENTS: env?.WEBCANBE_PAYMENTS === 'enabled',
+    PAYPAL_ENVIRONMENT_PRESENT: present(env?.PAYPAL_ENVIRONMENT),
+    PAYPAL_ENVIRONMENT_VALUE: environment,
+    ...Object.fromEntries([...PAYPAL_CORE_KEYS,...PAYPAL_PLAN_KEYS].map(key=>[key,present(env?.[key])])),
+    paymentConfigured: paymentConfigured(env),
+  })
 }
 // Caller has already resolved the database session, checked CSRF/origin and bounded JSON.
 export async function privatePayment(request, path, db, session, env) {
