@@ -605,49 +605,49 @@
       "description": "Choose a support channel by the operation that needs help. Distinct categories make it easier to provide relevant context without exposing unnecessary account or source data.",
       "kind": "docs"
     },
+    "/legal": {
+      "title": "Legal Overview — Webcanbe",
+      "description": "Legal Overview review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
+      "kind": "information"
+    },
     "/legal/terms": {
       "title": "Terms of Service — Webcanbe",
-      "description": "Effective September 18, 2026. These Terms govern access to and use of Webcanbe.",
+      "description": "Terms of Service review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/privacy": {
       "title": "Privacy Policy — Webcanbe",
-      "description": "Effective September 19, 2026. This policy explains how Webcanbe handles information when you use the service.",
-      "kind": "information"
-    },
-    "/legal": {
-      "title": "Legal overview — Webcanbe",
-      "description": "Policies and release-specific agreements that govern accounts, source projects and marketplace transactions.",
+      "description": "Privacy Policy review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/buyer-license": {
       "title": "Buyer License — Webcanbe",
-      "description": "Understand which permissions accompany a marketplace release before acquiring, exporting or distributing it.",
+      "description": "Buyer License review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/creator-distribution": {
       "title": "Creator Distribution Agreement — Webcanbe",
-      "description": "Review the rights, source and commercial terms required to distribute a project through Webcanbe.",
+      "description": "Creator Distribution Agreement review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/refunds": {
       "title": "Refund Policy — Webcanbe",
-      "description": "Ask for a transaction-specific review through Billing Help. Eligibility depends on the applicable purchase terms and mandatory consumer protections.",
+      "description": "Refund Policy review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/acceptable-use": {
       "title": "Acceptable Use — Webcanbe",
-      "description": "Use Webcanbe only for projects and activities you are authorized to undertake.",
+      "description": "Acceptable Use review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/licenses": {
-      "title": "Licenses and notices — Webcanbe",
-      "description": "Webcanbe and marketplace projects use software and assets with their own license obligations.",
+      "title": "Licenses — Webcanbe",
+      "description": "Licenses review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/legal/privacy-requests": {
       "title": "Privacy Requests — Webcanbe",
-      "description": "Contact Webcanbe about access, correction, deletion or other applicable rights relating to your personal information.",
+      "description": "Privacy Requests review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
       "kind": "information"
     },
     "/about": {

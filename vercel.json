@@ -527,16 +527,16 @@
       "dest": "/__public/docs/troubleshooting/contact.html"
     },
     {
+      "src": "^/legal/?$",
+      "dest": "/__public/legal.html"
+    },
+    {
       "src": "^/legal/terms/?$",
       "dest": "/__public/legal/terms.html"
     },
     {
       "src": "^/legal/privacy/?$",
       "dest": "/__public/legal/privacy.html"
-    },
-    {
-      "src": "^/legal/?$",
-      "dest": "/__public/legal.html"
     },
     {
       "src": "^/legal/buyer-license/?$",

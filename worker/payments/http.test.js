@@ -44,4 +44,15 @@ describe("payment HTTP contract", () => {
     expect(billing.subscription).toMatchObject({ planKey: "studio_annual", status })
     expect(billing.aiActions.purchased).toBe(100)
   })
+
+  it("preserves paid plan access through a cancelled subscription's recorded period end", async () => {
+    const repo = {
+      currentSubscriptionForUser: async () => ({ subscriptionId: "11111111-1111-4111-8111-111111111111", planKey: "pro_monthly", status: "cancelled", createdAt: "2026-09-01T00:00:00Z", cancelledAt: "2026-09-20T00:00:00Z", currentPeriodEnd: "2026-10-01T00:00:00Z" }),
+      aiActionBalanceForUser: async () => ({ purchased: 0 }),
+    }
+    const before = await handlePrivatePaymentRequest(new Request("https://webcanbe.com/__webcanbe/api/payments/status", { method: "POST" }), "/__webcanbe/api/payments/status", { repo, provider: {}, session: { userId: "buyer" }, env: {}, clock: () => Date.parse("2026-09-23T00:00:00Z") })
+    expect((await before.json()).billing.currentPlanKey).toBe("pro_monthly")
+    const after = await handlePrivatePaymentRequest(new Request("https://webcanbe.com/__webcanbe/api/payments/status", { method: "POST" }), "/__webcanbe/api/payments/status", { repo, provider: {}, session: { userId: "buyer" }, env: {}, clock: () => Date.parse("2026-10-01T00:00:00Z") })
+    expect((await after.json()).billing.currentPlanKey).toBe("free")
+  })
 })
