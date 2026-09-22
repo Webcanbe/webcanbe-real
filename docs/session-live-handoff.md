@@ -1320,3 +1320,39 @@ Order:
 6. start customer acquisition tonight rather than reopening noncritical product polish.
 
 Do not merge or build extra polish merely because time remains. Once the launch gate passes, market learning becomes the highest-value work.
+
+
+## 27. 2026-09-23 overnight execution plan — launch + market entry
+
+User is staying home from school on 2026-09-23 because they feel somewhat unwell and expects to have more time tonight. Treat this as extra execution time, not an excuse for uncontrolled polishing or exhaustion.
+
+### Tonight priority order
+1. **Final UI/UX pass — hard cap: 60 minutes**
+   - only obvious trust/clarity/flow problems
+   - no redesigns, no new feature branches
+   - anything non-blocking goes to backlog
+2. **Real production core-flow acceptance**
+   - login
+   - real project/materialize
+   - Visual edit/save
+   - reload/reopen
+   - Code edit/save
+   - export
+   - independent build
+3. **PostHog launch instrumentation**
+   - minimal funnel events only
+   - no analytics overbuilding
+4. **Public launch surface**
+   - truthful beta messaging
+   - flagship project/demo
+   - support/contact path
+5. **Start customer acquisition immediately**
+   - first launch posts / Build League announcement assets
+   - begin external distribution rather than returning to product polish
+6. **Seller/developer outreach remains separate**
+   - direct targeted outreach can continue after customer-side launch begins
+
+### Discipline
+- After the 60-minute UI/UX cap, do not reopen cosmetic work unless a real user-flow blocker is found.
+- The highest-value outcome tonight is not “more complete code”; it is **Webcanbe being publicly usable and beginning to collect real market evidence**.
+- Because the user feels somewhat unwell, judge continuation by output quality. If quality collapses, stop low-value work rather than forcing hours of bad decisions.
