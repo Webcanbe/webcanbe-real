@@ -652,17 +652,22 @@
     },
     "/about": {
       "title": "About Webcanbe — Webcanbe",
-      "description": "Webcanbe is a source-first web project marketplace for people who want a useful starting point and real code they can keep.",
+      "description": "Webcanbe is a source-first marketplace and workspace for real web projects: discover a usable starting point, make an editable copy, and leave with the code.",
       "kind": "information"
     },
     "/updates": {
       "title": "Product updates — Webcanbe",
-      "description": "Follow the public product and its source. Read the changelog for current changes and use documentation for supported workflows.",
+      "description": "Notes about changes that are present in the Webcanbe product and repository—not planned features or release speculation.",
       "kind": "information"
     },
     "/changelog": {
       "title": "Changelog — Webcanbe",
-      "description": "Changes to the public Webcanbe experience. These notes describe this interface without inventing release dates or implying that account features are enabled for everyone.",
+      "description": "A concise record of shipped repository changes. Entries are based on current project history and avoid claiming unavailable payment or deployment features.",
+      "kind": "information"
+    },
+    "/github": {
+      "title": "Webcanbe on GitHub — Webcanbe",
+      "description": "Webcanbe’s public development presence is the Webcanbe/webcanbe-real repository on GitHub.",
       "kind": "information"
     },
     "/contact": {

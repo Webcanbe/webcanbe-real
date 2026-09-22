@@ -575,6 +575,10 @@
       "dest": "/__public/changelog.html"
     },
     {
+      "src": "^/github/?$",
+      "dest": "/__public/github.html"
+    },
+    {
       "src": "^/contact/?$",
       "dest": "/__public/contact.html"
     },

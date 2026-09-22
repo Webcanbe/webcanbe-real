@@ -250,10 +250,10 @@ const contactTopics: Record<string,{title:string;category:import("./hostedProduc
   payments:{title:"Payment Dispute",category:"payment_dispute"}, payouts:{title:"Payout Issue",category:"payout_issue"},
 }
 function RequestIntake({topic}:{topic:(typeof contactTopics)[string]}) {
-  const [email,setEmail]=useState(""),[subject,setSubject]=useState(""),[description,setDescription]=useState(""),[busy,setBusy]=useState(false),[result,setResult]=useState(""),[error,setError]=useState("")
+  const [email,setEmail]=useState(""),[subject,setSubject]=useState(""),[description,setDescription]=useState(""),[includeContext,setIncludeContext]=useState(false),[busy,setBusy]=useState(false),[result,setResult]=useState(""),[error,setError]=useState("")
   const submit=async(event:React.FormEvent<HTMLFormElement>)=>{
     event.preventDefault();if(busy)return;setBusy(true);setError("");setResult("")
-    const safeContext={currentUrl:window.location.origin+window.location.pathname,appVersion:String(import.meta.env.VITE_APP_VERSION||"web")}
+    const safeContext=includeContext?{currentUrl:window.location.origin+window.location.pathname,appVersion:String(import.meta.env.VITE_APP_VERSION||"web").slice(0,100)}:{}
     try{
       const signedIn=productionAuthMode()&&await productionSignedIn()
       const input={category:topic.category,subject,description,safeContext,...(!signedIn&&email.trim()?{requesterEmail:email.trim()}:{})}
@@ -266,6 +266,7 @@ function RequestIntake({topic}:{topic:(typeof contactTopics)[string]}) {
     <label>Email for replies<input type="email" autoComplete="email" maxLength={320} value={email} onChange={event=>setEmail(event.target.value)}/></label>
     <label>Subject<input required minLength={3} maxLength={160} value={subject} onChange={event=>setSubject(event.target.value)}/></label>
     <label>Description<textarea required minLength={10} maxLength={5000} rows={8} value={description} onChange={event=>setDescription(event.target.value)}/></label>
+    <label className="support-context"><input type="checkbox" checked={includeContext} onChange={event=>setIncludeContext(event.target.checked)}/><span><b>Include safe technical context</b><small>Adds only this page path and the app version. It never includes browser details, your source, or the message you wrote.</small></span></label>
     <p>Do not include passwords, tokens, cookies, payment credentials, private source, or Bigperson factors. Attachments are not supported yet.</p>
     <button className="wcb-public-button" type="submit" disabled={busy}>{busy?"Creating request…":"Create request"}</button>
     {result?<p role="status"><strong>Request created: {result}</strong><br/>Save this reference. Email delivery is not configured or claimed.</p>:null}
@@ -1205,7 +1206,7 @@ export default function App() {
   else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/")[2]??""}/>
   else if(basePath==="/docs"||basePath.startsWith("/docs/"))page=<Documentation path={basePath}/>
   else if(basePath==="/legal"||basePath.startsWith("/legal/")||basePath.startsWith("/contact/"))page=<PublicInfo path={basePath}/>
-  else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
+  else if(["/changelog","/about","/contact","/updates","/github","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
   else if(basePath==="/auth/complete")page=<AuthComplete/>
   else if(basePath===GATE2_AUTH_SMOKE_PATH)page=<Gate2AuthSmoke/>
   else if(basePath.startsWith("/checkout/"))page=<Protected><Checkout/></Protected>
