@@ -32,6 +32,8 @@ function fakeDb(){
     project:{project_id:projectId,workspace_id:workspaceId,name:"Purchased project",revision:baseRevision,files:payload(f.files),history:f.history,source_epoch:1,role:"owner",membership_epoch:1,workspace_epoch:1},
     capability:undefined,
     drafts:undefined,
+    aiGrant:undefined,
+    aiReservations:[],
     began:0,committed:0,rolledBack:0,
   }
   const db={async query(sql,params=[]){
@@ -63,6 +65,29 @@ function fakeDb(){
     }
     if(sql.startsWith("SELECT version,payload FROM wcb_drafts")) return state.drafts?{rows:[state.drafts],rowCount:1}:{rows:[],rowCount:0}
     if(sql.includes("pg_advisory_xact_lock")) return {rows:[{}],rowCount:1}
+    if(sql.startsWith("SELECT * FROM wcb_ai_usage_reservations WHERE user_id=$1 AND idempotency_key=$2")) {
+      const row=state.aiReservations.find(item=>item.user_id===params[0]&&item.idempotency_key===params[1]);return row?{rows:[row],rowCount:1}:{rows:[],rowCount:0}
+    }
+    if(sql.startsWith("SELECT plan_key FROM wcb_subscriptions")||sql.startsWith("SELECT 1 FROM wcb_subscriptions")) return {rows:[],rowCount:0}
+    if(sql.startsWith("INSERT INTO wcb_ai_included_grants")) {
+      state.aiGrant={grant_id:params[0],included_actions:params[3],expires_at:params[4]};return{rows:[],rowCount:1}
+    }
+    if(sql.startsWith("SELECT grant_id,included_actions,expires_at FROM wcb_ai_included_grants")) return state.aiGrant?{rows:[state.aiGrant],rowCount:1}:{rows:[],rowCount:0}
+    if(sql.startsWith("SELECT credit_id,purchased_actions FROM wcb_ai_purchased_credits")) return {rows:[],rowCount:0}
+    if(sql.startsWith("SELECT * FROM wcb_ai_usage_reservations WHERE user_id=$1 AND status IN")) return {rows:state.aiReservations.filter(item=>item.user_id===params[0]&&["reserved","committed"].includes(item.status)),rowCount:state.aiReservations.length}
+    if(sql.startsWith("INSERT INTO wcb_ai_usage_reservations")) {
+      const row={reservation_id:params[0],user_id:params[1],project_id:params[2],idempotency_key:params[3],cost:params[4],expected_revision:params[5],allocations:JSON.parse(params[6]),status:"reserved",outcome:null};state.aiReservations.push(row);return{rows:[row],rowCount:1}
+    }
+    if(sql.startsWith("SELECT user_id FROM wcb_ai_usage_reservations")) {
+      const row=state.aiReservations.find(item=>item.reservation_id===params[0]);return row?{rows:[{user_id:row.user_id}],rowCount:1}:{rows:[],rowCount:0}
+    }
+    if(sql.startsWith("SELECT * FROM wcb_ai_usage_reservations WHERE reservation_id=$1")) {
+      const row=state.aiReservations.find(item=>item.reservation_id===params[0]);return row?{rows:[row],rowCount:1}:{rows:[],rowCount:0}
+    }
+    if(sql.startsWith("SELECT 1\n        FROM jsonb_array_elements")) return {rows:[],rowCount:0}
+    if(sql.startsWith("UPDATE wcb_ai_usage_reservations")) {
+      const row=state.aiReservations.find(item=>item.reservation_id===params[0]);if(!row)return{rows:[],rowCount:0};if(sql.includes("SET outcome=$2::jsonb")){if(row.status!=="reserved")return{rows:[],rowCount:0};row.outcome=JSON.parse(params[1]);return{rows:[row],rowCount:1}}if(row.status==="reserved")row.status=params[1];if(params[1]==="committed"&&params[3])row.outcome=JSON.parse(params[3]);return{rows:[row],rowCount:1}
+    }
     if(sql.startsWith("INSERT INTO wcb_drafts")) {
       state.drafts={version:params[2],payload:JSON.parse(params[3])};return{rows:[],rowCount:1}
     }
@@ -73,6 +98,44 @@ function fakeDb(){
 }
 
 describe("production Worker source editor API",()=>{
+  it.each([['reviewed','original'],['reviewed','accepted'],['direct','original'],['direct','accepted']])("recovers AI settlement endpoint after %s Apply using %s revision",async(flow,revisionChoice)=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const listed=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)
+    const hash=listed.value.files.find(item=>item.file==='src/App.tsx').hash
+    let generations=0,allocations=0,releases=0
+    const env={AI:{run:async()=>{generations++;return {response:JSON.stringify({summary:'Settlement recovery',operations:[{kind:'update',file:'src/App.tsx',expectedHash:hash,content:'export default function App(){return <main>Accepted once</main>}'}]})}}}}
+    const body={...auth,feature:'modify',prompt:'Change heading',mode:'standard',expectedRevision:baseRevision,idempotencyKey:'ai-settlement-recovery'}
+    const query=db.query.bind(db);let failDone=false
+    db.query=async(sql,params=[])=>{
+      if(sql.startsWith('INSERT INTO wcb_ai_usage_reservations'))allocations++
+      if(sql.startsWith('UPDATE wcb_ai_usage_reservations')){
+        if(params[1]==='released')releases++
+        if(failDone && (sql.includes('SET outcome=$2') || params[3] && JSON.parse(params[3]).state==='done'))throw new Error('injected ledger outage after source acceptance')
+      }
+      return query(sql,params)
+    }
+    if(flow==='reviewed')await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,body,env)
+    failDone=true
+    await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...body,apply:true},env)).rejects.toMatchObject({status:503})
+    const acceptedRevision=state.project.revision
+    expect(state.project.history.transactions).toHaveLength(1)
+    expect(state.aiReservations[0].status).toBe(flow==='reviewed'?'committed':'reserved')
+    failDone=false
+    const recovery={...body,apply:true,expectedRevision:revisionChoice==='accepted'?acceptedRevision:baseRevision}
+    for(const attack of [{idempotencyKey:'different-stale-key',expectedRevision:baseRevision},{prompt:'Different request'}, {mode:'deep'}, {capability:'invalid'}]){
+      await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...recovery,...attack},env)).rejects.toBeDefined()
+    }
+    await expect(editorProjectRequest(db,{...session,userId:otherUser},`/__webcanbe/api/projects/${projectId}/ai`,recovery,env)).rejects.toMatchObject({status:403})
+    for(let replay=0;replay<2;replay++)await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,recovery,env)).resolves.toMatchObject({status:200,value:{state:'done',result:{applied:true,revision:acceptedRevision}}})
+    expect(state.project.revision).toBe(acceptedRevision)
+    expect(state.project.history.transactions).toHaveLength(1)
+    expect(state.project.history.transactions[0].producer).toBe('ai')
+    expect({generations,allocations,releases}).toEqual({generations:1,allocations:1,releases:0})
+    expect(state.aiReservations).toHaveLength(1)
+    expect(state.aiReservations[0]).toMatchObject({status:'committed',cost:1,outcome:{state:'done'}})
+  })
   it("keeps source hashing ordered and ignores non-editable files",()=>{
     const f=fixture()
     const a=sourceContentHash(f.files,f.history)
@@ -122,6 +185,49 @@ describe("production Worker source editor API",()=>{
     expect(reopened.value.revision).toBe(saved.value.revision)
     expect(state.committed).toBe(1)
     expect(state.rolledBack).toBe(0)
+  })
+
+  it("reviews then applies AI through canonical source, history, reopen, undo and export",async()=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const original=Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")
+    const hash=(await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)).value.files.find(item=>item.file==="src/App.tsx").hash
+    const changed='export default function App(){return <main>AI accepted</main>}'
+    const env={AI:{run:async()=>({response:JSON.stringify({summary:"Update the main heading",operations:[{kind:"update",file:"src/App.tsx",expectedHash:hash,content:changed}]})})}}
+    const body={...auth,feature:"modify",prompt:"Change the heading",mode:"standard",selection:{file:"src/App.tsx"},expectedRevision:baseRevision,idempotencyKey:"ai-review-apply-1"}
+    const proposed=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,body,env)
+    expect(proposed.value).toMatchObject({state:"ready_to_review",cost:1,result:{applied:false,revision:baseRevision}})
+    expect(Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")).toBe(original)
+    const applied=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...body,apply:true},env)
+    expect(applied.value).toMatchObject({state:"done",result:{applied:true}})
+    const acceptedRevision=applied.value.result.revision
+    const reopened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,{...auth,file:"src/App.tsx"})
+    expect(reopened.value).toMatchObject({source:changed,revision:acceptedRevision})
+    const history=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/history`,auth)
+    expect(history.value.history.transactions.at(-1)).toMatchObject({producer:"ai",editType:"ai",summary:"Update the main heading"})
+    const archive=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/export`,{...auth,expectedRevision:acceptedRevision})
+    expect(Buffer.from(archive.value.archive,"base64").includes(Buffer.from(changed))).toBe(true)
+    const undone=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/undo`,{...auth,expectedRevision:acceptedRevision,idempotencyKey:"undo-ai-accepted-1"})
+    expect(undone.value.transaction.editType).toBe("revert")
+    const afterUndo=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,{...auth,file:"src/App.tsx"})
+    expect(afterUndo.value.source).toBe(original)
+  })
+
+  it("refuses a reviewed AI proposal after a newer Code revision",async()=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const listed=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)
+    const app=listed.value.files.find(item=>item.file==="src/App.tsx"),aiSource='export default function App(){return <main>AI stale</main>}'
+    const env={AI:{run:async()=>({response:JSON.stringify({summary:"Stale proposal",operations:[{kind:"update",file:"src/App.tsx",expectedHash:app.hash,content:aiSource}]})})}}
+    const body={...auth,feature:"modify",prompt:"Change heading",mode:"standard",selection:{file:"src/App.tsx"},expectedRevision:baseRevision,idempotencyKey:"ai-stale-review-1"}
+    await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,body,env)
+    const manual='export default function App(){return <main>Newer Code</main>}'
+    const saved=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/code`,{...auth,expectedRevision:baseRevision,idempotencyKey:"newer-code-before-ai",operations:[{kind:"update",file:"src/App.tsx",expectedHash:app.hash,content:manual}]})
+    await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...body,apply:true},env)).rejects.toMatchObject({status:409})
+    expect(state.project.revision).toBe(saved.value.revision)
+    expect(Buffer.from(state.project.files["src/App.tsx"],"base64").toString("utf8")).toBe(manual)
   })
 
   it("inspects a safe static JSX text target and commits it as a Visual source transaction",async()=>{
