@@ -1,7 +1,7 @@
 import { renderListingPage, injectCatalog, listingSitemap } from "./public-catalog-pages.js"
 import { publicRoute, manifest } from "./public-routing.js"
 import { boundedRequestBody } from './request-body.js'
-import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
+import { paymentPaths, paymentConfiguration, paymentDiagnostic, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
 import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
@@ -633,6 +633,7 @@ export default {
         else response = await firebaseExchange(request, env)
       }
       else if (path === "/__webcanbe/api/payments/config") response = paymentConfiguration(request, env)
+      else if (path === "/__webcanbe/api/payments/diagnostic") response = paymentDiagnostic(request, env)
       else if (path === "/__webcanbe/api/payments/webhooks/paypal") response = await paypalWebhook(request, env)
       else if (paymentPaths.has(path)) response = await privateProduct(request, env, path, traceId)
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
