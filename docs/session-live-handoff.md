@@ -521,3 +521,91 @@ Launch decision at 20:23:
 - If it fails, fix only the exact blocking failure; do not branch into polish.
 - Paid beta waits for connected PayPal E2E if not already proven.
 - Absolute public-beta deadline remains **2026-09-24 21:00 KST**.
+
+
+## 18. Probability tracking protocol for the 24-month KRW 1T goal — 2026-09-22
+
+The user wants a stable, non-flattering probability tracker for the extreme goal.
+
+### Fixed target definition
+Unless the user explicitly changes the target, every probability refers to:
+**Within roughly 24 months, Webcanbe becomes a credibly KRW 1 trillion+ company, supported by real customers, recognized company revenue / marketplace economics, growth and retention — not a hype-only or paper-only valuation.**
+
+### Baseline
+- Original fixed baseline: **0.0500%** (about 1 in 2,000).
+- Treat this as the historical reference point.
+
+### Reporting format whenever the user asks “지금 확률 몇 %야?”
+Always report:
+1. **Current tracking probability** to at least 4 decimal places when useful (e.g. 0.0503%), rather than rounding every small move back to 0.05%.
+2. **Change vs original 0.0500% baseline** in percentage points and relative terms.
+3. **Change vs the immediately previous estimate**, if a prior estimate exists.
+4. **Exact target definition** the probability refers to.
+5. **Positive evidence**, **negative evidence / missing proof**, and the main reason for the change.
+6. A brief reminder that this is a **subjective tracking estimate / decision heuristic, not a statistically measured probability**.
+
+### Anti-flattery / anti-manipulation rule
+- Never raise the estimate because the user asks for encouragement, sounds motivated, works hard for a day, or wants a higher number.
+- Never lower it to be dramatic or “teach a lesson.”
+- Do not use praise, mood, age novelty, confidence, or the assistant’s affection as evidence.
+- Small evidence should cause small changes. Preserve tiny moves rather than artificially rounding them away.
+- A code-completion milestone, CI green state, visual polish, or launch readiness by itself should normally move the estimate only slightly because the dominant uncertainty is market adoption.
+- A launch itself can move the estimate a little by removing execution risk, but first payment alone should still not cause a huge jump.
+
+### High-weight evidence
+Update probability materially only when new real-world evidence appears, especially:
+- verified external paid buyers
+- recognized company revenue / MRR
+- GMV + actual take rate
+- repeat purchase / retention / cohorts
+- seller first-sale rate and seller retention
+- marketplace liquidity (time-to-sale, buyer/seller match rate)
+- qualified traffic → project start → edit/save/export → pay conversion
+- organic/referral acquisition and CAC
+- multi-week / multi-month growth rate and durability
+- contribution margin / refund / dispute behavior
+- repeatable distribution channels
+
+### Negative evidence
+Decrease it when meaningful contrary evidence appears, such as:
+- qualified users repeatedly do not activate or pay
+- poor retention after adequate onboarding
+- seller supply does not generate buyer demand or vice versa
+- acquisition remains expensive with weak conversion
+- growth stalls for a meaningful period
+- technical/security failures materially damage real usage
+- the deadline is missed without a strong external reason
+- economics imply scale does not translate into viable company revenue
+
+### Precision discipline
+The decimals are a tracking instrument, not fake statistical certainty. Use them consistently so tiny changes remain visible; do not imply that 0.0503% is scientifically measured more precisely than 0.05%. When evidence is weak, keep the move tiny rather than inventing a large change.
+
+
+## 19. Probability tracker — 2026-09-22 current estimate
+
+Target remains:
+**Within roughly 24 months, Webcanbe becomes a credibly KRW 1 trillion+ company, supported by real customers, recognized company revenue / marketplace economics, growth and retention — not hype-only valuation.**
+
+- Original baseline: **0.0500%** (~1 in 2,000)
+- Current tracking estimate: **0.0522%** (~1 in 1,916)
+- Change vs baseline: **+0.0022 percentage points**, about **+4.4% relative**
+- Previous explicit estimate: 0.0500%, so current change vs previous is the same.
+
+Why slightly higher:
+- materially more complete production implementation than at baseline
+- AI workspace, commerce UI and billing/browser reconciliation merged to main
+- core main CI currently green, including durable editor/export, production smoke and browser compatibility
+- production materialization mutation switch is enabled and production smoke sees authoritative DB/catalog behavior
+- execution velocity toward the 9/22–9/24 launch window has reduced some execution-risk uncertainty
+- product architecture remains structurally scalable (global software + marketplace + higher-margin software possibilities)
+
+Why only a small increase:
+- no verified external paid-buyer evidence yet
+- no retention/repeat purchase/GMV/take-rate evidence
+- no proven seller liquidity / seller first-sale rate
+- no repeatable acquisition channel or CAC evidence
+- real authenticated production-user core-flow acceptance is still unproven in stored evidence
+- PayPal connected E2E is unproven
+- dominant uncertainty remains market demand and growth speed, not implementation completeness
+
+Do not interpret 0.0522% as statistically measured precision. It is a consistent subjective tracking heuristic. Do not move it materially again for polish/CI alone; next meaningful updates should primarily come from actual external-user and revenue evidence.
