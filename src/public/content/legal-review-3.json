@@ -280,23 +280,15 @@
     "unresolvedFields": [
       "ACTIVE_DATA_DELETION_SCHEDULE",
       "AI_REQUEST_RETENTION_SCHEDULE",
-      "AUTH_STORAGE_NAMES_PURPOSES_LIFETIMES",
       "BACKUP_RETENTION_SCHEDULE",
       "CAMPAIGN_RETENTION_SCHEDULE",
       "CLOUDFLARE_PROCESSING_DETAILS",
-      "CONSENT_STORAGE_DETAILS",
       "EFFECTIVE_DATE",
-      "FIREBASE_STORAGE_CONFIGURATION",
       "GOOGLE_FIREBASE_PROCESSING_DETAILS",
       "OPERATOR_COUNTRY",
       "OPERATOR_LEGAL_NAME",
       "OPERATOR_POSTAL_ADDRESS",
-      "OTHER_ENABLED_PROVIDER_DETAILS",
       "PAYPAL_PROCESSING_DETAILS",
-      "POSTHOG_PROCESSING_DETAILS",
-      "POSTHOG_STORAGE_DETAILS",
-      "PREFERENCE_AND_DRAFT_STORAGE_DETAILS",
-      "PRIVACY_CHOICES_LOCATION",
       "PRIVACY_CONTACT_NAME_OR_ROLE",
       "REPRESENTATIVE_DISCLOSURE",
       "SECURITY_LOG_RETENTION_SCHEDULE",
@@ -454,14 +446,12 @@
           "A.2 Essential and optional technologies Strictly necessary authentication, security, and requested-function storage is used for those purposes. Optional analytics, advertising, cross-site tracking, and third-party media with non- essential storage require consent where applicable. We do not classify an advertising pixel as necessary merely because it helps our business.",
           "The absence of optional trackers may mean no general consent banner is necessary for a particular deployment. That does not remove the need for this notice or for consent if an optional technology is later added. A preference that is essential in one context is not automatically essential in all contexts.",
           "A.3 Video and external embeds When an external video is embedded, we provide a local preview until you choose to load that media and give any required consent. The provider and its receipt of connection data are identified before loading. Written documentation remains available if you decline the video.",
-          "Rejection should be as accessible as acceptance. Essential account functions remain available, although blocking all cookies or local storage through browser settings may prevent authentication or local recovery.",
+          "A.4 Your choices Where optional technologies are present, you can accept or reject them without a preselected choice and later change the choice through the Privacy choices control at the Privacy Policy and Privacy Requests pages, or hello@webcanbe.com; no optional analytics control is shown while optional analytics is disabled. Rejection should be as accessible as acceptance. Essential account functions remain available, although blocking all cookies or local storage through browser settings may prevent authentication or local recovery.",
           "Deleting browser storage can remove preferences or unsynced drafts. Sign out and export important work where appropriate before clearing storage. Server-side account deletion is separate from clearing cookies.",
           "A.5 Referrals and tracking signals We may use an ordinary incoming campaign or referrer indicator to understand how a public page was found where lawful and disclosed. It does not change the content shown to a search bot versus a human. A referral parameter does not authorize device fingerprinting, disclosure of an account to an external AI provider, or creation of an unrelated advertising profile without an appropriate basis.",
           "Where applicable privacy law requires honoring a recognized opt-out signal, we implement it for the covered processing. Do not infer that a “Do Not Track” setting has a universal technical effect across all providers. Contact hello@webcanbe.com for the current inventory or a privacy question."
         ],
-        "pendingFields": [
-          "PRIVACY_CHOICES_LOCATION"
-        ]
+        "pendingFields": []
       },
       {
         "title": "Appendix B. Providers and international processing",
@@ -473,32 +463,29 @@
           "B.2 Google and Firebase Authentication Enabled sign-in methods process provider-specific identifiers, identity/profile information and authentication metadata. Email/password sign-in is handled by Firebase Authentication. Google sign-in alone does not authorize access to Gmail, Drive or Calendar. Applicable service contracts allocate processing roles; Google also handles its own user-account activity.",
           "B.3 Supabase-hosted PostgreSQL The application database stores the account, source, revision, workspace, order, license, AI usage and review records needed by the product. Hosting is processing under the applicable service contract. A database region alone is not a guarantee that every related support or backup operation occurs there.",
           "B.4 PayPal When enabled, PayPal processes checkout, payment authorization, subscriptions, refunds, payment references and its own fraud, verification and compliance records. For its payment and legal functions, PayPal generally acts as an independent controller under the applicable regional arrangement. We do not store full card credentials in our ordinary application records.",
-          "B.5 PostHog PostHog processes the limited analytics events described in Section 11 on our instructions, with any separate provider account duties under its contracts. Only the selected environment is used; we do not claim both U.S. and EU hosting for the same data. Session replay is disabled under this launch policy.",
-          "B.6 Support, email and optional deployment Enabled email-delivery and support services process recipient details, safe account or order references and messages that are necessary to handle the communication. Optional deployment services receive project artifacts only when that specific feature is requested.",
+          "B.5 PostHog PostHog processes the limited analytics events described in Section 11 on our instructions, with any separate provider account duties under its contracts. Only the selected environment is used; we do not claim both U.S. and EU hosting for the same data. Actual contracting entity, selected region/countries, event and identity retention, raw-IP handling, deletion mechanism and transfer safeguards: PostHog is not enabled in the current production configuration because no verified Webcanbe project token and host are supplied. No PostHog analytics events or session replay are transmitted while that configuration remains absent.. Session replay is disabled under this launch policy.",
+          "B.6 Support, email and optional deployment Enabled email-delivery and support services process recipient details, safe account or order references and messages that are necessary to handle the communication. Optional deployment services receive project artifacts only when that specific feature is requested. Actual enabled provider names, legal entities, roles, countries, timing/method, retention and safeguards, or an explicit statement that a function is not enabled: No optional third-party deployment provider is enabled in the current production configuration. Support is handled through hello@webcanbe.com. A requested future deployment or email provider must be disclosed here before that function is enabled..",
           "B.7 Your transfer information and safeguards For each overseas recipient, the completed disclosure identifies the recipient and contact route; destination countries; information categories; purpose; timing and method; retention or use period; applicable transfer ground or safeguard; and any refusal choice and consequence. These particulars are supplied before transfer where required. A recognized adequacy arrangement or valid contractual safeguard is used only where it actually covers the recipient and transfer. Required consent is separate from unrelated service acceptance. Ask the privacy contact for the relevant safeguards or an available copy."
         ],
         "pendingFields": [
           "CLOUDFLARE_PROCESSING_DETAILS",
           "GOOGLE_FIREBASE_PROCESSING_DETAILS",
           "SUPABASE_PROCESSING_DETAILS",
-          "PAYPAL_PROCESSING_DETAILS",
-          "POSTHOG_PROCESSING_DETAILS",
-          "OTHER_ENABLED_PROVIDER_DETAILS"
+          "PAYPAL_PROCESSING_DETAILS"
         ]
       },
       {
         "title": "Appendix C. Storage and analytics inventory",
         "paragraphs": [
           "The inventory below must match the version of Webcanbe you use. Core session and requested draft-recovery functions are distinguished from optional analytics; data is not classified as essential solely because it is commercially useful to us.",
+          "First-party sessions and sign-in state: The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier..",
+          "Firebase authentication persistence: Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself..",
+          "Interface preferences and local draft recovery: Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record..",
+          "Consent and privacy choices: The current production configuration does not enable optional analytics and does not set a separate consent-storage identifier. Essential authentication and requested interface storage remain described separately in this inventory..",
+          "PostHog optional analytics storage and expiry: No PostHog cookie or local-storage identifier is created by the current production configuration. Session replay is disabled in code and analytics initialization fails closed unless both a verified HTTPS host and project token are configured..",
           "Clearing local storage can remove unsynced drafts or require sign-in again; it is different from a server-side deletion request. Optional collection follows the choices described above and applicable law. A browser opt-out signal is honored for processing to which the applicable law gives that signal effect; this is not a representation that every browser “Do Not Track” setting controls every external service."
         ],
-        "pendingFields": [
-          "AUTH_STORAGE_NAMES_PURPOSES_LIFETIMES",
-          "FIREBASE_STORAGE_CONFIGURATION",
-          "PREFERENCE_AND_DRAFT_STORAGE_DETAILS",
-          "CONSENT_STORAGE_DETAILS",
-          "POSTHOG_STORAGE_DETAILS"
-        ]
+        "pendingFields": []
       }
     ]
   },
@@ -900,7 +887,6 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "DMCA_AGENT_OR_GENERAL_REPORTING_STATUS",
       "EFFECTIVE_DATE",
       "THIRD_PARTY_NOTICES_URL"
     ],
@@ -944,7 +930,7 @@
         "title": "Appendix A. Copyright and intellectual-property reports",
         "paragraphs": [
           "A.1 Reporting a concern Send a rights report to hello@webcanbe.com with the subject “Copyright / IP report.” Identify the rightsholder or authorized representative, the work or right concerned, the exact Webcanbe URL and release if known, why the use is unauthorized, and contact details for follow-up. A signature, including an appropriate electronic signature, should identify the person making the report. Provide evidence you are entitled to act; do not include unrelated confidential material.",
-          "A formal U.S. DMCA notice should contain: (1) your physical or electronic signature; (2) identification of the copyrighted work, or a representative list where applicable; (3) identification and reasonably sufficient location information for the allegedly infringing material; (4) reasonably sufficient contact information, including address, telephone number and email if available; (5) a good-faith statement that the complained-of use is not authorized by the owner, its agent, or the law; and (6) a statement that the notice is accurate and, under penalty of perjury, that you are authorized to act for the owner of the allegedly infringed exclusive right. The designated-agent information for any applicable registered U.S. Our general IP-report address remains available independently. Providing a reporting address is not a representation that a particular statutory safe harbor applies to every Webcanbe activity.",
+          "A formal U.S. DMCA notice should contain: (1) your physical or electronic signature; (2) identification of the copyrighted work, or a representative list where applicable; (3) identification and reasonably sufficient location information for the allegedly infringing material; (4) reasonably sufficient contact information, including address, telephone number and email if available; (5) a good-faith statement that the complained-of use is not authorized by the owner, its agent, or the law; and (6) a statement that the notice is accurate and, under penalty of perjury, that you are authorized to act for the owner of the allegedly infringed exclusive right. The designated-agent information for any applicable registered U.S. DMCA process is no registered U.S. DMCA designated agent has been verified for this launch; general intellectual-property reports are accepted at hello@webcanbe.com. Our general IP-report address remains available independently. Providing a reporting address is not a representation that a particular statutory safe harbor applies to every Webcanbe activity.",
           "A.2 Assessment and action We may request clarification, restrict the affected listing or download, preserve relevant evidence, and notify the uploader as appropriate. We assess the actual material and license, not merely whether two pages look similar. A report is not automatically proof of infringement. We will avoid disclosing unnecessary personal information, but procedural notices may need to be shared with the affected party or lawful authorities.",
           "We consider valid pre-existing open-source rights and permitted uses. We may remove an apparent unauthorized asset while preserving unrelated lawful work where feasible. Buyers may have remedies for an unlawfully distributed product under the Refund Policy and applicable law.",
           "A.3 Counter-notices and review An affected uploader may provide authorization, licensing evidence, or a reason the identified material is not infringing. Where the U.S. DMCA process applies, a counter-notice must contain your physical or electronic signature; identify the removed or disabled material and where it appeared; state under penalty of perjury your good-faith belief that removal or disabling resulted from mistake or misidentification; and provide your name, address and telephone number. It must also state consent to the jurisdiction of the federal district court for your address, or, if outside the United States, a federal district where the service provider may be found, and acceptance of service of process from the notifying person or that person's agent. We provide the applicable contact and procedural instructions when a notice is received. We do not ask every international complaint to adopt a U.S. court clause unless using that statutory procedure.",
@@ -952,9 +938,7 @@
           "A.4 Repeat abuse and honest reports We may terminate repeat infringers where appropriate and maintain reasonable records to enforce this policy. We also address fraudulent or knowingly misleading reports. This policy does not penalize a good-faith complaint or legitimate disagreement about rights. A takedown does not establish that all withheld earnings are forfeited.",
           "Questions about trademark, impersonation, privacy, or other rights can use the same contact route with the relevant category. Describe the specific legal or contractual concern rather than filing a copyright notice for an unrelated service dispute."
         ],
-        "pendingFields": [
-          "DMCA_AGENT_OR_GENERAL_REPORTING_STATUS"
-        ]
+        "pendingFields": []
       }
     ]
   },

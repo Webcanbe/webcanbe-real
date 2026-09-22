@@ -17,13 +17,30 @@ const sources = [
   ["09.txt", "/legal/privacy-requests", "Privacy Requests"],
 ]
 
+// Verified from the production-bound implementation. These are deployment
+// facts, not legal assumptions: keep operator, contract and retention choices
+// unresolved until the operator supplies or verifies them.
+const verifiedFacts = {
+  AUTH_STORAGE_NAMES_PURPOSES_LIFETIMES: "The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier.",
+  FIREBASE_STORAGE_CONFIGURATION: "Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself.",
+  PREFERENCE_AND_DRAFT_STORAGE_DETAILS: "Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record.",
+  CONSENT_STORAGE_DETAILS: "The current production configuration does not enable optional analytics and does not set a separate consent-storage identifier. Essential authentication and requested interface storage remain described separately in this inventory.",
+  POSTHOG_PROCESSING_DETAILS: "PostHog is not enabled in the current production configuration because no verified Webcanbe project token and host are supplied. No PostHog analytics events or session replay are transmitted while that configuration remains absent.",
+  POSTHOG_STORAGE_DETAILS: "No PostHog cookie or local-storage identifier is created by the current production configuration. Session replay is disabled in code and analytics initialization fails closed unless both a verified HTTPS host and project token are configured.",
+  PRIVACY_CHOICES_LOCATION: "the Privacy Policy and Privacy Requests pages, or hello@webcanbe.com; no optional analytics control is shown while optional analytics is disabled",
+  OTHER_ENABLED_PROVIDER_DETAILS: "No optional third-party deployment provider is enabled in the current production configuration. Support is handled through hello@webcanbe.com. A requested future deployment or email provider must be disclosed here before that function is enabled.",
+  DMCA_AGENT_OR_GENERAL_REPORTING_STATUS: "no registered U.S. DMCA designated agent has been verified for this launch; general intellectual-property reports are accepted at hello@webcanbe.com",
+}
+
+const applyVerifiedFacts = text => text.replace(/\[\[([A-Z0-9_\s]+)\]\]/g, (match, field) => verifiedFacts[field.replace(/\s+/g, "")] ?? match)
+
 const normalizePlaceholder = text => text.replace(/\[\[([A-Z0-9_\s]+)\]\]/g, (_match, field) => `[[${field.replace(/\s+/g, "")}]]`)
 const fieldsIn = text => [...text.matchAll(/\[\[([A-Z0-9_]+)\]\]/g)].map(match => match[1])
 const heading = text => /^(?:\d+\.|Appendix [A-Z]\.)\s+/.test(text)
 const footer = text => /^(?:Legal Overview|Terms of Service|Privacy Policy|Buyer License|Creator Distribution Agreement|Refund Policy|Acceptable Use|Licenses|Privacy Requests)\s+\d+\s*\/\s*\d+$/.test(text)
 
 function cleanLines(raw) {
-  const lines = normalizePlaceholder(raw.replaceAll("\f", "\n")).split(/\r?\n/).map(line => line.trim())
+  const lines = applyVerifiedFacts(normalizePlaceholder(raw.replaceAll("\f", "\n"))).split(/\r?\n/).map(line => line.trim())
   return lines.filter(line => {
     if (!line) return true
     if (/^Webcanbe \/ Legal\s+REVIEW DRAFT/.test(line)) return false
