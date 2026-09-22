@@ -740,3 +740,121 @@ Watch:
 - freebie-abuse / duplicate-account rate
 
 If it creates signups but not core-flow completion, tighten qualification or stop it. If it materially lifts activation and produces share/referral behavior, expand the pool.
+
+
+## 22. Founding Domain Drop v2 — optimized for only 2–3 domains — 2026-09-22
+
+Budget reality: user expects to buy only **2–3 short domains**, so the campaign must maximize activation and repeated publicity per domain.
+
+### Core mechanic: micro-drops, not one giant giveaway
+Recommended structure:
+- **1 domain per cohort of 5 qualified builders**
+- Each cohort has exactly 5 verified qualified entries.
+- One winner is randomly selected from that cohort.
+- Therefore displayed odds are a concrete **1 in 5 (20%)**, rather than an undefined giant lottery.
+- With 2 domains: two cohorts = first 10 qualified builders.
+- With 3 domains: three cohorts = first 15 qualified builders.
+- One real person/account can qualify once; winners cannot re-enter.
+
+This solves the “I probably won’t win” problem better than an uncapped raffle while preserving randomness and fairness.
+
+### Qualification
+An entry is earned only after the real product core flow:
+signup/login → real project/materialize → at least one accepted edit → durable save → export.
+A bare signup does not count.
+No purchase should be required for the launch draw.
+
+### Campaign framing
+Do not lead with “giveaway.”
+Working framing:
+**Founding Domain Drops**
+**3 domains. 15 builders. 1-in-5 odds per drop.**
+
+Core copy:
+**Build something real. Keep the source. Earn a spot in a 5-builder domain drop.**
+Supporting copy:
+**Every five verified beta builders unlock one domain drop. One of those five gets the featured 3-letter domain. Then the next drop opens.**
+
+Use “short 3-letter domain” rather than exaggerated “rare” language unless rarity is objectively supportable.
+
+### Why this is stronger
+- high perceived win probability (20%)
+- visible progress (“3/5 spots filled”)
+- urgency without fake countdowns
+- each domain creates a separate launch moment
+- only 2–3 domains can produce 4–8 social posts / updates
+- reward is tied directly to activation rather than traffic
+- cohort cap limits freebie abuse and acquisition cost
+
+### Reveal strategy
+Do not necessarily expose the entire inventory at once.
+Preferred:
+- announce Drop #1 domain at launch
+- when cohort #1 fills / winner is selected, reveal Drop #2
+- save the most attractive giveaway domain for the final drop if possible
+This creates repeated attention instead of spending all scarcity in one post.
+
+### Guaranteed value for non-winners
+All qualified builders should still receive a low-cost permanent Founding Builder marker/perk so completing the flow never feels wasted.
+Possible low-cost perks:
+- Founding Builder account badge/status
+- priority access to new launch features
+- small AI Actions credit when practical
+- future beta perk
+Do not promise expensive lifetime economics before pricing is proven.
+
+### Public UI
+Campaign module:
+- featured domain
+- “3 / 5 builder spots filled”
+- exact qualification checklist
+- current cohort status
+- previous winner/claimed domain after each drop
+- CTA: **Build & qualify**
+Keep claimed domains visible as social proof.
+
+### Winner selection trust
+For each 5-person cohort:
+- freeze the five qualified entry IDs
+- draw once using a documented random method
+- publish the winner and the completed cohort result
+- do not redraw unless the selected entry is ineligible under pre-published rules
+No purchase requirement; publish short official eligibility/claim/renewal terms before the first random draw.
+
+### Content sequence for 3 domains
+1. teaser: “We saved 3 short domains for the first Webcanbe builders.”
+2. launch: Drop #1 + product demo
+3. progress: “3/5 spots filled”
+4. Drop #1 winner + project/share card
+5. reveal Drop #2
+6. Drop #2 winner
+7. final-domain reveal (strongest domain if strategically appropriate)
+8. final winner + campaign recap / product metrics
+Thus 3 domains create multiple authentic content moments.
+
+### PostHog experiment
+Campaign property: `campaign=founding_domain_drop`.
+Track:
+- domain_drop_view
+- domain_drop_cta_clicked
+- signup_completed
+- materialize_completed
+- first_edit_saved
+- export_completed
+- domain_qualified
+- domain_draw_entered
+- domain_won
+- domain_share_clicked
+
+Primary metrics:
+- campaign visitor → qualified builder
+- signup → qualified builder
+- cost per qualified builder
+- later qualified builder → paid conversion
+- campaign vs non-campaign activation
+Do not judge campaign by raw signups.
+
+### Kill/expand rules
+- If domain traffic signs up but does not edit/export: stop or tighten message/qualification.
+- If 2–3 domain cohorts fill quickly and qualified activation is materially better than ordinary traffic: buy more only then.
+- If campaign attracts mostly domain hunters with no retention/product interest: do not scale even if signup count looks good.
