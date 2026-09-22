@@ -1550,3 +1550,89 @@ Anything non-blocking after the 30-minute cutoff goes to backlog.
 
 Operating principle from this point:
 **Market evidence outranks internal polish.**
+
+
+## 30. 2026-09-23 operating plan — first full business day after launch
+
+Context:
+- Public launch is complete.
+- User plans to go to the hospital around 09:00 KST.
+- Remaining UI/UX + legal integration is capped at 30 minutes total; after that, market work outranks product polish.
+
+### Today — first business execution day
+Before hospital / immediately after return:
+1. finish the 30-minute closure block only;
+2. verify PostHog receives production events;
+3. freeze product-polish backlog.
+
+Business blocks after return:
+- **Launch distribution block:** publish the first strong Webcanbe launch/demo post and distribute to the highest-fit channels.
+- **Build League block:** ship the minimum public campaign surface (rules, prize-vault framing, submission path, referral attribution); manual verification is acceptable initially.
+- **Seller supply block:** start a focused first batch of creator/developer outreach; do not wait for a perfect creator program.
+- **Measurement block:** record visitor → signup → materialize → edit/save → export → purchase; separate internal/test traffic from real external users.
+- **Daily review:** identify one measurable bottleneck and make only the product change that attacks it.
+
+### First 14 days
+Goal: prove real strangers can discover, activate, finish the core flow and show early return/payment behavior.
+Key evidence:
+- first external full-flow completions
+- first genuine paid buyer
+- second independent buyer / first repeat buyer
+- first creator submission / creator revenue signal
+- D1/D7 return
+- channel-by-channel activation
+- Build League UGC and referral-qualified users
+
+### 2–8 weeks
+Goal: find the strongest wedge.
+Measure segment/category/channel conversion and cut weak messages quickly.
+Preserve the large-company goal, not the exact current product shape.
+Potential wedges to test if evidence supports them:
+- source-owned web project marketplace
+- visual + code editing workspace
+- a specific high-pull category
+- creator-led distribution
+- AI/source ownership workflow
+
+### Months 2–6
+Goal: PMF evidence + repeatable acquisition.
+Need meaningful growth in:
+- paid buyers / recognized revenue
+- repeat purchase and retention
+- seller first-sale / seller retention
+- marketplace liquidity
+- organic/referral share
+- CAC and contribution margin
+- multi-week growth durability
+
+### Months 6–12
+Goal: scale the winning loop.
+Increase supply quality, buyer demand and repeat usage; add higher-margin software revenue only where usage proves it (AI, collaboration, deployment, teams, subscriptions).
+Hire only for proven bottlenecks.
+
+### Months 12–24
+Goal: attempt hypergrowth toward the KRW 1T outcome if evidence supports it.
+Double down on the strongest category/channel, deepen network effects and product moat, expand internationally, and consider capital only if it accelerates a proven engine.
+If the current shape cannot compound fast enough, change the shape rather than lower the ambition automatically.
+
+### If Webcanbe reaches ~KRW 1T credibly
+Do not default to selling the company or maximizing salary.
+Evaluate:
+- growth rate and future expected value
+- founder concentration risk and control
+- strategic acquisition offers
+- small founder secondary for personal liquidity
+- taxes / cross-border structure
+- whether Webcanbe remains the best vehicle for the next 10x
+Use independent CFO/strategic finance, M&A counsel/advisor and tax professionals before major liquidity decisions.
+
+### Beyond the 1T milestone
+If growth remains exceptional, continue compounding toward multi-trillion scale rather than treating 1T as the finish line.
+Founder personal-brand strategy only follows genuine business proof:
+- company brand remains product-first and separate;
+- personal media becomes entertainment/personality/IRL-first, with business as one axis rather than “young CEO advice” content;
+- leverage real success for global network, U.S. relocation options, partnerships and long-term new ventures without abandoning the engine prematurely.
+
+### Operating rule
+From launch onward, market evidence outranks internal polish.
+Every week must improve at least one of acquisition, activation, retention, monetization, seller liquidity or trust.
