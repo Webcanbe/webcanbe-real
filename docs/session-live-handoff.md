@@ -1522,3 +1522,31 @@ If the current model cannot plausibly compound fast enough, pivot the product/bu
 10. sustained multi-month compounding growth
 
 The plan is not “finish code, then think about business.” From this point, the company is managed by market evidence.
+
+
+## 29. 2026-09-23 morning transition — product closure → business execution
+
+User confirmed:
+- Public launch is complete.
+- The remaining UI/UX and legal-document cleanup gets a **hard 30-minute cap**.
+- After that cap, Webcanbe moves fully into business execution.
+
+### 30-minute closure rule
+Only finish:
+- obvious launch-facing UI/UX defects or confusing copy;
+- legal footer/page integration needed for a truthful public site;
+- any broken links or missing legal-page wiring;
+- no new features, redesigns, architecture work, or speculative polish.
+
+Anything non-blocking after the 30-minute cutoff goes to backlog.
+
+### Immediate business phase after cutoff
+1. Verify PostHog launch funnel is receiving real events.
+2. Publish / distribute the first customer-acquisition content.
+3. Launch the minimal Build League / Prize Vault campaign surface.
+4. Start separate seller/developer outreach.
+5. Record first real visitor, signup, materialize, edit/save, export, referral and purchase evidence.
+6. Let market data determine the next product work.
+
+Operating principle from this point:
+**Market evidence outranks internal polish.**
