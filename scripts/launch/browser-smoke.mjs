@@ -55,6 +55,9 @@ for (const [browserName, browserType] of browsers) {
             await page.waitForSelector("h1", { state: "attached", timeout: 7_000 }).catch(() => {})
             if (route === "/") await page.locator(".landing-react-host a[href]").first().waitFor({ state: "visible", timeout: 7_000 })
             if (route === "/plans") await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
+            // Settle session/config reads before replacing the document. WebKit
+            // reports cancelled prior-document requests as access-control errors.
+            await page.waitForLoadState("networkidle")
           } catch (error) {
             fail(`${browserName}/${viewportName} ${route} loads`, error instanceof Error ? error.message : String(error))
             continue
@@ -127,11 +130,15 @@ for (const [browserName, browserType] of browsers) {
           if (["/browse", "/login", "/checkout/return?payment=cancelled"].includes(route)) {
             await page.reload({ waitUntil: "domcontentloaded" })
             await page.locator("h1").first().waitFor({ state: "visible" })
+            await page.waitForLoadState("networkidle")
             await page.goto(new URL("/docs/security", origin).href, { waitUntil: "domcontentloaded" })
+            await page.waitForLoadState("networkidle")
             await page.goBack({ waitUntil: "domcontentloaded" })
             await page.locator("h1").first().waitFor({ state: "visible" })
+            await page.waitForLoadState("networkidle")
             assert(`${browserName}/${viewportName} ${route} refresh/back restores route`, page.url() === url, page.url())
             await page.goForward({ waitUntil: "domcontentloaded" })
+            await page.waitForLoadState("networkidle")
             assert(`${browserName}/${viewportName} ${route} forward restores route`, new URL(page.url()).pathname === "/docs/security", page.url())
           }
         }
