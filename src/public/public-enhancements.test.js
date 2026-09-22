@@ -2,16 +2,14 @@ import fs from 'node:fs'
 import {JSDOM} from 'jsdom'
 import {it,expect} from 'vitest'
 const source=fs.readFileSync('public/public-enhancements.js','utf8')
-it('prepares categorized mail with allowlisted account context and no secrets or query strings',async()=>{
+it('creates a persisted categorized case with bounded safe context and no secrets or query strings',async()=>{
  const dom=new JSDOM(fs.readFileSync('.public-site/__public/contact/issues.html','utf8'),{url:'https://webcanbe.com/contact/issues?token=DO_NOT_SHARE',runScripts:'outside-only'}),w=dom.window
- w.fetch=async url=>({ok:true,json:async()=>url.endsWith('/session')?{csrf:'SECRET_CSRF'}:{account:{userId:'account-safe-id',providers:['google'],email:'private@example.com',password:'SECRET_PASSWORD',token:'SECRET_TOKEN'}}})
+ const calls=[];w.fetch=async(url,options={})=>{calls.push({url,options});return {ok:true,json:async()=>url.endsWith('/session')?{csrf:'csrf-value'}:{request:{requestNumber:'WCB-REQ-ABC234'}}}}
  w.eval(source);await new Promise(r=>setTimeout(r,0))
  const d=w.document,form=d.querySelector('form');form.querySelector('[name=subject]').value='Preview issue';form.querySelector('[name=message]').value='The preview failed after opening my project.';form.querySelector('[name=steps]').value='Open the project and connect preview.'
- // A canceled navigation in jsdom is intentional: no email is sent by this test.
  form.dispatchEvent(new w.Event('submit',{cancelable:true,bubbles:true}))
- const href=d.querySelector('[data-support-status] a').href,mail=new URL(href),body=mail.searchParams.get('body')
- expect(mail.pathname).toBe('hello@webcanbe.com');expect(mail.searchParams.get('subject')).toContain('[bug-report]');expect(body).toContain('account-safe-id');expect(body).toContain('google');expect(body).toContain('Open the project and connect preview.');expect(body).not.toMatch(/SECRET_|DO_NOT_SHARE|private@example.com/);expect(body).not.toContain('?token=')
- form.querySelector('[name=context]').checked=false;form.dispatchEvent(new w.Event('submit',{cancelable:true,bubbles:true}));expect(new URL(d.querySelector('[data-support-status] a').href).searchParams.get('body')).not.toContain('account-safe-id');dom.window.close()
+ await new Promise(r=>setTimeout(r,0));const request=calls.find(call=>call.url.endsWith('/requests/create')),body=JSON.parse(request.options.body)
+ expect(request.options.headers['X-WCB-CSRF']).toBe('csrf-value');expect(body.category).toBe('bug_report');expect(body.description).toContain('Open the project and connect preview.');expect(body.safeContext.currentUrl).toBe('https://webcanbe.com/contact/issues');expect(JSON.stringify(body)).not.toMatch(/DO_NOT_SHARE|private@example.com|password|token/i);expect(d.querySelector('[data-support-status]').textContent).toContain('WCB-REQ-ABC234');expect(d.querySelector('a[href^="mailto:"]')).toBeNull();dom.window.close()
 })
 it('search enhancement returns real topic links without injecting query HTML',async()=>{
  const dom=new JSDOM(fs.readFileSync('.public-site/__public/docs/visual-editor.html','utf8'),{url:'https://webcanbe.com/docs/visual-editor',runScripts:'outside-only'}),w=dom.window

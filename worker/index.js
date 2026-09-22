@@ -20,6 +20,10 @@ import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPa
 import { applyPreviewRuntimeHeaders } from "./preview-runtime-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
+import { createRequest, myRequests, myRequest, requestQueue, mutateRequest, RequestCaseError } from "./requests.js"
+import { notifyRequestCreated } from "./request-notifications.js"
+import { databaseCreatorFinance } from "./creator-finance.js"
+import { sellerApplication, applySeller, creatorStudio, updateCreatorListing, createSellerSubmission, CreatorDomainError } from "./creator-domain.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
 const CALLBACK_URI = APP_ORIGIN + "/__webcanbe/auth/callback"
@@ -212,6 +216,27 @@ async function publicCatalog(request, env, path, traceId) {
     if (message.startsWith("Invalid ") || message.includes("too long")) return json({ error: message }, 422)
     safeFailureLog({ event: "public_catalog_database", requestId: traceId, path, status: 503 })
     return json({ error: "Product catalog is temporarily unavailable." }, 503)
+  }
+}
+
+async function publicRequestIntake(request, env, traceId) {
+  if (!requireSameOriginPost(request)) return json({ error: "Request intake refused." }, 403)
+  if (!databaseAvailable(env)) return json({ error: "Request service is not configured." }, 503)
+  let body
+  try { body = await smallJsonBody(request, 8 * 1024) }
+  catch { return json({ error: "Invalid or oversized request." }, 400) }
+  try {
+    return await withHyperdrive(env, async db => {
+      await db.query("BEGIN")
+      let created
+      try { created = await createRequest(db, body); await db.query("COMMIT") }
+      catch (error) { await db.query("ROLLBACK"); throw error }
+      return json({ request: created, notification: await notifyRequestCreated(env, created) }, 201)
+    })
+  } catch (error) {
+    if (error instanceof RequestCaseError) return json({ error: error.message }, error.status)
+    safeFailureLog({ event: "public_request_intake", requestId: traceId, path: "/__webcanbe/api/requests/public/create", status: 503 })
+    return json({ error: "Request intake is temporarily unavailable." }, 503)
   }
 }
 
@@ -426,6 +451,37 @@ async function privateProduct(request, env, path, traceId) {
         const bounded = new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify(body) })
         return privatePayment(bounded, path, db, databaseSession, env)
       }
+      if (path === "/__webcanbe/api/requests/create" || path === "/__webcanbe/api/requests/mine" || path === "/__webcanbe/api/requests/detail") {
+        let body
+        try { body = await smallJsonBody(request, 8 * 1024) } catch { return json({ error: "Invalid or oversized request." }, 400) }
+        try {
+          if (path.endsWith("/create")) {
+            await db.query("BEGIN")
+            let created
+            try { created = await createRequest(db, body, databaseSession); await db.query("COMMIT") }
+            catch (error) { await db.query("ROLLBACK"); throw error }
+            return json({ request: created, notification: await notifyRequestCreated(env, created) }, 201)
+          }
+          if (path.endsWith("/mine")) return json({ requests: await myRequests(db, databaseSession) })
+          return json(await myRequest(db, databaseSession, body))
+        } catch (error) { return error instanceof RequestCaseError ? json({ error: error.message }, error.status) : json({ error: "Request service is temporarily unavailable." }, 503) }
+      }
+      if (path === "/__webcanbe/api/product/seller/applications/get" || path === "/__webcanbe/api/product/seller/applications/apply" || path === "/__webcanbe/api/product/seller/studio/get" || path === "/__webcanbe/api/product/seller/studio/listings/update" || path === "/__webcanbe/api/product/seller/submissions/create" || path === "/__webcanbe/api/product/seller/finance") {
+        let body
+        try { body = await smallJsonBody(request) } catch { return json({ error: "Invalid creator request." }, 400) }
+        try {
+          if (path.endsWith("/applications/get")) { const value = await sellerApplication(db, databaseSession); return value ? json({ application: value }) : json({ error: "Seller application not found." }, 404) }
+          if (path.endsWith("/applications/apply")) { await db.query("BEGIN"); try { const value = await applySeller(db, databaseSession, body); await db.query("COMMIT"); return json({ application: value }, 201) } catch (error) { await db.query("ROLLBACK"); throw error } }
+          if (path.endsWith("/studio/get")) return json({ studio: await creatorStudio(db, databaseSession) })
+          if (path.endsWith("/finance")) { const finance = await databaseCreatorFinance(db, databaseSession); return finance ? json({ finance }) : json({ error: "Approved creator access required." }, 403) }
+          await db.query("BEGIN")
+          try {
+            const value = path.endsWith("/listings/update") ? await updateCreatorListing(db, databaseSession, body) : await createSellerSubmission(db, databaseSession, body)
+            await db.query("COMMIT")
+            return json(path.endsWith("/listings/update") ? { listing: value } : { submission: value }, path.endsWith("/submissions/create") ? 201 : 200)
+          } catch (error) { await db.query("ROLLBACK"); throw error }
+        } catch (error) { return error instanceof CreatorDomainError ? json({ error: error.message }, error.status) : json({ error: "Creator operation is temporarily unavailable." }, 503) }
+      }
       if (path === "/__webcanbe/api/workspaces/create") {
         let body
         try { body = await smallJsonBody(request) } catch { return json({ error: "Invalid workspace request." }, 400) }
@@ -473,6 +529,13 @@ async function privateProduct(request, env, path, traceId) {
         try { body = await smallJsonBody(request) }
         catch { return json({ error: "Invalid privileged request." }, 400) }
         try {
+          if (path === "/__webcanbe/api/ops/requests/queue") return json(await requestQueue(db, databaseSession, body))
+          if (["assign", "status", "priority", "note", "link-action"].some(action => path === "/__webcanbe/api/ops/requests/" + action)) {
+            const action = path.split("/").pop()
+            await db.query("BEGIN")
+            try { const requestCase = await mutateRequest(db, databaseSession, action === "link-action" ? "link" : action, body); await db.query("COMMIT"); return json({ request: requestCase }) }
+            catch (error) { await db.query("ROLLBACK"); throw error }
+          }
           if (path === "/__webcanbe/api/ops/bigperson/register/options") {
             return json(await beginBigpersonRegistration(db, databaseSession, body, env, request))
           }
@@ -542,7 +605,7 @@ async function privateProduct(request, env, path, traceId) {
           }
           return json({ error: "Privileged operation is unavailable." }, 404)
         } catch (error) {
-          return json({ error: error instanceof Error ? error.message : "Privileged operation refused." }, 403)
+          return json({ error: error instanceof Error ? error.message : "Privileged operation refused." }, error instanceof RequestCaseError ? error.status : 403)
         }
       }
       if (path === "/__webcanbe/api/account/identities/link/firebase") {
@@ -634,6 +697,10 @@ export default {
       }
       else if (path === "/__webcanbe/api/payments/config") response = paymentConfiguration(request, env)
       else if (path === "/__webcanbe/api/payments/webhooks/paypal") response = await paypalWebhook(request, env)
+      else if (path === "/__webcanbe/api/requests/public/create") {
+        const key = await anonymousRateKey(request, "requests:public")
+        response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicRequestIntake(request, env, traceId)
+      }
       else if (paymentPaths.has(path)) response = await privateProduct(request, env, path, traceId)
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
       else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
@@ -645,7 +712,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path.startsWith("/__webcanbe/api/requests/") || path.startsWith("/__webcanbe/api/product/seller/") || path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else if (path === "/sitemap-listings.xml") {
         const key=await anonymousRateKey(request,"public:listing-sitemap")
         if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()

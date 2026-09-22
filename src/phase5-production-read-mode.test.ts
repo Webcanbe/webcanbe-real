@@ -5,6 +5,7 @@ const shell = fs.readFileSync("src/app-shell.tsx", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const index = fs.readFileSync("index.html", "utf8")
+const creator = fs.readFileSync("src/creator-shell.tsx", "utf8")
 
 describe("Phase 5 production product mode", () => {
   it("activates production reads plus the bounded materialization mutation seam", () => {
@@ -44,15 +45,14 @@ describe("Phase 5 production product mode", () => {
   })
 
   it("keeps Seller on the full hosted boundary, Checkout on production reads, and Control independently gated", () => {
-    const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     const control = app.slice(app.indexOf("function Control()"), app.indexOf("\nfunction ", app.indexOf("function Control()")+20))
     const checkout = app.slice(app.indexOf("function Checkout()"), app.indexOf("\nfunction ", app.indexOf("function Checkout()")+20))
-    expect(seller).toContain("hostedProductMode()")
+    expect(creator).toContain("productReadMode()")
     expect(checkout).toContain("productReadMode()")
     expect(control).toContain("controlMode()")
     expect(client).toContain("productionControlMode")
     expect(client).toContain("controlMode = () => hostedProductMode() || productionControlMode()")
-    expect(seller).not.toContain("productReadMode()")
+    expect(creator).not.toContain("productMutationMode()")
     expect(control).not.toContain("productReadMode()")
   })
 

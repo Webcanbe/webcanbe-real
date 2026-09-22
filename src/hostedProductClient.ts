@@ -42,6 +42,21 @@ export type CreatorStudioData = Readonly<{
   ready: ReadyQualification[]
 }>
 
+export type RequestCategory = "general_support" | "account_help" | "seller_support" | "billing" | "bug_report" | "sales" | "partnership" | "security_report" | "privacy_request" | "refund_request" | "payment_dispute" | "payout_issue"
+export type RequestStatus = "open" | "triaged" | "in_progress" | "waiting_on_user" | "waiting_internal" | "resolved" | "closed" | "reopened"
+export type RequestPriority = "low" | "normal" | "high" | "urgent"
+export type RequestCase = Readonly<{ requestId: string; requestNumber: string; requesterUserId: string | null; requesterEmail: string | null; category: RequestCategory; subject: string; description: string; status: RequestStatus; priority: RequestPriority; assignedOperatorUserId: string | null; references: Record<string,string|null>; safeContext: Record<string,string>; createdAt: string; updatedAt: string; resolvedAt: string | null }>
+export type RequestEvent = Readonly<{ eventId: string; requestId: string; actorUserId: string | null; actorKind: string; eventType: string; visibility: "requester" | "internal"; data: Record<string,unknown>; createdAt: string }>
+export type CreatorFinance = Readonly<{
+  summary: Readonly<{ grossPaidSalesMinor:number; refundsDisputesMinor:number; netCreatorEarningMinor:number; orderCount:number; currency:"USD" }>
+  balances: Readonly<{ heldMinor:number; pendingMinor:number; availableMinor:number; paidMinor:number; negativeAdjustmentsMinor:number; currency:"USD" }>
+  payoutPolicy: Readonly<{ minimumMinor:number; holdDays:number; windows:number[] }>
+  feeState: Readonly<{ founding:boolean; foundingEligible:boolean; foundingDeadline:string|null; cumulativeGrossMinor:number; foundingCapMinor:number; standardIntroBasisPoints:number; standardBasisPoints:number; latestAppliedBasisPoints:number|null }>
+  orders: Array<Readonly<{ orderId:string; listingId:string; listingTitle:string; grossMinor:number; platformFeeMinor:number; creatorEarningMinor:number; refundMinor:number; currency:string; status:string; createdAt:string; completedAt:string|null; refundedAt:string|null }>>
+  ledger: Array<Readonly<{ entryId:string; orderId:string|null; kind:string; grossMinor:number; platformFeeMinor:number; creatorAmountMinor:number; currency:string; provider:string; providerReference:string; holdUntil:string; state:string; payoutBatchId:string|null; occurredAt:string; paidAt:string|null }>>
+  payouts: Array<Readonly<{ batchId:string; batchKey:string; scheduledFor:string; status:string; providerReference:string|null; createdAt:string; updatedAt:string; paidAt:string|null }>>
+}>
+
 export type ControlData = Readonly<{
   authority: Readonly<{ role: "reviewer" | "admin" | "bigperson"; epoch: number }>
   sellerApplications: Array<Record<string, unknown>>
@@ -268,6 +283,34 @@ export class HostedProductClient {
 
   async createSellerSubmission(sellerApplicationId: string, workspaceId: string, sourceProjectId: string) {
     return (await this.post<{ submission: SellerSubmission }>("/__webcanbe/api/product/seller/submissions/create", { sellerApplicationId, workspaceId, sourceProjectId })).submission
+  }
+
+  async creatorFinance() {
+    return (await this.post<{ finance: CreatorFinance }>("/__webcanbe/api/product/seller/finance", {})).finance
+  }
+
+  async createPublicRequest(input: Record<string,unknown>) {
+    return (await this.publicPost<{ request: RequestCase }>("/__webcanbe/api/requests/public/create", input)).request
+  }
+
+  async createRequest(input: Record<string,unknown>) {
+    return (await this.post<{ request: RequestCase }>("/__webcanbe/api/requests/create", input)).request
+  }
+
+  async myRequests() {
+    return (await this.post<{ requests: RequestCase[] }>("/__webcanbe/api/requests/mine", {})).requests
+  }
+
+  async myRequest(requestId: string) {
+    return await this.post<{ request: RequestCase; events: RequestEvent[] }>("/__webcanbe/api/requests/detail", { requestId })
+  }
+
+  async controlRequestQueue(input: Record<string,unknown> = {}) {
+    return await this.post<{ requests: RequestCase[]; selected: RequestCase|null; events: RequestEvent[]; operators:Array<{userId:string;role:string}> }>("/__webcanbe/api/ops/requests/queue", input)
+  }
+
+  async controlMutateRequest(action: "assign"|"status"|"priority"|"note"|"link-action", input: Record<string,unknown>) {
+    return (await this.post<{ request: RequestCase }>(`/__webcanbe/api/ops/requests/${action}`, input)).request
   }
 
   async registerBigpersonPasskey(password: string) {
