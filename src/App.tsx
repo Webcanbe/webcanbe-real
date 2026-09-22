@@ -1,6 +1,12 @@
 import { Component, Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react"
 import { LayoutDashboard, Store, FolderKanban, ShoppingBag, PanelsTopLeft, BookOpen, Settings2, Settings as SettingsIcon, ChevronDown, ChevronRight, Search, Bell, Phone, X, FileCode2, History, PackageCheck, Sparkles, Plus, CircleHelp, ShieldCheck, ScrollText, LogOut, Command, CheckCircle2, ExternalLink, ListTodo, MessagesSquare, Users, Bug, HelpCircle, ChevronsUpDown, Download, CreditCard, BadgeCheck, UserCircle2 } from "lucide-react"
 import Home from "./Home"
+import { SharedCTA, SharedFooter } from "./public/SharedFooter"
+const DocsShell = lazy(() => import("./public/DocsShell").then(m=>({default:m.DocsShell})))
+import publicManifest from "./public/route-manifest.json"
+const docPages = publicManifest.routes as Record<string,{title:string;description:string}>
+import { ProductShell, OnboardingStrip, Avatar, useAccount, useWorkspaces, CreateWorkspaceDialog } from "./app-shell"
+import { appRoutes, viewForPath, finishAuthIntent, readLocal, writeLocal, workspaceLabel, type DashboardView } from "./shellState"
 import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
@@ -31,9 +37,9 @@ function hostedProject(listing: HostedListing | HostedListingDetail, index = 0):
 }
 
 function usePath() {
-  const [path, setPath] = useState(window.location.pathname)
-  useEffect(() => { const update = () => setPath(window.location.pathname); window.addEventListener("popstate", update); return () => window.removeEventListener("popstate", update) }, [])
-  return path
+  const [path, setPath] = useState(window.location.pathname + window.location.search)
+  useEffect(() => { const update = () => setPath(window.location.pathname + window.location.search); window.addEventListener("popstate", update); return () => window.removeEventListener("popstate", update) }, [])
+  return path.split("?")[0]
 }
 
 let routeTimer: number | undefined
@@ -41,11 +47,12 @@ function go(to: string) {
   const current = window.location.pathname + window.location.search
   if (to.startsWith("/login") || to.startsWith("/signup")) {
     const nextUrl = new URL(to, window.location.origin)
-    const next = authNext(nextUrl.searchParams.get("next") || (current.startsWith("/login") || current.startsWith("/signup") ? "/dashboard" : current))
+    const next = authNext(nextUrl.searchParams.get("next") || "/dashboard")
     window.dispatchEvent(new CustomEvent("wcb:open-auth", { detail: { signup: to.startsWith("/signup"), next } }))
     return
   }
   if (to === current) return
+  if (publicManifest.routes[to as keyof typeof publicManifest.routes] || to.startsWith("/docs/") || to.startsWith("/contact/") || to.startsWith("/legal/")) { window.location.assign(to); return }
   if (routeTimer) window.clearTimeout(routeTimer)
   document.documentElement.classList.add("wcb-route-leaving")
   routeTimer = window.setTimeout(() => {
@@ -57,7 +64,7 @@ function go(to: string) {
   }, 120)
 }
 function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
-function Mark() { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src="/favicon.png" alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
+function Mark({publicBrand=false}:{publicBrand?:boolean}={}) { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src={publicBrand?"/brand/webcanbe-mark.svg":"/favicon.png"} alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
 function Arrow() { return <span className="arrow">↗</span> }
 function GoogleBrandMark() {
   return <svg className="auth-provider-brand auth-provider-google" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.482h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.909c1.702-1.567 2.683-3.875 2.683-6.615Z"/><path fill="#34A853" d="M9 18c2.43 0 4.468-.806 5.957-2.18l-2.909-2.258c-.806.54-1.835.859-3.048.859-2.344 0-4.328-1.585-5.037-3.715H.956v2.332A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.963 10.706A5.41 5.41 0 0 1 3.682 9c0-.592.102-1.168.281-1.706V4.962H.956A9 9 0 0 0 0 9c0 1.452.347 2.827.956 4.038l3.007-2.332Z"/><path fill="#EA4335" d="M9 3.579c1.321 0 2.508.454 3.441 1.346l2.581-2.581C13.464.892 11.425 0 9 0A9 9 0 0 0 .956 4.962l3.007 2.332C4.672 5.164 6.656 3.579 9 3.579Z"/></svg>
@@ -74,9 +81,7 @@ function Landing() { return <Home onNavigate={go} /> }
 const publicNav = [["Product", "/docs/visual-editor"], ["Marketplace", "/browse"], ["Learn", "/docs"], ["Resources", "/changelog"]] as const
 
 
-function SiteFooter() {
-  return <footer className="site-footer"><div className="site-footer-grid"><div className="site-footer-brand"><Link to="/" className="brand"><Mark/></Link><p>Edit visually. Leave with real code you own.</p><a href="mailto:hello@webcanbe.com">hello@webcanbe.com</a></div><div><b>Product</b><Link to="/browse">Marketplace</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/export">Export</Link></div><div><b>Learn</b><Link to="/docs">Documentation</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/docs/security">Security</Link><Link to="/changelog">Changelog</Link></div><div><b>Company</b><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/updates">Updates</Link><a href="https://github.com/Webcanbe/webcanbe-real" target="_blank" rel="noreferrer">GitHub</a></div><div><b>Legal</b><Link to="/terms">Terms</Link><Link to="/policy">Privacy</Link><Link to="/licenses">Licenses</Link></div></div><div className="site-footer-bottom"><span>© 2026 Webcanbe</span><span>The source is the product.</span></div></footer>
-}
+function SiteFooter() { return <SharedFooter/> }
 function localSignedIn(){try{return sessionStorage.getItem("wcb-demo-auth")==="1"}catch{return false}}
 async function productionSignedIn(){
   if(await hostedProductClient.authenticated().catch(()=>false))return true
@@ -98,28 +103,10 @@ async function productionSignOut(){
 function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
   const auth=productionAuthMode(), [menu,setMenu]=useState(false), [signedIn,setSignedIn]=useState(auth?false:localSignedIn())
   useEffect(()=>{let current=true;const refresh=()=>{if(!current)return;if(auth)void productionSignedIn().then(v=>{if(current)setSignedIn(v)});else setSignedIn(localSignedIn())};refresh();window.addEventListener("wcb:auth-changed",refresh);return()=>{current=false;window.removeEventListener("wcb:auth-changed",refresh)}},[auth])
-  return <div className="product public-product"><header className="product-header public-header"><Link to="/" className="brand"><Mark/></Link><nav>{publicNav.map(([n,p])=><Link key={p} to={p} className={active===p?"active":""}>{n}</Link>)}</nav><div className="header-actions">{signedIn?<Link to="/settings" className="quiet-link">Account</Link>:<><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" onClick={()=>setMenu(!menu)}>Menu</button></div>{menu&&<div className="mobile-nav">{publicNav.map(([n,p])=><Link key={p} to={p}>{n}</Link>)}{signedIn?<Link to="/settings">Account</Link>:<><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}<SiteFooter/></div>
+  return <div className={"product public-product"+(active==="/docs"?" docs-public-page":"")}><header className="product-header public-header"><Link to="/" className="brand"><Mark publicBrand/></Link><nav>{publicNav.map(([n,p])=><Link key={p} to={p} className={active===p?"active":""}>{n}</Link>)}</nav><div className="header-actions">{signedIn?<Link to="/settings" className="quiet-link">Account</Link>:<><Link to="/login" className="quiet-link">Log in</Link><Link to="/signup" className="button primary compact">Get started</Link></>}<button className="mobile-menu" aria-expanded={menu} aria-label="Toggle navigation" onClick={()=>setMenu(!menu)}>Menu</button></div>{menu&&<div className="mobile-nav">{publicNav.map(([n,p])=><Link key={p} to={p}>{n}</Link>)}{signedIn?<Link to="/settings">Account</Link>:<><Link to="/login">Log in</Link><Link to="/signup">Get started</Link></>}</div>}</header>{children}<SharedCTA/><SiteFooter/></div>
 }
-function AppShell({ children, active, footer=true }:{children:React.ReactNode;active?:string;footer?:boolean}) {
-  const hosted=productReadMode(), auth=productionAuthMode(), [menu,setMenu]=useState(false), [collapsed,setCollapsed]=useState(false), [palette,setPalette]=useState(false), [q,setQ]=useState(""), [notices,setNotices]=useState(false), [sidebarAccount,setSidebarAccount]=useState(false), [topAccount,setTopAccount]=useState(false)
-  const [workspaces,setWorkspaces]=useState<string[]>(hosted?[]:["Personal workspace"]), [workspace,setWorkspace]=useState("Personal workspace")
-  const activePath=active||window.location.pathname
-  const commands=[["Dashboard","/dashboard","⌘1"],["Marketplace","/browse","⌘2"],["My projects","/projects",""],["Purchases","/purchases",""],["Creator Studio","/seller",""],["Documentation","/docs",""],["Plans","/plans",""],["Settings","/settings","⌘P"]] as const
-  const shown=commands.filter(([label])=>label.toLowerCase().includes(q.toLowerCase()))
-  useEffect(()=>{if(!hosted)return;let current=true;void hostedProductClient.workspaces().then(v=>{if(current){setWorkspaces(v);if(v.length)setWorkspace(w=>v.includes(w)?w:v[0])}}).catch(()=>{if(current)setWorkspaces([])});return()=>{current=false}},[hosted])
-  useEffect(()=>{const h=(e:KeyboardEvent)=>{if(!(e.metaKey||e.ctrlKey)){if(e.key==="Escape"){setPalette(false);setNotices(false);setSidebarAccount(false);setTopAccount(false)}return}const k=e.key.toLowerCase();if(k==="k"){e.preventDefault();setPalette(v=>!v);setQ("")}if(k==="p"){e.preventDefault();go("/settings")}if(k==="1"){e.preventDefault();go("/dashboard")}if(k==="2"){e.preventDefault();go("/browse")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[])
-  const item=(to:string,label:string,Icon:typeof LayoutDashboard)=><Link to={to} className={activePath===to?"active":""}><Icon/><span>{label}</span></Link>
-  const signOut=async()=>{if(auth){await productionSignOut()}else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
-  return <div className={"product app-frame rope-app"+(collapsed?" rope-collapsed":"")+(activePath==="/dashboard"?" dashboard-shell":"")}>
-    <aside className={"app-sidebar rope-sidebar"+(menu?" open":"")}><div className="rope-sidebar-head"><Link to="/dashboard" className="brand app-sidebar-brand"><Mark/><span className="brand-context"><small>Source-first workspace</small></span></Link><button className="rope-collapse" onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expand sidebar":"Collapse sidebar"}><PanelsTopLeft/></button></div>
-      <label className="workspace-switcher"><span>Workspace</span><select value={workspaces.includes(workspace)?workspace:workspaces[0]||""} disabled={!workspaces.length} onChange={e=>setWorkspace(e.target.value)}>{workspaces.length?workspaces.map(v=><option key={v}>{v}</option>):<option>No workspace yet</option>}</select></label>
-      <div className="rope-sidebar-scroll"><div className="rope-nav-group"><span className="rope-nav-label">General</span><nav className="rope-nav-list">{item("/dashboard","Dashboard",LayoutDashboard)}{item("/browse","Marketplace",Store)}</nav></div><details open className="rope-nav-group rope-nav-collapsible"><summary><PanelsTopLeft/><span>Workspace</span><ChevronDown/></summary><div className="rope-subnav">{item("/projects","My projects",FolderKanban)}{item("/purchases","Purchases",ShoppingBag)}</div></details><details open className="rope-nav-group rope-nav-collapsible"><summary><PackageCheck/><span>Creator</span><ChevronDown/></summary><div className="rope-subnav">{item("/seller","Creator Studio",Sparkles)}{item("/seller/projects","Listings",FolderKanban)}{item("/seller/projects/new","New submission",Plus)}</div></details><details open className="rope-nav-group rope-nav-collapsible"><summary><CircleHelp/><span>Other</span><ChevronDown/></summary><div className="rope-subnav">{item("/docs","Documentation",BookOpen)}{item("/plans","Plans",ScrollText)}{item("/settings","Settings",Settings2)}</div></details></div>
-      <div className="app-sidebar-account rope-account"><button onClick={()=>{setSidebarAccount(v=>!v);setTopAccount(false)}}><span className="avatar">WC</span><span><b>Webcanbe account</b><small>Account menu</small></span></button>{sidebarAccount&&<div className="account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button onClick={()=>void signOut()}><LogOut/>Sign out</button></div>}</div>
-    </aside>
-    <div className="app-main rope-main"><header className="rope-topbar"><button className="rope-mobile-trigger" onClick={()=>setMenu(v=>!v)} aria-expanded={menu}>Menu</button><div className="rope-topbar-title"><span>Webcanbe</span><b>{commands.find(([,to])=>to===activePath)?.[0]||"Workspace"}</b></div><div className="rope-topbar-actions"><button className="rope-search" onClick={()=>setPalette(true)}><Search/><span>Search and navigate</span><kbd>⌘K</kbd></button><div className="topbar-popover-wrap"><button className="rope-icon-button" aria-label="Notifications" onClick={()=>{setNotices(v=>!v);setTopAccount(false)}}><Bell/></button>{notices&&<div className="notification-popover"><b>No new notifications</b><p>Account and project alerts will appear here when the hosted backend reports them.</p></div>}</div><div className="topbar-popover-wrap"><button className="rope-user-button" aria-label="Account menu" aria-expanded={topAccount} onClick={()=>{setTopAccount(v=>!v);setNotices(false);setSidebarAccount(false)}}><span className="avatar">WC</span></button>{topAccount&&<div className="top-account-popover"><Link to="/settings">Settings</Link><Link to="/docs">Documentation</Link><button onClick={()=>void signOut()}><LogOut/>Sign out</button></div>}</div></div></header>{children}{footer&&<SiteFooter/>}</div>
-    {menu&&<button className="app-sidebar-scrim" aria-label="Close navigation" onClick={()=>setMenu(false)}/>}
-    {palette&&<div className="command-backdrop" onMouseDown={()=>setPalette(false)}><section className="command-palette" role="dialog" aria-modal="true" onMouseDown={e=>e.stopPropagation()}><div className="command-input"><Search/><input autoFocus value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&shown[0]){setPalette(false);go(shown[0][1])}}} placeholder="Search pages and actions"/><kbd>esc</kbd></div><div className="command-results">{shown.map(([label,to,hint])=><button key={to} onClick={()=>{setPalette(false);go(to)}}><span><Command/>{label}</span>{hint&&<kbd>{hint}</kbd>}</button>)}</div></section></div>}
-  </div>
+function AppShell({ children, active }:{children:React.ReactNode;active?:string;footer?:boolean}) {
+  return <RopeanDashboardShell view={viewForPath(active || window.location.pathname)}>{children}</RopeanDashboardShell>
 }
 function Protected({ children }: { children: React.ReactNode }) {
   const auth = productionAuthMode()
@@ -146,8 +133,8 @@ function Preview({ project, large = false }: { project: Project; large?: boolean
 }
 function ProjectCard({ project }: { project: Project }) { return <article className="project-card"><Link to={`/project/${project.slug}`}><Preview project={project}/></Link><div className="card-meta"><div><Link className="project-title" to={`/project/${project.slug}`}>{project.title}</Link><p>{project.tagline}</p></div><strong>${project.price}</strong></div><div className="stacks">{project.stack.map(x => <span key={x}>{x}</span>)}</div></article> }
 
-function Browse() {
-  const [query,setQuery]=useState(""), [category,setCategory]=useState("All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
+function Browse({ authenticated = false }: { authenticated?: boolean }) {
+  const [query,setQuery]=useState(""), [category,setCategory]=useState(()=>new URLSearchParams(window.location.search).get("category")||"All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
   const hosted=productReadMode(), [catalog,setCatalog]=useState<Project[]>([]), [catalogMessage,setCatalogMessage]=useState(hosted?"Loading projects…":""), [catalogFailed,setCatalogFailed]=useState(false), [retry,setRetry]=useState(0)
   const categories=["All projects","Marketing","Commerce","SaaS","Editorial","Directory"]
   const local=useMemo(()=>projects.filter(p=>(category==="All projects"||p.category===category)&&(`${p.title} ${p.tagline} ${p.stack.join(" ")}`).toLowerCase().includes(query.toLowerCase())),[query,category])
@@ -155,7 +142,8 @@ function Browse() {
   const filtered=hosted?catalog:local
   const visible=useMemo(()=>{const n=[...filtered];if(sort==="price-low")n.sort((a,b)=>a.price-b.price);else if(sort==="price-high")n.sort((a,b)=>b.price-a.price);else if(sort==="name")n.sort((a,b)=>a.title.localeCompare(b.title));return n},[filtered,sort])
   const state = catalogMessage ? <HubState kind={catalogFailed ? "error" : "loading"} title={catalogFailed ? "Marketplace is unavailable" : "Loading marketplace"} body={catalogFailed ? catalogMessage : ""} action={catalogFailed ? <button className="button" onClick={()=>setRetry(value=>value+1)}>Try again</button> : undefined}/> : visible.length ? <section className="project-grid">{visible.map(p=><ProjectCard project={p} key={p.id}/>)}</section> : <HubState kind="empty" title="No matching projects" body={query || category !== "All projects" ? "Try a different search or category." : "There are no available marketplace projects right now."} action={<button className="button" onClick={()=>{setQuery("");setCategory("All projects")}}>Clear filters</button>}/>
-  return <PublicShell active="/browse"><main className="browse browse-enter"><section className="browse-hero"><div><span className="signal">Marketplace</span><h1>Start from<br/><em>something real.</em></h1></div><p>Working web projects, ready to open, change, and make your own. The source code is always yours.</p></section><section className="browse-controls"><label className="search"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search projects, stacks, or styles"/></label><div className="filters">{categories.map(c=><button onClick={()=>setCategory(c)} className={category===c?"selected":""} key={c}>{c}</button>)}</div></section><section className="browse-heading"><p>{catalogMessage||`${visible.length} working projects`}</p><label className="sort">Sort<select value={sort} onChange={e=>setSort(e.target.value as typeof sort)}><option value="recent">Recently updated</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></label></section>{state}</main></PublicShell>
+  const Shell = authenticated ? AppShell : PublicShell
+  return <Shell active={authenticated ? "/marketplace" : "/browse"}><main className="browse browse-enter">{authenticated ? <header className="hub-title"><div><h1>Marketplace</h1><p>Find a template to make your own. Every project comes with its source.</p></div><Link className="button" to="/projects">My projects</Link></header> : <section className="browse-hero"><div><span className="signal">Marketplace</span><h1>Start from<br/><em>something real.</em></h1></div><p>Working web projects, ready to open, change, and make your own. The source code is always yours.</p></section>}<section className="browse-controls"><label className="search"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search projects, stacks, or styles"/></label><div className="filters">{categories.map(c=><button onClick={()=>setCategory(c)} className={category===c?"selected":""} key={c}>{c}</button>)}</div></section><section className="browse-heading"><p>{catalogMessage||`${visible.length} working projects`}</p><label className="sort">Sort<select value={sort} onChange={e=>setSort(e.target.value as typeof sort)}><option value="recent">Recently updated</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></label></section>{state}</main></Shell>
 }
 function projectStructure(project:Project){const next=project.stack.some(v=>v.toLowerCase().includes("next"));return next?["app/","  page.tsx","  layout.tsx","components/","  Hero.tsx","styles/","  globals.css"]:["src/","  main.tsx","  App.tsx","  components/","    Hero.tsx","  styles.css","public/"]}
 function Detail({ reference }: { reference: string }) {
@@ -181,6 +169,7 @@ function authNext(raw: unknown = new URLSearchParams(window.location.search).get
 function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:string;onClose?:()=>void}) {
   const auth=productionAuthMode(),[busy,setBusy]=useState(false),[error,setError]=useState(""),[emailStep,setEmailStep]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState("")
   const dialogRef = useRef<HTMLElement>(null)
+  const startedAt = useRef(Date.now())
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
     dialogRef.current?.querySelector<HTMLElement>("button:not([disabled])")?.focus()
@@ -201,66 +190,19 @@ function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:st
     window.addEventListener("keydown", keyboard)
     return () => window.removeEventListener("keydown", keyboard)
   }, [busy, onClose])
-  const finish=()=>{window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(next)}
+  const finish=async()=>{const destination=await finishAuthIntent(signup,startedAt.current,next);window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(destination)}
   const establishFirebaseSession=async(credential:Awaited<ReturnType<typeof signInWithGithubFirebase>>)=>{
     const idToken=await credential.user.getIdToken(true)
     await hostedProductClient.firebaseExchange(idToken)
   }
-  const runGoogle=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){try{sessionStorage.setItem("wcb-auth-next",next)}catch{}window.location.assign(await hostedProductClient.authStart());return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){setError(e instanceof Error?e.message:"Sign-in is unavailable.");setBusy(false)}}
-  const runGithub=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){const credential=await signInWithGithubFirebase();await establishFirebaseSession(credential);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
-  const runEmail=async()=>{if(busy)return;setError("");if(!emailStep){if(!email.trim()){setError("Enter your email address.");return}setEmailStep(true);return}if(!password){setError("Enter your password.");return}setBusy(true);try{if(auth){const credential=signup?await createEmailAccountFirebase(email.trim(),password):await signInWithEmailFirebase(email.trim(),password);await establishFirebaseSession(credential);finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
+  const runGoogle=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){try{sessionStorage.setItem("wcb-auth-next",next);sessionStorage.setItem("wcb-auth-intent",JSON.stringify({signup,startedAt:startedAt.current}))}catch{}window.location.assign(await hostedProductClient.authStart());return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){setError(e instanceof Error?e.message:"Sign-in is unavailable.");setBusy(false)}}
+  const runGithub=async()=>{if(busy)return;setBusy(true);setError("");try{if(auth){const credential=await signInWithGithubFirebase();await establishFirebaseSession(credential);await finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
+  const runEmail=async()=>{if(busy)return;setError("");if(!emailStep){if(!email.trim()){setError("Enter your email address.");return}setEmailStep(true);return}if(!password){setError("Enter your password.");return}setBusy(true);try{if(auth){const credential=signup?await createEmailAccountFirebase(email.trim(),password):await signInWithEmailFirebase(email.trim(),password);await establishFirebaseSession(credential);await finish();return}try{sessionStorage.setItem("wcb-demo-auth","1")}catch{}finish()}catch(e){if(auth)await signOutFirebase().catch(()=>{});setError(firebaseAuthErrorMessage(e));setBusy(false)}}
   return <div className="auth-demo-layer"><div className="auth-demo-backdrop"/><section ref={dialogRef} className="auth-demo-modal" role="dialog" aria-modal="true" aria-labelledby="wcb-auth-title" aria-busy={busy}><button className="auth-demo-close" aria-label="Close sign-in" onClick={onClose}><X/></button><h1 id="wcb-auth-title">{signup?"Create your Webcanbe account":"Log in to Webcanbe"}</h1><p>Open projects, keep source history, and continue from any workspace.</p><div className="auth-demo-actions"><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGoogle()}><GoogleBrandMark/><span>Continue with Google</span></button><button className="auth-demo-provider" disabled={busy} onClick={()=>void runGithub()}><GitHubBrandMark/><span>Continue with GitHub</span></button><button className="auth-demo-provider" disabled title="Phone sign-in is not connected yet"><Phone/><span>Continue with phone</span></button></div><div className="auth-demo-divider"><span>OR</span></div><input className="auth-demo-email" aria-label={emailStep?"Password":"Email address"} type={emailStep?"password":"email"} placeholder={emailStep?"Password":"Email address"} value={emailStep?password:email} autoComplete={emailStep?(signup?"new-password":"current-password"):"email"} onChange={event=>emailStep?setPassword(event.target.value):setEmail(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void runEmail()}}/><button className="auth-demo-continue" disabled={busy} onClick={()=>void runEmail()}>{busy?<><LoadingSpinner small/><span>Continuing…</span></>:"Continue"}</button>{auth&&<p className="auth-demo-provider-note">Google, GitHub, and email sign-in are available.</p>}{error&&<p className="auth-demo-error" role="alert">{error}</p>}</section></div>
 }
-const docPages: Record<string, { title: string; eyebrow: string; intro: string; sections: { title: string; body: string }[] }> = {
-  "/docs": { title: "Introduction", eyebrow: "Getting Started", intro: "Webcanbe is a source-first marketplace and browser workspace for real web projects.", sections: [
-    { title: "The source is the product", body: "Visual, Code, Split, history, export, and future AI edits stay attached to the same working project source and revision." },
-    { title: "Start from something real", body: "Marketplace listings point to versioned project releases. A purchase can become your own editable working copy without mutating the published release." },
-    { title: "Own the code", body: "Export stays part of the product contract. The project should continue as a normal codebase outside Webcanbe." },
-  ]},
-  "/docs/getting-started": { title: "Getting started", eyebrow: "Getting Started", intro: "Move from marketplace release to editable project without introducing a second source of truth.", sections: [
-    { title: "1. Browse", body: "Open Marketplace and inspect a working project release." },
-    { title: "2. Create a working copy", body: "Your editable copy is created from the immutable release you selected." },
-    { title: "3. Edit", body: "Use Visual, Code, or Split. Changes operate against the same project source." },
-  ]},
-  "/docs/customization": { title: "Customization", eyebrow: "Getting Started", intro: "Change appearance and structure while the project source remains authoritative.", sections: [
-    { title: "Visual edits", body: "Use the visual workspace for layout, spacing, type, and supported style changes." },
-    { title: "Code edits", body: "Open source directly when the visual layer is not the right tool for the change." },
-  ]},
-  "/docs/marketplace": { title: "Marketplace", eyebrow: "Product", intro: "Browse immutable releases of working web projects.", sections: [
-    { title: "Listings", body: "Listings expose bounded public metadata and point to a specific release." },
-    { title: "Release integrity", body: "A published release does not silently change underneath a purchase." },
-  ]},
-  "/docs/visual-editor": { title: "Visual editor", eyebrow: "Workspace", intro: "Edit the interface without replacing the underlying source with a proprietary canvas.", sections: [
-    { title: "Source-backed selection", body: "Visual selections resolve to source-backed targets in the working revision." },
-    { title: "Minimal patches", body: "Visual changes should produce minimal source edits and then reparse the project." },
-  ]},
-  "/docs/code-editor": { title: "Code editor", eyebrow: "Workspace", intro: "Open and edit the actual source in the same workspace.", sections: [
-    { title: "Same project", body: "Code mode is not a generated copy of the visual project. It is the same working source." },
-    { title: "Split mode", body: "Preview and source can stay side by side without introducing another canonical representation." },
-  ]},
-  "/docs/export": { title: "Export", eyebrow: "Ownership", intro: "Leave with the project source you have been editing.", sections: [
-    { title: "Portable by design", body: "The exported project should continue in a normal local development workflow." },
-    { title: "No runtime lock-in", body: "Webcanbe is not meant to remain in the runtime for the exported project to work." },
-  ]},
-  "/docs/compatibility": { title: "Compatibility", eyebrow: "Reference", intro: "Compatibility is explicit instead of being hidden behind conversion.", sections: [
-    { title: "Current focus", body: "React/Vite projects with JSX or TSX, CSS, CSS Modules, inline styles, Flex, Grid, and Tailwind are the main target." },
-    { title: "Separate dimensions", body: "Runtime support, visual editability, verification, security admission, export, and hosted readiness are tracked separately." },
-  ]},
-  "/docs/security": { title: "Security", eyebrow: "Reference", intro: "Uploaded projects and hosted operations stay behind explicit authority boundaries.", sections: [
-    { title: "Admission", body: "Uploaded package scripts, plugins, lifecycle hooks, and arbitrary installs are not executed during admission." },
-    { title: "Authority", body: "Session, project, revision, and privileged operation boundaries are enforced server-side." },
-  ]},
-}
-
-const docsNav = [
-  ["Getting Started", [["Introduction","/docs"],["Getting started","/docs/getting-started"],["Customization","/docs/customization"]]],
-  ["Product", [["Marketplace","/docs/marketplace"],["Visual editor","/docs/visual-editor"],["Code editor","/docs/code-editor"],["Export","/docs/export"]]],
-  ["Reference", [["Compatibility","/docs/compatibility"],["Security","/docs/security"],["Changelog","/changelog"]]],
-] as const
-
-function Documentation({path}:{path:string}){const page=docPages[path]??docPages["/docs"];return <PublicShell active="/docs"><main className="docs-page"><div className="docs-layout"><aside className="docs-sidebar">{docsNav.map(([g,items])=><section key={g}><h3>{g}</h3>{items.map(([l,h])=><Link key={h} to={h} className={path===h?"active":""}>{l}</Link>)}</section>)}</aside><article className="docs-content"><div className="docs-breadcrumb">Docs <span>/</span> {page.eyebrow}</div><h1>{page.title}</h1><p className="docs-lead">{page.intro}</p>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <section id={id} key={sec.title}><h2>{sec.title}</h2><p>{sec.body}</p></section>})}</article><aside className="docs-toc"><span>On this page</span>{page.sections.map(sec=>{const id=sec.title.toLowerCase().replace(/[^a-z0-9]+/g,"-");return <a key={sec.title} href={"#"+id}>{sec.title}</a>})}</aside></div></main></PublicShell>}
+function Documentation({path}:{path:string}) { return docPages[path] ? <PublicShell active="/docs"><DocsShell path={path}/></PublicShell> : <NotFound path={path}/> }
 const infoPages: Record<string, { eyebrow: string; title: string; intro: string; items: { title: string; body: string }[] }> = {
-  "/changelog": { eyebrow:"Resources", title:"Changelog", intro:"Product UI and platform changes for Webcanbe.", items:[{title:"Phase 4",body:"Final product UX, landing, auth demo, dashboard shell, documentation, and app-wide UI polish."},{title:"Phase 3",body:"Hosted product domain, marketplace, purchases, Creator Studio, releases, and control surfaces."}] },
+  "/changelog": { eyebrow:"Resources", title:"Changelog", intro:"Product UI and platform changes for Webcanbe.", items:[{title:"Public experience",body:"Marketplace browsing, account sign-in, documentation, and source-first project workflows."},{title:"Phase 3",body:"Hosted product domain, marketplace, purchases, Creator Studio, releases, and control surfaces."}] },
   "/about": { eyebrow:"Company", title:"About Webcanbe", intro:"A source-first way to start from working web projects and keep the code.", items:[{title:"Principle",body:"Do not hide the code. Edit the code visually."},{title:"Ownership",body:"The source remains the product, not a proprietary canvas."}] },
   "/contact": { eyebrow:"Company", title:"Contact", intro:"Questions about Webcanbe, creator publishing, or the product.", items:[{title:"Email",body:"hello@webcanbe.com"},{title:"Repository",body:"github.com/Webcanbe/webcanbe-real"}] },
   "/updates": { eyebrow:"Resources", title:"Updates", intro:"Product changes and release notes.", items:[{title:"Current",body:"Launch closure is in progress: production reads are live, authentication is under final provider smoke, and materialization is staged behind an explicit production gate."}] },
@@ -297,11 +239,22 @@ function InfoPage({ path }: { path: string }) {
   return <PublicShell><main className="info-page"><span className="signal">{page.eyebrow}</span><h1>{page.title}</h1><p className="info-lead">{page.intro}</p><section className="info-grid">{page.items.map(item => <article key={item.title}><h2>{item.title}</h2><p>{item.body}</p></article>)}</section></main></PublicShell>
 }
 
+const contactTopics: Record<string,string> = {support:"General Support",sellers:"Seller Support",sales:"Talk to Sales",partnerships:"Partnerships",issues:"Report an issue",account:"Account help"}
+function PublicInfo({path}:{path:string}) {
+  const legalAliases:Record<string,string>={"/legal/terms":"/terms","/legal/privacy":"/policy","/legal/licenses":"/licenses"}
+  if(legalAliases[path])return <InfoPage path={legalAliases[path]}/>
+  const topic=contactTopics[path.split("/")[2]]
+  if(path.startsWith("/contact/")&&topic)return <PublicShell><main className="info-page"><span className="signal">Contact</span><h1>{topic}</h1><p className="info-lead">Tell us what you need help with. Include the project link and relevant steps when reporting an issue. Never include passwords or access tokens.</p><a className="wcb-public-button" href={"mailto:hello@webcanbe.com?subject="+encodeURIComponent("Webcanbe — "+topic)}>Email {topic.toLowerCase()}</a><p className="contact-note">hello@webcanbe.com</p><a href="/docs">Explore the documentation</a></main></PublicShell>
+  if(path==="/legal")return <PublicShell><main className="info-page"><span className="signal">Legal</span><h1>Clear terms. Real ownership.</h1><p className="info-lead">Read how Webcanbe handles your account, projects, and information.</p><div className="legal-links">{[["Terms of Service","terms"],["Privacy Policy","privacy"],["Licenses","licenses"],["Acceptable use","acceptable-use"],["Privacy requests","privacy-requests"]].map(([name,slug])=><a key={slug} href={"/legal/"+slug}>{name}<ChevronRight/></a>)}</div></main></PublicShell>
+  if(path==="/legal/acceptable-use"||path==="/legal/privacy-requests")return <PublicShell><main className="info-page"><span className="signal">Legal</span><h1>{path.endsWith("acceptable-use")?"Acceptable use":"Privacy requests"}</h1><p className="info-lead">{path.endsWith("acceptable-use")?infoPages["/terms"].items[5].body:infoPages["/policy"].items[8].body}</p><a href={path.endsWith("acceptable-use")?"/legal/terms":"/legal/privacy"}>Read the full policy</a><p><a href="mailto:hello@webcanbe.com?subject=Privacy%20or%20policy%20question">Contact Webcanbe</a></p></main></PublicShell>
+  return <NotFound path={path}/>
+}
+
 function AuthComplete() {
   const [message, setMessage] = useState("Finishing sign-in…")
   useEffect(() => {
     let current = true
-    void hostedProductClient.authenticated().then(ok => {
+    void hostedProductClient.authenticated().then(async ok => {
       if (!current) return
       if (!ok) { setMessage("Your sign-in session could not be verified."); window.setTimeout(() => go("/login"), 300); return }
       let next = "/dashboard"
@@ -310,8 +263,11 @@ function AuthComplete() {
         sessionStorage.removeItem("wcb-auth-next")
         if (stored && stored.startsWith("/") && !stored.startsWith("//")) next = stored
       } catch { /* Session storage is convenience-only; safe dashboard fallback remains. */ }
+      let intent={signup:false,startedAt:0}
+      try { intent=JSON.parse(sessionStorage.getItem("wcb-auth-intent")||"null")||intent;sessionStorage.removeItem("wcb-auth-intent") } catch {}
+      const destination=await finishAuthIntent(intent.signup,intent.startedAt,authNext(next))
       setMessage("Signed in. Continuing…")
-      go(next)
+      go(destination)
     }).catch(() => { if (current) { setMessage("Your sign-in session could not be verified."); window.setTimeout(() => go("/login"), 300) } })
     return () => { current = false }
   }, [])
@@ -529,10 +485,6 @@ function Checkout() {
   return <main className="checkout-page"><header className="checkout-header"><Link to="/" className="brand"><Mark/></Link><Link to={project ? `/project/${project.slug}` : "/browse"}>Back to marketplace</Link></header><section className="checkout-layout"><div className="checkout-main"><span className="signal">Checkout</span><h1>{titles[state]}</h1><p>{message || (state === "success" ? "Your server-confirmed entitlement is now available in Purchases." : state === "cancelled" ? "PayPal approval was cancelled. Check Purchases for the server-confirmed payment status." : "Webcanbe verifies the listing, release, price, seller, fees, and entitlement on the server.")}</p><div className="checkout-provider-placeholder"><strong>{priceMinor === 0 ? "Free listing" : "PayPal checkout"}</strong><p>{priceMinor === 0 ? "No provider approval is required. Webcanbe will create the order and entitlement together." : "You will approve the server-created order in PayPal, then return here for idempotent capture."}</p>{state === "success" ? <Link className="button primary" to="/purchases">View Purchases <Arrow/></Link> : state === "cancelled" ? <Link className="button" to="/browse">Return to marketplace</Link> : state === "reconciliation_required" ? <Link className="button" to="/purchases">Check Purchases</Link> : <button className="button primary" disabled={busy || !project || (Boolean(priceMinor) && !configuration?.checkoutAvailable)} onClick={()=>void start()}>{busy ? titles[state] : state === "failed" ? "Retry checkout" : priceMinor === 0 ? "Get this project" : `Pay ${total} with PayPal`}</button>}</div></div><aside className="checkout-summary"><span>Order summary</span><h2>{project?.title ?? "Selected project"}</h2><p>{project?.tagline ?? "The selected immutable release will be bound to the completed purchase."}</p><dl><div><dt>Project</dt><dd>{total}</dd></div><div><dt>Total</dt><dd>{total}</dd></div></dl><small>Completed order → entitlement → Purchases → working copy. Refreshing this return page cannot create a second entitlement.</small></aside></section></main>
 }
 
-function Workspace() { const [mode, setMode] = useState("Visual"); const [selected, setSelected] = useState("Hero.tsx"); const [prompt, setPrompt] = useState(""); const [sent, setSent] = useState(false); return <main className="workspace"><header className="workspace-top"><Link to="/projects" className="brand"><Mark/></Link><div className="workspace-name"><span className="dot"/> Northstar Studio <span className="slash">/</span> <small>All changes saved</small></div><div className="workspace-actions"><button>Share</button><button>Export code</button><button className="workspace-publish">Publish</button></div></header><div className="workspace-body"><aside className="workspace-files"><div className="files-head"><span>Files</span><button>＋</button></div><div className="file-list"><b>▾ app</b><button className={selected === "page.tsx" ? "on" : ""} onClick={() => setSelected("page.tsx")}>⌘ page.tsx</button><b>▾ components</b><button className={selected === "Hero.tsx" ? "on" : ""} onClick={() => setSelected("Hero.tsx")}>⌘ Hero.tsx</button><button className={selected === "Navigation.tsx" ? "on" : ""} onClick={() => setSelected("Navigation.tsx")}>⌘ Navigation.tsx</button><button className={selected === "Manifesto.tsx" ? "on" : ""} onClick={() => setSelected("Manifesto.tsx")}>⌘ Manifesto.tsx</button><b>▾ styles</b><button className={selected === "globals.css" ? "on" : ""} onClick={() => setSelected("globals.css")}># globals.css</button></div><div className="files-bottom"><Link to="/projects">← Back to projects</Link></div></aside><section className="workspace-main"><div className="workspace-tabs"><div>{["Visual", "Code", "Preview"].map(x => <button key={x} onClick={() => setMode(x)} className={mode === x ? "active" : ""}>{x}</button>)}</div><span>Desktop <b>⌄</b></span></div><div className="workspace-stage">{mode === "Visual" && <div className="canvas"><div className="canvas-toolbar"><button>↖ Select</button><button>Text</button><button>Frame</button><button>◫</button></div><div className="canvas-page"><div className="mini-header"><b>NORTHSTAR</b><span>Work&nbsp;&nbsp; Studio&nbsp;&nbsp; Journal</span></div><div className="mini-hero"><p>Independent design<br/>for <em>useful things.</em></p><div className="mini-image"/><span className="selection-label">Hero.tsx</span><span className="selection-handle a"/><span className="selection-handle b"/></div><div className="mini-copy">We create identities, tools, and places for people making a more thoughtful world.</div></div></div>}{mode === "Code" && <CodePane file={selected}/>} {mode === "Preview" && <div className="preview-browser"><div className="browser-bar"><i/><i/><i/><span>northstar.local</span></div><div className="site-full"><div className="mini-header"><b>NORTHSTAR</b><span>Work&nbsp;&nbsp; Studio&nbsp;&nbsp; Journal</span></div><div className="mini-hero"><p>Independent design<br/>for <em>useful things.</em></p><div className="mini-image"/></div></div></div>}</div></section><aside className="workspace-ai"><div className="ai-head"><span>Project changes</span><span className="same-files">Same files</span></div><div className="change-note"><span className="dot"/>Visual edit</div><p className="ai-copy">The selected hero is linked to <b>components/Hero.tsx</b>. Move it here, and its source changes too.</p><div className="ai-thread">{sent ? <><span className="you">You</span><p>{prompt}</p><span className="assistant-label">Webcanbe</span><p>Drafted a change to <b>{selected}</b>. Review it in the code panel before keeping it.</p></> : <><span className="assistant-label">Webcanbe</span><p>Ask for a change. It will be made in this project — not a separate preview.</p></>}</div><div className="ai-input"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ask for a change..."/><button disabled={!prompt} onClick={() => { setSent(true); setPrompt("") }}>↑</button></div></aside></div></main> }
-
-function CodePane({ file }: { file: string }) { const lines = ["import { Arrow } from \"./Arrow\"", "", "export default function Hero() {", "  return (", "    <section className=\"hero\">", "      <p className=\"eyebrow\">Northstar Studio</p>", "      <h1>Independent design for", "        <em>useful things.</em>", "      </h1>", "      <div className=\"hero-image\" />", "    </section>", "  )", "}"]; return <div className="code-pane"><div className="code-file">{file}</div><pre>{lines.map((l,i) => <code key={i}><i>{i + 1}</i>{l}</code>)}</pre></div> }
-
 function useProductLibrary() {
   const hosted = productReadMode()
   const [copies, setCopies] = useState<WorkspaceProject[]>([])
@@ -596,7 +548,9 @@ function Purchases() {
     if (entitlement.status !== "active" || working) return
     setWorking(entitlement.entitlementId); setActionError("")
     try {
-      const workspaceId = (await hostedProductClient.workspaces())[0]
+      const availableWorkspaces = await hostedProductClient.workspaces()
+      const preferredWorkspace = readLocal<string>("wcb-selected-workspace", "")
+      const workspaceId = availableWorkspaces.includes(preferredWorkspace) ? preferredWorkspace : availableWorkspaces[0]
       if (!workspaceId) throw new Error("Create or join an editable workspace before making a working copy.")
       const copy = await hostedProductClient.materialize(workspaceId, entitlement.entitlementId, project.title)
       library.setCopies(current => [...current, copy]); go(`/workspace/${copy.workspaceProjectId}`)
@@ -607,156 +561,33 @@ function Purchases() {
   return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId, createDisabled = !copy && !mutationsEnabled; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>{project.price ? `$${project.price}` : "—"}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active" || createDisabled} title={createDisabled ? "New working-copy creation stays disabled until the production materialization endpoint is activated." : undefined} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : createDisabled ? "Creation not enabled" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>$${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
 }
 
-type DashboardView = "overview" | "projects" | "marketplace" | "purchases" | "creator" | "source-visual" | "source-code" | "source-split" | "workspace" | "docs" | "settings" | "account" | "billing" | "notifications" | "help"
-
-function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView: (view: DashboardView) => void }) {
-  const auth = productionAuthMode()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [teamMenu, setTeamMenu] = useState(false)
-  const [accountMenu, setAccountMenu] = useState(false)
-  const [profileMenu, setProfileMenu] = useState(false)
-  const [workspaceOpen, setWorkspaceOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-
-  const choose = (next: DashboardView) => {
-    onView(next)
-    setAccountMenu(false)
-    setProfileMenu(false)
-    setTeamMenu(false)
-  }
+function RopeanDashboardShell({ children, view }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView?: (view: DashboardView) => void }) {
   const signOut = async () => {
-    if (auth) await productionSignOut()
+    if (productionAuthMode()) await productionSignOut()
     else { try { sessionStorage.removeItem("wcb-demo-auth") } catch {} }
-    window.dispatchEvent(new Event("wcb:auth-changed"))
-    go("/")
+    try { sessionStorage.removeItem("wcb-onboarding-user") } catch {}
+    window.dispatchEvent(new Event("wcb:auth-changed")); go("/")
   }
-  const navButton = (label: string, target: DashboardView, Icon: typeof LayoutDashboard, badge = "") =>
-    <button key={label} type="button" className={"rd-nav-button" + (view === target ? " active" : "")} onClick={() => choose(target)}><Icon/><span>{label}</span>{badge && <em>{badge}</em>}</button>
+  return <ProductShell view={view} navigate={go} signOut={signOut}>{children}</ProductShell>
+}
 
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSearchOpen(false); setTeamMenu(false); setAccountMenu(false); setProfileMenu(false)
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true) }
-    }
-    window.addEventListener("keydown", handler)
-    return () => window.removeEventListener("keydown", handler)
-  }, [])
-  return <div className={"rd-shell" + (sidebarOpen ? "" : " rd-sidebar-collapsed")}>
-    <aside className="rd-sidebar">
-      <div className="rd-sidebar-header">
-        <div className="rd-menu-anchor">
-          <button className={"rd-team-switcher" + (teamMenu ? " is-open" : "")} type="button" aria-expanded={teamMenu} onClick={() => { setTeamMenu(v => !v); setAccountMenu(false); setProfileMenu(false) }}>
-            <span className="rd-team-logo rd-team-official-logo"><img src="/favicon.png" alt="" aria-hidden="true"/></span>
-            <span className="rd-team-copy"><b>Webcanbe</b><small>Source-first workspace</small></span>
-            <ChevronsUpDown/>
-          </button>
-          {teamMenu && <div className="rd-dropdown rd-team-dropdown">
-            <span className="rd-dropdown-label">Workspaces</span>
-            <button type="button" className="rd-dropdown-item selected" onClick={() => choose("overview")}><span className="rd-mini-logo"><img src="/favicon.png" alt=""/></span><span>Personal workspace</span><kbd>⌘1</kbd></button>
-            <div className="rd-dropdown-separator"/>
-            <button type="button" className="rd-dropdown-item" onClick={() => choose("workspace")}><Plus/><span>Add workspace</span></button>
-          </div>}
-        </div>
-        <div className="rd-app-title">
-          <div><b>Personal workspace</b><small>Current workspace</small></div>
-          <button type="button" aria-label="Toggle sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
-        </div>
-      </div>
-
-      <div className="rd-sidebar-content">
-        <section className="rd-nav-group">
-          <span className="rd-nav-label">General</span>
-          {navButton("Dashboard","overview",LayoutDashboard)}
-          {navButton("My projects","projects",ListTodo)}
-          {navButton("Marketplace","marketplace",PackageCheck)}
-          {navButton("Purchases","purchases",MessagesSquare,purchaseBadge > 0 ? String(purchaseBadge) : "")}
-          {navButton("Creator Studio","creator",Users)}
-          <div className={"rd-collapsible" + (workspaceOpen ? " open" : "")}>
-            <button className={"rd-nav-button rd-collapsible-trigger" + (["source-visual","source-code","source-split"].includes(view) ? " active" : "")} type="button" aria-expanded={workspaceOpen} onClick={() => setWorkspaceOpen(v => !v)}><ShieldCheck/><span>Source-backed editing</span><ChevronRight className="rd-chevron"/></button>
-            {workspaceOpen && <div className="rd-collapsible-content">
-              {navButton("Visual editor","source-visual",PanelsTopLeft)}
-              {navButton("Code editor","source-code",FileCode2)}
-              {navButton("Split view","source-split",LayoutDashboard)}
-            </div>}
-          </div>
-        </section>
-
-        <section className="rd-nav-group">
-          <span className="rd-nav-label">Pages</span>
-          {navButton("Workspace","workspace",ShieldCheck)}
-          {navButton("Documentation","docs",Bug)}
-        </section>
-
-        <section className="rd-nav-group">
-          <span className="rd-nav-label">Other</span>
-          <div className={"rd-collapsible" + (settingsOpen ? " open" : "")}>
-            <button className={"rd-nav-button rd-collapsible-trigger" + (["settings","account","billing","notifications"].includes(view) ? " active" : "")} type="button" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(v => !v)}><Settings2/><span>Settings</span><ChevronRight className="rd-chevron"/></button>
-            {settingsOpen && <div className="rd-collapsible-content">
-              {navButton("Profile","settings",BadgeCheck)}
-              {navButton("Account","account",UserCircle2)}
-              {navButton("Billing","billing",CreditCard)}
-              {navButton("Notifications","notifications",Bell)}
-            </div>}
-          </div>
-          {navButton("Help Center","help",HelpCircle)}
-        </section>
-      </div>
-
-      <div className="rd-sidebar-footer rd-menu-anchor">
-        <button className={"rd-account-trigger" + (accountMenu ? " is-open" : "")} type="button" aria-expanded={accountMenu} onClick={() => { setAccountMenu(v => !v); setTeamMenu(false); setProfileMenu(false) }}>
-          <span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span><ChevronsUpDown/>
-        </button>
-        {accountMenu && <div className="rd-dropdown rd-account-dropdown">
-          <div className="rd-dropdown-user"><span className="rd-avatar">WC</span><span><b>Webcanbe account</b><small>Signed in</small></span></div>
-          <div className="rd-dropdown-separator"/>
-          <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><Sparkles/><span>Upgrade to Pro</span></button>
-          <div className="rd-dropdown-separator"/>
-          <button type="button" className="rd-dropdown-item" onClick={() => choose("account")}><BadgeCheck/><span>Account</span></button>
-          <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><CreditCard/><span>Billing</span></button>
-          <button type="button" className="rd-dropdown-item" onClick={() => choose("notifications")}><Bell/><span>Notifications</span></button>
-          <div className="rd-dropdown-separator"/>
-          <button type="button" className="rd-dropdown-item destructive" onClick={() => void signOut()}><LogOut/><span>Sign out</span></button>
-        </div>}
-      </div>
-    </aside>
-
-    <div className="rd-content">
-      <header className="rd-header">
-        <button className="rd-sidebar-trigger" type="button" aria-label="Sidebar" onClick={() => setSidebarOpen(v => !v)}><PanelsTopLeft/></button>
-        <span className="rd-separator"/>
-        <nav className="rd-topnav">
-          <button type="button" className={view === "overview" ? "active" : ""} onClick={() => choose("overview")}>Overview</button>
-          <button type="button" className={view === "projects" ? "active" : ""} onClick={() => choose("projects")}>Projects</button>
-          <button type="button" className={view === "marketplace" ? "active" : ""} onClick={() => choose("marketplace")}>Marketplace</button>
-          <button type="button" className={["settings","account","billing","notifications"].includes(view) ? "active" : ""} onClick={() => choose("settings")}>Settings</button>
-        </nav>
-        <div className="rd-header-actions">
-          <button className="rd-search" type="button" onClick={() => setSearchOpen(true)}><Search/><span>Search Webcanbe</span><kbd>⌘K</kbd></button>
-          <button className="rd-header-icon" type="button" aria-label="Display settings"><SettingsIcon/></button>
-          <button className="rd-header-icon" type="button" aria-label="Notifications" onClick={() => choose("notifications")}><Bell/></button>
-          <div className="rd-menu-anchor">
-            <button className={"rd-header-avatar" + (profileMenu ? " is-open" : "")} type="button" aria-label="Profile" aria-expanded={profileMenu} onClick={() => { setProfileMenu(v => !v); setAccountMenu(false); setTeamMenu(false) }}>WC</button>
-            {profileMenu && <div className="rd-dropdown rd-profile-dropdown">
-              <div className="rd-dropdown-user compact"><span><b>Webcanbe account</b><small>Signed in</small></span></div>
-              <div className="rd-dropdown-separator"/>
-              <button type="button" className="rd-dropdown-item" onClick={() => choose("settings")}><span>Profile</span><kbd>⇧⌘P</kbd></button>
-              <button type="button" className="rd-dropdown-item" onClick={() => choose("billing")}><span>Billing</span><kbd>⌘B</kbd></button>
-              <button type="button" className="rd-dropdown-item" onClick={() => choose("settings")}><span>Settings</span><kbd>⌘S</kbd></button>
-              <button type="button" className="rd-dropdown-item" onClick={() => choose("workspace")}><span>New workspace</span></button>
-              <div className="rd-dropdown-separator"/>
-              <button type="button" className="rd-dropdown-item destructive" onClick={() => void signOut()}><span>Sign out</span><kbd>⇧⌘Q</kbd></button>
-            </div>}
-          </div>
-        </div>
-      </header>
-      {children}
-    </div>
-
-    {searchOpen && <div className="rd-search-backdrop" onMouseDown={() => setSearchOpen(false)}><div className="rd-search-dialog" onMouseDown={event => event.stopPropagation()}><Search/><input autoFocus placeholder="Search Webcanbe"/><kbd>ESC</kbd></div></div>}
-  </div>
+function PageHeading({title,description}:{title:string;description:string}) { return <header className="wcb-page-heading"><h1>{title}</h1><p>{description}</p></header> }
+function WorkspacePage() {
+  const workspaces=useWorkspaces(), [create,setCreate]=useState(false)
+  return <><PageHeading title="Workspace" description="Choose where your next working copy belongs."/><section className="rd-panel"><header className="wcb-panel-heading"><div><h2>Your workspaces</h2><p>Each workspace keeps its own working copies.</p></div><button className="rd-primary-action" onClick={()=>setCreate(true)}><Plus/>Add workspace</button></header><div className="wcb-padded">{workspaces.loading?<p role="status">Loading workspaces…</p>:workspaces.error?<div role="alert"><p>{workspaces.error}</p><button className="button" onClick={()=>window.dispatchEvent(new Event('wcb:workspaces-updated'))}>Try again</button></div>:workspaces.ids.length?workspaces.ids.map((id,index)=><article className="wcb-workspace-row" key={id}><PanelsTopLeft/><div><h3>{workspaceLabel(id,index)}</h3><p>{id===workspaces.selected?"Selected for new working copies":"Available to your account"}</p></div><button className="button" disabled={id===workspaces.selected} onClick={()=>workspaces.select(id)}>{id===workspaces.selected?"Selected":"Use workspace"}</button></article>):<div className="rd-empty"><PanelsTopLeft/><b>Create your first workspace</b><p>A space for projects you can edit and export.</p></div>}</div></section><section className="wcb-quick-actions"><Link to="/projects"><FolderKanban/><b>Continue a project</b><p>Open your existing working copies.</p></Link><Link to="/purchases"><ShoppingBag/><b>Start from a purchase</b><p>Create a working copy in the selected workspace.</p></Link></section>{create&&<CreateWorkspaceDialog onClose={()=>setCreate(false)} navigate={go}/>}</>
+}
+function AccountPage({section}:{section:"settings"|"account"}) {
+  const {account,error,setAccount}=useAccount(), [name,setName]=useState(''), [busy,setBusy]=useState(false), [message,setMessage]=useState('')
+  useEffect(()=>setName(account.displayName||''),[account.displayName])
+  const save=async()=>{if(busy)return;setBusy(true);setMessage('');try{if(!name.trim()||name.trim().length>120)throw new Error('Use a name between 1 and 120 characters.');if(productionAuthMode())setAccount(await hostedProductClient.updateAccount(name.trim()));else{const next={...account,displayName:name.trim()};writeLocal('wcb-demo-profile',next);setAccount(next)}window.dispatchEvent(new Event('wcb:profile-updated'));setMessage('Profile saved.')}catch(reason){setMessage(reason instanceof Error?reason.message:'Could not save profile.')}finally{setBusy(false)}}
+  const signOut=async()=>{setBusy(true);if(productionAuthMode())await productionSignOut();else{try{sessionStorage.removeItem('wcb-demo-auth')}catch{}}try{sessionStorage.removeItem('wcb-onboarding-user')}catch{}window.dispatchEvent(new Event('wcb:auth-changed'));go('/')}
+  return <><PageHeading title={section==='settings'?'Profile':'Account'} description={section==='settings'?'Your name and profile image across WebCanBe.':'Your verified identity and active sign-in session.'}/>{error&&<p role="alert">{error}</p>}<section className="rd-panel wcb-padded wcb-account-form">{section==='settings'?<form onSubmit={event=>{event.preventDefault();void save()}}><div className="wcb-profile-summary"><Avatar account={account}/><div><h2>{account.displayName||'Your profile'}</h2><p>{account.picture?'Profile image from your sign-in provider.':'Your initials appear when a profile image is unavailable.'}</p></div></div><label>Display name<input required maxLength={120} value={name} onChange={event=>setName(event.target.value)} autoComplete="name"/></label><p>Your name appears in the workspace and account menu.</p><button className="rd-primary-action" disabled={busy||!name.trim()||Boolean(error)}>{busy?'Saving…':'Save profile'}</button>{message&&<p role="status">{message}</p>}</form>:<><h2>Sign-in details</h2><label>Email address<input readOnly value={account.email||''} placeholder={productionAuthMode()?'Loading account…':'No email in demo mode'}/></label><dl className="wcb-detail-list"><div><dt>Email verification</dt><dd>{account.emailVerified?'Verified':account.email?'Not verified':'Not available'}</dd></div><div><dt>Sign-in providers</dt><dd>{account.providers?.join(', ')||(productionAuthMode()?'Loading provider details…':'Local demo session')}</dd></div><div><dt>Active sessions</dt><dd>{account.activeSessions??(productionAuthMode()?'Loading…':1)}</dd></div></dl><div className="wcb-session-action"><div><h3>Sign out of this browser</h3><p>You can sign back in to continue your projects.</p></div><button className="button" disabled={busy} onClick={()=>void signOut()}><LogOut/>Sign out</button></div></>}</section></>
+}
+function ReferencePage({help=false}:{help?:boolean}) {
+  const [query,setQuery]=useState('')
+  const topics=[['Getting started','Choose a project, create a working copy, and start editing.','/docs/getting-started'],['Visual editor','Change supported elements while preserving real source.','/docs/visual-editor'],['Code editor','Edit files and save accepted source revisions.','/docs/code-editor'],['Compatibility','Understand supported projects and import requirements.','/docs/compatibility'],['Export','Download a standalone project you can run elsewhere.','/docs/export'],['Security','Understand account, workspace, and source boundaries.','/docs/security']]
+  const shown=topics.filter(item=>item.slice(0,2).join(' ').toLowerCase().includes(query.toLowerCase()))
+  return <><PageHeading title={help?'Help Center':'Documentation'} description={help?'Find help for the next step in your project.':'Practical guides for building with your own source.'}/><label className="wcb-search-label"><Search/><input aria-label="Search guides" placeholder="Search guides" value={query} onChange={event=>setQuery(event.target.value)}/></label><section className="wcb-reference-grid">{shown.map(([title,description,path])=><Link key={path} to={path}><BookOpen/><h2>{title}</h2><p>{description}</p><span>Read guide <ChevronRight/></span></Link>)}</section>{!shown.length&&<div className="rd-empty"><b>No guides found</b><button className="button" onClick={()=>setQuery('')}>Clear search</button></div>}{help&&<section className="rd-panel wcb-padded"><h2>Still need a hand?</h2><p>Tell us which project you are working on and what happened.</p><a className="button" href="mailto:hello@webcanbe.com?subject=WebCanBe%20support">Contact support</a><details className="wcb-help-details"><summary>What should I include?</summary><p>The page URL, the action you tried, and any visible error message. Never include passwords, session tokens, or payment details.</p></details></section>}</>
 }
 
 function useBillingOverview(enabled = true) {
@@ -780,10 +611,11 @@ function useBillingOverview(enabled = true) {
 const planName = (key: string | undefined) => key ? key.split("_")[0].replace(/^./, value => value.toUpperCase()) : "Free"
 const cadenceName = (key: string | undefined) => key?.endsWith("_annual") ? "Annual" : key?.endsWith("_monthly") ? "Monthly" : "No renewal"
 
-function Dashboard() {
+function Dashboard({ initialView = "overview" }: { initialView?: DashboardView }) {
   const lib = useProductLibrary()
-  const billing = useBillingOverview(productReadMode())
-  const [view, setView] = useState<DashboardView>("overview")
+  const view = initialView
+  const setView = (next: DashboardView) => go(appRoutes[next][0])
+  const [projectQuery, setProjectQuery] = useState("")
   const working = lib.hosted
     ? lib.copies.map(copy => ({ project: releaseProject(lib.catalog, copy.releaseId, copy.workspaceProjectId), href: "/workspace/" + copy.workspaceProjectId }))
     : projects.slice(0,3).map(project => ({ project, href: "/workspace/" + project.id }))
@@ -800,47 +632,40 @@ function Dashboard() {
     : projects.slice(3).map(project => ({ project, href: "/project/" + project.slug }))
 
   const projectRows = (items: Array<{ project: Project; href: string }>) => <div className="rd-project-list">
-    {items.length ? items.slice(0,8).map(({project,href}) => <Link to={href} key={href} className="rd-project-row">
-      <span className={"rd-project-thumb " + project.color}/>
+    {items.length ? items.filter(({project}) => project.title.toLowerCase().includes(projectQuery.toLowerCase())).slice(0,8).map(({project,href}) => <Link to={view.startsWith("source-") ? href + "?mode=" + view.replace("source-", "").replace("visual", "canvas") : href} key={href} className="rd-project-row">
+      <span className="rd-project-thumb"><FileCode2/></span>
       <span className="rd-project-copy"><b>{project.title}</b><small>{project.stack.slice(0,2).join(" · ")}</small></span>
       <span className="rd-project-meta">{project.updated}</span>
-    </Link>) : <div className="rd-empty"><b>No projects yet.</b><p>Start from Marketplace when you are ready.</p></div>}
+    </Link>) : <div className="rd-empty"><FolderKanban/><b>No projects yet</b><p>Choose a template to start your first project.</p><Link className="rd-primary-action" to="/marketplace">Browse marketplace</Link></div>}
   </div>
 
   const secondaryView = () => {
-    if (view === "projects") return <><div className="rd-main-heading"><h1>My projects</h1></div><section className="rd-panel"><header><h2>Working copies</h2><p>Your source-backed projects stay here.</p></header>{projectRows(working)}</section></>
-    if (view === "marketplace") return <><div className="rd-main-heading"><h1>Marketplace</h1></div><section className="rd-panel"><header><h2>Working projects</h2><p>Open a release without leaving the dashboard shell.</p></header>{catalog.length ? <div className="rd-project-list">{catalog.slice(0,8).map(project => <Link to={"/project/" + project.slug} key={project.id} className="rd-project-row"><span className={"rd-project-thumb " + project.color}/><span className="rd-project-copy"><b>{project.title}</b><small>{project.category} · {project.stack.slice(0,2).join(" · ")}</small></span><span className="rd-project-meta">{project.price ? "$" + project.price : "—"}</span></Link>)}</div> : <div className="rd-empty"><b>No published projects yet.</b><p>The production catalog is empty. Demo listings are not substituted.</p></div>}</section></>
-    if (view === "purchases") return <><div className="rd-main-heading"><h1>Purchases</h1></div><section className="rd-stat-grid"><article><div><span>Purchased releases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active entitlements</p></article><article><div><span>Needs attention</span><Bell/></div><strong>{attention}</strong><p>{attention ? "Review blocked product state" : "No blocking product state"}</p></article></section><section className="rd-panel rd-dashboard-section"><header><h2>Your library</h2><p>Purchased releases stay associated with your account.</p></header>{projectRows(purchaseRows)}</section></>
-    if (view === "creator") return <><div className="rd-main-heading"><h1>Creator Studio</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Creator pipeline</h2><p>Submission, review, release, and listing tools remain available from the dedicated creator surface.</p></header><div className="rd-dashboard-callout"><span>Creator tools</span><b>Keep the dashboard shell stable while creator workflows remain separate.</b><Link className="rd-primary-action" to="/seller">Open Creator Studio</Link></div></section></>
-    if (view === "source-visual") return <><div className="rd-main-heading"><h1>Visual editor</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Edit visually, keep the real source.</h2><p>Visual changes and code changes stay attached to the same project source.</p></header>{projectRows(working)}</section></>
-    if (view === "source-code") return <><div className="rd-main-heading"><h1>Code editor</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Open the actual source.</h2><p>Use the code workspace when precision matters, without converting the project into another format.</p></header>{projectRows(working)}</section></>
-    if (view === "source-split") return <><div className="rd-main-heading"><h1>Split view</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Visual and code together.</h2><p>Use both editing surfaces against the same source-backed working copy.</p></header>{projectRows(working)}</section></>
-    if (view === "workspace") return <><div className="rd-main-heading"><h1>Workspace</h1></div><section className="rd-panel"><header><h2>Continue editing</h2><p>Open one of your current working copies.</p></header>{projectRows(working)}</section></>
-    if (view === "docs") return <><div className="rd-main-heading"><h1>Documentation</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Product documentation</h2><p>Reference pages for editing, compatibility, export, and security.</p></header><div className="rd-dashboard-links"><Link to="/docs">Introduction</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/security">Security</Link></div></section></>
-    if (view === "settings") return <><div className="rd-main-heading"><h1>Profile</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Webcanbe profile</h2><p>Your account profile stays inside the same dashboard shell.</p></header><div className="rd-dashboard-callout"><span>Profile</span><b>Webcanbe account</b><p className="muted-copy">Profile data is backed by the production account store. Manage your editable profile and verified sign-in methods from Settings.</p></div></section></>
-    if (view === "account") return <><div className="rd-main-heading"><h1>Account</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Account settings</h2><p>Session and account controls without leaving the dashboard shell.</p></header><div className="rd-dashboard-callout"><span>Account</span><b>Webcanbe account</b><p className="muted-copy">Verified sign-in methods and active Webcanbe sessions are backed by the production account store and can be reviewed from Settings.</p></div></section></>
-    if (view === "billing") return <><div className="rd-main-heading"><h1>Billing</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Plan and billing</h2><p>{billing.loading ? "Loading your server-backed billing state…" : billing.error || (billing.configuration?.checkoutAvailable ? "Subscriptions and AI Action packs are available through PayPal." : "Paid checkout is currently unavailable.")}</p></header><div className="rd-dashboard-callout"><span>Current plan</span><b>{planName(billing.billing?.currentPlanKey)}</b>{billing.billing?.subscription && <p className="muted-copy">{cadenceName(billing.billing.subscription.planKey)} · {billing.billing.subscription.status.replace(/_/g, " ")}</p>}<button className="rd-primary-action" type="button" onClick={() => go("/settings?section=billing")}>Manage billing</button></div></section></>
-    if (view === "notifications") return <><div className="rd-main-heading"><h1>Notifications</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Notifications</h2><p>Account and project notices will appear here.</p></header><div className="rd-empty"><b>No new notifications.</b><p>Nothing needs your attention right now.</p></div></section></>
-    return <><div className="rd-main-heading"><h1>Help Center</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Help and reference</h2><p>Use the product documentation or contact Webcanbe.</p></header><div className="rd-dashboard-links"><Link to="/docs/getting-started">Getting started</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/contact">Contact</Link></div></section></>
+    if (view === "workspace") return <WorkspacePage/>
+    if (view === "settings" || view === "account") return <AccountPage section={view}/>
+    if (view === "billing") return <><PageHeading title="Billing" description="Your plan, subscription, and purchased AI Actions."/><section className="rd-panel wcb-padded"><BillingSettings/></section></>
+    if (view === "docs" || view === "help") return <ReferencePage help={view === "help"}/>
+    if (view === "notifications") return <><PageHeading title="Notifications" description="Purchase issues that need your attention."/><section className="rd-panel"><header><h2>{attention ? `${attention} purchases need review` : "You’re all caught up"}</h2><p>Notices reflect your current purchase status.</p></header>{attention ? <div className="wcb-padded">{lib.entitlements.filter(item=>item.status!=="active").map(item=><div className="wcb-notice" key={item.entitlementId}><Bell/><div><b>{releaseProject(lib.catalog,item.releaseId,item.entitlementId).title}</b><p>Purchase status: {item.status}. Review your entitlement before editing.</p></div><Link to="/purchases">Review purchase</Link></div>)}</div> : <div className="rd-empty"><CheckCircle2/><b>No purchase issues</b><p>There are no blocked purchases to review.</p><Link className="button" to="/purchases">View purchases</Link></div>}</section></>
+    const mode = view.replace("source-", ""), title = appRoutes[view][1]
+    return <><PageHeading title={title} description={mode === "visual" ? "Select and edit elements directly. Every accepted change updates the source." : mode === "code" ? "Work with the actual files, with source history and precise controls." : "See the page and its source together, in one connected workspace."}/><nav className="wcb-mode-links" aria-label="Editing modes">{(["source-visual","source-code","source-split"] as DashboardView[]).map(key=><Link key={key} to={appRoutes[key][0]} className={key===view?"active":""}>{appRoutes[key][1]}</Link>)}</nav><section className="rd-panel"><header><h2>Choose a project</h2><p>Open a working copy in {mode === "visual" ? "Visual" : mode === "code" ? "Code" : "Split"}.</p></header><div className="wcb-padded"><label className="wcb-search-label"><Search/><input aria-label="Find a project" placeholder="Find a project" value={projectQuery} onChange={event=>setProjectQuery(event.target.value)}/></label></div>{projectRows(working)}{working.length > 0 && !working.some(({project})=>project.title.toLowerCase().includes(projectQuery.toLowerCase())) && <div className="rd-empty"><b>No matching projects</b><button className="button" onClick={()=>setProjectQuery("")}>Clear search</button></div>}</section></>
   }
 
-  if (lib.loading) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>Dashboard</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="loading" title="Loading your product state" body=""/></section></main></RopeanDashboardShell>
-  if (lib.error) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>Dashboard</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="error" title="Dashboard data could not be loaded" body={lib.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/></section></main></RopeanDashboardShell>
+  if (lib.loading && (view === "overview" || view.startsWith("source-") || view === "notifications")) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>{appRoutes[view][1]}</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="loading" title="Loading your product state" body=""/></section></main></RopeanDashboardShell>
+  if (lib.error && (view === "overview" || view.startsWith("source-") || view === "notifications")) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>{appRoutes[view][1]}</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="error" title="Dashboard data could not be loaded" body={lib.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/></section></main></RopeanDashboardShell>
 
   return <RopeanDashboardShell purchaseBadge={purchaseCount} view={view} onView={setView}>
     <main key={view} className="rd-main">
       {view === "overview" ? <>
         <div className="rd-main-heading">
           <h1>Dashboard</h1>
-          <button className="rd-primary-action" type="button" onClick={() => setView("projects")}><Download/> Open projects</button>
+          <Link className="rd-primary-action" to="/marketplace">Browse templates <Plus/></Link>
         </div>
-        <div className="rd-tabs"><button className="active">Overview</button><button>Activity</button><button disabled>Reports</button><button disabled>Notifications</button></div>
+
 
         <section className="rd-stat-grid">
           <article><div><span>Working copies</span><FolderKanban/></div><strong>{working.length}</strong><p>Projects ready to continue editing</p></article>
           <article><div><span>Purchases</span><ShoppingBag/></div><strong>{purchaseCount}</strong><p>{activePurchases} active release entitlements</p></article>
-          <article><div><span>Editing modes</span><FileCode2/></div><strong>3</strong><p>Visual, Code, and Split share one source</p></article>
-          <article><div><span>Needs attention</span><Bell/></div><strong>{attention}</strong><p>{attention ? "Review blocked product state" : "No blocking product state"}</p></article>
+
+
         </section>
 
         <section className="rd-dashboard-grid">
@@ -849,14 +674,9 @@ function Dashboard() {
             {projectRows(working)}
           </article>
 
-          <article className="rd-panel rd-recent-panel">
-            <header><h2>Recent activity</h2><p>Product state that matters to your next action.</p></header>
-            <div className="rd-recent-list">
-              {working.slice(0,5).map(({project},index) => <div key={project.id}><span className="rd-avatar small">{project.title.slice(0,2).toUpperCase()}</span><span><b>{project.title}</b><small>{index === 0 ? "Continue editing" : "Working copy ready"}</small></span><em>{project.updated}</em></div>)}
-              {!working.length && <div className="rd-empty"><p>No recent activity.</p></div>}
-            </div>
-          </article>
+          <article className="rd-panel rd-attention-panel"><header><h2>Needs attention</h2></header><div className="rd-empty"><CheckCircle2/><b>{attention ? `${attention} purchases need review` : "You’re all caught up"}</b><p>{attention ? "Review purchase status before starting a working copy." : "No blocked purchases."}</p>{attention > 0 && <Link className="button" to="/purchases">Review purchases</Link>}</div></article>
         </section>
+        <section className="rd-panel rd-dashboard-section"><header><h2>Recent activity</h2><p>Your most recently created working copies.</p></header>{lib.hosted && lib.copies.length ? <div className="rd-project-list">{[...lib.copies].sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,5).map(copy=><Link key={copy.workspaceProjectId} className="rd-project-row" to={"/workspace/"+copy.workspaceProjectId}><History/><span className="rd-project-copy"><b>{releaseProject(lib.catalog,copy.releaseId,copy.workspaceProjectId).title}</b><small>Working copy created</small></span><time>{new Date(copy.createdAt).toLocaleDateString()}</time></Link>)}</div> : <div className="rd-empty compact"><History/><b>No activity yet</b><p>Your working copies will appear here as you create them.</p></div>}</section>
       </> : secondaryView()}
     </main>
   </RopeanDashboardShell>
@@ -1028,7 +848,7 @@ function Seller({ page = "home" }: { page?: "home" | "projects" | "new" }) {
   }
   const updateListing = (updated: CreatorStudioData["listings"][number]) => setStudio(current => current ? { ...current, listings: current.listings.map(item => item.listingId === updated.listingId ? updated : item) } : current)
 
-  if (!hosted) return <AppShell><main className="seller creator-studio"><header className="seller-head"><div><span className="signal">Creator Studio preview</span><h1>Prepare real projects for the marketplace.</h1><p>The hosted product connects this surface to application, review, assessment, release, Ready, and Listing state.</p></div></header><section className="creator-local-note"><b>Local UI preview</b><p>Connect the hosted product boundary to see real seller state. No fake sales or review data is generated here.</p></section></main></AppShell>
+  if (!hosted) return <AppShell><main className="seller creator-studio"><PageHeading title="Creator Studio" description="Prepare your source project for the marketplace."/><section className="rd-panel wcb-padded"><h2>Your first submission</h2><p>Open a working project, check its responsive layout, and export its source before submitting it for review.</p><div className="rd-page-actions"><Link to="/projects" className="rd-primary-action">Choose a project <Arrow/></Link><Link to="/app/docs" className="button">Read the publishing guide</Link></div></section><section className="rd-panel wcb-padded"><h2>Publishing access</h2><p>Applications and submissions are available when signed in to the hosted product. This local preview does not publish projects.</p><Link to="/marketplace" className="button">Explore the marketplace <Arrow/></Link></section></main></AppShell>
   if (loading) return <AppShell><main className="seller creator-studio"><header className="seller-head"><div><span className="signal">Creator Studio</span><h1>Loading creator state…</h1></div></header><HubState kind="loading" title="Loading Creator Studio" body=""/></main></AppShell>
   if (error) return <AppShell><main className="seller creator-studio"><header className="seller-head"><div><span className="signal">Creator Studio</span><h1>Creator Studio needs attention.</h1></div></header><HubState kind="error" title="Creator Studio unavailable" body={error} action={<button className="button" onClick={() => void refresh()}>Try again</button>}/></main></AppShell>
   if (!application) return <AppShell><main className="seller creator-studio"><header className="seller-head"><div><span className="signal">Become a creator</span><h1>Sell working projects, not flattened files.</h1><p>Apply once. Approved creators can submit source-backed projects into the review and assessment pipeline.</p></div></header><section className="creator-application"><span>No application yet</span><h2>Start your creator application.</h2><p>The application starts as pending and does not grant publication authority.</p><button className="button primary" disabled={busy} onClick={() => void apply()}>{busy ? "Applying…" : "Apply to become a creator"} <Arrow/></button></section></main></AppShell>
@@ -1260,11 +1080,19 @@ function routeMetadata(path: string): RouteMetadata {
     "/privacy": { title: "Privacy Policy — Webcanbe", description: "How Webcanbe handles account and product data.", canonical: "/policy" },
   }
   if (exact[path]) return exact[path]
+  const appRoute = Object.values(appRoutes).find(([route]) => route === path)
+  if (appRoute) return { title: `${appRoute[1]} — Webcanbe`, description: "Your Webcanbe workspace.", noIndex: true }
+  const legalMetadata:Record<string,string>={"/legal/terms":"/terms","/legal/privacy":"/policy","/legal/licenses":"/licenses"}
+  if(legalMetadata[path]) return {...exact[legalMetadata[path]]}
+  if(["/legal","/legal/acceptable-use","/legal/privacy-requests"].includes(path))return {title:"Legal — Webcanbe",description:"Webcanbe policies, acceptable use, and privacy requests.",canonical:path}
+  if(path.startsWith("/contact/")&&contactTopics[path.split("/")[2]])return {title:contactTopics[path.split("/")[2]]+" — Webcanbe",description:"Contact Webcanbe for help with your account, projects, or business.",canonical:path}
   if (path === "/docs" || path.startsWith("/docs/")) {
-    const title = docPages[path]?.title ?? "Documentation"
-    return { title: title + " — Webcanbe", description: "Webcanbe documentation for source-first projects, editing, compatibility, export, and security.", canonical: path }
+    if(!docPages[path]) return {title:"Page not found — Webcanbe",description:"This documentation page does not exist.",noIndex:true}
+    const title = docPages[path].title
+    return { title, description: docPages[path].description, canonical: path }
   }
   if (path.startsWith("/project/")) {
+    if(path.endsWith("/acquire")) return {title:"Acquire project — Webcanbe",description:"Review acquisition for the selected release.",noIndex:true}
     const preview = path.endsWith("/preview")
     return { title: (preview ? "Project preview" : "Project") + " — Webcanbe", description: "Inspect a real source-backed Webcanbe project and its release details.", canonical: path }
   }
@@ -1330,10 +1158,11 @@ export default function App() {
   const basePath=directAuth?"/":path;let page:React.ReactNode
   if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
   else if(basePath==="/")page=<Landing/>
-  else if(basePath==="/browse"||basePath==="/templates")page=<Browse/>
+  else if(basePath==="/browse"||basePath==="/templates")page=<Browse key={window.location.search}/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage key={basePath} reference={basePath.split("/")[2]||""}/>
-  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/").pop()??""}/>
-  else if(basePath.startsWith("/docs"))page=<Documentation path={basePath}/>
+  else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/")[2]??""}/>
+  else if(basePath==="/docs"||basePath.startsWith("/docs/"))page=<Documentation path={basePath}/>
+  else if(basePath==="/legal"||basePath.startsWith("/legal/")||basePath.startsWith("/contact/"))page=<PublicInfo path={basePath}/>
   else if(["/changelog","/about","/contact","/updates","/licenses","/terms","/policy","/privacy"].includes(basePath))page=<InfoPage path={basePath}/>
   else if(basePath==="/auth/complete")page=<AuthComplete/>
   else if(basePath===GATE2_AUTH_SMOKE_PATH)page=<Gate2AuthSmoke/>
@@ -1343,6 +1172,8 @@ export default function App() {
   else if(basePath==="/purchases")page=<Protected><Purchases/></Protected>
   else if(basePath==="/dashboard-preview")page=productionAuthMode()?<NotFound path={basePath}/>:<Dashboard/>
   else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
+  else if(basePath==="/marketplace")page=<Protected><Browse authenticated/></Protected>
+  else if(basePath!=="/seller" && Object.values(appRoutes).some(([route])=>route===basePath))page=<Protected><Dashboard key={basePath} initialView={viewForPath(basePath)}/></Protected>
   else if(basePath==="/settings")page=<Protected><Settings/></Protected>
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
   else if(basePath==="/seller/projects/new")page=<Protected><Seller page="new"/></Protected>

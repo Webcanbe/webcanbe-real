@@ -1,8 +1,684 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/templates/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/browse"
+      }
+    },
+    {
+      "src": "^/pricing/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/plans"
+      }
+    },
+    {
+      "src": "^/terms/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/legal/terms"
+      }
+    },
+    {
+      "src": "^/privacy/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/legal/privacy"
+      }
+    },
+    {
+      "src": "^/policy/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/legal/privacy"
+      }
+    },
+    {
+      "src": "^/licenses/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/legal/licenses"
+      }
+    },
+    {
+      "src": "^/docs/?$",
+      "dest": "/__public/docs.html"
+    },
+    {
+      "src": "^/docs/index/?$",
+      "dest": "/__public/docs/index.html"
+    },
+    {
+      "src": "^/docs/what-is-webcanbe/?$",
+      "dest": "/__public/docs/what-is-webcanbe.html"
+    },
+    {
+      "src": "^/docs/getting-started/?$",
+      "dest": "/__public/docs/getting-started.html"
+    },
+    {
+      "src": "^/docs/create-account/?$",
+      "dest": "/__public/docs/create-account.html"
+    },
+    {
+      "src": "^/docs/sign-in/?$",
+      "dest": "/__public/docs/sign-in.html"
+    },
+    {
+      "src": "^/docs/first-project/?$",
+      "dest": "/__public/docs/first-project.html"
+    },
+    {
+      "src": "^/docs/releases-introduction/?$",
+      "dest": "/__public/docs/releases-introduction.html"
+    },
+    {
+      "src": "^/docs/first-edit/?$",
+      "dest": "/__public/docs/first-edit.html"
+    },
+    {
+      "src": "^/docs/first-export/?$",
+      "dest": "/__public/docs/first-export.html"
+    },
+    {
+      "src": "^/docs/marketplace/?$",
+      "dest": "/__public/docs/marketplace.html"
+    },
+    {
+      "src": "^/docs/marketplace/search/?$",
+      "dest": "/__public/docs/marketplace/search.html"
+    },
+    {
+      "src": "^/docs/marketplace/categories/?$",
+      "dest": "/__public/docs/marketplace/categories.html"
+    },
+    {
+      "src": "^/docs/marketplace/project-details/?$",
+      "dest": "/__public/docs/marketplace/project-details.html"
+    },
+    {
+      "src": "^/docs/marketplace/previews/?$",
+      "dest": "/__public/docs/marketplace/previews.html"
+    },
+    {
+      "src": "^/docs/marketplace/releases/?$",
+      "dest": "/__public/docs/marketplace/releases.html"
+    },
+    {
+      "src": "^/docs/marketplace/free-and-paid/?$",
+      "dest": "/__public/docs/marketplace/free-and-paid.html"
+    },
+    {
+      "src": "^/docs/marketplace/licenses/?$",
+      "dest": "/__public/docs/marketplace/licenses.html"
+    },
+    {
+      "src": "^/docs/purchases/acquire/?$",
+      "dest": "/__public/docs/purchases/acquire.html"
+    },
+    {
+      "src": "^/docs/purchases/entitlements/?$",
+      "dest": "/__public/docs/purchases/entitlements.html"
+    },
+    {
+      "src": "^/docs/purchases/checkout-return/?$",
+      "dest": "/__public/docs/purchases/checkout-return.html"
+    },
+    {
+      "src": "^/docs/purchases/missing/?$",
+      "dest": "/__public/docs/purchases/missing.html"
+    },
+    {
+      "src": "^/docs/purchases/working-copy/?$",
+      "dest": "/__public/docs/purchases/working-copy.html"
+    },
+    {
+      "src": "^/docs/purchases/receipts/?$",
+      "dest": "/__public/docs/purchases/receipts.html"
+    },
+    {
+      "src": "^/docs/purchases/refunds/?$",
+      "dest": "/__public/docs/purchases/refunds.html"
+    },
+    {
+      "src": "^/docs/purchases/access/?$",
+      "dest": "/__public/docs/purchases/access.html"
+    },
+    {
+      "src": "^/docs/working-copies/?$",
+      "dest": "/__public/docs/working-copies.html"
+    },
+    {
+      "src": "^/docs/working-copies/open/?$",
+      "dest": "/__public/docs/working-copies/open.html"
+    },
+    {
+      "src": "^/docs/working-copies/source-release/?$",
+      "dest": "/__public/docs/working-copies/source-release.html"
+    },
+    {
+      "src": "^/docs/working-copies/capacity/?$",
+      "dest": "/__public/docs/working-copies/capacity.html"
+    },
+    {
+      "src": "^/docs/working-copies/missing/?$",
+      "dest": "/__public/docs/working-copies/missing.html"
+    },
+    {
+      "src": "^/docs/working-copies/modes/?$",
+      "dest": "/__public/docs/working-copies/modes.html"
+    },
+    {
+      "src": "^/docs/working-copies/preview/?$",
+      "dest": "/__public/docs/working-copies/preview.html"
+    },
+    {
+      "src": "^/docs/customization/?$",
+      "dest": "/__public/docs/customization.html"
+    },
+    {
+      "src": "^/docs/visual-editor/?$",
+      "dest": "/__public/docs/visual-editor.html"
+    },
+    {
+      "src": "^/docs/visual-editor/select-elements/?$",
+      "dest": "/__public/docs/visual-editor/select-elements.html"
+    },
+    {
+      "src": "^/docs/visual-editor/text/?$",
+      "dest": "/__public/docs/visual-editor/text.html"
+    },
+    {
+      "src": "^/docs/visual-editor/spacing/?$",
+      "dest": "/__public/docs/visual-editor/spacing.html"
+    },
+    {
+      "src": "^/docs/visual-editor/typography-colors/?$",
+      "dest": "/__public/docs/visual-editor/typography-colors.html"
+    },
+    {
+      "src": "^/docs/visual-editor/responsive/?$",
+      "dest": "/__public/docs/visual-editor/responsive.html"
+    },
+    {
+      "src": "^/docs/visual-editor/shared-source/?$",
+      "dest": "/__public/docs/visual-editor/shared-source.html"
+    },
+    {
+      "src": "^/docs/visual-editor/style-origins/?$",
+      "dest": "/__public/docs/visual-editor/style-origins.html"
+    },
+    {
+      "src": "^/docs/visual-editor/unsupported/?$",
+      "dest": "/__public/docs/visual-editor/unsupported.html"
+    },
+    {
+      "src": "^/docs/code-editor/?$",
+      "dest": "/__public/docs/code-editor.html"
+    },
+    {
+      "src": "^/docs/code-editor/files/?$",
+      "dest": "/__public/docs/code-editor/files.html"
+    },
+    {
+      "src": "^/docs/code-editor/saving/?$",
+      "dest": "/__public/docs/code-editor/saving.html"
+    },
+    {
+      "src": "^/docs/split-view/?$",
+      "dest": "/__public/docs/split-view.html"
+    },
+    {
+      "src": "^/docs/code-editor/styles/?$",
+      "dest": "/__public/docs/code-editor/styles.html"
+    },
+    {
+      "src": "^/docs/code-editor/drafts/?$",
+      "dest": "/__public/docs/code-editor/drafts.html"
+    },
+    {
+      "src": "^/docs/code-editor/errors/?$",
+      "dest": "/__public/docs/code-editor/errors.html"
+    },
+    {
+      "src": "^/docs/code-editor/shortcuts/?$",
+      "dest": "/__public/docs/code-editor/shortcuts.html"
+    },
+    {
+      "src": "^/docs/ai-editing/?$",
+      "dest": "/__public/docs/ai-editing.html"
+    },
+    {
+      "src": "^/docs/ai-editing/modes/?$",
+      "dest": "/__public/docs/ai-editing/modes.html"
+    },
+    {
+      "src": "^/docs/ai-editing/actions/?$",
+      "dest": "/__public/docs/ai-editing/actions.html"
+    },
+    {
+      "src": "^/docs/ai-editing/context/?$",
+      "dest": "/__public/docs/ai-editing/context.html"
+    },
+    {
+      "src": "^/docs/ai-editing/review-diffs/?$",
+      "dest": "/__public/docs/ai-editing/review-diffs.html"
+    },
+    {
+      "src": "^/docs/ai-editing/apply/?$",
+      "dest": "/__public/docs/ai-editing/apply.html"
+    },
+    {
+      "src": "^/docs/ai-editing/stale-revisions/?$",
+      "dest": "/__public/docs/ai-editing/stale-revisions.html"
+    },
+    {
+      "src": "^/docs/ai-editing/failures/?$",
+      "dest": "/__public/docs/ai-editing/failures.html"
+    },
+    {
+      "src": "^/docs/ai-editing/security/?$",
+      "dest": "/__public/docs/ai-editing/security.html"
+    },
+    {
+      "src": "^/docs/history/?$",
+      "dest": "/__public/docs/history.html"
+    },
+    {
+      "src": "^/docs/history/inspect/?$",
+      "dest": "/__public/docs/history/inspect.html"
+    },
+    {
+      "src": "^/docs/history/undo-redo/?$",
+      "dest": "/__public/docs/history/undo-redo.html"
+    },
+    {
+      "src": "^/docs/history/drafts/?$",
+      "dest": "/__public/docs/history/drafts.html"
+    },
+    {
+      "src": "^/docs/history/conflicts/?$",
+      "dest": "/__public/docs/history/conflicts.html"
+    },
+    {
+      "src": "^/docs/history/recovery/?$",
+      "dest": "/__public/docs/history/recovery.html"
+    },
+    {
+      "src": "^/docs/history/ai-changes/?$",
+      "dest": "/__public/docs/history/ai-changes.html"
+    },
+    {
+      "src": "^/docs/history/multiple-tabs/?$",
+      "dest": "/__public/docs/history/multiple-tabs.html"
+    },
+    {
+      "src": "^/docs/export/?$",
+      "dest": "/__public/docs/export.html"
+    },
+    {
+      "src": "^/docs/export/accepted-source/?$",
+      "dest": "/__public/docs/export/accepted-source.html"
+    },
+    {
+      "src": "^/docs/export/local-setup/?$",
+      "dest": "/__public/docs/export/local-setup.html"
+    },
+    {
+      "src": "^/docs/export/environment/?$",
+      "dest": "/__public/docs/export/environment.html"
+    },
+    {
+      "src": "^/docs/export/ownership/?$",
+      "dest": "/__public/docs/export/ownership.html"
+    },
+    {
+      "src": "^/docs/export/review/?$",
+      "dest": "/__public/docs/export/review.html"
+    },
+    {
+      "src": "^/docs/export/troubleshooting/?$",
+      "dest": "/__public/docs/export/troubleshooting.html"
+    },
+    {
+      "src": "^/docs/export/version-control/?$",
+      "dest": "/__public/docs/export/version-control.html"
+    },
+    {
+      "src": "^/docs/compatibility/?$",
+      "dest": "/__public/docs/compatibility.html"
+    },
+    {
+      "src": "^/docs/compatibility/runtime/?$",
+      "dest": "/__public/docs/compatibility/runtime.html"
+    },
+    {
+      "src": "^/docs/compatibility/visual-support/?$",
+      "dest": "/__public/docs/compatibility/visual-support.html"
+    },
+    {
+      "src": "^/docs/compatibility/styling/?$",
+      "dest": "/__public/docs/compatibility/styling.html"
+    },
+    {
+      "src": "^/docs/compatibility/dependencies/?$",
+      "dest": "/__public/docs/compatibility/dependencies.html"
+    },
+    {
+      "src": "^/docs/compatibility/preview-modes/?$",
+      "dest": "/__public/docs/compatibility/preview-modes.html"
+    },
+    {
+      "src": "^/docs/compatibility/admission/?$",
+      "dest": "/__public/docs/compatibility/admission.html"
+    },
+    {
+      "src": "^/docs/integrations/?$",
+      "dest": "/__public/docs/integrations.html"
+    },
+    {
+      "src": "^/docs/creators/?$",
+      "dest": "/__public/docs/creators.html"
+    },
+    {
+      "src": "^/docs/creators/studio/?$",
+      "dest": "/__public/docs/creators/studio.html"
+    },
+    {
+      "src": "^/docs/creators/submissions/?$",
+      "dest": "/__public/docs/creators/submissions.html"
+    },
+    {
+      "src": "^/docs/creators/review/?$",
+      "dest": "/__public/docs/creators/review.html"
+    },
+    {
+      "src": "^/docs/creators/releases/?$",
+      "dest": "/__public/docs/creators/releases.html"
+    },
+    {
+      "src": "^/docs/creators/immutable-releases/?$",
+      "dest": "/__public/docs/creators/immutable-releases.html"
+    },
+    {
+      "src": "^/docs/creators/rules/?$",
+      "dest": "/__public/docs/creators/rules.html"
+    },
+    {
+      "src": "^/docs/creators/fees-payouts/?$",
+      "dest": "/__public/docs/creators/fees-payouts.html"
+    },
+    {
+      "src": "^/docs/creators/pricing/?$",
+      "dest": "/__public/docs/creators/pricing.html"
+    },
+    {
+      "src": "^/docs/creators/licensing/?$",
+      "dest": "/__public/docs/creators/licensing.html"
+    },
+    {
+      "src": "^/docs/creators/listing-updates/?$",
+      "dest": "/__public/docs/creators/listing-updates.html"
+    },
+    {
+      "src": "^/docs/account/identity/?$",
+      "dest": "/__public/docs/account/identity.html"
+    },
+    {
+      "src": "^/docs/account/providers/?$",
+      "dest": "/__public/docs/account/providers.html"
+    },
+    {
+      "src": "^/docs/account/google/?$",
+      "dest": "/__public/docs/account/google.html"
+    },
+    {
+      "src": "^/docs/account/github/?$",
+      "dest": "/__public/docs/account/github.html"
+    },
+    {
+      "src": "^/docs/account/email/?$",
+      "dest": "/__public/docs/account/email.html"
+    },
+    {
+      "src": "^/docs/account/sessions/?$",
+      "dest": "/__public/docs/account/sessions.html"
+    },
+    {
+      "src": "^/docs/account/profile/?$",
+      "dest": "/__public/docs/account/profile.html"
+    },
+    {
+      "src": "^/docs/account/workspaces/?$",
+      "dest": "/__public/docs/account/workspaces.html"
+    },
+    {
+      "src": "^/docs/billing/plans/?$",
+      "dest": "/__public/docs/billing/plans.html"
+    },
+    {
+      "src": "^/docs/billing/checkout/?$",
+      "dest": "/__public/docs/billing/checkout.html"
+    },
+    {
+      "src": "^/docs/billing/subscription-state/?$",
+      "dest": "/__public/docs/billing/subscription-state.html"
+    },
+    {
+      "src": "^/docs/billing/ai-allowance/?$",
+      "dest": "/__public/docs/billing/ai-allowance.html"
+    },
+    {
+      "src": "^/docs/billing/credits/?$",
+      "dest": "/__public/docs/billing/credits.html"
+    },
+    {
+      "src": "^/docs/billing/changes/?$",
+      "dest": "/__public/docs/billing/changes.html"
+    },
+    {
+      "src": "^/docs/billing/orders/?$",
+      "dest": "/__public/docs/billing/orders.html"
+    },
+    {
+      "src": "^/docs/billing/limits/?$",
+      "dest": "/__public/docs/billing/limits.html"
+    },
+    {
+      "src": "^/docs/security/?$",
+      "dest": "/__public/docs/security.html"
+    },
+    {
+      "src": "^/docs/security/runtime-isolation/?$",
+      "dest": "/__public/docs/security/runtime-isolation.html"
+    },
+    {
+      "src": "^/docs/security/secrets/?$",
+      "dest": "/__public/docs/security/secrets.html"
+    },
+    {
+      "src": "^/docs/security/privacy/?$",
+      "dest": "/__public/docs/security/privacy.html"
+    },
+    {
+      "src": "^/docs/security/disclosure/?$",
+      "dest": "/__public/docs/security/disclosure.html"
+    },
+    {
+      "src": "^/docs/security/support-data/?$",
+      "dest": "/__public/docs/security/support-data.html"
+    },
+    {
+      "src": "^/docs/troubleshooting/login/?$",
+      "dest": "/__public/docs/troubleshooting/login.html"
+    },
+    {
+      "src": "^/docs/troubleshooting/preview/?$",
+      "dest": "/__public/docs/troubleshooting/preview.html"
+    },
+    {
+      "src": "^/docs/troubleshooting/visual-target/?$",
+      "dest": "/__public/docs/troubleshooting/visual-target.html"
+    },
+    {
+      "src": "^/docs/troubleshooting/contact/?$",
+      "dest": "/__public/docs/troubleshooting/contact.html"
+    },
+    {
+      "src": "^/legal/terms/?$",
+      "dest": "/__public/legal/terms.html"
+    },
+    {
+      "src": "^/legal/privacy/?$",
+      "dest": "/__public/legal/privacy.html"
+    },
+    {
+      "src": "^/legal/?$",
+      "dest": "/__public/legal.html"
+    },
+    {
+      "src": "^/legal/buyer-license/?$",
+      "dest": "/__public/legal/buyer-license.html"
+    },
+    {
+      "src": "^/legal/creator-distribution/?$",
+      "dest": "/__public/legal/creator-distribution.html"
+    },
+    {
+      "src": "^/legal/refunds/?$",
+      "dest": "/__public/legal/refunds.html"
+    },
+    {
+      "src": "^/legal/acceptable-use/?$",
+      "dest": "/__public/legal/acceptable-use.html"
+    },
+    {
+      "src": "^/legal/licenses/?$",
+      "dest": "/__public/legal/licenses.html"
+    },
+    {
+      "src": "^/legal/privacy-requests/?$",
+      "dest": "/__public/legal/privacy-requests.html"
+    },
+    {
+      "src": "^/about/?$",
+      "dest": "/__public/about.html"
+    },
+    {
+      "src": "^/updates/?$",
+      "dest": "/__public/updates.html"
+    },
+    {
+      "src": "^/changelog/?$",
+      "dest": "/__public/changelog.html"
+    },
+    {
+      "src": "^/contact/?$",
+      "dest": "/__public/contact.html"
+    },
+    {
+      "src": "^/brand/?$",
+      "dest": "/__public/brand.html"
+    },
+    {
+      "src": "^/contact/support/?$",
+      "dest": "/__public/contact/support.html"
+    },
+    {
+      "src": "^/contact/account/?$",
+      "dest": "/__public/contact/account.html"
+    },
+    {
+      "src": "^/contact/sellers/?$",
+      "dest": "/__public/contact/sellers.html"
+    },
+    {
+      "src": "^/contact/billing/?$",
+      "dest": "/__public/contact/billing.html"
+    },
+    {
+      "src": "^/contact/issues/?$",
+      "dest": "/__public/contact/issues.html"
+    },
+    {
+      "src": "^/contact/sales/?$",
+      "dest": "/__public/contact/sales.html"
+    },
+    {
+      "src": "^/contact/partnerships/?$",
+      "dest": "/__public/contact/partnerships.html"
+    },
+    {
+      "src": "^/contact/security/?$",
+      "dest": "/__public/contact/security.html"
+    },
+    {
+      "src": "^//?$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "^/browse/?$",
+      "dest": "/__public/browse.html"
+    },
+    {
+      "src": "^/browse/marketing/?$",
+      "dest": "/__public/browse/marketing.html"
+    },
+    {
+      "src": "^/browse/saas/?$",
+      "dest": "/__public/browse/saas.html"
+    },
+    {
+      "src": "^/browse/commerce/?$",
+      "dest": "/__public/browse/commerce.html"
+    },
+    {
+      "src": "^/browse/directories/?$",
+      "dest": "/__public/browse/directories.html"
+    },
+    {
+      "src": "^/browse/editorial/?$",
+      "dest": "/__public/browse/editorial.html"
+    },
+    {
+      "src": "^/browse/portfolio/?$",
+      "dest": "/__public/browse/portfolio.html"
+    },
+    {
+      "src": "^/browse/dashboards/?$",
+      "dest": "/__public/browse/dashboards.html"
+    },
+    {
+      "src": "^/plans/?$",
+      "dest": "/__public/plans.html"
+    },
+    {
+      "src": "^/(?:__public/.*|app-shell\\.html)$",
+      "dest": "/__public/404.html",
+      "status": 404,
+      "headers": {
+        "X-Robots-Tag": "noindex"
+      }
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
+      "dest": "/app-shell.html",
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow"
+      }
+    },
+    {
+      "src": "^/.*$",
+      "dest": "/__public/404.html",
+      "status": 404,
+      "headers": {
+        "X-Robots-Tag": "noindex"
+      }
     }
   ]
 }

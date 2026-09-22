@@ -1,0 +1,253 @@
+[
+  {
+    "title": "Product",
+    "links": [
+      [
+        "Marketplace",
+        "/browse"
+      ],
+      [
+        "Visual editor",
+        "/docs/visual-editor"
+      ],
+      [
+        "Code editor",
+        "/docs/code-editor"
+      ],
+      [
+        "Split view",
+        "/docs/split-view"
+      ],
+      [
+        "AI editing",
+        "/docs/ai-editing"
+      ],
+      [
+        "History",
+        "/docs/history"
+      ],
+      [
+        "Export",
+        "/docs/export"
+      ],
+      [
+        "Plans",
+        "/plans"
+      ]
+    ]
+  },
+  {
+    "title": "Marketplace",
+    "links": [
+      [
+        "All projects",
+        "/browse"
+      ],
+      [
+        "Marketing websites",
+        "/browse/marketing"
+      ],
+      [
+        "SaaS projects",
+        "/browse/saas"
+      ],
+      [
+        "Commerce projects",
+        "/browse/commerce"
+      ],
+      [
+        "Directories",
+        "/browse/directories"
+      ],
+      [
+        "Editorial / Blog",
+        "/browse/editorial"
+      ],
+      [
+        "Portfolio / Agency",
+        "/browse/portfolio"
+      ],
+      [
+        "Dashboard / Admin",
+        "/browse/dashboards"
+      ]
+    ]
+  },
+  {
+    "title": "Creators",
+    "links": [
+      [
+        "Creator Studio",
+        "/seller"
+      ],
+      [
+        "Publish a project",
+        "/seller/projects/new"
+      ],
+      [
+        "Seller guide",
+        "/docs/creators"
+      ],
+      [
+        "Marketplace rules",
+        "/docs/creators/rules"
+      ],
+      [
+        "Fees & payouts",
+        "/docs/creators/fees-payouts"
+      ],
+      [
+        "Releases & versioning",
+        "/docs/creators/releases"
+      ],
+      [
+        "Licensing guide",
+        "/docs/creators/licensing"
+      ],
+      [
+        "Creator docs",
+        "/docs/creators"
+      ]
+    ]
+  },
+  {
+    "title": "Resources",
+    "links": [
+      [
+        "Documentation",
+        "/docs"
+      ],
+      [
+        "Getting started",
+        "/docs/getting-started"
+      ],
+      [
+        "Compatibility",
+        "/docs/compatibility"
+      ],
+      [
+        "Security",
+        "/docs/security"
+      ],
+      [
+        "Changelog",
+        "/changelog"
+      ],
+      [
+        "Help Center",
+        "/contact/support"
+      ],
+      [
+        "API / Integrations overview",
+        "/docs/integrations"
+      ]
+    ]
+  },
+  {
+    "title": "Company",
+    "links": [
+      [
+        "About",
+        "/about"
+      ],
+      [
+        "Updates",
+        "/updates"
+      ],
+      [
+        "Changelog",
+        "/changelog"
+      ],
+      [
+        "Contact",
+        "/contact"
+      ],
+      [
+        "GitHub",
+        "https://github.com/Webcanbe/webcanbe-real"
+      ],
+      [
+        "Brand assets",
+        "/brand"
+      ]
+    ]
+  },
+  {
+    "title": "Support",
+    "links": [
+      [
+        "General Support",
+        "/contact/support"
+      ],
+      [
+        "Account Help",
+        "/contact/account"
+      ],
+      [
+        "Seller Support",
+        "/contact/sellers"
+      ],
+      [
+        "Billing Help",
+        "/contact/billing"
+      ],
+      [
+        "Report an Issue",
+        "/contact/issues"
+      ],
+      [
+        "Talk to Sales",
+        "/contact/sales"
+      ],
+      [
+        "Partnerships",
+        "/contact/partnerships"
+      ],
+      [
+        "Security Report",
+        "/contact/security"
+      ]
+    ]
+  },
+  {
+    "title": "Legal",
+    "links": [
+      [
+        "Legal overview",
+        "/legal"
+      ],
+      [
+        "Terms of Service",
+        "/legal/terms"
+      ],
+      [
+        "Privacy Policy",
+        "/legal/privacy"
+      ],
+      [
+        "Buyer License",
+        "/legal/buyer-license"
+      ],
+      [
+        "Creator Distribution Agreement",
+        "/legal/creator-distribution"
+      ],
+      [
+        "Refund Policy",
+        "/legal/refunds"
+      ],
+      [
+        "Acceptable Use",
+        "/legal/acceptable-use"
+      ],
+      [
+        "Licenses",
+        "/legal/licenses"
+      ],
+      [
+        "Privacy Requests",
+        "/legal/privacy-requests"
+      ]
+    ]
+  }
+]

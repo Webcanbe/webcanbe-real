@@ -5,7 +5,7 @@ const landing = fs.readFileSync("public/wcb-landing/index.html", "utf8")
 const root = fs.readFileSync("index.html", "utf8")
 const security = fs.readFileSync("worker/security-headers.js", "utf8")
 
-const inlineScriptPattern = /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/gi
+const inlineScriptPattern = /<script\b(?![^>]*\btype=["']application\/ld\+json["'])(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/gi
 const remoteRuntimePatterns = [
   /<(?:script|img|source|video|audio|iframe)\b[^>]*(?:src|srcset)=["']https?:\/\//gi,
   /<link\b(?=[^>]*rel=["'](?:stylesheet|preload|modulepreload|icon|apple-touch-icon)["'])[^>]*href=["']https?:\/\//gi,
@@ -13,12 +13,24 @@ const remoteRuntimePatterns = [
 ]
 
 describe("Phase 5 CSP compatibility inventory", () => {
-  it("keeps the retained landing free of runtime scripts and external runtime asset origins", () => {
+  it("allows only the local landing interaction module and no external runtime asset origins", () => {
     expect(landing.match(inlineScriptPattern) ?? []).toHaveLength(0)
-    expect(landing.match(/<script\b[^>]*\bsrc=/gi) ?? []).toHaveLength(0)
+    expect(landing.match(/<script\b[^>]*\bsrc=/gi) ?? []).toHaveLength(2)
+    expect(landing).toContain('src="/landing-interactions.js"')
     for (const pattern of remoteRuntimePatterns) expect(landing.match(pattern) ?? []).toHaveLength(0)
     expect(landing).not.toMatch(/\beval\s*\(/)
     expect(landing).not.toMatch(/new\s+Function\s*\(/)
+  })
+
+  it("serves every app font locally under the self-only font CSP", () => {
+    const css = fs.readFileSync("src/globals.css", "utf8")
+    const urls = [...css.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(match => match[1])
+    expect(urls.length).toBeGreaterThan(0)
+    for (const url of urls) {
+      expect(url).toMatch(/^\/fonts\/[^/]+\.woff2$/)
+      expect(fs.readFileSync("public" + url).subarray(0, 4).toString()).toBe("wOF2")
+    }
+    expect(security).toContain("font-src 'self' data:")
   })
 
   it("keeps the React root free of inline scripts", () => {

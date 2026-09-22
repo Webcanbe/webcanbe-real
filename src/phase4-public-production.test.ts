@@ -23,7 +23,7 @@ describe("Phase 4 public production seams", () => {
     expect(identity).not.toContain('Location: "/workspace/northstar"')
     expect(app).toContain('function AuthComplete()')
     expect(app).toContain('sessionStorage.getItem("wcb-auth-next")')
-    expect(app).toContain('if (path === "/auth/complete") return <AuthComplete/>')
+    expect(app).toMatch(/else if\s*\(basePath\s*===\s*"\/auth\/complete"\)\s*page\s*=\s*<AuthComplete\/>/)
   })
 
   it("serves intended public and authenticated SPA routes on hard refresh", () => {

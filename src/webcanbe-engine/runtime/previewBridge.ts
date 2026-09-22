@@ -69,24 +69,32 @@ function reportRoute() {
 }
 function refreshSelection() {
   reportRoute()
-  if (!active) return
+  // Selection geometry must track scrolling even while preview interaction is enabled.
   if (selected && !selected.isConnected) {
     selected = undefined
     window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "clear", session, generation }, parentOrigin === "null" ? "*" : parentOrigin)
   }
   if (selected) { const element = describe(selected); if (element) send("select", element) }
-  if (hovered?.isConnected) { const element = describe(hovered); if (element) send("hover", element) }
+  if (active && hovered?.isConnected) { const element = describe(hovered); if (element) send("hover", element) }
 }
 
 
 window.addEventListener("message", (event) => {
   if (event.source !== window.parent || !safeParentOrigin(event.origin) || !event.data || typeof event.data !== "object") return
-  const message = event.data as { channel?: string; type?: string; session?: string; generation?: string; active?: boolean; hash?: string }
+  const message = event.data as { channel?: string; type?: string; session?: string; generation?: string; active?: boolean; hash?: string; selection?: { file?: unknown; elementStart?: unknown } }
   if (message.channel !== PREVIEW_CHANNEL || message.type !== "configure" || typeof message.session !== "string" || message.session.length > 128 || typeof message.generation !== "string" || !/^[a-zA-Z0-9-]{1,128}$/.test(message.generation) || typeof message.active !== "boolean") return
   generation = message.generation
   session = message.session
   parentOrigin = event.origin
   active = Boolean(message.active)
+  if (message.selection && typeof message.selection.file === "string" && Number.isInteger(message.selection.elementStart)) {
+    // Resolve a Layers selection against the actual rendered source identities.
+    selected = [...document.querySelectorAll<HTMLElement>("[data-wcb-id]")].find(element => {
+      const identity = decodeSourceIdentity(element.dataset.wcbId ?? "")
+      return identity?.file === message.selection!.file && identity?.elementStart === message.selection!.elementStart
+    })
+    if (selected) { const element = describe(selected); if (element) send("select", element) }
+  }
   if (!__WCB_HTTP_PREVIEW__ && typeof message.hash === "string" && /^#\/[\x20-\x7e]{0,2048}$/.test(message.hash) && window.location.hash !== message.hash) window.location.hash = message.hash
   window.parent.postMessage({ channel: PREVIEW_CHANNEL, type: "ready", session, generation }, parentOrigin === "null" ? "*" : parentOrigin)
   reportRoute()

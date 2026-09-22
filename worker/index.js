@@ -1,3 +1,5 @@
+import { renderListingPage, injectCatalog, listingSitemap } from "./public-catalog-pages.js"
+import { publicRoute, manifest } from "./public-routing.js"
 import { boundedRequestBody } from './request-body.js'
 import { paymentPaths, paymentConfiguration, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
@@ -5,7 +7,7 @@ import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
 import { databaseReadiness } from "./readiness.js"
-import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
+import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces, createDatabaseWorkspace, WorkspaceCreationError } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
 import { EditorProjectError, editorProjectRequest } from "./editor-projects.js"
@@ -424,6 +426,12 @@ async function privateProduct(request, env, path, traceId) {
         const bounded = new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify(body) })
         return privatePayment(bounded, path, db, databaseSession, env)
       }
+      if (path === "/__webcanbe/api/workspaces/create") {
+        let body
+        try { body = await smallJsonBody(request) } catch { return json({ error: "Invalid workspace request." }, 400) }
+        try { return json({ workspaceId: await createDatabaseWorkspace(db, databaseSession, body) }, 201) }
+        catch (error) { return error instanceof WorkspaceCreationError ? json({ error: error.message }, 400) : json({ error: "Workspace creation is temporarily unavailable." }, 503) }
+      }
       if (path === "/__webcanbe/api/workspaces") {
         return json({ workspaces: await databaseWorkspaces(db, databaseSession) })
       }
@@ -637,14 +645,59 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path === "/sitemap-listings.xml") {
+        const key=await anonymousRateKey(request,"public:listing-sitemap")
+        if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()
+        else if (!env.HYPERDRIVE?.connectionString) response = new Response("Public catalog unavailable", {status:503,headers:{"Retry-After":"300"}})
+        else response = await withHyperdrive(env, async db => {
+          const result = await db.query("SELECT l.slug,l.updated_at FROM wcb_listings l JOIN wcb_catalog_projects c ON c.catalog_project_id=l.catalog_project_id JOIN wcb_project_releases r ON r.release_id=l.release_id WHERE l.status='published' AND l.availability='available' AND c.status='active' AND r.status='published'")
+          return new Response(listingSitemap(result.rows), {headers:{"Content-Type":"application/xml; charset=utf-8"}})
+        })
+      }
+      else if (/^\/project\/[^/]+(?:\/(?:preview|acquire))?$/.test(path)) {
+        const key = await anonymousRateKey(request, "public:listing-html")
+        if (!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()
+        else if (!env.HYPERDRIVE?.connectionString) response=new Response("The public catalog is temporarily unavailable.",{status:503,headers:{"Content-Type":"text/plain; charset=utf-8","Retry-After":"300"}})
+        else response=await withHyperdrive(env,async db=>{
+          let reference
+          try { reference=decodeURIComponent(path.split("/")[2]) } catch { reference="" }
+          const listing=reference && reference.length<=100 ? await catalogDetail(db,reference) : undefined
+          const assetUrl=new URL(request.url);assetUrl.pathname="/__public/404.html"
+          const template=await env.ASSETS.fetch(new Request(assetUrl,request))
+          if(!listing||listing.availability!=="available")return applySecurityHeaders(new Response(template.body,{status:404,headers:template.headers}),{noIndex:true})
+          const suffix=path.endsWith("/preview")?"/preview":path.endsWith("/acquire")?"/acquire":""
+          if(suffix){assetUrl.pathname="/app-shell.html";return applySecurityHeaders(await env.ASSETS.fetch(new Request(assetUrl,request)),{noIndex:true})}
+          const canonical="/project/"+encodeURIComponent(listing.slug)
+          if(path!==canonical)return new Response(null,{status:308,headers:{Location:canonical}})
+          return applySecurityHeaders(new Response(renderListingPage(await template.text(),listing),{headers:{"Content-Type":"text/html; charset=utf-8"}}))
+        })
+      }
       else {
-        const asset = await env.ASSETS.fetch(request)
+        const route = publicRoute(path, new URL(request.url).search)
+        if (route?.redirect) return withRequestId(new Response(null, { status: route.status, headers: { Location: route.redirect } }), traceId)
+        const internal = path.startsWith("/__public/") || path === "/app-shell.html"
+        const assetUrl = new URL(request.url)
+        if (internal) assetUrl.pathname = "/__public/404.html"
+        else if (route?.asset) assetUrl.pathname = route.asset
+        else if (isKnownAppPath(path) && path !== "/__wcb_preview_runtime") assetUrl.pathname = "/app-shell.html"
+        else if (!path.split("/").pop().includes(".")) assetUrl.pathname = "/__public/404.html"
+        let fetched = await env.ASSETS.fetch(new Request(assetUrl, request))
+        if ((path === "/browse" || path.startsWith("/browse/")) && route?.status === 200 && env.HYPERDRIVE?.connectionString) {
+          const category = manifest.categories.find(c=>"/browse/"+c.slug===path)
+          try {
+            const key=await anonymousRateKey(request,"public:category-html")
+            if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) return withRequestId(rateLimitedResponse(),traceId)
+            const listings = await withHyperdrive(env,db=>browseCatalog(db,{limit:100,...(category?{tags:[category.tag.toLowerCase()]}:{})}))
+            fetched=new Response(injectCatalog(await fetched.text(),listings),{status:fetched.status,headers:fetched.headers})
+          } catch { /* Public category guidance remains available during catalog outages. */ }
+        }
+        const asset = route?.status === 404 || internal ? new Response(fetched.body, {status:404,headers:fetched.headers}) : fetched
         if (path === "/__wcb_preview_runtime") {
           response = applyPreviewRuntimeHeaders(asset)
         } else {
           const acceptsHtml = request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html")
-          const unknownAppPath = acceptsHtml && !isKnownAppPath(path)
+          const unknownAppPath = ((acceptsHtml && (asset.headers.get("Content-Type") || "").includes("text/html")) || !path.split("/").pop().includes(".")) && !isKnownAppPath(path)
           const secured = applySecurityHeaders(asset, { noIndex: shouldNoIndexPath(path) || unknownAppPath })
           response = unknownAppPath && secured.status === 200
             ? new Response(secured.body, { status: 404, headers: secured.headers })

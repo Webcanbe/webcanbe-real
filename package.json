@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/generate-public.mjs && tsc -b && vite build && node scripts/generate-public.mjs --dist",
     "preview": "vite preview",
     "test": "vitest run",
     "runtime:prepare": "npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6",
@@ -23,7 +23,10 @@
     "smoke:production:public": "node scripts/production-smoke-public.mjs",
     "db:recovery:preflight": "node scripts/db/recovery-preflight.mjs",
     "launch:smoke-fixture": "node scripts/launch/materialization-smoke-fixture.mjs",
-    "db:restore:recovery": "node scripts/db/restore-recovery.mjs"
+    "db:restore:recovery": "node scripts/db/restore-recovery.mjs",
+    "public:generate": "node scripts/generate-public.mjs",
+    "predev": "npm run public:generate",
+    "public:check": "node scripts/check-public.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",

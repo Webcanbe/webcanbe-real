@@ -19,7 +19,7 @@ describe("Phase 5 Gate 3 production materialization activation", () => {
   it("opens only the materialization seam without Seller or payment mutation routes", () => {
     expect(client).toContain("productionMutationProductMode")
     expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
-    const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("type DashboardView"))
+    const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("function RopeanDashboardShell"))
     const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     expect(purchases).toContain("productMutationMode()")
     expect(purchases).toContain("hostedProductClient.materialize")
