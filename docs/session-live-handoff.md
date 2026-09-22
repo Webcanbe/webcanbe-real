@@ -1356,3 +1356,49 @@ User is staying home from school on 2026-09-23 because they feel somewhat unwell
 - After the 60-minute UI/UX cap, do not reopen cosmetic work unless a real user-flow blocker is found.
 - The highest-value outcome tonight is not “more complete code”; it is **Webcanbe being publicly usable and beginning to collect real market evidence**.
 - Because the user feels somewhat unwell, judge continuation by output quality. If quality collapses, stop low-value work rather than forcing hours of bad decisions.
+
+
+## 27. 2026-09-23 overnight launch execution plan
+
+Context:
+- User can work later tonight because they are not going to school tomorrow and expects enough uninterrupted time to reach marketing.
+- User wants **exactly ~1 hour** for final UI/UX polish, then no more open-ended product polishing.
+- Basic technical/product work is considered covered inside that final UI/UX block; do not turn the night back into another feature-building session.
+
+### Tonight's order
+1. **60 min hard-cap: final UI/UX pass**
+   - only obvious friction, broken states, clarity, mobile/desktop launch-facing rough edges
+   - no new features
+   - no architecture changes
+   - anything non-blocking goes to backlog when the hour ends
+
+2. **Core production acceptance**
+   - real login
+   - working copy/materialize
+   - Visual edit/save
+   - reopen/reload
+   - Code edit/save
+   - export
+   - independent build
+   - if this passes, treat the product as ready for free/limited public beta
+
+3. **PostHog minimum instrumentation**
+   - landing / signup / materialize / edit-save / export
+   - do not delay launch for analytics perfection
+
+4. **Launch assets**
+   - one short real product demo
+   - one concise launch post
+   - one clear landing CTA
+   - optional Founding Build League teaser only if it is ready enough to be truthful
+
+5. **Marketing begins the same night**
+   - publish first launch content
+   - start measuring actual traffic and activation
+   - no returning to cosmetic polish unless real users expose a blocker
+
+### Motivation rule
+Use external skepticism as energy, not as the decision-maker.
+- Do not argue with family about whether the project is important.
+- Convert the feeling into measurable proof: shipped product, external users, activation, revenue, retention.
+- The strongest answer is not “I told you so”; it is a product that real people choose to use.
