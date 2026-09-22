@@ -428,3 +428,46 @@ Working judgment:
 - The strongest current claim is:
   **Webcanbe is one of the more plausible kinds of businesses for the founder's extreme goal, provided the market proves that users actually want the source-owning visual+code workflow and marketplace loop.**
 - If real traction fails to appear, preserving the 1T goal is more important than preserving the exact current product shape; use evidence-driven pivots rather than identity attachment to the initial idea.
+
+
+## 16. 2026-09-22 launch-closure snapshot from live GitHub
+
+This section supersedes older launch-percentage impressions when they conflict with actual repo evidence.
+
+Latest main observed:
+- `b139a7913709b0bf0145c9620b94ac92e72f4ccd`
+- PR #83 merged: invalid project route/public browser stabilization.
+
+Current commerce/AI closure chain:
+- **PR #84 — AI workspace closure**
+  - open, not merged.
+  - head `15a88311368effad7c1796a60b03596481bcaaa2`
+  - several canonical workflows are RED.
+  - at least one deterministic rendered stale-response/revision bug is confirmed: a delayed accepted AI response can regress the client revision after a newer Code save, causing Export to request an older revision.
+  - therefore do not merge #84 until corrected and green.
+- **PR #85 — commerce UI closure**
+  - open, not merged.
+  - frozen `INTEGRATION_READY=fd665fc9dad7fb1ab3257b91621fc92b28a91cab`
+  - 69 focused payment/UI tests + build reportedly pass.
+  - PayPal Sandbox connected E2E was **not run** because sandbox credentials / plan IDs are absent in that environment.
+  - depends on correcting/merging #84 first in the current integration sequence.
+- **PR #86 — billing/browser/CI reconcile**
+  - draft, open, not merged.
+  - head `a60fceb4de087c0ce886063d1ccd3f2a3e4147e6`
+  - depends on corrected #84, then #85.
+  - 75 focused commerce tests, deterministic Chromium commerce checks, and schema/payment-state checks reportedly pass.
+  - not PayPal connected E2E.
+  - no FINAL_RC frozen.
+
+Interpretation of coding-agent percentages:
+- “code 99% / launch 94–96% / payments 98–99%” can be directionally reasonable as an engineering-completeness estimate, but **must not be treated as GO status**.
+- The remaining percentage contains high-criticality integration/production checks; launch readiness is binary at those gates.
+- AI itself is not part of the minimum public-beta core promise. If AI remains the only defect, it may be disabled/hidden for launch rather than delaying the usable core beta.
+- Commerce is not mandatory for FREE/LIMITED public beta, but is mandatory for PAID beta.
+- Auth isolation, materialization, durable edit/save/reopen/export and serious security/data-integrity issues remain non-negotiable beta blockers.
+
+Current decision rule:
+1. If #84 is not green but AI can be truthfully disabled without affecting core editing, do not let AI alone push the beta past the hard deadline.
+2. If #85/#86 or PayPal connected E2E are not ready, launch free/limited beta by the hard deadline and keep paid CTA disabled.
+3. Do not launch even free beta until authenticated account isolation + real working-copy materialization + durable edit/save/reopen/export are proven in production.
+4. Absolute public-beta deadline remains **2026-09-24 21:00 KST**.
