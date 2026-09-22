@@ -13,6 +13,10 @@ const proposal = {
 }
 
 describe("CompatibleWorkspace AI client contract", () => {
+  it("binds the existing Workers AI provider in the canonical deployment", () => {
+    const config = JSON.parse(fs.readFileSync("wrangler.jsonc", "utf8"))
+    expect(config.ai).toEqual({ binding: "AI" })
+  })
   it("builds explain and selected-source requests against an exact revision", () => {
     const explain = createAiRequestSpec({ feature: "explain", prompt: "  Explain this component  ", mode: "standard", revision: "rev_1", idempotencyKey: "request_123", includeSelection: true, target })
     expect(explain).toEqual(expect.objectContaining({ feature: "explain", prompt: "Explain this component", mode: "standard", expectedRevision: "rev_1", apply: false, selection: { file: "src/App.tsx", start: 12, end: 44 } }))

@@ -14,7 +14,7 @@ const viewports = [
   ["mobile", { width: 390, height: 844 }],
 ]
 
-const routes = ["/", "/browse", "/plans", "/login", "/updates", "/docs/security"]
+const routes = ["/", "/browse", "/plans", "/login", "/dashboard", "/projects", "/purchases", "/workspace/00000000-0000-4000-8000-000000000001", "/checkout/return?payment=return", "/checkout/return?payment=cancelled", "/updates", "/docs/security"]
 const failures = []
 let checks = 0
 
@@ -124,6 +124,16 @@ for (const [browserName, browserType] of browsers) {
             return { interactive: ["a","button","input","select","textarea"].includes(tag), tag }
           })
           assert(`${browserName}/${viewportName} ${route} accepts keyboard focus`, focus.interactive, `active tag ${focus.tag || "none"}`)
+          if (["/browse", "/login", "/checkout/return?payment=cancelled"].includes(route)) {
+            await page.reload({ waitUntil: "domcontentloaded" })
+            await page.locator("h1").first().waitFor({ state: "visible" })
+            await page.goto(new URL("/docs/security", origin).href, { waitUntil: "domcontentloaded" })
+            await page.goBack({ waitUntil: "domcontentloaded" })
+            await page.locator("h1").first().waitFor({ state: "visible" })
+            assert(`${browserName}/${viewportName} ${route} refresh/back restores route`, page.url() === url, page.url())
+            await page.goForward({ waitUntil: "domcontentloaded" })
+            assert(`${browserName}/${viewportName} ${route} forward restores route`, new URL(page.url()).pathname === "/docs/security", page.url())
+          }
         }
 
         await page.goto(new URL("/login", origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
