@@ -65,6 +65,23 @@ describe("hosted product route adapter", () => {
     expect(f.seen.map(call => call.path)).toContain("/__webcanbe/api/product/workspace-projects/list")
   })
 
+  it("posts only server-authority payment identifiers and reads resulting billing state", async () => {
+    const order = { orderId: "order-1", listingId: "listing-1", releaseId: "release-1", status: "approval_pending", grossMinor: 7900, currency: "USD", approvalUrl: "https://sandbox.paypal.test/approve", createdAt: "2026-09-22T00:00:00.000Z" }
+    const f = fixture([
+      ["/__webcanbe/auth/session", { csrf: "csrf-payments" }],
+      ["/__webcanbe/api/payments/orders/create", { order }, 201],
+      ["/__webcanbe/api/payments/orders/capture", { order: { ...order, status: "completed" } }],
+      ["/__webcanbe/api/payments/status", { billing: { currentPlanKey: "free", subscription: null, aiActions: { purchased: 100 } } }],
+    ])
+    await f.client.createPaymentOrder("listing-1", "marketplace:key")
+    await f.client.capturePaymentOrder("PAYPAL-TOKEN")
+    expect(await f.client.paymentStatus()).toMatchObject({ currentPlanKey: "free", aiActions: { purchased: 100 } })
+    expect(f.seen[1].body).toEqual({ listingId: "listing-1", idempotencyKey: "marketplace:key" })
+    expect(f.seen[2].body).toEqual({ providerOrderId: "PAYPAL-TOKEN" })
+    expect(JSON.stringify(f.seen[1].body)).not.toContain("price")
+    expect(f.seen.slice(1).every(call => call.headers.get("X-WCB-CSRF") === "csrf-payments")).toBe(true)
+  })
+
 
 
   it("exchanges a Firebase ID token for the first-party session cookie", async () => {

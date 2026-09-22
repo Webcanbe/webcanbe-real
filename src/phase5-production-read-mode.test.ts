@@ -41,12 +41,12 @@ describe("Phase 5 production product mode", () => {
     expect(settings).toContain("hostedProductClient.updateAccount(name)")
   })
 
-  it("keeps Seller and Checkout on the full hosted boundary while Control stays independently gated", () => {
+  it("keeps Seller on the full hosted boundary, Checkout on production reads, and Control independently gated", () => {
     const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     const control = app.slice(app.indexOf("function Control()"), app.indexOf("\nfunction ", app.indexOf("function Control()")+20))
     const checkout = app.slice(app.indexOf("function Checkout()"), app.indexOf("\nfunction ", app.indexOf("function Checkout()")+20))
     expect(seller).toContain("hostedProductMode()")
-    expect(checkout).toContain("hostedProductMode()")
+    expect(checkout).toContain("productReadMode()")
     expect(control).toContain("controlMode()")
     expect(client).toContain("productionControlMode")
     expect(client).toContain("controlMode = () => hostedProductMode() || productionControlMode()")

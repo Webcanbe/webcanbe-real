@@ -68,6 +68,13 @@ export function domainId(value, label = "payment") {
   return value
 }
 
+export function providerId(value, label = "provider") {
+  if (typeof value !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(value)) {
+    throw new PaymentError(422, "invalid_provider_identifier", `Invalid ${label} request.`)
+  }
+  return value
+}
+
 export function moneyMinor(value, label = "amount") {
   if (!Number.isSafeInteger(value) || value < 0) throw new PaymentError(422, "invalid_amount", `Invalid ${label}.`)
   return value

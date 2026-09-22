@@ -109,6 +109,26 @@ async function completedSale(price = 900) {
 }
 
 describe("provider-neutral marketplace payments", () => {
+  it("completes a free listing without contacting PayPal and grants once", async () => {
+    const repo = new MemoryRepository(0), provider = new StubProvider()
+    const first = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "free" }, options)
+    const replay = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "free" }, options)
+    expect(first).toMatchObject({ status: "completed", grossMinor: 0 })
+    expect(replay.orderId).toBe(first.orderId)
+    expect(provider.createCalls).toBe(0)
+    expect(repo.entitlements).toHaveLength(1)
+  })
+
+  it("rejects missing, stale, and unavailable listing state before provider work", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId: "99999999-9999-4999-8999-999999999999", idempotencyKey: "missing" }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
+    for (const patch of [{ status: "archived" }, { availability: "unavailable" }, { releaseStatus: "draft" }]) {
+      Object.assign(repo.listing, { status: "published", availability: "available", releaseStatus: "published" }, patch)
+      await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: `stale-${Object.keys(patch)[0]}` }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
+    }
+    expect(provider.createCalls).toBe(0)
+  })
+
   it("uses authoritative server price and rejects client price/creator tampering", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "checkout", priceMinor: 1 }, options)).rejects.toMatchObject({ code: "invalid_request" })
@@ -128,6 +148,15 @@ describe("provider-neutral marketplace payments", () => {
     expect(repo.entitlements).toHaveLength(1)
     expect(repo.ledger.filter(row => row.kind === "sale")).toHaveLength(1)
     expect(provider.captureCalls).toBe(1)
+  })
+
+  it("captures an approval return by provider token and keeps duplicate returns idempotent", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "provider-return" }, options)
+    await captureMarketplaceOrder(repo, provider, { userId: buyer }, { providerOrderId: `PP-${order.orderId}` })
+    await captureMarketplaceOrder(repo, provider, { userId: buyer }, { providerOrderId: `PP-${order.orderId}` })
+    expect(provider.captureCalls).toBe(1)
+    expect(repo.entitlements).toHaveLength(1)
   })
 
   it("resumes an interrupted provider create with the same Webcanbe order", async () => {
@@ -246,6 +275,15 @@ describe("purchased AI Action packs", () => {
     expect(repo.purchasedCredits).toHaveLength(1)
     expect(repo.purchasedCredits[0]).not.toHaveProperty("expiresAt")
     expect(repo.ledger).toHaveLength(0)
+  })
+
+  it("captures an AI pack return by provider token and refuses the wrong user", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_100", idempotencyKey: "pack-token" }, options)
+    const providerOrderId = `PP-${order.aiPackOrderId}`
+    await expect(captureAiPackOrder(repo, provider, { userId: otherBuyer }, { providerOrderId })).rejects.toMatchObject({ code: "ai_pack_order_not_found" })
+    await captureAiPackOrder(repo, provider, { userId: buyer }, { providerOrderId })
+    expect(repo.purchasedCredits[0]).toMatchObject({ purchasedActions: 100 })
   })
 
   it.each([

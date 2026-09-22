@@ -151,19 +151,22 @@ for (const [browserName, browserType] of browsers) {
 
         await page.goto(new URL("/plans", origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
         await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
+        const configurationResponse = await page.request.get(new URL("/__webcanbe/api/payments/config", origin).href)
+        if (!configurationResponse.ok()) throw new Error("Payment configuration is unavailable during browser verification.")
+        const configuration = await configurationResponse.json()
         const plans = await page.evaluate(() => {
-          const buttons = [...document.querySelectorAll("button")]
-          const paid = buttons.filter(button => (button.textContent || "").includes("Billing coming soon"))
+          const cards = [...document.querySelectorAll(".plan-grid article")]
           return {
-            paidCount: paid.length,
-            paidAllDisabled: paid.length === 2 && paid.every(button => button.disabled),
-            free: buttons.some(button => (button.textContent || "").includes("Start for free") && !button.disabled),
-            truth: document.body.innerText.includes("Paid billing is not active yet"),
+            paid: cards.slice(1).map(card => ({ label: card.querySelector("button")?.textContent?.trim(), disabled: card.querySelector("button")?.disabled })),
+            free: cards[0]?.querySelector("button")?.textContent?.includes("Start for free") && !cards[0]?.querySelector("button")?.disabled,
+            available: document.body.innerText.includes("PayPal subscription checkout is available."),
+            unavailable: document.body.innerText.includes("Paid checkout is currently unavailable"),
           }
         })
-        assert(`${browserName}/${viewportName} paid plans stay disabled`, plans.paidAllDisabled, `paid buttons ${plans.paidCount}`)
+        const available = configuration.checkoutAvailable === true
+        assert(`${browserName}/${viewportName} paid plan CTAs match server availability`, plans.paid.length === 2 && plans.paid.every((button, index) => button.disabled === !available && button.label === (available ? ["Choose Pro", "Choose Studio"][index] : "Checkout unavailable")), JSON.stringify(plans.paid))
         assert(`${browserName}/${viewportName} free plan remains actionable`, plans.free, "free plan CTA missing")
-        assert(`${browserName}/${viewportName} plans explain billing state`, plans.truth, "billing truth copy missing")
+        assert(`${browserName}/${viewportName} plans explain authoritative billing state`, available ? plans.available && !plans.unavailable : plans.unavailable && !plans.available, "billing state differs from payment configuration")
 
         for (const path of ["/project/not-a-real-project", "/project/not-a-real-project/preview"]) {
           await page.goto(new URL(path, origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })

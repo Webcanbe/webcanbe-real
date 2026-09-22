@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import { AI_ACTION_PACKS, PAYMENT_CURRENCY, PaymentError, domainId, exactObject, paymentKey } from "./contracts.js"
+import { AI_ACTION_PACKS, PAYMENT_CURRENCY, PaymentError, domainId, exactObject, paymentKey, providerId } from "./contracts.js"
 
 const uuid = factory => (factory || randomUUID)()
 const output = order => Object.freeze({ aiPackOrderId: order.aiPackOrderId, packKey: order.packKey, actions: order.actions, grossMinor: order.grossMinor, currency: order.currency, status: order.status, ...(order.approvalUrl ? { approvalUrl: order.approvalUrl } : {}) })
@@ -50,10 +50,13 @@ async function finalize(repo, aiPackOrderId, capture) {
 }
 
 export async function captureAiPackOrder(repo, provider, session, input) {
-  exactObject(input, ["aiPackOrderId"])
-  const id = domainId(input.aiPackOrderId, "AI pack capture")
-  const order = await repo.aiPackOrderById(id)
+  exactObject(input, ["aiPackOrderId", "providerOrderId"])
+  if (Boolean(input.aiPackOrderId) === Boolean(input.providerOrderId)) throw new PaymentError(422, "invalid_request", "Provide exactly one AI pack capture identifier.")
+  const order = input.aiPackOrderId
+    ? await repo.aiPackOrderById(domainId(input.aiPackOrderId, "AI pack capture"))
+    : await repo.aiPackOrderByProviderOrder(providerId(input.providerOrderId, "AI pack capture"))
   if (!order || order.userId !== session.userId) throw new PaymentError(404, "ai_pack_order_not_found", "AI pack order not found.")
+  const id = order.aiPackOrderId
   if (order.status === "completed") return output(order)
   if (order.status !== "approval_pending") throw new PaymentError(409, "order_not_capturable", "AI pack order is not ready to capture.")
   return output(await finalize(repo, id, await provider.captureOrder(order.providerOrderId, `ai-pack-capture:${id}`)))

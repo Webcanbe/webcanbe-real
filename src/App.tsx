@@ -5,12 +5,13 @@ import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
 const PreviewRuntimeHost = lazy(() => import("./PreviewRuntimeHost"))
-import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type SourceProjectSummary } from "./hostedProductClient"
+import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type PaymentBilling, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 import { loadPublicPaymentConfiguration, type PublicPaymentConfiguration, type PublicPaymentPlan } from "./webcanbe-engine/runtime/planCatalog"
+import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn } from "./paymentFlow"
 
-type Project = { id: string; slug: string; title: string; tagline: string; price: number; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
+type Project = { id: string; slug: string; title: string; tagline: string; price: number; priceMinor?: number; currency?: "USD"; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
 
 export const projects: Project[] = [
   { id: "northstar", slug: "northstar-studio", title: "Northstar Studio", tagline: "A considered site for a small creative practice.", price: 79, stack: ["Next.js", "TypeScript", "Tailwind"], category: "Marketing", color: "lilac", creator: "Sora Kim", updated: "Updated 4 days ago" },
@@ -25,7 +26,8 @@ const colors = ["lilac", "sand", "mint", "rose", "ink", "orange"]
 const metadataText = (value: unknown, fallback: string) => typeof value === "string" && value.trim() ? value : fallback
 function hostedProject(listing: HostedListing | HostedListingDetail, index = 0): Project {
   const detail = "publicMetadata" in listing ? listing.publicMetadata : {}, demo = listing.demoMetadata
-  return { id: listing.listingId, slug: listing.slug, title: listing.title, tagline: listing.summary, price: typeof demo.price === "number" && Number.isFinite(demo.price) ? demo.price : 0, stack: listing.tags.length ? listing.tags : ["React", "Vite"], category: metadataText(detail.category ?? demo.category, "Project"), color: metadataText(demo.color, colors[index % colors.length]), creator: metadataText(detail.creator ?? demo.creator, "Webcanbe creator"), updated: `Release ${listing.releaseVersion}`, releaseId: listing.releaseId }
+  const priceMinor = typeof listing.priceMinor === "number" && Number.isSafeInteger(listing.priceMinor) ? listing.priceMinor : 0
+  return { id: listing.listingId, slug: listing.slug, title: listing.title, tagline: listing.summary, price: priceMinor / 100, priceMinor, currency: listing.currency === "USD" ? "USD" : undefined, stack: listing.tags.length ? listing.tags : ["React", "Vite"], category: metadataText(detail.category ?? demo.category, "Project"), color: metadataText(demo.color, colors[index % colors.length]), creator: metadataText(detail.creator ?? demo.creator, "Webcanbe creator"), updated: `Release ${listing.releaseVersion}`, releaseId: listing.releaseId }
 }
 
 function usePath() {
@@ -474,17 +476,57 @@ function Gate2AuthSmoke() {
 }
 
 function Checkout() {
-  const params = new URLSearchParams(window.location.search), reference = params.get("project") ?? "", hosted = hostedProductMode()
+  const params = new URLSearchParams(window.location.search), reference = params.get("project") ?? "", hosted = productReadMode()
+  const returned = paymentReturn(window.location.search, "payment")
   const fallback = projects.find(item => item.slug === reference)
-  const [project, setProject] = useState<Project | undefined>(hosted ? undefined : fallback), [message, setMessage] = useState(hosted ? "Loading order…" : "")
+  const [project, setProject] = useState<Project | undefined>(hosted ? undefined : fallback)
+  const [configuration, setConfiguration] = useState<PublicPaymentConfiguration>()
+  const [state, setState] = useState<"loading_order" | "ready" | "starting_checkout" | "redirecting" | "returning" | "capturing" | "success" | "cancelled" | "failed" | "reconciliation_required">(returned.kind === "cancelled" ? "cancelled" : returned.kind === "return" ? "returning" : "loading_order")
+  const [message, setMessage] = useState("")
+  const captureStarted = useRef(false)
+  const checkoutStarted = useRef(false)
   useEffect(() => {
-    if (!hosted || !reference) return
+    if (returned.kind !== "return") return
+    if (captureStarted.current) return
+    captureStarted.current = true
+    if (!returned.providerOrderId) { setState("failed"); setMessage("PayPal did not return an order token. Open Purchases to check whether the verified webhook completed the order."); return }
+    setState("capturing")
+    void hostedProductClient.capturePaymentOrder(returned.providerOrderId).then(order => {
+      if (order.status === "completed") { setState("success"); clearPaymentIdempotencyKey("marketplace", order.listingId) }
+      else if (order.status === "reconciliation_required") { setState("reconciliation_required"); setMessage("The captured payment needs reconciliation before an entitlement can be issued.") }
+      else { setState("failed"); setMessage(`The order returned with status ${order.status}.`) }
+    }, reason => { setState("failed"); setMessage(reason instanceof Error ? reason.message : "The payment could not be captured.") })
+  }, [returned.kind, returned.providerOrderId])
+  useEffect(() => {
+    if (returned.kind !== "none") return
     let current = true
-    void hostedProductClient.detail(reference).then(listing => { if (current) { setProject(hostedProject(listing)); setMessage("") } }, reason => { if (current) setMessage(reason instanceof Error ? reason.message : "Order details are unavailable.") })
+    const detail = hosted ? hostedProductClient.detail(reference) : Promise.resolve(fallback)
+    void Promise.all([detail, loadPublicPaymentConfiguration()]).then(([listing, config]) => {
+      if (!current) return
+      const resolved = hosted && listing ? hostedProject(listing as HostedListingDetail) : listing as Project | undefined
+      setProject(resolved); setConfiguration(config)
+      if (!resolved || (hosted && (!resolved.releaseId || resolved.currency !== "USD"))) { setState("failed"); setMessage("This listing is missing or unavailable for checkout.") }
+      else setState("ready")
+    }, reason => { if (current) { setState("failed"); setMessage(reason instanceof Error ? reason.message : "Order details are unavailable.") } })
     return () => { current = false }
-  }, [hosted, reference])
-  const price = project?.price ?? 0
-  return <main className="checkout-page"><header className="checkout-header"><Link to="/" className="brand"><Mark/></Link><Link to={project ? `/project/${project.slug}` : "/browse"}>Back to project</Link></header><section className="checkout-layout"><div className="checkout-main"><span className="signal">Checkout</span><h1>{message || "Complete your purchase."}</h1><p>Your account is ready. Payment is the next boundary: Webcanbe must not create an entitlement until the payment provider confirms the transaction.</p><div className="checkout-provider-placeholder"><strong>Card checkout</strong><p>The real card-first provider connection belongs to Phase 5. This Phase 4 surface defines the correct flow without pretending a payment happened.</p><button className="button primary" disabled>{price ? `Pay $${price}` : "Pay"}</button></div></div><aside className="checkout-summary"><span>Order summary</span><h2>{project?.title ?? "Selected project"}</h2><p>{project?.tagline ?? "The selected immutable release will be bound to the completed purchase."}</p><dl><div><dt>Project</dt><dd>{price ? `$${price}` : "—"}</dd></div><div><dt>Total</dt><dd>{price ? `$${price}` : "—"}</dd></div></dl><small>Successful payment → entitlement → Dashboard. From there, create or open the editable working copy.</small></aside></section></main>
+  }, [hosted, reference, returned.kind])
+  const start = async () => {
+    if (!project || checkoutStarted.current || !["ready","failed"].includes(state)) return
+    if ((project.priceMinor ?? Math.round(project.price * 100)) > 0 && !configuration?.checkoutAvailable) { setState("failed"); setMessage("Paid checkout is not available right now."); return }
+    checkoutStarted.current = true
+    setState("starting_checkout"); setMessage("")
+    try {
+      const order = await hostedProductClient.createPaymentOrder(project.id, paymentIdempotencyKey("marketplace", project.id))
+      if (order.status === "completed") { clearPaymentIdempotencyKey("marketplace", project.id); setState("success"); return }
+      if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this order.")
+      setState("redirecting"); window.location.assign(order.approvalUrl)
+    } catch (reason) { checkoutStarted.current = false; setState("failed"); setMessage(reason instanceof Error ? reason.message : "Checkout could not be started.") }
+  }
+  const priceMinor = project?.priceMinor ?? (project ? Math.round(project.price * 100) : undefined)
+  const total = priceMinor === undefined ? "—" : priceMinor === 0 ? "Free" : `$${(priceMinor / 100).toFixed(2)}`
+  const titles = { loading_order:"Loading order…", ready:"Complete your purchase.", starting_checkout:"Starting checkout…", redirecting:"Redirecting to PayPal…", returning:"Returning from PayPal…", capturing:"Capturing your payment…", success:"Purchase complete.", cancelled:"Checkout cancelled.", failed:"Checkout needs attention.", reconciliation_required:"Reconciliation required." } as const
+  const busy = ["loading_order","starting_checkout","redirecting","returning","capturing"].includes(state)
+  return <main className="checkout-page"><header className="checkout-header"><Link to="/" className="brand"><Mark/></Link><Link to={project ? `/project/${project.slug}` : "/browse"}>Back to marketplace</Link></header><section className="checkout-layout"><div className="checkout-main"><span className="signal">Checkout</span><h1>{titles[state]}</h1><p>{message || (state === "success" ? "Your server-confirmed entitlement is now available in Purchases." : state === "cancelled" ? "PayPal approval was cancelled. Check Purchases for the server-confirmed payment status." : "Webcanbe verifies the listing, release, price, seller, fees, and entitlement on the server.")}</p><div className="checkout-provider-placeholder"><strong>{priceMinor === 0 ? "Free listing" : "PayPal checkout"}</strong><p>{priceMinor === 0 ? "No provider approval is required. Webcanbe will create the order and entitlement together." : "You will approve the server-created order in PayPal, then return here for idempotent capture."}</p>{state === "success" ? <Link className="button primary" to="/purchases">View Purchases <Arrow/></Link> : state === "cancelled" ? <Link className="button" to="/browse">Return to marketplace</Link> : state === "reconciliation_required" ? <Link className="button" to="/purchases">Check Purchases</Link> : <button className="button primary" disabled={busy || !project || (Boolean(priceMinor) && !configuration?.checkoutAvailable)} onClick={()=>void start()}>{busy ? titles[state] : state === "failed" ? "Retry checkout" : priceMinor === 0 ? "Get this project" : `Pay ${total} with PayPal`}</button>}</div></div><aside className="checkout-summary"><span>Order summary</span><h2>{project?.title ?? "Selected project"}</h2><p>{project?.tagline ?? "The selected immutable release will be bound to the completed purchase."}</p><dl><div><dt>Project</dt><dd>{total}</dd></div><div><dt>Total</dt><dd>{total}</dd></div></dl><small>Completed order → entitlement → Purchases → working copy. Refreshing this return page cannot create a second entitlement.</small></aside></section></main>
 }
 
 function Workspace() { const [mode, setMode] = useState("Visual"); const [selected, setSelected] = useState("Hero.tsx"); const [prompt, setPrompt] = useState(""); const [sent, setSent] = useState(false); return <main className="workspace"><header className="workspace-top"><Link to="/projects" className="brand"><Mark/></Link><div className="workspace-name"><span className="dot"/> Northstar Studio <span className="slash">/</span> <small>All changes saved</small></div><div className="workspace-actions"><button>Share</button><button>Export code</button><button className="workspace-publish">Publish</button></div></header><div className="workspace-body"><aside className="workspace-files"><div className="files-head"><span>Files</span><button>＋</button></div><div className="file-list"><b>▾ app</b><button className={selected === "page.tsx" ? "on" : ""} onClick={() => setSelected("page.tsx")}>⌘ page.tsx</button><b>▾ components</b><button className={selected === "Hero.tsx" ? "on" : ""} onClick={() => setSelected("Hero.tsx")}>⌘ Hero.tsx</button><button className={selected === "Navigation.tsx" ? "on" : ""} onClick={() => setSelected("Navigation.tsx")}>⌘ Navigation.tsx</button><button className={selected === "Manifesto.tsx" ? "on" : ""} onClick={() => setSelected("Manifesto.tsx")}>⌘ Manifesto.tsx</button><b>▾ styles</b><button className={selected === "globals.css" ? "on" : ""} onClick={() => setSelected("globals.css")}># globals.css</button></div><div className="files-bottom"><Link to="/projects">← Back to projects</Link></div></aside><section className="workspace-main"><div className="workspace-tabs"><div>{["Visual", "Code", "Preview"].map(x => <button key={x} onClick={() => setMode(x)} className={mode === x ? "active" : ""}>{x}</button>)}</div><span>Desktop <b>⌄</b></span></div><div className="workspace-stage">{mode === "Visual" && <div className="canvas"><div className="canvas-toolbar"><button>↖ Select</button><button>Text</button><button>Frame</button><button>◫</button></div><div className="canvas-page"><div className="mini-header"><b>NORTHSTAR</b><span>Work&nbsp;&nbsp; Studio&nbsp;&nbsp; Journal</span></div><div className="mini-hero"><p>Independent design<br/>for <em>useful things.</em></p><div className="mini-image"/><span className="selection-label">Hero.tsx</span><span className="selection-handle a"/><span className="selection-handle b"/></div><div className="mini-copy">We create identities, tools, and places for people making a more thoughtful world.</div></div></div>}{mode === "Code" && <CodePane file={selected}/>} {mode === "Preview" && <div className="preview-browser"><div className="browser-bar"><i/><i/><i/><span>northstar.local</span></div><div className="site-full"><div className="mini-header"><b>NORTHSTAR</b><span>Work&nbsp;&nbsp; Studio&nbsp;&nbsp; Journal</span></div><div className="mini-hero"><p>Independent design<br/>for <em>useful things.</em></p><div className="mini-image"/></div></div></div>}</div></section><aside className="workspace-ai"><div className="ai-head"><span>Project changes</span><span className="same-files">Same files</span></div><div className="change-note"><span className="dot"/>Visual edit</div><p className="ai-copy">The selected hero is linked to <b>components/Hero.tsx</b>. Move it here, and its source changes too.</p><div className="ai-thread">{sent ? <><span className="you">You</span><p>{prompt}</p><span className="assistant-label">Webcanbe</span><p>Drafted a change to <b>{selected}</b>. Review it in the code panel before keeping it.</p></> : <><span className="assistant-label">Webcanbe</span><p>Ask for a change. It will be made in this project — not a separate preview.</p></>}</div><div className="ai-input"><textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ask for a change..."/><button disabled={!prompt} onClick={() => { setSent(true); setPrompt("") }}>↑</button></div></aside></div></main> }
@@ -717,8 +759,30 @@ function RopeanDashboardShell({ children, purchaseBadge = 0, view, onView }: { c
   </div>
 }
 
+function useBillingOverview(enabled = true) {
+  const [configuration, setConfiguration] = useState<PublicPaymentConfiguration>()
+  const [billing, setBilling] = useState<PaymentBilling>()
+  const [loading, setLoading] = useState(enabled)
+  const [error, setError] = useState("")
+  const [version, setVersion] = useState(0)
+  useEffect(() => {
+    if (!enabled) return
+    let current = true
+    setLoading(true); setError("")
+    void Promise.all([loadPublicPaymentConfiguration(), hostedProductClient.paymentStatus()]).then(([config, status]) => {
+      if (current) { setConfiguration(config); setBilling(status); setLoading(false) }
+    }, reason => { if (current) { setError(reason instanceof Error ? reason.message : "Billing is unavailable."); setLoading(false) } })
+    return () => { current = false }
+  }, [enabled, version])
+  return { configuration, billing, setBilling, loading, error, refresh: () => setVersion(value => value + 1) }
+}
+
+const planName = (key: string | undefined) => key ? key.split("_")[0].replace(/^./, value => value.toUpperCase()) : "Free"
+const cadenceName = (key: string | undefined) => key?.endsWith("_annual") ? "Annual" : key?.endsWith("_monthly") ? "Monthly" : "No renewal"
+
 function Dashboard() {
   const lib = useProductLibrary()
+  const billing = useBillingOverview(productReadMode())
   const [view, setView] = useState<DashboardView>("overview")
   const working = lib.hosted
     ? lib.copies.map(copy => ({ project: releaseProject(lib.catalog, copy.releaseId, copy.workspaceProjectId), href: "/workspace/" + copy.workspaceProjectId }))
@@ -755,7 +819,7 @@ function Dashboard() {
     if (view === "docs") return <><div className="rd-main-heading"><h1>Documentation</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Product documentation</h2><p>Reference pages for editing, compatibility, export, and security.</p></header><div className="rd-dashboard-links"><Link to="/docs">Introduction</Link><Link to="/docs/visual-editor">Visual editor</Link><Link to="/docs/code-editor">Code editor</Link><Link to="/docs/security">Security</Link></div></section></>
     if (view === "settings") return <><div className="rd-main-heading"><h1>Profile</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Webcanbe profile</h2><p>Your account profile stays inside the same dashboard shell.</p></header><div className="rd-dashboard-callout"><span>Profile</span><b>Webcanbe account</b><p className="muted-copy">Profile data is backed by the production account store. Manage your editable profile and verified sign-in methods from Settings.</p></div></section></>
     if (view === "account") return <><div className="rd-main-heading"><h1>Account</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Account settings</h2><p>Session and account controls without leaving the dashboard shell.</p></header><div className="rd-dashboard-callout"><span>Account</span><b>Webcanbe account</b><p className="muted-copy">Verified sign-in methods and active Webcanbe sessions are backed by the production account store and can be reviewed from Settings.</p></div></section></>
-    if (view === "billing") return <><div className="rd-main-heading"><h1>Billing</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Plan and billing</h2><p>Paid billing is not active yet. Plan pricing is informational until the payment backend is enabled.</p></header><div className="rd-dashboard-callout"><span>Current plan</span><b>Free</b><button className="rd-primary-action" type="button" onClick={() => go("/plans")}>Review plans</button></div></section></>
+    if (view === "billing") return <><div className="rd-main-heading"><h1>Billing</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Plan and billing</h2><p>{billing.loading ? "Loading your server-backed billing state…" : billing.error || (billing.configuration?.checkoutAvailable ? "Subscriptions and AI Action packs are available through PayPal." : "Paid checkout is currently unavailable.")}</p></header><div className="rd-dashboard-callout"><span>Current plan</span><b>{planName(billing.billing?.currentPlanKey)}</b>{billing.billing?.subscription && <p className="muted-copy">{cadenceName(billing.billing.subscription.planKey)} · {billing.billing.subscription.status.replace(/_/g, " ")}</p>}<button className="rd-primary-action" type="button" onClick={() => go("/settings?section=billing")}>Manage billing</button></div></section></>
     if (view === "notifications") return <><div className="rd-main-heading"><h1>Notifications</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Notifications</h2><p>Account and project notices will appear here.</p></header><div className="rd-empty"><b>No new notifications.</b><p>Nothing needs your attention right now.</p></div></section></>
     return <><div className="rd-main-heading"><h1>Help Center</h1></div><section className="rd-panel rd-dashboard-section"><header><h2>Help and reference</h2><p>Use the product documentation or contact Webcanbe.</p></header><div className="rd-dashboard-links"><Link to="/docs/getting-started">Getting started</Link><Link to="/docs/compatibility">Compatibility</Link><Link to="/contact">Contact</Link></div></section></>
   }
@@ -798,20 +862,89 @@ function Dashboard() {
   </RopeanDashboardShell>
 }
 
+function BillingSettings() {
+  const overview = useBillingOverview()
+  const returnedPack = paymentReturn(window.location.search, "ai-pack")
+  const returnedSubscription = paymentReturn(window.location.search, "subscription")
+  const [working, setWorking] = useState("")
+  const [message, setMessage] = useState(returnedPack.kind === "cancelled" || returnedSubscription.kind === "cancelled" ? "PayPal approval was cancelled. Refresh billing to check the server-confirmed status." : "")
+  const captureStarted = useRef(false)
+  const operationStarted = useRef(false)
+  useEffect(() => {
+    if (returnedPack.kind !== "return" || captureStarted.current) return
+    captureStarted.current = true
+    if (!returnedPack.providerOrderId) { setMessage("PayPal did not return an AI pack token. Refresh billing to check the server balance."); return }
+    setWorking("capture"); setMessage("Capturing the AI Action pack…")
+    void hostedProductClient.captureAiPack(returnedPack.providerOrderId).then(order => {
+      if (order.status === "completed") { clearPaymentIdempotencyKey("ai-pack", order.packKey); setMessage(`${order.actions} purchased AI Actions are now available.`); overview.refresh() }
+      else setMessage(`The AI Action pack returned with status ${order.status.replace(/_/g, " ")}.`)
+    }, reason => setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be captured.")).finally(() => setWorking(""))
+  }, [returnedPack.kind, returnedPack.providerOrderId])
+  useEffect(() => { if (returnedSubscription.kind === "return" && !overview.loading) setMessage(overview.billing?.subscription?.status === "active" ? "Your subscription is active." : "PayPal approval returned. Subscription status is verified by server webhook; refresh if activation is still pending.") }, [returnedSubscription.kind, overview.loading, overview.billing?.subscription?.status])
+  const cancel = async () => {
+    const subscription = overview.billing?.subscription
+    if (!subscription || working || operationStarted.current) return
+    operationStarted.current = true
+    setWorking("cancel"); setMessage("")
+    try { const cancelled=await hostedProductClient.cancelSubscription(subscription.subscriptionId); overview.setBilling(current => current ? { ...current, currentPlanKey: cancelled.status === "active" ? cancelled.planKey : "free", subscription: cancelled } : current); setMessage("Subscription cancelled.") }
+    catch (reason) { setMessage(reason instanceof Error ? reason.message : "The subscription could not be cancelled.") }
+    finally { operationStarted.current = false; setWorking("") }
+  }
+  const buyPack = async (packKey: string) => {
+    if (working || operationStarted.current || !overview.configuration?.checkoutAvailable) return
+    operationStarted.current = true
+    setWorking(packKey); setMessage("")
+    try {
+      const order = await hostedProductClient.createAiPack(packKey, paymentIdempotencyKey("ai-pack", packKey))
+      if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this pack.")
+      setMessage("Redirecting to PayPal…"); window.location.assign(order.approvalUrl)
+    } catch (reason) { operationStarted.current = false; setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be started."); setWorking("") }
+  }
+  if (overview.loading) return <div className="settings-billing"><b>Loading billing…</b></div>
+  if (overview.error || !overview.configuration || !overview.billing) return <div className="settings-billing"><b>Billing unavailable</b><p>{overview.error || "Billing state could not be loaded."}</p><button className="button" onClick={overview.refresh}>Try again</button></div>
+  const subscription = overview.billing.subscription
+  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}{subscription && !["cancelled","expired"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}<Link className="button" to="/plans">Review plans</Link></div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <button className="button" key={pack.key} disabled={!overview.configuration?.checkoutAvailable || Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — $${(pack.priceMinor/100).toFixed(2)}`}</button>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
+}
+
 function Settings() {
-  const auth=productionAuthMode(),live=productReadMode(),[section,setSection]=useState("Profile"),[name,setName]=useState("Webcanbe user"),[email,setEmail]=useState(""),[providers,setProviders]=useState<string[]>([]),[activeSessions,setActiveSessions]=useState(0),[message,setMessage]=useState("")
+  const requestedSection=new URLSearchParams(window.location.search).get("section"),auth=productionAuthMode(),live=productReadMode(),[section,setSection]=useState(requestedSection==="billing"||new URLSearchParams(window.location.search).has("subscription")||new URLSearchParams(window.location.search).has("ai-pack")?"Billing":"Profile"),[name,setName]=useState("Webcanbe user"),[email,setEmail]=useState(""),[providers,setProviders]=useState<string[]>([]),[activeSessions,setActiveSessions]=useState(0),[message,setMessage]=useState("")
   const sections=["Profile","Account","GitHub","Domains","Billing","Preferences"]
   useEffect(()=>{if(!live)return;let current=true;void hostedProductClient.account().then(account=>{if(current){setName(account.displayName);setEmail(account.email);setProviders(account.providers);setActiveSessions(account.activeSessions);setMessage("")}},error=>{if(current)setMessage(error instanceof Error?error.message:"Account profile is unavailable.")});return()=>{current=false}},[live])
   const save=async()=>{if(live){try{const account=await hostedProductClient.updateAccount(name);setName(account.displayName);setEmail(account.email);setMessage("Saved.")}catch(error){setMessage(error instanceof Error?error.message:"Could not save changes.")}return}try{localStorage.setItem("wcb-ui-settings",JSON.stringify({name,email}))}catch{}setMessage("Saved for this browser.")}
   const signOut=async()=>{if(auth)await productionSignOut();else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
-  return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} disabled={live} onChange={e=>setEmail(e.target.value)}/></label>{live&&<div className="settings-action-row"><div><b>Sign-in methods</b><p>{providers.length?providers.join(" · "):"No active identity provider."}</p></div></div>}<div className="settings-action-row"><div><b>Session</b><p>{live?activeSessions+" active Webcanbe session"+(activeSessions===1?"":"s")+".":"Sign out returns directly to the landing page."}</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Repository connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<div className="settings-billing"><b>Plan and billing</b><p>Real billing is not simulated before the payment backend exists.</p><Link className="button" to="/plans">Review plans</Link></div>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={()=>void save()}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
+  return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} disabled={live} onChange={e=>setEmail(e.target.value)}/></label>{live&&<div className="settings-action-row"><div><b>Sign-in methods</b><p>{providers.length?providers.join(" · "):"No active identity provider."}</p></div></div>}<div className="settings-action-row"><div><b>Session</b><p>{live?activeSessions+" active Webcanbe session"+(activeSessions===1?"":"s")+".":"Sign out returns directly to the landing page."}</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Repository connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<BillingSettings/>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={()=>void save()}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
 }
 function Plans() {
+  const queryPlan = new URLSearchParams(window.location.search).get("subscribe")
+  const [authTick, setAuthTick] = useState(0)
+  const requestedPlan = queryPlan || (() => { try { return sessionStorage.getItem("wcb-pending-subscription-plan") } catch { return null } })()
   const [annual, setAnnual] = useState(false)
   const [configuration, setConfiguration] = useState<PublicPaymentConfiguration>()
   const [configurationError, setConfigurationError] = useState("")
+  const [checkoutState, setCheckoutState] = useState<"idle"|"authenticating"|"starting"|"redirecting"|"failed">("idle")
+  const [checkoutMessage, setCheckoutMessage] = useState("")
   const [retry, setRetry] = useState(0)
+  const started = useRef(false)
+  useEffect(() => { const changed=()=>setAuthTick(value=>value+1); window.addEventListener("wcb:auth-changed", changed); return()=>window.removeEventListener("wcb:auth-changed", changed) }, [])
   useEffect(() => { let current = true; setConfigurationError(""); void loadPublicPaymentConfiguration().then(value => { if (current) setConfiguration(value) }, error => { if (current) setConfigurationError(error instanceof Error ? error.message : "Billing configuration is unavailable.") }); return () => { current = false } }, [retry])
+  useEffect(() => {
+    if (!configuration?.checkoutAvailable || !requestedPlan || started.current) return
+    const plan = configuration.plans.find(item => item.key === requestedPlan && item.key !== "free")
+    if (!plan) return
+    started.current = true
+    void (async () => {
+      setCheckoutState("authenticating"); setCheckoutMessage("")
+      if (!await productionSignedIn()) { try { sessionStorage.setItem("wcb-pending-subscription-plan", plan.key) } catch {}; started.current=false; go(`/login?next=${encodeURIComponent("/plans")}`); return }
+      setCheckoutState("starting")
+      try {
+        const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
+        if (subscription.status === "active") { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
+        if (!subscription.approvalUrl) throw new Error("PayPal subscription approval is unavailable.")
+        try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}
+        setCheckoutState("redirecting"); window.location.assign(subscription.approvalUrl)
+      } catch (reason) { setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
+    })()
+  }, [configuration, requestedPlan, authTick])
   if (configurationError) return <PublicShell active="/plans"><main className="plans"><HubState kind="error" title="Plans are unavailable" body={configurationError} action={<button className="button" onClick={() => setRetry(value => value + 1)}>Try again</button>}/></main></PublicShell>
   if (!configuration) return <PublicShell active="/plans"><main className="plans"><HubState kind="loading" title="Loading plans" body=""/></main></PublicShell>
   const indexed = new Map(configuration.plans.map(plan => [plan.key, plan]))
@@ -827,8 +960,23 @@ function Plans() {
     `${plan.deploySlots} deploy ${plan.deploySlots === 1 ? "slot" : "slots"}`,
   ]
   const money = (minor: number) => `$${minor / 100}`
-  const billingStatus = configuration.checkoutAvailable ? "Payment service is configured; subscription checkout is not exposed in this screen yet." : "Paid billing is not active yet; prices and limits come from the payment service."
-  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual preview</button></div></div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && <span className="popular">Coming soon</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "Configured capacity for source-first project work when paid billing opens."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={row.id !== "free"} onClick={() => { if (row.id === "free") go("/browse") }}>{row.id === "free" ? "Start for free" : "Billing coming soon"}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section></main></PublicShell> }
+  const startSubscription = async (plan: PublicPaymentPlan) => {
+    if (plan.key === "free") { go("/browse"); return }
+    if (!configuration.checkoutAvailable || started.current || checkoutState === "starting" || checkoutState === "redirecting") return
+    started.current = true
+    setCheckoutState("authenticating"); setCheckoutMessage("")
+    if (!await productionSignedIn()) { try { sessionStorage.setItem("wcb-pending-subscription-plan", plan.key) } catch {}; started.current=false; go(`/login?next=${encodeURIComponent("/plans")}`); return }
+    setCheckoutState("starting")
+    try {
+      const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
+      if (subscription.status === "active") { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
+      if (!subscription.approvalUrl) throw new Error("PayPal subscription approval is unavailable.")
+      try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}
+      setCheckoutState("redirecting"); window.location.assign(subscription.approvalUrl)
+    } catch (reason) { started.current = false; setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
+  }
+  const billingStatus = configuration.checkoutAvailable ? "PayPal subscription checkout is available." : "Paid checkout is currently unavailable; prices and limits still come from the payment service."
+  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual</button></div>{checkoutMessage&&<p className="inline-error" role="alert">{checkoutMessage}</p>}</div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly, paid = row.id !== "free"; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && configuration.checkoutAvailable && <span className="popular">Available</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "More active projects, AI Actions, concurrency, and deploy capacity."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={paid && (!configuration.checkoutAvailable || checkoutState === "starting" || checkoutState === "redirecting")} onClick={() => void startSubscription(plan)}>{row.id === "free" ? "Start for free" : !configuration.checkoutAvailable ? "Checkout unavailable" : checkoutState === "starting" ? "Starting checkout…" : checkoutState === "redirecting" ? "Redirecting…" : `Choose ${row.name}`}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section></main></PublicShell> }
 
 function CreatorListingEditor({ listing, onSaved }: { listing: CreatorStudioData["listings"][number]; onSaved: (listing: CreatorStudioData["listings"][number]) => void }) {
   const [title, setTitle] = useState(listing.title), [summary, setSummary] = useState(listing.summary), [availability, setAvailability] = useState(listing.availability), [tags, setTags] = useState(listing.tags.join(", "))

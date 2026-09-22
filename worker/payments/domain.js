@@ -14,6 +14,7 @@ import {
   grantMonth,
   moneyMinor,
   paymentKey,
+  providerId,
   payoutDateKey,
 } from "./contracts.js"
 
@@ -120,10 +121,13 @@ async function finalizeCapture(repo, orderId, capture) {
 }
 
 export async function captureMarketplaceOrder(repo, provider, session, input) {
-  exactObject(input, ["orderId"])
-  const orderId = domainId(input.orderId, "capture")
-  const order = await repo.orderById(orderId)
+  exactObject(input, ["orderId", "providerOrderId"])
+  if (Boolean(input.orderId) === Boolean(input.providerOrderId)) throw new PaymentError(422, "invalid_request", "Provide exactly one capture identifier.")
+  const order = input.orderId
+    ? await repo.orderById(domainId(input.orderId, "capture"))
+    : await repo.orderByProviderOrder(providerId(input.providerOrderId, "capture"))
   if (!order || order.buyerUserId !== session.userId) throw new PaymentError(404, "order_not_found", "Order not found.")
+  const orderId = order.orderId
   if (order.status === "completed") return publicOrder(order)
   if (order.status !== "approval_pending" || !order.providerOrderId) throw new PaymentError(409, "order_not_capturable", "Order is not ready to capture.")
   const capture = await provider.captureOrder(order.providerOrderId, `order-capture:${order.orderId}`)
