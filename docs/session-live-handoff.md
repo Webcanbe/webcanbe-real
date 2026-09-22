@@ -1305,3 +1305,18 @@ Even without breakout virality, the system should leave:
 - seller-facing demand proof
 
 Do not let the campaign end as “50 participants and then nothing.” The rare domains are launch accelerants inside a permanent League, not the League itself.
+
+
+## 27. Tonight execution plan — 2026-09-22
+
+If the final production core-flow smoke passes tonight, immediately switch from product work to market entry.
+
+Order:
+1. finish only true launch blockers;
+2. verify real production core flow end-to-end;
+3. attach PostHog launch funnel events;
+4. publish the first public beta announcement;
+5. prepare the first Build League / Prize Vault campaign asset and landing module;
+6. start customer acquisition tonight rather than reopening noncritical product polish.
+
+Do not merge or build extra polish merely because time remains. Once the launch gate passes, market learning becomes the highest-value work.
