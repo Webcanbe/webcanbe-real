@@ -81,6 +81,10 @@ function LoadingSpinner({ small=false }: { small?: boolean }) {
 
 function Landing() { return <Home onNavigate={go} /> }
 
+function CreatorIntroduction() {
+  return <PublicShell><main className="standard creator-introduction"><header className="hub-title"><div><h1>Share projects people can make their own.</h1><p>Webcanbe Creator is for source-backed web projects that are ready to be reviewed, released, and supported as real starting points.</p></div></header><section className="hub-section"><div className="hub-section-head"><div><h2>A deliberate publishing path</h2><p>Your account is not automatically a creator account.</p></div></div><ol className="creator-intro-steps"><li><b>Sign in or create an account</b><span>Use your existing Webcanbe account to begin.</span></li><li><b>Submit your application</b><span>Applications enter review before creator tools become available.</span></li><li><b>Build and submit a source project</b><span>Approved creators submit an immutable revision through the release pipeline.</span></li></ol><div className="rd-page-actions"><Link className="button primary" to="/seller">Start creator application <Arrow/></Link><Link className="button" to="/docs/creators">Read the creator guide</Link></div></section></main></PublicShell>
+}
+
 const publicNav = [["Product", "/docs/visual-editor"], ["Marketplace", "/browse"], ["Learn", "/docs"], ["Resources", "/changelog"]] as const
 
 
@@ -151,9 +155,9 @@ function Browse() {
 }
 function projectStructure(project:Project){const next=project.stack.some(v=>v.toLowerCase().includes("next"));return next?["app/","  page.tsx","  layout.tsx","components/","  Hero.tsx","styles/","  globals.css"]:["src/","  main.tsx","  App.tsx","  components/","    Hero.tsx","  styles.css","public/"]}
 function Detail({ reference }: { reference: string }) {
-  const hosted=productReadMode(), fallback=projects.find(p=>p.slug===reference)
-  const [project,setProject]=useState<Project|undefined>(hosted?undefined:fallback),[tab,setTab]=useState("Overview"),[message,setMessage]=useState(hosted?"Loading project…":fallback?"":"No project matches this address."),[failed,setFailed]=useState(!hosted&&!fallback),[retry,setRetry]=useState(0),[buying,setBuying]=useState(false)
-  useEffect(()=>{if(!hosted){setProject(fallback);setFailed(!fallback);setMessage(fallback?"":"No project matches this address.");return}let current=true;setProject(undefined);setFailed(false);setMessage("Loading project…");void hostedProductClient.detail(reference).then(l=>{if(current){setProject(hostedProject(l));setMessage("")}},e=>{if(current){setFailed(true);setMessage(e instanceof Error?e.message:"Project unavailable.")}});return()=>{current=false}},[hosted,reference,retry])
+  const hosted=productReadMode()
+  const [project,setProject]=useState<Project|undefined>(),[tab,setTab]=useState("Overview"),[message,setMessage]=useState(hosted?"Loading project…":"Marketplace previews require the hosted catalog."),[failed,setFailed]=useState(!hosted),[retry,setRetry]=useState(0),[buying,setBuying]=useState(false)
+  useEffect(()=>{if(!hosted)return;let current=true;setProject(undefined);setFailed(false);setMessage("Loading project…");void hostedProductClient.detail(reference).then(l=>{if(current){setProject(hostedProject(l));setMessage("")}},e=>{if(current){setFailed(true);setMessage(e instanceof Error?e.message:"Project unavailable.")}});return()=>{current=false}},[hosted,reference,retry])
   if(!project)return <PublicShell active="/browse"><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{failed ? "Unavailable" : "Loading"}</span></div><HubState kind={failed ? "error" : "loading"} title={failed ? "This project is unavailable" : "Loading project"} body={failed ? message : ""} action={failed ? <><button className="button primary" onClick={()=>setRetry(value=>value+1)}>Try again</button><Link className="button" to="/browse">Back to marketplace</Link></> : undefined}/></main></PublicShell>
   const target=`/checkout/${encodeURIComponent(project.releaseId??project.id)}?project=${encodeURIComponent(project.slug)}`
   const buy=async()=>{if(buying)return;setBuying(true);if(!hosted){go("/login?next="+encodeURIComponent(target));return}go(await hostedProductClient.authenticated()?target:"/login?next="+encodeURIComponent(target))}
@@ -1216,6 +1220,7 @@ export default function App() {
   if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
   else if(basePath==="/")page=<Landing/>
   else if(basePath==="/browse"||basePath==="/templates")page=<Browse key={window.location.search}/>
+  else if(basePath==="/creators")page=<CreatorIntroduction/>
   else if(basePath.startsWith("/creators/"))page=<CreatorProfile handle={basePath.split("/")[2]||""}/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage key={basePath} reference={basePath.split("/")[2]||""}/>
   else if(basePath.startsWith("/project/"))page=<Detail key={basePath} reference={basePath.split("/")[2]??""}/>

@@ -50,6 +50,7 @@ const PRIVATE_PREFIXES = ["/__webcanbe/", "/__public/", "/_ops/", "/auth/", "/wo
 const PUBLIC_EXACT = new Set([
   "/",
   "/browse",
+  "/creators",
   "/templates",
   "/legal",
   "/legal/terms",
