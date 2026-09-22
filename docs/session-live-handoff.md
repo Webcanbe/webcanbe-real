@@ -637,3 +637,20 @@ The user explicitly wants the assistant to stay sharp on business questions rath
 - When market data contradicts the current product or plan, prefer the evidence.
 - Keep company revenue, GMV, take rate, margin, CAC, retention, cash/runway, founder equity and valuation conceptually separate.
 - Optimize advice for increasing the real probability of building a large company, not for preserving a prior plan or making the user feel good.
+
+
+## 21. Launch domain-giveaway promotion — proposed, not yet finalized — 2026-09-22
+
+User plans to work on this tomorrow, after core implementation is effectively complete.
+
+Working promotion idea:
+- Use one or more short 3-letter domains (current candidates include .bz / .cx names) as a **launch hook**, not as the core Webcanbe value proposition.
+- Do **not** give a domain merely for signup; that would attract domain hunters and contaminate activation metrics.
+- Tie eligibility to meaningful product behavior, e.g. an external user who signs up, creates/materializes a project, completes a real edit/save, and reaches export/publish.
+- Prefer a bounded “founding users” mechanic such as:
+  - first N qualified users get one domain from a disclosed pool, or
+  - first N qualified users enter a drawing for a small number of stronger domains.
+- Keep the promotion visibly secondary to Webcanbe’s core pitch: real web projects, visual+code editing, source ownership.
+- Track promo traffic separately in PostHog with campaign/referrer properties so giveaway-driven users can be compared against ordinary launch traffic.
+- Do not let domain procurement, copy polish, or giveaway mechanics delay the core public-beta launch.
+- Before announcing, confirm actual availability, total first-year cost, renewal responsibility, transfer/registrar mechanics, and clear terms for who receives ownership.
