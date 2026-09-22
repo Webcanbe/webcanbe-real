@@ -1080,3 +1080,116 @@ Do not promise a fixed probability because the final pool size remains open.
 
 ### Safety against a weak launch
 If 25 qualified builders are not reached by a separately published calendar fallback date, start the final window anyway. This prevents an indefinitely open campaign and avoids showing a stalled counter forever.
+
+
+## 25. Customer growth engine — Webcanbe Build League + Prize Vault — 2026-09-22
+
+Founder clarified:
+- developer/seller acquisition can be handled separately through direct outreach (roughly 100-target style outreach);
+- the scarce-domain campaign should primarily solve **customer demand / buyer awareness**;
+- the campaign should not die after one small cohort; it needs to create reusable traffic, UGC, referrals, activation data, SEO/share assets and seller-facing proof.
+
+### Core system
+Working name: **Webcanbe Build League**.
+This is an always-on customer growth loop, not a one-off giveaway.
+
+Flow:
+1. user starts from a real Webcanbe template/project;
+2. materially customizes it;
+3. saves/exports or publishes the real result;
+4. posts the finished result publicly on any accepted platform;
+5. includes the finished project link and tags/mentions Webcanbe or the campaign;
+6. submits the public post URL to Webcanbe;
+7. Webcanbe verifies the product flow + post and creates a gallery/leaderboard entry;
+8. entrant receives a referral link so Webcanbe can attribute downstream qualified users.
+
+### Two-layer reward architecture
+
+#### A. Permanent seasonal layer
+Keep the League running continuously in short seasons (weekly/biweekly highlights + monthly resets):
+- Random Builder reward: fair chance for every verified builder.
+- Breakout/Impact reward: based primarily on **verified referred Webcanbe traffic and qualified referred builders**, not raw social views.
+- Best Build reward: based on published quality/originality rubric, not follower size.
+- regular rewards should be low marginal-cost: bounded AI Actions, temporary Pro/features, Founding/Builder status, gallery spotlight, future beta perks.
+
+This makes the campaign sustainable after premium domains are gone.
+
+#### B. One-time cumulative Prize Vault
+The strongest domains are fixed headline milestone prizes rather than being spent all at once.
+Current preferred headline candidates: **may.cx, she.cx, way.bz** (subject to final availability/purchase).
+
+Use cumulative verified-builder milestones. Initial working ladder:
+- first premium domain unlock around **25 qualified builders**
+- second around **75–100**
+- third around **200–250**
+Final thresholds should be chosen after launch velocity is observed; only the next reachable unlock needs heavy public emphasis.
+
+The important mechanic:
+- there is **no fixed participation cap**;
+- premium domains unlock as the community grows;
+- the ordinary League continues after each unlock and after all premium domains are eventually awarded.
+
+### Participation-scaled prize pool
+The non-domain prize pool can grow automatically with verified participation.
+Example principle:
+- every block of qualified builders unlocks more bounded AI Action credit / temporary feature access / extra spotlight reward.
+- public copy can truthfully say **“The prize pool grows as more builders qualify.”**
+- never promise an unbounded cash-cost liability; the growth formula must be bounded and based on low marginal-cost product rewards.
+
+### Judging: do not use raw views as the sole winner metric
+Raw views are useful as marketing telemetry but are a poor primary prize rule because they are easy to game and strongly favor existing audience size.
+Preferred three-path system:
+1. **Random Draw** — every verified builder has a real chance.
+2. **Impact Leaderboard** — measured from attributed unique visits and, much more importantly, referred users who become qualified builders.
+3. **Best Build** — quality/originality/use of Webcanbe under a simple published rubric.
+
+Views can be shown as a secondary leaderboard / signal, but should not solely decide a premium prize.
+
+### External-first distribution
+The Webcanbe site is the canonical verification/rules/gallery layer, but discovery should happen mostly outside it.
+Accept original build posts from channels such as:
+- X
+- TikTok
+- Instagram Reels
+- YouTube / Shorts
+- other public social/community posts where promotion is permitted
+The entrant should post their **actual finished project**, not generic praise.
+
+Core content prompt:
+**Start with a Webcanbe project. Make it yours. Put it live. Show the result.**
+
+### Compounding assets even if the campaign does not go viral
+Every verified entry should produce:
+- one external UGC post;
+- one public Webcanbe gallery/showcase card/page;
+- one attributable referral path;
+- one activated user record;
+- one project example usable (with permission) in later launch content;
+- aggregate demand data by country/referrer/channel/template.
+
+This makes the campaign valuable even if it does not “go viral.”
+
+### Seller-facing proof
+Do not pitch sellers raw vanity traffic alone.
+Use truthful metrics such as:
+- qualified buyer visitors
+- countries
+- project-view → materialize conversion
+- edit/export completion
+- return rate
+- later purchase conversion
+- fastest-growing template categories
+- number of verified public builds / UGC posts
+Raw visits may be included, but qualified demand and conversion are the stronger seller pitch.
+
+### “Guaranteed virality” principle
+No campaign can guarantee that Webcanbe will go viral.
+Design the system so that every outcome produces a next asset:
+- weak reach → learn channel/message;
+- good reach / weak activation → fix landing/offer;
+- good activation / weak sharing → improve sharing mechanic;
+- good sharing / weak referral activation → improve referral audience/offer;
+- strong qualified referral loop → scale aggressively.
+
+### Platform-operating note
+X officially permits post/mention/hashtag contests but discourages multi-account and duplicate-post mechanics. YouTube contests require free entry and prohibit manipulating platform metrics. Therefore the League should use one original entry per person and should not reward repeated spam or view/like manipulation.
