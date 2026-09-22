@@ -35,7 +35,7 @@ Cloudflare Worker maps only registered public routes to generated HTML and retur
 ## Validation
 
 - TypeScript and production build: pass.
-- Public validation: 153 routes, 121 Docs URLs, 41,032 internal anchor occurrences checked; unique metadata/canonical coverage 153/153; JSON-LD parses on all 153 pages; sitemap, robots, navigation, article quality and footer checks pass.
+- Public validation: 153 routes, 121 Docs URLs, 40,868 internal anchor occurrences checked; unique metadata/canonical coverage 153/153; JSON-LD parses on all 153 pages; sitemap, robots, navigation, article quality and footer checks pass.
 - Public regression selection: **11 suites / 42 tests pass**, including Worker HTTP response contracts, real 404s, alias redirects, static/React footer parity, catalog rendering and escaping, carousel boundaries/keyboard/cleanup, docs anchors, search, and support context redaction.
 - Build budgets: pass. App distribution 12.61 MiB; largest app JS 669.5 KiB; CSS 466.3 KiB total. Docs article text is not added to the initial public JS path.
 - Browser smoke at 1280×720 and 390×844: docs search opens the intended article; grouped/mobile navigation opens and links; carousel moves both directions; category cards open the expected collection; support form fields/context and two-column mobile footer render correctly; no horizontal overflow or console errors observed.
