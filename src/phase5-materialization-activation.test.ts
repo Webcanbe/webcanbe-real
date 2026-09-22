@@ -7,6 +7,7 @@ const worker = fs.readFileSync("worker/index.js", "utf8")
 const app = fs.readFileSync("src/App.tsx", "utf8")
 const client = fs.readFileSync("src/hostedProductClient.ts", "utf8")
 const fixture = fs.readFileSync("scripts/launch/materialization-smoke-fixture.mjs", "utf8")
+const creator = fs.readFileSync("src/creator-shell.tsx", "utf8")
 
 describe("Phase 5 Gate 3 production materialization activation", () => {
   it("requires both bounded production mutation switches", () => {
@@ -20,12 +21,11 @@ describe("Phase 5 Gate 3 production materialization activation", () => {
     expect(client).toContain("productionMutationProductMode")
     expect(client).toContain('meta[name="wcb-product-mutation-mode"]')
     const purchases = app.slice(app.indexOf("function Purchases()"), app.indexOf("function RopeanDashboardShell"))
-    const seller = app.slice(app.indexOf("function Seller("), app.indexOf("\nfunction ", app.indexOf("function Seller(")+20))
     expect(purchases).toContain("productMutationMode()")
     expect(purchases).toContain("hostedProductClient.materialize")
-    expect(seller).toContain("hostedProductMode()")
-    expect(seller).not.toContain("productMutationMode()")
-    expect(worker).not.toContain("/__webcanbe/api/product/seller/")
+    expect(creator).toContain("productReadMode()")
+    expect(creator).not.toContain("productMutationMode()")
+    expect(worker).toContain("/__webcanbe/api/product/seller/")
     expect(worker).not.toContain("/__webcanbe/api/product/entitlements/test/grant-self")
   })
 

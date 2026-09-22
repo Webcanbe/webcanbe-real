@@ -36,6 +36,7 @@ const PRIVATE_EXACT = new Set([
   "/dashboard-preview",
   "/projects",
   "/purchases",
+  "/requests",
   "/settings",
   "/_ops/keystone-7f31",
   "/_ops/gate2-auth-smoke",

@@ -6,6 +6,8 @@ import "./phase4-final-ui.css"
 import "./app-shell.css"
 import "./editor-shell.css"
 
+if (window.location.pathname === "/requests") void import("./my-requests.css")
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />

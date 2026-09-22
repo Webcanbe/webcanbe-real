@@ -615,6 +615,22 @@
       "dest": "/__public/contact/security.html"
     },
     {
+      "src": "^/contact/privacy/?$",
+      "dest": "/__public/contact/privacy.html"
+    },
+    {
+      "src": "^/contact/refunds/?$",
+      "dest": "/__public/contact/refunds.html"
+    },
+    {
+      "src": "^/contact/payments/?$",
+      "dest": "/__public/contact/payments.html"
+    },
+    {
+      "src": "^/contact/payouts/?$",
+      "dest": "/__public/contact/payouts.html"
+    },
+    {
       "src": "^//?$",
       "dest": "/index.html"
     },
@@ -666,7 +682,7 @@
       "handle": "filesystem"
     },
     {
-      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
+      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|requests|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
       "dest": "/app-shell.html",
       "headers": {
         "X-Robots-Tag": "noindex, nofollow"

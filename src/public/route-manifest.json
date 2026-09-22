@@ -667,7 +667,7 @@
     },
     "/contact": {
       "title": "Contact Webcanbe — Webcanbe",
-      "description": "Choose the channel that fits your question. Each prepares a categorized email to hello@webcanbe.com with relevant, reviewable context.",
+      "description": "Choose the channel that fits your question. Each form creates a persisted case with a reference you can use to track the request.",
       "kind": "information"
     },
     "/brand": {
@@ -713,6 +713,26 @@
     "/contact/security": {
       "title": "Security Report — Webcanbe",
       "description": "Privately report a suspected vulnerability or exposure affecting Webcanbe. Use only accounts and projects you control for a minimal reproduction.",
+      "kind": "support"
+    },
+    "/contact/privacy": {
+      "title": "Privacy Request — Webcanbe",
+      "description": "Request access, correction, deletion, or another applicable privacy right.",
+      "kind": "support"
+    },
+    "/contact/refunds": {
+      "title": "Refund Request — Webcanbe",
+      "description": "Create a case for transaction-specific refund review.",
+      "kind": "support"
+    },
+    "/contact/payments": {
+      "title": "Payment Dispute — Webcanbe",
+      "description": "Report a duplicate, reversed, disputed, or otherwise unexpected marketplace payment.",
+      "kind": "support"
+    },
+    "/contact/payouts": {
+      "title": "Payout Issue — Webcanbe",
+      "description": "Ask about a creator ledger balance, payout hold, or payout batch.",
       "kind": "support"
     },
     "/": {
