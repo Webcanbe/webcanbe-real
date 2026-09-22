@@ -1636,3 +1636,70 @@ Founder personal-brand strategy only follows genuine business proof:
 ### Operating rule
 From launch onward, market evidence outranks internal polish.
 Every week must improve at least one of acquisition, activation, retention, monetization, seller liquidity or trust.
+
+
+## 31. Restored original master strategy — 2026-09-23
+
+User explicitly chose to return to the earlier full Webcanbe business simulation as the long-term master strategy.
+
+Recovered source: the 2026-09-13 strategy memo whose central thesis was:
+**Webcanbe is not merely a code marketplace and not an AI website builder. It should become the ecosystem where people buy already-built software, turn it into their own product, operate it, extend it, and keep evolving it.**
+
+### Original category / market position
+The intended category is:
+- not ThemeForest with better templates;
+- not a smaller Lovable/Replit-style prompt builder;
+- not only a design-asset marketplace;
+- a **software capability marketplace + operating ecosystem**;
+- the category statement: **“a market where complete software is bought, evolved, and operated.”**
+
+Original customer promise:
+**Start at 80%, not 0%.**
+A user starts from a 70–90% complete real product, then modifies and launches it.
+
+### Original strategic ladder
+1. Initial wedge: freelancers and small agencies because they can be repeat buyers and also become sellers.
+2. Project Marketplace as customer-acquisition layer.
+3. Workspace: real source + Visual editing + Code + AI + preview/versioning/export/deploy.
+4. Project Care: ongoing dependency/security/update/health/backup/rollback service.
+5. AI-assisted upstream merge: preserve customer changes while merging Creator updates.
+6. Feature Marketplace: installable capabilities such as billing, teams, admin, RBAC, booking, CMS, etc.
+7. Creator Updates & Support subscriptions, turning one-off project sales into creator ARR.
+8. Expert services attached to the live code context.
+9. Payments as a later, very large revenue layer around economic activity of businesses built on Webcanbe.
+10. Creator-led distribution / referral growth.
+11. Try-before-buy temporary workspace / live product trial.
+12. Remix economy with explicit remix licenses, lineage and upstream royalties.
+13. Inventory-driven SEO based on real project capabilities, not generic AI blog content.
+14. Search by software capability rather than only visual category.
+15. Enterprise / private marketplace / security / SLA layer at scale.
+
+### Original flywheel
+Projects → buyers → Workspace usage → modules/updates/care → more value per project → more buyers → more creators/modules → stronger marketplace → more external distribution → more projects.
+
+### Original mature revenue mix illustration
+- ~30–35% Workspace subscriptions + AI usage
+- ~20–25% Project Care / managed deploy / runtime
+- ~15–20% Project + Feature Marketplace fees
+- ~10–15% Payments
+- ~5–10% Expert services
+- remainder Enterprise / private marketplace / security / SLA
+
+### Original scale simulation
+Illustrative mature monthly revenue structure:
+- 200k paid Workspaces × ~KRW 90k average = **KRW 18B/month (180억)**
+- 200k production projects × ~KRW 60k average care/runtime = **KRW 12B/month (120억)**
+- Marketplace/modules monthly GMV KRW 100B × 10% blended take = **KRW 10B/month (100억)**
+- business payment volume KRW 1.4T/month × 0.5% = **KRW 7B/month (70억)**
+- 300 enterprise customers × KRW 10M/month = **KRW 3B/month (30억)**
+Total illustrative mature revenue: **KRW 50B/month (500억)**.
+
+This was an economic reverse-build illustration, not a forecast.
+
+### Current operating interpretation
+Adopt the strategic architecture above as the long-term North Star again.
+Do not immediately rebuild everything. Current launch remains the entry point:
+Marketplace → real project → real-code Workspace → external users → market evidence.
+Then add Care, modules, creator ARR, experts, payments, remix and enterprise in the order actual demand justifies.
+
+Current public launch pricing/fees/legal commitments remain the operational source of truth until explicitly changed; restoring this strategy does not silently rewrite existing contracts or production economics.
