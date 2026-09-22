@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import { describe, expect, it } from "vitest"
+const shell = fs.readFileSync("src/app-shell.tsx","utf8")
 const app = fs.readFileSync("src/App.tsx","utf8")
 const home = fs.readFileSync("src/Home.tsx","utf8")
 const landing = fs.readFileSync("public/wcb-landing/index.html","utf8")
@@ -13,9 +14,9 @@ describe("Phase 4 unified shell", () => {
     expect(landing).not.toContain('id="wcb-auth-bridge"')
   })
   it("has working shell controls instead of decorative buttons", () => {
-    expect(app).toContain("setCollapsed")
-    expect(app).toContain("setPalette")
-    expect(app).toContain('aria-label="Notifications"')
+    expect(shell).toContain("setSidebarOpen")
+    expect(shell).toContain("setSearch")
+    expect(shell).toContain('aria-label="Notifications"')
     expect(app).toContain("Sign out")
     expect(app).toContain("function NotFound")
   })

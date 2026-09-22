@@ -211,3 +211,23 @@ export async function databaseWorkspaces(db, session) {
   )
   return result.rows.map(row => String(row.workspace_id))
 }
+
+export class WorkspaceCreationError extends Error {}
+
+/** Creates only a new workspace owned by the authenticated account. Retry-safe per UUID. */
+export async function createDatabaseWorkspace(db, session, input) {
+  if (!input || Object.keys(input).length !== 1 || typeof input.workspaceId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input.workspaceId)) throw new WorkspaceCreationError('Invalid workspace request.')
+  await db.query('BEGIN')
+  try {
+    // Serialize creation so parallel requests cannot exceed the account limit or claim an existing workspace.
+    await db.query('SELECT id FROM wcb_identity_lock WHERE id=1 FOR UPDATE')
+    const existing = await databaseWorkspaces(db, session)
+    if (existing.includes(input.workspaceId)) { await db.query('COMMIT'); return input.workspaceId }
+    if (existing.length >= 20) throw new WorkspaceCreationError('This account has reached the 20 workspace limit.')
+    const occupied = await db.query('SELECT workspace_id FROM wcb_workspace_members WHERE workspace_id=$1 LIMIT 1', [input.workspaceId])
+    if (occupied.rowCount) throw new WorkspaceCreationError('Workspace identifier is unavailable. Try again.')
+    await db.query("INSERT INTO wcb_workspace_members(workspace_id,user_id,role,epoch,active) VALUES($1,$2,'owner',1,true)", [input.workspaceId, session.userId])
+    await db.query('COMMIT')
+    return input.workspaceId
+  } catch (error) { await db.query('ROLLBACK'); throw error }
+}

@@ -36,7 +36,7 @@ describe("Phase 5 explicit save and stale-draft policy", () => {
   })
 
   it("makes export semantics explicit", () => {
-    expect(workspace).toContain("Export accepted source only; unsaved Code drafts are excluded")
+    expect(fs.readFileSync("src/webcanbe-engine/visual-editor/EditorChrome.tsx", "utf8")).toContain("Includes accepted changes. Save Code drafts before exporting.")
     expect(workspace).toContain("Export accepted source")
     expect(workspace).toContain("Draft backup is recovery-only")
   })

@@ -30,6 +30,8 @@ export const SECURITY_HEADERS = Object.freeze({
 
 const PRIVATE_EXACT = new Set([
   "/dashboard",
+  "/marketplace", "/editor/visual", "/editor/code", "/editor/split",
+  "/workspace", "/app/docs", "/profile", "/account", "/billing", "/notifications", "/help",
   "/dashboard-preview",
   "/projects",
   "/purchases",

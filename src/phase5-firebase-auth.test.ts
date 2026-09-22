@@ -66,9 +66,9 @@ describe("Phase 5 Firebase Authentication", () => {
 
   it("returns successful GitHub or email auth to the existing dashboard target", () => {
     expect(app).toContain('function Auth({signup=false,next="/dashboard"')
-    expect(app).toContain("finish=()=>")
+    expect(app).toContain("finish=async()=>")
     expect(app).toContain("await establishFirebaseSession(credential)")
-    expect(app).toContain("go(next)")
+    expect(app).toContain("go(destination)")
   })
 
   it("keeps the public Firebase project ID in the Worker rather than requiring another runtime secret", () => {

@@ -5,7 +5,7 @@ import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
 import { databaseReadiness } from "./readiness.js"
-import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces } from "./postgres-session.js"
+import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces, createDatabaseWorkspace, WorkspaceCreationError } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
 import { EditorProjectError, editorProjectRequest } from "./editor-projects.js"
@@ -424,6 +424,12 @@ async function privateProduct(request, env, path, traceId) {
         const bounded = new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify(body) })
         return privatePayment(bounded, path, db, databaseSession, env)
       }
+      if (path === "/__webcanbe/api/workspaces/create") {
+        let body
+        try { body = await smallJsonBody(request) } catch { return json({ error: "Invalid workspace request." }, 400) }
+        try { return json({ workspaceId: await createDatabaseWorkspace(db, databaseSession, body) }, 201) }
+        catch (error) { return error instanceof WorkspaceCreationError ? json({ error: error.message }, 400) : json({ error: "Workspace creation is temporarily unavailable." }, 503) }
+      }
       if (path === "/__webcanbe/api/workspaces") {
         return json({ workspaces: await databaseWorkspaces(db, databaseSession) })
       }
@@ -637,7 +643,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else {
         const asset = await env.ASSETS.fetch(request)
         if (path === "/__wcb_preview_runtime") {
