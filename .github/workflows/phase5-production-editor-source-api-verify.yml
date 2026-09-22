@@ -26,6 +26,8 @@ jobs:
         run: npm run security:secrets
       - name: Worker editor source regressions
         run: npx vitest run worker/editor-projects.test.js worker/materialization.test.js src/phase5-production-hosted-editor.test.ts src/phase5-gate4-launch-chain.test.ts src/phase5-editor-durable-export.test.ts src/phase5-editor-refresh-recovery.test.ts src/phase5-editor-save-policy.test.ts
+      - name: AI settlement and rendered revision regressions
+        run: npx vitest run worker/ai.test.js worker/ai-usage.test.js src/phase5-ai-revision-race.test.tsx src/phase5-ai-workspace.test.ts
       - name: Worker syntax
         run: node --check worker/editor-projects.js && node --check worker/index.js
       - name: Production build

@@ -53,7 +53,7 @@ describe("CompatibleWorkspace AI client contract", () => {
     expect(panel).toContain('apply: true')
     expect(panel).toContain("await onApplied")
     expect(panel).not.toContain("localStorage")
-    expect(worker).toContain('saveCode(db, session, projectId, { ...body, summary: proposal.summary, operations: proposal.operations }, "ai")')
+    expect(worker).toContain('aiRequestIdentity: aiRequestIdentity(body), summary: proposal.summary, operations: proposal.operations }, "ai")')
     expect(worker).toContain('producer:action==="ai"?"ai"')
   })
 })

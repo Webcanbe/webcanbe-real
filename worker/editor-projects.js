@@ -5,7 +5,7 @@ import { summarizeCompatibility } from "../src/webcanbe-engine/core/compatibilit
 import { patchText, patchProjectStyle, patchResponsiveConstruct, patchSiblingReorder, formatTransactionDiff } from "../src/webcanbe-engine/mutations/sourceMutations.ts"
 import { Buffer } from "node:buffer"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
-import { AiRequestError, WorkersAiProvider, aiModel, runAiRequest } from "./ai.js"
+import { AiRequestError, WorkersAiProvider, aiModel, runAiRequest, aiRequestIdentity, actionCost } from "./ai.js"
 import { AiUsageService, PostgresAiUsageRepository } from "./ai-usage.js"
 
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
@@ -289,6 +289,7 @@ async function saveCode(db, session, projectId, body, action = "code") {
     const nextContentHash=sourceContentHash(nextFiles,state.history)
     const nextRevision="rev_"+randomUUID()
     const {tx,revision,validation}=transactionFor({projectId,userId:session.userId,baseRevision:state.revision,newRevision:nextRevision,idempotencyKey:body.idempotencyKey,requestHash,operations,changes:prepared.changes,newContentHash:nextContentHash,producer:action==="ai"?"ai":action==="code"?"code":"system",editType:action==="ai"?"ai":action==="code"?"code":action==="redo"?"redo":"revert",summary:action==="ai"?body.summary:undefined})
+    if (action === "ai") tx.aiRequestIdentity = body.aiRequestIdentity
     const history=structuredClone(state.history)
     history.transactions.push(tx);history.revisions.push(revision)
     if(inverse){
@@ -312,6 +313,22 @@ async function saveCode(db, session, projectId, body, action = "code") {
 
 async function aiProposal(db, session, projectId, body, env) {
   const { state } = await readState(db, session, projectId, body, body.apply === true)
+  // Recovery is read/settle only: authority plus canonical history prove acceptance.
+  // Never relax the revision guard for a proposal which has not already committed.
+  if (body.apply === true && typeof body.idempotencyKey === "string" && IDEMPOTENCY.test(body.idempotencyKey)) {
+    const tx = state.history.transactions.find(item => item.idempotencyKey === body.idempotencyKey && item.producer === "ai" && item.actor === session.userId && item.success && item.status === "accepted")
+    if (tx) {
+      const repository = new PostgresAiUsageRepository(db)
+      const held = await repository.atomic(session.userId, repo => repo.reservationByUserKeyForUpdate(session.userId, body.idempotencyKey))
+      const accepted = state.history.revisions.find(item => item.revisionId === tx.newRevisionId && item.transactionId === tx.id && item.parentRevisionId === tx.baseRevisionId && item.producer === "ai")
+      if (!held || held.userId !== session.userId || held.projectId !== projectId || held.status === "released" || held.cost !== actionCost(body.mode) || held.expectedRevision !== tx.baseRevisionId || tx.aiRequestIdentity !== aiRequestIdentity(body) || !accepted || ![tx.baseRevisionId, tx.newRevisionId, state.revision].includes(body.expectedRevision)) fail(409, "AI recovery does not match an accepted request.")
+      const outcome = { state: "done", cost: held.cost, contextFiles: held.outcome?.contextFiles ?? tx.operations.map(operation => operation.file), proposal: { summary: tx.summary, operations: tx.operations }, result: { applied: true, revision: tx.newRevisionId, transaction: tx, validation: tx.validation, replayed: true } }
+      try { await new AiUsageService(repository).commit(held.id, outcome) }
+      catch { fail(503, "Source was accepted; AI Action settlement is pending.") }
+      await verifyCapability(db, session, projectId, body, true)
+      return outcome
+    }
+  }
   if (body.expectedRevision !== state.revision) fail(409, "Source changed; reload before requesting AI.")
   const files = textFiles(state.files, state.history)
   const controller = new AbortController()
@@ -322,7 +339,7 @@ async function aiProposal(db, session, projectId, body, env) {
       files, userId: session.userId, projectId, revision: state.revision,
       apply: async proposal => {
         if (body.apply !== true || proposal.operations.length === 0) return { applied: false, revision: state.revision }
-        const accepted = await saveCode(db, session, projectId, { ...body, summary: proposal.summary, operations: proposal.operations }, "ai")
+        const accepted = await saveCode(db, session, projectId, { ...body, aiRequestIdentity: aiRequestIdentity(body), summary: proposal.summary, operations: proposal.operations }, "ai")
         return { applied: true, ...accepted.value }
       },
     })

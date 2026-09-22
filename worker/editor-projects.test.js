@@ -98,6 +98,44 @@ function fakeDb(){
 }
 
 describe("production Worker source editor API",()=>{
+  it.each([['reviewed','original'],['reviewed','accepted'],['direct','original'],['direct','accepted']])("recovers AI settlement endpoint after %s Apply using %s revision",async(flow,revisionChoice)=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const listed=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)
+    const hash=listed.value.files.find(item=>item.file==='src/App.tsx').hash
+    let generations=0,allocations=0,releases=0
+    const env={AI:{run:async()=>{generations++;return {response:JSON.stringify({summary:'Settlement recovery',operations:[{kind:'update',file:'src/App.tsx',expectedHash:hash,content:'export default function App(){return <main>Accepted once</main>}'}]})}}}}
+    const body={...auth,feature:'modify',prompt:'Change heading',mode:'standard',expectedRevision:baseRevision,idempotencyKey:'ai-settlement-recovery'}
+    const query=db.query.bind(db);let failDone=false
+    db.query=async(sql,params=[])=>{
+      if(sql.startsWith('INSERT INTO wcb_ai_usage_reservations'))allocations++
+      if(sql.startsWith('UPDATE wcb_ai_usage_reservations')){
+        if(params[1]==='released')releases++
+        if(failDone && (sql.includes('SET outcome=$2') || params[3] && JSON.parse(params[3]).state==='done'))throw new Error('injected ledger outage after source acceptance')
+      }
+      return query(sql,params)
+    }
+    if(flow==='reviewed')await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,body,env)
+    failDone=true
+    await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...body,apply:true},env)).rejects.toMatchObject({status:503})
+    const acceptedRevision=state.project.revision
+    expect(state.project.history.transactions).toHaveLength(1)
+    expect(state.aiReservations[0].status).toBe(flow==='reviewed'?'committed':'reserved')
+    failDone=false
+    const recovery={...body,apply:true,expectedRevision:revisionChoice==='accepted'?acceptedRevision:baseRevision}
+    for(const attack of [{idempotencyKey:'different-stale-key',expectedRevision:baseRevision},{prompt:'Different request'}, {mode:'deep'}, {capability:'invalid'}]){
+      await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,{...recovery,...attack},env)).rejects.toBeDefined()
+    }
+    await expect(editorProjectRequest(db,{...session,userId:otherUser},`/__webcanbe/api/projects/${projectId}/ai`,recovery,env)).rejects.toMatchObject({status:403})
+    for(let replay=0;replay<2;replay++)await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/ai`,recovery,env)).resolves.toMatchObject({status:200,value:{state:'done',result:{applied:true,revision:acceptedRevision}}})
+    expect(state.project.revision).toBe(acceptedRevision)
+    expect(state.project.history.transactions).toHaveLength(1)
+    expect(state.project.history.transactions[0].producer).toBe('ai')
+    expect({generations,allocations,releases}).toEqual({generations:1,allocations:1,releases:0})
+    expect(state.aiReservations).toHaveLength(1)
+    expect(state.aiReservations[0]).toMatchObject({status:'committed',cost:1,outcome:{state:'done'}})
+  })
   it("keeps source hashing ordered and ignores non-editable files",()=>{
     const f=fixture()
     const a=sourceContentHash(f.files,f.history)

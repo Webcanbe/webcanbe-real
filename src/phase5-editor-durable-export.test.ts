@@ -8,6 +8,7 @@ import { DurableSource, contentHash, transactionEntry } from "./webcanbe-engine/
 import { buildIndependentExport } from "./webcanbe-engine/runtime/independentExport"
 import { detectProject, extractSafeZip, type ProjectRecord } from "./webcanbe-engine/runtime/projectRegistry"
 import { exportProjectZip } from "./webcanbe-engine/runtime/projectExport"
+import { acceptsRevisionTransition, type RevisionState } from "./webcanbe-engine/visual-editor/revisionTransition"
 
 const roots: string[] = []
 afterEach(() => { for (const root of roots.splice(0)) fs.rmSync(root, { recursive: true, force: true }) })
@@ -86,7 +87,7 @@ describe("Phase 5 durable save, canonical revision and standalone export", () =>
     expect(Object.keys(declared).some(name => /webcanbe/i.test(name))).toBe(false)
   })
 
-  it("keeps Visual, Code and Split wired to the same project request/revision acceptance path", () => {
+  it("keeps Visual, Code, Split and AI on guarded canonical acceptance and export", () => {
     const workspace = fs.readFileSync("src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx", "utf8")
     const code = fs.readFileSync("src/webcanbe-engine/visual-editor/CodeWorkspace.tsx", "utf8")
     const sourceApi = fs.readFileSync("src/webcanbe-engine/runtime/sourceApi.ts", "utf8")
@@ -95,12 +96,35 @@ describe("Phase 5 durable save, canonical revision and standalone export", () =>
     expect(workspace).toContain("<CodeWorkspace")
     expect(workspace).toContain("request={request}")
     expect(workspace).toContain("onAccepted={sourceAccepted}")
-    expect(workspace).toContain("revision.current = data.revision ?? revision.current")
+    expect(workspace).toContain("onApplied={sourceAccepted}")
+    expect(workspace).toContain("if (!updateRevision(data.revision, data)) return")
+    expect(workspace).toContain("acceptsRevisionTransition(")
+    expect(workspace).toContain('expectedRevision: revision.current')
     expect(workspace).toContain('request("mutate"')
     expect(code).toContain('requests.current("code"')
     expect(sourceApi).toContain('action === "code"')
     expect(sourceApi).toContain('transactionEntry(project.id, revision, "visual"')
     expect(sourceApi.match(/durable\.commit\(/g)?.length).toBeGreaterThanOrEqual(2)
+
+    // Revision identities are opaque. The same CAS contract serves every producer,
+    // including inverse operations; neither lexical ordering nor producer wins.
+    let canonical: RevisionState = { revision: "z-base", connection: 1 }
+    const accept = (origin: RevisionState, revision: string) => {
+      if (acceptsRevisionTransition(canonical, origin)) canonical = { ...canonical, revision }
+    }
+    for (const producer of ["Visual", "Code", "Split", "AI", "undo", "redo", "restore"]) {
+      const origin = { ...canonical }
+      accept(origin, `${producer}-accepted`)
+      expect(canonical.revision).toBe(`${producer}-accepted`)
+      accept(origin, "delayed-older-result")
+      expect(canonical.revision).toBe(`${producer}-accepted`)
+    }
+    const disconnected = { ...canonical }
+    canonical = { ...canonical, connection: 2 }
+    accept(disconnected, "old-connection-result")
+    expect(acceptsRevisionTransition(canonical, undefined)).toBe(false)
+    const exportRequest = { expectedRevision: canonical.revision }
+    expect(exportRequest.expectedRevision).toBe("restore-accepted")
   })
 
   it("keeps export behind independent-build validation and fresh authority", () => {

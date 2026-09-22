@@ -136,7 +136,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
       const applied = validateAiOutcome(response.data)
       if (applied.state !== "done" || !applied.result?.applied || typeof applied.result.revision !== "string") throw new Error("The proposal was not applied to source.")
       setOutcome(applied); setProposalRevision(applied.result.revision); setPhase("done")
-      try { await onApplied({ revision: applied.result.revision, transaction: applied.result.transaction }) }
+      try { await onApplied(applied.result) }
       catch { setError("Source was applied, but the workspace refresh failed. Reconnect to load the accepted revision.") }
     } catch (caught) {
       if (abort.signal.aborted) { setApplyUncertain(true); setError("Apply was cancelled before confirmation. Reload source before retrying.") }

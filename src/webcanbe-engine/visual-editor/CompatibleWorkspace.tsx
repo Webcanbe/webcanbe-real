@@ -12,6 +12,7 @@ import { samePointerFrame } from "./rasterFrame"
 import SourceGestures from "./SourceGestures"
 import { hostedEditorMode } from "./editorMode"
 import AiWorkspacePanel from "./AiWorkspacePanel"
+import { acceptsRevisionTransition, type RevisionState } from "./revisionTransition"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -114,7 +115,12 @@ export default function CompatibleWorkspace() {
   const keyInput = useRef<HTMLInputElement>(null)
   const revision = useRef("")
   const [currentRevision, setCurrentRevision] = useState("")
-  function updateRevision(value?: string) { if (value) { revision.current = value; setCurrentRevision(value) } }
+  const responseOrigins = useRef(new WeakMap<object, RevisionState>())
+  function responseIsCurrent(data: object) { return acceptsRevisionTransition({ revision: revision.current, connection: connectionEpoch.current }, responseOrigins.current.get(data)) }
+  function updateRevision(value: string | undefined, data: object) {
+    if (!value || !responseIsCurrent(data)) return false
+    revision.current = value; setCurrentRevision(value); return true
+  }
   const [preview, setPreview] = useState<{ url: string; transport: "blob" | "http" | "raster" | "snapshot"; generation: string }>()
   const [snapshotElements, setSnapshotElements] = useState<PreviewElement[]>([])
   const [snapshotViewport, setSnapshotViewport] = useState({ width: 1280, height: 900 })
@@ -139,24 +145,31 @@ export default function CompatibleWorkspace() {
   }
 
   async function request(path: string, body: Record<string, unknown> = {}, signal?: AbortSignal) {
+    // Code may have refreshed accepted source while a prior Apply response is in flight.
+    // Preserve both the unchanged local state and the server-checked causal predecessor.
+    const initiated = { revision: revision.current, connection: connectionEpoch.current,
+      baseRevision: ["code", "mutate", "ai", "undo", "redo", "revert"].includes(path) && typeof body.expectedRevision === "string" ? body.expectedRevision : undefined }
     const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: headers(), signal, body: JSON.stringify({ ...(revision.current ? { expectedRevision: revision.current } : {}), viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
-    return { ok: response.ok, status: response.status, data: await response.json() as ApiResponse }
+    const data = await response.json() as ApiResponse & { result?: object }
+    responseOrigins.current.set(data, initiated)
+    if (data.result && typeof data.result === "object") responseOrigins.current.set(data.result, initiated)
+    return { ok: response.ok, status: response.status, data }
   }
 
   async function refreshCompatibility() {
     const epoch = connectionEpoch.current, expectedRevision = revision.current
     const response = await request("compatibility")
     if (epoch !== connectionEpoch.current || expectedRevision !== revision.current) return
-    if (response.ok) { updateRevision(response.data.revision); setSummary(response.data.summary); setTargets(response.data.targets ?? []); setBreakpoints(response.data.breakpoints ?? []); setStyleDiagnostics(response.data.styleDiagnostics ?? []) }
+    if (response.ok && responseIsCurrent(response.data)) { updateRevision(response.data.revision, response.data); setSummary(response.data.summary); setTargets(response.data.targets ?? []); setBreakpoints(response.data.breakpoints ?? []); setStyleDiagnostics(response.data.styleDiagnostics ?? []) }
   }
 
   async function inspect(element: PreviewElement) {
     const sequence = ++inspectSequence.current, generation = activeGeneration.current, epoch = connectionEpoch.current
     setMessage("Reading the element’s real source location…")
     const response = await request("inspect", { identity: element.identity })
-    if (sequence !== inspectSequence.current || generation !== activeGeneration.current || epoch !== connectionEpoch.current) return
+    if (sequence !== inspectSequence.current || generation !== activeGeneration.current || epoch !== connectionEpoch.current || !responseIsCurrent(response.data)) return
     if (!response.ok || !response.data.target) { setTarget(undefined); setSelected(undefined); inspected.current = ""; setMessage(response.data.error ?? "This element is preview-only."); return }
-    updateRevision(response.data.revision)
+    updateRevision(response.data.revision, response.data)
     setSource(response.data.source ?? "")
     setTarget(response.data.target)
     setBreakpoints(response.data.breakpoints ?? [])
@@ -206,7 +219,7 @@ export default function CompatibleWorkspace() {
     if (!response.ok && incremental && preview?.transport !== "snapshot") response = await request("preview", { route: routePath.current, ...(expectedRevision ? { expectedRevision } : {}) })
     if (!current()) return
     if (response.data.updateKind) setMessage(response.data.updateKind === "css-hot-update" ? "CSS updated inside the controlled runner; application state retained." : response.data.updateKind === "react-fast-refresh" ? "React component refreshed inside the controlled runner; compatible component state retained." : response.data.updateKind === "generation-restart" ? "Structural source change started a new controlled generation." : "Incremental rebuild applied; document reloaded with route and viewport retained.")
-    updateRevision(response.data.revision)
+    updateRevision(response.data.revision, response.data)
     if (response.ok && response.data.transport === "snapshot" && response.data.png && response.data.generation) {
       activeGeneration.current = response.data.generation
       setSnapshotElements(response.data.snapshotElements ?? [])
@@ -355,8 +368,8 @@ export default function CompatibleWorkspace() {
   useEffect(() => { configurePreview() }, [selectMode, preview])
 
   async function sourceAccepted(data: SourceResponse) {
+    if (!updateRevision(data.revision, data)) return
     activeGeneration.current = ""; rasterQueued.current = []
-    updateRevision(data.revision)
     setDiff(data.diff ?? "")
     inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
@@ -483,7 +496,7 @@ export default function CompatibleWorkspace() {
     inspected.current = key; void inspect(element)
   }
 
-  return <main className="compatible-workspace">
+  return <main className="compatible-workspace" data-source-revision={currentRevision}>
     <header className="compatible-topbar">
       <a href="/projects" className="compatible-brand">WebCanBe <span>/ Compatible</span></a>
       <div className="compatible-project-status"><i/> {project?.name ?? "Loading project"} <small>{project?.detection.tailwind ? "Tailwind detected" : "Actual source files"}</small></div>

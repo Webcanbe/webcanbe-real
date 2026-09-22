@@ -11,6 +11,9 @@ const fail = (status, message) => { throw new AiRequestError(status, message) }
 const bytes = value => new TextEncoder().encode(value).byteLength
 
 export function actionCost(mode) { return mode === "deep" ? 3 : 1 }
+export function aiRequestIdentity(request) {
+  return createHash("sha256").update(JSON.stringify({ feature: request.feature, prompt: request.prompt, mode: request.mode ?? "standard", selection: request.selection ?? null, files: request.files ?? [] })).digest("hex")
+}
 export function aiModel(env) { return typeof env?.WEBCANBE_AI_MODEL === "string" && env.WEBCANBE_AI_MODEL.length <= 200 ? env.WEBCANBE_AI_MODEL : "@cf/meta/llama-3.3-70b-instruct-fp8-fast" }
 export function safeAiPath(file) { return typeof file === "string" && file.length <= 512 && SOURCE_PATH.test(file) && !file.includes("..") && !SECRET_PATH.test(file) }
 function relativeImportCandidates(importer, specifier) {
@@ -112,6 +115,7 @@ export async function runAiRequest({ provider, usage, request, files, userId, pr
   if (reservation.status === "released") fail(409, "This AI request was released; use a new idempotency key.")
   if (reservation.status === "committed" && reservation.outcome) {
     if (request.apply === true && reservation.outcome.state === "ready_to_review") {
+      parseProposal(JSON.stringify(reservation.outcome.proposal), new Set(context.map(item => item.file).filter(file => reservation.outcome.contextFiles.includes(file))))
       const result = await apply(reservation.outcome.proposal)
       const outcome = { ...reservation.outcome, state: result?.applied ? "done" : "ready_to_review", result }
       try { await usage.commit(reservation.id, outcome) }
