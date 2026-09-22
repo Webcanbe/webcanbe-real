@@ -1011,3 +1011,72 @@ Pre-publish a deadline clause:
 ### Measurement
 Primary success metric remains **qualified activated users and referred qualified users per domain-dollar**, not total signups or post count.
 Track cohort position, milestone eligibility, referral-qualified count and later retention/purchase in PostHog.
+
+
+## 24. Founding Domain Drop v4 — uncapped-until-trigger launch mechanic — 2026-09-22
+
+User does not want an obviously tiny fixed cap such as 10 participants or a large arbitrary cap such as 100. Preferred structure: **the pool is numerically uncapped until a real participation threshold triggers a short final window**.
+
+### Recommended mechanic: Threshold → Final Window
+- Entry pool has **no published numeric maximum**.
+- A user qualifies only after real product activation + one original public Build/Share post.
+- When the campaign reaches a predetermined number of verified qualified builders, a **48-hour final-entry window** automatically begins.
+- Anyone who qualifies before that final window ends is eligible.
+- Therefore the pool is theoretically open-ended, but the campaign still converges and gains urgency.
+- Recommended initial trigger: **25 qualified builders**. If launch traffic is stronger than expected, use 40–50 in later drops; do not start at 100 simply to look large.
+- Public progress copy before trigger: “17 builders qualified · Final 48h unlocks at 25.”
+- After trigger: “Final 48 hours are live · all verified builders who qualify before the timer ends enter.”
+
+This avoids the weak psychology of “1 of 1,000” while avoiding an artificially tiny 10-person cap.
+
+### Prize architecture for only 2–3 domains
+Use different prizes for different growth jobs:
+- **Premium headline domain:** Grand Draw among all verified qualified builders before close.
+- **Mid-tier domain #1:** Best Build award, judged on a published simple rubric (real use, quality, originality, not follower count).
+- **Mid-tier domain #2, if available:** Growth award for the entrant who drives the most **new qualified builders**, not clicks/likes/follows.
+
+This creates three paths:
+1. everyone has a chance,
+2. strong builders can win on merit,
+3. strong distributors can win by bringing real activated users.
+
+### Entry / ticket system
+Base eligibility:
+signup/login → project/materialize → accepted edit → durable save → export → original public Build/Share post tagging Webcanbe.
+
+For the random Grand Draw:
+- every qualified builder gets **1 base entry**
+- optional referral bonuses can add entries only when a referred person becomes a **qualified builder**, not merely visits/signs up
+- cap referral bonus per person (e.g. +3) so one influencer cannot dominate the draw
+- do not grant extra entries for duplicate posts, likes, or spammy tagging
+
+### Strong public framing
+Working campaign name: **Webcanbe Founding Builder Drop**.
+
+Headline:
+**Build something real. Share what you built. The final 48 hours unlock when 25 builders qualify.**
+
+Prize reveal:
+**One of the founding builders takes [premium-domain].**
+
+Before trigger, emphasize progress rather than odds:
+- “17 / 25 builders until Final 48”
+- “8 builders until the final window opens”
+After trigger, emphasize time:
+- “Final 48h”
+- “Final 24h”
+- “Last 6h”
+
+Do not promise a fixed probability because the final pool size remains open.
+
+### Why this mechanic is preferred
+- no arbitrary hard cap
+- still has a concrete convergence mechanism
+- participation itself accelerates the campaign toward its deadline
+- progress updates create multiple authentic social posts
+- no need to buy a large domain inventory
+- the premium domain acts as acquisition media; mid-tier domains drive product quality/referrals
+- PostHog can distinguish freebie traffic from qualified activation
+
+### Safety against a weak launch
+If 25 qualified builders are not reached by a separately published calendar fallback date, start the final window anyway. This prevents an indefinitely open campaign and avoids showing a stalled counter forever.
