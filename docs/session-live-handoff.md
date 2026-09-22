@@ -471,3 +471,53 @@ Current decision rule:
 2. If #85/#86 or PayPal connected E2E are not ready, launch free/limited beta by the hard deadline and keep paid CTA disabled.
 3. Do not launch even free beta until authenticated account isolation + real working-copy materialization + durable edit/save/reopen/export are proven in production.
 4. Absolute public-beta deadline remains **2026-09-24 21:00 KST**.
+
+
+## 17. 2026-09-22 20:23 KST launch judgment from live GitHub
+
+Live repo state rechecked:
+
+- Current main: `6951fd7d82a47775405142a098e966140ba238f8`.
+- PR #84 AI workspace closure: **merged** after causal revision / stale-response fix.
+- PR #85 commerce UI closure: **merged**.
+- PR #86 billing/browser reconcile: **merged**.
+- Current main workflows:
+  - UI verify: PASS
+  - durable editor/export: PASS
+  - Bigperson checkpoint: PASS
+  - production smoke: PASS
+  - browser compatibility smoke: PASS
+- Production smoke on main reports:
+  - product read **and materialization mutation switches deployed**
+  - production DB readiness PASS
+  - authoritative catalog read PASS
+  - anonymous private reads refused
+  - anonymous materialization refused
+  - 28 checks / 0 failures
+- `wrangler.jsonc` on main currently has `WEBCANBE_PRODUCT_MUTATIONS = enabled`.
+- PR #87 public marketplace/docs shell remains open and unmerged.
+- PR #88 authenticated shell/onboarding/editor polish remains open and unmerged.
+  - Both are **not launch blockers** by themselves and should not be allowed to delay the core beta merely for polish/content breadth.
+
+Remaining unproven critical item:
+- The repository still lacks evidence of a **real authenticated production-user core-flow acceptance** after current integration:
+  - same-account auth path / available provider path
+  - real working-copy materialization
+  - Visual edit
+  - durable save
+  - reopen/reload
+  - Code save
+  - export → independent build
+- Previous PR #60 explicitly lists this authenticated operator acceptance as pending.
+- GitHub/Email same-account provider E2E also remains unproven in stored evidence.
+- PayPal code is integrated, but connected PayPal sandbox/production E2E is not proven in current evidence.
+
+Launch decision at 20:23:
+- **Do not merge PR #87/#88 simply to feel more complete.**
+- **Do not wait on AI anymore; #84 is merged and main is green.**
+- **Do not require PayPal for a free/limited public beta.**
+- The only thing that should stand between current main and a public free/limited beta tonight is one real authenticated production core-flow smoke.
+- If that full core flow passes tonight, launch the free/limited public beta **tonight 9/22**.
+- If it fails, fix only the exact blocking failure; do not branch into polish.
+- Paid beta waits for connected PayPal E2E if not already proven.
+- Absolute public-beta deadline remains **2026-09-24 21:00 KST**.
