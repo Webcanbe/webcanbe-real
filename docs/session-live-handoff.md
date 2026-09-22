@@ -942,3 +942,72 @@ Primary business metric is **cost per qualified activated user / referred activa
 
 ### Disclosure / platform-operating requirement
 Because entry offers a chance to win something of value in exchange for a public post, treat the post as incentivized. For U.S.-facing promotion, entrants should clearly disclose the contest relationship in the post itself, e.g. `Entry for @Webcanbe's #WebcanbeDomainContest`, rather than hiding it. X allows post/tag/hashtag-based contests but advises against multiple-account entries and duplicate-post mechanics. Publish short official rules before launch.
+
+
+## 24. Founding Domain Drops v4 — scale beyond 10 entrants with only 2–3 domains — 2026-09-22
+
+The user correctly rejected a 10-person cap as too small for acquisition. Revised strategy: keep the prize inventory tiny while allowing **50–100+ qualified builders** by using milestone draws and cumulative eligibility rather than a single tiny cohort.
+
+### Recommended 3-domain structure
+Use three escalating milestones:
+- **Drop #1 at 20 qualified builders** — mid-tier 3-letter domain
+- **Drop #2 at 50 qualified builders** — stronger 3-letter domain
+- **Grand Drop at 100 qualified builders** — strongest/premium domain
+
+A “qualified builder” is not a signup. They must:
+1. create/materialize a real Webcanbe project,
+2. complete an accepted edit + durable save,
+3. export the source,
+4. publish one original post/demo showing what they built and tag @Webcanbe,
+5. submit/verify that post.
+
+### Early-entry advantage without fake scarcity
+Eligibility is cumulative:
+- Builders 1–20 are eligible for Drops #1, #2 and Grand Drop if they have not already won.
+- Builders 21–50 are eligible for Drop #2 and Grand Drop.
+- Builders 51–100 are eligible for Grand Drop.
+- A winner exits later domain draws.
+
+This makes joining early genuinely more valuable while still allowing up to 100 qualified builders from only three domains. Do not advertise misleading single-draw odds; show milestone sizes and current progress honestly.
+
+### Viral loop
+Every qualified builder receives one base entry for the draws they are eligible for.
+Optionally add referral boosts:
+- +1 extra entry when a referred person becomes a **qualified builder**, not merely when they click/signup.
+- cap referral bonus entries at +2 or +3 per person.
+- never award extra entries for likes, repost counts or raw impressions.
+This makes entrants recruit real activated users rather than spam social engagement.
+
+### Campaign UI
+Show:
+- current progress: `37 / 50 builders`
+- next unlock: featured domain
+- later locked milestone: `Grand Drop unlocks at 100 builders`
+- each verified builder entry / project card when permission allows
+- previous winners and claimed domains remain visible
+- CTA: **Build, share, qualify**
+
+### Suggested public framing
+Headline:
+**100 builders. 3 domain drops. Build early, get more shots.**
+
+Supporting:
+**Ship a real Webcanbe project, export the source, and share what you built. Domain drops unlock at 20, 50 and 100 verified builders. Early builders stay eligible for later drops until they win.**
+
+This avoids the “I probably won't win” problem by making early participation materially improve opportunity without pretending the overall entrant pool is smaller than it is.
+
+### If only 2 domains are available
+Use:
+- Drop #1 at **25 qualified builders**
+- Grand Drop at **75 qualified builders**
+Builders 1–25 are eligible for both; builders 26–75 for the grand drop.
+
+### If the campaign stalls
+Do not fake progress or lower the published threshold silently.
+Pre-publish a deadline clause:
+- each unlocked milestone draws normally;
+- if the campaign reaches the deadline before the next milestone, either extend transparently or run the final draw among all valid qualified entries only if that fallback was stated in the rules from the start.
+
+### Measurement
+Primary success metric remains **qualified activated users and referred qualified users per domain-dollar**, not total signups or post count.
+Track cohort position, milestone eligibility, referral-qualified count and later retention/purchase in PostHog.
