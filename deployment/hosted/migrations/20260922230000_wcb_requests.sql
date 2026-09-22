@@ -54,7 +54,7 @@ DROP TRIGGER IF EXISTS wcb_immutable_request_events ON public.wcb_request_events
 CREATE TRIGGER wcb_immutable_request_events BEFORE UPDATE OR DELETE ON public.wcb_request_events
   FOR EACH ROW EXECUTE FUNCTION public.wcb_refuse_request_event_mutation();
 
-REVOKE ALL ON public.wcb_requests, public.wcb_request_events FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON public.wcb_requests, public.wcb_request_events FROM PUBLIC, anon, authenticated, webcanbe_runtime;
 ALTER TABLE public.wcb_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wcb_request_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY wcb_requests_server ON public.wcb_requests TO webcanbe_runtime USING (true) WITH CHECK (true);
