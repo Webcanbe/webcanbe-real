@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { AlertCircle, Check, Clock3, Copy, Link2, MessageSquareText, Search, UserRound, X } from "lucide-react"
 import { hostedProductClient, type RequestCase, type RequestEvent, type RequestPriority, type RequestStatus } from "./hostedProductClient"
+import "./control-requests.css"
 
 const categories=["general_support","account_help","seller_support","billing","bug_report","sales","partnership","security_report","privacy_request","refund_request","payment_dispute","payout_issue"]
 const statuses:RequestStatus[]=["open","triaged","in_progress","waiting_on_user","waiting_internal","resolved","closed","reopened"]

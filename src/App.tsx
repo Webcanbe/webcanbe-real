@@ -16,8 +16,8 @@ import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProv
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 import { loadPublicPaymentConfiguration, type PublicPaymentConfiguration, type PublicPaymentPlan } from "./webcanbe-engine/runtime/planCatalog"
 import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn } from "./paymentFlow"
-import { CreatorEnvironment } from "./creator-shell"
-import { ControlRequests } from "./control-requests"
+const CreatorEnvironment = lazy(() => import("./creator-shell").then(module=>({default:module.CreatorEnvironment})))
+const ControlRequests = lazy(() => import("./control-requests").then(module=>({default:module.ControlRequests})))
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; priceMinor?: number; currency?: "USD"; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
 
@@ -1063,7 +1063,7 @@ function Control() {
     finally{setBusy(false)}
   }
   if (!hosted) return <div className="control-standalone"><main className="control"><header className="control-head"><span className="signal">Operations</span><h1>Hosted privileged session required.</h1><p>The local product preview does not fabricate privileged records or platform roles.</p></header></main></div>
-  if (controlView==="requests") return <ControlRequests onBack={()=>setControlView("overview")}/>
+  if (controlView==="requests") return <Suspense fallback={<main className="control-standalone" aria-busy="true"/>}><ControlRequests onBack={()=>setControlView("overview")}/></Suspense>
   if (!control) return <div className="control-standalone"><main className="control"><header className="control-head"><span className="signal">Bigperson Operations</span><h1>Operations access</h1><p>Ordinary request triage uses your active operator role and first-party session. High-risk platform controls continue to require the complete fresh three-factor ceremony.</p></header><section className="control-auth-gate"><div><b>Requests</b><p>Read, assign, prioritize, transition, and record notes with operator authorization and append-only request audit.</p><button className="button primary" onClick={()=>setControlView("requests")}>Open Requests queue</button></div><div><b>1. Google identity</b><p>Verified again on the server from the current first-party session and the enrolled Google issuer + subject.</p></div><div><b>2. Privileged factor</b><p>Entered for this operation only. It is cleared from UI state before the passkey ceremony.</p></div><div><b>3. Apple / WebAuthn passkey</b><p>User verification is required. The signed challenge is one-time, session-bound, operation-bound and expires after 90 seconds.</p></div><label>Privileged factor<input type="password" autoComplete="current-password" value={password} onChange={event=>setPassword(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void verifyAndRead()}}/></label><div className="control-auth-actions"><button className="button primary" disabled={busy||!password} onClick={()=>void verifyAndRead()}>{busy?"Verifying…":"Verify all 3 factors"}</button><button className="button" disabled={busy||!password} onClick={()=>void enrollPasskey()}>First Bigperson: register passkey</button></div>{error&&<p className="creator-message" role="status">{error}</p>}</section></main></div>
   const metrics = [["Users", control.users.length], ["Operators", control.operators.filter(row => field(row,"active") === true).length], ["Seller applications", control.sellerApplications.length], ["Submissions", control.submissions.length], ["Listings", control.listings.length], ["Audit events", control.audit.length]] as const
   const pendingSellers=control.sellerApplications.filter(row=>String(field(row,"status")??"")==="pending").length
@@ -1219,7 +1219,7 @@ export default function App() {
   else if(basePath!=="/seller" && Object.values(appRoutes).some(([route])=>route===basePath))page=<Protected><Dashboard key={basePath} initialView={viewForPath(basePath)}/></Protected>
   else if(basePath==="/settings")page=<Protected><Settings/></Protected>
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
-  else if(basePath==="/seller"||basePath.startsWith("/seller/"))page=<Protected><CreatorEnvironment path={basePath}/></Protected>
+  else if(basePath==="/seller"||basePath.startsWith("/seller/"))page=<Protected><Suspense fallback={<main aria-busy="true"/>}><CreatorEnvironment path={basePath}/></Suspense></Protected>
   else if(basePath===BIGPERSON_CONTROL_PATH)page=<Protected><Control/></Protected>
   else page=<NotFound path={basePath}/>
   const closeAuth=()=>{setAuthIntent(null);if(directAuth){window.history.replaceState({},"","/");window.dispatchEvent(new PopStateEvent("popstate"))}}

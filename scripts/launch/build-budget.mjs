@@ -23,11 +23,12 @@ const mib = value => value / (1024 * 1024)
 const kib = value => value / 1024
 
 const isPreview = item => /^assets\/(?:preview-runtime|PreviewRuntimeHost)-[^/]+\.js$/.test(item.file)
+const isDeferredRouteCss = item => /^assets\/(?:creator-shell|control-requests|my-requests)-[^/]+\.css$/.test(item.file)
 const total = sum(() => true)
 const appTotal = sum(item => !isPreview(item))
 const jsTotal = sum(item => !isPreview(item) && item.file.endsWith(".js"))
 const cssTotal = sum(item => !isPreview(item) && item.file.endsWith(".css"))
-const appCssTotal = sum(item => !isPreview(item) && item.file.startsWith("assets/") && item.file.endsWith(".css"))
+const appCssTotal = sum(item => !isPreview(item) && !isDeferredRouteCss(item) && item.file.startsWith("assets/") && item.file.endsWith(".css"))
 const largestJs = max(item => !isPreview(item) && item.file.endsWith(".js"))
 const largestCss = max(item => !isPreview(item) && item.file.endsWith(".css"))
 const previewTotal = sum(isPreview)

@@ -5,8 +5,8 @@ import App from "./App"
 import "./phase4-final-ui.css"
 import "./app-shell.css"
 import "./editor-shell.css"
-import "./creator-shell.css"
-import "./control-requests.css"
+
+if (window.location.pathname === "/requests") void import("./my-requests.css")
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

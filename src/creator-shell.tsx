@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowLeft, BarChart3, Banknote, CircleDollarSign, Clipbo
 import { Avatar, useAccount } from "./app-shell"
 import { hostedProductClient, productReadMode, type CreatorFinance, type CreatorStudioData, type SourceProjectSummary } from "./hostedProductClient"
 import type { Listing, SellerApplication } from "./webcanbe-engine/runtime/productDomain"
+import "./creator-shell.css"
 
 const routes = [
   ["/seller", "Overview", LayoutDashboard], ["/seller/projects", "Projects", FolderKanban], ["/seller/listings", "Listings", Store],
