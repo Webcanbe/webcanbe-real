@@ -609,3 +609,31 @@ Why only a small increase:
 - dominant uncertainty remains market demand and growth speed, not implementation completeness
 
 Do not interpret 0.0522% as statistically measured precision. It is a consistent subjective tracking heuristic. Do not move it materially again for polish/CI alone; next meaningful updates should primarily come from actual external-user and revenue evidence.
+
+
+## 20. Analytics decision + business-advisor operating rule — 2026-09-22
+
+### Analytics
+- Chosen launch analytics stack: **PostHog**.
+- Near-term purpose is not vanity traffic reporting; it is to measure the actual activation and purchase funnel.
+- Minimum useful event set for launch:
+  - landing_view
+  - signup_completed
+  - listing/project_view
+  - materialize_started / materialize_completed
+  - edit_saved (producer/mode as property where useful)
+  - reopen_success
+  - export_completed
+  - checkout_started / purchase_completed when paid flow is enabled
+- Country/referrer/device/session-replay data are secondary context. The primary launch metrics are qualified visitor → signup → project start/materialize → edit/save → reopen/export → pay.
+- Avoid over-instrumenting before launch; add only events that change a business decision.
+
+### Business-advisor rule
+The user explicitly wants the assistant to stay sharp on business questions rather than merely encouraging.
+- Treat business questions as decision problems: identify the objective, bottleneck, relevant economics, evidence, downside and next test.
+- Separate product completion from market proof.
+- Challenge avoidance disguised as product work.
+- Do not raise success estimates or praise execution without evidence.
+- When market data contradicts the current product or plan, prefer the evidence.
+- Keep company revenue, GMV, take rate, margin, CAC, retention, cash/runway, founder equity and valuation conceptually separate.
+- Optimize advice for increasing the real probability of building a large company, not for preserving a prior plan or making the user feel good.
