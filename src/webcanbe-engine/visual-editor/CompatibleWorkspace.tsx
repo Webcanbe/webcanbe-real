@@ -18,6 +18,7 @@ import SourceGestures from "./SourceGestures"
 import { hostedEditorMode } from "./editorMode"
 import AiWorkspacePanel from "./AiWorkspacePanel"
 import { acceptsRevisionTransition, type RevisionState } from "./revisionTransition"
+import { analytics } from "../../analytics"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -221,6 +222,7 @@ export default function CompatibleWorkspace() {
       connected = data.session
       if (cancelled) { stop(connected); return }
       advanceOnboarding(1, window.location.pathname.split("/").filter(Boolean).at(-1) || projectId); setLeftPanel("pages"); setRuntime(data.runtime); setProject(data.project); setSession(data.session); setMessage("Project source is ready. See the verified preview boundary below.")
+      analytics.capture("wcb_workspace_opened", { source: "direct", editor_mode: "visual" })
     })().catch(() => { if (!cancelled) setMessage("The local Compatible engine is unavailable.") })
     const pagehide = () => { if (connected) stop(connected) }
     window.addEventListener("pagehide", pagehide)
@@ -416,6 +418,7 @@ export default function CompatibleWorkspace() {
     if (!response.ok || !response.data.transaction?.success) { setMessage(response.data.transaction?.error ?? response.data.error ?? "The source change was not safe to apply."); return }
     setDiff(response.data.diff ?? "")
     setMessage(`Saved ${response.data.transaction.editType} transaction to the real source.`)
+    analytics.capture("wcb_visual_save_completed", { editor_mode: "visual", state: "success", source: "workspace" })
     await sourceAccepted(response.data)
   }
 
@@ -443,11 +446,13 @@ export default function CompatibleWorkspace() {
     setProjectId(data.project.id)
   }
   async function exportProject() {
+    analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface })
     const response = await request("export")
-    if (!response.ok || !response.data.archive) { setMessage(response.data.error ?? "Export unavailable."); return }
+    if (!response.ok || !response.data.archive) { analytics.capture("wcb_export_completed", { source: "workspace", state: "failure" }); setMessage(response.data.error ?? "Export unavailable."); return }
     const bytes = Uint8Array.from(atob(response.data.archive), ch => ch.charCodeAt(0))
     const url = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }))
     const link = document.createElement("a"); link.href = url; link.download = `${project?.name ?? "project"}.zip`; link.click(); setMessage("Accepted source ZIP is ready to download."); advanceOnboarding(3, window.location.pathname.split("/").filter(Boolean).at(-1) || projectId); setTimeout(() => URL.revokeObjectURL(url), 1000)
+    analytics.capture("wcb_export_completed", { source: "workspace", state: "success" })
   }
 
   useEffect(() => {

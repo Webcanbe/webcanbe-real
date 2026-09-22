@@ -18,6 +18,7 @@ import { loadPublicPaymentConfiguration, type PublicPaymentConfiguration, type P
 import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn } from "./paymentFlow"
 const CreatorEnvironment = lazy(() => import("./creator-shell").then(module=>({default:module.CreatorEnvironment})))
 const ControlRequests = lazy(() => import("./control-requests").then(module=>({default:module.ControlRequests})))
+import { analytics } from "./analytics"
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; priceMinor?: number; currency?: "USD"; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string }
 
@@ -133,7 +134,9 @@ function Protected({ children }: { children: React.ReactNode }) {
 function Preview({ project, large = false }: { project: Project; large?: boolean }) {
   return <div className={`project-preview ${project.color} ${large ? "large" : ""}`}><div className="preview-nav"><span>{project.title}</span><span>Index&nbsp;&nbsp; About&nbsp;&nbsp; Contact</span></div><div className="preview-body"><p>{project.category}</p><h3>{project.title}<br/>made to be <em>used.</em></h3><div className="preview-orb"/></div><div className="preview-foot"><span>Scroll to explore</span><span>01 — 04</span></div></div>
 }
-function ProjectCard({ project }: { project: Project }) { return <article className="project-card"><Link to={`/project/${project.slug}`}><Preview project={project}/></Link><div className="card-meta"><div><Link className="project-title" to={`/project/${project.slug}`}>{project.title}</Link><p>{project.tagline}</p></div><strong>${project.price}</strong></div><div className="stacks">{project.stack.map(x => <span key={x}>{x}</span>)}</div></article> }
+function ProjectCard({ project }: { project: Project }) {
+  return <article className="project-card"><Link to={`/project/${project.slug}`}><Preview project={project}/></Link><div className="card-meta"><div><Link className="project-title" to={`/project/${project.slug}`}>{project.title}</Link><p>{project.tagline}</p></div><strong>${project.price}</strong></div><div className="stacks">{project.stack.map(x => <span key={x}>{x}</span>)}</div></article>
+}
 
 function Browse({ authenticated = false }: { authenticated?: boolean }) {
   const [query,setQuery]=useState(""), [category,setCategory]=useState(()=>new URLSearchParams(window.location.search).get("category")||"All projects"), [sort,setSort]=useState<"recent"|"price-low"|"price-high"|"name">("recent")
@@ -1197,6 +1200,14 @@ export default function App() {
   useLayoutEffect(()=>{const h=(e:Event)=>{const d=(e as CustomEvent<{signup?:boolean;next?:unknown}>).detail;setAuthIntent({signup:Boolean(d?.signup),next:authNext(d?.next)})};window.addEventListener("wcb:open-auth",h);return()=>window.removeEventListener("wcb:open-auth",h)},[])
   useEffect(()=>{if(directAuth)setAuthIntent({signup:path==="/signup",next:directNext})},[directAuth,path,directNext])
   useEffect(()=>{syncRouteMetadata(path)},[path])
+  useEffect(() => {
+    if (path === "/browse" || path === "/marketplace") analytics.capture("wcb_marketplace_viewed", { source: "marketplace" })
+    if (path.startsWith("/project/")) {
+      const reference = path.split("/")[2]
+      const project = projects.find(item => item.slug === reference || item.id === reference)
+      if (project) analytics.capture("wcb_project_viewed", { listing_id: project.id, source: "marketplace" })
+    }
+  }, [path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
   if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
   else if(basePath==="/")page=<Landing/>
