@@ -1193,3 +1193,115 @@ Design the system so that every outcome produces a next asset:
 
 ### Platform-operating note
 X officially permits post/mention/hashtag contests but discourages multi-account and duplicate-post mechanics. YouTube contests require free entry and prohibit manipulating platform metrics. Therefore the League should use one original entry per person and should not reward repeated spam or view/like manipulation.
+
+
+## 26. FINAL customer campaign — Build League + Founding Prize Vault — 2026-09-22
+
+This supersedes the earlier small-cohort domain-drop variants.
+
+### Objective
+Seller/developer acquisition is handled separately by direct outreach. This campaign is specifically for **customer acquisition, activation, UGC, referral traffic, demand proof and reusable marketplace proof**.
+
+### Permanent campaign
+Name: **Webcanbe Build League**.
+It is always-on and divided into short seasons (default: 14 days) so the leaderboard can reset while cumulative community progress never resets.
+
+Qualified entry:
+1. start from a real Webcanbe project/template;
+2. materially customize it;
+3. save/export or publish the result;
+4. publish one original public post/video showing the finished result on an accepted public platform;
+5. include the live project/result link and a Webcanbe mention/link;
+6. submit the public post URL to Webcanbe for verification.
+
+One person may submit multiple builds across time, but cap leaderboard-eligible submissions per season to prevent spam.
+
+### Three competition lanes
+1. **Most Viewed / Reach** — highest verified organic public-view count at the season/milestone close. Obvious bought/bot/manipulated traffic is disqualified under published rules. Views are allowed as a real competition category.
+2. **Random Builder Draw** — every verified builder gets a real chance, so small accounts still care.
+3. **Impact / Referral** — highest number of attributed referred users who themselves become qualified Webcanbe builders. This is the most business-relevant lane.
+
+If only two premium domains are purchased, use Most Viewed + Random or Impact depending launch priorities. If three are purchased, use all three lanes.
+
+### Founding Prize Vault
+The campaign has **no participant cap**. Rewards grow with cumulative verified builders.
+
+Premium headline candidates: **may.cx, she.cx, way.bz** subject to actual purchase/availability.
+
+Working cumulative unlock ladder:
+- **25 verified builders** → first premium domain unlock
+- **100 verified builders** → second premium domain unlock
+- **250 verified builders** → third premium domain unlock
+
+Reaching a milestone unlocks the domain; it does not close the League. Use a short declared final window for the domain award while the permanent League continues.
+
+The ordinary prize pool scales with participation using low-marginal-cost Webcanbe rewards:
+- bounded AI Actions
+- temporary Pro/features where appropriate
+- gallery/official account spotlight
+- Founding Builder / League status
+- future beta perks
+
+Public message:
+**The more builders join, the bigger the Prize Vault gets.**
+
+### Retention system
+The campaign must leave a reason to return after the first post.
+
+1. **14-day seasons**
+   - seasonal leaderboard resets, so new users can still compete;
+   - lifetime builder count / profile / cumulative vault progress never resets.
+
+2. **Persistent Prize Vault**
+   - old users remain invested in the next community unlock;
+   - domain milestones are Founding-era prizes only; the League continues after domains are gone.
+
+3. **Weekly build prompt / featured challenge**
+   - fresh reason to create another project;
+   - low-cost reward = AI Actions + official feature/spotlight.
+
+4. **Referral residual**
+   - old users continue earning bounded AI Actions / League points when a referred person becomes a qualified builder;
+   - reward qualified activation, not raw clicks.
+
+5. **Public Build Gallery**
+   - every verified build becomes a durable Webcanbe showcase entry with consent;
+   - user receives a persistent public artifact/profile rather than a one-day contest entry.
+
+6. **Official highlights**
+   - weekly “builds we liked” and season recap;
+   - each strong user-generated build becomes future company marketing content.
+
+7. **New supply loop**
+   - as seller outreach brings new projects/templates, returning customers receive new material to remix/build with.
+   - this is the bridge from campaign retention into marketplace retention.
+
+### Anti-fraud for view-based prizes
+Publish a short rule:
+- manipulated/bought/bot views, fake accounts, duplicate spam, or unverifiable analytics can be disqualified;
+- Webcanbe may request platform analytics evidence for finalists;
+- one real person/account per identity for prize eligibility.
+This allows a real Most Viewed category without treating raw view counts as automatically trustworthy.
+
+### PostHog business measurement
+Track campaign → signup → materialize → edit/save → export → public-post submission → referral visit → referred qualified builder → return build.
+Primary metrics:
+- cost per qualified builder
+- qualified builder D7/D14 return
+- builds per qualified user
+- UGC posts created
+- referred qualified builders per entrant
+- later purchase conversion
+- seller-facing qualified-demand metrics
+
+### Strategic fallback
+Even without breakout virality, the system should leave:
+- activated customers
+- public UGC
+- gallery/showcase inventory
+- attributable referral paths
+- country/channel/template demand data
+- retention data
+- seller-facing demand proof
+
+Do not let the campaign end as “50 participants and then nothing.” The rare domains are launch accelerants inside a permanent League, not the League itself.
