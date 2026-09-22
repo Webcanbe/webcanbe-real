@@ -446,7 +446,7 @@ export default function CompatibleWorkspace() {
     setProjectId(data.project.id)
   }
   async function exportProject() {
-    analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface })
+    analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface === "split" ? "preview" : surface })
     const response = await request("export")
     if (!response.ok || !response.data.archive) { analytics.capture("wcb_export_completed", { source: "workspace", state: "failure" }); setMessage(response.data.error ?? "Export unavailable."); return }
     const bytes = Uint8Array.from(atob(response.data.archive), ch => ch.charCodeAt(0))
