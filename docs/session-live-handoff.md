@@ -1833,3 +1833,20 @@ Desired reaction remains:
 This scenario is intentionally an upper-success simulation. Specific media outlets, programs, people, dates, exact security arrangements, monthly cash flow and meeting sequences are not commitments or predictions. They are the user's preferred picture of what to do **if** the underlying success becomes real enough to make those events plausible.
 
 Use this exact simulation as the default reference when the user later says “the original success simulation,” “the U.S. one,” “the Sam/Musk one,” or similar.
+
+
+## 33. Continuity rule — MD is the primary persistent memory — 2026-09-23
+
+User explicitly requires Webcanbe continuity to be written to Markdown as aggressively as practical.
+
+Operating rule from now on:
+- Do not rely on the assistant's conversational memory, hidden reasoning, or compressed chat context as the authoritative project state.
+- For every meaningful Webcanbe session, first reconcile the current GitHub main/PR/workflow state, then read the latest relevant Markdown handoff.
+- docs/session-live-handoff.md is the primary continuity document for current decisions, current phase, blockers, launch state, marketing state, and exact next actions.
+- If chat context, memory summary, or an older handoff conflicts with current repository evidence, current repository evidence wins, and the handoff should be updated immediately.
+- Record material decisions, completed milestones, blockers, changed assumptions, and exact next actions in Markdown before the session can be lost.
+- Avoid relying on 'I remember' as a source of truth for Webcanbe. Persistent written state is preferred.
+- When a long session advances significantly, append a fresh concise checkpoint even if older sections remain historically useful.
+- Do not overwrite history blindly; mark superseded decisions explicitly.
+
+Reason: the user has experienced long-chat context drift and wants continuity that survives chat failure or model/context changes.
