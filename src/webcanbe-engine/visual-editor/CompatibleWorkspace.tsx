@@ -179,7 +179,10 @@ export default function CompatibleWorkspace() {
     const initiated = { revision: revision.current, connection: connectionEpoch.current,
       baseRevision: ["code", "mutate", "ai", "undo", "redo", "revert"].includes(path) && typeof body.expectedRevision === "string" ? body.expectedRevision : undefined }
     const response = await fetch(`/__webcanbe/api/projects/${projectId}/${path}`, { method: "POST", headers: headers(), signal, body: JSON.stringify({ ...(revision.current ? { expectedRevision: revision.current } : {}), viewport, ...body, previewId: session?.previewId, capability: session?.capability }) })
-    const data = await response.json() as ApiResponse & { result?: object }
+    const contentType = response.headers.get("content-type") ?? ""
+    const data = contentType.includes("application/json")
+      ? await response.json() as ApiResponse & { result?: object }
+      : { error: `${path} returned ${response.status} without a JSON response. Retry the action.` } as ApiResponse & { result?: object }
     responseOrigins.current.set(data, initiated)
     if (data.result && typeof data.result === "object") responseOrigins.current.set(data.result, initiated)
     return { ok: response.ok, status: response.status, data }
@@ -238,7 +241,9 @@ export default function CompatibleWorkspace() {
     selectionSource.current = "runtime"
     invalidateRaster(); setPreviewState("starting"); activeGeneration.current = ""; inspected.current = ""; ++inspectSequence.current
     setSelected(undefined); setHovered(undefined); setTarget(undefined)
-    let response = await request("preview", { ...(incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current }), ...(expectedRevision ? { expectedRevision } : {}) })
+    let response
+    try { response = await request("preview", { ...(incremental && preview?.transport === "raster" ? { command: "update", generation: preview.generation } : { route: routePath.current }), ...(expectedRevision ? { expectedRevision } : {}) }) }
+    catch { if (current()) { setPreviewState("failed"); setMessage("Preview connection failed. Retry from Preview controls.") } return }
     if (!current()) return
     if (!response.ok && response.status === 429 && preview?.transport === "snapshot") {
       setPreviewState("cooldown")
