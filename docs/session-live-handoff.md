@@ -2096,3 +2096,22 @@ Best use of this advisor now is not generic startup mentorship or product/UI fee
 6. If relevant, ask for 1–3 introductions to people who plausibly fit the buyer/creator profile; introductions are more valuable than broad advice if they are genuinely high-fit.
 
 Do not spend the conversation on code architecture, cosmetic UI detail, or abstract “how do I build a big startup?” discussion. Use the call/message to improve first-customer acquisition and trust/conversion.
+
+
+## 37. Prize-domain purchase milestone — may.cx — 2026-09-23
+
+User completed the purchase/order for **may.cx** through Instra for the Build League / Founding Prize Vault campaign.
+
+Evidence from the registrar screen:
+- domain: may.cx
+- action type: CREATE
+- registrar status at the time of screenshot: **IN PROGRESS**
+
+Interpretation:
+- payment/order step is complete from the user's side;
+- registry/registrar provisioning is still processing, so do not yet describe the domain publicly as fully active/transferred until it appears as registered/active in the account.
+
+Campaign use once registration is confirmed:
+- preferred headline prize: **may.cx**
+- initial consumer/event distribution channels: **X + Instagram**
+- Build League / Prize Vault remains the customer-acquisition system.
