@@ -36,6 +36,10 @@
 .public-product .public-article section h2{font-size:25px;font-weight:640;color:#272239}
 .public-product .public-article section p,.public-product .public-article section li{font-size:16px;line-height:1.8;color:#565162}
 .public-product .public-article section li{margin:9px 0}
+.public-product .public-article .support-scenarios{border-bottom:0;padding-bottom:0}
+.support-scenarios article{padding:20px 0;border-top:1px solid #e9e5f0}
+.support-scenarios article h3{font-size:19px;color:#302b3a;margin:0 0 10px}
+.support-scenarios article p{margin:8px 0}
 .public-product .support-form{padding:32px;gap:22px;margin:50px 0}
 .public-product .support-form label{font-size:15px;color:#302b3a}
 .public-product .support-form input:not([type=checkbox]),.public-product .support-form textarea{font-size:16px;min-height:45px}
