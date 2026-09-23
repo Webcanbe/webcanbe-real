@@ -84,7 +84,9 @@ function verifyProjectState(projectId, row) {
   if (head?.revisionId !== row.revision || head?.contentHash !== textContentHash(text)) fail(409, "Stored source and history disagree.")
   // The database row is parsed afresh on every request. Keep this verified
   // decoded view only for this request, avoiding another full UTF-8 pass.
-  return { files, text, history: structuredClone(row.history), revision: String(row.revision), epoch: String(row.source_epoch) }
+  // The database adapter parses this JSON into a fresh object for the request.
+  // Mutations clone it at their commit boundary; read paths can retain it.
+  return { files, text, history: row.history, revision: String(row.revision), epoch: String(row.source_epoch) }
 }
 
 function detectProject(name, files) {
@@ -423,7 +425,7 @@ function validateDraftSource(file, source) {
 }
 
 function previewPayload(state,route="/"){
-  const files=Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,Buffer.from(bytes).toString("base64")]))
+  const files=Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,bytes.toString("base64")]))
   return {files,entry:["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file=>files[file]!==undefined),title:"Webcanbe isolated preview",route}
 }
 
