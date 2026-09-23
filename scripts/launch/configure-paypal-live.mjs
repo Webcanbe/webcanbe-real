@@ -152,7 +152,20 @@ async function ensurePlan(token, productId, spec) {
 }
 
 function putSecret(name, value) {
-  run(process.platform === "win32" ? "npx.cmd" : "npx", ["--yes","wrangler@4","secret","put",name], { input: value + "\n" })
+  run(process.platform === "win32" ? "npx.cmd" : "npx", ["--yes","wrangler@4","versions","secret","put",name], { input: value + "\n" })
+}
+
+function deployNewestSecretVersion() {
+  const command = process.platform === "win32" ? "npx.cmd" : "npx"
+  const listed = spawnSync(command, ["--yes","wrangler@4","versions","list","--json"], { encoding: "utf8", env: process.env })
+  if (listed.status !== 0) fail("Could not list Worker versions after publishing secrets.")
+  let versions
+  try { versions = JSON.parse(listed.stdout) } catch { fail("Wrangler returned invalid versions JSON.") }
+  const rows = Array.isArray(versions) ? versions : Array.isArray(versions?.versions) ? versions.versions : []
+  const latest = rows[0]
+  const id = latest?.id || latest?.version_id || latest?.versionId
+  if (typeof id !== "string" || !id) fail("Could not resolve the newest Worker version ID.")
+  run(command, ["--yes","wrangler@4","versions","deploy",`${id}@100%`,"-y"])
 }
 
 async function verifyProduction() {
@@ -202,6 +215,9 @@ console.log("Publishing Worker secrets/bindings…")
 putSecret("PAYPAL_CLIENT_ID", clientId)
 putSecret("PAYPAL_CLIENT_SECRET", clientSecret)
 for (const spec of plans) putSecret(spec.env, resolved[spec.env])
+
+console.log("Deploying the newest secret-bearing Worker version…")
+deployNewestSecretVersion()
 
 console.log("Building and deploying current Webcanbe Worker…")
 run(process.platform === "win32" ? "npm.cmd" : "npm", ["run","build"])
