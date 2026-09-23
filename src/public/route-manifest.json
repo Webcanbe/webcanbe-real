@@ -662,22 +662,22 @@
     },
     "/about": {
       "title": "About Webcanbe — Webcanbe",
-      "description": "Webcanbe is a source-first marketplace and workspace for real web projects: discover a usable starting point, make an editable copy, and leave with the code.",
+      "description": "Webcanbe helps people start from a real web project, make an independent working copy, edit the source, and take that source with them.",
       "kind": "information"
     },
     "/updates": {
       "title": "Product updates — Webcanbe",
-      "description": "Notes about changes that are present in the Webcanbe product and repository—not planned features or release speculation.",
+      "description": "A product-focused view of implemented changes and the steps they make possible. Planned work is identified separately from changes available now.",
       "kind": "information"
     },
     "/changelog": {
       "title": "Changelog — Webcanbe",
-      "description": "A concise record of shipped repository changes. Entries are based on current project history and avoid claiming unavailable payment or deployment features.",
+      "description": "Shipped source and product changes grouped by date. This record describes implemented work without treating a repository commit as proof of a live payment or customer outcome.",
       "kind": "information"
     },
     "/github": {
-      "title": "Webcanbe on GitHub — Webcanbe",
-      "description": "Webcanbe’s public development presence is the Webcanbe/webcanbe-real repository on GitHub.",
+      "title": "Webcanbe and GitHub — Webcanbe",
+      "description": "Understand where GitHub fits when you own and export a Webcanbe project, and where to take product questions.",
       "kind": "information"
     },
     "/contact": {
@@ -687,7 +687,7 @@
     },
     "/brand": {
       "title": "Webcanbe brand assets — Webcanbe",
-      "description": "Use the Webcanbe name and supplied marks consistently when referring to the product.",
+      "description": "The product name, wordmark and symbol are available here for accurate identification and approved references.",
       "kind": "information"
     },
     "/contact/support": {

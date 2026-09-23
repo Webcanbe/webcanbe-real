@@ -81,10 +81,6 @@
         "/seller/apply"
       ],
       [
-        "Seller application",
-        "/seller/apply"
-      ],
-      [
         "Seller guide",
         "/docs/creators"
       ],
@@ -103,10 +99,6 @@
       [
         "Licensing guide",
         "/docs/creators/licensing"
-      ],
-      [
-        "Creator docs",
-        "/docs/creators"
       ]
     ]
   },
@@ -128,10 +120,6 @@
       [
         "Security",
         "/docs/security"
-      ],
-      [
-        "Changelog",
-        "/changelog"
       ],
       [
         "Help Center",
@@ -206,6 +194,22 @@
       [
         "Security Report",
         "/contact/security"
+      ],
+      [
+        "Privacy Requests",
+        "/contact/privacy"
+      ],
+      [
+        "Refund Requests",
+        "/contact/refunds"
+      ],
+      [
+        "Payment Disputes",
+        "/contact/payments"
+      ],
+      [
+        "Payout Issues",
+        "/contact/payouts"
       ]
     ]
   },
