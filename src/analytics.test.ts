@@ -6,9 +6,9 @@ function client() {
 }
 
 describe("analytics", () => {
-  it("is a no-op when disabled", () => {
+  it("is a no-op when disabled", async () => {
     const analytics = createAnalytics()
-    expect(initializeAnalytics("", "")).toBeNull()
+    expect(await initializeAnalytics("", "")).toBeNull()
     expect(() => {
       analytics.capture("wcb_marketplace_viewed", { source: "marketplace" })
       analytics.identify("internal-user-1", { plan: "free" })
