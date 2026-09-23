@@ -16,6 +16,7 @@
 .bl-hero-copy>p{color:#67646e}
 .bl-hero-actions>span{color:#75717e}
 .bl-art{background:#f4f3f8}
+.bl-hero-art img{object-fit:cover;object-position:center}
 .bl-art-fallback{color:#302c3b;background:linear-gradient(140deg,#f5f4fb 0%,#eae8f5 56%,#dedcf0 100%)}
 .bl-art-fallback span{font-weight:600;letter-spacing:-.075em;line-height:.92}
 .bl-art-fallback small{color:#635bff}
@@ -31,6 +32,9 @@
 .bl-stage{background:#faf9fc!important;border:1px solid #e8e7ec;border-radius:6px}
 .bl-stage:nth-child(2){background:#f8f7fc!important}.bl-stage:nth-child(3){background:#f6f5fc!important}.bl-stage:nth-child(4){background:#f3f2fb!important}.bl-stage:nth-child(5){background:#f0effb!important}.bl-stage:nth-child(6){background:#edebfb!important}
 .bl-stage-1{background:#eeeaff!important;border-color:#ded9ff;color:#17151b}
+.bl-stage-1{position:relative;overflow:hidden}
+.bl-stage-1::before{content:"";position:absolute;inset:0 0 0 27%;background:url("/build-league/campaign.webp") center/cover no-repeat;opacity:.16;mask-image:linear-gradient(90deg,transparent,#000 42%);pointer-events:none}
+.bl-stage-1>*{position:relative;z-index:1}
 .bl-stage-top{color:#68637e}
 .bl-stage>strong{font-weight:600;letter-spacing:-.06em}
 .bl-stage h3{font-weight:600;font-size:22px}
@@ -57,9 +61,13 @@
 .bl-final{background:#f7f6fb;color:#17151b;border-top:1px solid var(--bl-line)}
 .bl-modal-backdrop{background:#17151b80;backdrop-filter:blur(3px)}
 .bl-modal{background:#fff;border-radius:8px;box-shadow:0 28px 90px #17151b33;font-family:Inter,Arial,sans-serif;color:#17151b}
+.bl-modal{width:min(100%,680px)}
+.bl-modal-copy{text-align:center}
+.bl-modal-art{width:min(43vh,420px,calc(100% - 50px));height:auto;aspect-ratio:1;margin:4px auto 0;border-radius:50%;overflow:hidden}
+.bl-modal-art img{width:100%;height:100%;object-fit:cover}
 .bl-modal-close{color:#67646e}
 .bl-modal-copy small{color:#635bff}
-.bl-modal h2{font-weight:600;line-height:1.06}
+.bl-modal h2{font-size:clamp(42px,4.4vw,60px);font-weight:600;line-height:1.08}
 .bl-sticky{background:#fff;color:#17151b;border-bottom:1px solid var(--bl-line);box-shadow:0 3px 12px #17151b0a;font-family:Inter,Arial,sans-serif}
 .bl-sticky strong{color:#17151b}.bl-sticky span{color:#67646e}.bl-sticky a{color:#635bff}
 .bl-sticky + .product .product-header{position:relative;top:auto}
@@ -70,3 +78,5 @@
 .bl-social-story p{margin:8px 0 23px;font-size:15px;line-height:1.5;color:#55515e}
 @media(max-width:800px){.bl-hero h1{font-size:clamp(56px,10vw,78px)}.bl-social{grid-template-columns:1fr}}
 @media(max-width:520px){.bl-hero h1{font-size:56px}.bl-social h2{font-size:48px}.bl-modal h2{font-size:46px}}
+@media(max-width:800px){.bl-modal-art{width:min(36vh,340px,calc(100% - 50px));height:auto;margin:4px auto 0}}
+@media(max-width:520px){.bl-modal-art{width:min(32vh,290px,calc(100% - 50px));height:auto;margin:0 auto}}

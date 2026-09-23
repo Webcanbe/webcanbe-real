@@ -29,8 +29,7 @@ const nextAction=(p?:BuildLeagueProgress)=>!p?"Start your first project":count(p
 const nextHref=(p?:BuildLeagueProgress)=>!p||count(p,"working_copy_created")===0?"/marketplace":count(p,"source_saved")===0||count(p,"ai_edit_applied")<3||count(p,"export_completed")===0?"/projects":p.entry?"#social-impact":"#final-entry"
 
 function CampaignImage({className=""}:{className?:string}) {
-  const [available,setAvailable]=useState(true)
-  return <div className={"bl-art "+className}>{available?<img src="/build-league/campaign.webp" alt="BUILD LEAGUE campaign artwork" onError={()=>setAvailable(false)}/>:<div className="bl-art-fallback" aria-label="BUILD LEAGUE artwork pending"><span>BUILD<br/>LEAGUE</span><small>STAGE 01 / 06</small></div>}</div>
+  return <div className={"bl-art "+className}><img src="/build-league/campaign.webp" alt="An architectural portal built from stone, brushed metal, and violet glass"/></div>
 }
 
 export function BuildLeagueChrome({path}:{path:string}) {
