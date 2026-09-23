@@ -86,7 +86,10 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       let details
       try { details = await provider.getSubscription(subscription.providerSubscriptionId) }
       catch (error) {
-        if (paypalSubscriptionNeedsReview(error)) return json({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
+        if (paypalSubscriptionNeedsReview(error)) {
+          await repo.markSubscriptionForReconciliation(subscription.subscriptionId, subscription.providerSubscriptionId)
+          return json({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
+        }
         throw error
       }
       const reason = details?.billing_info?.last_failed_payment?.reason_code

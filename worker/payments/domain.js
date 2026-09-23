@@ -221,6 +221,21 @@ async function verifiedPendingApproval(provider, subscription) {
   return subscription
 }
 
+async function verifyAndStoreSubscription(repo, provider, subscription, options) {
+  if (!subscription.providerSubscriptionId) {
+    const created = await provider.createSubscription({ planId: subscription.providerPlanId, subscriptionId: subscription.subscriptionId, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl, requestId: `subscription-create:${subscription.subscriptionId}` })
+    subscription = await repo.updateSubscription(subscription.subscriptionId, { providerSubscriptionId: created.providerSubscriptionId, approvalUrl: created.approvalUrl })
+  }
+  try { await verifiedPendingApproval(provider, subscription) }
+  catch (error) {
+    if (paypalSubscriptionNeedsReview(error) || error?.code === "subscription_reconciliation_required") {
+      await repo.markSubscriptionForReconciliation(subscription.subscriptionId, subscription.providerSubscriptionId)
+    }
+    throw error
+  }
+  return await repo.markSubscriptionApprovalPending(subscription.subscriptionId, subscription.providerSubscriptionId) || repo.subscriptionForUpdate(subscription.subscriptionId)
+}
+
 export async function createPlanSubscription(repo, provider, session, input, options) {
   exactObject(input, ["planKey", "idempotencyKey"])
   const plan = WEB_CAN_BE_PLANS[input.planKey]
@@ -230,11 +245,9 @@ export async function createPlanSubscription(repo, provider, session, input, opt
   if (existing) {
     if (existing.planKey !== plan.key) throw new PaymentError(409, "idempotency_conflict", "This subscription key belongs to another plan.")
     if (existing.status === "reconciliation_required") throw new PaymentError(409, "subscription_reconciliation_required", "Billing review is needed before another checkout.")
-    if (existing.status === "creating") {
-      const resumed = await provider.createSubscription({ planId: existing.providerPlanId, subscriptionId: existing.subscriptionId, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl, requestId: `subscription-create:${existing.subscriptionId}` })
-      return repo.updateSubscription(existing.subscriptionId, { providerSubscriptionId: resumed.providerSubscriptionId, approvalUrl: resumed.approvalUrl, status: "approval_pending" })
-    }
-    return existing.status === "approval_pending" ? verifiedPendingApproval(provider, existing) : existing
+    if (existing.status === "creating") return verifyAndStoreSubscription(repo, provider, existing, options)
+    if (existing.status === "approval_pending") return verifyAndStoreSubscription(repo, provider, existing, options)
+    return existing
   }
   const current = await repo.currentSubscriptionForUser(session.userId)
   if (current) {
@@ -242,15 +255,13 @@ export async function createPlanSubscription(repo, provider, session, input, opt
     const paidThrough = current.status === "cancelled" && current.currentPeriodEnd && new Date(current.currentPeriodEnd).getTime() > Number((options.clock || Date.now)())
     if (!["cancelled", "expired"].includes(current.status) || paidThrough) {
       if (current.planKey !== plan.key) throw new PaymentError(409, "plan_change_undefined", "Plan changes are not available yet.")
-      return current.status === "approval_pending" ? verifiedPendingApproval(provider, current) : current
+      return current.status === "approval_pending" ? verifyAndStoreSubscription(repo, provider, current, options) : current
     }
   }
   const subscriptionId = uuid(repo.uuid), at = nowIso(options.clock || Date.now), providerPlanId = options.planIds[plan.key]
   if (!providerPlanId) throw new PaymentError(503, "plan_not_configured", "Subscription plan is not configured.")
-  let subscription = await repo.insertSubscription({ subscriptionId, userId: session.userId, planKey: plan.key, provider: "paypal", providerPlanId, idempotencyKey: key, status: "creating", createdAt: at })
-  const created = await provider.createSubscription({ planId: providerPlanId, subscriptionId, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl, requestId: `subscription-create:${subscriptionId}` })
-  subscription = await repo.updateSubscription(subscriptionId, { providerSubscriptionId: created.providerSubscriptionId, approvalUrl: created.approvalUrl, status: "approval_pending" })
-  return subscription
+  const subscription = await repo.insertSubscription({ subscriptionId, userId: session.userId, planKey: plan.key, provider: "paypal", providerPlanId, idempotencyKey: key, status: "creating", createdAt: at })
+  return verifyAndStoreSubscription(repo, provider, subscription, options)
 }
 
 export async function applySubscriptionEvent(repo, event, clock = Date.now) {

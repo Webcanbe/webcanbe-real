@@ -25,6 +25,25 @@ describe("PayPal provider boundary", () => {
     const request = calls[1]
     expect(request.init.headers["PayPal-Request-Id"]).toBe("order-create:wcb-order")
     expect(JSON.parse(request.init.body).purchase_units[0]).toMatchObject({ custom_id: "wcb-order", amount: { currency_code: "USD", value: "12.00" } })
+    expect(JSON.parse(request.init.body).payment_source.paypal.experience_context.landing_page).toBe("GUEST_CHECKOUT")
+    expect(result.providerHttpStatus).toBe(201)
+  })
+
+  it("reads back a newly created order using the same live credential context", async () => {
+    const calls = []
+    const provider = new PayPalProvider({ ...env, PAYPAL_ENVIRONMENT: "live" }, async (url, init) => {
+      calls.push({ url, init })
+      return url.endsWith("/v1/oauth2/token") ? response({ access_token: "token", expires_in: 300 }) : response({ id: "ORDER-1", status: "CREATED", purchase_units: [{ custom_id: "wcb-order" }] })
+    })
+    expect((await provider.getOrder("ORDER-1")).id).toBe("ORDER-1")
+    expect(calls[1].url).toBe("https://api-m.paypal.com/v2/checkout/orders/ORDER-1")
+  })
+
+  it("maps an explicit PayPal self-payment refusal to a useful buyer message", async () => {
+    const provider = new PayPalProvider(env, async url => url.endsWith("/v1/oauth2/token")
+      ? response({ access_token: "token", expires_in: 300 })
+      : response({ name: "CANNOT_PAY_SELF", debug_id: "trace-self" }, 422))
+    await expect(provider.getOrder("ORDER-1")).rejects.toMatchObject({ code: "paypal_cannot_pay_self", providerName: "CANNOT_PAY_SELF", providerDebugId: "trace-self", message: "Complete payment with a buyer account or payment method different from the Webcanbe merchant account." })
   })
 
   it("normalizes a completed capture for domain-side exact matching", async () => {

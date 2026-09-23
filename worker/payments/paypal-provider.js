@@ -8,22 +8,27 @@ function requireText(value, code) {
   return value
 }
 
-function providerError(status, body) {
-  const debug = body && typeof body === "object" && typeof body.debug_id === "string" ? body.debug_id : undefined
+function providerError(status, body, headers) {
+  const debug = body && typeof body === "object" && typeof body.debug_id === "string" ? body.debug_id : headers?.get?.("paypal-debug-id")
   const name = body && typeof body === "object" && typeof body.name === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(body.name) ? body.name : undefined
+  const issues = Array.isArray(body?.details) ? body.details.map(item => item?.issue) : []
   const reference = debug && /^[a-zA-Z0-9-]{1,64}$/.test(debug) ? `; ref ${debug}` : ""
   const detail = name ? `${name} (HTTP ${status}${reference})` : `HTTP ${status}${reference}`
-  const error = new PaymentError(status >= 500 ? 503 : 409, "paypal_request_failed", `PayPal request failed: ${detail}.`)
+  const selfPayment = name === "CANNOT_PAY_SELF" || issues.includes("CANNOT_PAY_SELF")
+  const error = selfPayment
+    ? new PaymentError(409, "paypal_cannot_pay_self", "Complete payment with a buyer account or payment method different from the Webcanbe merchant account.")
+    : new PaymentError(status >= 500 ? 503 : 409, "paypal_request_failed", `PayPal request failed: ${detail}.`)
   error.providerHttpStatus = status
   error.providerName = name
-  error.providerIssue = Array.isArray(body?.details) && body.details.some(item => item?.issue === "INVALID_RESOURCE_ID") ? "INVALID_RESOURCE_ID" : undefined
+  error.providerIssue = issues.includes("INVALID_RESOURCE_ID") ? "INVALID_RESOURCE_ID" : selfPayment ? "CANNOT_PAY_SELF" : undefined
+  error.providerDebugId = reference ? debug : undefined
   return error
 }
 
 async function responseJson(response) {
   let body
   try { body = await response.json() } catch { body = undefined }
-  if (!response.ok) throw providerError(response.status, body)
+  if (!response.ok) throw providerError(response.status, body, response.headers)
   return body
 }
 
@@ -51,17 +56,22 @@ export class PayPalProvider {
     return value
   }
 
-  async request(path, { method = "GET", body, requestId } = {}) {
+  async request(path, { method = "GET", body, requestId, withMetadata = false } = {}) {
     const headers = { Authorization: `Bearer ${await this.accessToken()}`, "Content-Type": "application/json", Accept: "application/json" }
     if (requestId) headers["PayPal-Request-Id"] = requestId
     if (body !== undefined) headers.Prefer = "return=representation"
-    return responseJson(await this.fetch(`${this.baseUrl}${path}`, { method, headers, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }))
+    const response = await this.fetch(`${this.baseUrl}${path}`, { method, headers, ...(body === undefined ? {} : { body: JSON.stringify(body) }) })
+    const value = await responseJson(response)
+    if (!withMetadata) return value
+    const debug = response.headers.get("paypal-debug-id")
+    return { body: value, providerHttpStatus: response.status, ...(debug && /^[a-zA-Z0-9-]{1,64}$/.test(debug) ? { providerDebugId: debug } : {}) }
   }
 
   async createOrder(order) {
-    const body = await this.request("/v2/checkout/orders", {
+    const { body, providerHttpStatus, providerDebugId } = await this.request("/v2/checkout/orders", {
       method: "POST",
       requestId: order.providerRequestId,
+      withMetadata: true,
       body: {
         intent: "CAPTURE",
         purchase_units: [{
@@ -70,12 +80,16 @@ export class PayPalProvider {
           description: order.title,
           amount: { currency_code: order.currency, value: moneyString(order.grossMinor) },
         }],
-        payment_source: { paypal: { experience_context: { user_action: "PAY_NOW", return_url: order.returnUrl, cancel_url: order.cancelUrl } } },
+        payment_source: { paypal: { experience_context: { landing_page: "GUEST_CHECKOUT", user_action: "PAY_NOW", return_url: order.returnUrl, cancel_url: order.cancelUrl } } },
       },
     })
     const approvalUrl = Array.isArray(body?.links) ? body.links.find(link => link?.rel === "payer-action" || link?.rel === "approve")?.href : undefined
     if (typeof body?.id !== "string" || typeof approvalUrl !== "string") throw new PaymentError(503, "paypal_order_invalid", "PayPal returned an invalid order.")
-    return Object.freeze({ providerOrderId: body.id, status: String(body.status || "CREATED"), approvalUrl })
+    return Object.freeze({ providerOrderId: body.id, status: String(body.status || "CREATED"), approvalUrl, providerHttpStatus, ...(providerDebugId ? { providerDebugId } : {}) })
+  }
+
+  async getOrder(providerOrderId) {
+    return this.request(`/v2/checkout/orders/${encodeURIComponent(providerOrderId)}`)
   }
 
   async captureOrder(providerOrderId, requestId) {
@@ -101,13 +115,17 @@ export class PayPalProvider {
   }
 
   async createSubscription({ planId, subscriptionId, returnUrl, cancelUrl, requestId }) {
-    const body = await this.request("/v1/billing/subscriptions", {
-      method: "POST", requestId,
+    const { body, providerHttpStatus, providerDebugId } = await this.request("/v1/billing/subscriptions", {
+      method: "POST", requestId, withMetadata: true,
       body: { plan_id: planId, custom_id: subscriptionId, application_context: { user_action: "SUBSCRIBE_NOW", return_url: returnUrl, cancel_url: cancelUrl } },
     })
     const approvalUrl = Array.isArray(body?.links) ? body.links.find(link => link?.rel === "approve")?.href : undefined
     if (typeof body?.id !== "string" || typeof approvalUrl !== "string") throw new PaymentError(503, "paypal_subscription_invalid", "PayPal returned an invalid subscription.")
-    return Object.freeze({ providerSubscriptionId: body.id, status: String(body.status || "APPROVAL_PENDING"), approvalUrl })
+    return Object.freeze({ providerSubscriptionId: body.id, status: String(body.status || "APPROVAL_PENDING"), approvalUrl, providerHttpStatus, ...(providerDebugId ? { providerDebugId } : {}) })
+  }
+
+  async getPlan(planId) {
+    return this.request(`/v1/billing/plans/${encodeURIComponent(planId)}`)
   }
 
   async getSubscription(providerSubscriptionId) {

@@ -70,13 +70,14 @@ describe("payment HTTP contract", () => {
     expect(await allowed.json()).toEqual({ provider: { status: "APPROVAL_PENDING", planMatches: true, referenceMatches: true, lastFailedReason: "PAYMENT_DENIED" } })
   })
 
-  it("reports an unverifiable provider ID for billing review without changing the pending row", async () => {
+  it("quarantines an unverifiable pending provider ID without treating it as paid", async () => {
     const id = "11111111-1111-4111-8111-111111111111"
     const subscription = { subscriptionId: id, userId: "buyer", providerSubscriptionId: "I-PAYPAL", providerPlanId: "P-EXPECTED", status: "approval_pending" }
     const provider = { getSubscription: async () => { const error = new PaymentError(409, "paypal_request_failed", "Provider error"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error } }
-    const repo = { subscriptionForUpdate: async () => subscription, updateSubscription: () => { throw new Error("must not mutate") } }
+    const repo = { subscriptionForUpdate: async () => subscription, markSubscriptionForReconciliation: async (rowId, providerId) => { expect(rowId).toBe(id); expect(providerId).toBe("I-PAYPAL"); subscription.status = "reconciliation_required"; subscription.approvalUrl = null } }
     const request = new Request("https://webcanbe.com/__webcanbe/api/payments/subscriptions/inspect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscriptionId: id }) })
     const response = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo, provider, session: { userId: "buyer" }, env: {} })
     expect(await response.json()).toEqual({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
+    expect(subscription.status).toBe("reconciliation_required")
   })
 })

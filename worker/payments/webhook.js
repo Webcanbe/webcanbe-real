@@ -45,7 +45,7 @@ export async function processPayPalEvent(repo, event) {
     case "PAYMENT.CAPTURE.REFUNDED": {
       const resource = event.resource || {}
       const providerCaptureId = String(related(resource, "capture_id") || "")
-      const pack = await applyAiPackRefund(repo, { providerCaptureId, providerRefundId: String(resource.id || ""), currency: String(resource.amount?.currency_code || ""), occurredAt: time(event) })
+      const pack = await applyAiPackRefund(repo, { providerCaptureId, providerRefundId: String(resource.id || ""), refundMinor: parseMoney(resource.amount?.value), currency: String(resource.amount?.currency_code || ""), occurredAt: time(event) })
       if (pack) return pack
       const order = await repo.orderByCapture(providerCaptureId)
       if (!order) { await repo.flagReconciliation({ kind: "refund_without_order", providerId: String(resource.id || ""), payload: event }); return { state: "reconciliation_required" } }

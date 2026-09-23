@@ -68,12 +68,14 @@ class MemoryRepository {
   insertRefund(row) { this.refunds.push(structuredClone(row)); return structuredClone(row) }
   flagReconciliation(row) { this.reconciliation.push(structuredClone(row)); return row }
   subscriptionByUserKey(userId, key) { return structuredClone(this.subscriptions.find(row => row.userId === userId && row.idempotencyKey === key)) }
-  currentSubscriptionForUser(userId) { return structuredClone(this.subscriptions.find(row => row.userId === userId && ["creating","approval_pending","active","past_due","cancelled"].includes(row.status))) }
+  currentSubscriptionForUser(userId) { return structuredClone(this.subscriptions.find(row => row.userId === userId && ["creating","approval_pending","active","past_due","cancelled","reconciliation_required"].includes(row.status))) }
   subscriptionByProviderId(id) { return structuredClone(this.subscriptions.find(row => row.providerSubscriptionId === id)) }
   subscriptionByProviderIdForUpdate(id) { return this.subscriptionByProviderId(id) }
   subscriptionForUpdate(id) { return structuredClone(this.subscriptions.find(row => row.subscriptionId === id)) }
   insertSubscription(row) { this.subscriptions.push(structuredClone(row)); return structuredClone(row) }
   updateSubscription(id, patch) { const row = this.subscriptions.find(item => item.subscriptionId === id); Object.assign(row, structuredClone(patch)); return structuredClone(row) }
+  markSubscriptionForReconciliation(id, providerSubscriptionId) { const row = this.subscriptions.find(item => item.subscriptionId === id && item.providerSubscriptionId === providerSubscriptionId); if (!row || !["creating", "approval_pending"].includes(row.status)) return undefined; Object.assign(row, { status: "reconciliation_required", approvalUrl: null }); return structuredClone(row) }
+  markSubscriptionApprovalPending(id, providerSubscriptionId) { const row = this.subscriptions.find(item => item.subscriptionId === id && item.providerSubscriptionId === providerSubscriptionId && item.status === "creating"); if (!row) return undefined; row.status = "approval_pending"; return structuredClone(row) }
   insertSubscriptionPayment(row) { if (this.subscriptionPayments.some(item => item.providerPaymentId === row.providerPaymentId)) return false; this.subscriptionPayments.push(structuredClone(row)); return true }
   ensureAiGrant(row) { const existing = this.grants.find(item => item.subscriptionId === row.subscriptionId && item.grantMonth === row.grantMonth); if (existing) return structuredClone(existing); this.grants.push(structuredClone(row)); return structuredClone(row) }
   insertProviderEvent(row) { const existing=this.events.find(item=>item.providerEventId===row.providerEventId); if(existing){if(existing.status!=="failed")return false; Object.assign(existing,{...structuredClone(row),status:"received",error:undefined}); return true} this.events.push({ ...structuredClone(row), status: "received" }); return true }
@@ -90,14 +92,15 @@ class MemoryRepository {
 class StubProvider {
   constructor() { this.createCalls = 0; this.captureCalls = 0; this.refundCalls = 0; this.subscriptionCalls = 0 }
   createOrder(order) { this.createCalls++; this.grossMinor = order.grossMinor; return { providerOrderId: `PP-${order.orderId}`, status: "CREATED", approvalUrl: "https://sandbox.paypal.test/approve" } }
+  getOrder(id) { return { id, status: "CREATED", purchase_units: [{ reference_id: id.slice(3), custom_id: id.slice(3), amount: { currency_code: "USD", value: `${Math.floor(this.grossMinor / 100)}.${String(this.grossMinor % 100).padStart(2, "0")}` } }] } }
   captureOrder(id, requestId) {
     this.captureCalls++
     const orderId = id.slice(3)
     return { providerOrderId: id, providerCaptureId: `CAP-${orderId}`, status: "COMPLETED", grossMinor: this.grossMinor, currency: "USD", customId: orderId, capturedAt: "2026-09-01T00:00:00.000Z", requestId }
   }
   refundCapture(_capture, amount, currency) { this.refundCalls++; return { providerRefundId: `REF-${this.refundCalls}`, status: "COMPLETED", refundMinor: amount, currency, refundedAt: "2026-09-20T00:00:00.000Z" } }
-  createSubscription({ subscriptionId }) { this.subscriptionCalls++; return { providerSubscriptionId: `SUB-${subscriptionId}`, status: "APPROVAL_PENDING", approvalUrl: "https://sandbox.paypal.test/subscription" } }
-  getSubscription(id) { return { id, custom_id: id.slice(4), plan_id: "P-MONTHLY", status: "APPROVAL_PENDING" } }
+  createSubscription({ subscriptionId, planId }) { this.subscriptionCalls++; this.subscriptionPlanId = planId; return { providerSubscriptionId: `SUB-${subscriptionId}`, status: "APPROVAL_PENDING", approvalUrl: "https://sandbox.paypal.test/subscription" } }
+  getSubscription(id) { return { id, custom_id: id.slice(4), plan_id: this.subscriptionPlanId, status: "APPROVAL_PENDING" } }
 }
 
 const options = { publicPaidLaunchAt: "2026-09-01T00:00:00.000Z", returnUrl: "https://webcanbe.com/purchases", cancelUrl: "https://webcanbe.com/marketplace", clock: () => Date.parse("2026-09-01T00:00:00.000Z") }
@@ -211,6 +214,16 @@ describe("provider-neutral marketplace payments", () => {
 })
 
 describe("subscription entitlement and monthly AI grants", () => {
+  it("quarantines a new PayPal 201 subscription whose immediate GET returns 404 without creating another", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    provider.getSubscription = async () => { const error = new PaymentError(409, "paypal_request_failed", "Not found"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error }
+    const input = { planKey: "pro_monthly", idempotencyKey: "fresh-404" }
+    const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }
+    await expect(createPlanSubscription(repo, provider, { userId: buyer }, input, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
+    expect(repo.subscriptions[0]).toMatchObject({ status: "reconciliation_required", providerSubscriptionId: `SUB-${repo.subscriptions[0].subscriptionId}`, approvalUrl: null })
+    await expect(createPlanSubscription(repo, provider, { userId: buyer }, { ...input, idempotencyKey: "another" }, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
+    expect(provider.subscriptionCalls).toBe(1)
+  })
   it("blocks a stale approval on the same and a new key without starting another PayPal subscription", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }
@@ -220,7 +233,7 @@ describe("subscription entitlement and monthly AI grants", () => {
     await expect(createPlanSubscription(repo, provider, { userId: buyer }, input, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
     await expect(createPlanSubscription(repo, provider, { userId: buyer }, { ...input, idempotencyKey: "second" }, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
     expect(repo.subscriptions).toHaveLength(1)
-    expect(repo.subscriptions[0]).toMatchObject({ subscriptionId: previous.subscriptionId, status: "approval_pending" })
+    expect(repo.subscriptions[0]).toMatchObject({ subscriptionId: previous.subscriptionId, status: "reconciliation_required" })
     expect(provider.subscriptionCalls).toBe(1)
     expect(repo.grants).toHaveLength(0)
   })
@@ -300,6 +313,38 @@ describe("subscription entitlement and monthly AI grants", () => {
 })
 
 describe("purchased AI Action packs", () => {
+  it("verifies a new order before approval and quarantines a missing provider order without another POST", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    provider.getOrder = async () => { const error = new PaymentError(409, "paypal_request_failed", "Not found"); error.providerHttpStatus = 404; throw error }
+    const input = { packKey: "actions_100", idempotencyKey: "pack-missing" }
+    await expect(createAiPackOrder(repo, provider, { userId: buyer }, input, options)).rejects.toMatchObject({ code: "ai_pack_reconciliation_required" })
+    expect(repo.aiPackOrders[0]).toMatchObject({ grossMinor: 500, currency: "USD", status: "reconciliation_required", approvalUrl: null })
+    expect(provider.createCalls).toBe(1)
+    expect((await createAiPackOrder(repo, provider, { userId: buyer }, input, options)).approvalUrl).toBeUndefined()
+    expect(provider.createCalls).toBe(1)
+  })
+
+  it("keeps a mismatched completed capture in reconciliation instead of granting credit", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_100", idempotencyKey: "pack-mismatch" }, options)
+    const capture = provider.captureOrder.bind(provider)
+    provider.captureOrder = (...args) => ({ ...capture(...args), grossMinor: 499 })
+    await expect(captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })).rejects.toMatchObject({ code: "capture_mismatch" })
+    expect(repo.aiPackOrders[0].status).toBe("reconciliation_required")
+    expect(repo.purchasedCredits).toHaveLength(0)
+  })
+
+  it("flags a partial refund without representing it as a full refund", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const order = await createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_100", idempotencyKey: "pack-partial" }, options)
+    await captureAiPackOrder(repo, provider, { userId: buyer }, { aiPackOrderId: order.aiPackOrderId })
+    const result = await processPayPalEvent(repo, { id: "WH-PARTIAL", event_type: "PAYMENT.CAPTURE.REFUNDED", create_time: "2026-09-20T00:00:00.000Z", resource: { id: "REF-PARTIAL", amount: { value: "1.00", currency_code: "USD" }, supplementary_data: { related_ids: { capture_id: repo.aiPackOrders[0].providerCaptureId } } } })
+    expect(result.state).toBe("reconciliation_required")
+    expect(repo.aiPackOrders[0].status).toBe("reconciliation_required")
+    expect(repo.purchasedCredits[0].revocationReason).toBe("partial_refund")
+    expect(repo.reconciliation).toHaveLength(1)
+  })
+
   it("selects pack price on the server, grants once, never adds creator earnings and has no expiry", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     await expect(createAiPackOrder(repo, provider, { userId: buyer }, { packKey: "actions_100", idempotencyKey: "pack", grossMinor: 1 }, options)).rejects.toMatchObject({ code: "invalid_request" })

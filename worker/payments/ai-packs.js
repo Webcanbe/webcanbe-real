@@ -2,7 +2,33 @@ import { randomUUID } from "node:crypto"
 import { AI_ACTION_PACKS, PAYMENT_CURRENCY, PaymentError, domainId, exactObject, paymentKey, providerId } from "./contracts.js"
 
 const uuid = factory => (factory || randomUUID)()
-const output = order => Object.freeze({ aiPackOrderId: order.aiPackOrderId, packKey: order.packKey, actions: order.actions, grossMinor: order.grossMinor, currency: order.currency, status: order.status, ...(order.approvalUrl ? { approvalUrl: order.approvalUrl } : {}) })
+const output = order => Object.freeze({ aiPackOrderId: order.aiPackOrderId, packKey: order.packKey, actions: order.actions, grossMinor: order.grossMinor, currency: order.currency, status: order.status, ...(order.status === "approval_pending" && order.approvalUrl ? { approvalUrl: order.approvalUrl } : {}) })
+
+async function verifyOrder(repo, provider, order) {
+  let details
+  try { details = await provider.getOrder(order.providerOrderId) }
+  catch (error) {
+    if (error?.providerHttpStatus !== 404) throw error
+    await repo.updateAiPackOrder(order.aiPackOrderId, { status: "reconciliation_required", approvalUrl: null })
+    throw new PaymentError(409, "ai_pack_reconciliation_required", "PayPal could not verify this order. Start a new checkout attempt after billing review.")
+  }
+  const unit = details?.purchase_units?.[0]
+  const valid = details?.id === order.providerOrderId && unit?.reference_id === order.aiPackOrderId && unit?.custom_id === order.aiPackOrderId && unit?.amount?.currency_code === order.currency && unit?.amount?.value === `${Math.floor(order.grossMinor / 100)}.${String(order.grossMinor % 100).padStart(2, "0")}`
+  if (!valid || !["CREATED", "PAYER_ACTION_REQUIRED"].includes(details.status)) {
+    await repo.updateAiPackOrder(order.aiPackOrderId, { status: "reconciliation_required", approvalUrl: null })
+    throw new PaymentError(409, "ai_pack_reconciliation_required", "PayPal order details need billing review before another checkout.")
+  }
+  return details
+}
+
+async function finishOrderCreation(repo, provider, order, options) {
+  if (!order.providerOrderId) {
+    const created = await provider.createOrder({ orderId: order.aiPackOrderId, providerRequestId: order.providerRequestId, title: `${order.actions} AI Actions`, grossMinor: order.grossMinor, currency: order.currency, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl })
+    order = await repo.updateAiPackOrder(order.aiPackOrderId, { providerOrderId: created.providerOrderId, approvalUrl: created.approvalUrl })
+  }
+  await verifyOrder(repo, provider, order)
+  return output(await repo.updateAiPackOrder(order.aiPackOrderId, { status: "approval_pending" }))
+}
 
 export async function createAiPackOrder(repo, provider, session, input, options) {
   exactObject(input, ["packKey", "idempotencyKey"], "Only packKey and idempotencyKey are accepted.")
@@ -12,29 +38,25 @@ export async function createAiPackOrder(repo, provider, session, input, options)
   const existing = await repo.aiPackOrderByUserKey(session.userId, key)
   if (existing) {
     if (existing.packKey !== pack.key) throw new PaymentError(409, "idempotency_conflict", "This checkout key belongs to another AI pack.")
-    if (existing.status === "creating") {
-      const resumed = await provider.createOrder({ orderId: existing.aiPackOrderId, providerRequestId: existing.providerRequestId, title: `${existing.actions} AI Actions`, grossMinor: existing.grossMinor, currency: existing.currency, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl })
-      return output(await repo.updateAiPackOrder(existing.aiPackOrderId, { providerOrderId: resumed.providerOrderId, approvalUrl: resumed.approvalUrl, status: "approval_pending" }))
-    }
+    if (existing.status === "creating") return finishOrderCreation(repo, provider, existing, options)
+    if (existing.status === "approval_pending") await verifyOrder(repo, provider, existing)
     return output(existing)
   }
   const aiPackOrderId = uuid(repo.uuid), createdAt = new Date((options.clock || Date.now)()).toISOString()
-  let order = await repo.insertAiPackOrder({ aiPackOrderId, userId: session.userId, packKey: pack.key, actions: pack.actions, grossMinor: pack.priceMinor, currency: PAYMENT_CURRENCY, provider: "paypal", providerRequestId: `ai-pack-create:${aiPackOrderId}`, idempotencyKey: key, status: "creating", createdAt })
-  const created = await provider.createOrder({ orderId: aiPackOrderId, providerRequestId: order.providerRequestId, title: `${pack.actions} AI Actions`, grossMinor: pack.priceMinor, currency: PAYMENT_CURRENCY, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl })
-  order = await repo.updateAiPackOrder(aiPackOrderId, { providerOrderId: created.providerOrderId, approvalUrl: created.approvalUrl, status: "approval_pending" })
-  return output(order)
+  const order = await repo.insertAiPackOrder({ aiPackOrderId, userId: session.userId, packKey: pack.key, actions: pack.actions, grossMinor: pack.priceMinor, currency: PAYMENT_CURRENCY, provider: "paypal", providerRequestId: `ai-pack-create:${aiPackOrderId}`, idempotencyKey: key, status: "creating", createdAt })
+  return finishOrderCreation(repo, provider, order, options)
 }
 
 async function finalize(repo, aiPackOrderId, capture) {
   const candidate = await repo.aiPackOrderById(aiPackOrderId)
-  return repo.atomic(async tx => {
+  const result = await repo.atomic(async tx => {
     await tx.lockPaymentCapture(capture.providerCaptureId)
     await tx.lockAiUsageUser(candidate.userId)
     const order = await tx.aiPackOrderForUpdate(aiPackOrderId)
     if (order.status === "completed") return order
     if (capture.status !== "COMPLETED" || capture.providerOrderId !== order.providerOrderId || capture.customId !== order.aiPackOrderId || capture.grossMinor !== order.grossMinor || capture.currency !== order.currency) {
       await tx.updateAiPackOrder(aiPackOrderId, { status: "reconciliation_required" })
-      throw new PaymentError(409, "capture_mismatch", "Captured payment does not match the Webcanbe AI pack order.")
+      return { mismatch: true }
     }
     const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: "ai_pack_capture", providerId: capture.providerCaptureId, aiPackOrderId, occurredAt: capture.capturedAt })
     if (!first) return tx.aiPackOrderForUpdate(aiPackOrderId)
@@ -47,6 +69,8 @@ async function finalize(repo, aiPackOrderId, capture) {
     }
     return completed
   })
+  if (result?.mismatch) throw new PaymentError(409, "capture_mismatch", "Captured payment does not match the Webcanbe AI pack order.")
+  return result
 }
 
 export async function captureAiPackOrder(repo, provider, session, input) {
@@ -71,8 +95,16 @@ export async function applyAiPackCaptureWebhook(repo, capture) {
 async function applyAiPackReversal(repo, reversal) {
   return repo.atomic(async tx => {
     await tx.lockPaymentCapture(reversal.providerCaptureId)
-    await tx.recordPaymentReversal({ provider: "paypal", kind: reversal.reason, providerId: reversal.providerId, providerCaptureId: reversal.providerCaptureId, currency: reversal.currency, occurredAt: reversal.occurredAt })
     const candidate = await tx.aiPackOrderByCapture(reversal.providerCaptureId)
+    if (candidate && reversal.reason === "refund" && reversal.refundMinor !== candidate.grossMinor) {
+      await tx.lockAiUsageUser(candidate.userId)
+      const first = await tx.insertPaymentIdentity({ provider: "paypal", kind: "ai_pack_partial_refund", providerId: reversal.providerId, aiPackOrderId: candidate.aiPackOrderId, occurredAt: reversal.occurredAt })
+      if (!first) return { state: "duplicate", aiPackOrder: output(candidate) }
+      await tx.revokePurchasedAiCredit(candidate.aiPackOrderId, reversal.occurredAt, "partial_refund")
+      await tx.flagReconciliation({ kind: "ai_pack_partial_refund", providerId: reversal.providerId, payload: { providerCaptureId: reversal.providerCaptureId, refundMinor: reversal.refundMinor, expectedMinor: candidate.grossMinor } })
+      return { state: "reconciliation_required", aiPackOrder: output(await tx.updateAiPackOrder(candidate.aiPackOrderId, { status: "reconciliation_required" })) }
+    }
+    await tx.recordPaymentReversal({ provider: "paypal", kind: reversal.reason, providerId: reversal.providerId, providerCaptureId: reversal.providerCaptureId, currency: reversal.currency, occurredAt: reversal.occurredAt })
     if (!candidate) return undefined
     await tx.lockAiUsageUser(candidate.userId)
     const order = await tx.aiPackOrderByCaptureForUpdate(reversal.providerCaptureId)
