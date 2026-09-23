@@ -1833,3 +1833,266 @@ Desired reaction remains:
 This scenario is intentionally an upper-success simulation. Specific media outlets, programs, people, dates, exact security arrangements, monthly cash flow and meeting sequences are not commitments or predictions. They are the user's preferred picture of what to do **if** the underlying success becomes real enough to make those events plausible.
 
 Use this exact simulation as the default reference when the user later says “the original success simulation,” “the U.S. one,” “the Sam/Musk one,” or similar.
+
+
+## 33. Continuity rule — MD is the primary persistent memory — 2026-09-23
+
+User explicitly requires Webcanbe continuity to be written to Markdown as aggressively as practical.
+
+Operating rule from now on:
+- Do not rely on the assistant's conversational memory, hidden reasoning, or compressed chat context as the authoritative project state.
+- For every meaningful Webcanbe session, first reconcile the current GitHub main/PR/workflow state, then read the latest relevant Markdown handoff.
+- docs/session-live-handoff.md is the primary continuity document for current decisions, current phase, blockers, launch state, marketing state, and exact next actions.
+- If chat context, memory summary, or an older handoff conflicts with current repository evidence, current repository evidence wins, and the handoff should be updated immediately.
+- Record material decisions, completed milestones, blockers, changed assumptions, and exact next actions in Markdown before the session can be lost.
+- Avoid relying on 'I remember' as a source of truth for Webcanbe. Persistent written state is preferred.
+- When a long session advances significantly, append a fresh concise checkpoint even if older sections remain historically useful.
+- Do not overwrite history blindly; mark superseded decisions explicitly.
+
+Reason: the user has experienced long-chat context drift and wants continuity that survives chat failure or model/context changes.
+
+
+## 34. Relearned canonical operating state — 2026-09-23 evening
+
+This checkpoint reconciles the latest persistent handoff with current GitHub evidence after chat-context drift.
+
+### Current source-of-truth order
+1. Current GitHub main / open PRs / workflow evidence.
+2. This live handoff.
+3. Older handoffs and compressed chat memory only as historical context.
+
+### Current phase
+- Public launch is already recorded as complete.
+- Webcanbe is no longer in the “finish the product before launch” phase.
+- Primary operating phase is now **business execution / market evidence**.
+- Product work should be limited to real-user blockers, trust/security issues, conversion blockers, or measured retention/monetization problems.
+
+### Current product state inferred from latest main history
+Latest product commit before continuity-only docs:
+- `72d2e1028356aa7de187d45dc3a02ed4c7eae8b8` — production app asset versioning.
+
+Recent merged product milestones immediately before it:
+- production PostHog base connection and CSP allowance;
+- PayPal runtime switched to Live defaults;
+- one-command PayPal Live product/plan/webhook/secret bootstrap;
+- atomic/version-aware PayPal Live secret publishing;
+- truthful Marketplace demo when hosted catalog is empty;
+- live checkout revalidation and checkout/return repair;
+- coherent product shell + real Aperture North preview;
+- first-party templates made editable;
+- Stillform added and source images optimized for hosted editing;
+- managed preview logging and longer cold-start allowance.
+
+### Current verification picture
+At product commit `72d2e102...`:
+- Phase 5 UI verify: PASS.
+- durable editor/export verify: PASS.
+- Bigperson checkpoint verify: PASS.
+- production smoke: PASS.
+- browser compatibility smoke: FAIL, with evidence including a /browse load timeout, a slow cancelled-checkout DCL sample, and a later expectation timeout for an “unavailable” heading. Treat this as a real current test signal, but not automatically as a proven production outage until reproduced/triaged.
+- Vercel commit statuses are failing because of Vercel build-rate-limit, not because a build compilation failure was established.
+
+### Analytics
+- Base production PostHog integration is merged.
+- PR #106 `Add detailed privacy-safe PostHog product tracking` remains open at `4b7fa8c4...`.
+- That PR adds detailed funnel/link/editor/billing/creator tracking without session replay or broad autocapture.
+- Because its base predates the later product reconciliation, do not merge it blindly; reconcile/cherry-pick only after checking current main.
+
+### Business / GTM strategy
+Current first customer-acquisition system remains:
+**Webcanbe Build League + Founding Prize Vault**.
+Core mechanics:
+- start from a real Webcanbe project;
+- materially customize it;
+- save/export or publish;
+- post the finished result publicly;
+- submit the public post;
+- verify the build;
+- create a gallery/leaderboard/referral path.
+
+Competition lanes:
+- Most Viewed
+- Random Builder
+- Impact / Referral
+
+Retention loop:
+- 14-day seasons;
+- permanent cumulative Prize Vault progress;
+- weekly build prompts;
+- referral residuals;
+- durable public Build Gallery;
+- official highlights;
+- new seller/project supply feeding returning users.
+
+Preferred rare-domain reward style remains names like `may.cx`, `she.cx`, `way.bz`; actual ownership/purchase status is not assumed here.
+
+### Long-term strategy
+The restored long-term North Star is broader than a template marketplace:
+**a market/ecosystem where complete software is bought, evolved, operated and handed off**.
+Current wedge:
+Marketplace → real project → real-code Workspace → external users → market evidence.
+Later layers only if demand supports them:
+Care → upstream merge → Feature Marketplace → creator ARR → experts → payments → remix → enterprise/private marketplace.
+
+### Probability tracker
+Until new external market evidence is confirmed:
+- fixed target: roughly 24 months to a credibly KRW 1T+ Webcanbe backed by real customers, recognized company economics, growth and retention;
+- original baseline: 0.0500%;
+- last explicit tracking estimate: **0.0523%**.
+Do not move this materially for code, plans, polish, or internal completion alone.
+
+### Current unresolved facts that should be answered by the user or fresh evidence
+1. Has the first public marketing/launch post actually been published and distributed yet?
+2. Is the Build League / Prize Vault public surface actually live yet, or still strategy/preparation?
+3. Have there been any genuine external users, full-flow completions, purchases, repeat users, or Creator submissions since the last recorded probability update?
+4. Which rare domains, if any, have actually been purchased/secured?
+5. Should PR #106 detailed PostHog tracking be reconciled into current main now, or is a newer analytics implementation already replacing it?
+
+These are intentionally treated as unknown rather than guessed.
+
+
+## 35. Canonical war-plan recovery — 100-day plan + active 72-hour market war — 2026-09-23
+
+Recovered from Library handoffs and promoted into the primary GitHub continuity record.
+
+### A. Canonical 100-day war plan
+The older aggressive plan remains valid as the **canonical stretch operating baseline**, not as a prediction.
+
+Core spine:
+- 3 days to public — already achieved early by the Sep 23 public launch.
+- 7 days to first genuine external payment — latest-bound target Sep 28.
+- Sep 30 stretch checkpoint:
+  - 10 paid buyers
+  - 40 external completed-use outcomes
+  - 10 strong live projects
+  - 3+ external Creators
+  - first repeat buyer or second independent buyer signal
+- Oct 7:
+  - 30–50 cumulative paid buyers
+  - $10k+ cumulative GMV stretch
+  - repeat purchase observed
+- Oct 31:
+  - $50k+ monthly GMV stretch
+  - 150–300 paid buyers
+  - 50 active sellers
+  - ~100 strong live listings
+  - clear repeat purchase
+- Nov 30: $250k+ monthly GMV stretch.
+- Dec 31: $1M+ monthly GMV stretch.
+
+Accounting correction:
+- GMV is not Webcanbe company revenue.
+- Current recognized marketplace revenue follows actual fee-bearing sales and current Creator economics (Founding Creator 0%; standard 5%/8%) plus real subscription/AI/other revenue.
+- Do not reuse the historical 15–25% take-rate illustration as current truth.
+
+Operating doctrine:
+- Every business day: metrics → distribution → conversations → one measured bottleneck → record.
+- No coding-only day with no market evidence.
+- Three independent qualified users blocked at the same step => investigate immediately.
+- Two consecutive days of weak qualified conversion => change target/message/offer before adding features.
+- Product Hunt waits until the funnel can convert and teach us something.
+- Founder age is not the initial company marketing hook; the earlier threshold was 100+ real customers OR roughly $50k–$100k+ monthly GMV with fast verified growth.
+- Build League + Founding Prize Vault is the evolved permanent customer-acquisition system.
+
+### B. Active 72-hour market war
+There was an earlier operational declaration tied to the 12:30 product-closure cutoff, but the **formal declaration supersedes it for the canonical war clock**.
+
+Formal war window:
+- Start: **2026-09-23 15:20 KST**
+- End: **2026-09-26 15:20 KST**
+
+Non-negotiable objective:
+Turn Webcanbe from a launched product into a company with **real external market evidence**.
+
+Primary outcomes:
+1. attributable real external traffic;
+2. external full-core-flow completions;
+3. first genuine paid buyer;
+4. if buyer #1 lands early, buyer #2 or repeat-purchase signal;
+5. seller/Creator outreach and concrete submission interest;
+6. Build League / Prize Vault UGC/referral evidence;
+7. PostHog truth from visitor → signup → project start/materialize → edit/save → export → checkout/purchase;
+8. identify and attack the single biggest real bottleneck each cycle.
+
+War rules:
+- Market evidence and revenue outrank polish.
+- No speculative feature expansion or cosmetic polish that displaces market work.
+- Code is allowed only for measured activation/conversion/reliability/payment/trust/seller-buyer blockers.
+- Every day includes distribution, direct conversations, measurement, and one evidence-driven iteration.
+- If a milestone is reached early, pull the next milestone forward immediately.
+- Approximate founder-led operating targets remain:
+  - ~100 qualified buyer/prospect touches/day
+  - ~50 seller/Creator touches/day
+  - at least 5 real user/customer conversations/day
+- These are quality/follow-up targets, not permission for indiscriminate spam.
+
+### C. 24h / 48h / 72h evidence gates
+24h:
+- real attributed traffic;
+- >=1 external core-flow completion;
+- buyer/seller outreach running;
+- >=1 serious Creator intent;
+- Build League joinable;
+- real non-founder PostHog data;
+- first paid buyer = stretch target.
+
+48h:
+- first genuine paid buyer OR exact evidence-backed purchase blocker;
+- 3–5 external full-flow completions;
+- at least one real Creator submission / launch-ready external project in motion;
+- one meaningfully stronger acquisition channel;
+- no unresolved blocker hitting multiple qualified users.
+
+72h:
+Minimum acceptable:
+- real traffic + funnel data;
+- multiple external completions;
+- first buyer OR precise purchase blocker;
+- meaningful seller pipeline;
+- Build League real entrant/UGC/referral signal or clear messaging failure evidence;
+- exact best channel + biggest funnel blocker + next 7-day experiment.
+
+Strong:
+- first paid buyer;
+- buyer #2 or repeat signal;
+- 5–10+ external completions;
+- 1–3 serious Creator submissions/live projects;
+- first Build League UGC/referral evidence;
+- measurable D1 return signal.
+
+### D. Seller-side progress already recorded inside the 72h war
+- First seller outbound batch actually sent via Resend: **30 emails** from hello@webcanbe.com.
+- Airtable rows were marked SENT with send date and Resend IDs.
+- **20 additional high-fit seller candidates** were discovered and added to the WebCanBe GTM Airtable Prospects table.
+- Seller-side first-day target pool therefore reached **30 contacted + 20 fresh candidates = 50**.
+- Next recorded seller action: verify/enrich the 20 new candidates, prioritize direct public emails, then send the second Founding Creator batch.
+
+### E. Current user clarification after recovery
+As of the user's latest clarification in this chat:
+- the first public consumer marketing/event post has **not** been published yet;
+- planned public distribution is primarily X + Instagram initially, with image/event creative acceptable while the site UI is still being cleaned up;
+- Build League / Prize Vault remains strategy/preparation and is intended to go public shortly;
+- no genuine external-user, full-flow, purchase, repeat-user, or Creator-submission market proof has yet been confirmed in this chat;
+- rare-domain rewards are not yet purchased; search continues until shortly before promotion;
+- detailed PostHog tracking has already been implemented beyond the older base-only state, so PR #106 should not be treated as the sole current analytics truth without reconciling actual main.
+
+This section supersedes any older handoff implication that consumer/public marketing had already begun.
+
+
+## 36. Immediate launch-advisor plan — 2026-09-23
+
+User knows 윤성용, CEO of 강남디벨로퍼스 주식회사, and may ask him for practical advice at the current market-entry stage.
+
+Current launch-channel decision:
+- first public consumer/event distribution: **X + Instagram**
+- preferred rare-domain prize: **may.cx** (purchase/ownership still to be completed before promotion)
+
+Best use of this advisor now is not generic startup mentorship or product/UI feedback. Ask for high-signal launch/GTM judgment:
+1. What would make this offer compelling enough for a stranger to actually try or pay?
+2. If starting from zero audience, what exact first 20–50 customer-acquisition actions would he prioritize?
+3. Does the Build League / may.cx prize mechanic strengthen product demand or distract from the product, and what would he change?
+4. Which initial customer segment would he target first from the current Webcanbe product, and why?
+5. What trust objection would stop him from buying from a newly launched marketplace?
+6. If relevant, ask for 1–3 introductions to people who plausibly fit the buyer/creator profile; introductions are more valuable than broad advice if they are genuinely high-fit.
+
+Do not spend the conversation on code architecture, cosmetic UI detail, or abstract “how do I build a big startup?” discussion. Use the call/message to improve first-customer acquisition and trust/conversion.
