@@ -49,7 +49,7 @@ describe("Phase 5 free managed Browser Run Visual preview", () => {
     expect(workspace).toContain("function selectSnapshot")
     expect(workspace).toContain('preview?.transport === "snapshot" ? <img')
     expect(workspace).toContain('Managed Browser Run preview is ready')
-    expect(worker).toContain('waitForSelector:{selector:"html[data-wcb-ready=\'1\']",timeout:12000}')
+    expect(worker).toContain('waitForSelector:{selector:"html[data-wcb-ready=\'1\']",timeout:45000}')
     expect(worker).not.toContain("visible:false")
   })
 })

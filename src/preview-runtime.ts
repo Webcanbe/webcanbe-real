@@ -259,6 +259,24 @@ function bootstrap(payload: Payload) {
   const moduleCache = new Map<string, { exports: unknown }>()
   const styleCache = new Set<string>()
   const utilities = generatedUtilityCss(files)
+  const virtualPublicPrefix = "/__wcb_virtual_public__/"
+  const publicImages = new Map<string, string>()
+  const materializePublicImages = () => {
+    for (const image of document.querySelectorAll<HTMLImageElement>(`img[src^="${virtualPublicPrefix}"]`)) {
+      const name = image.getAttribute("src")!.slice(virtualPublicPrefix.length)
+      if (!/^[a-zA-Z0-9/_-]+\.(?:png|jpe?g|gif|webp|svg)$/.test(name) || name.includes("..")) continue
+      const file = `public/${name}`
+      if (!files[file]) continue
+      let url = publicImages.get(file)
+      if (!url) {
+        const mime = name.endsWith(".svg") ? "image/svg+xml" : name.endsWith(".png") ? "image/png" : name.endsWith(".webp") ? "image/webp" : name.endsWith(".gif") ? "image/gif" : "image/jpeg"
+        url = `data:${mime};base64,${files[file]}`
+        publicImages.set(file, url)
+      }
+      image.src = url
+    }
+  }
+  new MutationObserver(materializePublicImages).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] })
 
   const addCss = (file: string, css: string) => {
     if (styleCache.has(file)) return
@@ -300,7 +318,7 @@ function bootstrap(payload: Payload) {
       return module.exports
     }
 
-    let source = decodeText(files[file])
+    let source = decodeText(files[file]).replaceAll("import.meta.env.BASE_URL", JSON.stringify(virtualPublicPrefix))
     if (file.endsWith(".tsx") || file.endsWith(".jsx")) source = instrument(file, source)
     const output = ts.transpileModule(source, {
       fileName: file,
@@ -342,6 +360,7 @@ function bootstrap(payload: Payload) {
     : ["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file => files[file] !== undefined)
   if (!entry) throw new Error("No supported React/Vite entry file was found.")
   load(entry)
+  materializePublicImages()
 }
 
 function layoutContext(style: CSSStyleDeclaration) {
