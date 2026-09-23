@@ -247,6 +247,14 @@
       [
         "Privacy Requests",
         "/legal/privacy-requests"
+      ],
+      [
+        "Legal Version Archive",
+        "/legal/archive"
+      ],
+      [
+        "Third-Party Notices",
+        "/legal/third-party-notices"
       ]
     ]
   }

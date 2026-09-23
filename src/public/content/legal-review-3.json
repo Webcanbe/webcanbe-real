@@ -5,11 +5,6 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "EFFECTIVE_DATE",
-      "LEGAL_VERSION_ARCHIVE_URL",
-      "OPERATOR_COUNTRY",
-      "OPERATOR_LEGAL_FORM",
-      "OPERATOR_LEGAL_NAME",
       "OPERATOR_POSTAL_ADDRESS",
       "OPERATOR_REGISTRATION_DISCLOSURE",
       "OPERATOR_REQUIRED_CONTACT_DETAILS",
@@ -23,9 +18,6 @@
           "The Webcanbe name is a product brand. Your account agreement and order confirmation identify the actual contracting operator. An authentication, infrastructure or payment provider does not become the supplier of your Webcanbe purchase merely by providing that service."
         ],
         "pendingFields": [
-          "OPERATOR_LEGAL_NAME",
-          "OPERATOR_LEGAL_FORM",
-          "OPERATOR_COUNTRY",
           "OPERATOR_POSTAL_ADDRESS",
           "OPERATOR_REGISTRATION_DISCLOSURE",
           "OPERATOR_REQUIRED_CONTACT_DETAILS",
@@ -66,12 +58,10 @@
       {
         "title": "5. Versions and questions",
         "paragraphs": [
-          "Each document identifies its version and effective date. The version accepted with an account action or order remains associated with that record; a later website update does not silently rewrite a previously granted project license.",
+          "Each document identifies its version and effective date. The version accepted with an account action or order remains associated with that record; a later website update does not silently rewrite a previously granted project license. Prior versions and retained copies are available through https://webcanbe.com/legal/archive or by contacting hello@webcanbe.com.",
           "For an order question, include a safe order reference and the relevant project or plan. For a source-rights question, include the listing and release. Do not send account passwords, authentication tokens or complete payment-card details. The applicable document explains the next step and any relevant review route."
         ],
-        "pendingFields": [
-          "LEGAL_VERSION_ARCHIVE_URL"
-        ]
+        "pendingFields": []
       }
     ]
   },
@@ -81,10 +71,6 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "EFFECTIVE_DATE",
-      "OPERATOR_COUNTRY",
-      "OPERATOR_LEGAL_FORM",
-      "OPERATOR_LEGAL_NAME",
       "OPERATOR_POSTAL_ADDRESS",
       "OPERATOR_REGISTRATION_DISCLOSURE",
       "OPERATOR_REQUIRED_CONTACT_DETAILS",
@@ -99,9 +85,6 @@
           "You accept these Terms through the account or checkout acceptance action presented to you. Merely viewing a public page does not create a paid subscription. An individual acting for an organization must have authority to bind it; the identified organization is then the customer for that account or order."
         ],
         "pendingFields": [
-          "OPERATOR_LEGAL_NAME",
-          "OPERATOR_LEGAL_FORM",
-          "OPERATOR_COUNTRY",
           "OPERATOR_POSTAL_ADDRESS",
           "OPERATOR_REQUIRED_CONTACT_DETAILS",
           "OPERATOR_REGISTRATION_DISCLOSURE",
@@ -283,14 +266,10 @@
       "BACKUP_RETENTION_SCHEDULE",
       "CAMPAIGN_RETENTION_SCHEDULE",
       "CLOUDFLARE_PROCESSING_DETAILS",
-      "EFFECTIVE_DATE",
       "GOOGLE_FIREBASE_PROCESSING_DETAILS",
-      "OPERATOR_COUNTRY",
-      "OPERATOR_LEGAL_NAME",
       "OPERATOR_POSTAL_ADDRESS",
       "PAYPAL_PROCESSING_DETAILS",
       "PRIVACY_CONTACT_NAME_OR_ROLE",
-      "REPRESENTATIVE_DISCLOSURE",
       "SECURITY_LOG_RETENTION_SCHEDULE",
       "SUPABASE_PROCESSING_DETAILS"
     ],
@@ -298,15 +277,13 @@
       {
         "title": "1. Controller and contact",
         "paragraphs": [
+          "Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement..",
           "For personal information an organization places in its private project for processing solely on its instructions, that organization may be the controller and Webcanbe its processor. Section 14 below explains the separate processing agreement for that role. We do not treat a controller's project data as available for unrelated advertising simply because it is hosted in our workspace.",
           "This policy describes personal-data handling, not a transfer of your intellectual property. Optional marketing, non-essential tracking, and legally required cross-border consents are not bundled into general account acceptance."
         ],
         "pendingFields": [
-          "OPERATOR_LEGAL_NAME",
           "OPERATOR_POSTAL_ADDRESS",
-          "OPERATOR_COUNTRY",
-          "PRIVACY_CONTACT_NAME_OR_ROLE",
-          "REPRESENTATIVE_DISCLOSURE"
+          "PRIVACY_CONTACT_NAME_OR_ROLE"
         ]
       },
       {
@@ -493,10 +470,8 @@
     "title": "Buyer License",
     "intro": "Buyer License review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "EFFECTIVE_DATE"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. The licensed release",
@@ -588,22 +563,17 @@
     "title": "Creator Distribution Agreement",
     "intro": "Creator Distribution Agreement review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "EFFECTIVE_DATE",
-      "OPERATOR_LEGAL_NAME"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Parties, acceptance, and model",
         "paragraphs": [
-          "It applies after affirmative acceptance and the applicable account and project approvals. An organization representative must be authorized to bind it. Display-name approval alone is not merchant, payout, or project approval.",
+          "This agreement is between MIN SIHOO, operating Webcanbe, and the individual or organization identified in the Creator acceptance record. It applies after affirmative acceptance and the applicable account and project approvals. An organization representative must be authorized to bind it. Display-name approval alone is not merchant, payout, or project approval.",
           "Under this agreement, the Creator authorizes Webcanbe to distribute identified releases and grant the stated Buyer License as the contracting distributor for those orders. The Creator supplies licensed digital project materials and earns the contractual share below. Webcanbe enters into the corresponding buyer supply contract in its own name and is the buyer-facing contact for that contract. The buyer receives the identified release and license from Webcanbe under that authority. Your underlying intellectual property remains yours.",
           "Webcanbe does not represent that Creator earnings are escrowed, insured deposits, stored money transferable between users, or interest-bearing balances. Creators are independent suppliers, not employees or equity partners merely because they use the service. This agreement is non-exclusive."
         ],
-        "pendingFields": [
-          "OPERATOR_LEGAL_NAME"
-        ]
+        "pendingFields": []
       },
       {
         "title": "2. Creator identity and eligibility",
@@ -728,8 +698,6 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "EFFECTIVE_DATE",
-      "OPERATOR_LEGAL_NAME",
       "OPERATOR_POSTAL_ADDRESS"
     ],
     "sections": [
@@ -796,7 +764,6 @@
           "You may use this sample or another clear statement. It does not replace any additional local instructions we must provide at checkout."
         ],
         "pendingFields": [
-          "OPERATOR_LEGAL_NAME",
           "OPERATOR_POSTAL_ADDRESS"
         ]
       },
@@ -814,10 +781,8 @@
     "title": "Acceptable Use",
     "intro": "Acceptable Use review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "EFFECTIVE_DATE"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Scope",
@@ -885,11 +850,8 @@
     "title": "Licenses",
     "intro": "Licenses review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "EFFECTIVE_DATE",
-      "THIRD_PARTY_NOTICES_URL"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Platform code and purchased projects are different",
@@ -902,12 +864,10 @@
       {
         "title": "2. Third-party notices",
         "paragraphs": [
-          "That inventory identifies the package or asset, version where applicable, copyright owner, license, required attribution, and source or notice location. Notices are specific to the distributed package or asset and its applicable version.",
+          "The release-specific platform component and asset notices are provided at https://webcanbe.com/legal/third-party-notices. That inventory identifies the package or asset, version where applicable, copyright owner, license, required attribution, and source or notice location. Notices are specific to the distributed package or asset and its applicable version.",
           "Project exports must preserve their own license manifest and required notices. A top-level code license does not automatically cover every photograph, icon, font, sample logo, or bundled dataset. If an essential asset requires a separate license, that restriction must be disclosed before acquisition."
         ],
-        "pendingFields": [
-          "THIRD_PARTY_NOTICES_URL"
-        ]
+        "pendingFields": []
       },
       {
         "title": "3. Branding and reports",
@@ -948,7 +908,6 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "EFFECTIVE_DATE",
       "PRIVACY_CONTACT_NAME_OR_ROLE"
     ],
     "sections": [

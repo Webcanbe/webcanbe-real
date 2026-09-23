@@ -21,6 +21,13 @@ const sources = [
 // facts, not legal assumptions: keep operator, contract and retention choices
 // unresolved until the operator supplies or verifies them.
 const verifiedFacts = {
+  EFFECTIVE_DATE: "2026-09-23",
+  OPERATOR_LEGAL_NAME: "MIN SIHOO",
+  OPERATOR_LEGAL_FORM: "individual operator",
+  OPERATOR_COUNTRY: "Republic of Korea",
+  REPRESENTATIVE_DISCLOSURE: "MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement.",
+  LEGAL_VERSION_ARCHIVE_URL: "https://webcanbe.com/legal/archive",
+  THIRD_PARTY_NOTICES_URL: "https://webcanbe.com/legal/third-party-notices",
   AUTH_STORAGE_NAMES_PURPOSES_LIFETIMES: "The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier.",
   FIREBASE_STORAGE_CONFIGURATION: "Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself.",
   PREFERENCE_AND_DRAFT_STORAGE_DETAILS: "Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record.",

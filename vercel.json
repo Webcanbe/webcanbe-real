@@ -563,6 +563,14 @@
       "dest": "/__public/legal/privacy-requests.html"
     },
     {
+      "src": "^/legal/archive/?$",
+      "dest": "/__public/legal/archive.html"
+    },
+    {
+      "src": "^/legal/third-party-notices/?$",
+      "dest": "/__public/legal/third-party-notices.html"
+    },
+    {
       "src": "^/about/?$",
       "dest": "/__public/about.html"
     },
