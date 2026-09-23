@@ -66,3 +66,8 @@ describe("Worker security header adapter", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.firebaseapp.com")
   })
 })
+
+
+test("allows the configured PostHog ingestion host", () => {
+  assert.match(CONTENT_SECURITY_POLICY, /connect-src[^;]*https:\/\/us\.i\.posthog\.com/)
+})
