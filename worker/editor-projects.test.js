@@ -283,7 +283,7 @@ describe("production Worker source editor API",()=>{
     expect(received.options.waitForSelector).toEqual({selector:"html[data-wcb-ready='1']",timeout:45000})
     expect(received.options.addScriptTag[0].content).toContain("__WCB_PROJECT_PAYLOAD__")
     expect(received.options.addScriptTag[0].content).not.toContain("__Host-wcb-session")
-    expect(received.options.allowRequestPattern).toEqual(["/^https:\\/\\/webcanbe-real\\.iseig513\\.workers\\.dev\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"])
+    expect(received.options.allowRequestPattern).toEqual(["^https://webcanbe-real\\.iseig513\\.workers\\.dev/(?:__wcb_preview_runtime|assets/[^?#]+)$"])
   })
 
   it("routes production project APIs before the static SPA fallback",()=>{
