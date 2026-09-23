@@ -13,10 +13,11 @@ const remoteRuntimePatterns = [
 ]
 
 describe("Phase 5 CSP compatibility inventory", () => {
-  it("allows only the local landing interaction module and no external runtime asset origins", () => {
+  it("allows only local landing and analytics scripts and no external runtime asset origins", () => {
     expect(landing.match(inlineScriptPattern) ?? []).toHaveLength(0)
-    expect(landing.match(/<script\b[^>]*\bsrc=/gi) ?? []).toHaveLength(2)
+    expect(landing.match(/<script\b[^>]*\bsrc=/gi) ?? []).toHaveLength(3)
     expect(landing).toContain('src="/landing-interactions.js"')
+    expect(landing).toContain('src="/public-analytics.js"')
     for (const pattern of remoteRuntimePatterns) expect(landing.match(pattern) ?? []).toHaveLength(0)
     expect(landing).not.toMatch(/\beval\s*\(/)
     expect(landing).not.toMatch(/new\s+Function\s*\(/)

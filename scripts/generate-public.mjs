@@ -5,6 +5,7 @@ import {build} from 'esbuild'
 import {JSDOM} from 'jsdom'
 const out='.public-site';fs.mkdirSync(out,{recursive:true})
 await build({entryPoints:['scripts/public-render-entry.tsx'],outfile:out+'/renderer.mjs',bundle:true,platform:'node',format:'esm',packages:'external',jsx:'automatic'})
+await build({entryPoints:['src/public-analytics.ts'],outfile:out+'/public-analytics.js',bundle:true,platform:'browser',format:'iife',minify:true,define:{'import.meta.env.VITE_POSTHOG_PROJECT_TOKEN':'""','import.meta.env.VITE_POSTHOG_HOST':'""'}})
 const {render,footer,cta,docPages,articles,docFamilies,infoPages,supportChannels,categories}=await import(path.resolve(out+'/renderer.mjs')+'?'+Date.now())
 const buildId=process.env.WCB_BUILD_SHA||execFileSync('git',['rev-parse','--short=12','HEAD'],{encoding:'utf8'}).trim()
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
@@ -29,7 +30,7 @@ function head(url,m){return `<meta charset="utf-8"><script src="/public-paint.js
 for(const [url,m] of Object.entries(routes)){
  if(url==='/')continue
  const file=out+'/__public'+url+'.html';fs.mkdirSync(path.dirname(file),{recursive:true})
- fs.writeFileSync(file,'<!doctype html><html lang="en"><head>'+head(url,m)+'</head><body>'+render(url,buildId)+'<script type="module" src="/public-enhancements.js"></script></body></html>')
+ fs.writeFileSync(file,'<!doctype html><html lang="en"><head>'+head(url,m)+'</head><body>'+render(url,buildId)+'<script type="module" src="/public-enhancements.js"></script><script defer src="/public-analytics.js"></script></body></html>')
 }
 // Retain the existing landing composition and hero; share the actual footer components.
 const landingPath='public/wcb-landing/index.html'
@@ -55,6 +56,7 @@ for(const node of d.head.querySelectorAll('title,meta[charset],meta[name="viewpo
 const h=new JSDOM('<head>'+head('/',routes['/'])+'</head>').window.document.head
 for(const node of [...h.children])if(!d.head.querySelector(`link[href="${node.getAttribute('href')}"]`)||node.tagName!=='LINK')d.head.append(d.importNode(node,true))
 d.head.prepend(d.head.querySelector('meta[charset]'))
+if(!d.querySelector('script[src="/public-analytics.js"]')){const script=d.createElement('script');script.defer=true;script.src='/public-analytics.js';d.body.append(script)}
 fs.writeFileSync('public/wcb-landing/copy.txt',d.body.textContent.split('\n').map(line=>line.trimEnd()).join('\n')+'\n');fs.writeFileSync(landingPath,dom.serialize());fs.mkdirSync(out+'/__public',{recursive:true});fs.writeFileSync(out+'/__public/home.html',dom.serialize())
 fs.writeFileSync(out+'/__public/404.html','<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found — Webcanbe</title><meta name="robots" content="noindex"><link rel="stylesheet" href="/public-shell.css"><link rel="stylesheet" href="/public-base.css"></head><body>'+render('/404',buildId)+'</body></html>')
 fs.writeFileSync('src/public/route-manifest.json',JSON.stringify({routes,aliases,categories:categories.map(c=>({slug:c.slug,tag:c.tag}))},null,2)+'\n')
@@ -72,12 +74,13 @@ for(const name of ['robots.txt','sitemap.xml','sitemap-public.xml','llms.txt'])f
 const staticConfig={routes:[...Object.entries(aliases).map(([from,to])=>({src:'^'+from+'/?$',status:308,headers:{Location:to}})),...Object.keys(routes).map(url=>({src:'^'+url+'/?$',dest:url==='/'?'/index.html':'/__public'+url+'.html'})),{src:'^/(?:__public/.*|app-shell\\.html)$',dest:'/__public/404.html',status:404,headers:{'X-Robots-Tag':'noindex'}},{handle:'filesystem'},{src:'^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|requests|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$',dest:'/app-shell.html',headers:{'X-Robots-Tag':'noindex, nofollow'}},{src:'^/.*$',dest:'/__public/404.html',status:404,headers:{'X-Robots-Tag':'noindex'}}]}
 fs.writeFileSync('vercel.json',JSON.stringify(staticConfig,null,2)+'\n')
 console.log(JSON.stringify({articles:Object.keys(articles).length,categories:docFamilies.length,publicRoutes:Object.keys(routes).length,build:buildId}))
-if(process.argv.includes('--dist')){for(const name of ['__public','docs-search.json','robots.txt','sitemap.xml','sitemap-public.xml','llms.txt','llms-full.txt'])fs.cpSync(out+'/'+name,'dist/'+name,{recursive:true});fs.copyFileSync('dist/index.html','dist/app-shell.html');fs.copyFileSync(out+'/__public/home.html','dist/index.html')
+if(process.argv.includes('--dist')){for(const name of ['__public','docs-search.json','robots.txt','sitemap.xml','sitemap-public.xml','llms.txt','llms-full.txt','public-analytics.js'])fs.cpSync(out+'/'+name,'dist/'+name,{recursive:true});fs.copyFileSync('dist/index.html','dist/app-shell.html');fs.copyFileSync(out+'/__public/home.html','dist/index.html')
 // Keep the existing subscription UI and its pending-checkout resume behavior at /plans.
 // Its first response still contains useful public plan guidance and metadata.
 const appDoc=new JSDOM(fs.readFileSync('dist/app-shell.html','utf8')).window.document
 const plansDoc=new JSDOM(fs.readFileSync('dist/__public/plans.html','utf8')).window.document
 plansDoc.querySelector('script[src="/public-enhancements.js"]')?.remove()
+plansDoc.querySelector('script[src="/public-analytics.js"]')?.remove()
 const root=plansDoc.createElement('div');root.id='root';while(plansDoc.body.firstChild)root.append(plansDoc.body.firstChild);plansDoc.body.append(root)
 for(const node of appDoc.querySelectorAll('link[rel="stylesheet"],link[rel="modulepreload"],script[type="module"][src]'))plansDoc.head.append(plansDoc.importNode(node,true))
 fs.writeFileSync('dist/__public/plans.html','<!doctype html>'+plansDoc.documentElement.outerHTML)

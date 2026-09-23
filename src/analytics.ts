@@ -234,7 +234,7 @@ export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult
   return { ...event, properties }
 }
 
-const DEFAULT_POSTHOG_PROJECT_TOKEN = "phc_qUNb8jnbKrpCLAmrSrMA26rF9p9WMb38qDYAJqEqAYu2"
+export const DEFAULT_POSTHOG_PROJECT_TOKEN = "phc_qUNb8jnbKrpCLAmrSrMA26rF9p9WMb38qDYAJqEqAYu2"
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com"
 
 export async function initializeAnalytics(
