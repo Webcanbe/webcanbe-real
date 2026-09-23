@@ -18,6 +18,14 @@ export const analyticsEvents = [
   "wcb_marketplace_purchase_completed",
   "wcb_subscription_started",
   "wcb_ai_pack_purchased",
+  "wcb_link_clicked",
+  "wcb_dashboard_viewed",
+  "wcb_projects_viewed",
+  "wcb_purchases_viewed",
+  "wcb_marketplace_preview_opened",
+  "wcb_editor_mode_changed",
+  "wcb_creator_application_submitted",
+  "wcb_creator_submission_submitted",
 ] as const
 
 export type AnalyticsEvent = (typeof analyticsEvents)[number]
@@ -25,10 +33,13 @@ export type AnalyticsProperties = Partial<{
   plan_key: string
   listing_id: string
   release_id: string
-  editor_mode: "visual" | "code" | "preview" | "history"
+  editor_mode: "visual" | "code" | "split" | "preview" | "history"
   ai_mode: "proposal" | "apply"
-  source: "marketplace" | "dashboard" | "projects" | "workspace" | "plans" | "auth" | "direct"
+  source: "marketplace" | "dashboard" | "projects" | "purchases" | "workspace" | "plans" | "auth" | "settings" | "creator" | "public" | "direct"
   state: "success" | "failure"
+  target_route: string
+  target_host: string
+  link_kind: "internal" | "external"
 }>
 export type AnalyticsPersonProperties = Partial<{
   plan: string
@@ -39,12 +50,15 @@ export type AnalyticsPersonProperties = Partial<{
 type AnalyticsClient = Pick<PostHog, "capture" | "identify" | "reset">
 
 const eventNames = new Set<string>(analyticsEvents)
-const propertyNames = new Set(["plan_key", "listing_id", "release_id", "editor_mode", "ai_mode", "source", "state"])
+const propertyNames = new Set(["plan_key", "listing_id", "release_id", "editor_mode", "ai_mode", "source", "state", "target_route", "target_host", "link_kind"])
 const identifier = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/
-const editorModes = new Set(["visual", "code", "preview", "history"])
+const editorModes = new Set(["visual", "code", "split", "preview", "history"])
 const aiModes = new Set(["proposal", "apply"])
-const sources = new Set(["marketplace", "dashboard", "projects", "workspace", "plans", "auth", "direct"])
+const sources = new Set(["marketplace", "dashboard", "projects", "purchases", "workspace", "plans", "auth", "settings", "creator", "public", "direct"])
 const states = new Set(["success", "failure"])
+const linkKinds = new Set(["internal", "external"])
+const safeRoutePattern = /^\/[A-Za-z0-9/_:.-]{0,180}$/
+const safeHostPattern = /^[A-Za-z0-9.-]{1,253}$/
 
 function safeIdentifier(value: unknown): value is string {
   if (typeof value !== "string" || !identifier.test(value)) return false
@@ -62,6 +76,9 @@ export function isSafeAnalyticsPayload(properties: unknown): properties is Analy
     if (key === "ai_mode" && !aiModes.has(String(value))) return false
     if (key === "source" && !sources.has(String(value))) return false
     if (key === "state" && !states.has(String(value))) return false
+    if (key === "target_route" && (typeof value !== "string" || !safeRoutePattern.test(value))) return false
+    if (key === "target_host" && (typeof value !== "string" || !safeHostPattern.test(value))) return false
+    if (key === "link_kind" && !linkKinds.has(String(value))) return false
   }
   return true
 }
@@ -128,10 +145,50 @@ export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult
   delete properties.$referrer
   delete properties.$referring_domain
   if (typeof event.event === "string" && eventNames.has(event.event)) {
-    const supplied = Object.fromEntries(Object.entries(properties).filter(([key]) => !key.startsWith("$")))
+    // createAnalytics() already rejects arbitrary caller properties. PostHog adds its own
+    // transport/context properties before before_send, including non-$ keys such as token
+    // and distinct_id. Validate only Webcanbe-owned analytics keys here so those SDK fields
+    // do not accidentally suppress every custom event.
+    const supplied = Object.fromEntries(Object.entries(properties).filter(([key]) => propertyNames.has(key)))
     if (!isSafeAnalyticsPayload(supplied)) return null
   }
   return { ...event, properties }
+}
+
+
+function sourceForPath(pathname: string): AnalyticsProperties["source"] {
+  if (pathname === "/browse" || pathname === "/marketplace" || pathname.startsWith("/project/")) return "marketplace"
+  if (pathname === "/dashboard") return "dashboard"
+  if (pathname === "/projects") return "projects"
+  if (pathname === "/purchases") return "purchases"
+  if (pathname.startsWith("/workspace/")) return "workspace"
+  if (pathname === "/plans") return "plans"
+  if (pathname === "/login" || pathname === "/signup") return "auth"
+  if (pathname.startsWith("/settings")) return "settings"
+  if (pathname.startsWith("/seller") || pathname.startsWith("/creator")) return "creator"
+  return "public"
+}
+
+let linkTrackingInstalled = false
+export function installLinkTracking() {
+  if (linkTrackingInstalled || typeof document === "undefined" || typeof window === "undefined") return
+  linkTrackingInstalled = true
+  document.addEventListener("click", event => {
+    if (!(event.target instanceof Element)) return
+    const anchor = event.target.closest("a[href]")
+    if (!(anchor instanceof HTMLAnchorElement)) return
+    if (anchor.download || anchor.target === "_blank" && !anchor.href) return
+    let url: URL
+    try { url = new URL(anchor.href, window.location.href) } catch { return }
+    if (url.protocol !== "http:" && url.protocol !== "https:") return
+    const internal = url.origin === window.location.origin
+    const properties: AnalyticsProperties = {
+      source: sourceForPath(window.location.pathname),
+      link_kind: internal ? "internal" : "external",
+      ...(internal ? { target_route: normalizedPath(url.pathname) } : { target_host: url.hostname.toLowerCase() }),
+    }
+    analytics.capture("wcb_link_clicked", properties)
+  }, { capture: true })
 }
 
 const DEFAULT_POSTHOG_PROJECT_TOKEN = "phc_qUNb8jnbKrpCLAmrSrMA26rF9p9WMb38qDYAJqEqAYu2"
