@@ -48,6 +48,7 @@ export type AnalyticsPersonProperties = Partial<{
 }>
 
 type AnalyticsClient = Pick<PostHog, "capture" | "identify" | "reset">
+type CaptureOptions = { transport: "sendBeacon"; send_instantly: true }
 
 const eventNames = new Set<string>(analyticsEvents)
 const propertyNames = new Set(["plan_key", "listing_id", "release_id", "editor_mode", "ai_mode", "source", "state", "link_kind", "target_route", "target_host"])
@@ -106,7 +107,7 @@ function safePersonProperties(properties: unknown): properties is AnalyticsPerso
 
 export function createAnalytics(initialClient: AnalyticsClient | null = null) {
   let client = initialClient
-  let pending: Array<[AnalyticsEvent, AnalyticsProperties]> = []
+  let pending: Array<[AnalyticsEvent, AnalyticsProperties, CaptureOptions | undefined]> = []
   let pendingIdentity: [string, AnalyticsPersonProperties] | null = null
   return {
     setClient(next: AnalyticsClient | null) {
@@ -115,17 +116,23 @@ export function createAnalytics(initialClient: AnalyticsClient | null = null) {
         if (pendingIdentity) {
           try { client.identify(...pendingIdentity) } catch { /* Authentication remains authoritative. */ }
         }
-        for (const [event, properties] of pending) {
-          try { client.capture(event, properties) } catch { /* Never block product behavior. */ }
+        for (const [event, properties, options] of pending) {
+          try {
+            if (options) client.capture(event, properties, options)
+            else client.capture(event, properties)
+          } catch { /* Never block product behavior. */ }
         }
       }
       pendingIdentity = null
       pending = []
     },
-    capture(event: AnalyticsEvent, properties: AnalyticsProperties = {}) {
+    capture(event: AnalyticsEvent, properties: AnalyticsProperties = {}, options?: CaptureOptions) {
       if (!eventNames.has(event) || !safeEventPayload(event, properties)) return
-      if (!client) { if (pending.length < 20) pending.push([event, properties]); return }
-      try { client.capture(event, properties) } catch { /* Analytics must never interrupt product behavior. */ }
+      if (!client) { if (pending.length < 20) pending.push([event, properties, options]); return }
+      try {
+        if (options) client.capture(event, properties, options)
+        else client.capture(event, properties)
+      } catch { /* Analytics must never interrupt product behavior. */ }
     },
     identify(distinctId: string, properties: AnalyticsPersonProperties = {}) {
       if (!safeIdentifier(distinctId) || !safePersonProperties(properties)) return
@@ -187,7 +194,7 @@ export function installLinkTracking() {
     const anchor = event.target.closest("a[href]")
     if (!(anchor instanceof HTMLAnchorElement) || anchor.hasAttribute("download")) return
     const properties = safeLinkClickPayload(anchor.href, window.location.href)
-    if (properties) analytics.capture("wcb_link_clicked", properties)
+    if (properties) analytics.capture("wcb_link_clicked", properties, properties.link_kind === "external" ? { transport: "sendBeacon", send_instantly: true } : undefined)
   }, { capture: true })
 }
 

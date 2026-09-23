@@ -109,6 +109,15 @@ describe("analytics", () => {
     expect(safeLinkClickPayload("/notes/name%40example.com", "https://webcanbe.com/browse")).toBeNull()
   })
 
+  it("sends an external click immediately before navigation", () => {
+    const posthog = client()
+    const analytics = createAnalytics(posthog as never)
+    const properties = safeLinkClickPayload("https://github.com/Webcanbe?private=yes", "https://webcanbe.com/github")
+    expect(properties).toEqual({ source: "public", link_kind: "external", target_host: "github.com" })
+    analytics.capture("wcb_link_clicked", properties!, { transport: "sendBeacon", send_instantly: true })
+    expect(posthog.capture).toHaveBeenCalledWith("wcb_link_clicked", properties, { transport: "sendBeacon", send_instantly: true })
+  })
+
   it("rejects mixed link targets, query-bearing routes, and arbitrary fields", () => {
     const posthog = client()
     const analytics = createAnalytics(posthog as never)
