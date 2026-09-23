@@ -439,7 +439,14 @@ async function browserSnapshot(env,state,viewport,route){
   try{
     if(response instanceof Response){
       if(!response.ok){
-        console.warn('browser_run_preview_failed', { status: response.status })
+        const failure = await response.clone().json().catch(() => ({}))
+        console.warn('browser_run_preview_failed', {
+          status: response.status,
+          errors: Array.isArray(failure?.errors) ? failure.errors.map(item => ({
+            code: Number(item?.code) || 0,
+            message: String(item?.message || '').replace(/https?:\/\/\S+/g, '[url]').replace(/[A-Za-z0-9+/=]{80,}/g, '[data]').slice(0, 180),
+          })).slice(0, 2) : [],
+        })
         if(response.status===429)fail(429,"Free preview capacity is cooling down. Wait about 10 seconds and refresh preview.")
         fail(503,"Browser Run preview request failed.")
       }
