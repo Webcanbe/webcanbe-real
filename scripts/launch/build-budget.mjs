@@ -23,7 +23,7 @@ const mib = value => value / (1024 * 1024)
 const kib = value => value / 1024
 
 const isPreview = item => /^assets\/(?:preview-runtime|PreviewRuntimeHost)-[^/]+\.js$/.test(item.file)
-const isSourceDemo = item => item.file.startsWith("demo/aperture-north/")
+const isSourceDemo = item => item.file.startsWith("demo/aperture-north/") || item.file.startsWith("demo/stillform/") || item.file.startsWith("template-source/")
 const isDeferredRouteCss = item => /^assets\/(?:creator-shell|control-requests|my-requests)-[^/]+\.css$/.test(item.file)
 const total = sum(() => true)
 const appTotal = sum(item => !isPreview(item) && !isSourceDemo(item))
@@ -49,7 +49,7 @@ const limits = {
   previewTotal: 14 * 1024 * 1024,
   previewJsTotal: 13 * 1024 * 1024,
   previewLargestJs: 13 * 1024 * 1024,
-  sourceDemoTotal: 3 * 1024 * 1024,
+  sourceDemoTotal: 12 * 1024 * 1024,
 }
 
 const checks = [
@@ -63,7 +63,7 @@ const checks = [
   ["preview runtime total", previewTotal <= limits.previewTotal, `${mib(previewTotal).toFixed(2)} MiB <= 14 MiB`],
   ["preview runtime JS", previewJsTotal <= limits.previewJsTotal, `${mib(previewJsTotal).toFixed(2)} MiB <= 13 MiB`],
   ["preview largest JS", previewLargestJs.bytes <= limits.previewLargestJs, `${previewLargestJs.file} ${mib(previewLargestJs.bytes).toFixed(2)} MiB <= 13 MiB`],
-  ["source demo", sourceDemoTotal <= limits.sourceDemoTotal, `${mib(sourceDemoTotal).toFixed(2)} MiB <= 3 MiB`],
+  ["first-party templates and source", sourceDemoTotal <= limits.sourceDemoTotal, `${mib(sourceDemoTotal).toFixed(2)} MiB <= 12 MiB`],
   ["production source maps", sourceMaps.length === 0, sourceMaps.length ? sourceMaps.map(item => item.file).join(", ") : "none"],
 ]
 

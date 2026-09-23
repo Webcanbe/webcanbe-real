@@ -204,6 +204,10 @@ export class HostedProductClient {
     return (await this.post<{ workspaceId: string }>("/__webcanbe/api/workspaces/create", { workspaceId })).workspaceId
   }
 
+  async createFirstPartyTemplate(slug: "aperture-north" | "stillform", workspaceId: string, idempotencyKey: string) {
+    return (await this.post<{ projectId: string; replayed: boolean }>("/__webcanbe/api/templates/create", { slug, workspaceId, idempotencyKey })).projectId
+  }
+
   async workspaces() {
     return (await this.post<{ workspaces: string[] }>("/__webcanbe/api/workspaces", {})).workspaces
   }

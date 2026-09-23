@@ -2,6 +2,7 @@ node_modules
 .webcanbe/
 dist
 public/demo/
+public/template-source/
 .DS_Store
 *.tsbuildinfo
 

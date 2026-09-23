@@ -10,6 +10,7 @@ import { databaseReadiness } from "./readiness.js"
 import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces, createDatabaseWorkspace, WorkspaceCreationError } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
+import { FirstPartyTemplateError, createFirstPartyTemplate } from "./first-party-templates.js"
 import { EditorProjectError, editorProjectRequest } from "./editor-projects.js"
 import { databaseAccount, updateDatabaseAccount } from "./account-profile.js"
 import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
@@ -510,6 +511,14 @@ async function privateProduct(request, env, path, traceId) {
           return json({ error: "Working-copy creation is temporarily unavailable." }, 503)
         }
       }
+      if (path === "/__webcanbe/api/templates/create") {
+        if (env.WEBCANBE_PRODUCT_MUTATIONS !== "enabled") return json({ error: "Template creation is not enabled." }, 503)
+        let body
+        try { body = await smallJsonBody(request) }
+        catch { return json({ error: "Invalid template request." }, 400) }
+        try { return json(await createFirstPartyTemplate(db, databaseSession, body, env), 201) }
+        catch (error) { return error instanceof FirstPartyTemplateError ? json({ error: error.message }, error.status) : json({ error: "Template creation is temporarily unavailable." }, 503) }
+      }
       if (path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/")) {
         let body
         try { body = await smallJsonBody(request, 8 * 1024 * 1024) }
@@ -713,7 +722,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path.startsWith("/__webcanbe/api/requests/") || path.startsWith("/__webcanbe/api/product/seller/") || path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path.startsWith("/__webcanbe/api/requests/") || path.startsWith("/__webcanbe/api/product/seller/") || path === "/__webcanbe/api/templates/create" || path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else if (path === "/sitemap-listings.xml") {
         const key=await anonymousRateKey(request,"public:listing-sitemap")
         if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()
@@ -723,12 +732,12 @@ export default {
           return new Response(listingSitemap(result.rows), {headers:{"Content-Type":"application/xml; charset=utf-8"}})
         })
       }
-      else if (path.startsWith("/demo/aperture-north/")) {
+      else if (path.startsWith("/demo/aperture-north/") || path.startsWith("/demo/stillform/")) {
         const assetUrl = new URL(request.url)
-        if (path === "/demo/aperture-north/") assetUrl.pathname = "/demo/aperture-north/index.html"
+        if (path === "/demo/aperture-north/" || path === "/demo/stillform/") assetUrl.pathname = `${path}index.html`
         response = applySourceDemoHeaders(await env.ASSETS.fetch(new Request(assetUrl, request)))
       }
-      else if (path === "/project/aperture-north-source-demo" || path === "/project/aperture-north-source-demo/preview") {
+      else if (["/project/aperture-north", "/project/aperture-north/preview", "/project/stillform", "/project/stillform/preview"].includes(path)) {
         const assetUrl = new URL(request.url); assetUrl.pathname = "/app-shell.html"
         response = applySecurityHeaders(await env.ASSETS.fetch(new Request(assetUrl, request)), { noIndex: true })
       }
