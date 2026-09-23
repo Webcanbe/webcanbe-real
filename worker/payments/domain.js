@@ -204,6 +204,23 @@ export async function applyDispute(repo, dispute) {
   })
 }
 
+export function paypalSubscriptionNeedsReview(error) {
+  return error?.providerHttpStatus === 404 && error?.providerName === "RESOURCE_NOT_FOUND" && error?.providerIssue === "INVALID_RESOURCE_ID"
+}
+
+async function verifiedPendingApproval(provider, subscription) {
+  if (!subscription.providerSubscriptionId || !subscription.approvalUrl) throw new PaymentError(409, "subscription_reconciliation_required", "PayPal approval cannot be verified. Billing review is needed before another checkout.")
+  let details
+  try { details = await provider.getSubscription(subscription.providerSubscriptionId) }
+  catch (error) {
+    if (paypalSubscriptionNeedsReview(error)) throw new PaymentError(409, "subscription_reconciliation_required", "PayPal cannot verify this subscription. Billing review is needed before another checkout.")
+    throw error
+  }
+  if (details?.id !== subscription.providerSubscriptionId || details?.custom_id !== subscription.subscriptionId || details?.plan_id !== subscription.providerPlanId) throw new PaymentError(409, "subscription_reconciliation_required", "PayPal subscription details do not match. Billing review is needed before another checkout.")
+  if (details.status !== "APPROVAL_PENDING") throw new PaymentError(409, "subscription_verification_pending", "PayPal approval is no longer pending. Wait for verified billing status before another checkout.")
+  return subscription
+}
+
 export async function createPlanSubscription(repo, provider, session, input, options) {
   exactObject(input, ["planKey", "idempotencyKey"])
   const plan = WEB_CAN_BE_PLANS[input.planKey]
@@ -212,18 +229,20 @@ export async function createPlanSubscription(repo, provider, session, input, opt
   const existing = await repo.subscriptionByUserKey(session.userId, key)
   if (existing) {
     if (existing.planKey !== plan.key) throw new PaymentError(409, "idempotency_conflict", "This subscription key belongs to another plan.")
+    if (existing.status === "reconciliation_required") throw new PaymentError(409, "subscription_reconciliation_required", "Billing review is needed before another checkout.")
     if (existing.status === "creating") {
       const resumed = await provider.createSubscription({ planId: existing.providerPlanId, subscriptionId: existing.subscriptionId, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl, requestId: `subscription-create:${existing.subscriptionId}` })
       return repo.updateSubscription(existing.subscriptionId, { providerSubscriptionId: resumed.providerSubscriptionId, approvalUrl: resumed.approvalUrl, status: "approval_pending" })
     }
-    return existing
+    return existing.status === "approval_pending" ? verifiedPendingApproval(provider, existing) : existing
   }
   const current = await repo.currentSubscriptionForUser(session.userId)
   if (current) {
+    if (current.status === "reconciliation_required") throw new PaymentError(409, "subscription_reconciliation_required", "Billing review is needed before another checkout.")
     const paidThrough = current.status === "cancelled" && current.currentPeriodEnd && new Date(current.currentPeriodEnd).getTime() > Number((options.clock || Date.now)())
     if (!["cancelled", "expired"].includes(current.status) || paidThrough) {
       if (current.planKey !== plan.key) throw new PaymentError(409, "plan_change_undefined", "Plan changes are not available yet.")
-      return current
+      return current.status === "approval_pending" ? verifiedPendingApproval(provider, current) : current
     }
   }
   const subscriptionId = uuid(repo.uuid), at = nowIso(options.clock || Date.now), providerPlanId = options.planIds[plan.key]

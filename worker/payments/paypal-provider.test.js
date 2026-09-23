@@ -40,10 +40,13 @@ describe("PayPal provider boundary", () => {
       requests.push(url)
       return url.endsWith("/v1/oauth2/token")
         ? response({ access_token: "token", expires_in: 300 })
-        : response({ name: "RESOURCE_NOT_FOUND", debug_id: "trace-123", details: [{ issue: "private payer data" }] }, 404)
+        : response({ name: "RESOURCE_NOT_FOUND", debug_id: "trace-123", details: [{ issue: "INVALID_RESOURCE_ID" }] }, 404)
     })
     await expect(provider.getSubscription("I-OLD")).rejects.toMatchObject({
       code: "paypal_request_failed",
+      providerHttpStatus: 404,
+      providerName: "RESOURCE_NOT_FOUND",
+      providerIssue: "INVALID_RESOURCE_ID",
       message: "PayPal request failed: RESOURCE_NOT_FOUND (HTTP 404; ref trace-123).",
     })
     expect(requests[1]).toBe("https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-OLD")

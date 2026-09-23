@@ -13,7 +13,11 @@ function providerError(status, body) {
   const name = body && typeof body === "object" && typeof body.name === "string" && /^[A-Z][A-Z0-9_]{0,63}$/.test(body.name) ? body.name : undefined
   const reference = debug && /^[a-zA-Z0-9-]{1,64}$/.test(debug) ? `; ref ${debug}` : ""
   const detail = name ? `${name} (HTTP ${status}${reference})` : `HTTP ${status}${reference}`
-  return new PaymentError(status >= 500 ? 503 : 409, "paypal_request_failed", `PayPal request failed: ${detail}.`)
+  const error = new PaymentError(status >= 500 ? 503 : 409, "paypal_request_failed", `PayPal request failed: ${detail}.`)
+  error.providerHttpStatus = status
+  error.providerName = name
+  error.providerIssue = Array.isArray(body?.details) && body.details.some(item => item?.issue === "INVALID_RESOURCE_ID") ? "INVALID_RESOURCE_ID" : undefined
+  return error
 }
 
 async function responseJson(response) {

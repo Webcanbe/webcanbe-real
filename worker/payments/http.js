@@ -1,5 +1,5 @@
 import { AI_ACTION_COST, AI_ACTION_PACKS, MINIMUM_PAID_LISTING_MINOR, PAYMENT_CURRENCY, PAYPAL_WEBHOOK_EVENTS, WEB_CAN_BE_PLANS, PaymentError, domainId, paypalPlanMapping } from "./contracts.js"
-import { captureMarketplaceOrder, createMarketplaceOrder, createPlanSubscription } from "./domain.js"
+import { captureMarketplaceOrder, createMarketplaceOrder, createPlanSubscription, paypalSubscriptionNeedsReview } from "./domain.js"
 import { captureAiPackOrder, createAiPackOrder } from "./ai-packs.js"
 
 const headers = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
@@ -83,7 +83,12 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       const subscription = await repo.subscriptionForUpdate(subscriptionId)
       if (!subscription || subscription.userId !== session.userId) throw new PaymentError(404, "subscription_not_found", "Subscription not found.")
       if (!subscription.providerSubscriptionId) return json({ provider: { status: "NOT_CREATED", planMatches: false, referenceMatches: false } })
-      const details = await provider.getSubscription(subscription.providerSubscriptionId)
+      let details
+      try { details = await provider.getSubscription(subscription.providerSubscriptionId) }
+      catch (error) {
+        if (paypalSubscriptionNeedsReview(error)) return json({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
+        throw error
+      }
       const reason = details?.billing_info?.last_failed_payment?.reason_code
       return json({ provider: {
         status: typeof details?.status === "string" ? details.status : "UNKNOWN",

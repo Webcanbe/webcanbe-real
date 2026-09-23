@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { PAYMENT_CURRENCY } from "./contracts.js"
+import { PAYMENT_CURRENCY, PaymentError } from "./contracts.js"
 import {
   applyCaptureWebhook,
   applyDispute,
@@ -97,6 +97,7 @@ class StubProvider {
   }
   refundCapture(_capture, amount, currency) { this.refundCalls++; return { providerRefundId: `REF-${this.refundCalls}`, status: "COMPLETED", refundMinor: amount, currency, refundedAt: "2026-09-20T00:00:00.000Z" } }
   createSubscription({ subscriptionId }) { this.subscriptionCalls++; return { providerSubscriptionId: `SUB-${subscriptionId}`, status: "APPROVAL_PENDING", approvalUrl: "https://sandbox.paypal.test/subscription" } }
+  getSubscription(id) { return { id, custom_id: id.slice(4), plan_id: "P-MONTHLY", status: "APPROVAL_PENDING" } }
 }
 
 const options = { publicPaidLaunchAt: "2026-09-01T00:00:00.000Z", returnUrl: "https://webcanbe.com/purchases", cancelUrl: "https://webcanbe.com/marketplace", clock: () => Date.parse("2026-09-01T00:00:00.000Z") }
@@ -210,6 +211,20 @@ describe("provider-neutral marketplace payments", () => {
 })
 
 describe("subscription entitlement and monthly AI grants", () => {
+  it("blocks a stale approval on the same and a new key without starting another PayPal subscription", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }
+    const input = { planKey: "pro_monthly", idempotencyKey: "first" }
+    const previous = await createPlanSubscription(repo, provider, { userId: buyer }, input, config)
+    provider.getSubscription = async () => { const error = new PaymentError(409, "paypal_request_failed", "PayPal unavailable"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error }
+    await expect(createPlanSubscription(repo, provider, { userId: buyer }, input, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
+    await expect(createPlanSubscription(repo, provider, { userId: buyer }, { ...input, idempotencyKey: "second" }, config)).rejects.toMatchObject({ code: "subscription_reconciliation_required" })
+    expect(repo.subscriptions).toHaveLength(1)
+    expect(repo.subscriptions[0]).toMatchObject({ subscriptionId: previous.subscriptionId, status: "approval_pending" })
+    expect(provider.subscriptionCalls).toBe(1)
+    expect(repo.grants).toHaveLength(0)
+  })
+
   it("allows a fresh checkout after an unpaid cancellation", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }

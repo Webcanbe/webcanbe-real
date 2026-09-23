@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { PAYMENT_RETURN_URLS, handlePrivatePaymentRequest, publicPaymentConfiguration } from "./http.js"
+import { PaymentError } from "./contracts.js"
 
 describe("payment HTTP contract", () => {
   it("publishes the locked concurrency and deploy-slot entitlements", () => {
@@ -67,5 +68,15 @@ describe("payment HTTP contract", () => {
     expect(calls).toBe(0)
     const allowed = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionForUpdate: async () => subscription }, provider, session: { userId: "buyer" }, env: {} })
     expect(await allowed.json()).toEqual({ provider: { status: "APPROVAL_PENDING", planMatches: true, referenceMatches: true, lastFailedReason: "PAYMENT_DENIED" } })
+  })
+
+  it("reports an unverifiable provider ID for billing review without changing the pending row", async () => {
+    const id = "11111111-1111-4111-8111-111111111111"
+    const subscription = { subscriptionId: id, userId: "buyer", providerSubscriptionId: "I-PAYPAL", providerPlanId: "P-EXPECTED", status: "approval_pending" }
+    const provider = { getSubscription: async () => { const error = new PaymentError(409, "paypal_request_failed", "Provider error"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error } }
+    const repo = { subscriptionForUpdate: async () => subscription, updateSubscription: () => { throw new Error("must not mutate") } }
+    const request = new Request("https://webcanbe.com/__webcanbe/api/payments/subscriptions/inspect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscriptionId: id }) })
+    const response = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo, provider, session: { userId: "buyer" }, env: {} })
+    expect(await response.json()).toEqual({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
   })
 })
