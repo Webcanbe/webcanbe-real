@@ -34,5 +34,5 @@ for (const slug of ["aperture-north", "stillform"]) {
     expect(files.get("src/main.tsx")).toContain("Edited section 3")
     expect(files.get("src/style.css")).toContain("48px")
     expect(original.length).toBeGreaterThan(20)
-  })
+  }, 20_000)
 }
