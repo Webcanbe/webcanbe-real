@@ -136,6 +136,10 @@ export class HostedProductClient {
     return (await this.post<{ billing: PaymentBilling }>("/__webcanbe/api/payments/status", {})).billing
   }
 
+  async verifyPaymentPlans() {
+    return (await this.post<{ environment: "live"; plans: Array<{ key: string; providerPlanId: string; status: "ACTIVE"; currency: "USD"; priceMinor: number; cadence: string; contractMatches: true }> }>("/__webcanbe/api/payments/plans/verify", {})).plans
+  }
+
   async createPaymentOrder(listingId: string, idempotencyKey: string) {
     return (await this.post<{ order: PaymentOrder }>("/__webcanbe/api/payments/orders/create", { listingId, idempotencyKey })).order
   }
