@@ -57,4 +57,13 @@ describe("analytics", () => {
     expect(result?.properties.$pathname).toBe("/workspace/:project")
     expect(result?.properties.$referrer).toBeUndefined()
   })
+
+  it("keeps a safe product event when the SDK supplies transport fields", () => {
+    const result = sanitizePostHogEvent({
+      event: "wcb_project_viewed",
+      properties: { listing_id: "aperture-north", source: "marketplace", token: "project-token", distinct_id: "anonymous-1", $current_url: "https://webcanbe.com/project/aperture-north?private=yes", private_note: "do not send" },
+    } as never)
+    expect(result?.properties).toMatchObject({ listing_id: "aperture-north", source: "marketplace", token: "project-token", distinct_id: "anonymous-1", $current_url: "https://webcanbe.com/project/:project" })
+    expect(result?.properties.private_note).toBeUndefined()
+  })
 })

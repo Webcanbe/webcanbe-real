@@ -66,3 +66,4 @@
 @media(max-width:530px){.rd-project-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}.rd-gallery-card .project-preview{aspect-ratio:.82}}
 .rd-shell{--rd-sidebar:230px}.rd-sidebar-header{padding:0 6px 9px}.rd-team-switcher{height:40px;min-height:40px}.rd-sidebar-search{margin-top:10px}.rd-nav-button{min-height:31px}.rd-main{padding-top:54px}.rd-new-project{height:30px;padding:0 12px}.rd-project-sort>button{height:30px;padding:0 8px;gap:7px}
 @media(max-width:760px){.rd-shell:not(.rd-sidebar-collapsed) .rd-sidebar{width:230px}.rd-main{padding-top:68px}}
+@media(max-width:530px){.rd-all-projects>header{align-items:center}.rd-all-projects>header>div{flex-direction:row;align-items:center;gap:8px}.rd-project-sort>button{font-size:11px}.rd-new-project{font-size:11px}}

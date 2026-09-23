@@ -128,7 +128,13 @@ export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult
   delete properties.$referrer
   delete properties.$referring_domain
   if (typeof event.event === "string" && eventNames.has(event.event)) {
-    const supplied = Object.fromEntries(Object.entries(properties).filter(([key]) => !key.startsWith("$")))
+    // The SDK adds non-$ transport fields to captured events. They are not
+    // product payload, so strip unknown fields rather than dropping the event.
+    const sdkFields = new Set(["token", "distinct_id", "uuid", "timestamp", "lib", "lib_version"])
+    for (const key of Object.keys(properties)) {
+      if (!key.startsWith("$") && !propertyNames.has(key) && !sdkFields.has(key)) delete properties[key]
+    }
+    const supplied = Object.fromEntries(Object.entries(properties).filter(([key]) => propertyNames.has(key)))
     if (!isSafeAnalyticsPayload(supplied)) return null
   }
   return { ...event, properties }
