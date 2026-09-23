@@ -12,6 +12,7 @@
 .compatible-workspace.preview-only .compatible-inspector { display: none; }
 .compatible-workspace.preview-only .compatible-preview-shell { grid-column: 1; }
 .compatible-workspace.preview-only .editor-canvas-tools > button:first-child { display: none; }
+.compatible-workspace.full-page-canvas { overflow:clip; }
 .compatible-workspace.full-page-canvas .compatible-layout { height:auto; min-height:calc(100dvh - 52px); overflow:visible; align-items:start; }
 .compatible-workspace.full-page-canvas .compatible-files,
 .compatible-workspace.full-page-canvas .compatible-inspector { height:calc(100dvh - 52px); position:sticky; top:52px; }
