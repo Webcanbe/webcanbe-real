@@ -62,6 +62,7 @@
 .bl-modal h2{font-weight:600;line-height:1.06}
 .bl-sticky{background:#fff;color:#17151b;border-bottom:1px solid var(--bl-line);box-shadow:0 3px 12px #17151b0a;font-family:Inter,Arial,sans-serif}
 .bl-sticky strong{color:#17151b}.bl-sticky span{color:#67646e}.bl-sticky a{color:#635bff}
+.bl-sticky + .product .product-header{position:relative;top:auto}
 .bl-milestones{color:#67646e}.bl-milestones b{color:#635bff}
 .bl-hero h1 em{font-style:normal;font-weight:600}
 .bl-social-story{align-self:center;border-top:1px solid #dedbe9;max-width:520px}
