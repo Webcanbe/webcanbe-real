@@ -26,6 +26,7 @@ const verifiedFacts = {
   OPERATOR_LEGAL_FORM: "individual operator",
   OPERATOR_COUNTRY: "Republic of Korea",
   REPRESENTATIVE_DISCLOSURE: "MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement.",
+  PRIVACY_CONTACT_NAME_OR_ROLE: "Webcanbe Privacy Contact",
   LEGAL_VERSION_ARCHIVE_URL: "https://webcanbe.com/legal/archive",
   THIRD_PARTY_NOTICES_URL: "https://webcanbe.com/legal/third-party-notices",
   AUTH_STORAGE_NAMES_PURPOSES_LIFETIMES: "The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier.",

@@ -7,21 +7,19 @@
     "unresolvedFields": [
       "OPERATOR_POSTAL_ADDRESS",
       "OPERATOR_REGISTRATION_DISCLOSURE",
-      "OPERATOR_REQUIRED_CONTACT_DETAILS",
-      "PRIVACY_CONTACT_NAME_OR_ROLE"
+      "OPERATOR_REQUIRED_CONTACT_DETAILS"
     ],
     "sections": [
       {
         "title": "1. Who operates Webcanbe",
         "paragraphs": [
-          "General, billing and legal contact: hello@webcanbe.com.",
+          "General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
           "The Webcanbe name is a product brand. Your account agreement and order confirmation identify the actual contracting operator. An authentication, infrastructure or payment provider does not become the supplier of your Webcanbe purchase merely by providing that service."
         ],
         "pendingFields": [
           "OPERATOR_POSTAL_ADDRESS",
           "OPERATOR_REGISTRATION_DISCLOSURE",
-          "OPERATOR_REQUIRED_CONTACT_DETAILS",
-          "PRIVACY_CONTACT_NAME_OR_ROLE"
+          "OPERATOR_REQUIRED_CONTACT_DETAILS"
         ]
       },
       {
@@ -269,7 +267,6 @@
       "GOOGLE_FIREBASE_PROCESSING_DETAILS",
       "OPERATOR_POSTAL_ADDRESS",
       "PAYPAL_PROCESSING_DETAILS",
-      "PRIVACY_CONTACT_NAME_OR_ROLE",
       "SECURITY_LOG_RETENTION_SCHEDULE",
       "SUPABASE_PROCESSING_DETAILS"
     ],
@@ -277,13 +274,12 @@
       {
         "title": "1. Controller and contact",
         "paragraphs": [
-          "Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement..",
+          "Privacy contact: Webcanbe Privacy Contact, hello@webcanbe.com. Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement..",
           "For personal information an organization places in its private project for processing solely on its instructions, that organization may be the controller and Webcanbe its processor. Section 14 below explains the separate processing agreement for that role. We do not treat a controller's project data as available for unrelated advertising simply because it is hosted in our workspace.",
           "This policy describes personal-data handling, not a transfer of your intellectual property. Optional marketing, non-essential tracking, and legally required cross-border consents are not bundled into general account acceptance."
         ],
         "pendingFields": [
-          "OPERATOR_POSTAL_ADDRESS",
-          "PRIVACY_CONTACT_NAME_OR_ROLE"
+          "OPERATOR_POSTAL_ADDRESS"
         ]
       },
       {
@@ -373,11 +369,9 @@
         "title": "10. Security and changes",
         "paragraphs": [
           "We use measures appropriate to the service, including encrypted transport, access controls, authenticated server-side authorization, and limits on secret exposure. No promise of absolute security, end-to-end encryption of all source, zero data retention, or independent certification is made here unless separately and accurately documented.",
-          "Material changes to purposes, recipients, or choices will be explained before they take effect where required, with fresh consent where necessary. The effective date above identifies this version."
+          "Material changes to purposes, recipients, or choices will be explained before they take effect where required, with fresh consent where necessary. The effective date above identifies this version. Contact Webcanbe Privacy Contact at hello@webcanbe.com for questions."
         ],
-        "pendingFields": [
-          "PRIVACY_CONTACT_NAME_OR_ROLE"
-        ]
+        "pendingFields": []
       },
       {
         "title": "11. PostHog analytics and session replay",
@@ -906,20 +900,16 @@
     "title": "Privacy Requests",
     "intro": "Privacy Requests review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "PRIVACY_CONTACT_NAME_OR_ROLE"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Request access, correction, or deletion",
         "paragraphs": [
-          "State the action you seek, the account email or safe account reference if known, and an email where we can reply. You do not need to cite an article of law or explain why you wish to exercise a right.",
+          "Contact Webcanbe Privacy Contact at hello@webcanbe.com with the subject “Privacy request,” or use the privacy form where one is provided. State the action you seek, the account email or safe account reference if known, and an email where we can reply. You do not need to cite an article of law or explain why you wish to exercise a right.",
           "Available rights depend on applicable law and may include access, correction, deletion, restriction, objection, portability, withdrawal of consent, and review of qualifying automated decisions. You may complain to the relevant supervisory authority. Closing an account, cancelling a subscription, and withdrawing a particular consent are distinct actions; tell us which you intend, and we will explain their consequences."
         ],
-        "pendingFields": [
-          "PRIVACY_CONTACT_NAME_OR_ROLE"
-        ]
+        "pendingFields": []
       },
       {
         "title": "2. Verification and representatives",
