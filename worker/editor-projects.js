@@ -522,6 +522,43 @@ async function browserSnapshot(env,state,viewport,route){
   return {png,observation,width}
 }
 
+// Isolate-local, bounded reuse for authenticated endpoint reads only. Candidate
+// frames used by saveVisual must always go through browserSnapshot directly.
+const previewCache = {entries:new Map(),pending:new Map(),bytes:0}
+const PREVIEW_CACHE_TTL_MS = 60_000
+const PREVIEW_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
+const PREVIEW_CACHE_MAX_BYTES = 8 * 1024 * 1024
+const PREVIEW_CACHE_MAX_ENTRIES = 4
+async function cachedPreviewSnapshot(env,projectId,state,viewport,route,force=false){
+  if (!env?.BROWSER || (typeof env.BROWSER !== "object" && typeof env.BROWSER !== "function")) return browserSnapshot(env,state,viewport,route)
+  const cache=previewCache
+  const key=JSON.stringify([projectId,state.revision,state.history.revisions.at(-1).contentHash,viewport==="mobile"?"mobile":viewport==="tablet"?"tablet":"desktop",route])
+  const now=Date.now()
+  for(const [savedKey,item] of cache.entries) if(item.expiresAt<=now){cache.entries.delete(savedKey);cache.bytes-=item.bytes}
+  if(force){const old=cache.entries.get(key);if(old){cache.entries.delete(key);cache.bytes-=old.bytes}}
+  else {
+    const hit=cache.entries.get(key)
+    if(hit){cache.entries.delete(key);cache.entries.set(key,hit);return hit.frame}
+    const pending=cache.pending.get(key)
+    if(pending)return pending
+  }
+  const work=(async()=>{
+    const frame=await browserSnapshot(env,state,viewport,route)
+    const bytes=frame.png.length+Buffer.byteLength(JSON.stringify(frame.observation))
+    if(bytes<=PREVIEW_CACHE_MAX_ENTRY_BYTES){
+      while(cache.entries.size>=PREVIEW_CACHE_MAX_ENTRIES||cache.bytes+bytes>PREVIEW_CACHE_MAX_BYTES){
+        const oldest=cache.entries.keys().next().value
+        if(oldest===undefined)break
+        const removed=cache.entries.get(oldest);cache.entries.delete(oldest);cache.bytes-=removed.bytes
+      }
+      cache.entries.set(key,{frame,bytes,expiresAt:Date.now()+PREVIEW_CACHE_TTL_MS});cache.bytes+=bytes
+    }
+    return frame
+  })()
+  cache.pending.set(key,work)
+  try{return await work}finally{if(cache.pending.get(key)===work)cache.pending.delete(key)}
+}
+
 async function saveVisual(db,session,projectId,body,env){
   if(typeof body.expectedRevision!=="string"||!REVISION.test(body.expectedRevision)||typeof body.idempotencyKey!=="string"||!IDEMPOTENCY.test(body.idempotencyKey))fail(400,"A current revision and bounded idempotency key are required.")
   if(!body.edit||!["text","style","layout","responsive","responsive-create","reorder"].includes(body.edit.type)||typeof body.edit.value!=="string"||body.edit.value.includes("\0")||Buffer.byteLength(body.edit.value)>32*1024)fail(422,"A supported bounded Visual edit is required.")
@@ -711,7 +748,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     }
     if(body.command&&body.command!=="update"&&body.command!=="capture")fail(422,"Snapshot preview does not accept interactive browser commands.")
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before preview.")
-    const frame=await browserSnapshot(env,state,body.viewport,typeof body.route==="string"?body.route:"/")
+    const frame=await cachedPreviewSnapshot(env,projectId,state,body.viewport,typeof body.route==="string"?body.route:"/",body.command==="capture")
     const generation=randomUUID()
     return {status:200,value:await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,snapshotElements:frame.observation.elements,snapshotViewport:frame.observation.viewport,snapshotRoute:frame.observation.route,state:"ready"})}
   }

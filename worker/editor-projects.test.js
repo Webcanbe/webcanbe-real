@@ -133,12 +133,37 @@ describe("production Worker source editor API",()=>{
       const listing=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)
       expect(listing.value.files).toEqual(expect.arrayContaining([expect.objectContaining({file:"src/App.tsx",hash:expect.any(String)})]))
       await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/history`,auth)
-      const preview=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision},env)
+      const preview=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision,route:"/light-read-test"},env)
       expect(preview.value.snapshotViewport.height).toBe(1800)
       expect(decode).not.toHaveBeenCalled()
       state.project.files["src/App.tsx"]=Buffer.from("tampered accepted source").toString("base64")
       await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/code`,{...auth,expectedRevision:baseRevision,idempotencyKey:"tampered-write-1",operations:[{kind:"update",file:"src/App.tsx",expectedHash:listing.value.files.find(item=>item.file==="src/App.tsx").hash,content:"next"}]})).rejects.toMatchObject({status:409})
     } finally { decode.mockRestore() }
+  })
+  it("reuses only authorized same-head preview frames and invalidates on revision, route or viewport changes",async()=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    let captures=0
+    const env={BROWSER:{quickAction:async()=>{captures++;return {screenshot:Buffer.alloc(120,captures).toString("base64"),content:'<script id="wcb-observation">'+JSON.stringify({elements:[],viewport:{width:1280,height:1800},route:"/"})+'</script>'}}}}
+    const call=(body={})=>editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:state.project.revision,route:"/cache-test",viewport:"desktop",...body},env)
+    const first=await call(),second=await call()
+    expect(captures).toBe(1)
+    expect(second.value.png).toBe(first.value.png)
+    expect(second.value.generation).not.toBe(first.value.generation)
+    await expect(editorProjectRequest(db,{...session,userId:otherUser},`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision},env)).rejects.toMatchObject({status:403})
+    await expect(call({capability:"invalid"})).rejects.toMatchObject({status:403})
+    expect(captures).toBe(1)
+    await call({route:"/about"});await call({viewport:"mobile"})
+    expect(captures).toBe(3)
+    const next="rev_77777777-7777-4777-8777-777777777777"
+    state.project.revision=next
+    state.project.history.revisions.push({...state.project.history.revisions.at(-1),revisionId:next,parentRevisionId:baseRevision})
+    const changed=await call()
+    expect(captures).toBe(4)
+    expect(changed.value.png).not.toBe(first.value.png)
+    await call({command:"capture"})
+    expect(captures).toBe(5)
   })
   it.each([['reviewed','original'],['reviewed','accepted'],['direct','original'],['direct','accepted']])("recovers AI settlement endpoint after %s Apply using %s revision",async(flow,revisionChoice)=>{
     const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
