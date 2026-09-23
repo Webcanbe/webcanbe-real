@@ -35,13 +35,18 @@ describe("PayPal provider boundary", () => {
   })
 
   it("reports a safe provider error category and reference for subscription diagnosis", async () => {
-    const provider = new PayPalProvider(env, async url => url.endsWith("/v1/oauth2/token")
-      ? response({ access_token: "token", expires_in: 300 })
-      : response({ name: "RESOURCE_NOT_FOUND", debug_id: "trace-123", details: [{ issue: "private payer data" }] }, 404))
+    const requests = []
+    const provider = new PayPalProvider(env, async url => {
+      requests.push(url)
+      return url.endsWith("/v1/oauth2/token")
+        ? response({ access_token: "token", expires_in: 300 })
+        : response({ name: "RESOURCE_NOT_FOUND", debug_id: "trace-123", details: [{ issue: "private payer data" }] }, 404)
+    })
     await expect(provider.getSubscription("I-OLD")).rejects.toMatchObject({
       code: "paypal_request_failed",
       message: "PayPal request failed: RESOURCE_NOT_FOUND (HTTP 404; ref trace-123).",
     })
+    expect(requests[1]).toBe("https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-OLD")
   })
 
   it("posts the configured webhook ID and delivery headers to PayPal verification", async () => {

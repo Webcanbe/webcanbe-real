@@ -107,7 +107,7 @@ export class PayPalProvider {
   }
 
   async getSubscription(providerSubscriptionId) {
-    return this.request(`/v1/billing/subscriptions/${encodeURIComponent(providerSubscriptionId)}?fields=last_failed_payment,plan`)
+    return this.request(`/v1/billing/subscriptions/${encodeURIComponent(providerSubscriptionId)}`)
   }
 
   async cancelSubscription(providerSubscriptionId, reason = "Cancelled by subscriber") {
