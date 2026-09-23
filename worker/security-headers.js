@@ -10,7 +10,7 @@ export const CONTENT_SECURITY_POLICY = [
   "style-src-attr 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com",
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com https://us.i.posthog.com",
   "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://www.youtube-nocookie.com https://player.vimeo.com",
   "worker-src 'self' blob:",
   "media-src 'self' blob: https:",

@@ -134,9 +134,12 @@ export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult
   return { ...event, properties }
 }
 
+const DEFAULT_POSTHOG_PROJECT_TOKEN = "phc_qUNb8jnbKrpCLAmrSrMA26rF9p9WMb38qDYAJqEqAYu2"
+const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com"
+
 export async function initializeAnalytics(
-  token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN,
-  host = import.meta.env.VITE_POSTHOG_HOST,
+  token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN || DEFAULT_POSTHOG_PROJECT_TOKEN,
+  host = import.meta.env.VITE_POSTHOG_HOST || DEFAULT_POSTHOG_HOST,
 ): Promise<PostHog | null> {
   if (!token?.trim() || !host?.trim()) { analytics.setClient(null); return null }
   try {
