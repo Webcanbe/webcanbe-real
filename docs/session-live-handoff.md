@@ -2077,3 +2077,22 @@ As of the user's latest clarification in this chat:
 - detailed PostHog tracking has already been implemented beyond the older base-only state, so PR #106 should not be treated as the sole current analytics truth without reconciling actual main.
 
 This section supersedes any older handoff implication that consumer/public marketing had already begun.
+
+
+## 36. Immediate launch-advisor plan — 2026-09-23
+
+User knows 윤성용, CEO of 강남디벨로퍼스 주식회사, and may ask him for practical advice at the current market-entry stage.
+
+Current launch-channel decision:
+- first public consumer/event distribution: **X + Instagram**
+- preferred rare-domain prize: **may.cx** (purchase/ownership still to be completed before promotion)
+
+Best use of this advisor now is not generic startup mentorship or product/UI feedback. Ask for high-signal launch/GTM judgment:
+1. What would make this offer compelling enough for a stranger to actually try or pay?
+2. If starting from zero audience, what exact first 20–50 customer-acquisition actions would he prioritize?
+3. Does the Build League / may.cx prize mechanic strengthen product demand or distract from the product, and what would he change?
+4. Which initial customer segment would he target first from the current Webcanbe product, and why?
+5. What trust objection would stop him from buying from a newly launched marketplace?
+6. If relevant, ask for 1–3 introductions to people who plausibly fit the buyer/creator profile; introductions are more valuable than broad advice if they are genuinely high-fit.
+
+Do not spend the conversation on code architecture, cosmetic UI detail, or abstract “how do I build a big startup?” discussion. Use the call/message to improve first-customer acquisition and trust/conversion.
