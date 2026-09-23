@@ -1850,3 +1850,102 @@ Operating rule from now on:
 - Do not overwrite history blindly; mark superseded decisions explicitly.
 
 Reason: the user has experienced long-chat context drift and wants continuity that survives chat failure or model/context changes.
+
+
+## 34. Relearned canonical operating state — 2026-09-23 evening
+
+This checkpoint reconciles the latest persistent handoff with current GitHub evidence after chat-context drift.
+
+### Current source-of-truth order
+1. Current GitHub main / open PRs / workflow evidence.
+2. This live handoff.
+3. Older handoffs and compressed chat memory only as historical context.
+
+### Current phase
+- Public launch is already recorded as complete.
+- Webcanbe is no longer in the “finish the product before launch” phase.
+- Primary operating phase is now **business execution / market evidence**.
+- Product work should be limited to real-user blockers, trust/security issues, conversion blockers, or measured retention/monetization problems.
+
+### Current product state inferred from latest main history
+Latest product commit before continuity-only docs:
+- `72d2e1028356aa7de187d45dc3a02ed4c7eae8b8` — production app asset versioning.
+
+Recent merged product milestones immediately before it:
+- production PostHog base connection and CSP allowance;
+- PayPal runtime switched to Live defaults;
+- one-command PayPal Live product/plan/webhook/secret bootstrap;
+- atomic/version-aware PayPal Live secret publishing;
+- truthful Marketplace demo when hosted catalog is empty;
+- live checkout revalidation and checkout/return repair;
+- coherent product shell + real Aperture North preview;
+- first-party templates made editable;
+- Stillform added and source images optimized for hosted editing;
+- managed preview logging and longer cold-start allowance.
+
+### Current verification picture
+At product commit `72d2e102...`:
+- Phase 5 UI verify: PASS.
+- durable editor/export verify: PASS.
+- Bigperson checkpoint verify: PASS.
+- production smoke: PASS.
+- browser compatibility smoke: FAIL, with evidence including a /browse load timeout, a slow cancelled-checkout DCL sample, and a later expectation timeout for an “unavailable” heading. Treat this as a real current test signal, but not automatically as a proven production outage until reproduced/triaged.
+- Vercel commit statuses are failing because of Vercel build-rate-limit, not because a build compilation failure was established.
+
+### Analytics
+- Base production PostHog integration is merged.
+- PR #106 `Add detailed privacy-safe PostHog product tracking` remains open at `4b7fa8c4...`.
+- That PR adds detailed funnel/link/editor/billing/creator tracking without session replay or broad autocapture.
+- Because its base predates the later product reconciliation, do not merge it blindly; reconcile/cherry-pick only after checking current main.
+
+### Business / GTM strategy
+Current first customer-acquisition system remains:
+**Webcanbe Build League + Founding Prize Vault**.
+Core mechanics:
+- start from a real Webcanbe project;
+- materially customize it;
+- save/export or publish;
+- post the finished result publicly;
+- submit the public post;
+- verify the build;
+- create a gallery/leaderboard/referral path.
+
+Competition lanes:
+- Most Viewed
+- Random Builder
+- Impact / Referral
+
+Retention loop:
+- 14-day seasons;
+- permanent cumulative Prize Vault progress;
+- weekly build prompts;
+- referral residuals;
+- durable public Build Gallery;
+- official highlights;
+- new seller/project supply feeding returning users.
+
+Preferred rare-domain reward style remains names like `may.cx`, `she.cx`, `way.bz`; actual ownership/purchase status is not assumed here.
+
+### Long-term strategy
+The restored long-term North Star is broader than a template marketplace:
+**a market/ecosystem where complete software is bought, evolved, operated and handed off**.
+Current wedge:
+Marketplace → real project → real-code Workspace → external users → market evidence.
+Later layers only if demand supports them:
+Care → upstream merge → Feature Marketplace → creator ARR → experts → payments → remix → enterprise/private marketplace.
+
+### Probability tracker
+Until new external market evidence is confirmed:
+- fixed target: roughly 24 months to a credibly KRW 1T+ Webcanbe backed by real customers, recognized company economics, growth and retention;
+- original baseline: 0.0500%;
+- last explicit tracking estimate: **0.0523%**.
+Do not move this materially for code, plans, polish, or internal completion alone.
+
+### Current unresolved facts that should be answered by the user or fresh evidence
+1. Has the first public marketing/launch post actually been published and distributed yet?
+2. Is the Build League / Prize Vault public surface actually live yet, or still strategy/preparation?
+3. Have there been any genuine external users, full-flow completions, purchases, repeat users, or Creator submissions since the last recorded probability update?
+4. Which rare domains, if any, have actually been purchased/secured?
+5. Should PR #106 detailed PostHog tracking be reconciled into current main now, or is a newer analytics implementation already replacing it?
+
+These are intentionally treated as unknown rather than guessed.
