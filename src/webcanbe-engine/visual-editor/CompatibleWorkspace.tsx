@@ -44,6 +44,7 @@ export default function CompatibleWorkspace() {
   const [copiedText, setCopiedText] = useState<string>()
   const previewContainer = useRef<HTMLDivElement>(null)
   const [availableWidth, setAvailableWidth] = useState(1280)
+  const [availableHeight, setAvailableHeight] = useState(() => typeof window === "undefined" ? 900 : Math.max(320, window.innerHeight - 180))
   const [leftPanel, setLeftPanel] = useState<"pages" | "layers" | "assets" | "project">("pages")
   const [pages,setPages] = useState<EditorPage[]>([{path:"/",name:"Home"}])
   const [projectFiles,setProjectFiles] = useState<string[]>([])
@@ -137,7 +138,8 @@ export default function CompatibleWorkspace() {
   const [snapshotViewport, setSnapshotViewport] = useState({ width: 1280, height: 900 })
   const previewUrl = preview?.url ?? ""
   const viewportWidth = { mobile: 390, tablet: 768, desktop: 1280 }[viewport]
-  const scale = zoom === "fit" ? Math.max(0.1, Math.min(1, availableWidth / viewportWidth)) : zoom
+  const frameHeight = preview?.transport === "snapshot" ? snapshotViewport.height : 900
+  const scale = zoom === "fit" ? Math.max(0.1, Math.min(1, availableWidth / viewportWidth, availableHeight / frameHeight)) : zoom
 
   useEffect(() => {
     let active=true
@@ -507,8 +509,10 @@ export default function CompatibleWorkspace() {
     const container = previewContainer.current
     if (!container) return
     const observer = new ResizeObserver(entries => setAvailableWidth(entries[0]?.contentRect.width ?? container.clientWidth))
+    const updateAvailableHeight = () => setAvailableHeight(Math.max(320, window.innerHeight - 180))
     observer.observe(container)
-    return () => observer.disconnect()
+    window.addEventListener("resize", updateAvailableHeight)
+    return () => { observer.disconnect(); window.removeEventListener("resize", updateAvailableHeight) }
   }, [])
 
   const activeBox = selected ?? hovered
@@ -523,7 +527,6 @@ export default function CompatibleWorkspace() {
     { label: "Border / Radius", properties: ["border", "borderRadius"] },
     { label: "Shadow", properties: [] },
   ]
-  const frameHeight = preview?.transport === "snapshot" ? snapshotViewport.height : 900
   const frameStyle = { width: viewportWidth, height: frameHeight, transform: `scale(${scale})` }
   function selectSnapshot(event: MouseEvent<HTMLImageElement>) {
     if (!selectMode || preview?.transport !== "snapshot") return
