@@ -23,6 +23,14 @@ describe("analytics", () => {
     expect(posthog.capture).toHaveBeenCalledWith("wcb_project_viewed", { listing_id: "listing-1", source: "marketplace" })
   })
 
+  it("flushes safe events captured before asynchronous initialization", () => {
+    const analytics = createAnalytics()
+    analytics.capture("wcb_marketplace_viewed", { source: "marketplace" })
+    const posthog = client()
+    analytics.setClient(posthog as never)
+    expect(posthog.capture).toHaveBeenCalledWith("wcb_marketplace_viewed", { source: "marketplace" })
+  })
+
   it("identifies by stable internal ID and resets", () => {
     const posthog = client()
     const analytics = createAnalytics(posthog as never)

@@ -80,10 +80,18 @@ function safePersonProperties(properties: unknown): properties is AnalyticsPerso
 
 export function createAnalytics(initialClient: AnalyticsClient | null = null) {
   let client = initialClient
+  let pending: Array<[AnalyticsEvent, AnalyticsProperties]> = []
   return {
-    setClient(next: AnalyticsClient | null) { client = next },
+    setClient(next: AnalyticsClient | null) {
+      client = next
+      if (client) for (const [event, properties] of pending) {
+        try { client.capture(event, properties) } catch { /* Never block product behavior. */ }
+      }
+      pending = []
+    },
     capture(event: AnalyticsEvent, properties: AnalyticsProperties = {}) {
-      if (!client || !eventNames.has(event) || !isSafeAnalyticsPayload(properties)) return
+      if (!eventNames.has(event) || !isSafeAnalyticsPayload(properties)) return
+      if (!client) { if (pending.length < 20) pending.push([event, properties]); return }
       try { client.capture(event, properties) } catch { /* Analytics must never interrupt product behavior. */ }
     },
     identify(distinctId: string, properties: AnalyticsPersonProperties = {}) {
