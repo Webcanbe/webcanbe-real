@@ -68,6 +68,6 @@ describe("Worker security header adapter", () => {
 })
 
 
-test("allows the configured PostHog ingestion host", () => {
-  assert.match(CONTENT_SECURITY_POLICY, /connect-src[^;]*https:\/\/us\.i\.posthog\.com/)
+it("allows the configured PostHog ingestion host", () => {
+  expect(CONTENT_SECURITY_POLICY).toMatch(/connect-src[^;]*https:\/\/us\.i\.posthog\.com/)
 })
