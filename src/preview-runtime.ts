@@ -318,7 +318,7 @@ function bootstrap(payload: Payload) {
       return module.exports
     }
 
-    let source = decodeText(files[file]).replaceAll("import.meta.env.BASE_URL", JSON.stringify(virtualPublicPrefix))
+    let source = decodeText(files[file]).replace(/\bimport\.meta\.env\.BASE_URL\b/g, JSON.stringify(virtualPublicPrefix))
     if (file.endsWith(".tsx") || file.endsWith(".jsx")) source = instrument(file, source)
     const output = ts.transpileModule(source, {
       fileName: file,
