@@ -1,5 +1,5 @@
 import { AI_ACTION_COST, AI_ACTION_PACKS, MINIMUM_PAID_LISTING_MINOR, PAYMENT_CURRENCY, PAYPAL_WEBHOOK_EVENTS, WEB_CAN_BE_PLANS, PaymentError, domainId, paypalPlanMapping } from "./contracts.js"
-import { captureMarketplaceOrder, createMarketplaceOrder, createPlanSubscription, paypalSubscriptionNeedsReview } from "./domain.js"
+import { auditConfiguredPlans, captureMarketplaceOrder, createMarketplaceOrder, createPlanSubscription, paypalSubscriptionNeedsReview } from "./domain.js"
 import { captureAiPackOrder, createAiPackOrder } from "./ai-packs.js"
 
 const headers = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
@@ -54,6 +54,10 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
         } : null,
         aiActions,
       } })
+    }
+    if (path === "/__webcanbe/api/payments/plans/verify") {
+      if (env.PAYPAL_ENVIRONMENT !== "live") throw new PaymentError(409, "paypal_live_required", "Live PayPal plans are not available.")
+      return json({ environment: "live", plans: await auditConfiguredPlans(provider, paypalPlanMapping(env)) })
     }
     if (path === "/__webcanbe/api/payments/orders/create") {
       const order = await createMarketplaceOrder(repo, provider, session, await body(request), {

@@ -3,6 +3,33 @@ import { PAYMENT_RETURN_URLS, handlePrivatePaymentRequest, publicPaymentConfigur
 import { PaymentError } from "./contracts.js"
 
 describe("payment HTTP contract", () => {
+  it("verifies every configured Live plan with the runtime provider without creating subscriptions", async () => {
+    const prices = { pro_monthly: ["MONTH", "12.00"], pro_annual: ["YEAR", "120.00"], studio_monthly: ["MONTH", "29.00"], studio_annual: ["YEAR", "290.00"] }
+    const keys = { PAYPAL_PLAN_PRO_MONTHLY: "P-PM", PAYPAL_PLAN_PRO_ANNUAL: "P-PA", PAYPAL_PLAN_STUDIO_MONTHLY: "P-SM", PAYPAL_PLAN_STUDIO_ANNUAL: "P-SA" }
+    const byId = Object.fromEntries(Object.entries(keys).map(([key, id]) => [id, key.replace("PAYPAL_PLAN_", "").toLowerCase()]))
+    const queried = []
+    const provider = { getPlan: async id => { queried.push(id); const [unit, value] = prices[byId[id]]; return { id, status: "ACTIVE", billing_cycles: [{ tenure_type: "REGULAR", frequency: { interval_unit: unit, interval_count: 1 }, pricing_scheme: { fixed_price: { currency_code: "USD", value } } }] } } }
+    const path = "/__webcanbe/api/payments/plans/verify"
+    const response = await handlePrivatePaymentRequest(new Request(`https://webcanbe.com${path}`, { method: "POST" }), path, { repo: {}, provider, session: { userId: "buyer" }, env: { PAYPAL_ENVIRONMENT: "live", ...keys } })
+    expect(response.status).toBe(200)
+    const result = await response.json()
+    expect(result.environment).toBe("live")
+    expect(result.plans).toEqual(expect.arrayContaining([
+      { key: "pro_monthly", providerPlanId: "P-PM", status: "ACTIVE", currency: "USD", priceMinor: 1200, cadence: "month", contractMatches: true },
+      { key: "studio_annual", providerPlanId: "P-SA", status: "ACTIVE", currency: "USD", priceMinor: 29000, cadence: "year", contractMatches: true },
+    ]))
+    expect(queried).toHaveLength(4)
+    expect(JSON.stringify(result)).not.toContain("secret")
+  })
+
+  it("refuses an inactive or mispriced Live plan and any sandbox audit", async () => {
+    const path = "/__webcanbe/api/payments/plans/verify"
+    const request = new Request(`https://webcanbe.com${path}`, { method: "POST" })
+    const env = { PAYPAL_ENVIRONMENT: "live", PAYPAL_PLAN_PRO_MONTHLY: "P-PM", PAYPAL_PLAN_PRO_ANNUAL: "P-PA", PAYPAL_PLAN_STUDIO_MONTHLY: "P-SM", PAYPAL_PLAN_STUDIO_ANNUAL: "P-SA" }
+    const provider = { getPlan: async id => ({ id, status: "INACTIVE", billing_cycles: [] }) }
+    expect((await handlePrivatePaymentRequest(request.clone(), path, { repo: {}, provider, session: { userId: "buyer" }, env })).status).toBe(409)
+    expect((await handlePrivatePaymentRequest(request, path, { repo: {}, provider, session: { userId: "buyer" }, env: { ...env, PAYPAL_ENVIRONMENT: "sandbox" } })).status).toBe(409)
+  })
   it("publishes the locked concurrency and deploy-slot entitlements", () => {
     const configuration = publicPaymentConfiguration()
     const plans = Object.fromEntries(configuration.plans.map(plan => [plan.key, plan]))

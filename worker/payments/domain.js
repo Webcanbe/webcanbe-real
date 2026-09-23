@@ -236,13 +236,23 @@ async function verifyAndStoreSubscription(repo, provider, subscription, options)
   return await repo.markSubscriptionApprovalPending(subscription.subscriptionId, subscription.providerSubscriptionId) || repo.subscriptionForUpdate(subscription.subscriptionId)
 }
 
-async function verifyLivePlan(provider, providerPlanId, plan) {
+export async function verifyLivePlan(provider, providerPlanId, plan) {
   const remote = await provider.getPlan(providerPlanId, plan)
   const regular = Array.isArray(remote?.billing_cycles) ? remote.billing_cycles.find(cycle => cycle?.tenure_type === "REGULAR") : undefined
   const price = regular?.pricing_scheme?.fixed_price
   if (remote?.id !== providerPlanId || remote?.status !== "ACTIVE" || regular?.frequency?.interval_unit !== (plan.cadence === "month" ? "MONTH" : "YEAR") || Number(regular?.frequency?.interval_count) !== 1 || price?.currency_code !== PAYMENT_CURRENCY || Number(price?.value) !== plan.priceMinor / 100) {
     throw new PaymentError(409, "paypal_plan_unverified", "PayPal could not verify the selected plan and price. Billing review is needed before checkout.")
   }
+}
+
+export async function auditConfiguredPlans(provider, planIds) {
+  const plans = await Promise.all(Object.entries(planIds).map(async ([key, providerPlanId]) => {
+    const contract = WEB_CAN_BE_PLANS[key]
+    if (!contract || !providerPlanId) throw new PaymentError(503, "plan_not_configured", "Subscription plan is not configured.")
+    await verifyLivePlan(provider, providerPlanId, contract)
+    return { key, providerPlanId, status: "ACTIVE", currency: PAYMENT_CURRENCY, priceMinor: contract.priceMinor, cadence: contract.cadence, contractMatches: true }
+  }))
+  return plans
 }
 
 export async function createPlanSubscription(repo, provider, session, input, options) {
