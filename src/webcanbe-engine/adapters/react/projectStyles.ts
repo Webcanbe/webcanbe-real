@@ -75,6 +75,24 @@ function selectorMayMatch(selector: string, tag: string, classes: string[]) {
 }
 export function analyzeProjectStyles(files: Map<string, string>, tailwind: boolean, width = 1280): StyleAnalysis {
   const registry = breakpointRegistry(files, tailwind)
+  // A stylesheet normally declares only a small fraction of the supported
+  // properties. Index exact class rules once instead of walking the entire
+  // stylesheet for every property of every rendered element.
+  const stylesheetProperties = new Map<string, Map<string, Set<StyleProperty>>>()
+  const propertyByCSSName = new Map(supportedProperties.map(property => [property.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`), property]))
+  for (const [file, code] of files) if (file.endsWith(".css") && !file.endsWith(".module.css")) {
+    const selectors = new Map<string, Set<StyleProperty>>()
+    try { parsedCSS(code).walkRules(rule => {
+      if (!/^\.[A-Za-z_][\w-]*$/.test(rule.selector)) return
+      rule.walkDecls(declaration => {
+        const property = propertyByCSSName.get(declaration.prop)
+        if (!property) return
+        if (!selectors.has(rule.selector)) selectors.set(rule.selector, new Set())
+        selectors.get(rule.selector)!.add(property)
+      })
+    }) } catch { /* Invalid CSS is reported by the registry. */ }
+    stylesheetProperties.set(file, selectors)
+  }
   const targets = [...files].filter(([file]) => /\.[jt]sx?$/.test(file)).flatMap(([file, code]) => analyzedFile(file, code, files, tailwind))
   const componentCounts = new Map<string, number>()
   for (const target of targets) if (target.nodeKind === "component" && target.component?.resolved) { const key=`${target.component.file}:${target.component.definitionName}`;componentCounts.set(key,(componentCounts.get(key)??0)+1) }
@@ -95,7 +113,7 @@ export function analyzeProjectStyles(files: Map<string, string>, tailwind: boole
     if (target.nodeKind !== "native") continue
     for (const [file, code] of files) {
       if (!file.endsWith(".css") || file.endsWith(".module.css") || !importedCSS.has(file)) continue
-      for (const name of target.classNames ?? []) for (const property of supportedProperties) {
+      for (const name of target.classNames ?? []) for (const property of stylesheetProperties.get(file)?.get(`.${name}`) ?? []) {
         for (const media of [undefined, ...registry.breakpoints.filter(item => item.media).map(item => item.media)]) {
           if (target.styleOrigins.some(item => item.file === file && item.selector === `.${name}` && item.property === property && item.media === media)) continue
           const range = cssDeclaration(code, `.${name}`, property, media)
