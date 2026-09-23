@@ -64,5 +64,5 @@
 @media(max-width:1180px){.rd-project-gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 20px}}
 @media(max-width:880px){.rd-project-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:530px){.rd-project-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}.rd-gallery-card .project-preview{aspect-ratio:.82}}
-.rd-shell{--rd-sidebar:230px}.rd-sidebar-header{padding:0 6px 9px}.rd-team-switcher{height:40px}.rd-sidebar-search{margin-top:10px}.rd-main{padding-top:54px}.rd-new-project{height:30px;padding:0 12px}.rd-project-sort>button{height:30px;padding:0 8px;gap:7px}
+.rd-shell{--rd-sidebar:230px}.rd-sidebar-header{padding:0 6px 9px}.rd-team-switcher{height:40px;min-height:40px}.rd-sidebar-search{margin-top:10px}.rd-nav-button{min-height:31px}.rd-main{padding-top:54px}.rd-new-project{height:30px;padding:0 12px}.rd-project-sort>button{height:30px;padding:0 8px;gap:7px}
 @media(max-width:760px){.rd-shell:not(.rd-sidebar-collapsed) .rd-sidebar{width:230px}.rd-main{padding-top:68px}}
