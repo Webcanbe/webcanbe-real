@@ -1,22 +1,18 @@
 {
   "/legal": {
     "title": "Legal Overview",
-    "intro": "Legal Overview review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "OPERATOR_REGISTRATION_DISCLOSURE"
-    ],
+    "intro": "Legal Overview. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Who operates Webcanbe",
         "paragraphs": [
-          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with its business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894). Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with its business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894). Required business-registration and supplier contact information: Business registration is currently pending. Do not claim a business registration number or mail-order-sales filing number that has not actually been issued. Contact details: Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
           "The Webcanbe name is a product brand. Your account agreement and order confirmation identify the actual contracting operator. An authentication, infrastructure or payment provider does not become the supplier of your Webcanbe purchase merely by providing that service."
         ],
-        "pendingFields": [
-          "OPERATOR_REGISTRATION_DISCLOSURE"
-        ]
+        "pendingFields": []
       },
       {
         "title": "2. Find the right document",
@@ -61,25 +57,19 @@
   },
   "/legal/terms": {
     "title": "Terms of Service",
-    "intro": "Terms of Service review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "OPERATOR_REGISTRATION_DISCLOSURE",
-      "SUPPORTED_CUSTOMER_TERRITORIES"
-    ],
+    "intro": "Terms of Service. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Who operates Webcanbe",
         "paragraphs": [
-          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with a business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894) and required supplier contact information Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. Contact: hello@webcanbe.com. “Webcanbe,” “we,” and “us” mean that operator, not the software's creators, an authentication provider, or a payment processor.",
-          "These Terms govern your account and use of our marketplace and source-editing service. The operator is the contracting supplier of Webcanbe subscriptions and AI Actions. Merely making public information accessible does not promise that every paid feature or payout method is offered in every country. For marketplace orders under the distribution model described in the Creator Distribution Agreement, the operator supplies the project license as an authorized distributor; the identified Creator retains the underlying intellectual property. Your checkout and order confirmation identify the contracting supplier and Creator. A payment processor is not substituted for that supplier merely because it processes payment.",
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with a business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894) and required supplier contact information Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. Applicable business or trade registration details: Business registration is currently pending. Do not claim a business registration number or mail-order-sales filing number that has not actually been issued. Contact: hello@webcanbe.com. “Webcanbe,” “we,” and “us” mean that operator, not the software's creators, an authentication provider, or a payment processor.",
+          "These Terms govern your account and use of our marketplace and source-editing service. The operator is the contracting supplier of Webcanbe subscriptions and AI Actions. We offer enabled services in: United States, Canada, United Kingdom, European Economic Area, Switzerland, Australia, New Zealand, Japan, Singapore, South Korea, Hong Kong, plus other jurisdictions where Webcanbe and its providers may lawfully provide service, excluding sanctioned, restricted, or unsupported jurisdictions. Merely making public information accessible does not promise that every paid feature or payout method is offered in every country. For marketplace orders under the distribution model described in the Creator Distribution Agreement, the operator supplies the project license as an authorized distributor; the identified Creator retains the underlying intellectual property. Your checkout and order confirmation identify the contracting supplier and Creator. A payment processor is not substituted for that supplier merely because it processes payment.",
           "You accept these Terms through the account or checkout acceptance action presented to you. Merely viewing a public page does not create a paid subscription. An individual acting for an organization must have authority to bind it; the identified organization is then the customer for that account or order."
         ],
-        "pendingFields": [
-          "OPERATOR_REGISTRATION_DISCLOSURE",
-          "SUPPORTED_CUSTOMER_TERRITORIES"
-        ]
+        "pendingFields": []
       },
       {
         "title": "2. Related documents and precedence",
@@ -247,16 +237,10 @@
   },
   "/legal/privacy": {
     "title": "Privacy Policy",
-    "intro": "Privacy Policy review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "ACTIVE_DATA_DELETION_SCHEDULE",
-      "AI_REQUEST_RETENTION_SCHEDULE",
-      "BACKUP_RETENTION_SCHEDULE",
-      "CAMPAIGN_RETENTION_SCHEDULE",
-      "SECURITY_LOG_RETENTION_SCHEDULE"
-    ],
+    "intro": "Privacy Policy. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Controller and contact",
@@ -319,19 +303,17 @@
         "paragraphs": [
           "We retain each category only for the stated purpose and applicable legal requirements. The following is our retention schedule, subject to the provider schedule in the Privacy Policy and a specific, documented legal or security hold:",
           "Category Retention approach",
-          "Contracts, payment and Keep the minimum records for the applicable statutory period. Where supply records Korean electronic-commerce record rules apply, contract/cancellation and payment/supply records are generally retained for five years.",
-          "Consumer complaints and Where Korean electronic-commerce record rules apply, generally three disputes years; retain a particular unresolved claim longer only on a documented legal basis.",
+          "Active account, workspace and source — While the account or workspace is used and needed to provide the service. Verified deletion requests have an operational target of completion within 30 days, except for records that must remain for legal, accounting, payment, fraud, security or dispute obligations. Requests are handled through the Privacy Requests process; Webcanbe does not claim that account deletion is automatic, and provider-managed deletion or backup lifecycles may continue for the periods disclosed below.",
+          "Recoverable backups — Webcanbe does not currently operate a separate managed backup store, and the current Supabase Free plan does not include automatic daily database backups. If Webcanbe-managed backup copies are introduced, their deletion or overwrite target is 30 days. Provider-managed disaster-recovery copies follow the provider's verified lifecycle; for example, Firebase states that deleted Authentication data is removed from live and backup systems within 180 days. A specifically documented lawful hold may require longer retention; backups are not used to reactivate deleted accounts for ordinary purposes.",
+          "Routine raw security and diagnostic logs — The application does not maintain a general durable store of raw diagnostic logs. Any ordinary Webcanbe-controlled transient security or audit log that is retained has a 180-day target, with longer retention only for an active incident, fraud investigation, dispute or legal obligation. Relevant incident records are isolated and reviewed instead of retaining all raw logs indefinitely. Immutable control, release, publication, rights, payment, license and entitlement evidence is not treated as an ordinary raw log and remains with the underlying provenance or transaction record.",
+          "Contracts, payment and supply records — Keep the minimum records for the applicable statutory period. Where Korean electronic-commerce record rules apply, contract/cancellation and payment/supply records are generally retained for five years.",
+          "Consumer complaints and disputes — Where Korean electronic-commerce record rules apply, generally three years; retain a particular unresolved claim longer only on a documented legal basis.",
           "Advertising records Where the corresponding Korean record rule applies, generally six months.",
           "License and rights evidence Keep the minimum release, license, order, and rights evidence needed for outstanding licenses or claims, separating it from unnecessary profile and source data.",
-          "Accepted edits form part of project history. Provider-side retention is stated separately.",
+          "AI request results — The current implementation does not persist raw AI prompt text or transient selected-source input context after the request completes, which is shorter than the 30-day maximum target for any future Webcanbe-controlled temporary copy. Accepted project edits and revisions remain ordinary project data, while AI usage, reservation and outcome metadata remains account or transaction data. Cloudflare Workers AI does not store request content unless a separate storage service is deliberately used and does not use Customer Content for training or service improvement without explicit consent.",
           "When a backup is restored for recovery, deletion instructions must be reapplied before it becomes an ordinary live data source. Deleting a Creator account does not require deletion of the minimum release and license evidence needed to honor buyers' existing lawful rights. We do not keep an entire private workspace merely because one order record must be retained."
         ],
-        "pendingFields": [
-          "ACTIVE_DATA_DELETION_SCHEDULE",
-          "BACKUP_RETENTION_SCHEDULE",
-          "SECURITY_LOG_RETENTION_SCHEDULE",
-          "AI_REQUEST_RETENTION_SCHEDULE"
-        ]
+        "pendingFields": []
       },
       {
         "title": "8. Your rights and choices",
@@ -361,9 +343,9 @@
       {
         "title": "11. PostHog analytics and session replay",
         "paragraphs": [
-          "We use PostHog for optional product analytics to understand visits, broad country-level location, referral sources and whether people complete relevant actions, such as creating an account, starting a project, saving an edit, returning to a project, exporting source or completing an enabled purchase. Analytics can include a pseudonymous visitor or account identifier, timestamps, permitted route and campaign labels, browser or device category, event names and limited event properties. These are not necessarily anonymous merely because a direct name is omitted.",
+          "If enabled after a verified Webcanbe project token and host are configured, PostHog will provide optional product analytics to understand visits, broad country-level location, referral sources and whether people complete relevant actions, such as creating an account, starting a project, saving an edit, returning to a project, exporting source or completing an enabled purchase. Analytics can include a pseudonymous visitor or account identifier, timestamps, permitted route and campaign labels, browser or device category, event names and limited event properties. These are not necessarily anonymous merely because a direct name is omitted.",
           "We do not intentionally send private project source, AI prompt text, access credentials, full support messages, payment-card data or identity-verification documents to product analytics. Public-page URLs and referrers are reduced or filtered to avoid query-string secrets and unnecessary identifiers. Location is approximate rather than GPS-level location. IP addresses can be processed in the connection and country-lookup process; the actual storage and disposal rule is in Appendix B. Refusing optional analytics does not prevent the essential account, licensed editing or payment functions.",
-          "Our launch configuration is event-based analytics with session replay disabled. If replay is later offered, we will update this notice and provide any required prior choice before capture begins. That feature can reconstruct on-site interactions; it is not permission to record a user's entire device. Private source editors, project previews containing private content, authentication, payment credentials, identity records and sensitive support fields must be excluded or masked before transmission. General input masking alone is not treated as protection for code displayed as page text.",
+          "PostHog is disabled in the current launch configuration, and session replay is disabled in code. If replay is later offered, we will update this notice and provide any required prior choice before capture begins. That feature can reconstruct on-site interactions; it is not permission to record a user's entire device. Private source editors, project previews containing private content, authentication, payment credentials, identity records and sensitive support fields must be excluded or masked before transmission. General input masking alone is not treated as protection for code displayed as page text.",
           "We do not use analytics identifiers for third-party cross-context behavioral advertising or sell access to individual usage profiles. Campaign results shared with prospective Creators use aggregate figures, not identifiable participant or customer records. Cookie and other storage choices are described in Appendix A; the active PostHog region, recipient, retention and rights-handling configuration are disclosed in Appendix B."
         ],
         "pendingFields": []
@@ -374,11 +356,9 @@
           "If you voluntarily enter a campaign, we process your account reference, public handle, submitted post and project URLs, entry time, qualifying product events, permitted referral attribution and selection or claim records. We use those records to verify eligibility, assess the disclosed competition criteria, contact selected participants, deliver rewards and address documented abuse. Where analytics consent is required, we do not bypass that choice by relabeling optional audience tracking as eligibility verification. Essential campaign evidence is kept separately from optional analytics.",
           "For a domain award, the selected participant may need a registrar account reference, eligible contact information and a transfer acceptance. Relevant information is shared with the actual registrar or transfer provider only for delivery and its stated registration duties. We do not ask for a registrar password or payment to release an advertised free prize.",
           "Only the public entry information described before submission is displayed in a leaderboard or gallery. Contact details, identity evidence and private source are not public entry fields. Additional use in advertisements, testimonials or winner publicity requires the applicable",
-          "separate permission; declining unrelated publicity does not forfeit a valid reward. Entry administration messages are distinct from optional marketing subscriptions."
+          "separate permission; declining unrelated publicity does not forfeit a valid reward. Entry administration messages are distinct from optional marketing subscriptions. Campaign records follow this schedule: No optional PostHog analytics or durable campaign-attribution store is enabled in the current production configuration. If ordinary campaign or referral attribution data is collected for a published campaign, its retention target is 90 days unless a longer period is required for a specific legal or accounting purpose. Reward eligibility, claim, fraud-prevention and financial records are separate records and may be kept for their applicable obligation, including a documented dispute or legal-record requirement."
         ],
-        "pendingFields": [
-          "CAMPAIGN_RETENTION_SCHEDULE"
-        ]
+        "pendingFields": []
       },
       {
         "title": "13. Choices that do not require losing your account",
@@ -442,8 +422,8 @@
   },
   "/legal/buyer-license": {
     "title": "Buyer License",
-    "intro": "Buyer License review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Buyer License. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [
@@ -535,8 +515,8 @@
   },
   "/legal/creator-distribution": {
     "title": "Creator Distribution Agreement",
-    "intro": "Creator Distribution Agreement review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Creator Distribution Agreement. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [
@@ -668,8 +648,8 @@
   },
   "/legal/refunds": {
     "title": "Refund Policy",
-    "intro": "Refund Policy review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Refund Policy. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [
@@ -750,8 +730,8 @@
   },
   "/legal/acceptable-use": {
     "title": "Acceptable Use",
-    "intro": "Acceptable Use review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Acceptable Use. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [
@@ -819,8 +799,8 @@
   },
   "/legal/licenses": {
     "title": "Licenses",
-    "intro": "Licenses review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Licenses. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [
@@ -875,8 +855,8 @@
   },
   "/legal/privacy-requests": {
     "title": "Privacy Requests",
-    "intro": "Privacy Requests review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
-    "version": "2026-09-23-review-3",
+    "intro": "Privacy Requests. Effective 23 September 2026.",
+    "version": "2026-09-23",
     "publicationBlocked": false,
     "unresolvedFields": [],
     "sections": [

@@ -13,7 +13,7 @@ describe("reviewed legal package", () => {
     expect(Object.keys(legalReview).sort()).toEqual([...routes].sort())
     for (const route of routes) {
       const page = legalReview[route]
-      expect(page.version).toBe("2026-09-23-review-3")
+      expect(page.version).toBe("2026-09-23")
       expect(page.sections.length).toBeGreaterThan(2)
       expect(page.sections.flatMap(section => section.paragraphs).join(" ").length).toBeGreaterThan(500)
     }
@@ -23,7 +23,20 @@ describe("reviewed legal package", () => {
     const visible = Object.values(legalReview).flatMap(page => page.sections.flatMap(section => section.paragraphs)).join("\n")
     expect(visible).not.toMatch(/\[\[[A-Z0-9_\s]+\]\]/)
     expect(Object.values(legalReview).every(page => page.publicationBlocked === (page.unresolvedFields.length > 0))).toBe(true)
-    expect(Object.values(legalReview).some(page => page.publicationBlocked)).toBe(true)
+    expect(Object.values(legalReview).every(page => !page.publicationBlocked && page.unresolvedFields.length === 0)).toBe(true)
+    expect(Object.values(legalReview).every(page => page.intro.includes("Effective 23 September 2026"))).toBe(true)
+  })
+
+  it("publishes the confirmed operator, territory, registration and retention disclosures", () => {
+    const visible = Object.values(legalReview).flatMap(page => page.sections.flatMap(section => section.paragraphs)).join("\n")
+    expect(visible).toContain("MIN SIHOO")
+    expect(visible).toContain("256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea")
+    expect(visible).toContain("hello@webcanbe.com")
+    expect(visible).toContain("Business registration is currently pending")
+    expect(visible).toContain("United States, Canada, United Kingdom, European Economic Area")
+    expect(visible).toContain("within 30 days")
+    expect(visible).toContain("180-day target")
+    expect(visible).toContain("90 days")
   })
 
   it("wires legal documents into the relevant account, checkout, creator, and privacy surfaces", () => {
