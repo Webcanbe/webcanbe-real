@@ -5,6 +5,7 @@ import App from "./App"
 import "./phase4-final-ui.css"
 import "./app-shell.css"
 import "./editor-shell.css"
+import "./editor-split-fix.css"
 import { initializeAnalytics } from "./analytics"
 
 if (window.location.pathname === "/requests") void import("./my-requests.css")

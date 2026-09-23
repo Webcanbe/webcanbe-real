@@ -1,0 +1,13 @@
+/* The Code pane occupies its full grid cell in desktop Split mode. */
+@media (min-width: 681px) {
+  .compatible-preview-shell.split-mode .source-workspace {
+    height: 100%;
+    max-height: none;
+    min-height: 0;
+    border-bottom: 0;
+    border-left: 1px solid var(--editor-border);
+  }
+  .compatible-preview-shell.split-mode .source-code-editor .cm-editor {
+    min-height: 340px;
+  }
+}
