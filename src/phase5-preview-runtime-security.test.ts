@@ -31,6 +31,7 @@ describe("Phase 5 preview runtime security boundary", () => {
   it("routes only the preview document through the special response headers", () => {
     const worker = fs.readFileSync("worker/index.js", "utf8")
     expect(worker).toContain('if (path === "/__wcb_preview_runtime")')
+    expect(worker).toContain('else if (isKnownAppPath(path)) assetUrl.pathname = "/app-shell.html"')
     expect(worker).toContain("applyPreviewRuntimeHeaders(asset)")
     expect(worker).toContain("applySecurityHeaders(asset")
   })

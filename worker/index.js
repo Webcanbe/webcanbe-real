@@ -769,7 +769,7 @@ export default {
         if (internal) assetUrl.pathname = "/__public/404.html"
         else if ((path === "/browse" || path.startsWith("/browse/")) && route?.status !== 404) assetUrl.pathname = "/app-shell.html"
         else if (route?.asset) assetUrl.pathname = route.asset
-        else if (isKnownAppPath(path) && path !== "/__wcb_preview_runtime") assetUrl.pathname = "/app-shell.html"
+        else if (isKnownAppPath(path)) assetUrl.pathname = "/app-shell.html"
         else if (!path.split("/").pop().includes(".")) assetUrl.pathname = "/__public/404.html"
         const fetched = await env.ASSETS.fetch(new Request(assetUrl, request))
         const browseSpa = (path === "/browse" || path.startsWith("/browse/")) && route?.status === 200
