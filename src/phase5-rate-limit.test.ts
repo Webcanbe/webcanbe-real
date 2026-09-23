@@ -24,7 +24,7 @@ describe("Phase 5 Worker abuse rate limiting", () => {
   })
 
   it("rate-limits private product access only after session and CSRF validation", () => {
-    const csrf = worker.indexOf("verifyDatabaseCsrf(db, databaseSession, csrf)")
+    const csrf = worker.indexOf("verifyDatabaseCsrf(db, databaseSession, csrf, token)")
     const limiter = worker.indexOf('rateLimitAllowed(env.PRIVATE_API_RATE_LIMITER, "user:" + databaseSession.userId)')
     expect(csrf).toBeGreaterThan(-1)
     expect(limiter).toBeGreaterThan(csrf)

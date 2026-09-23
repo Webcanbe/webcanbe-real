@@ -7,7 +7,7 @@ import { verifyFirebaseIdToken } from "./firebase-auth.js"
 import { browseCatalog, catalogDetail } from "./product-catalog.js"
 import { withHyperdrive } from "./hyperdrive.js"
 import { databaseReadiness } from "./readiness.js"
-import { issueDatabaseSession, resolveDatabaseSession, rotateDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces, createDatabaseWorkspace, WorkspaceCreationError } from "./postgres-session.js"
+import { issueDatabaseSession, resolveDatabaseSession, stableDatabaseCsrf, verifyDatabaseCsrf, revokeDatabaseSession, revokeAllDatabaseSessions, databaseWorkspaces, createDatabaseWorkspace, WorkspaceCreationError } from "./postgres-session.js"
 import { databasePurchases, databaseWorkspaceProjects } from "./product-private.js"
 import { MaterializationError, materializeDatabaseWorkspaceProject } from "./materialization.js"
 import { FirstPartyTemplateError, createFirstPartyTemplate } from "./first-party-templates.js"
@@ -382,7 +382,7 @@ async function session(request, env) {
 
   const databaseSession = await readDatabaseSession(request, env)
   if (databaseSession) {
-    const csrf = await withHyperdrive(env, db => rotateDatabaseCsrf(db, databaseSession))
+    const csrf = stableDatabaseCsrf(cookie(request, SESSION_COOKIE))
     return json({
       csrf,
       expiresAt: databaseSession.expiresAt,
@@ -417,7 +417,7 @@ async function logout(request, env) {
 
   const databaseSession = await readDatabaseSession(request, env)
   if (databaseSession) {
-    const allowed = await withHyperdrive(env, db => verifyDatabaseCsrf(db, databaseSession, request.headers.get("X-WCB-CSRF")))
+    const allowed = await withHyperdrive(env, db => verifyDatabaseCsrf(db, databaseSession, request.headers.get("X-WCB-CSRF"), cookie(request, SESSION_COOKIE)))
     if (!allowed) return json({ error: "Sign-out request refused." }, 403)
     await withHyperdrive(env, db => revokeDatabaseSession(db, databaseSession.sessionId))
     const headers = new Headers(commonHeaders)
@@ -442,7 +442,7 @@ async function privateProduct(request, env, path, traceId) {
       const databaseSession = token ? await resolveDatabaseSession(db, token) : undefined
       if (!databaseSession) return json({ error: "Sign in to continue." }, 403)
       const csrf = request.headers.get("X-WCB-CSRF")
-      if (!await verifyDatabaseCsrf(db, databaseSession, csrf)) return json({ error: "Product request refused." }, 403)
+      if (!await verifyDatabaseCsrf(db, databaseSession, csrf, token)) return json({ error: "Product request refused." }, 403)
       if (!await rateLimitAllowed(env.PRIVATE_API_RATE_LIMITER, "user:" + databaseSession.userId)) return rateLimitedResponse()
 
       if (paymentPaths.has(path)) {

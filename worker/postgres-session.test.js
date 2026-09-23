@@ -7,6 +7,7 @@ import {
   revokeDatabaseSession,
   revokeAllDatabaseSessions,
   rotateDatabaseCsrf,
+  stableDatabaseCsrf,
   verifyDatabaseCsrf,
 } from "./postgres-session.js"
 
@@ -24,6 +25,22 @@ function fakeDb(handler) {
 const expiresAt = new Date("2026-09-26T00:00:00.000Z")
 
 describe("PostgreSQL-backed Worker session adapter", () => {
+  it("keeps CSRF valid across concurrent tab session probes without accepting another cookie", async () => {
+    const session = { sessionId: "22222222-2222-4222-8222-222222222222", userId: "11111111-1111-4111-8111-111111111111", expiresAt: expiresAt.getTime() }
+    const token = "a".repeat(43)
+    const csrfA = stableDatabaseCsrf(token)
+    const csrfB = stableDatabaseCsrf(token)
+    const db = fakeDb((sql, params) => {
+      expect(sql).toContain("token_hash=$4")
+      expect(params[0]).toBe(session.sessionId)
+      return { rows: [{ session_id: session.sessionId }], rowCount: 1 }
+    })
+    expect(csrfA).toBe(csrfB)
+    expect(await verifyDatabaseCsrf(db, session, csrfA, token)).toBe(true)
+    expect(await verifyDatabaseCsrf(db, session, csrfB, token)).toBe(true)
+    expect(await verifyDatabaseCsrf(db, session, csrfA, "b".repeat(43))).toBe(false)
+    expect(db.calls).toHaveLength(2)
+  })
   it("issues a session for an existing verified issuer/subject mapping", async () => {
     const userId = "11111111-1111-4111-8111-111111111111"
     const db = fakeDb(sql => {

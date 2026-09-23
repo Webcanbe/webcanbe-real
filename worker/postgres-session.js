@@ -1,7 +1,15 @@
-import { createHash, randomBytes, randomUUID } from "node:crypto"
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto"
 
 const tokenHash = value => createHash("sha256").update(value).digest("hex")
 const randomToken = () => randomBytes(32).toString("base64url")
+
+// A session probe must not invalidate CSRF tokens already held by another tab.
+// Derive a separate, unguessable token from the HttpOnly session credential;
+// only the same-origin session endpoint reveals it to the application.
+export function stableDatabaseCsrf(token) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) throw new DatabaseAuthorityDenied()
+  return createHash("sha256").update("webcanbe-csrf-v1:").update(token).digest("base64url")
+}
 
 export class DatabaseAuthorityDenied extends Error {
   constructor(message = "Database session authority is unavailable.") {
@@ -171,8 +179,18 @@ export async function rotateDatabaseCsrf(db, session) {
   return csrf
 }
 
-export async function verifyDatabaseCsrf(db, session, csrf) {
+export async function verifyDatabaseCsrf(db, session, csrf, sessionToken) {
   if (typeof csrf !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(csrf)) return false
+  if (sessionToken !== undefined) {
+    let expected
+    try { expected = stableDatabaseCsrf(sessionToken) } catch { return false }
+    if (!timingSafeEqual(Buffer.from(csrf), Buffer.from(expected))) return false
+    const active = await db.query(
+      "SELECT s.session_id FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE s.session_id=$1 AND s.user_id=$2 AND expires_at=to_timestamp($3/1000.0) AND expires_at>clock_timestamp() AND active AND token_hash=$4 AND d.user_id IS NULL",
+      [session.sessionId, session.userId, session.expiresAt, tokenHash(sessionToken)],
+    )
+    return Boolean(active.rowCount)
+  }
   const result = await db.query(
     "SELECT s.session_id FROM wcb_sessions s LEFT JOIN wcb_disabled_users d ON d.user_id=s.user_id WHERE s.session_id=$1 AND s.user_id=$2 AND expires_at=to_timestamp($3/1000.0) AND expires_at>clock_timestamp() AND active AND csrf_hash=$4 AND d.user_id IS NULL",
     [session.sessionId, session.userId, session.expiresAt, tokenHash(csrf)],
