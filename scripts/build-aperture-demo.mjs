@@ -8,6 +8,12 @@ import path from 'node:path'
 // the authenticated user's own workspace. This path does not grant seller status.
 for (const slug of ['aperture-north', 'stillform']) {
   const fixture = `fixtures/${slug}`
+  const manifest = JSON.parse(fs.readFileSync(`${fixture}/package.json`, 'utf8'))
+  for (const declaration of ['@types/react', '@types/react-dom']) {
+    if (!manifest.dependencies?.[declaration] && !manifest.devDependencies?.[declaration]) {
+      throw new Error(`${slug} export cannot type-check after a fresh install: missing ${declaration}`)
+    }
+  }
   execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '-b', fixture], { stdio: 'inherit' })
   execFileSync(process.execPath, [
     'node_modules/vite/bin/vite.js', 'build', fixture,
