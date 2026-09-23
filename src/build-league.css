@@ -54,6 +54,9 @@
 .bl-leaderboard li>span,.bl-leaderboard li>small{color:#75717e}
 .bl-leaderboard li>b{font-weight:600}
 .bl-entry select,.bl-entry textarea{border-color:#d9d7df;border-radius:5px;color:#17151b}
+.bl-entry .creator-select{gap:8px;color:#17151b;font-size:12px;font-weight:700}
+.bl-entry .creator-select-trigger{min-height:49px;border-color:#d9d7df;border-radius:5px;padding:14px;color:#17151b;font-size:14px;font-weight:500}
+.bl-entry .creator-select-options{z-index:50}
 .bl-entry form p{color:var(--bl-muted)}
 .bl-entry-complete{border-color:#635bff}
 .bl-rules details,.bl-rules details:last-child{border-color:var(--bl-line)}
