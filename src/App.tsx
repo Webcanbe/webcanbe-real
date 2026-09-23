@@ -10,7 +10,7 @@ import { ProductShell, OnboardingStrip, Avatar, useAccount, useWorkspaces, Creat
 import { appRoutes, viewForPath, finishAuthIntent, readLocal, writeLocal, workspaceLabel, type DashboardView } from "./shellState"
 import { safeAuthReturn } from "./authReturn"
 import "./app.css"
-import CompatibleWorkspace from "./webcanbe-engine/visual-editor/CompatibleWorkspace"
+const CompatibleWorkspace = lazy(() => import("./webcanbe-engine/visual-editor/CompatibleWorkspace"))
 const PreviewRuntimeHost = lazy(() => import("./PreviewRuntimeHost"))
 import { hostedProductClient, hostedProductMode, controlMode, productMutationMode, productReadMode, productionAuthMode, type ControlData, type CreatorStudioData, type HostedListing, type HostedListingDetail, type PaymentBilling, type RequestCase, type RequestEvent, type SourceProjectSummary } from "./hostedProductClient"
 import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
@@ -1233,7 +1233,7 @@ export default function App() {
   else if(basePath==="/auth/complete")page=<AuthComplete/>
   else if(basePath===GATE2_AUTH_SMOKE_PATH)page=<Gate2AuthSmoke/>
   else if(basePath.startsWith("/checkout/"))page=<Protected><Checkout/></Protected>
-  else if(basePath.startsWith("/workspace/"))page=<Protected><CompatibleWorkspace/></Protected>
+  else if(basePath.startsWith("/workspace/"))page=<Protected><Suspense fallback={<main className="route-gate" role="status" aria-live="polite" aria-busy="true"><LoadingSpinner/><span className="signal">Workspace</span><p>Loading editor…</p></main>}><CompatibleWorkspace/></Suspense></Protected>
   else if(basePath==="/projects")page=<Protected><Projects/></Protected>
   else if(basePath==="/purchases")page=<Protected><Purchases/></Protected>
   else if(basePath==="/requests")page=<Protected><MyRequests/></Protected>
