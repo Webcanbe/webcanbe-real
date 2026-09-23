@@ -70,16 +70,21 @@ function textFiles(files, history) {
   return result
 }
 export function sourceContentHash(files, history) {
-  const pairs = [...textFiles(files, history)].sort(([a],[b]) => a.localeCompare(b))
-  return sha256(JSON.stringify(pairs))
+  return textContentHash(textFiles(files, history))
+}
+function textContentHash(text) {
+  return sha256(JSON.stringify([...text].sort(([a],[b]) => a.localeCompare(b))))
 }
 function verifyProjectState(projectId, row) {
   if (!row?.revision || !REVISION.test(String(row.revision)) || !row.history || row.history.schema !== 1 || row.history.projectId !== projectId || !Array.isArray(row.history.revisions) || !row.history.revisions.length || !Array.isArray(row.history.transactions) || !Array.isArray(row.history.past) || !Array.isArray(row.history.future)) fail(409, "Stored project history is invalid.")
   if (Buffer.byteLength(JSON.stringify(row.history)) > LIMITS.historyBytes) fail(409, "Stored project history exceeds limits.")
   const files = decodePayload(row.files)
+  const text = textFiles(files, row.history)
   const head = row.history.revisions.at(-1)
-  if (head?.revisionId !== row.revision || head?.contentHash !== sourceContentHash(files, row.history)) fail(409, "Stored source and history disagree.")
-  return { files, history: structuredClone(row.history), revision: String(row.revision), epoch: String(row.source_epoch) }
+  if (head?.revisionId !== row.revision || head?.contentHash !== textContentHash(text)) fail(409, "Stored source and history disagree.")
+  // The database row is parsed afresh on every request. Keep this verified
+  // decoded view only for this request, avoiding another full UTF-8 pass.
+  return { files, text, history: structuredClone(row.history), revision: String(row.revision), epoch: String(row.source_epoch) }
 }
 
 function detectProject(name, files) {
@@ -102,11 +107,12 @@ function detectProject(name, files) {
   }
 }
 
-async function authorityRow(db, session, projectId, write = false, lock = "") {
+async function authorityRow(db, session, projectId, write = false, includeSource = false, lock = "") {
   if (!UUID.test(String(projectId))) fail(404, "Project is unavailable.")
   const roles = write ? ["owner","editor"] : ["owner","editor","viewer"]
   const result = await db.query(
-    `SELECT p.project_id,p.workspace_id,p.name,p.revision,p.files,p.history,p.source_epoch,
+    `SELECT p.project_id,p.workspace_id,p.name,p.revision,p.source_epoch,
+            ${includeSource ? "p.files,p.history," : ""}
             pm.role,pm.epoch AS membership_epoch,wm.epoch AS workspace_epoch
        FROM wcb_projects p
        JOIN wcb_project_members pm ON pm.project_id=p.project_id AND pm.user_id=$2 AND pm.active
@@ -145,11 +151,11 @@ async function issueCapability(db, session, project) {
   return { projectId: String(project.project_id), previewId, capability, expiresAt: new Date(expiresAt).toISOString() }
 }
 
-async function verifyCapability(db, session, projectId, body, write = false) {
+async function verifyCapability(db, session, projectId, body, write = false, includeSource = false) {
   const previewId = typeof body?.previewId === "string" ? body.previewId : ""
   const capability = typeof body?.capability === "string" ? body.capability : ""
   if (!UUID.test(previewId) || !/^[A-Za-z0-9_-]{43}$/.test(capability)) fail(403, "Editor capability is unavailable.")
-  const project = await authorityRow(db, session, projectId, write)
+  const project = await authorityRow(db, session, projectId, write, includeSource)
   const result = await db.query(
     `SELECT grant_json
        FROM wcb_editor_capabilities
@@ -177,7 +183,7 @@ function validateDrafts(value) {
 }
 
 function publicFiles(state) {
-  return [...textFiles(state.files, state.history)].sort(([a],[b]) => a.localeCompare(b)).map(([file,source]) => ({ file, hash: sha256(source) }))
+  return [...state.text].sort(([a],[b]) => a.localeCompare(b)).map(([file,source]) => ({ file, hash: sha256(source) }))
 }
 
 function searchSource(state, query, caseSensitive, requestedLimit) {
@@ -187,7 +193,7 @@ function searchSource(state, query, caseSensitive, requestedLimit) {
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) fail(400, "Search result limit must be between 1 and 100.")
   const escaped = [...query].map(character => "^$.*+?()[]{}|".includes(character) || character.charCodeAt(0) === 92 ? "\\" + character : character).join("")
   const pattern = new RegExp(escaped, caseSensitive ? "g" : "gi")
-  const entries = [...textFiles(state.files, state.history)].sort(([a],[b]) => a.localeCompare(b))
+  const entries = [...state.text].sort(([a],[b]) => a.localeCompare(b))
   const results = []
   let scannedFiles=0, scannedBytes=0, truncated=false
   for (const [file,source] of entries) {
@@ -589,7 +595,7 @@ async function drafts(db,session,projectId,body) {
 }
 
 async function readState(db,session,projectId,body,write=false){
-  const project=await verifyCapability(db,session,projectId,body,write)
+  const project=await verifyCapability(db,session,projectId,body,write,true)
   return {project,state:verifyProjectState(projectId,project)}
 }
 async function finishRead(db,session,projectId,body,value){
@@ -620,7 +626,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   if(!match) fail(404,"Editor route is unavailable.")
   const [,projectId,action]=match
   if(action==="session"){
-    const project=await authorityRow(db,session,projectId,false)
+    const project=await authorityRow(db,session,projectId,false,true)
     const state=verifyProjectState(projectId,project)
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
@@ -638,7 +644,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     const listing=publicFiles(state)
     if(body.file!==undefined){
       if(typeof body.file!=="string"||!sourceMember(body.file,state.history))fail(404,"Source file is unavailable.")
-      const source=textFiles(state.files,state.history).get(body.file)
+      const source=state.text.get(body.file)
       if(source===undefined)fail(404,"Source file is unavailable.")
       return {status:200,value:await finishRead(db,session,projectId,body,{files:listing,source,revision:state.revision})}
     }
@@ -651,7 +657,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   if(action==="search") return {status:200,value:await finishRead(db,session,projectId,body,searchSource(state,body.query,body.caseSensitive,body.limit))}
   if(action==="validate"){
     if(body.mode==="semantic")fail(422,"The isolated semantic checker is not attached to the production Worker yet.")
-    if(typeof body.file!=="string"||typeof body.content!=="string"||!sourceMember(body.file,state.history)||!textFiles(state.files,state.history).has(body.file))fail(400,"Select an authorized source file.")
+    if(typeof body.file!=="string"||typeof body.content!=="string"||!sourceMember(body.file,state.history)||!state.text.has(body.file))fail(400,"Select an authorized source file.")
     if(body.content.includes("\0")||Buffer.byteLength(body.content)>LIMITS.fileBytes)fail(422,"Source file exceeds limits.")
     return {status:200,value:await finishRead(db,session,projectId,body,{validation:validateDraftSource(body.file,body.content),revision:state.revision})}
   }
@@ -660,7 +666,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   }
   if(action==="inspect"){
     const analysis=projectStyles(state,body.viewport),target=sourceTarget(state,body.identity,analysis)
-    const source=textFiles(state.files,state.history).get(target.identity.file)
+    const source=state.text.get(target.identity.file)
     return {status:200,value:await finishRead(db,session,projectId,body,{target,source,breakpoints:analysis.breakpoints,styleDiagnostics:analysis.diagnostics,revision:state.revision})}
   }
   if(action==="mutate") return saveVisual(db,session,projectId,body,env)

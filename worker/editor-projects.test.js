@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { EditorProjectError, editorProjectRequest, sourceContentHash, zipStore } from "./editor-projects.js"
 import fs from "node:fs"
 
@@ -98,6 +98,31 @@ function fakeDb(){
 }
 
 describe("production Worker source editor API",()=>{
+  it("keeps capability and draft checks on metadata while verifying source for file reads",async()=>{
+    const {db}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const queries=[]
+    const original=db.query.bind(db)
+    db.query=async(sql,params)=>{
+      if(sql.includes("FROM wcb_projects p")&&sql.includes("JOIN wcb_project_members"))queries.push(sql)
+      return original(sql,params)
+    }
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const decode=vi.spyOn(TextDecoder.prototype,"decode")
+    queries.length=0
+    try {
+      await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/drafts`,auth)
+      expect(queries.length).toBeGreaterThan(0)
+      expect(queries.every(sql=>!sql.includes("p.files,p.history"))).toBe(true)
+      expect(decode).not.toHaveBeenCalled()
+      queries.length=0
+      const result=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,{...auth,file:"src/styles.css"})
+      expect(result.value.source).toBe("main{padding:24px}")
+      expect(queries.filter(sql=>sql.includes("p.files,p.history"))).toHaveLength(1)
+      expect(queries.filter(sql=>!sql.includes("p.files,p.history")).length).toBeGreaterThan(0)
+      expect(decode).toHaveBeenCalledTimes(2)
+    } finally { decode.mockRestore() }
+  })
   it.each([['reviewed','original'],['reviewed','accepted'],['direct','original'],['direct','accepted']])("recovers AI settlement endpoint after %s Apply using %s revision",async(flow,revisionChoice)=>{
     const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
     const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
