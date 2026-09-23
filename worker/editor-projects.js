@@ -89,6 +89,36 @@ function verifyProjectState(projectId, row) {
   return { files, text, history: row.history, revision: String(row.revision), epoch: String(row.source_epoch) }
 }
 
+// Accepted source is validated and content-hashed inside the write transaction.
+// Ordinary reads still check the ledger head and bounded source references, but
+// avoid decoding and hashing the whole project on every editor poll.
+function readProjectState(projectId, row) {
+  const history = row?.history
+  if (!REVISION.test(String(row?.revision)) || !history || history.schema !== 1 || history.projectId !== projectId || !Array.isArray(history.revisions) || !history.revisions.length || !Array.isArray(history.transactions) || !Array.isArray(history.past) || !Array.isArray(history.future) || history.revisions.at(-1)?.revisionId !== row.revision || typeof history.revisions.at(-1)?.contentHash !== "string") fail(409, "Stored project history is invalid.")
+  const encodedFiles = row.files
+  if (!encodedFiles || typeof encodedFiles !== "object" || Array.isArray(encodedFiles)) fail(409, "Stored project source is invalid.")
+  const sourceFiles = new Map(), seen = new Set()
+  let entries = 0
+  for (const [file, encoded] of Object.entries(encodedFiles)) {
+    if (!safePath(file) || seen.has(file.toLowerCase()) || typeof encoded !== "string" || encoded.length > Math.ceil(LIMITS.fileBytes / 3) * 4 + 4 || ++entries > LIMITS.entries) fail(409, "Stored project source is invalid.")
+    seen.add(file.toLowerCase())
+    if (sourceMember(file, history)) sourceFiles.set(file, encoded)
+  }
+  return { encodedFiles, sourceFiles, history, revision: String(row.revision) }
+}
+
+function readSource(encoded) {
+  if (typeof encoded !== "string" || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) fail(409, "Stored project source is invalid.")
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(Buffer.from(encoded, "base64")) }
+  catch { fail(409, "Stored editable source is not valid UTF-8.") }
+}
+
+function detectStoredProject(name, state) {
+  const files = new Map([...Object.keys(state.encodedFiles)].map(file => [file, Buffer.alloc(0)]))
+  if (typeof state.encodedFiles["package.json"] === "string") files.set("package.json", Buffer.from(state.encodedFiles["package.json"], "base64"))
+  return detectProject(name, files)
+}
+
 function detectProject(name, files) {
   let packageJson = {}
   const raw = files.get("package.json")
@@ -185,6 +215,7 @@ function validateDrafts(value) {
 }
 
 function publicFiles(state) {
+  if (state.sourceFiles) return [...state.sourceFiles].sort(([a],[b]) => a.localeCompare(b)).map(([file,encoded]) => ({ file, hash: sha256(Buffer.from(encoded,"base64")) }))
   return [...state.text].sort(([a],[b]) => a.localeCompare(b)).map(([file,source]) => ({ file, hash: sha256(source) }))
 }
 
@@ -425,7 +456,7 @@ function validateDraftSource(file, source) {
 }
 
 function previewPayload(state,route="/"){
-  const files=Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,bytes.toString("base64")]))
+  const files=state.encodedFiles ?? Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,bytes.toString("base64")]))
   return {files,entry:["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file=>files[file]!==undefined),title:"Webcanbe isolated preview",route}
 }
 
@@ -597,9 +628,9 @@ async function drafts(db,session,projectId,body) {
   }catch(error){await db.query("ROLLBACK").catch(()=>{});throw error}
 }
 
-async function readState(db,session,projectId,body,write=false){
+async function readState(db,session,projectId,body,write=false,light=false){
   const project=await verifyCapability(db,session,projectId,body,write,true)
-  return {project,state:verifyProjectState(projectId,project)}
+  return {project,state:light ? readProjectState(projectId,project) : verifyProjectState(projectId,project)}
 }
 async function finishRead(db,session,projectId,body,value){
   await verifyCapability(db,session,projectId,body,false)
@@ -620,8 +651,8 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
         ORDER BY p.project_id`,[session.userId,session.sessionId,session.expiresAt])).rows
     const projects=[]
     for(const row of rows){
-      const state=verifyProjectState(String(row.project_id),row)
-      projects.push(detectProject({id:String(row.project_id),name:String(row.name||"Hosted project")},state.files))
+      const state=readProjectState(String(row.project_id),row)
+      projects.push(detectStoredProject({id:String(row.project_id),name:String(row.name||"Hosted project")},state))
     }
     return {status:200,value:{projects}}
   }
@@ -630,10 +661,10 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   const [,projectId,action]=match
   if(action==="session"){
     const project=await authorityRow(db,session,projectId,false,true)
-    const state=verifyProjectState(projectId,project)
+    const state=readProjectState(projectId,project)
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
-      project:detectProject({id:projectId,name:String(project.name||"Hosted project")},state.files),
+      project:detectStoredProject({id:projectId,name:String(project.name||"Hosted project")},state),
       runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Visual edits use AST source mutations; shared definitions require explicit source scope. Snapshot preview does not support live interaction."]},
       session:editorSession,revision:state.revision,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
       compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
@@ -642,13 +673,14 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   if(action==="drafts") return drafts(db,session,projectId,body)
   if(["code","revert","undo","redo"].includes(action)) return saveCode(db,session,projectId,body,action)
   if(action==="ai") return {status:200,value:await aiProposal(db,session,projectId,body,env)}
-  const {state}=await readState(db,session,projectId,body,false)
+  const {state}=await readState(db,session,projectId,body,false,["files","history","preview"].includes(action))
   if(action==="files"){
     const listing=publicFiles(state)
     if(body.file!==undefined){
       if(typeof body.file!=="string"||!sourceMember(body.file,state.history))fail(404,"Source file is unavailable.")
-      const source=state.text.get(body.file)
-      if(source===undefined)fail(404,"Source file is unavailable.")
+      const encoded=state.sourceFiles.get(body.file)
+      if(encoded===undefined)fail(404,"Source file is unavailable.")
+      const source=readSource(encoded)
       return {status:200,value:await finishRead(db,session,projectId,body,{files:listing,source,revision:state.revision})}
     }
     return {status:200,value:await finishRead(db,session,projectId,body,{files:listing,revision:state.revision})}

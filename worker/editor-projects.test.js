@@ -98,7 +98,7 @@ function fakeDb(){
 }
 
 describe("production Worker source editor API",()=>{
-  it("keeps capability and draft checks on metadata while verifying source for file reads",async()=>{
+  it("keeps capability and draft checks on metadata while decoding only the opened source file",async()=>{
     const {db}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
     const queries=[]
     const original=db.query.bind(db)
@@ -120,7 +120,24 @@ describe("production Worker source editor API",()=>{
       expect(result.value.source).toBe("main{padding:24px}")
       expect(queries.filter(sql=>sql.includes("p.files,p.history"))).toHaveLength(1)
       expect(queries.filter(sql=>!sql.includes("p.files,p.history")).length).toBeGreaterThan(0)
-      expect(decode).toHaveBeenCalledTimes(2)
+      expect(decode).toHaveBeenCalledTimes(1)
+    } finally { decode.mockRestore() }
+  })
+  it("serves listing, history and managed preview without decoding every editable file, while writes still verify the source hash",async()=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const decode=vi.spyOn(TextDecoder.prototype,"decode")
+    const env={BROWSER:{quickAction:async()=>({screenshot:Buffer.alloc(120,7).toString("base64"),content:'<script id="wcb-observation">'+JSON.stringify({elements:[],viewport:{width:1280,height:1800},route:"/"})+'</script>'})}}
+    try {
+      const listing=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/files`,auth)
+      expect(listing.value.files).toEqual(expect.arrayContaining([expect.objectContaining({file:"src/App.tsx",hash:expect.any(String)})]))
+      await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/history`,auth)
+      const preview=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision},env)
+      expect(preview.value.snapshotViewport.height).toBe(1800)
+      expect(decode).not.toHaveBeenCalled()
+      state.project.files["src/App.tsx"]=Buffer.from("tampered accepted source").toString("base64")
+      await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/code`,{...auth,expectedRevision:baseRevision,idempotencyKey:"tampered-write-1",operations:[{kind:"update",file:"src/App.tsx",expectedHash:listing.value.files.find(item=>item.file==="src/App.tsx").hash,content:"next"}]})).rejects.toMatchObject({status:409})
     } finally { decode.mockRestore() }
   })
   it.each([['reviewed','original'],['reviewed','accepted'],['direct','original'],['direct','accepted']])("recovers AI settlement endpoint after %s Apply using %s revision",async(flow,revisionChoice)=>{
