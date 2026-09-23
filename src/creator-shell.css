@@ -4,3 +4,5 @@
 
 
 .creator-shell{font-size:14px}.creator-table{font-size:13px}.creator-table th{font-size:11px}.creator-primary,.creator-submit-action{font-size:13px}.creator-sidebar nav a:focus-visible,.creator-shell a:focus-visible,.creator-shell button:focus-visible,.creator-shell select:focus-visible,.creator-shell input:focus-visible,.creator-shell textarea:focus-visible{outline:2px solid var(--creator-accent);outline-offset:3px}
+
+.creator-finance-error{padding:24px;color:#a3354a}.creator-finance-error button{margin-left:8px;border:0;background:none;color:var(--creator-accent);text-decoration:underline;cursor:pointer}
