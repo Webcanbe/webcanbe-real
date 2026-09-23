@@ -1,4 +1,4 @@
-import posthog, { type CaptureResult, type PostHog } from "posthog-js"
+import type { CaptureResult, PostHog } from "posthog-js"
 
 export const analyticsEvents = [
   "wcb_signup_completed",
@@ -134,14 +134,15 @@ export function sanitizePostHogEvent(event: CaptureResult | null): CaptureResult
   return { ...event, properties }
 }
 
-export function initializeAnalytics(
+export async function initializeAnalytics(
   token = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN,
   host = import.meta.env.VITE_POSTHOG_HOST,
-): PostHog | null {
+): Promise<PostHog | null> {
   if (!token?.trim() || !host?.trim()) { analytics.setClient(null); return null }
   try {
     const endpoint = new URL(host.trim())
     if (endpoint.protocol !== "https:" || endpoint.username || endpoint.password) { analytics.setClient(null); return null }
+    const { default: posthog } = await import("posthog-js")
     posthog.init(token.trim(), {
       api_host: endpoint.toString().replace(/\/$/, ""),
       defaults: "2026-05-30",
