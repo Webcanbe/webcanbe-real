@@ -4,6 +4,19 @@
   min-height: 52px;
   grid-template-columns: 260px minmax(0, 1fr) 260px;
 }
+/* Preview button shows the accepted source render across the full canvas.
+   The artboard itself carries page height, so its parent scrolls instead of a
+   900px embedded document trapping the rest of the page. */
+.compatible-workspace.preview-only .compatible-layout { grid-template-columns: minmax(0, 1fr); }
+.compatible-workspace.preview-only .compatible-files,
+.compatible-workspace.preview-only .compatible-inspector { display: none; }
+.compatible-workspace.preview-only .compatible-preview-shell { grid-column: 1; }
+.compatible-workspace.preview-only .editor-canvas-tools > button:first-child { display: none; }
+.compatible-workspace.full-page-canvas .compatible-layout { height:auto; min-height:calc(100dvh - 52px); overflow:visible; align-items:start; }
+.compatible-workspace.full-page-canvas .compatible-files,
+.compatible-workspace.full-page-canvas .compatible-inspector { height:calc(100dvh - 52px); position:sticky; top:52px; }
+.compatible-workspace.full-page-canvas .compatible-preview-shell { height:auto; min-height:calc(100dvh - 52px); overflow:visible; }
+.compatible-workspace.full-page-canvas .compatible-frame-wrap { flex:none; height:auto; min-height:calc(100dvh - 52px); overflow:visible; }
 .compatible-workspace .compatible-layout { height: calc(100dvh - 52px); }
 .compatible-workspace .editor-reference-toolbar button,
 .compatible-workspace .editor-reference-toolbar a {

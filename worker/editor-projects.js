@@ -449,6 +449,7 @@ async function browserSnapshot(env,state,viewport,route){
       url:"https://webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime",
       formats:["content","screenshot"],
       viewport:{width,height:900,deviceScaleFactor:1},
+      screenshotOptions:{fullPage:true},
       actionTimeout:60000,
       gotoOptions:{waitUntil:"domcontentloaded",timeout:30000},
       waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:45000},
@@ -632,7 +633,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     return {status:201,value:{
       project:detectProject({id:projectId,name:String(project.name||"Hosted project")},state.files),
       runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Visual edits use AST source mutations; shared definitions require explicit source scope. Snapshot preview does not support live interaction."]},
-      session:editorSession,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
+      session:editorSession,revision:state.revision,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
       compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
     }}
   }

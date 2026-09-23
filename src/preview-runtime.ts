@@ -426,7 +426,7 @@ async function render() {
     const script = document.createElement("script")
     script.id = "wcb-observation"
     script.type = "application/json"
-    script.textContent = JSON.stringify({ route: payload.route || "/", viewport: { width: innerWidth, height: innerHeight }, elements: observations() }).replace(/</g, "\\u003c")
+    script.textContent = JSON.stringify({ route: payload.route || "/", viewport: { width: innerWidth, height: Math.max(innerHeight, document.documentElement.scrollHeight, document.body.scrollHeight) }, elements: observations() }).replace(/</g, "\\u003c")
     document.body.append(script)
     document.documentElement.dataset.wcbReady = "1"
   } catch (error) {

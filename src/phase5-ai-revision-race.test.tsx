@@ -25,7 +25,7 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
   const answer = (data: unknown, status = 200) => Promise.resolve({ ok: status === 200, status, headers: new Headers({ 'content-type': 'application/json' }), json: async () => data } as Response)
   vi.stubGlobal('fetch', vi.fn((url: string, init: RequestInit) => {
     const action = url.split('/').at(-1), body = JSON.parse(String(init.body))
-    if (action === 'session') return answer({ session: { previewId: 'preview', capability: 'capability' }, project: { id: 'phase1-fixture', name: 'Race fixture', detection: { tailwind: false } } })
+    if (action === 'session') return answer({ session: { previewId: 'preview', capability: 'capability' }, revision, project: { id: 'phase1-fixture', name: 'Race fixture', detection: { tailwind: false } } })
     if (action === 'compatibility') return failReads ? answer({ error: 'Injected read failure' }, 503) : answer({ revision, targets: [], breakpoints: [], summary: { score: 100, full: 1, partial: 0, codeOnly: 0 } })
     if (action === 'preview') { if (failReads) return answer({ error: 'Injected read failure' }, 503); previews.push(revision); return answer({ revision, transport: 'blob', generation: revision, html: '<main>preview</main>' }) }
     if (action === 'files') return answer({ revision, files: [{ file: 'src/App.tsx', hash: revision }], ...(body.file ? { source } : {}) })
@@ -57,7 +57,8 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
     await act(async () => root.render(<CompatibleWorkspace />));
     (host.querySelector('[aria-label="Local editor access key"]') as HTMLInputElement).value = 'fixture-key'
     await click('Connect / renew session')
-    await flushUntil(() => expect(host.querySelector('main')?.getAttribute('data-source-revision')).toBe('rev_0'))
+    await flushUntil(() => expect(host.querySelector('iframe')?.getAttribute('srcdoc')).toBe('<main>preview</main>'))
+    expect(host.querySelector('main')?.getAttribute('data-source-revision')).toBe('rev_0')
     expect(host.querySelector('iframe')?.getAttribute('sandbox')).toBe('allow-scripts')
     expect(host.querySelector('iframe')?.getAttribute('srcdoc')).toBe('<main>preview</main>')
     await click('Canvas')
