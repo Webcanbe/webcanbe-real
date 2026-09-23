@@ -2115,3 +2115,25 @@ Campaign use once registration is confirmed:
 - preferred headline prize: **may.cx**
 - initial consumer/event distribution channels: **X + Instagram**
 - Build League / Prize Vault remains the customer-acquisition system.
+
+
+## 38. First U.S.-targeted X/Instagram launch window — 2026-09-23 evening
+
+Current decision:
+- consumer/event launch post has not yet been published;
+- site is still unstable enough that a polished product-demo video should not be forced tonight;
+- first public creative may be an image/event post around the Build League / may.cx prize instead.
+
+Recommended U.S.-overlap posting window for tonight:
+- **Primary X window: 2026-09-24 02:30–03:15 KST**
+  - approximately 13:30–14:15 U.S. Eastern / 10:30–11:15 U.S. Pacific on Sep 23.
+- Instagram can follow in the same window or ~15–30 minutes after X.
+- **Hard latest launch bound tonight: 04:00 KST** rather than letting unstable development consume the entire market window.
+
+Development rule before posting:
+- use the hours before the window only for launch-facing instability/blockers;
+- stop speculative polish by ~02:15 KST;
+- if the site is still too unstable for a truthful demo, post the image/event creative and direct users only to a stable landing/campaign surface;
+- do not delay first public distribution solely to wait for a perfect video.
+
+This is the active first-distribution timing inside the 72-hour market war.
