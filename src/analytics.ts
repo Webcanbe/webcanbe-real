@@ -26,6 +26,11 @@ export const analyticsEvents = [
   "wcb_editor_mode_changed",
   "wcb_creator_application_submitted",
   "wcb_creator_submission_submitted",
+  "wcb_build_league_viewed",
+  "wcb_build_league_intro_dismissed",
+  "wcb_build_league_share_created",
+  "wcb_build_league_referral_visit",
+  "wcb_build_league_submission_completed",
 ] as const
 
 export type AnalyticsEvent = (typeof analyticsEvents)[number]

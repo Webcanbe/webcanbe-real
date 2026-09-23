@@ -24,6 +24,7 @@ import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
 import { createRequest, myRequests, myRequest, requestQueue, mutateRequest, RequestCaseError } from "./requests.js"
 import { notifyRequestCreated } from "./request-notifications.js"
 import { databaseCreatorFinance } from "./creator-finance.js"
+import { BuildLeagueError, campaignState, ensureParticipant, leaderboard, recordEvent, recordReferralVisit, submitEntry, winnerWeights } from "./build-league.js"
 import { sellerApplication, applySeller, creatorStudio, updateCreatorListing, createSellerSubmission, CreatorDomainError } from "./creator-domain.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
@@ -444,6 +445,27 @@ async function privateProduct(request, env, path, traceId) {
       const csrf = request.headers.get("X-WCB-CSRF")
       if (!await verifyDatabaseCsrf(db, databaseSession, csrf, token)) return json({ error: "Product request refused." }, 403)
       if (!await rateLimitAllowed(env.PRIVATE_API_RATE_LIMITER, "user:" + databaseSession.userId)) return rateLimitedResponse()
+      const buildReferral = cookie(request, "__Host-wcb-build-ref")
+      if (buildReferral) await ensureParticipant(db, databaseSession, buildReferral, cookie(request, "__Host-wcb-build-visitor")).catch(() => {})
+
+      if (path.startsWith("/__webcanbe/api/build-league/")) {
+        let body
+        try { body = await smallJsonBody(request, 4 * 1024) } catch { return json({ error: "Invalid campaign request." }, 400) }
+        try {
+          if (path.endsWith("/state")) return json({ progress: await campaignState(db, databaseSession, cookie(request, "__Host-wcb-build-ref"), cookie(request, "__Host-wcb-build-visitor")) })
+          if (path.endsWith("/track")) {
+            const key = typeof body.eventKey === "string" ? body.eventKey : `${body.kind}:${new Date().toISOString().slice(0,10)}`
+            await recordEvent(db, databaseSession, body.kind, key, body.projectId ?? null, "client")
+            return json({ ok: true })
+          }
+          if (path.endsWith("/submit")) {
+            await db.query("BEGIN")
+            try { const entry = await submitEntry(db, databaseSession, body); await db.query("COMMIT"); return json({ entry }, 201) }
+            catch (error) { await db.query("ROLLBACK"); throw error }
+          }
+          return json({ error: "Campaign route is unavailable." }, 404)
+        } catch (error) { return error instanceof BuildLeagueError ? json({ error: error.message }, error.status) : json({ error: "Campaign data is temporarily unavailable." }, 503) }
+      }
 
       if (paymentPaths.has(path)) {
         let body
@@ -505,6 +527,7 @@ async function privateProduct(request, env, path, traceId) {
         catch { return json({ error: "Invalid materialization request." }, 400) }
         try {
           const workspaceProject = await materializeDatabaseWorkspaceProject(db, databaseSession, body)
+          if (workspaceProject?.workspaceProjectId) await recordEvent(db, databaseSession, "working_copy_created", String(workspaceProject.workspaceProjectId), String(workspaceProject.workspaceProjectId)).catch(() => {})
           return json({ workspaceProject }, 201)
         } catch (error) {
           if (error instanceof MaterializationError) return json({ error: error.message }, error.status)
@@ -516,7 +539,11 @@ async function privateProduct(request, env, path, traceId) {
         let body
         try { body = await smallJsonBody(request) }
         catch { return json({ error: "Invalid template request." }, 400) }
-        try { return json(await createFirstPartyTemplate(db, databaseSession, body, env), 201) }
+        try {
+          const created = await createFirstPartyTemplate(db, databaseSession, body, env)
+          if (created?.projectId && !created.replayed) await recordEvent(db, databaseSession, "working_copy_created", String(created.projectId), String(created.projectId)).catch(() => {})
+          return json(created, 201)
+        }
         catch (error) { return error instanceof FirstPartyTemplateError ? json({ error: error.message }, error.status) : json({ error: "Template creation is temporarily unavailable." }, 503) }
       }
       if (path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/")) {
@@ -525,6 +552,23 @@ async function privateProduct(request, env, path, traceId) {
         catch { return json({ error: "Invalid editor request." }, 400) }
         try {
           const result = await editorProjectRequest(db, databaseSession, path, body, env)
+          const match = /^\/__webcanbe\/api\/projects\/([a-f0-9-]{36})\/([a-z-]+)$/.exec(path)
+          if (match && result.status < 300) {
+            const [, projectId, action] = match
+            let kind = "", key = ""
+            if (action === "session") { kind = "project_opened"; key = projectId + ":" + new Date().toISOString().slice(0,10) }
+            else if (action === "preview" && result.value?.state === "ready") { kind = "preview_opened"; key = projectId + ":" + new Date().toISOString().slice(0,10) }
+            else if (["code", "mutate"].includes(action) && result.value?.replayed !== true && result.value?.revision) { kind = "source_saved"; key = String(result.value.revision) }
+            else if (action === "ai" && body.apply === true && result.value?.result?.applied === true && result.value?.result?.replayed !== true) { kind = "ai_edit_applied"; key = String(result.value.result.revision) }
+            else if (action === "ai" && body.apply !== true && result.value?.proposal) { kind = "ai_proposal_created"; key = String(body.idempotencyKey ?? randomToken(12)) }
+            else if (action === "export" && result.value?.archive) { kind = "export_completed"; key = projectId + ":" + String(result.value.revision) }
+            if (kind) await recordEvent(db, databaseSession, kind, key, projectId).catch(() => {})
+            if (action === "mutate" && kind === "source_saved") {
+              const editType = String(body.edit?.type ?? "")
+              const detail = editType === "text" ? "text_edited" : editType === "layout" || editType === "reorder" ? "layout_edited" : "style_edited"
+              await recordEvent(db, databaseSession, detail, key, projectId).catch(() => {})
+            }
+          }
           return json(result.value, result.status)
         } catch (error) {
           if (error instanceof EditorProjectError) return json({ error: error.message }, error.status)
@@ -711,6 +755,32 @@ export default {
         const key = await anonymousRateKey(request, "requests:public")
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicRequestIntake(request, env, traceId)
       }
+      else if (path === "/__webcanbe/api/build-league/public") {
+        if (request.method !== "GET") response = json({ error: "Method not allowed." }, 405)
+        else {
+          const key = await anonymousRateKey(request, "build-league:public")
+          response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : !databaseAvailable(env) ? json({ error: "Campaign data is unavailable." }, 503) : await withHyperdrive(env, async db => { const weights = winnerWeights(env.WEBCANBE_BUILD_LEAGUE_WEIGHTS); return json({ leaderboard: await leaderboard(db, weights), weights }) })
+        }
+      }
+      else if (path === "/__webcanbe/api/build-league/visit") {
+        if (!requireSameOriginPost(request)) response = json({ error: "Referral request refused." }, 403)
+        else if (!databaseAvailable(env)) response = json({ error: "Campaign data is unavailable." }, 503)
+        else {
+          const key = await anonymousRateKey(request, "build-league:visit")
+          if (!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key)) response = rateLimitedResponse()
+          else {
+            let body
+            try { body = await smallJsonBody(request, 1024) } catch { body = {} }
+            const visitor = cookie(request, "__Host-wcb-build-visitor") || randomToken(24)
+            const valid = await withHyperdrive(env, db => recordReferralVisit(db, body.code, visitor))
+            const headers = new Headers(commonHeaders)
+            headers.set("Content-Type", "application/json; charset=utf-8")
+            if (!cookie(request, "__Host-wcb-build-visitor")) appendCookie(headers, `__Host-wcb-build-visitor=${visitor}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=2592000`)
+            if (valid) appendCookie(headers, `__Host-wcb-build-ref=${body.code}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=2592000`)
+            response = new Response(JSON.stringify({ recorded: valid }), { status: valid ? 200 : 404, headers })
+          }
+        }
+      }
       else if (paymentPaths.has(path)) response = await privateProduct(request, env, path, traceId)
       else if (path === "/__webcanbe/auth/session") response = await session(request, env)
       else if (path === "/__webcanbe/auth/logout") response = await logout(request, env)
@@ -722,7 +792,7 @@ export default {
         const key = await anonymousRateKey(request, "public:" + path)
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicCatalog(request, env, path, traceId)
       }
-      else if (path.startsWith("/__webcanbe/api/requests/") || path.startsWith("/__webcanbe/api/product/seller/") || path === "/__webcanbe/api/templates/create" || path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
+      else if (path.startsWith("/__webcanbe/api/build-league/") || path.startsWith("/__webcanbe/api/requests/") || path.startsWith("/__webcanbe/api/product/seller/") || path === "/__webcanbe/api/templates/create" || path === "/__webcanbe/api/workspaces/create" || path === "/__webcanbe/api/workspaces" || path === "/__webcanbe/api/product/purchases" || path === "/__webcanbe/api/product/workspace-projects/list" || path === "/__webcanbe/api/product/workspace-projects/materialize" || path === "/__webcanbe/api/projects" || path.startsWith("/__webcanbe/api/projects/") || path === "/__webcanbe/api/account/get" || path === "/__webcanbe/api/account/update" || path === "/__webcanbe/api/account/sessions/revoke-all" || path === "/__webcanbe/api/account/identities/link/firebase" || path.startsWith("/__webcanbe/api/ops/")) response = await privateProduct(request, env, path, traceId)
       else if (path === "/sitemap-listings.xml") {
         const key=await anonymousRateKey(request,"public:listing-sitemap")
         if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()

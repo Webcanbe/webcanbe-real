@@ -24,6 +24,8 @@ import { PlansGuide } from "./plans-guide"
 const CreatorEnvironment = lazy(() => import("./creator-shell").then(module=>({default:module.CreatorEnvironment})))
 const ControlRequests = lazy(() => import("./control-requests").then(module=>({default:module.ControlRequests})))
 import { analytics } from "./analytics"
+const BuildLeagueChrome = lazy(() => import("./BuildLeague").then(module => ({ default: module.BuildLeagueChrome })))
+const BuildLeagueEvent = lazy(() => import("./BuildLeague").then(module => ({ default: module.BuildLeagueEvent })))
 
 type Project = { id: string; slug: string; title: string; tagline: string; price: number; priceMinor?: number; currency?: "USD"; stack: string[]; category: string; color: string; creator: string; updated: string; releaseId?: string; preview?: string; livePreview?: string; thumbnail?: string; firstParty?: boolean }
 
@@ -1189,6 +1191,7 @@ function routeMetadata(path: string): RouteMetadata {
   const exact: Record<string, RouteMetadata> = {
     "/": { title: "Webcanbe — Edit visually. Leave with real code you own.", description: "Start from working web projects, edit the real source visually or in code, and keep the codebase.", canonical: "/" },
     "/browse": { title: "Marketplace — Webcanbe", description: "Browse working web projects with real source code, visual editing, code editing, and export.", canonical: "/browse" },
+    "/event": { title: "BUILD LEAGUE — Webcanbe", description: "Build something real. Six stages, three major winners, and a grand reward of may.cx.", canonical: "/event" },
     "/templates": { title: "Marketplace — Webcanbe", description: "Browse working web projects with real source code, visual editing, code editing, and export.", canonical: "/browse" },
     "/plans": { title: "Plans — Webcanbe", description: "Compare Webcanbe plans for source-first web project editing and ownership.", canonical: "/plans" },
     "/pricing": { title: "Plans — Webcanbe", description: "Compare Webcanbe plans for source-first web project editing and ownership.", canonical: "/plans" },
@@ -1294,6 +1297,7 @@ export default function App() {
   if(basePath==="/__wcb_preview_runtime")page=<Suspense fallback={<main/>}><PreviewRuntimeHost/></Suspense>
   else if(basePath==="/")page=<Landing/>
   else if(basePath==="/browse"||basePath.startsWith("/browse/")||basePath==="/templates")page=<Browse key={basePath+window.location.search}/>
+  else if(basePath==="/event")page=<PublicShell active="/event"><Suspense fallback={<main aria-busy="true"/>}><BuildLeagueEvent/></Suspense></PublicShell>
   else if(basePath==="/creators")page=<CreatorIntroduction/>
   else if(basePath.startsWith("/creators/"))page=<CreatorProfile handle={basePath.split("/")[2]||""}/>
   else if(basePath.startsWith("/project/")&&basePath.endsWith("/preview"))page=<ProjectPreviewPage key={basePath} reference={basePath.split("/")[2]||""}/>
@@ -1324,5 +1328,5 @@ export default function App() {
   else if(basePath===BIGPERSON_CONTROL_PATH)page=<Protected><Control/></Protected>
   else page=<NotFound path={basePath}/>
   const closeAuth=()=>{setAuthIntent(null);if(directAuth){window.history.replaceState({},"","/");window.dispatchEvent(new PopStateEvent("popstate"))}}
-  return <AppErrorBoundary>{page}{authIntent&&<Auth signup={authIntent.signup} next={authIntent.next} onClose={closeAuth}/>}</AppErrorBoundary>
+  return <AppErrorBoundary><Suspense fallback={null}><BuildLeagueChrome path={path}/></Suspense>{page}{authIntent&&<Auth signup={authIntent.signup} next={authIntent.next} onClose={closeAuth}/>}</AppErrorBoundary>
 }

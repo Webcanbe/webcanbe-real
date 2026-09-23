@@ -35,6 +35,10 @@ for(const [url,m] of Object.entries(routes)){
 // Retain the existing landing composition and hero; share the actual footer components.
 const landingPath='public/wcb-landing/index.html'
 const dom=new JSDOM(fs.readFileSync(landingPath,'utf8')),d=dom.window.document
+// The landing is a standalone static document, so mount the campaign without
+// replacing its existing composition or loading the React application.
+if(!d.head.querySelector('link[href="/build-league/landing.css"]')){const link=d.createElement('link');link.rel='stylesheet';link.href='/build-league/landing.css';d.head.append(link)}
+if(!d.body.querySelector('script[src="/build-league/landing.js"]')){const script=d.createElement('script');script.defer=true;script.src='/build-league/landing.js';d.body.append(script)}
 // The imported button recipe contains a decorative top-border and gradient states.
 // Remove that line at the component source; focus remains a visible outline in public-completion.css.
 for(const button of d.querySelectorAll('.wcb-hero a[data-slot="button"]')){button.classList.remove('border-t-primary');button.classList.add('wcb-hero-action')}
