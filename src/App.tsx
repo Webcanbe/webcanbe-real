@@ -207,7 +207,7 @@ function Auth({signup=false,next="/dashboard",onClose}:{signup?:boolean;next?:st
     window.addEventListener("keydown", keyboard)
     return () => window.removeEventListener("keydown", keyboard)
   }, [busy, onClose])
-  const finish=async()=>{const destination=await finishAuthIntent(signup,startedAt.current,next);window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(destination)}
+  const finish=async()=>{const destination=await finishAuthIntent(signup,startedAt.current,next);analytics.capture(signup?"wcb_signup_completed":"wcb_login_completed",{source:"auth",state:"success"});window.dispatchEvent(new Event("wcb:auth-changed"));onClose?.();go(destination)}
   const establishFirebaseSession=async(credential:Awaited<ReturnType<typeof signInWithGithubFirebase>>)=>{
     const idToken=await credential.user.getIdToken(true)
     await hostedProductClient.firebaseExchange(idToken)
@@ -496,7 +496,7 @@ function Checkout() {
     if (!returned.providerOrderId) { setState("failed"); setMessage("PayPal did not return an order token. Open Purchases to check whether the verified webhook completed the order."); return }
     setState("capturing")
     void hostedProductClient.capturePaymentOrder(returned.providerOrderId).then(order => {
-      if (order.status === "completed") { setState("success"); clearPaymentIdempotencyKey("marketplace", order.listingId) }
+      if (order.status === "completed") { setState("success"); clearPaymentIdempotencyKey("marketplace", order.listingId); analytics.capture("wcb_marketplace_purchase_completed", { listing_id: order.listingId, source: "marketplace", state: "success" }) }
       else if (order.status === "reconciliation_required") { setState("reconciliation_required"); setMessage("The captured payment needs reconciliation before an entitlement can be issued.") }
       else { setState("failed"); setMessage(`The order returned with status ${order.status}.`) }
     }, reason => { setState("failed"); setMessage(reason instanceof Error ? reason.message : "The payment could not be captured.") })
@@ -520,8 +520,9 @@ function Checkout() {
     checkoutStarted.current = true
     setState("starting_checkout"); setMessage("")
     try {
+      analytics.capture("wcb_checkout_started", { listing_id: project.id, source: "marketplace" })
       const order = await hostedProductClient.createPaymentOrder(project.id, paymentIdempotencyKey("marketplace", project.id))
-      if (order.status === "completed") { clearPaymentIdempotencyKey("marketplace", project.id); setState("success"); return }
+      if (order.status === "completed") { clearPaymentIdempotencyKey("marketplace", project.id); analytics.capture("wcb_marketplace_purchase_completed", { listing_id: project.id, source: "marketplace", state: "success" }); setState("success"); return }
       if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this order.")
       setState("redirecting"); window.location.assign(order.approvalUrl)
     } catch (reason) { checkoutStarted.current = false; setState("failed"); setMessage(reason instanceof Error ? reason.message : "Checkout could not be started.") }
@@ -601,6 +602,7 @@ function Purchases() {
       const workspaceId = availableWorkspaces.includes(preferredWorkspace) ? preferredWorkspace : availableWorkspaces[0]
       if (!workspaceId) throw new Error("Create or join an editable workspace before making a working copy.")
       const copy = await hostedProductClient.materialize(workspaceId, entitlement.entitlementId, project.title)
+      analytics.capture("wcb_working_copy_created", { release_id: entitlement.releaseId, source: "purchases", state: "success" })
       library.setCopies(current => [...current, copy]); go(`/workspace/${copy.workspaceProjectId}`)
     } catch (reason) { setActionError(reason instanceof Error ? reason.message : "A working copy could not be created.") }
     finally { setWorking("") }
@@ -751,7 +753,7 @@ function BillingSettings() {
     if (!returnedPack.providerOrderId) { setMessage("PayPal did not return an AI pack token. Refresh billing to check the server balance."); return }
     setWorking("capture"); setMessage("Capturing the AI Action pack…")
     void hostedProductClient.captureAiPack(returnedPack.providerOrderId).then(order => {
-      if (order.status === "completed") { clearPaymentIdempotencyKey("ai-pack", order.packKey); setMessage(`${order.actions} purchased AI Actions are now available.`); overview.refresh() }
+      if (order.status === "completed") { clearPaymentIdempotencyKey("ai-pack", order.packKey); analytics.capture("wcb_ai_pack_purchased", { plan_key: order.packKey, source: "settings", state: "success" }); setMessage(`${order.actions} purchased AI Actions are now available.`); overview.refresh() }
       else setMessage(`The AI Action pack returned with status ${order.status.replace(/_/g, " ")}.`)
     }, reason => setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be captured.")).finally(() => setWorking(""))
   }, [returnedPack.kind, returnedPack.providerOrderId])
@@ -772,6 +774,7 @@ function BillingSettings() {
     try {
       const freshConfiguration = await loadPublicPaymentConfiguration()
       if (!freshConfiguration.checkoutAvailable) throw new Error("Paid checkout is not available yet. Refresh billing status and try again.")
+      analytics.capture("wcb_checkout_started", { plan_key: packKey, source: "settings" })
       const order = await hostedProductClient.createAiPack(packKey, paymentIdempotencyKey("ai-pack", packKey))
       if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this pack.")
       const approval = new URL(order.approvalUrl)
@@ -817,7 +820,9 @@ function Plans() {
       if (!await productionSignedIn()) { try { sessionStorage.setItem("wcb-pending-subscription-plan", plan.key) } catch {}; started.current=false; go(`/login?next=${encodeURIComponent("/plans")}`); return }
       setCheckoutState("starting")
       try {
-        const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
+        analytics.capture("wcb_subscription_started", { plan_key: plan.key, source: "plans" })
+        analytics.capture("wcb_subscription_started", { plan_key: plan.key, source: "plans" })
+      const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
         if (subscription.status === "active") { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
         if (!subscription.approvalUrl) throw new Error("PayPal subscription approval is unavailable.")
         try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}
@@ -895,14 +900,14 @@ function Seller({ page = "home" }: { page?: "home" | "projects" | "new" }) {
   useEffect(() => { void refresh() }, [hosted])
   const apply = async () => {
     setBusy(true); setError("")
-    try { setApplication(await hostedProductClient.applySeller()) }
+    try { const created = await hostedProductClient.applySeller(); setApplication(created); analytics.capture("wcb_creator_application_submitted", { source: "creator", state: "success" }) }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Creator application could not be created.") }
     finally { setBusy(false) }
   }
   const submit = async () => {
     if (!application || !workspaceId || !sourceProjectId || busy) return
     setBusy(true); setError("")
-    try { await hostedProductClient.createSellerSubmission(application.applicationId, workspaceId, sourceProjectId); await refresh(); go("/seller/projects") }
+    try { await hostedProductClient.createSellerSubmission(application.applicationId, workspaceId, sourceProjectId); analytics.capture("wcb_creator_submission_submitted", { source: "creator", state: "success" }); await refresh(); go("/seller/projects") }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Submission could not be created.") }
     finally { setBusy(false) }
   }
@@ -1220,10 +1225,15 @@ export default function App() {
   useEffect(()=>{syncRouteMetadata(path)},[path])
   useEffect(() => {
     if (path === "/browse" || path === "/marketplace") analytics.capture("wcb_marketplace_viewed", { source: "marketplace" })
+    if (path === "/dashboard") analytics.capture("wcb_dashboard_viewed", { source: "dashboard" })
+    if (path === "/projects") analytics.capture("wcb_projects_viewed", { source: "projects" })
+    if (path === "/purchases") analytics.capture("wcb_purchases_viewed", { source: "purchases" })
     if (path.startsWith("/project/")) {
       const reference = path.split("/")[2]
-      const project = projects.find(item => item.slug === reference || item.id === reference)
-      if (project) analytics.capture("wcb_project_viewed", { listing_id: project.id, source: "marketplace" })
+      if (reference) {
+        if (path.endsWith("/preview")) analytics.capture("wcb_marketplace_preview_opened", { listing_id: reference, source: "marketplace" })
+        else analytics.capture("wcb_project_viewed", { listing_id: reference, source: "marketplace" })
+      }
     }
   }, [path])
   const basePath=directAuth?"/":path;let page:React.ReactNode
