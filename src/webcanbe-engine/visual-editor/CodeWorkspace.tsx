@@ -63,6 +63,8 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   const [files, setFiles] = useState<Array<{ file: string; hash: string }>>([])
   const [drafts, setDrafts] = useState<Record<string, Draft>>({})
   const [active, setActive] = useState("")
+  const [fileLoad, setFileLoad] = useState<{ file: string; state: "loading" | "error"; message?: string }>()
+  const [fileLoadAttempt, setFileLoadAttempt] = useState(0)
   const [draftsLoaded, setDraftsLoaded] = useState(false)
   const [backupStatus, setBackupStatus] = useState("")
   const draftVersion = useRef(0), backupQueue = useRef(Promise.resolve())
@@ -109,7 +111,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   }
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; ++serial.current } }, [])
-  useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); setRecentFiles([]); setQuickOpen(false); setFindOpen(false); setProjectSearchOpen(false); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError(""); setReveal(undefined); ++serial.current }, [projectId])
+  useEffect(() => { setDrafts({}); setDraftsLoaded(false); draftVersion.current = 0; setActive(""); setFileLoad(undefined); setFileLoadAttempt(0); setFiles([]); setLedger(undefined); setValidation(undefined); setStatus(""); setRecentFiles([]); setQuickOpen(false); setFindOpen(false); setProjectSearchOpen(false); setProjectResults([]); setProjectSearchMeta(undefined); setProjectSearchError(""); setReveal(undefined); ++serial.current }, [projectId])
   useEffect(() => {
     if (!connected) return
     const sequence = ++serial.current
@@ -239,14 +241,25 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
   useEffect(() => {
     if (!active || !connected) return
     let cancelled = false
-    void requests.current("files", { file: active }).then(response => {
-      if (cancelled || !response.ok || response.data.source === undefined) return
-      const source = response.data.source, hash = response.data.files?.find(file => file.file === active)?.hash ?? "", baseRevision = response.data.revision ?? ""
+    const file = active
+    setFileLoad({ file, state: "loading" })
+    void requests.current("files", { file }).then(response => {
+      if (cancelled) return
+      const hash = response.data.files?.find(item => item.file === file)?.hash
+      const baseRevision = response.data.revision
+      if (!response.ok || typeof response.data.source !== "string" || !hash || !baseRevision) {
+        const message = response.data.error ?? "The source response was incomplete. Retry loading this file."
+        setFileLoad({ file, state: "error", message })
+        setStatus(`Could not load ${file}: ${message}`)
+        return
+      }
+      const source = response.data.source
       setHead(baseRevision)
-      setDrafts(current => current[active] && current[active].text !== current[active].baseline ? current : { ...current, [active]: { file: active, text: source, baseline: source, hash, baseRevision } })
-    }).catch(() => { if (!cancelled) setStatus("Unable to load this file.") })
+      setDrafts(current => current[file] && current[file].text !== current[file].baseline ? current : { ...current, [file]: { file, text: source, baseline: source, hash, baseRevision } })
+      setFileLoad(undefined)
+    }).catch(() => { if (!cancelled) { setFileLoad({ file, state: "error", message: "Source connection unavailable. Retry loading this file." }); setStatus(`Could not load ${file}: source connection unavailable.`) } })
     return () => { cancelled = true }
-  }, [active, epoch, connected])
+  }, [active, epoch, connected, fileLoadAttempt])
   useEffect(() => {
     const version=++validationVersion.current
     setValidation(undefined)
@@ -417,6 +430,8 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
         {findOpen && <div className="source-find-panel"><div className="source-find-row"><input autoFocus aria-label="Find in current file" value={findQuery} onChange={event => setFindQuery(event.target.value)} placeholder="Find in current file…" onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); jumpToMatch(event.shiftKey ? matchIndex - 1 : matchIndex + 1) } }} /><span>{findQuery ? `${searchMatches.length ? matchIndex + 1 : 0} / ${searchMatches.length}` : "0 / 0"}</span><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex - 1)}>Previous</button><button type="button" disabled={!searchMatches.length} onClick={() => jumpToMatch(matchIndex + 1)}>Next</button><label><input type="checkbox" checked={caseSensitive} onChange={event => setCaseSensitive(event.target.checked)} /> Match case</label></div><div className="source-find-row"><input aria-label="Replace in current file" value={replaceValue} onChange={event => setReplaceValue(event.target.value)} placeholder="Replace with…" /><button type="button" disabled={!searchMatches.length} onClick={replaceCurrentMatch}>Replace</button><button type="button" disabled={!searchMatches.length} onClick={replaceAllMatches}>Replace all</button><small>Replacements modify the draft only. Save source performs the accepted transaction.</small></div></div>}
         <details className="source-file-operations"><summary>File operations</summary><label>File action <select aria-label="File action" value={fileAction} onChange={event => setFileAction(event.target.value as typeof fileAction)}><option value="create">Create</option><option value="rename">Rename</option><option value="delete">Delete</option></select></label>{fileAction !== "create" && <p>{fileAction === "delete" ? "Delete" : "Rename"} <b>{active}</b></p>}{fileAction !== "delete" && <label>New source path <input aria-label="New source path" value={newPath} onChange={event => setNewPath(event.target.value)} /></label>}<p>Save or discard drafts first. Renames update statically resolved source, CSS and asset references in the same transaction. Ambiguous references require a Code edit. The preview build must still pass.</p><button onClick={() => void applyFileOperation()} disabled={busy || !connected || Object.values(drafts).some(item => item.text !== item.baseline)}>Apply file operation</button></details>
         {conflictedDrafts.length > 0 && <div className="source-stale-drafts" role="alert"><b>Accepted HEAD changed after {conflictedDrafts.length} draft{conflictedDrafts.length === 1 ? "" : "s"} opened.</b><p>Stale drafts cannot be saved over newer accepted source. Rebase a file only when its accepted bytes are unchanged; otherwise reconcile manually.</p>{conflict && <button type="button" onClick={() => void reloadBase()}>Rebase current file if unchanged</button>}</div>}
+        {fileLoad?.file === active && fileLoad.state === "error" && <div className="source-file-load-error" role="alert"><b>{active} could not be loaded.</b><p>{fileLoad.message} Accepted source and local drafts are unchanged.</p><button type="button" onClick={() => setFileLoadAttempt(value => value + 1)}>Retry loading file</button></div>}
+        {fileLoad?.file === active && fileLoad.state === "loading" && !draft && <p className="source-file-loading" role="status">Loading {active}…</p>}
         {draft && <CodeEditor file={active} value={draft.text} reveal={reveal} onChange={value => setDrafts(all => ({ ...all, [active]: { ...all[active], text: value } }))} onSave={() => void save()} onSaveAll={() => void save(true)} />}
         {validation && <div className="source-diagnostics" role="status">{validation.level === "semantic" ? (validation.passed ? "Semantic TypeScript checks passed. Build and runtime validation are separate." : "Semantic TypeScript errors — source remains unchanged.") : validation.passed ? "Parse checks passed. Save validates the controlled preview bundle." : "Syntax/validation error — draft retained; preview remains at the last accepted revision."}{validation.diagnostics.map((item, index) => <p key={index}>{item.file}{item.line ? `:${item.line}:${item.column ?? 0}` : ""}: {item.message}</p>)}</div>}
         {showDiff && draft && <pre className="draft-diff">{`${active}\n--- Accepted source\n${draft.baseline.split("\n").map(line => "-" + line).join("\n")}\n+++ Draft\n${draft.text.split("\n").map(line => "+" + line).join("\n")}`}</pre>}
