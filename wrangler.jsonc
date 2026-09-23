@@ -52,8 +52,8 @@
     "WEBCANBE_CONTROL_MODE": "enabled",
     "WEBCANBE_PRODUCT_MUTATIONS": "enabled",
     "WEBCANBE_PAYMENTS": "enabled",
-    "PAYPAL_ENVIRONMENT": "sandbox",
-    "PAYPAL_WEBHOOK_ID": "6T668283MW272273V"
+    "PAYPAL_ENVIRONMENT": "live",
+    "PAYPAL_WEBHOOK_ID": "7T758752LK1378010"
   },
   "hyperdrive": [
     {
