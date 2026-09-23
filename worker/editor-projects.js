@@ -421,14 +421,14 @@ async function browserSnapshot(env,state,viewport,route){
   let response
   try{
     response=await env.BROWSER.quickAction("snapshot",{
-      url:"https://webcanbe.com/__wcb_preview_runtime",
+      url:"https://webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime",
       formats:["content","screenshot"],
       viewport:{width,height:900,deviceScaleFactor:1},
       actionTimeout:60000,
       gotoOptions:{waitUntil:"domcontentloaded",timeout:30000},
       waitForSelector:{selector:"html[data-wcb-ready='1']",timeout:45000},
       addScriptTag:[{content:injection}],
-      allowRequestPattern:["/^https:\\/\\/webcanbe\\.com\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"],
+      allowRequestPattern:["/^https:\\/\\/webcanbe-real\\.iseig513\\.workers\\.dev\\/(?:__wcb_preview_runtime|assets\\/[^?#]+)$/"],
     })
   }catch(error){
     const message=error instanceof Error?error.message:"Browser Run preview failed."
