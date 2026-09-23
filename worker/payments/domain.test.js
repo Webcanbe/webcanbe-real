@@ -100,6 +100,7 @@ class StubProvider {
   }
   refundCapture(_capture, amount, currency) { this.refundCalls++; return { providerRefundId: `REF-${this.refundCalls}`, status: "COMPLETED", refundMinor: amount, currency, refundedAt: "2026-09-20T00:00:00.000Z" } }
   createSubscription({ subscriptionId, planId }) { this.subscriptionCalls++; this.subscriptionPlanId = planId; return { providerSubscriptionId: `SUB-${subscriptionId}`, status: "APPROVAL_PENDING", approvalUrl: "https://sandbox.paypal.test/subscription" } }
+  getPlan(id, plan) { return { id, status: "ACTIVE", billing_cycles: [{ tenure_type: "REGULAR", frequency: { interval_unit: plan.cadence === "month" ? "MONTH" : "YEAR", interval_count: 1 }, pricing_scheme: { fixed_price: { currency_code: "USD", value: (plan.priceMinor / 100).toFixed(2) } } }] } }
   getSubscription(id) { return { id, custom_id: id.slice(4), plan_id: this.subscriptionPlanId, status: "APPROVAL_PENDING" } }
 }
 
@@ -214,6 +215,13 @@ describe("provider-neutral marketplace payments", () => {
 })
 
 describe("subscription entitlement and monthly AI grants", () => {
+  it("refuses a provider plan with the wrong live price before creating a subscription", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    provider.getPlan = async id => ({ id, status: "ACTIVE", billing_cycles: [{ tenure_type: "REGULAR", frequency: { interval_unit: "MONTH", interval_count: 1 }, pricing_scheme: { fixed_price: { currency_code: "USD", value: "29.00" } } }] })
+    await expect(createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_monthly", idempotencyKey: "wrong-plan" }, { ...options, planIds: { pro_monthly: "P-WRONG" } })).rejects.toMatchObject({ code: "paypal_plan_unverified" })
+    expect(provider.subscriptionCalls).toBe(0)
+    expect(repo.subscriptions).toHaveLength(0)
+  })
   it("quarantines a new PayPal 201 subscription whose immediate GET returns 404 without creating another", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     provider.getSubscription = async () => { const error = new PaymentError(409, "paypal_request_failed", "Not found"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error }
