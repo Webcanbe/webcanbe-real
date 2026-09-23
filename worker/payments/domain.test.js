@@ -210,6 +210,26 @@ describe("provider-neutral marketplace payments", () => {
 })
 
 describe("subscription entitlement and monthly AI grants", () => {
+  it("allows a fresh checkout after an unpaid cancellation", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }
+    const previous = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_monthly", idempotencyKey: "first" }, config)
+    repo.updateSubscription(previous.subscriptionId, { status: "cancelled", cancelledAt: "2026-09-01T00:00:00.000Z" })
+    const next = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_monthly", idempotencyKey: "second" }, config)
+    expect(next.subscriptionId).not.toBe(previous.subscriptionId)
+    expect(provider.subscriptionCalls).toBe(2)
+  })
+
+  it("keeps a paid-through cancelled subscription without starting another charge", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const config = { ...options, planIds: { pro_monthly: "P-MONTHLY" } }
+    const previous = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_monthly", idempotencyKey: "first" }, config)
+    repo.updateSubscription(previous.subscriptionId, { status: "cancelled", cancelledAt: "2026-09-01T00:00:00.000Z", currentPeriodEnd: "2026-10-01T00:00:00.000Z" })
+    const next = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_monthly", idempotencyKey: "second" }, config)
+    expect(next.subscriptionId).toBe(previous.subscriptionId)
+    expect(provider.subscriptionCalls).toBe(1)
+  })
+
   it("grants annual subscribers monthly and deduplicates renewal events", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     const created = await createPlanSubscription(repo, provider, { userId: buyer }, { planKey: "pro_annual", idempotencyKey: "annual" }, { ...options, planIds: { pro_annual: "P-ANNUAL" } })

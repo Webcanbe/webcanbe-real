@@ -76,6 +76,22 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       })
       return json({ subscription }, 201)
     }
+    if (path === "/__webcanbe/api/payments/subscriptions/inspect") {
+      const input = await body(request)
+      const subscriptionId = domainId(input?.subscriptionId, "subscription")
+      if (Object.keys(input || {}).some(key => key !== "subscriptionId")) throw new PaymentError(422, "invalid_request", "Invalid subscription request.")
+      const subscription = await repo.subscriptionForUpdate(subscriptionId)
+      if (!subscription || subscription.userId !== session.userId) throw new PaymentError(404, "subscription_not_found", "Subscription not found.")
+      if (!subscription.providerSubscriptionId) return json({ provider: { status: "NOT_CREATED", planMatches: false, referenceMatches: false } })
+      const details = await provider.getSubscription(subscription.providerSubscriptionId)
+      const reason = details?.billing_info?.last_failed_payment?.reason_code
+      return json({ provider: {
+        status: typeof details?.status === "string" ? details.status : "UNKNOWN",
+        planMatches: details?.plan_id === subscription.providerPlanId,
+        referenceMatches: details?.id === subscription.providerSubscriptionId && details?.custom_id === subscription.subscriptionId,
+        ...(typeof reason === "string" ? { lastFailedReason: reason } : {}),
+      } })
+    }
     if (path === "/__webcanbe/api/payments/ai-packs/create") {
       return json({ order: await createAiPackOrder(repo, provider, session, await body(request), { clock, returnUrl: PAYMENT_RETURN_URLS.aiPackReturn, cancelUrl: PAYMENT_RETURN_URLS.aiPackCancel }) }, 201)
     }

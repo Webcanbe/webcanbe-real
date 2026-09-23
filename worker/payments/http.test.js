@@ -55,4 +55,17 @@ describe("payment HTTP contract", () => {
     const after = await handlePrivatePaymentRequest(new Request("https://webcanbe.com/__webcanbe/api/payments/status", { method: "POST" }), "/__webcanbe/api/payments/status", { repo, provider: {}, session: { userId: "buyer" }, env: {}, clock: () => Date.parse("2026-10-01T00:00:00Z") })
     expect((await after.json()).billing.currentPlanKey).toBe("free")
   })
+
+  it("checks only the owner's PayPal subscription and returns safe status fields", async () => {
+    const id = "11111111-1111-4111-8111-111111111111"
+    const subscription = { subscriptionId: id, userId: "buyer", providerSubscriptionId: "I-PAYPAL", providerPlanId: "P-EXPECTED" }
+    let calls = 0
+    const provider = { getSubscription: async () => { calls++; return { id: "I-PAYPAL", custom_id: id, plan_id: "P-EXPECTED", status: "APPROVAL_PENDING", subscriber: { email_address: "private@example.com" }, billing_info: { last_failed_payment: { reason_code: "PAYMENT_DENIED" } } } } }
+    const request = new Request("https://webcanbe.com/__webcanbe/api/payments/subscriptions/inspect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscriptionId: id }) })
+    const denied = await handlePrivatePaymentRequest(request.clone(), "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionForUpdate: async () => subscription }, provider, session: { userId: "other" }, env: {} })
+    expect(denied.status).toBe(404)
+    expect(calls).toBe(0)
+    const allowed = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionForUpdate: async () => subscription }, provider, session: { userId: "buyer" }, env: {} })
+    expect(await allowed.json()).toEqual({ provider: { status: "APPROVAL_PENDING", planMatches: true, referenceMatches: true, lastFailedReason: "PAYMENT_DENIED" } })
+  })
 })

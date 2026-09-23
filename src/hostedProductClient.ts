@@ -148,6 +148,10 @@ export class HostedProductClient {
     return (await this.post<{ subscription: PaymentSubscription }>("/__webcanbe/api/payments/subscriptions/create", { planKey, idempotencyKey })).subscription
   }
 
+  async inspectSubscription(subscriptionId: string) {
+    return (await this.post<{ provider: { status: string; planMatches: boolean; referenceMatches: boolean; lastFailedReason?: string } }>("/__webcanbe/api/payments/subscriptions/inspect", { subscriptionId })).provider
+  }
+
   async cancelSubscription(subscriptionId: string) {
     return (await this.post<{ subscription: PaymentSubscription }>("/__webcanbe/api/payments/subscriptions/cancel", { subscriptionId })).subscription
   }

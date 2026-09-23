@@ -220,8 +220,11 @@ export async function createPlanSubscription(repo, provider, session, input, opt
   }
   const current = await repo.currentSubscriptionForUser(session.userId)
   if (current) {
-    if (current.planKey !== plan.key) throw new PaymentError(409, "plan_change_undefined", "Plan changes are not available yet.")
-    return current
+    const paidThrough = current.status === "cancelled" && current.currentPeriodEnd && new Date(current.currentPeriodEnd).getTime() > Number((options.clock || Date.now)())
+    if (!["cancelled", "expired"].includes(current.status) || paidThrough) {
+      if (current.planKey !== plan.key) throw new PaymentError(409, "plan_change_undefined", "Plan changes are not available yet.")
+      return current
+    }
   }
   const subscriptionId = uuid(repo.uuid), at = nowIso(options.clock || Date.now), providerPlanId = options.planIds[plan.key]
   if (!providerPlanId) throw new PaymentError(503, "plan_not_configured", "Subscription plan is not configured.")

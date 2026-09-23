@@ -8,7 +8,7 @@ import { handlePayPalWebhook } from './payments/webhook.js'
 import { PaymentError } from './payments/contracts.js'
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), {status, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})
-export const paymentPaths = new Set(['status','orders/create','orders/capture','subscriptions/create','subscriptions/cancel','ai-packs/create','ai-packs/capture'].map(path=>'/__webcanbe/api/payments/'+path))
+export const paymentPaths = new Set(['status','orders/create','orders/capture','subscriptions/create','subscriptions/inspect','subscriptions/cancel','ai-packs/create','ai-packs/capture'].map(path=>'/__webcanbe/api/payments/'+path))
 const PAYPAL_CORE_KEYS = ['PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','PAYPAL_WEBHOOK_ID']
 const PAYPAL_PLAN_KEYS = ['PAYPAL_PLAN_PRO_MONTHLY','PAYPAL_PLAN_PRO_ANNUAL','PAYPAL_PLAN_STUDIO_MONTHLY','PAYPAL_PLAN_STUDIO_ANNUAL']
 const present = value => typeof value === 'string' && value.length > 0

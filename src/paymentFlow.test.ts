@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn } from "./paymentFlow"
+import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn, paypalApprovalUrl } from "./paymentFlow"
 
 class MemoryStorage {
   values = new Map<string, string>()
@@ -26,5 +26,15 @@ describe("browser payment flow primitives", () => {
     expect(paymentReturn("?payment=return&token=%3Cscript%3E", "payment")).toEqual({ kind: "return" })
     expect(paymentReturn("?subscription=cancelled", "subscription")).toEqual({ kind: "cancelled" })
     expect(paymentReturn("", "ai-pack")).toEqual({ kind: "none" })
+  })
+
+  it("uses the exact provider approval link only for the configured PayPal environment", () => {
+    const live = "https://www.paypal.com/checkoutnow?token=ORDER-1&exp_flow=authenticate"
+    expect(paypalApprovalUrl(live, "live")).toBe(live)
+    expect(paypalApprovalUrl("https://www.sandbox.paypal.com/webapps/billing/subscriptions?ba_token=SUB-1", "sandbox")).toContain("ba_token=SUB-1")
+    expect(() => paypalApprovalUrl(live, "sandbox")).toThrow("invalid approval")
+    expect(() => paypalApprovalUrl("https://paypal.com.evil.example/checkoutnow", "live")).toThrow("invalid approval")
+    expect(() => paypalApprovalUrl("https://user@www.paypal.com/checkoutnow", "live")).toThrow("invalid approval")
+    expect(() => paypalApprovalUrl("http://www.paypal.com/checkoutnow", "live")).toThrow("invalid approval")
   })
 })

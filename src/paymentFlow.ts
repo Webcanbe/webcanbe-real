@@ -26,3 +26,15 @@ export function paymentIdempotencyKey(kind: "marketplace" | "subscription" | "ai
 export function clearPaymentIdempotencyKey(kind: "marketplace" | "subscription" | "ai-pack", subject: string, storage: Pick<Storage, "removeItem"> = localStorage) {
   storage.removeItem(`wcb-payment:${kind}:${subject}`)
 }
+
+export function paypalApprovalUrl(value: string | undefined, environment: "live" | "sandbox" | null): string {
+  if (!value || !environment) throw new Error("PayPal approval is unavailable. Refresh the checkout status and try again.")
+  let url: URL
+  try { url = new URL(value) }
+  catch { throw new Error("PayPal returned an invalid approval address.") }
+  const allowedHosts = environment === "live" ? ["paypal.com", "www.paypal.com"] : ["sandbox.paypal.com", "www.sandbox.paypal.com"]
+  if (url.protocol !== "https:" || !allowedHosts.includes(url.hostname.toLowerCase()) || url.username || url.password || url.port) {
+    throw new Error("PayPal returned an invalid approval address.")
+  }
+  return value
+}

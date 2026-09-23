@@ -18,7 +18,9 @@ import { hostedProductClient, hostedProductMode, controlMode, productMutationMod
 import { createEmailAccountFirebase, currentFirebaseIdToken, currentFirebaseProviderIds, firebaseAuthErrorMessage, signInWithEmailFirebase, signInWithGithubFirebase, signOutFirebase } from "./firebaseAuth"
 import type { LicenseEntitlement, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 import { loadPublicPaymentConfiguration, type PublicPaymentConfiguration, type PublicPaymentPlan } from "./webcanbe-engine/runtime/planCatalog"
-import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn } from "./paymentFlow"
+import { clearPaymentIdempotencyKey, paymentIdempotencyKey, paymentReturn, paypalApprovalUrl } from "./paymentFlow"
+import { CreatorApplyIntroduction } from "./catalog/CreatorApplyIntroduction"
+import { PlansGuide } from "./plans-guide"
 const CreatorEnvironment = lazy(() => import("./creator-shell").then(module=>({default:module.CreatorEnvironment})))
 const ControlRequests = lazy(() => import("./control-requests").then(module=>({default:module.ControlRequests})))
 import { analytics } from "./analytics"
@@ -136,8 +138,8 @@ function Protected({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 function Preview({ project, large = false }: { project: Project; large?: boolean }) {
-  if(!large&&project.livePreview)return <div className="project-preview project-live-preview project-card-live-preview"><iframe title={`${project.title} actual page preview`} src={project.livePreview} loading="lazy" tabIndex={-1} aria-hidden="true" sandbox="allow-scripts allow-same-origin"/></div>
   if(!large&&project.thumbnail)return <div className="project-preview project-preview-image"><img src={project.thumbnail} alt={`${project.title} project photography`} loading="lazy"/></div>
+  if(!large&&project.livePreview)return <div className="project-preview project-live-preview project-card-live-preview"><iframe title={`${project.title} actual page preview`} src={project.livePreview} loading="lazy" tabIndex={-1} aria-hidden="true" sandbox="allow-scripts allow-same-origin"/></div>
   if(project.livePreview)return <div className={`project-preview project-live-preview ${large ? "large" : ""}`}><iframe title={`${project.title} live source preview`} src={project.livePreview} loading={large?"eager":"lazy"} sandbox="allow-scripts allow-same-origin"/></div>
   if(project.preview)return <div className={`project-preview project-preview-image ${large ? "large" : ""}`}><img src={project.preview} alt={`${project.title} website preview`}/></div>
   return <div className={`project-preview ${project.color} ${large ? "large" : ""}`}><div className="preview-nav"><span>{project.title}</span><span>Index&nbsp;&nbsp; About&nbsp;&nbsp; Contact</span></div><div className="preview-body"><p>{project.category}</p><h3>{project.title}<br/>made to be <em>used.</em></h3><div className="preview-orb"/></div><div className="preview-foot"><span>Scroll to explore</span><span>01 — 04</span></div></div>
@@ -170,7 +172,7 @@ function Detail({ reference }: { reference: string }) {
   const hosted=productReadMode()
   const firstParty=projects.find(item=>item.slug===reference)
   const creationKey=useRef(crypto.randomUUID())
-  const [project,setProject]=useState<Project|undefined>(firstParty),[tab,setTab]=useState("Overview"),[message,setMessage]=useState(firstParty?"":hosted?"Loading project…":"Marketplace previews require the hosted catalog."),[failed,setFailed]=useState(!hosted&&!firstParty),[retry,setRetry]=useState(0),[buying,setBuying]=useState(false)
+  const [project,setProject]=useState<Project|undefined>(firstParty),[tab,setTab]=useState("Product information"),[message,setMessage]=useState(firstParty?"":hosted?"Loading project…":"Marketplace previews require the hosted catalog."),[failed,setFailed]=useState(!hosted&&!firstParty),[retry,setRetry]=useState(0),[buying,setBuying]=useState(false)
   useEffect(()=>{if(firstParty){setProject(firstParty);setFailed(false);return}if(!hosted)return;let current=true;setProject(undefined);setFailed(false);setMessage("Loading project…");const timeout=window.setTimeout(()=>{if(current){setFailed(true);setMessage("Project lookup timed out. Try again.")}},6_000);void hostedProductClient.detail(reference).then(l=>{if(current){window.clearTimeout(timeout);setProject(hostedProject(l));setMessage("")}},e=>{if(current){window.clearTimeout(timeout);setFailed(true);setMessage(e instanceof Error?e.message:"Project unavailable.")}});return()=>{current=false;window.clearTimeout(timeout)}},[firstParty,hosted,reference,retry])
   if(!project)return <MarketplaceShell><main className="detail"><div className="crumb"><Link to="/browse">Marketplace</Link><span>/</span><span>{failed ? "Unavailable" : "Loading"}</span></div><HubState kind={failed ? "error" : "loading"} title={failed ? "This project is unavailable" : "Loading project"} body={failed ? message : ""} action={failed ? <><button className="button primary" onClick={()=>setRetry(value=>value+1)}>Try again</button><Link className="button" to="/browse">Back to marketplace</Link></> : undefined}/></main></MarketplaceShell>
   const target=`/checkout/${encodeURIComponent(project.releaseId??project.id)}?project=${encodeURIComponent(project.slug)}`
@@ -551,8 +553,8 @@ function Checkout() {
     try {
       const order = await hostedProductClient.createPaymentOrder(project.id, paymentIdempotencyKey("marketplace", project.id))
       if (order.status === "completed") { clearPaymentIdempotencyKey("marketplace", project.id); analytics.capture("wcb_marketplace_purchase_completed", { listing_id: project.id, source: "marketplace", state: "success" }); setState("success"); return }
-      if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this order.")
-      setState("redirecting"); window.location.assign(order.approvalUrl)
+      const approvalUrl = paypalApprovalUrl(order.approvalUrl, configuration?.environment ?? null)
+      setState("redirecting"); window.location.assign(approvalUrl)
     } catch (reason) { checkoutStarted.current = false; setState("failed"); setMessage(reason instanceof Error ? reason.message : "Checkout could not be started.") }
   }
   const priceMinor = project?.priceMinor ?? (project ? Math.round(project.price * 100) : undefined)
@@ -623,7 +625,6 @@ function Purchases() {
   const mutationsEnabled = productMutationMode()
   const [working, setWorking] = useState("")
   const [actionError, setActionError] = useState("")
-  const localPurchases = projects.slice(3)
   const copiesByEntitlement = new Map(library.copies.map(copy => [copy.entitlementId, copy]))
   const openPurchase = async (entitlement: LicenseEntitlement, project: Project) => {
     const existing = copiesByEntitlement.get(entitlement.entitlementId)
@@ -642,8 +643,8 @@ function Purchases() {
     } catch (reason) { setActionError(reason instanceof Error ? reason.message : "A working copy could not be created.") }
     finally { setWorking("") }
   }
-  const activeCount = library.hosted ? library.entitlements.filter(item => item.status === "active").length : localPurchases.length
-  return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId, createDisabled = !copy && !mutationsEnabled; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>{project.price ? `$${project.price}` : "—"}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active" || createDisabled} title={createDisabled ? "New working-copy creation stays disabled until the production materialization endpoint is activated." : undefined} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : createDisabled ? "Creation not enabled" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <div className="purchase-list">{localPurchases.map(project => <article className="purchase-row" key={project.id}><Preview project={project}/><div className="purchase-copy"><span className="entitlement-status active">active</span><h3>{project.title}</h3><p>This preview keeps the purchased release separate from editable working copies.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>$${project.price}</strong><Link className="button primary" to={`/workspace/${project.id}`}>Create working copy <Arrow/></Link></div></article>)}</div>}</section></main></AppShell>
+  const activeCount = library.entitlements.filter(item => item.status === "active").length
+  return <AppShell active="/purchases"><main className="standard product-hub"><header className="hub-title"><div><span className="signal">Your library</span><h1>Purchases</h1><p>Entitlements stay intact here even before you create an editable working copy.</p></div><Link className="button" to="/browse">Browse marketplace <Arrow/></Link></header><HubTabs active="purchases"/>{actionError && <div className="inline-error" role="alert">{actionError}</div>}<section className="hub-section"><div className="hub-section-head"><div><h2>Purchased releases</h2><p>Each purchase remains bound to its release.</p></div><span>{activeCount} active</span></div>{library.loading ? <HubState kind="loading" title="Loading purchases" body=""/> : library.error ? <HubState kind="error" title="Purchases could not be loaded" body={library.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/> : library.hosted ? library.entitlements.length ? <div className="purchase-list">{library.entitlements.map(entitlement => { const project = releaseProject(library.catalog, entitlement.releaseId, entitlement.entitlementId, "Purchased project"), copy = copiesByEntitlement.get(entitlement.entitlementId), busy = working === entitlement.entitlementId, createDisabled = !copy && !mutationsEnabled; return <article className="purchase-row" key={entitlement.entitlementId}><Preview project={project}/><div className="purchase-copy"><span className={`entitlement-status ${entitlement.status}`}>{entitlement.status}</span><h3>{project.title}</h3><p>Release entitlement granted {new Date(entitlement.grantedAt).toLocaleDateString()}.</p><small>{project.stack.join(" · ")}</small></div><div className="purchase-action"><strong>{project.price ? `$${project.price}` : "—"}</strong><button className={copy ? "button" : "button primary"} disabled={busy || entitlement.status !== "active" || createDisabled} title={createDisabled ? "New working-copy creation stays disabled until the production materialization endpoint is activated." : undefined} onClick={() => void openPurchase(entitlement, project)}>{copy ? "Open working copy" : createDisabled ? "Creation not enabled" : busy ? "Creating copy…" : "Create working copy"} <Arrow/></button></div></article> })}</div> : <HubState kind="empty" title="No purchases yet" body="Browse the marketplace when you want a working project to start from." action={<Link className="button primary" to="/browse">Browse projects <Arrow/></Link>}/> : <HubState kind="empty" title="Purchases require a signed-in account" body="Sign in to load your server-confirmed entitlements." action={<Link className="button" to="/login?next=%2Fpurchases">Sign in</Link>}/>}</section></main></AppShell>
 }
 
 function RopeanDashboardShell({ children, view }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView?: (view: DashboardView) => void }) {
@@ -758,6 +759,7 @@ function BillingSettings() {
   const returnedSubscription = paymentReturn(window.location.search, "subscription")
   const [working, setWorking] = useState("")
   const [message, setMessage] = useState(returnedPack.kind === "cancelled" || returnedSubscription.kind === "cancelled" ? "PayPal approval was cancelled. Refresh billing to check the server-confirmed status." : "")
+  const [providerStatus, setProviderStatus] = useState("")
   const captureStarted = useRef(false)
   const operationStarted = useRef(false)
   useEffect(() => {
@@ -771,6 +773,10 @@ function BillingSettings() {
     }, reason => setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be captured.")).finally(() => setWorking(""))
   }, [returnedPack.kind, returnedPack.providerOrderId])
   useEffect(() => { if (returnedSubscription.kind === "return" && !overview.loading) setMessage(overview.billing?.subscription?.status === "active" ? "Your subscription is active." : "PayPal approval returned. Subscription status is verified by server webhook; refresh if activation is still pending.") }, [returnedSubscription.kind, overview.loading, overview.billing?.subscription?.status])
+  useEffect(() => {
+    const subscription = overview.billing?.subscription
+    if (subscription && ["active", "cancelled", "expired"].includes(subscription.status)) clearPaymentIdempotencyKey("subscription", subscription.planKey)
+  }, [overview.billing?.subscription?.status, overview.billing?.subscription?.planKey])
   const cancel = async () => {
     const subscription = overview.billing?.subscription
     if (!subscription || working || operationStarted.current) return
@@ -779,6 +785,16 @@ function BillingSettings() {
     try { const cancelled=await hostedProductClient.cancelSubscription(subscription.subscriptionId); overview.setBilling(current => current ? { ...current, currentPlanKey: cancelled.status === "active" ? cancelled.planKey : "free", subscription: cancelled } : current); setMessage("Subscription cancelled.") }
     catch (reason) { setMessage(reason instanceof Error ? reason.message : "The subscription could not be cancelled.") }
     finally { operationStarted.current = false; setWorking("") }
+  }
+  const inspect = async () => {
+    const subscription = overview.billing?.subscription
+    if (!subscription || working) return
+    setWorking("inspect"); setProviderStatus("")
+    try {
+      const provider = await hostedProductClient.inspectSubscription(subscription.subscriptionId)
+      setProviderStatus(`PayPal: ${provider.status.replace(/_/g, " ").toLowerCase()}. ${provider.planMatches && provider.referenceMatches ? "Plan and subscription reference match Webcanbe." : "Plan or subscription reference needs support review."}${provider.lastFailedReason ? ` Last failed payment: ${provider.lastFailedReason.replace(/_/g, " ").toLowerCase()}.` : ""}`)
+    } catch (reason) { setProviderStatus(reason instanceof Error ? reason.message : "PayPal status could not be checked.") }
+    finally { setWorking("") }
   }
   const buyPack = async (packKey: string) => {
     if (working || operationStarted.current) return
@@ -789,17 +805,15 @@ function BillingSettings() {
       if (!freshConfiguration.checkoutAvailable) throw new Error("Paid checkout is not available yet. Refresh billing status and try again.")
       analytics.capture("wcb_checkout_started", { plan_key: packKey, source: "settings" })
       const order = await hostedProductClient.createAiPack(packKey, paymentIdempotencyKey("ai-pack", packKey))
-      if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this pack.")
-      const approval = new URL(order.approvalUrl)
-      if (approval.protocol !== "https:" || !/(^|\.)paypal\.com$/i.test(approval.hostname)) throw new Error("PayPal returned an invalid approval address.")
+      const approvalUrl = paypalApprovalUrl(order.approvalUrl, freshConfiguration.environment)
       setMessage("Redirecting to PayPal…")
-      window.location.href = approval.toString()
+      window.location.assign(approvalUrl)
     } catch (reason) { operationStarted.current = false; setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be started."); setWorking("") }
   }
   if (overview.loading) return <div className="settings-billing"><b>Loading billing…</b></div>
   if (overview.error || !overview.configuration || !overview.billing) return <div className="settings-billing"><b>Billing unavailable</b><p>{overview.error || "Billing state could not be loaded."}</p><button className="button" onClick={overview.refresh}>Try again</button></div>
   const subscription = overview.billing.subscription
-  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${planName(subscription.planKey)} ${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}{subscription && !["cancelled","expired"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}<Link className="button" to="/plans">Review plans</Link></div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <button className="button" key={pack.key} disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — $${(pack.priceMinor/100).toFixed(2)}`}</button>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
+  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${planName(subscription.planKey)} ${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}{subscription && !["cancelled","expired"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}{subscription && <button className="button" disabled={Boolean(working)} onClick={()=>void inspect()}>{working === "inspect" ? "Checking PayPal…" : "Check PayPal status"}</button>}<Link className="button" to="/plans">Review plans</Link>{providerStatus && <p className="settings-save-status" role="status">{providerStatus}</p>}</div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <button className="button" key={pack.key} disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — $${(pack.priceMinor/100).toFixed(2)}`}</button>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
 }
 
 function Settings() {
@@ -835,11 +849,12 @@ function Plans() {
       try {
         analytics.capture("wcb_subscription_started", { plan_key: plan.key, source: "plans" })
         const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
-        if (subscription.status === "active") { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
-        if (!subscription.approvalUrl) throw new Error("PayPal subscription approval is unavailable.")
+        if (subscription.status === "active" || subscription.status === "cancelled" && subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Date.now()) { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
+        if (["cancelled", "expired"].includes(subscription.status)) { clearPaymentIdempotencyKey("subscription", plan.key); throw new Error("The previous PayPal approval has ended. Choose the plan again to start a new approval.") }
+        const approvalUrl = paypalApprovalUrl(subscription.approvalUrl, configuration.environment)
         try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}
-        setCheckoutState("redirecting"); window.location.assign(subscription.approvalUrl)
-      } catch (reason) { setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
+        setCheckoutState("redirecting"); window.location.assign(approvalUrl)
+      } catch (reason) { started.current = false; setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
     })()
   }, [configuration, requestedPlan, authTick])
   if (configurationError) return <PublicShell active="/plans"><main className="plans"><HubState kind="error" title="Plans are unavailable" body={configurationError} action={<button className="button" onClick={() => setRetry(value => value + 1)}>Try again</button>}/></main></PublicShell>
@@ -867,14 +882,15 @@ function Plans() {
     try {
       analytics.capture("wcb_subscription_started", { plan_key: plan.key, source: "plans" })
       const subscription = await hostedProductClient.createSubscription(plan.key, paymentIdempotencyKey("subscription", plan.key))
-      if (subscription.status === "active") { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
-      if (!subscription.approvalUrl) throw new Error("PayPal subscription approval is unavailable.")
+      if (subscription.status === "active" || subscription.status === "cancelled" && subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Date.now()) { clearPaymentIdempotencyKey("subscription", plan.key); try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}; go("/settings?section=billing"); return }
+      if (["cancelled", "expired"].includes(subscription.status)) { clearPaymentIdempotencyKey("subscription", plan.key); throw new Error("The previous PayPal approval has ended. Choose the plan again to start a new approval.") }
+      const approvalUrl = paypalApprovalUrl(subscription.approvalUrl, configuration.environment)
       try { sessionStorage.removeItem("wcb-pending-subscription-plan") } catch {}
-      setCheckoutState("redirecting"); window.location.assign(subscription.approvalUrl)
+      setCheckoutState("redirecting"); window.location.assign(approvalUrl)
     } catch (reason) { started.current = false; setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
   }
   const billingStatus = configuration.checkoutAvailable ? "PayPal subscription checkout is available." : "Paid checkout is currently unavailable; prices and limits still come from the payment service."
-  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual</button></div>{checkoutMessage&&<p className="inline-error" role="alert">{checkoutMessage}</p>}</div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly, paid = row.id !== "free"; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && configuration.checkoutAvailable && <span className="popular">Available</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "More active projects, AI Actions, concurrency, and deploy capacity."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={paid && (!configuration.checkoutAvailable || checkoutState === "starting" || checkoutState === "redirecting")} onClick={() => void startSubscription(plan)}>{row.id === "free" ? "Start for free" : !configuration.checkoutAvailable ? "Checkout unavailable" : checkoutState === "starting" ? "Starting checkout…" : checkoutState === "redirecting" ? "Redirecting…" : `Choose ${row.name}`}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section></main></PublicShell> }
+  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch"><button className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>Monthly</button><button className={annual ? "active" : ""} onClick={() => setAnnual(true)}>Annual</button></div>{checkoutMessage&&<p className="inline-error" role="alert">{checkoutMessage}</p>}</div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly, paid = row.id !== "free"; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && configuration.checkoutAvailable && <span className="popular">Available</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "More active projects, AI Actions, concurrency, and deploy capacity."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={paid && (!configuration.checkoutAvailable || checkoutState === "starting" || checkoutState === "redirecting")} onClick={() => void startSubscription(plan)}>{row.id === "free" ? "Start for free" : !configuration.checkoutAvailable ? "Checkout unavailable" : checkoutState === "starting" ? "Starting checkout…" : checkoutState === "redirecting" ? "Redirecting…" : `Choose ${row.name}`}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section><PlansGuide configuration={configuration}/></main></PublicShell> }
 
 function CreatorListingEditor({ listing, onSaved }: { listing: CreatorStudioData["listings"][number]; onSaved: (listing: CreatorStudioData["listings"][number]) => void }) {
   const [title, setTitle] = useState(listing.title), [summary, setSummary] = useState(listing.summary), [availability, setAvailability] = useState(listing.availability), [tags, setTags] = useState(listing.tags.join(", "))
@@ -1267,7 +1283,7 @@ export default function App() {
   else if(basePath==="/requests")page=<Protected><MyRequests/></Protected>
   else if(basePath==="/dashboard-preview")page=productionAuthMode()?<NotFound path={basePath}/>:<Dashboard/>
   else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
-  else if(basePath==="/marketplace")page=<Browse/>
+  else if(basePath==="/marketplace")page=<Browse key={basePath+window.location.search}/>
   else if(basePath!=="/seller" && Object.values(appRoutes).some(([route])=>route===basePath))page=<Protected><Dashboard key={basePath} initialView={viewForPath(basePath)}/></Protected>
   else if(basePath==="/settings"){
     const settingsQuery = new URLSearchParams(window.location.search)
@@ -1275,6 +1291,7 @@ export default function App() {
     page=<Protected><Dashboard key={path+window.location.search} initialView={settingsQuery.get("section")==="billing"||billingReturn?"billing":"settings"}/></Protected>
   }
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
+  else if(basePath==="/seller/apply")page=<CreatorApplyIntroduction/>
   else if(basePath==="/seller"||basePath.startsWith("/seller/"))page=<Protected><Suspense fallback={<main aria-busy="true"/>}><CreatorEnvironment path={basePath}/></Suspense></Protected>
   else if(basePath===BIGPERSON_CONTROL_PATH)page=<Protected><Control/></Protected>
   else page=<NotFound path={basePath}/>

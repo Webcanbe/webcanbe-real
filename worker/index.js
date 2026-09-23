@@ -1,5 +1,5 @@
-import { listingSitemap, renderListingPage } from "./public-catalog-pages.js"
-import { publicRoute } from "./public-routing.js"
+import { listingSitemap, renderListingPage, renderSpaPublicPage } from "./public-catalog-pages.js"
+import { publicRoute, manifest } from "./public-routing.js"
 import { boundedRequestBody } from './request-body.js'
 import { paymentPaths, paymentConfiguration, paymentDiagnostic, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
 import { createRemoteJWKSet, jwtVerify } from "jose"
@@ -767,11 +767,13 @@ export default {
         const internal = path.startsWith("/__public/") || path === "/app-shell.html"
         const assetUrl = new URL(request.url)
         if (internal) assetUrl.pathname = "/__public/404.html"
+        else if (path === "/plans" && route?.status === 200) assetUrl.pathname = "/app-shell.html"
         else if (route?.asset) assetUrl.pathname = route.asset
         else if (isKnownAppPath(path)) assetUrl.pathname = "/app-shell.html"
         else if (!path.split("/").pop().includes(".")) assetUrl.pathname = "/__public/404.html"
         const fetched = await env.ASSETS.fetch(new Request(assetUrl, request))
-        const asset = route?.status === 404 || internal ? new Response(fetched.body, {status:404,headers:fetched.headers}) : fetched
+        const plansSpa = path === "/plans" && route?.status === 200
+        const asset = route?.status === 404 || internal ? new Response(fetched.body, {status:404,headers:fetched.headers}) : plansSpa ? new Response(renderSpaPublicPage(await fetched.text(),path,manifest.routes[path]),{status:fetched.status,headers:fetched.headers}) : fetched
         if (path === "/__wcb_preview_runtime") {
           response = applyPreviewRuntimeHeaders(asset)
         } else {
