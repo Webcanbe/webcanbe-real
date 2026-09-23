@@ -766,19 +766,24 @@ function BillingSettings() {
     finally { operationStarted.current = false; setWorking("") }
   }
   const buyPack = async (packKey: string) => {
-    if (working || operationStarted.current || !overview.configuration?.checkoutAvailable) return
+    if (working || operationStarted.current) return
     operationStarted.current = true
-    setWorking(packKey); setMessage("")
+    setWorking(packKey); setMessage("Checking live checkout…")
     try {
+      const freshConfiguration = await loadPublicPaymentConfiguration()
+      if (!freshConfiguration.checkoutAvailable) throw new Error("Paid checkout is not available yet. Refresh billing status and try again.")
       const order = await hostedProductClient.createAiPack(packKey, paymentIdempotencyKey("ai-pack", packKey))
       if (!order.approvalUrl) throw new Error("PayPal approval is unavailable for this pack.")
-      setMessage("Redirecting to PayPal…"); window.location.assign(order.approvalUrl)
+      const approval = new URL(order.approvalUrl)
+      if (approval.protocol !== "https:" || !/(^|\.)paypal\.com$/i.test(approval.hostname)) throw new Error("PayPal returned an invalid approval address.")
+      setMessage("Redirecting to PayPal…")
+      window.location.href = approval.toString()
     } catch (reason) { operationStarted.current = false; setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be started."); setWorking("") }
   }
   if (overview.loading) return <div className="settings-billing"><b>Loading billing…</b></div>
   if (overview.error || !overview.configuration || !overview.billing) return <div className="settings-billing"><b>Billing unavailable</b><p>{overview.error || "Billing state could not be loaded."}</p><button className="button" onClick={overview.refresh}>Try again</button></div>
   const subscription = overview.billing.subscription
-  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}{subscription && !["cancelled","expired"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}<Link className="button" to="/plans">Review plans</Link></div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <button className="button" key={pack.key} disabled={!overview.configuration?.checkoutAvailable || Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — $${(pack.priceMinor/100).toFixed(2)}`}</button>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
+  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}{subscription && !["cancelled","expired"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}<Link className="button" to="/plans">Review plans</Link></div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <button className="button" key={pack.key} disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — ${(pack.priceMinor/100).toFixed(2)}`}</button>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
 }
 
 function Settings() {
