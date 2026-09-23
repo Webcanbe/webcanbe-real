@@ -26,7 +26,7 @@ export class PayPalProvider {
     this.clientSecret = requireText(env?.PAYPAL_CLIENT_SECRET, "paypal_secret_missing")
     this.webhookId = requireText(env?.PAYPAL_WEBHOOK_ID, "paypal_webhook_missing")
     this.baseUrl = env?.PAYPAL_ENVIRONMENT === "live" ? LIVE : SANDBOX
-    this.fetch = fetchImpl
+    this.fetch = fetchImpl.bind(globalThis)
     this.access = undefined
   }
 

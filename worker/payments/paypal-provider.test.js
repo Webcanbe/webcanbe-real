@@ -5,6 +5,14 @@ const env = { PAYPAL_CLIENT_ID: "sandbox-client", PAYPAL_CLIENT_SECRET: "sandbox
 const response = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } })
 
 describe("PayPal provider boundary", () => {
+  it("calls the fetch implementation with the global receiver required by Workers", async () => {
+    function receiverSensitiveFetch() {
+      if (this !== globalThis) throw new TypeError("Illegal invocation")
+      return Promise.resolve(response({ access_token: "token", expires_in: 300 }))
+    }
+    await expect(new PayPalProvider(env, receiverSensitiveFetch).accessToken()).resolves.toBe("token")
+  })
+
   it("creates server-priced orders with provider idempotency and no browser amount", async () => {
     const calls = []
     const provider = new PayPalProvider(env, async (url, init) => {

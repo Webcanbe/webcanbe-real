@@ -1222,7 +1222,11 @@ export default function App() {
   else if(basePath==="/dashboard")page=<Protected><Dashboard/></Protected>
   else if(basePath==="/marketplace")page=<Browse/>
   else if(basePath!=="/seller" && Object.values(appRoutes).some(([route])=>route===basePath))page=<Protected><Dashboard key={basePath} initialView={viewForPath(basePath)}/></Protected>
-  else if(basePath==="/settings")page=<Protected><Dashboard key={path+window.location.search} initialView={new URLSearchParams(window.location.search).get("section")==="billing"?"billing":"settings"}/></Protected>
+  else if(basePath==="/settings"){
+    const settingsQuery = new URLSearchParams(window.location.search)
+    const billingReturn = settingsQuery.has("subscription") || settingsQuery.has("ai-pack")
+    page=<Protected><Dashboard key={path+window.location.search} initialView={settingsQuery.get("section")==="billing"||billingReturn?"billing":"settings"}/></Protected>
+  }
   else if(basePath==="/plans"||basePath==="/pricing")page=<Plans/>
   else if(basePath==="/seller"||basePath.startsWith("/seller/"))page=<Protected><Suspense fallback={<main aria-busy="true"/>}><CreatorEnvironment path={basePath}/></Suspense></Protected>
   else if(basePath===BIGPERSON_CONTROL_PATH)page=<Protected><Control/></Protected>

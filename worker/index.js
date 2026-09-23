@@ -724,7 +724,9 @@ export default {
         })
       }
       else if (path.startsWith("/demo/aperture-north/")) {
-        response = applySourceDemoHeaders(await env.ASSETS.fetch(request))
+        const assetUrl = new URL(request.url)
+        if (path === "/demo/aperture-north/") assetUrl.pathname = "/demo/aperture-north/index.html"
+        response = applySourceDemoHeaders(await env.ASSETS.fetch(new Request(assetUrl, request)))
       }
       else if (path === "/project/aperture-north-source-demo" || path === "/project/aperture-north-source-demo/preview") {
         const assetUrl = new URL(request.url); assetUrl.pathname = "/app-shell.html"
