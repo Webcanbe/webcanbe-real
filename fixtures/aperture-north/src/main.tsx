@@ -16,7 +16,7 @@ function App() {
     <section className="intro" id="approach"><p className="eyebrow">A small studio, worldwide</p><h2>We turn a clear point of view into visual systems that make room for real life.</h2><div><p>From first thought to finished environment, Aperture North works across identity, digital, editorial and spatial design.</p><a href="#contact">Our approach <span>↗</span></a></div></section>
     <section className="work" id="work"><header><p className="eyebrow">Selected work</p><p>2019—2026</p></header><div className="work-grid">{work.map(([title, description, index]) => <article key={title}><div className={`project-art art-${index}`}><span>{index}</span></div><h3>{title}</h3><p>{description}</p></article>)}</div></section>
     <section className="statement"><p>We work slowly enough to notice what matters, and precisely enough to give it a durable form.</p><span>AN</span></section>
-    <section className="contact" id="contact"><p className="eyebrow">Start a conversation</p><h2>Have a place,<br/>object or story<br/>in mind?</h2><a href="mailto:hello@example.com">hello@aperturenorth.studio <span>↗</span></a></section>
+    <section className="contact" id="contact"><p className="eyebrow">Start a conversation</p><h2>Have a place,<br/>object or story<br/>in mind?</h2><a href="mailto:hello@webcanbe.com?subject=Aperture%20North%20template%20inquiry">hello@webcanbe.com <span>↗</span></a><p className="contact-note">This starter site is yours to customize. Replace the example studio details with your own.</p></section>
     <footer><span>© Aperture North</span><span>New York · Copenhagen</span><a href="#top">Back to top ↑</a></footer>
   </main>
 }

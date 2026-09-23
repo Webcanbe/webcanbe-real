@@ -34,6 +34,16 @@ describe("PayPal provider boundary", () => {
     await expect(provider.captureOrder("ORDER-1", "capture-key")).resolves.toEqual({ providerOrderId: "ORDER-1", providerCaptureId: "CAPTURE-1", status: "COMPLETED", grossMinor: 900, currency: "USD", customId: "wcb-order", capturedAt: "2026-09-21T00:00:00.000Z" })
   })
 
+  it("reports a safe provider error category and reference for subscription diagnosis", async () => {
+    const provider = new PayPalProvider(env, async url => url.endsWith("/v1/oauth2/token")
+      ? response({ access_token: "token", expires_in: 300 })
+      : response({ name: "RESOURCE_NOT_FOUND", debug_id: "trace-123", details: [{ issue: "private payer data" }] }, 404))
+    await expect(provider.getSubscription("I-OLD")).rejects.toMatchObject({
+      code: "paypal_request_failed",
+      message: "PayPal request failed: RESOURCE_NOT_FOUND (HTTP 404; ref trace-123).",
+    })
+  })
+
   it("posts the configured webhook ID and delivery headers to PayPal verification", async () => {
     const calls = []
     const provider = new PayPalProvider(env, async (url, init) => {
