@@ -65,7 +65,7 @@ function go(to: string) {
     routeTimer = undefined
   }, 120)
 }
-function Link({ to, children, className = "" }: { to: string; children: React.ReactNode; className?: string }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); go(to) }}>{children}</a> }
+function Link({ to, children, className = "", onClick }: { to: string; children: React.ReactNode; className?: string; onClick?: () => void }) { return <a className={className} href={to} onClick={(e) => { if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; onClick?.(); e.preventDefault(); go(to) }}>{children}</a> }
 function Mark({publicBrand=false}:{publicBrand?:boolean}={}) { return <span className="wcb-logo-wrap"><img className="wcb-logo-symbol" src={publicBrand?"/brand/webcanbe-mark.svg":"/favicon.png"} alt="" aria-hidden="true"/><span className="wcb-wordmark">Webcanbe</span></span> }
 function Arrow() { return <span className="arrow">↗</span> }
 function GoogleBrandMark() {
@@ -584,7 +584,8 @@ function useProductLibrary() {
 }
 
 function sourceProject(source: SourceProjectSummary): Project {
-  return { id: source.id, slug: source.id, title: source.name, tagline: "Your editable source project.", price: 0, stack: ["React", "Vite"], category: "Project", color: "sand", creator: "You", updated: "Working project" }
+  const firstPartyPreview = source.name === "Aperture North" ? "/demo/aperture-north/index.html" : source.name === "Stillform" ? "/demo/stillform/index.html" : undefined
+  return { id: source.id, slug: source.id, title: source.name, tagline: "Your editable source project.", price: 0, stack: ["React", "Vite"], category: "Project", color: "sand", creator: "You", updated: "Working project", livePreview: firstPartyPreview }
 }
 
 function releaseProject(catalog: Project[], releaseId: string, fallbackId: string, title = "Workspace project") {
@@ -703,6 +704,8 @@ function Dashboard({ initialView = "overview" }: { initialView?: DashboardView }
   const view = initialView
   const setView = (next: DashboardView) => go(appRoutes[next][0])
   const [projectQuery, setProjectQuery] = useState("")
+  const [projectSort, setProjectSort] = useState<"recent" | "name">("recent")
+  const [sortOpen, setSortOpen] = useState(false)
   const working = lib.hosted
     ? [...lib.sources.filter(source => !lib.copies.some(copy => copy.workspaceProjectId === source.id)).map(source => ({ project: sourceProject(source), href: "/workspace/" + source.id })), ...lib.copies.map(copy => ({ project: releaseProject(lib.catalog, copy.releaseId, copy.workspaceProjectId), href: "/workspace/" + copy.workspaceProjectId }))]
     : projects.map(project => ({ project, href: "/workspace/" + project.id }))
@@ -730,7 +733,11 @@ function Dashboard({ initialView = "overview" }: { initialView?: DashboardView }
   if (lib.loading && (view === "overview" || view.startsWith("source-") || view === "notifications")) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>{appRoutes[view][1]}</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="loading" title="Loading your product state" body=""/></section></main></RopeanDashboardShell>
   if (lib.error && (view === "overview" || view.startsWith("source-") || view === "notifications")) return <RopeanDashboardShell purchaseBadge={0} view={view} onView={setView}><main className="rd-main"><div className="rd-main-heading"><h1>{appRoutes[view][1]}</h1></div><section className="rd-panel rd-dashboard-section"><HubState kind="error" title="Dashboard data could not be loaded" body={lib.error} action={<button className="button" onClick={() => window.location.reload()}>Try again</button>}/></section></main></RopeanDashboardShell>
 
-  const gallery = <section className="rd-all-projects"><header><h1>All</h1><div><select aria-label="Sort projects" defaultValue="recent"><option value="recent">Last viewed by me</option><option value="name">Name</option></select><Link className="rd-new-project" to="/marketplace">New project <Plus/></Link></div></header>{working.length?<div className="rd-project-gallery">{working.map(({project,href})=><Link className="rd-gallery-card" to={href} key={href}><Preview project={project}/><strong>{project.title}</strong><span>{project.updated}</span></Link>)}</div>:<div className="rd-empty"><FolderKanban/><b>No projects yet</b><p>Choose a template to create your first working copy.</p><Link className="rd-primary-action" to="/marketplace">Browse marketplace</Link></div>}</section>
+  const lastViewed = readLocal<Record<string, number>>("wcb-project-last-viewed", {})
+  const sortedWorking = working.map((item, index) => ({ ...item, index })).sort((a, b) => projectSort === "name"
+    ? a.project.title.localeCompare(b.project.title) || a.index - b.index
+    : (lastViewed[b.href] ?? 0) - (lastViewed[a.href] ?? 0) || a.index - b.index)
+  const gallery = <section className="rd-all-projects"><header><h1>All</h1><div><div className="rd-project-sort"><button type="button" aria-label="Sort projects" aria-expanded={sortOpen} onClick={() => setSortOpen(value => !value)}>{projectSort === "recent" ? "Last viewed by me" : "Name"}<ChevronDown/></button>{sortOpen && <div role="menu" aria-label="Project sort options"><button type="button" role="menuitemradio" aria-checked={projectSort === "recent"} onClick={() => { setProjectSort("recent"); setSortOpen(false) }}>Last viewed by me</button><button type="button" role="menuitemradio" aria-checked={projectSort === "name"} onClick={() => { setProjectSort("name"); setSortOpen(false) }}>Name</button></div>}</div><Link className="rd-new-project" to="/marketplace">New project</Link></div></header>{working.length?<div className="rd-project-gallery">{sortedWorking.map(({project,href})=><Link className="rd-gallery-card" to={href} key={href} onClick={() => { try { writeLocal("wcb-project-last-viewed", { ...readLocal<Record<string, number>>("wcb-project-last-viewed", {}), [href]: Date.now() }) } catch {} }}><Preview project={project}/><div className="rd-gallery-meta"><strong>{project.title}</strong><small>{project.price ? `$${project.price}` : "Free"}</small></div><span>{project.updated}</span></Link>)}</div>:<div className="rd-empty"><FolderKanban/><b>No projects yet</b><p>Choose a template to create your first working copy.</p><Link className="rd-primary-action" to="/marketplace">Browse marketplace</Link></div>}</section>
   const settingsView = ["settings","account","billing","workspace"].includes(view)
   const settingsPanel = settingsView ? <div className="rd-settings-backdrop"><section className="rd-settings-modal" role="dialog" aria-modal="true" aria-label="Settings"><header><b>Settings</b><nav><Link to="/profile" className={view!=="workspace"?"active":""}>Account</Link><Link to="/workspace" className={view==="workspace"?"active":""}>Workspace</Link></nav><button aria-label="Close settings" onClick={()=>go('/dashboard')}><X/></button></header><div><aside>{view==="workspace"?<><b>Workspace</b><Link to="/workspace" className="active"><PanelsTopLeft/>General</Link><Link to="/billing"><CreditCard/>Billing</Link></>:<><b>Account</b><Link to="/profile" className={view==="settings"?"active":""}><UserCircle2/>Profile</Link><Link to="/account" className={view==="account"?"active":""}><SettingsIcon/>Sessions</Link><Link to="/billing" className={view==="billing"?"active":""}><CreditCard/>Billing</Link></>}</aside><main>{view==="workspace"?<WorkspacePage/>:view==="billing"?<><PageHeading title="Billing" description="Your plan, subscription, and purchased AI Actions."/><BillingSettings/></>:<AccountPage section={view==="account"?"account":"settings"}/>}</main></div></section></div>:null
 
