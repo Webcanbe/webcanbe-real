@@ -2,6 +2,7 @@ import type { DraftState } from "../runtime/draftStore"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { basicSetup, EditorView } from "codemirror"
 import { keymap } from "@codemirror/view"
+import { analytics } from "../../analytics"
 import { javascript } from "@codemirror/lang-javascript"
 import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
@@ -319,6 +320,7 @@ export default function CodeWorkspace({ projectId, request, epoch, connected, vi
         return next
       })
       setStatus(all ? `Saved ${saved.length} files in one source transaction. Preview is rebuilding.` : "Saved real source. Selection cleared; preview is rebuilding.")
+      analytics.capture("wcb_code_save_completed", { editor_mode: "code", state: "success", source: "workspace" })
       await onAccepted(response.data)
     } catch { setStatus("Save response unavailable. Drafts retained; Save retries the same request safely.") }
     finally { saving.current = false; if (mounted.current) setBusy(false) }

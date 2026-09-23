@@ -14,11 +14,13 @@ describe("production database readiness", () => {
       listings: true,
       entitlements: true,
       materializations: true,
+      requests: true,
+      request_events: true,
     }] }) }
     await expect(databaseReadiness(db)).resolves.toEqual({
       ok: true,
-      requiredCount: 10,
-      readyCount: 10,
+      requiredCount: 12,
+      readyCount: 12,
     })
   })
 
@@ -34,11 +36,13 @@ describe("production database readiness", () => {
       listings: false,
       entitlements: true,
       materializations: true,
+      requests: true,
+      request_events: true,
     }] }) }
     await expect(databaseReadiness(db)).resolves.toEqual({
       ok: false,
-      requiredCount: 10,
-      readyCount: 9,
+      requiredCount: 12,
+      readyCount: 11,
     })
   })
 })

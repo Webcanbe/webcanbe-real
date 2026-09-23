@@ -9,6 +9,8 @@ const REQUIRED_TABLES = Object.freeze([
   "wcb_listings",
   "wcb_license_entitlements",
   "wcb_entitlement_materializations",
+  "wcb_requests",
+  "wcb_request_events",
 ])
 
 export async function databaseReadiness(db) {
@@ -23,7 +25,9 @@ export async function databaseReadiness(db) {
       to_regclass('public.wcb_release_rights_verifications') IS NOT NULL AS rights,
       to_regclass('public.wcb_listings') IS NOT NULL AS listings,
       to_regclass('public.wcb_license_entitlements') IS NOT NULL AS entitlements,
-      to_regclass('public.wcb_entitlement_materializations') IS NOT NULL AS materializations`,
+      to_regclass('public.wcb_entitlement_materializations') IS NOT NULL AS materializations,
+      to_regclass('public.wcb_requests') IS NOT NULL AS requests,
+      to_regclass('public.wcb_request_events') IS NOT NULL AS request_events`,
   )
 
   const row = result.rows[0] ?? {}
@@ -38,6 +42,8 @@ export async function databaseReadiness(db) {
     row.listings,
     row.entitlements,
     row.materializations,
+    row.requests,
+    row.request_events,
   ]
   const readyCount = flags.filter(Boolean).length
 

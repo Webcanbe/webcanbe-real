@@ -605,69 +605,84 @@
       "description": "Choose a support channel by the operation that needs help. Distinct categories make it easier to provide relevant context without exposing unnecessary account or source data.",
       "kind": "docs"
     },
+    "/legal": {
+      "title": "Legal Overview — Webcanbe",
+      "description": "Legal Overview. Effective 23 September 2026.",
+      "kind": "information"
+    },
     "/legal/terms": {
       "title": "Terms of Service — Webcanbe",
-      "description": "Effective September 18, 2026. These Terms govern access to and use of Webcanbe.",
+      "description": "Terms of Service. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/privacy": {
       "title": "Privacy Policy — Webcanbe",
-      "description": "Effective September 19, 2026. This policy explains how Webcanbe handles information when you use the service.",
-      "kind": "information"
-    },
-    "/legal": {
-      "title": "Legal overview — Webcanbe",
-      "description": "Policies and release-specific agreements that govern accounts, source projects and marketplace transactions.",
+      "description": "Privacy Policy. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/buyer-license": {
       "title": "Buyer License — Webcanbe",
-      "description": "Understand which permissions accompany a marketplace release before acquiring, exporting or distributing it.",
+      "description": "Buyer License. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/creator-distribution": {
       "title": "Creator Distribution Agreement — Webcanbe",
-      "description": "Review the rights, source and commercial terms required to distribute a project through Webcanbe.",
+      "description": "Creator Distribution Agreement. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/refunds": {
       "title": "Refund Policy — Webcanbe",
-      "description": "Ask for a transaction-specific review through Billing Help. Eligibility depends on the applicable purchase terms and mandatory consumer protections.",
+      "description": "Refund Policy. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/acceptable-use": {
       "title": "Acceptable Use — Webcanbe",
-      "description": "Use Webcanbe only for projects and activities you are authorized to undertake.",
+      "description": "Acceptable Use. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/licenses": {
-      "title": "Licenses and notices — Webcanbe",
-      "description": "Webcanbe and marketplace projects use software and assets with their own license obligations.",
+      "title": "Licenses — Webcanbe",
+      "description": "Licenses. Effective 23 September 2026.",
       "kind": "information"
     },
     "/legal/privacy-requests": {
       "title": "Privacy Requests — Webcanbe",
-      "description": "Contact Webcanbe about access, correction, deletion or other applicable rights relating to your personal information.",
+      "description": "Privacy Requests. Effective 23 September 2026.",
+      "kind": "information"
+    },
+    "/legal/archive": {
+      "title": "Legal Version Archive — Webcanbe",
+      "description": "Effective and retained Webcanbe legal versions are identified here so an account action, order, or project license can remain associated with the version accepted at that time.",
+      "kind": "information"
+    },
+    "/legal/third-party-notices": {
+      "title": "Third-Party Notices — Webcanbe",
+      "description": "Runtime packages distributed with the current Webcanbe platform build are listed with their resolved version, license, copyright owner or project, and source location. Release-specific project notices remain part of that immutable project release.",
       "kind": "information"
     },
     "/about": {
       "title": "About Webcanbe — Webcanbe",
-      "description": "Webcanbe is a source-first web project marketplace for people who want a useful starting point and real code they can keep.",
+      "description": "Webcanbe is a source-first marketplace and workspace for real web projects: discover a usable starting point, make an editable copy, and leave with the code.",
       "kind": "information"
     },
     "/updates": {
       "title": "Product updates — Webcanbe",
-      "description": "Follow the public product and its source. Read the changelog for current changes and use documentation for supported workflows.",
+      "description": "Notes about changes that are present in the Webcanbe product and repository—not planned features or release speculation.",
       "kind": "information"
     },
     "/changelog": {
       "title": "Changelog — Webcanbe",
-      "description": "Changes to the public Webcanbe experience. These notes describe this interface without inventing release dates or implying that account features are enabled for everyone.",
+      "description": "A concise record of shipped repository changes. Entries are based on current project history and avoid claiming unavailable payment or deployment features.",
+      "kind": "information"
+    },
+    "/github": {
+      "title": "Webcanbe on GitHub — Webcanbe",
+      "description": "Webcanbe’s public development presence is the Webcanbe/webcanbe-real repository on GitHub.",
       "kind": "information"
     },
     "/contact": {
       "title": "Contact Webcanbe — Webcanbe",
-      "description": "Choose the channel that fits your question. Each prepares a categorized email to hello@webcanbe.com with relevant, reviewable context.",
+      "description": "Choose the channel that fits your question. Each form creates a persisted case with a reference you can use to track the request.",
       "kind": "information"
     },
     "/brand": {
@@ -713,6 +728,26 @@
     "/contact/security": {
       "title": "Security Report — Webcanbe",
       "description": "Privately report a suspected vulnerability or exposure affecting Webcanbe. Use only accounts and projects you control for a minimal reproduction.",
+      "kind": "support"
+    },
+    "/contact/privacy": {
+      "title": "Privacy Request — Webcanbe",
+      "description": "Request access, correction, deletion, or another applicable privacy right.",
+      "kind": "support"
+    },
+    "/contact/refunds": {
+      "title": "Refund Request — Webcanbe",
+      "description": "Create a case for transaction-specific refund review.",
+      "kind": "support"
+    },
+    "/contact/payments": {
+      "title": "Payment Dispute — Webcanbe",
+      "description": "Report a duplicate, reversed, disputed, or otherwise unexpected marketplace payment.",
+      "kind": "support"
+    },
+    "/contact/payouts": {
+      "title": "Payout Issue — Webcanbe",
+      "description": "Ask about a creator ledger balance, payout hold, or payout batch.",
       "kind": "support"
     },
     "/": {

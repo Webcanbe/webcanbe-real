@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS public.wcb_payment_reversals (
 CREATE INDEX IF NOT EXISTS wcb_payment_reversals_capture_idx
   ON public.wcb_payment_reversals(provider,provider_capture_id,occurred_at);
 
-REVOKE ALL ON public.wcb_payment_reversals FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON public.wcb_payment_reversals FROM PUBLIC, anon, authenticated, webcanbe_runtime;
 ALTER TABLE public.wcb_payment_reversals ENABLE ROW LEVEL SECURITY;
 CREATE POLICY wcb_payment_reversals_server ON public.wcb_payment_reversals TO webcanbe_runtime USING (true) WITH CHECK (true);
 GRANT SELECT, INSERT ON public.wcb_payment_reversals TO webcanbe_runtime;

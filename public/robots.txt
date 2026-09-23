@@ -8,6 +8,7 @@ Disallow: /dashboard-preview
 Disallow: /workspace
 Disallow: /projects
 Disallow: /purchases
+Disallow: /requests
 Disallow: /settings
 Disallow: /seller
 Disallow: /checkout/
@@ -33,6 +34,7 @@ Disallow: /dashboard-preview
 Disallow: /workspace
 Disallow: /projects
 Disallow: /purchases
+Disallow: /requests
 Disallow: /settings
 Disallow: /seller
 Disallow: /checkout/

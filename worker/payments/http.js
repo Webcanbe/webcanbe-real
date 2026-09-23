@@ -40,8 +40,9 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
         repo.currentSubscriptionForUser(session.userId),
         repo.aiActionBalanceForUser(session.userId),
       ])
+      const paidThroughCancellation = subscription?.status === "cancelled" && subscription.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Number(clock())
       return json({ billing: {
-        currentPlanKey: subscription?.status === "active" ? subscription.planKey : "free",
+        currentPlanKey: subscription?.status === "active" || paidThroughCancellation ? subscription.planKey : "free",
         subscription: subscription ? {
           subscriptionId: subscription.subscriptionId,
           planKey: subscription.planKey,

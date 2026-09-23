@@ -527,16 +527,16 @@
       "dest": "/__public/docs/troubleshooting/contact.html"
     },
     {
+      "src": "^/legal/?$",
+      "dest": "/__public/legal.html"
+    },
+    {
       "src": "^/legal/terms/?$",
       "dest": "/__public/legal/terms.html"
     },
     {
       "src": "^/legal/privacy/?$",
       "dest": "/__public/legal/privacy.html"
-    },
-    {
-      "src": "^/legal/?$",
-      "dest": "/__public/legal.html"
     },
     {
       "src": "^/legal/buyer-license/?$",
@@ -563,6 +563,14 @@
       "dest": "/__public/legal/privacy-requests.html"
     },
     {
+      "src": "^/legal/archive/?$",
+      "dest": "/__public/legal/archive.html"
+    },
+    {
+      "src": "^/legal/third-party-notices/?$",
+      "dest": "/__public/legal/third-party-notices.html"
+    },
+    {
       "src": "^/about/?$",
       "dest": "/__public/about.html"
     },
@@ -573,6 +581,10 @@
     {
       "src": "^/changelog/?$",
       "dest": "/__public/changelog.html"
+    },
+    {
+      "src": "^/github/?$",
+      "dest": "/__public/github.html"
     },
     {
       "src": "^/contact/?$",
@@ -613,6 +625,22 @@
     {
       "src": "^/contact/security/?$",
       "dest": "/__public/contact/security.html"
+    },
+    {
+      "src": "^/contact/privacy/?$",
+      "dest": "/__public/contact/privacy.html"
+    },
+    {
+      "src": "^/contact/refunds/?$",
+      "dest": "/__public/contact/refunds.html"
+    },
+    {
+      "src": "^/contact/payments/?$",
+      "dest": "/__public/contact/payments.html"
+    },
+    {
+      "src": "^/contact/payouts/?$",
+      "dest": "/__public/contact/payouts.html"
     },
     {
       "src": "^//?$",
@@ -666,7 +694,7 @@
       "handle": "filesystem"
     },
     {
-      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
+      "src": "^/(?:login|signup|dashboard|dashboard-preview|projects|purchases|requests|settings|seller|workspace|checkout|auth|_ops|project|marketplace|editor|app/docs|profile|account|billing|notifications|help)(?:/.*)?$",
       "dest": "/app-shell.html",
       "headers": {
         "X-Robots-Tag": "noindex, nofollow"

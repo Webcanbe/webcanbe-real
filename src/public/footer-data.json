@@ -77,8 +77,8 @@
     "title": "Creators",
     "links": [
       [
-        "Creator Studio",
-        "/seller"
+        "Become a creator",
+        "/creators"
       ],
       [
         "Publish a project",
@@ -164,7 +164,7 @@
       ],
       [
         "GitHub",
-        "https://github.com/Webcanbe/webcanbe-real"
+        "/github"
       ],
       [
         "Brand assets",
@@ -247,6 +247,14 @@
       [
         "Privacy Requests",
         "/legal/privacy-requests"
+      ],
+      [
+        "Legal Version Archive",
+        "/legal/archive"
+      ],
+      [
+        "Third-Party Notices",
+        "/legal/third-party-notices"
       ]
     ]
   }

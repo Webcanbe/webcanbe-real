@@ -1,0 +1,928 @@
+{
+  "/legal": {
+    "title": "Legal Overview",
+    "intro": "Legal Overview. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Who operates Webcanbe",
+        "paragraphs": [
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with its business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894). Required business-registration and supplier contact information: Business registration is currently pending. Do not claim a business registration number or mail-order-sales filing number that has not actually been issued. Contact details: Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
+          "The Webcanbe name is a product brand. Your account agreement and order confirmation identify the actual contracting operator. An authentication, infrastructure or payment provider does not become the supplier of your Webcanbe purchase merely by providing that service."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Find the right document",
+        "paragraphs": [
+          "Terms of Service. Read the Terms for accounts, the editing service, your content, suspension, liability and changes. Appendix A covers plans, renewal, cancellation and AI Actions. Appendix B explains AI-assisted source processing. Appendix C covers the relationship between ordinary service use and separately announced promotions.",
+          "Privacy Policy. Read the Privacy Policy for the information we process, why we process it, providers, international processing, retention, PostHog analytics and your choices. The cookie and provider schedules are included in this document rather than hidden in unrelated pages.",
+          "Buyer License. Read the Buyer License before acquiring a project. It distinguishes the Creator's original intellectual property, your own additions, and your rights to edit, export, commercially deploy and deliver one licensed End Project.",
+          "Creator Distribution Agreement. Read the Creator Agreement for non-exclusive distribution rights, release standards, fees, earnings, holds, payouts, support and delisting. Its appendix contains the marketplace submission standards.",
+          "Refund Policy. Read the Refund Policy for digital project issues, subscriptions, purchased Actions, billing corrections, cancellation and any applicable statutory withdrawal rights.",
+          "Acceptable Use. Read Acceptable Use for prohibited conduct, proportionate enforcement and appeals. It also explains good-faith security reporting. Legitimate development and honest criticism are not prohibited simply because they are unusual or unfavorable.",
+          "Licenses. Read Licenses and Notices for platform-versus-project rights, third-party code and asset notices, and copyright or other intellectual-property reporting.",
+          "Privacy Requests. Use Privacy Requests for a practical explanation of access, correction, deletion, portability, consent withdrawal and representative requests. Losing access to your account does not eliminate the email request route."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Three purchases, three different entitlements",
+        "paragraphs": [
+          "A marketplace purchase gives rights to the identified project release under its stated license. A Webcanbe subscription gives the enabled service features and allowances for its paid period. An AI Action pack adds the stated usage units to the purchasing account. Buying one does not automatically buy or renew another.",
+          "Webcanbe supplies marketplace licenses under distribution authority granted by the Creator. The Creator retains the original intellectual property. “Keep the source” or “own your project” describes your licensed source access, permitted modifications and portability; it is not an exclusive assignment of another person's copyright.",
+          "A cancelled Webcanbe subscription or a Creator's departure does not, by itself, cancel an existing valid project license. It also does not create a promise of indefinite cloud storage, lifetime updates, external hosting or a free domain."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Which terms apply",
+        "paragraphs": [
+          "Mandatory law takes priority. A separately signed agreement controls the subjects it expressly changes. The specific Buyer License governs project-use permissions, the Creator Agreement governs Creator distribution and earnings, and the Refund Policy governs its remedies. The Terms cover the remaining service relationship. Independent open-source and third-party licenses continue to govern their own materials.",
+          "The Privacy Policy is an explanation of data processing, not blanket consent to analytics, marketing, public sharing or AI training. Optional choices are presented separately. Campaign rules apply only to the specific promotion they identify and do not replace ordinary service or consumer rights."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Versions and questions",
+        "paragraphs": [
+          "Each document identifies its version and effective date. The version accepted with an account action or order remains associated with that record; a later website update does not silently rewrite a previously granted project license. Prior versions and retained copies are available through https://webcanbe.com/legal/archive or by contacting hello@webcanbe.com.",
+          "For an order question, include a safe order reference and the relevant project or plan. For a source-rights question, include the listing and release. Do not send account passwords, authentication tokens or complete payment-card details. The applicable document explains the next step and any relevant review route."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/terms": {
+    "title": "Terms of Service",
+    "intro": "Terms of Service. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Who operates Webcanbe",
+        "paragraphs": [
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with a business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894) and required supplier contact information Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. Applicable business or trade registration details: Business registration is currently pending. Do not claim a business registration number or mail-order-sales filing number that has not actually been issued. Contact: hello@webcanbe.com. “Webcanbe,” “we,” and “us” mean that operator, not the software's creators, an authentication provider, or a payment processor.",
+          "These Terms govern your account and use of our marketplace and source-editing service. The operator is the contracting supplier of Webcanbe subscriptions and AI Actions. We offer enabled services in: United States, Canada, United Kingdom, European Economic Area, Switzerland, Australia, New Zealand, Japan, Singapore, South Korea, Hong Kong, plus other jurisdictions where Webcanbe and its providers may lawfully provide service, excluding sanctioned, restricted, or unsupported jurisdictions. Merely making public information accessible does not promise that every paid feature or payout method is offered in every country. For marketplace orders under the distribution model described in the Creator Distribution Agreement, the operator supplies the project license as an authorized distributor; the identified Creator retains the underlying intellectual property. Your checkout and order confirmation identify the contracting supplier and Creator. A payment processor is not substituted for that supplier merely because it processes payment.",
+          "You accept these Terms through the account or checkout acceptance action presented to you. Merely viewing a public page does not create a paid subscription. An individual acting for an organization must have authority to bind it; the identified organization is then the customer for that account or order."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Related documents and precedence",
+        "paragraphs": [
+          "The Buyer License governs licensed project use. The Creator Distribution Agreement governs approved Creators. The Refund Policy and Appendix A below govern payment and service remedies. The Acceptable Use Policy governs prohibited conduct. The Privacy Policy explains personal-data processing; it is a notice, not blanket consent to unrelated uses of your information. Where a business customer needs a separate data-processing agreement, the parties must agree its scope and particulars as described in the Privacy Policy; these Terms are not an executed transfer instrument.",
+          "Mandatory law prevails. A separately signed agreement prevails on the subject it expressly changes. The specific project license controls project-use permissions; the Creator agreement controls Creator distribution and earnings; the billing and refund policies control their stated subjects. These Terms apply to other matters. An open-source or third-party license governs",
+          "its own components and is not restricted by conflicting marketplace wording. A listing may give additional rights but cannot silently remove the minimum rights or remedies promised in these documents."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Eligibility and account security",
+        "paragraphs": [
+          "Accounts are not available to children under 13. You must also meet any higher age or consent requirement applicable to you. If you lack legal capacity to contract, a parent, guardian, or other legally authorized representative must enter into and supervise the arrangement where the law permits it; a child's unchecked assertion of consent is not a substitute for any verification legally required. Some regions or features may require an adult-owned account. Merchant and payout eligibility are separate and may be stricter.",
+          "Provide accurate account and billing information, secure your sign-in methods, and notify us of suspected unauthorized use. You are responsible for use you authorize, but not automatically liable for every unauthorized act regardless of fault or applicable law. Do not share another person's identity or payment credentials. Account linking must prove control of the relevant identities; matching email text alone does not authorize a merge.",
+          "Workspace owners control membership and access within the permissions the service provides. Confirm that an invited member is entitled to access client work or licensed projects. Leaving a workspace does not itself transfer ownership of its contents or cancel a separately purchased license."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. The service and compatibility",
+        "paragraphs": [
+          "Webcanbe lets you discover versioned web projects, create working copies, edit supported source in Visual, Code, Split, and AI-assisted workflows, inspect history, and export source. A published release and your editable working copy are distinct. Editing your copy does not alter the Creator's published release or another customer's copy.",
+          "Compatibility is release-specific. Running a preview, locating an editable source element, building an export, and deploying a project are different capabilities. Read the listing and current compatibility documentation. A snapshot preview does not promise live form, navigation, or application interaction. A plan's deployment allowance does not include domain registration or an external hosting account unless expressly included, and does not mean every hosting provider, framework, dependency, or server feature is supported. Unavailable integrations must be identified before purchase when material to the offer.",
+          "We do not promise that every arbitrary source project can be edited visually. Verified functionality and express listing commitments remain binding; describing a feature as limited does not excuse a product that materially fails its stated supported use."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Your content and our limited processing license",
+        "paragraphs": [
+          "You retain the rights you hold in source, content, and original modifications you submit. You grant us a non-exclusive, purpose-limited right to store, reproduce, transmit, render, analyze, and modify that content to provide the features you request, maintain authorized history and backups, investigate issues, and secure the service. We may engage disclosed service providers for those purposes under appropriate obligations.",
+          "Private content does not become public merely by upload. Publication, shared-preview creation, and marketplace submission require their respective user actions. We do not gain a general right to sell your private source, use it in our advertising, or train general-purpose models on it. Any future optional training program would require a separate affirmative choice, not an unrelated Terms update.",
+          "You must have the rights needed to submit content, including permissions concerning personal data and client materials. Do not upload passwords, private keys, production credentials, or real end-user databases into an ordinary template unless an explicitly supported secure feature requires that information. Automated filtering reduces risk but is not a guarantee that every secret is detected."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Marketplace purchases and licenses",
+        "paragraphs": [
+          "A marketplace purchase supplies the identified release under its stated license; it is not an exclusive assignment of the Creator's copyright. Free releases also have license terms. A payment redirect, screenshot, or client-side success message is not conclusive payment evidence. The server confirms the order and associates the entitlement with the authenticated buyer.",
+          "Unless expressly included, purchases do not include custom development, lifetime updates, unlimited support, a domain, hosting, or third-party subscriptions. Promised compatibility, support, and update entitlements must be stated before payment. A Creator's departure or your cancellation of a Webcanbe plan does not by itself revoke a valid, fully paid project license. Continued cloud storage and access remain subject to the service terms and any lawful wind-down process."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Payments, recurring plans, and Actions",
+        "paragraphs": [
+          "The checkout presents the item, billing currency, total, taxes where applicable, recurrence, and cancellation conditions before authorization. A project purchase, a Webcanbe subscription, and an AI Action pack are separate transactions. Purchasing one does not silently enroll you in another.",
+          "Subscriptions renew only under the authorization you give. You can stop renewal using the cancellation method in Appendix A below. Purchased AI Actions are service units, not a deposit, transferable currency, or investment. Their stated non-expiry is subject to the protections in that policy, including remedies if we permanently stop providing the corresponding service.",
+          "We may investigate suspected payment abuse and pause affected functionality proportionately. We will not treat a good-faith refund request or lawful payment dispute as wrongdoing merely because it is inconvenient. Refunds, statutory withdrawal, and service remedies are governed by the Refund Policy and mandatory law."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "8. AI-assisted work",
+        "paragraphs": [
+          "AI produces proposals, not professional assurances. Review changes for functionality, security, rights, and suitability before applying or deploying them. The Terms, Appendix B: AI Use explains context processing, charging, review, and recovery. AI use does not expand the license to a purchased project or make generated content exclusively yours under every copyright law.",
+          "We remain responsible for our own contractual and statutory obligations. You are not required to accept hidden changes because an AI system generated them. The approved proposal, authorized source scope, revision checks, and accepted-source history govern application of edits."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "9. Third-party services and public links",
+        "paragraphs": [
+          "Authentication, payment, infrastructure, AI inference, and optional deployment services have their own roles and applicable terms. We remain the support contact for our own product and order obligations. You may need a separate account, license, or payment for an integration clearly identified as external.",
+          "Exporting a project does not give you another party's credentials or hosting account. Domain registration, transfers, and renewals are separate unless an actual promotion or order expressly includes them. We do not promise an unannounced giveaway or a domain we have not secured."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "10. Suspension, termination, and data retrieval",
+        "paragraphs": [
+          "We may suspend affected access to address a material breach, credible security threat, unlawful content, fraud, or a binding legal requirement. We will use measures proportionate to the issue, give a reason and review route where lawful, and normally allow a reasonable opportunity to correct a remediable breach. Immediate containment may be necessary for malware, compromised accounts, or ongoing harm.",
+          "You may close your account through an available account action or by contacting us. Closure and subscription cancellation must be coordinated so you are not unknowingly billed for an inaccessible service. Where safe and lawful, we provide a reasonable opportunity to export your own content before non-urgent termination. We may restrict delivery of infringing material or compromised secrets; that does not permit arbitrary deletion of unrelated lawful work.",
+          "If we discontinue a paid feature or end paid access without your material breach, we will provide any required refund and a fair remedy for prepaid service not supplied. If we permanently close the service, we will give practicable advance notice, export instructions, and a process for remaining valid obligations. Retention exceptions are explained in the Privacy Policy."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "11. Availability and warranties",
+        "paragraphs": [
+          "We will provide the service with reasonable care and skill and meet applicable mandatory conformity requirements. No system is guaranteed to be uninterrupted or free of every defect. We do not exclude mandatory digital-content conformity or security-update obligations that apply to a particular supply. Except for express commitments and rights that cannot be excluded, we do not provide an additional promise of fitness for every particular use, universal compatibility, business success, revenue, or search-engine ranking.",
+          "Keep appropriate independent copies of critical work. This recommendation does not excuse our failure to perform a promised backup, storage, or export obligation. A “Ready” or compatibility label is not a blanket security audit, legal clearance, accessibility certification, or guarantee of your application's future operation."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "12. Liability",
+        "paragraphs": [
+          "Nothing limits liability for fraud, intentional misconduct, gross negligence where it cannot be limited, death or personal injury caused by negligence where relevant, or any other liability or remedy that applicable law prohibits us from limiting. Obligations to pay valid refunds or Creator earnings are not cancelled by a liability cap.",
+          "For business customers only, and only to the extent lawful, our aggregate liability arising from the service in a twelve-month period is limited to the greater of USD 100 or the amounts that customer paid to Webcanbe for the service or affected project orders during the twelve months preceding the event. Loss that is too remote under applicable law is not recoverable; this is not an exclusion of foreseeable direct loss merely because it concerns data or a business tool. Consumer liability is governed by applicable mandatory rules rather than the business cap."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "13. Changes and disputes",
+        "paragraphs": [
+          "We may update these documents prospectively. We will give reasonable advance notice of a material adverse contractual change and obtain fresh acceptance where required. A new policy does not retrospectively reduce the license already granted for a purchased release or remove an accrued refund or payment obligation. We may act promptly where security or law requires it, with notice as soon as practicable.",
+          "Contact hello@webcanbe.com with an order or account reference to raise a dispute. We will consider it in good faith. Informal discussions do not suspend a legal deadline unless agreed or required by law. These Terms impose no mandatory arbitration, class-action waiver, gag clause, or exclusive foreign-court requirement. Applicable conflict-of-laws and jurisdiction rules determine the governing law and competent courts. Nothing removes the mandatory protections of a consumer's country where those rules apply.",
+          "If one provision is unenforceable, the remaining provisions continue to the extent they can fairly operate. We will not transfer the agreement in a way that reduces mandatory rights. No failure to enforce a provision once is a permanent waiver."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix A. Plans, billing and AI Actions",
+        "paragraphs": [
+          "A.1 Published plan schedule All amounts in this schedule are USD. Checkout must show the final amount due, tax treatment, billing interval, and contracting supplier before authorization. Taxes are included in displayed consumer prices where required; any lawful additional tax must be disclosed before you pay. Do not infer an extra fee from a support message after checkout.",
+          "Included Concurrent Monthly Annual Active AI Actions Plan AI billing billing projects each requests month",
+          "Free $0 Not 3 20 1 applicable",
+          "Pro $12 $120 20 300 2",
+          "Studio $29 $290 100 1,000 4",
+          "An annual price is charged annually, not the displayed monthly equivalent each month. Project licenses are purchased separately and are not made unlimited by a plan's active- project allowance. Source export is available on every plan for source you are entitled to export.",
+          "Where a supported deployment feature is enabled, its plan limits are 1, 5, and 20 for Free, Pro, and Studio. These limits do not include a domain, third-party hosting charges, or unsupported provider integrations. The offer shown before payment identifies which deployment functions are actually included; an allowance alone is not a promise that a deployment provider is available.",
+          "A.2 Renewal and plan changes Before subscribing, you must receive clear renewal terms and expressly authorize the recurring charge. We will provide a confirmation identifying the plan, interval, amount, supplier, and cancellation method. We do not start a subscription merely because you acquired a template or used the Free plan.",
+          "You can cancel renewal from Billing when that action is offered, and request assistance through hello@webcanbe.com if access fails. Cancellation must not require a sales call or repeated retention offers. The result must state whether renewal is cancelled and the exact paid-through date. Paid access remains through that date unless an independently explained lawful reason ends it earlier.",
+          "We will not apply a plan upgrade, downgrade, extra purchase, or new price without the required disclosure and authorization. Where the service does not support an automated change, it must not pretend one occurred. Material price changes apply prospectively after appropriate advance notice, ordinarily at least 30 days or a longer period required by law; existing prepaid periods are not repriced retroactively.",
+          "A.3 Monthly included Actions Included AI Actions are a monthly service allowance. Under the launch allocation schedule, grants are associated with a calendar month in UTC and expire at the next month's boundary; the account should display the exact renewal and expiry time. Annual subscribers still receive monthly grants throughout their paid service period, not one annual grant.",
+          "Unused included Actions do not roll over. We consume available included Actions with the nearest expiry before purchased Actions. Duplicate subscription events or repeated page loads do not create duplicate monthly grants. A cancelled subscription remains entitled to the applicable paid features and grants until its paid-through date. The exact grant and expiry times displayed in the account distinguish UTC calendar-month allowances from the provider's billing anniversary.",
+          "A.4 Purchased Actions",
+          "Pack Actions Price",
+          "Small 100 $5",
+          "Medium 500 $15",
+          "Large 1,500 $35",
+          "Purchased Actions are kept separately from included allowances and do not expire by the passage of a month. They remain associated with the purchasing account, including after cancellation of a plan, subject to valid payment and the account/service closure remedies in the Refund Policy. They are not transferable between users, do not earn interest, and cannot be used to pay Creators or third-party providers.",
+          "A refunded, reversed, or fraudulent pack may have its remaining units revoked and its associated usage reconciled. We will not revoke an unrelated valid pack merely because another order is disputed. A legitimate payment dispute is not automatically fraud.",
+          "A.5 When a request is charged Standard costs 1 Action; Deep costs 3 Actions. The chosen mode, described processing scope, and cost are shown before submission. A mode name or higher cost is not a guarantee of a better answer, and does not imply a different model unless expressly stated in the offer. We reserve the amount before processing and commit it when a valid, usable proposal or explanation has been delivered. This includes a proposal you review but choose not to apply. Applying the same stored proposal is not a second generation charge. A genuinely new generation request has its own stated cost.",
+          "Failure before a usable result should release the reservation. Source acceptance followed by a recording error requires reconciliation rather than a second charge or an unrecorded free edit. We must recover the accepted result using its original identity, without regenerating or applying twice. Browser aborts and lost connections can leave a request temporarily uncertain; a confirmation or server status, not optimistic UI text, determines what completed.",
+          "Per-plan concurrency limits control simultaneous requests. A temporarily reserved balance is not an additional fee. Persistent incorrect balances or duplicate charges should be reported for correction.",
+          "A.6 Failed payments and account limits We may pause new paid usage after an unconfirmed or failed payment and provide an explanation and recovery path. We do not silently delete existing licensed source as the first response to a failed renewal. If downgrading puts an account above an active-project limit, the product must explain the allowed actions and preserve a reasonable export path; it must not invent a retroactive project-license violation.",
+          "You remain entitled to applicable refunds, correction of erroneous charges, and mandatory consumer remedies. The Refund Policy supplies the detailed process."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix B. AI use and source processing",
+        "paragraphs": [
+          "B.1 What AI does Webcanbe's AI feature processes your request with bounded project context and produces a source-change proposal or explanation. It uses an inference provider; the launch implementation uses Cloudflare Workers AI. It is not a promise of a particular model forever or a certification that an output is secure, original, lawful, or correct for every deployment.",
+          "Generating a proposal and applying it are different actions. Review the affected files and diff. Source changes must pass the service's validation and authorization checks and be applied through the same accepted-source system as Visual and Code edits. A generated answer alone does not mean anything has been saved.",
+          "B.2 Context and permissions The feature may include the selected file or element, relevant authorized dependencies, nearby source, your prompt, and necessary project metadata. The model cannot grant itself access to another workspace or expand its file-write authority. Instructions found inside a project are untrusted project content, not permission to perform platform administration, expose credentials, or move money.",
+          "Keep private keys, tokens, passwords, and unnecessary personal information out of source and prompts. Webcanbe applies boundaries and credential-oriented filtering, but automated detection is not perfect. You must be entitled to process any client or third-party material through the feature. Do not paste private material into unrelated public support or marketing channels.",
+          "B.3 Data use We use submitted context and output to deliver the requested feature, maintain the resulting project history, diagnose relevant problems, and secure the service under the Privacy Policy. We do not use your private source or prompts to train a general-purpose model without a separate explicit opt-in. This is distinct from retention needed to operate a request, record an accepted proposal, or meet security obligations.",
+          "Provider processing and storage locations are described in the recipient schedule in the Privacy Policy. We do not promise zero retention, exclusive regional processing, or deletion from a provider's systems unless that configuration and contract have been established. Selecting an AI feature is not blanket consent for unrelated advertising or public disclosure.",
+          "B.4 Review, stale proposals, and recovery If source has changed since a proposal was created, the service must refuse an unrelated stale apply rather than overwrite newer work. A delayed response from an earlier request must not roll the editor back from a later accepted Code revision. History records should identify accepted AI changes, and ordinary undo/revert and export should operate on canonical source.",
+          "An accepted change whose usage settlement is interrupted must be recoverable exactly once. The service must not regenerate the proposal, duplicate its transaction, or charge again merely because a response was lost. Until the status is confirmed, avoid issuing repeated new requests to recreate the same change; use the recovery or support path.",
+          "B.5 Cost and output rights The Terms, Appendix A: Billing and AI Actions explains Standard, Deep, reservations, and the charge for a successfully delivered proposal. Declining a valid proposal is different from a technical failure before a useful result.",
+          "As between you and Webcanbe, we do not claim exclusive ownership of your original input or output solely because you used AI. Copyright and other rights may depend on human contribution and applicable law. Outputs may be similar to material generated for someone else. Underlying project and open-source licenses continue to apply; AI editing does not turn a single-project commercial license into an unlimited redistribution right.",
+          "Test a change appropriately before deploying it. Do not use AI output as the sole basis for decisions about safety, legal compliance, medical care, financial obligations, or access- control design without suitable review. This does not waive Webcanbe's own obligations concerning correct charging, authorized source changes, privacy, or consumer remedies."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix C. Promotions and public builds",
+        "paragraphs": [
+          "C.1 Separate, voluntary participation Build League, domain awards, referral rewards and similar promotions operate only when separately announced with their own published rules. Ordinary account use is not an entry. A project purchase or subscription does not improve a random draw's odds unless an",
+          "applicable, lawful promotion expressly states otherwise. A free-entry campaign will not require a hidden purchase. You may use the service without posting a favorable review, joining a campaign or opting into marketing.",
+          "C.2 Published reward conditions A campaign's rules identify its organizer, eligible participants and territories, start and end times with time zone, entry process, selection method, reward quantities, any participation- based unlocks, and claim process. Fixed domain inventory and additional promotional AI Actions must be distinguished. Domain awards specify the exact domain, paid registration term, control or transfer method, renewal responsibility and any actual transfer restrictions. This agreement does not promise an unannounced or unsecured domain, automatic recurring prizes or an indefinite prize budget.",
+          "Promotional Actions are separate from purchased Actions. Any expiry, amount, earning limit or usage condition must be disclosed when they are offered; paid balances retain their separate protections. We will not change an already-earned reward retrospectively merely because a promotion proved more expensive than expected. Necessary changes must respect the rules accepted for that campaign and mandatory law.",
+          "C.3 Public content and review You retain rights in your original public build, subject to the underlying project license. Submitting a public post URL gives us permission to review it for that campaign; it does not license us to publish your private source or use your image and work in unrelated paid advertising. A gallery feature, reusable promotional screenshot or testimonial is subject to the permission presented with that use. Honest criticism does not invalidate an otherwise eligible entry.",
+          "Material incentives should be disclosed clearly in the public post where required. We may verify finalist statistics and investigate documented artificial traffic, duplicate identities or fabricated referrals under the published rules. A sudden legitimate increase in reach is not proof of manipulation. Before a non-urgent disqualification, we will give the participant the relevant reason and a reasonable opportunity to provide an explanation. Platform-specific entry requirements are stated in the campaign rules; this paragraph is not a blanket ban on genuine reach-based competitions."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/privacy": {
+    "title": "Privacy Policy",
+    "intro": "Privacy Policy. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Controller and contact",
+        "paragraphs": [
+          "MIN SIHOO, operating Webcanbe from 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894), is responsible for personal information we process for our own account, marketplace, billing, security, and support purposes. Privacy contact: Webcanbe Privacy Contact, hello@webcanbe.com. Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement.",
+          "For personal information an organization places in its private project for processing solely on its instructions, that organization may be the controller and Webcanbe its processor. Section 14 below explains the separate processing agreement for that role. We do not treat a controller's project data as available for unrelated advertising simply because it is hosted in our workspace.",
+          "This policy describes personal-data handling, not a transfer of your intellectual property. Optional marketing, non-essential tracking, and legally required cross-border consents are not bundled into general account acceptance."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Information we process",
+        "paragraphs": [
+          "Account and authentication. We process a provider-specific account identifier, sign-in provider, email and verification state, display name, profile image where supplied, first-party session records, permissions, and security-related events. Google sign-in uses ordinary identity/profile scopes. The Google sign-in feature does not itself authorize reading your Gmail, Drive, or Calendar. GitHub and email/password sign-in use Firebase Authentication in the launch implementation. Passwords are submitted to that authentication service rather than intentionally stored by the Webcanbe application backend as plaintext.",
+          "Workspaces and source. We process the files and source you submit, project metadata, membership records, editable working copies, accepted revisions, draft-recovery records, export requests, and related usage necessary to provide the feature. Source may itself contain personal information. Use synthetic sample data for templates where possible.",
+          "AI. When you request AI assistance, we process the prompt, selected and relevant authorized source context, proposal or explanation, cost and reservation records, request identity, outcome, and source-history information where a change is accepted. The feature's provider receives context needed for inference. We do not need unrelated files or authentication secrets in that context.",
+          "Marketplace and Creator records. We process public listing and Creator-profile information, release identifiers, submissions, review decisions, rights evidence, orders, entitlements, licenses, support interactions, and payout-related references. Legal-name, verification, and payout data are not automatically public profile fields. We use proportionate identity or rights evidence and avoid collecting full identification documents where a provider-managed process suffices.",
+          "Billing. We process the selected product or plan, amount, currency, tax and billing information required for the transaction, payment-provider references, subscription status, purchase and refund events, and accounting records. Payment providers collect payment credentials through their controlled process. We do not require complete card numbers or card security codes in support messages.",
+          "Technical and support information. We may process IP addresses, browser and device information, timestamps, request and error identifiers, security logs, messages you send us, and attachments you choose to provide. Do not send passwords, session cookies, private keys, or unnecessary sensitive personal information. If you open a support request from a signed-in account, we may include safe account and order references to help identify the issue."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Sources and purposes",
+        "paragraphs": [
+          "Information comes from you and authorized workspace members, your selected identity or payment provider, technical interaction with the service, and Creator or support submissions. We use it to operate accounts, supply requested editing and AI features, deliver licensed releases, bill and reconcile orders, preserve history, handle rights and refund requests, secure access, prevent fraud, diagnose failures, communicate service changes, and meet legal obligations.",
+          "Where the GDPR applies, processing necessary to perform an account or purchase contract relies on Article 6(1)(b); accounting and disclosures required by a law applicable under that Regulation rely on Article 6(1)(c); proportionate security, abuse prevention, service diagnostics, and claim defense rely on Article 6(1)(f) where our legitimate interests are not overridden by your rights; optional marketing or non-essential technologies rely on consent where required. We do not label every useful processing operation as contract-necessary or treat a foreign legal request as automatically establishing a GDPR legal-obligation basis. Processing on a business customer's instructions is governed by that customer's lawful basis and our processor obligations.",
+          "We do not make consequential eligibility, payment-dispute, or rights determinations solely by an AI answer without appropriate review where legally required. Technical rate limits and fraud indicators are not an assertion that a person is guilty of wrongdoing. Contact us to seek human review of an account restriction or financial adjustment."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Private content, publication, and AI training",
+        "paragraphs": [
+          "Private working copies are not public marketplace listings. Authorized members and service personnel or providers who need access to deliver, secure, or troubleshoot the service may process them under access restrictions. A publication or public-sharing action has a separate effect that should be clear before you confirm it.",
+          "Published listings, approved previews, and public Creator-profile fields can be accessed and indexed by other people and search services. Removing a public page may not instantly remove copies held independently by search engines or recipients; we will take steps within our control and honor applicable rights.",
+          "We do not sell personal information or use sign-in information for third-party behavioral advertising. We do not train general-purpose AI models on private source or prompts without a separate explicit opt-in. This is not a promise that all operational records are immediately deleted or that public material cannot be accessed by independent crawlers. Our use of an inference provider is explained in the provider schedule."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Service providers and other disclosures",
+        "paragraphs": [
+          "The provider schedule in Appendix B below identifies the recipients, roles, processing locations, purposes, safeguards, and applicable retention information for enabled features. The launch architecture uses Cloudflare for delivery, Worker execution and relevant AI/ preview services, Firebase/Google for specified authentication, Supabase-hosted PostgreSQL for application records, and PayPal for enabled payment functions. PostHog provides optional product analytics under Section 11 below. Email and optional deployment providers are included in the schedule only for functions actually enabled.",
+          "Some providers act on our instructions for certain operations and as independent controllers for their own account, payment, fraud, or legal obligations. We do not claim one role covers every provider product. We share only the information relevant to the requested service or lawful purpose.",
+          "We may disclose information to comply with a valid legal obligation, protect rights or safety, investigate credible abuse, obtain confidential professional advice, or carry out a business transfer with appropriate safeguards and notice. A buyer's full account or billing data is not supplied to every Creator by default. Information shared to resolve a specific issue must not be reused by the Creator for unsolicited marketing."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. International processing",
+        "paragraphs": [
+          "Webcanbe and its providers may process information outside your country. The exact recipient, destination countries, categories, purpose, timing or method, retention, and available choices are set out in the transfer schedule in the Privacy Policy. We use a lawful transfer mechanism where required, such as a recognized adequacy arrangement or appropriate contractual safeguards, and assess the actual transfer rather than assuming a provider's brand is enough.",
+          "Where Korean law requires specific foreign-transfer notice, disclosure, or consent, we provide it before the relevant transfer. Contract-necessary processing and optional processing must be distinguished under the applicable basis. Where a consent is required, declining it must have the accurately stated consequence; it cannot authorize unrelated transfers. Contact us for relevant safeguards or questions about a recipient."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Retention and deletion",
+        "paragraphs": [
+          "We retain each category only for the stated purpose and applicable legal requirements. The following is our retention schedule, subject to the provider schedule in the Privacy Policy and a specific, documented legal or security hold:",
+          "Category Retention approach",
+          "Active account, workspace and source — While the account or workspace is used and needed to provide the service. Verified deletion requests have an operational target of completion within 30 days, except for records that must remain for legal, accounting, payment, fraud, security or dispute obligations. Requests are handled through the Privacy Requests process; Webcanbe does not claim that account deletion is automatic, and provider-managed deletion or backup lifecycles may continue for the periods disclosed below.",
+          "Recoverable backups — Webcanbe does not currently operate a separate managed backup store, and the current Supabase Free plan does not include automatic daily database backups. If Webcanbe-managed backup copies are introduced, their deletion or overwrite target is 30 days. Provider-managed disaster-recovery copies follow the provider's verified lifecycle; for example, Firebase states that deleted Authentication data is removed from live and backup systems within 180 days. A specifically documented lawful hold may require longer retention; backups are not used to reactivate deleted accounts for ordinary purposes.",
+          "Routine raw security and diagnostic logs — The application does not maintain a general durable store of raw diagnostic logs. Any ordinary Webcanbe-controlled transient security or audit log that is retained has a 180-day target, with longer retention only for an active incident, fraud investigation, dispute or legal obligation. Relevant incident records are isolated and reviewed instead of retaining all raw logs indefinitely. Immutable control, release, publication, rights, payment, license and entitlement evidence is not treated as an ordinary raw log and remains with the underlying provenance or transaction record.",
+          "Contracts, payment and supply records — Keep the minimum records for the applicable statutory period. Where Korean electronic-commerce record rules apply, contract/cancellation and payment/supply records are generally retained for five years.",
+          "Consumer complaints and disputes — Where Korean electronic-commerce record rules apply, generally three years; retain a particular unresolved claim longer only on a documented legal basis.",
+          "Advertising records Where the corresponding Korean record rule applies, generally six months.",
+          "License and rights evidence Keep the minimum release, license, order, and rights evidence needed for outstanding licenses or claims, separating it from unnecessary profile and source data.",
+          "AI request results — The current implementation does not persist raw AI prompt text or transient selected-source input context after the request completes, which is shorter than the 30-day maximum target for any future Webcanbe-controlled temporary copy. Accepted project edits and revisions remain ordinary project data, while AI usage, reservation and outcome metadata remains account or transaction data. Cloudflare Workers AI does not store request content unless a separate storage service is deliberately used and does not use Customer Content for training or service improvement without explicit consent.",
+          "When a backup is restored for recovery, deletion instructions must be reapplied before it becomes an ordinary live data source. Deleting a Creator account does not require deletion of the minimum release and license evidence needed to honor buyers' existing lawful rights. We do not keep an entire private workspace merely because one order record must be retained."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "8. Your rights and choices",
+        "paragraphs": [
+          "Depending on applicable law, you may request access, correction, deletion, a copy or portability, restriction, objection to certain processing, withdrawal of consent, and review of qualifying automated decisions. You may also complain to the competent privacy regulator, including your local supervisory authority where applicable. We do not condition a right on giving up another mandatory right.",
+          "Use Privacy Requests or hello@webcanbe.com. We verify identity proportionately and may need limited information to locate the records. We do not normally need your password or a full identity-document scan. Where an organization controls project data, we may forward or direct a request to that organization while assisting as required.",
+          "We respond within the applicable legal period. GDPR requests generally require a response within one month, with a permitted extension explained within that first month; a shorter local deadline takes priority. A deletion request may leave limited legally required records, which we will identify by category and reason."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "9. Cookies, communications, and minors",
+        "paragraphs": [
+          "Appendix A below explains essential authentication and preference storage and any optional technologies. Non-essential analytics, marketing, or third-party embeds must not be loaded before required consent. Refusing them does not prevent core account use. Service, security, and transaction communications are separate from optional marketing messages.",
+          "The service is not directed to children under 13. Higher local minimum-age or parental- consent requirements may apply. Where a lawful representative arrangement is required, it must be established before collecting information under that arrangement. If we learn that an account was created without legally required authorization, we will take proportionate steps to restrict processing and handle the information lawfully."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "10. Security and changes",
+        "paragraphs": [
+          "We use measures appropriate to the service, including encrypted transport, access controls, authenticated server-side authorization, and limits on secret exposure. No promise of absolute security, end-to-end encryption of all source, zero data retention, or independent certification is made here unless separately and accurately documented.",
+          "Material changes to purposes, recipients, or choices will be explained before they take effect where required, with fresh consent where necessary. The effective date above identifies this version. Contact Webcanbe Privacy Contact at hello@webcanbe.com for questions."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "11. PostHog analytics and session replay",
+        "paragraphs": [
+          "If enabled after a verified Webcanbe project token and host are configured, PostHog will provide optional product analytics to understand visits, broad country-level location, referral sources and whether people complete relevant actions, such as creating an account, starting a project, saving an edit, returning to a project, exporting source or completing an enabled purchase. Analytics can include a pseudonymous visitor or account identifier, timestamps, permitted route and campaign labels, browser or device category, event names and limited event properties. These are not necessarily anonymous merely because a direct name is omitted.",
+          "We do not intentionally send private project source, AI prompt text, access credentials, full support messages, payment-card data or identity-verification documents to product analytics. Public-page URLs and referrers are reduced or filtered to avoid query-string secrets and unnecessary identifiers. Location is approximate rather than GPS-level location. IP addresses can be processed in the connection and country-lookup process; the actual storage and disposal rule is in Appendix B. Refusing optional analytics does not prevent the essential account, licensed editing or payment functions.",
+          "PostHog is disabled in the current launch configuration, and session replay is disabled in code. If replay is later offered, we will update this notice and provide any required prior choice before capture begins. That feature can reconstruct on-site interactions; it is not permission to record a user's entire device. Private source editors, project previews containing private content, authentication, payment credentials, identity records and sensitive support fields must be excluded or masked before transmission. General input masking alone is not treated as protection for code displayed as page text.",
+          "We do not use analytics identifiers for third-party cross-context behavioral advertising or sell access to individual usage profiles. Campaign results shared with prospective Creators use aggregate figures, not identifiable participant or customer records. Cookie and other storage choices are described in Appendix A; the active PostHog region, recipient, retention and rights-handling configuration are disclosed in Appendix B."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "12. Build League, referrals and showcase information",
+        "paragraphs": [
+          "If you voluntarily enter a campaign, we process your account reference, public handle, submitted post and project URLs, entry time, qualifying product events, permitted referral attribution and selection or claim records. We use those records to verify eligibility, assess the disclosed competition criteria, contact selected participants, deliver rewards and address documented abuse. Where analytics consent is required, we do not bypass that choice by relabeling optional audience tracking as eligibility verification. Essential campaign evidence is kept separately from optional analytics.",
+          "For a domain award, the selected participant may need a registrar account reference, eligible contact information and a transfer acceptance. Relevant information is shared with the actual registrar or transfer provider only for delivery and its stated registration duties. We do not ask for a registrar password or payment to release an advertised free prize.",
+          "Only the public entry information described before submission is displayed in a leaderboard or gallery. Contact details, identity evidence and private source are not public entry fields. Additional use in advertisements, testimonials or winner publicity requires the applicable",
+          "separate permission; declining unrelated publicity does not forfeit a valid reward. Entry administration messages are distinct from optional marketing subscriptions. Campaign records follow this schedule: No optional PostHog analytics or durable campaign-attribution store is enabled in the current production configuration. If ordinary campaign or referral attribution data is collected for a published campaign, its retention target is 90 days unless a longer period is required for a specific legal or accounting purpose. Reward eligibility, claim, fraud-prevention and financial records are separate records and may be kept for their applicable obligation, including a documented dispute or legal-record requirement."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "13. Choices that do not require losing your account",
+        "paragraphs": [
+          "You may decline optional analytics, leave a promotion, unsubscribe from marketing or remove an optional public showcase without asking to delete all of your projects. Changes operate prospectively; we may retain limited evidence of a completed transaction, a concluded promotion or a legal claim where justified. We will explain any effect on an entry still awaiting selection. A privacy request is not treated as fraud or breach simply because it makes analytics less complete."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "14. Information processed for a business customer",
+        "paragraphs": [
+          "Where we process personal information in an organization's private project solely on that organization's instructions, a separate data-processing agreement is needed when applicable law requires it. That agreement must identify the parties, instructions, data categories, approved providers, safeguards, assistance, incident notification and return or deletion arrangements. We do not treat these general policies as a signed DPA, executed Standard Contractual Clauses or evidence of a particular data-residency configuration. Ask hello@webcanbe.com about the arrangement before uploading regulated or specially sensitive datasets into a workspace."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix A. Cookies and local storage",
+        "paragraphs": [
+          "A.1 Why storage is used Webcanbe uses browser storage and similar technologies to authenticate a session, complete a sign-in flow, retain necessary navigation state, support secure requests, and remember interface choices. These technologies must be classified by actual purpose rather than calling all scripts “essential.”",
+          "The production architecture includes secure first-party session and short-lived sign-in state cookies. Firebase authentication may use its own SDK persistence according to the chosen configuration. A local interface preference or draft-recovery entry may use session storage, local storage, or another browser store. The current names, purposes, lifetimes, providers, and storage types are listed in Appendix C below. The inventory is part of this policy and is updated when the enabled product changes.",
+          "A.2 Essential and optional technologies Strictly necessary authentication, security, and requested-function storage is used for those purposes. Optional analytics, advertising, cross-site tracking, and third-party media with non- essential storage require consent where applicable. We do not classify an advertising pixel as necessary merely because it helps our business.",
+          "The absence of optional trackers may mean no general consent banner is necessary for a particular deployment. That does not remove the need for this notice or for consent if an optional technology is later added. A preference that is essential in one context is not automatically essential in all contexts.",
+          "A.3 Video and external embeds When an external video is embedded, we provide a local preview until you choose to load that media and give any required consent. The provider and its receipt of connection data are identified before loading. Written documentation remains available if you decline the video.",
+          "A.4 Your choices Where optional technologies are present, you can accept or reject them without a preselected choice and later change the choice through the Privacy choices control at the Privacy Policy and Privacy Requests pages, or hello@webcanbe.com; no optional analytics control is shown while optional analytics is disabled. Rejection should be as accessible as acceptance. Essential account functions remain available, although blocking all cookies or local storage through browser settings may prevent authentication or local recovery.",
+          "Deleting browser storage can remove preferences or unsynced drafts. Sign out and export important work where appropriate before clearing storage. Server-side account deletion is separate from clearing cookies.",
+          "A.5 Referrals and tracking signals We may use an ordinary incoming campaign or referrer indicator to understand how a public page was found where lawful and disclosed. It does not change the content shown to a search bot versus a human. A referral parameter does not authorize device fingerprinting, disclosure of an account to an external AI provider, or creation of an unrelated advertising profile without an appropriate basis.",
+          "Where applicable privacy law requires honoring a recognized opt-out signal, we implement it for the covered processing. Do not infer that a “Do Not Track” setting has a universal technical effect across all providers. Contact hello@webcanbe.com for the current inventory or a privacy question."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix B. Providers and international processing",
+        "paragraphs": [
+          "This schedule describes each enabled recipient and its particular role. “Processor” means a provider processing on our instructions for that function; some providers separately determine how to process information for their own account, fraud-prevention or legal duties. The schedule does not treat all provider activity as one role.",
+          "B.1 Cloudflare Delivery, network security, Workers and related preview services process connection metadata and the source or render artifacts needed for the requested operation. Workers AI receives authorized prompts, selected project context and inference outputs when AI is",
+          "requested. These service-data functions are performed under the relevant service contracts, with separate provider account and legal functions where applicable. Contracting entity, processing countries, retention and transfer safeguards: Cloudflare, Inc. provides the production global edge network, Workers, static-asset delivery, Hyperdrive and Workers AI. Ordinary HTTPS traffic is processed at Cloudflare data centers near the connecting user unless a separately configured regional service applies; Webcanbe has not configured a regional-services restriction. Cloudflare's current DPA permits processing by Cloudflare and listed subprocessors in the United States and other listed service locations, uses the applicable EU Standard Contractual Clauses and UK transfer addendum for restricted transfers, and limits retention to the earlier of agreement termination or when processing is no longer necessary for the service. Request and response content is ordinarily handled in memory unless caching or another storage product is used. Workers AI does not use Customer Content to train models or improve Cloudflare or third-party services without explicit consent and stores that content only when a separate storage service is deliberately used.",
+          "Cloudflare's Workers AI data-use documentation distinguishes inference from training and use of separate storage products. Webcanbe does not authorize general-purpose training on private source or prompts through ordinary use. This does not promise that Webcanbe's own accepted source history, request outcomes, logs or backup records are never stored.",
+          "B.2 Google and Firebase Authentication Enabled sign-in methods process provider-specific identifiers, identity/profile information and authentication metadata. Email/password sign-in is handled by Firebase Authentication. Google sign-in alone does not authorize access to Gmail, Drive or Calendar. Applicable service contracts allocate processing roles; Google also handles its own user-account activity. Contracting entity, locations, authentication retention and transfer details: Google LLC provides Firebase Authentication for project webcanbe-b607e. Authentication is a United States-only Firebase service: credentials, provider identifiers, basic profile data and authentication metadata are sent by encrypted HTTPS when a person signs up, signs in, refreshes authentication or manages an account. Firebase retains the authentication account until Webcanbe initiates deletion; Firebase states that associated authentication data is then removed from live and backup systems within 180 days. Google and its listed subprocessors process under the applicable Firebase/Google service terms and Cloud Data Processing Addendum, including the applicable contractual transfer safeguards.",
+          "B.3 Supabase-hosted PostgreSQL The application database stores the account, source, revision, workspace, order, license, AI usage and review records needed by the product. Hosting is processing under the applicable service contract. Actual project region, provider entity, backup retention, support access and transfer safeguards: Supabase, Inc. hosts production project kappcfofcobhudmeuzmt. The configured PostgreSQL host resolves to Amazon Web Services region ap-northeast-2 (Northeast Asia / Seoul), so the primary database is in the Republic of Korea and is reached by the Worker through Cloudflare Hyperdrive. The authenticated Supabase dashboard identifies the current organization plan as Free; Supabase does not include automatic database backups on that plan, so no provider daily-backup retention window is claimed. Supabase and its listed subprocessors may access data as necessary to host, secure and support the service, including support by Supabase Pte. Ltd.; its current DPA uses the applicable EU Standard Contractual Clauses and related transfer safeguards for transfers, including support and onward processing in the United States and Singapore. This project-region statement does not claim that every support or account operation remains in the Republic of Korea. A database region alone is not a guarantee that every related support or backup operation occurs there.",
+          "B.4 PayPal When enabled, PayPal processes checkout, payment authorization, subscriptions, refunds, payment references and its own fraud, verification and compliance records. For its payment and legal functions, PayPal generally acts as an independent controller under the applicable regional arrangement. We do not store full card credentials in our ordinary application records. Actual contracting recipient, applicable countries, data categories transferred, timing, retention and provider privacy contact: PayPal payment processing is not enabled in the active production Worker: the safe production diagnostic reports that all PayPal client, secret, webhook and plan bindings are absent. No production checkout, subscription or refund data is therefore transferred to PayPal by Webcanbe at this time. The separately prepared Sandbox configuration is for non-production testing only and must not be described as Live. Before any Live activation, this disclosure must be updated for the verified merchant account and regional PayPal contracting entity. When enabled, PayPal receives checkout identity and contact data, amount, currency, order or subscription references and transaction events at checkout and through signed webhooks; PayPal acts as an independent controller for payment, fraud and legal-compliance functions, retains relationship data for the relationship plus the locally applicable period described in its regional privacy statement (generally 10 years unless law permits or requires longer), and accepts privacy requests through its Privacy Hub.",
+          "B.5 PostHog PostHog processes the limited analytics events described in Section 11 on our instructions, with any separate provider account duties under its contracts. Only the selected environment is used; we do not claim both U.S. and EU hosting for the same data. Actual contracting entity, selected region/countries, event and identity retention, raw-IP handling, deletion mechanism and transfer safeguards: PostHog is not enabled in the current production configuration because no verified Webcanbe project token and host are supplied. No PostHog analytics events or session replay are transmitted while that configuration remains absent. Session replay is disabled under this launch policy.",
+          "B.6 Support, email and optional deployment Enabled email-delivery and support services process recipient details, safe account or order references and messages that are necessary to handle the communication. Optional deployment services receive project artifacts only when that specific feature is requested. Actual enabled provider names, legal entities, roles, countries, timing/method, retention and safeguards, or an explicit statement that a function is not enabled: No optional third-party deployment provider is enabled in the current production configuration. Support is handled through hello@webcanbe.com. A requested future deployment or email provider must be disclosed here before that function is enabled.",
+          "B.7 Your transfer information and safeguards For each overseas recipient, the completed disclosure identifies the recipient and contact route; destination countries; information categories; purpose; timing and method; retention or use period; applicable transfer ground or safeguard; and any refusal choice and consequence. These particulars are supplied before transfer where required. A recognized adequacy arrangement or valid contractual safeguard is used only where it actually covers the recipient and transfer. Required consent is separate from unrelated service acceptance. Ask the privacy contact for the relevant safeguards or an available copy."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix C. Storage and analytics inventory",
+        "paragraphs": [
+          "The inventory below must match the version of Webcanbe you use. Core session and requested draft-recovery functions are distinguished from optional analytics; data is not classified as essential solely because it is commercially useful to us.",
+          "First-party sessions and sign-in state: The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier.",
+          "Firebase authentication persistence: Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself.",
+          "Interface preferences and local draft recovery: Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record.",
+          "Consent and privacy choices: The current production configuration does not enable optional analytics and does not set a separate consent-storage identifier. Essential authentication and requested interface storage remain described separately in this inventory.",
+          "PostHog optional analytics storage and expiry: No PostHog cookie or local-storage identifier is created by the current production configuration. Session replay is disabled in code and analytics initialization fails closed unless both a verified HTTPS host and project token are configured.",
+          "Clearing local storage can remove unsynced drafts or require sign-in again; it is different from a server-side deletion request. Optional collection follows the choices described above and applicable law. A browser opt-out signal is honored for processing to which the applicable law gives that signal effect; this is not a representation that every browser “Do Not Track” setting controls every external service."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/buyer-license": {
+    "title": "Buyer License",
+    "intro": "Buyer License. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. The licensed release",
+        "paragraphs": [
+          "This license applies when an order or free-release record expressly identifies the Webcanbe Single-Project Commercial License. Your license record identifies the buyer, Creator, project, immutable release version or hash, acquisition date, and applicable license version. A free or open-source project may instead specify a different license; a zero price alone does not determine its terms.",
+          "“Project Materials” means the source code, design files, and assets included in that release to the extent the Creator can license them. “End Project” means one identifiable website or application built using those materials, for you or one named client. Webcanbe distributes the license with authority granted by the Creator. The Creator retains ownership of the original Project Materials."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Rights granted",
+        "paragraphs": [
+          "Subject to valid acquisition and this license, you receive a worldwide, non-exclusive license, without a fixed expiry, to use, copy, modify, and incorporate the Project Materials into one End Project. Commercial use is permitted, including an application or SaaS product whose end users pay for access.",
+          "You may edit the source manually or using Webcanbe's Visual, Code, Split, or AI features; run local development, testing, staging, backup, and production copies for the same End Project; export it; and deploy it on a hosting service of your choice subject to that service's requirements. Moving the same End Project to another domain or host does not by itself require another license.",
+          "A single End Project may have related pages, localized versions, subdomains, and deployment environments that form the same product. Separate customer-branded sites or unrelated applications are separate End Projects even if generated from one repository. A multi-tenant application is one End Project where its tenants use the application rather than receive independently reusable template projects. A website-builder or template-generation business that distributes substantially reusable Project Materials requires a separate written license unless those materials independently carry a license allowing that use."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Client work and collaborators",
+        "paragraphs": [
+          "You may let employees and contractors access the source solely to work on the licensed End Project under obligations protecting the materials. Access does not give each collaborator an independent right to reuse the template for other customers.",
+          "When acquired for client work, you may transfer the customized End Project and this license to that named client as part of the project delivery. Give the client the license and applicable third-party notices, record the transfer, and stop independently reusing the licensed materials for another End Project. You may retain confidential archival copies and continue maintaining the client's project. The transfer does not create a second usable license. A later business transfer of that same End Project may carry its license where it does not become a standalone template resale."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Uses not granted",
+        "paragraphs": [
+          "Unless another applicable license or written permission grants them, you may not use one acquisition for a second unrelated End Project; sell, sublicense, redistribute, or publish the original or modified Project Materials as a template, starter, reusable component library, or competing project product; place proprietary Project Materials in a public source repository; or extract proprietary components for unrelated projects.",
+          "Providing ordinary browser-delivered assets needed to operate the End Project is permitted. That is different from distributing its reusable source as a standalone product. Private source repositories for authorized collaborators are permitted.",
+          "Do not remove copyright or license notices that must be retained, claim authorship of the Creator's unmodified work, or imply the Creator endorses your business. Names, logos, and sample brands in a release are not a general trademark license. Replace sample branding unless permission expressly covers your use."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Open-source and third-party components",
+        "paragraphs": [
+          "Third-party dependencies, fonts, images, icons, and other components retain their own licenses. Required notices and license texts travel with the export. If a component is licensed under MIT, Apache-2.0, or another open-source license, this marketplace license does not take away rights that license grants. A public repository containing only your own material and lawfully redistributable components is not prohibited merely because you used Webcanbe.",
+          "The Creator must disclose material third-party restrictions before acquisition. A whole project genuinely distributed under a permissive open-source license cannot be made single-project- only by relabeling the same material here. A listed photograph, font, or example integration may need a separate license if clearly identified before purchase; undisclosed essential restrictions may be grounds for a remedy."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Your changes and AI",
+        "paragraphs": [
+          "You retain any rights that arise in your original additions and content. Those rights do not extinguish the Creator's rights in underlying materials. AI editing does not erase provenance, third-party notices, or the one-project limitation. We do not guarantee that an AI-generated addition is unique or eligible for copyright protection in every jurisdiction.",
+          "You may submit licensed source to a development service acting for you on the End Project only where you have appropriate rights and confidentiality arrangements. This does not authorize publication of the source as training data or granting a tool provider broad reuse rights inconsistent with this license."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Updates, support, and service independence",
+        "paragraphs": [
+          "The license covers the acquired release. Later updates and support are included only to the extent stated in the order or listing. A supported bug-fix release delivered for the same purchase does not consume a second license. New rights or restrictions on later versions do not silently replace the license for your existing release.",
+          "Cancelling a Webcanbe subscription, changing hosts, or the Creator leaving the marketplace does not by itself end this license. The right to use a valid exported copy is not conditional on keeping Webcanbe in its runtime. This does not promise indefinite hosted storage, re- download availability, compatibility with future external systems, or lifetime support."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "8. Refunds and termination",
+        "paragraphs": [
+          "A completed refund that rescinds the project purchase ordinarily ends the corresponding license. Stop using the refunded proprietary materials and delete working and distributable copies, except records legally required to be retained. We do not claim ownership of or require destruction of your independent original work; replace refunded licensed components where necessary. A partial remedy does not revoke the whole license unless that is part of the agreed or legally required remedy.",
+          "Opening a good-faith dispute alone does not automatically erase a valid license. Fraudulent or unauthorized acquisition does not establish valid rights. For another material license breach, we may terminate affected rights after notice and a reasonable opportunity to cure where cure is practicable, normally 14 days. Deliberate piracy or continuing serious rights violations may require immediate action. Mandatory consumer remedies remain unaffected."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "9. Questions and proof",
+        "paragraphs": [
+          "Keep your order and license record. Contact hello@webcanbe.com for project-scope, client- transfer, or rights questions. A sales message cannot expand a Creator's rights beyond what that Creator or another rightsholder can actually grant. The Terms and Refund Policy apply to service and purchase disputes; this document controls the project-use license."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "10. Practical examples",
+        "paragraphs": [
+          "A paid SaaS application: one license permits one identifiable SaaS product, including many end users and paid customer access. It does not permit handing each customer a reusable template product.",
+          "A client website: one acquisition may be used for a named client's completed website and transferred with that website. Building a separate website for another client ordinarily requires another license.",
+          "A redesign or domain move: changing the content, brand styling or domain of the same End Project does not, by itself, require repurchase. Spinning it into separate unrelated products does.",
+          "A public portfolio or competition post: you may show screenshots, a demo video and a link to the completed End Project. That permission is not permission to publish proprietary reusable template source or private client information.",
+          "Open-source dependencies: independent rights granted by an open-source component's license remain available. Preserve its required notices. This marketplace license does not turn separately licensed open-source code into exclusive Webcanbe property."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/creator-distribution": {
+    "title": "Creator Distribution Agreement",
+    "intro": "Creator Distribution Agreement. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Parties, acceptance, and model",
+        "paragraphs": [
+          "This agreement is between MIN SIHOO, operating Webcanbe, and the individual or organization identified in the Creator acceptance record. It applies after affirmative acceptance and the applicable account and project approvals. An organization representative must be authorized to bind it. Display-name approval alone is not merchant, payout, or project approval.",
+          "Under this agreement, the Creator authorizes Webcanbe to distribute identified releases and grant the stated Buyer License as the contracting distributor for those orders. The Creator supplies licensed digital project materials and earns the contractual share below. Webcanbe enters into the corresponding buyer supply contract in its own name and is the buyer-facing contact for that contract. The buyer receives the identified release and license from Webcanbe under that authority. Your underlying intellectual property remains yours.",
+          "Webcanbe does not represent that Creator earnings are escrowed, insured deposits, stored money transferable between users, or interest-bearing balances. Creators are independent suppliers, not employees or equity partners merely because they use the service. This agreement is non-exclusive."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Creator identity and eligibility",
+        "paragraphs": [
+          "Provide accurate legal identity, country, contact information, tax details where required, and an eligible payout destination held by you or the actual contracting entity. A lawful guardian or authorized representative may act only where the law and relevant providers permit it. The contracting Creator and payout instructions must identify the party actually entitled to receive the earnings.",
+          "We may request proportionate evidence of rights, identity, tax residence, or payout eligibility before a paid listing or payment. We will not publicly disclose private verification documents. Prefer provider-managed verification where available. Being a new Creator, without prior sales or a large audience, is not by itself a reason to reject a submission; source rights, quality, actual eligibility, and safety govern review."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Releases and required disclosures",
+        "paragraphs": [
+          "For each submission, identify the source snapshot, included files, framework and dependency requirements, license and notices, third-party assets, any external accounts or paid services required, supported preview/editing modes, documented install/build steps, and included support or updates.",
+          "You warrant that you own the submitted material or have sufficient rights to authorize distribution, previews, adaptation by buyers, and the advertised license. Disclose open- source and asset restrictions accurately. Material distributed under another license must not be presented as exclusively yours. Do not include malware, hidden tracking, stolen source, secrets, private customer records, undisclosed remote code, or deceptive sample results.",
+          "Published releases are immutable. A material update requires a new release and any required re-review. You may correct listing metadata through the allowed process, but cannot silently replace the files associated with an existing buyer's order."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. License to Webcanbe and buyers",
+        "paragraphs": [
+          "You grant Webcanbe a worldwide, non-exclusive right to store, reproduce, render, test, scan, package, transmit, and distribute approved Project Materials; produce previews and listing presentations; and sublicense them to buyers under the license fixed for the release. We may use necessary service providers under appropriate confidentiality and security obligations.",
+          "The operational license continues as needed to honor valid existing orders, licenses, support commitments, legal records, and backup obligations after delisting. It does not permit us to publish your private drafts, sell unapproved releases, train general-purpose AI models on private source, or reuse your brand in unrelated advertising. Public marketing may use the approved listing, preview, and Creator attribution; separate case studies or personal endorsements require permission.",
+          "You retain your underlying intellectual property. Buyers retain rights in their original additions subject to underlying licenses. The standard paid offer is one production End Project per purchase, including commercial SaaS and client use, unless a separately approved license grants more. Open-source rights are not restricted by this agreement."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Review and publication",
+        "paragraphs": [
+          "Seller acceptance and project acceptance are separate. We may reject or request changes for incomplete functionality, unsupported required dependencies, rights issues, safety concerns, or misleading claims. We provide an intelligible reason and a way to resubmit or seek review.",
+          "Compatibility and Ready qualifications attach to a specific release and its test evidence, not to all future work by a Creator. You cannot purchase or self-assign those labels. Review is not a guarantee of freedom from every vulnerability or legal issue and does not eliminate your warranties about source rights and disclosed functionality.",
+          "Free releases use the same core quality and safety review. A later decision to charge for a listing does not revoke licenses lawfully obtained for an earlier free release. Submission limits displayed in Creator Studio are operational controls; changes cannot retrospectively cancel existing licenses or accrued valid earnings."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Prices, discounts, and fees",
+        "paragraphs": [
+          "You may offer a free listing or choose a paid list price of at least USD 9. There is no general maximum price. Material price errors or deceptive pricing may be rejected. A discount and who funds it must be clear. Creator-funded discounts reduce the item-price fee base; Webcanbe-funded incentives do not silently reduce the Creator's agreed proceeds.",
+          "The standard platform fee is 5% during the first three calendar months after the public paid- marketplace launch, and 8% thereafter. The launch timestamp used for this calculation is disclosed in Creator Studio and the applicable fee schedule. It is not restarted per Creator. The fee base is the actual post-discount item price, excluding separately collected taxes. Published fee calculations use whole minor currency units and the documented rounding rule consistently; they do not round an amount differently merely to increase the fee.",
+          "The first 100 Creators expressly accepted into the Founding Creator offer receive a 0% platform fee until the earlier of 12 months from their first paid listing going live or USD 100,000 cumulative gross paid sales. Actual payment and payout processing costs remain separate. The offer is a platform-fee discount, not a guarantee of sales, marketing placement, free payment processing, or a cash reward. Eligibility must be recorded; a marketing badge alone does not establish it. The fee rate recorded when an order is accepted applies to that order. Under this offer, an order accepted before the sales cap is reached keeps that rate; the normal rate applies prospectively to later orders. The offer does not retroactively increase fees on earlier orders.",
+          "Third-party payment and payout costs are passed through only at actual attributable cost, without an undisclosed markup. The earnings statement separates item amount, tax, platform fee, actual processor costs, adjustments, and net payable. No extra buyer-facing Webcanbe service fee or Creator application/listing fee is imposed unless separately disclosed and accepted prospectively. Webcanbe subscription and AI-pack revenue is not Creator project-sale revenue."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Holds and payouts",
+        "paragraphs": [
+          "Ordinary earnings are held for 14 days after confirmed payment, then become eligible subject to reversals and verification. Payout batches are scheduled on the 1st and 15th of the month using Korea Standard Time, UTC+9. The ordinary minimum is USD 25 in available net payable earnings. Amounts below the minimum carry forward; they are not forfeited merely because the threshold was not reached.",
+          "Initial payout execution may be manual. An approval click is not proof of payment; a paid status requires an actual provider reference and reconciliation. Provider processing or banking delays can affect arrival. Creator Studio must distinguish pending, held, available, sent, paid/reconciled, and failed amounts where applicable, rather than treating all sales as immediately withdrawable cash.",
+          "We may extend a hold for a specific dispute, refund exposure, suspected fraud, identity mismatch, or legal requirement. The scope and amount will reasonably match the documented risk. We will give a reason and review route where lawful and review continuing holds rather than retain all earnings indefinitely without justification. On closure, lawful net earnings remain payable, including a practical final settlement process for amounts below USD 25 subject to actual transfer costs and provider constraints."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "8. Refunds, disputes, and losses",
+        "paragraphs": [
+          "The common Refund Policy applies; Creators cannot replace it with a stricter private policy that removes promised or mandatory buyer rights. Provide relevant support and evidence promptly when notified of an issue. Webcanbe remains the buyer-facing contact for its order obligations and may issue a justified refund without waiting indefinitely for Creator consent.",
+          "For a Creator-attributable failure, corresponding earnings may be reversed before payout. After payout, a documented adjustment may create a negative balance offset against future earnings or an amount legitimately due. We will identify the affected order, reason, provider costs, and calculation. Loss caused by Webcanbe's payment integration failure or misconduct is not automatically charged to an innocent Creator. A buyer's lawful dispute is not evidence of buyer fraud by itself.",
+          "We must not recover the same loss twice, apply an arbitrary penalty, or retroactively alter a fee to cover our unrelated costs. Partial refunds and tax adjustments must use an auditable, proportionate allocation. You may challenge an adjustment through Creator Support; undisputed amounts should not be withheld without an independent reason."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "9. Taxes and records",
+        "paragraphs": [
+          "Each party is responsible for taxes imposed on its own income and any tax duties assigned to it by applicable law. Webcanbe is responsible for the buyer-tax collection, invoicing, remittance, and platform reporting obligations that applicable law places on it as the contracting distributor. The Creator remains responsible for its own income and supplier-side tax obligations. Neither party may allocate a statutory duty away merely by describing the other as a supplier. Using PayPal does not, by itself, transfer those duties to PayPal. Required withholding or reporting must be disclosed and supported by appropriate documentation.",
+          "We may retain minimum transaction and license records needed to honor buyer rights and meet law. Access to full buyer personal information is not granted merely because you made a sale. Use any support information you receive only for that request, not unsolicited marketing."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "10. Support, updates, and withdrawal",
+        "paragraphs": [
+          "Honor the support and update scope stated when the buyer acquired the release. There is no default promise of lifetime updates, custom implementation, or unlimited support. A necessary remedy for a misleading or defective release cannot be avoided by declaring that all support was optional.",
+          "You may ask to stop future distribution. Delisting does not cancel existing buyer licenses, completed orders, earned sums, or support already promised. Tell us promptly of an infringement claim, dangerous defect, compromised dependency, or leaked credential. We may quarantine affected downloads and inform buyers while preserving unrelated lawful work and providing appropriate remedies."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "11. Claims and responsibility",
+        "paragraphs": [
+          "To the extent lawful for this professional supply relationship, you will reimburse reasonable direct losses and third-party claim costs attributable to your material breach of source-rights warranties, deliberate unlawful content, or intentional deception. This obligation does not cover losses caused by Webcanbe's own negligence or unauthorized alterations. We must give prompt notice, reasonable evidence, and an opportunity to participate in the defense; no settlement imposing admissions or non-monetary duties on you without your reasonable consent.",
+          "Our applicable liability terms do not eliminate payment obligations or mandatory remedies. Suspension and termination must be proportionate to the problem. Informal dispute review is available through hello@webcanbe.com and does not remove access to competent courts or statutory rights."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "12. Changes, duration and records",
+        "paragraphs": [
+          "This agreement continues while we distribute your approved releases or perform outstanding obligations under it. Either party may end future distribution through the stated delisting or closure process. Existing buyer rights, accrued earnings, justified adjustments, confidentiality, minimum record duties and terms needed to resolve existing claims survive only for their relevant purposes.",
+          "A material adverse change to future fees or this agreement is notified prospectively, ordinarily at least 30 days before it applies or longer where law requires. It does not reprice an accepted order or cut short a recorded Founding Creator benefit contrary to its accepted conditions. Necessary urgent legal or security changes may require a shorter interval with an explanation. You may stop future distribution rather than accept an applicable new arrangement, without forfeiting lawful accrued earnings.",
+          "Your acceptance record identifies the actual Creator, representative authority where relevant, agreement version, applicable fee schedule and accepted releases. Electronic confirmation and payout statements are retained in a form you can keep. Questions and requests for a calculation review can be sent to hello@webcanbe.com."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix A. Marketplace submission and release standards",
+        "paragraphs": [
+          "A.1 A release must be a real deliverable A listing must identify what is actually supplied: source files, dependencies, install/build instructions, assets, applicable license, supported editing/preview modes, and any external service needed. A polished screenshot is not proof that the project runs. A backend- dependent demo must disclose that dependency rather than promise a self-contained application.",
+          "Paid and free projects follow the same core standards for safety, rights, and accurate descriptions. Free content is not exempt from review, and payment does not purchase a Ready badge. We may apply disclosed submission and publication limits to prevent spam without charging a hidden upload fee.",
+          "A.2 Rights and provenance Keep evidence of authorship or redistribution permission for source and assets. A resource that is free to download or allowed for one client's website is not automatically allowed for redistribution in a template marketplace or website builder. Preserve third-party license and attribution files. Fonts, photos, icons, sample logos, and code can have different rights.",
+          "A release must include a license manifest identifying material restrictions and separately obtained assets. Do not remove MIT or Apache notices or claim those components are proprietary. Where a whole release is open source, describe that license truthfully; a buyer may be paying for curation or service rather than exclusive code rights.",
+          "A.3 Review, compatibility, and Ready We review the submitted release and any material replacement, not an indefinitely changing external repository. A compatibility record should distinguish runtime execution, Visual editability, source mapping, export build, hosted readiness, and test environment. Describe unsupported or partially supported cases clearly.",
+          "A snapshot preview can prove rendered appearance and source observations without proving live user interaction. An independent export build is different from successfully creating a ZIP. A recorded deployment intent is different from an active deployed URL. “Verified,” “Ready,” or similar claims must state the release and meaningful scope of evidence.",
+          "A.4 Price, support, and updates Free listings are allowed. The ordinary minimum paid list price is USD 9, without a general maximum. Pricing, discounts, taxes where applicable, and required third-party charges must be clear before payment. No fabricated crossed-out price or urgency is allowed.",
+          "State the included support and update terms. A listing does not promise lifetime support by default. However, statutory remedies and the common issue-refund policy cannot be removed by writing “no support” after a sale. A new release may be separately priced only if earlier update promises are honored.",
+          "A.5 Changes, delisting, and existing buyers A published release is immutable; edits to a buyer's working copy do not alter that release. Source updates require the supported new-release process, and material changes may require review. A Creator may correct public metadata without misleading buyers about what they purchased.",
+          "Changing a listing from free to paid, delisting it, or leaving Webcanbe does not revoke valid rights already granted. Serious rights or security problems may require limiting future downloads and notifying affected buyers, with appropriate remedies. Keep order and license evidence tied to the exact release.",
+          "A.6 Authentic presentation Use real project screenshots and clearly described demonstrations. Do not publish invented customer testimonials as genuine endorsements, fabricate usage or revenue numbers, or claim external company partnerships without evidence. A fictional persona can illustrate a use case only when the presentation does not mislead a reasonable visitor into believing it is a real customer's experience.",
+          "A private design preview containing invented testimonial copy must not be promoted to public marketing unchanged. Keep the layout and replace the content with documented reviews or plainly editorial product/use-case statements.",
+          "A.7 Reporting and appeal Use hello@webcanbe.com or the relevant reporting page for a non-working release, misleading listing, rights issue, or suspected malicious source. Give the listing and release reference and a concise explanation; do not include secrets. We assess the report, preserve relevant evidence, and may contact the Creator. Creators may seek review of a rejection or adjustment. Mandatory reporting and consumer remedies remain available."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/refunds": {
+    "title": "Refund Policy",
+    "intro": "Refund Policy. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Three different purchases",
+        "paragraphs": [
+          "A marketplace project license, a Webcanbe subscription, and a purchased AI Action pack are separate products. Cancelling a subscription does not automatically refund a project or invalidate its license. A refund to one order is not automatically a refund to every order on an account.",
+          "This policy includes a voluntary issue-based remedy and preserves mandatory rights. A seven-day request window below does not shorten a statutory withdrawal, conformity, fraud, or payment-dispute right. The law that protects you may require a different remedy or timing. A provider's claim process is also separate from our voluntary policy."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Digital project purchases",
+        "paragraphs": [
+          "We do not offer a general change-of-mind guarantee for digital project purchases. Please review the specific release, compatibility, preview limitations, required external services, and license before buying.",
+          "For our voluntary project-issue policy, contact us within seven calendar days of purchase where the listing was materially misleading, delivery failed or the files cannot be accessed, the represented essential functionality materially fails, the purchase was duplicated, or a verified Webcanbe failure prevents the normal promised use. Describe the issue and include your order reference. We will assess the actual release and disclosed requirements, not an unrelated example project.",
+          "A reasonable repair or replacement may resolve a defect where lawful and appropriate. We will not force an endless repair process, unreasonable work, or acceptance of materially different content in place of an applicable refund. Serious fraud, concealed rights problems, and mandatory legal claims remain reviewable after seven days.",
+          "A preference for another design, lack of a separate third-party service that was clearly disclosed, or an unsupported modification is not itself a covered original-product defect. Those exclusions do not apply when the relevant limitation was hidden or our own claim was misleading."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Subscriptions",
+        "paragraphs": [
+          "Cancelling stops future renewal according to the cancellation confirmation. Unless you choose a separately explained immediate termination or a lawful suspension applies, paid plan access continues until the paid-through date. No new renewal should be initiated after a valid cancellation takes effect. Service behavior and receipts must honor this rule.",
+          "Outside mandatory rights, we do not offer an automatic prorated refund simply because you stop using a functioning subscription mid-period. Contact us for duplicate or unauthorized billing, a charge after timely cancellation, failure to provide the purchased plan, or a material service failure. We will correct billing errors and provide the remedy required by law or the service we actually failed to supply. This subsection is not limited to the project's seven-day voluntary window.",
+          "Annual billing pays for the stated annual period. Monthly AI grants within that annual service do not convert it into twelve unrelated project purchases, and cancellation does not erase a statutory withdrawal right that still exists."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. AI Action packs and AI request failures",
+        "paragraphs": [
+          "Purchased Actions do not expire merely with a calendar month or subscription change. A successfully generated, validated, reviewable proposal is the billable result described before requesting it; applying the same accepted proposal does not create a second charge. Declining a valid proposal because you prefer a different result is not automatically a failed generation.",
+          "If the provider, network, or validation fails before delivery of a usable result, the service must release or correct the associated reservation. If source was already accepted but recording the outcome fails, we preserve and reconcile the original charge and result without charging or applying twice. A browser cancellation or disconnected response alone does not prove what the server completed; contact us with the request reference when its status remains uncertain.",
+          "We will correct duplicate charges, undelivered packs, and missing balances. Outside mandatory rights, packs are not freely redeemable for cash or refunded solely for a change of mind. If we permanently discontinue the service needed to use valid paid Actions, we will provide a fair remedy for the unused paid portion, ordinarily a proportional refund based on its actual purchase price, subject to mandatory law. We do not apply an invented cash value to free promotional Actions."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Statutory digital-content withdrawal",
+        "paragraphs": [
+          "Consumers in some regions, including the EU/EEA and UK, may have a statutory period to withdraw from a distance contract. The ordinary period for applicable service or electronically supplied digital-content contracts is generally 14 days from conclusion, subject to the local rules and required disclosures.",
+          "For downloadable digital content, loss of a withdrawal right is not caused by a hidden Terms clause alone. Where the law permits immediate supply with loss of withdrawal, we must obtain the required prior express consent and acknowledgement, begin supply accordingly, and give the required contract confirmation. Defect and misdescription rights are not waived by that consent.",
+          "For an ongoing service, requesting an early start is different from receiving a complete download. Where lawful, withdrawal may require payment only for properly requested service actually supplied; full loss of the service withdrawal right requires the applicable conditions. We do not use a digital-download waiver indiscriminately for every subscription or Action pack.",
+          "If you decline immediate digital supply, we must either offer lawful delayed delivery or refrain from presenting an incompatible immediate-delivery checkout to you. We do not treat a mandatory consent choice as an optional decoration and then supply the same content regardless.",
+          "You may notify us at hello@webcanbe.com or use the withdrawal function provided for eligible orders. In territories where an online withdrawal function is required, it must remain accessible during the relevant period and provide a durable acknowledgement. An account login must not prevent a customer who has lost access from sending a valid notice."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Submitting and handling a request",
+        "paragraphs": [
+          "Provide your contact email, order or subscription reference if available, product, and the requested remedy. For a technical defect, a short description or redacted screenshot is useful. A statutory withdrawal notice does not require a defect explanation, a video, or a particular form. We will not require passwords, complete card numbers, or secrets to investigate.",
+          "We will acknowledge and decide requests within the applicable deadline and explain the outcome. Where a refund is due, it is normally returned by the original payment method. We do not force store credit instead of a money refund required by law. Provider settlement time can affect when the refund appears, but we remain responsible for initiating it within the applicable deadline.",
+          "A reversal may update license, entitlement, and Creator earnings records. A completed rescission of a project purchase ordinarily ends the refunded license as explained in the Buyer License. Do not keep distributing refunded proprietary materials. We do not claim your unrelated original content, and an open dispute alone is not an automatic deletion instruction."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Sample withdrawal notice",
+        "paragraphs": [
+          "To: MIN SIHOO, 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894), hello@webcanbe.com.",
+          "I give notice that I withdraw from my contract for the following digital content or service: [description]. Order or contract date: [date]. Order reference, if known: [reference]. Customer name: [name]. Customer contact address: [address]. Email for confirmation: [email]. Date of notice: [date]. Signature is required only if this notice is sent on paper and the applicable form requires it.",
+          "You may use this sample or another clear statement. It does not replace any additional local instructions we must provide at checkout."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "8. Project issues, account deletion and promotions",
+        "paragraphs": [
+          "Deleting an account is not a substitute for cancelling a recurring plan, and cancelling a plan does not request deletion of all data. If you ask us to close an account with an active subscription, we will explain and coordinate the billing consequence rather than knowingly continue charging an unusable account. Privacy requests remain available separately.",
+          "A campaign entry, free promotional Action grant or domain prize is governed by the relevant campaign's accepted rules. Promotional units do not carry an invented cash redemption value. These distinctions do not excuse failure to deliver an earned promised reward or remove a remedy required by law."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/acceptable-use": {
+    "title": "Acceptable Use",
+    "intro": "Acceptable Use. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Scope",
+        "paragraphs": [
+          "This policy applies to public listings, private workspaces, AI requests, previews, exported materials to the extent our licenses govern them, and interactions with the service. A lawful technical topic or unfamiliar implementation is not automatically abuse; restrictions depend on actual conduct, permissions, content rights, and applicable law."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Prohibited conduct",
+        "paragraphs": [
+          "Do not upload or distribute material you are not entitled to use; impersonate another person or business; use stolen payment credentials; misrepresent source authorship or rights; or publish unlawful personal information. Do not distribute malware, credential theft, hidden malicious dependencies, unauthorized surveillance, or code intentionally designed to compromise others through our marketplace.",
+          "Do not bypass another user's authorization, exploit leaked secrets, evade transaction or usage controls, generate sham purchases or payouts, manipulate reviews or qualification evidence, or interfere with the service's availability. Testing your own project is different from attacking a provider's infrastructure or another customer's workspace. Security research should follow the Security Reporting Policy.",
+          "Do not submit illegal exploitation content, threats, criminal harassment, or products whose sale would violate applicable law or the approved payment-provider scope. We do not approve a regulated business merely because its website template can be edited. Project instructions and model responses do not authorize access to secrets, privileged tools, or financial operations."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Fair resource use",
+        "paragraphs": [
+          "Respect the limits disclosed for your plan and permitted automation. Do not hide automated abuse behind multiple accounts or overload isolated build and preview systems. We may use proportionate rate limits and ask for a legitimate-use explanation; legitimate automation or high volume is not by itself proof of malicious conduct."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Public claims and feedback",
+        "paragraphs": [
+          "Listings and marketing must accurately describe the release, supported features, third-party costs, and included license. Do not fabricate customers, reviews, transactions, screenshots presented as live results, or badges. Material incentives or relationships behind testimonials must be disclosed where required. Honest negative feedback and good-faith complaints are allowed; these terms contain no penalty or gag clause for them."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Enforcement and review",
+        "paragraphs": [
+          "We may remove or quarantine affected material, restrict the relevant function, request information, or suspend an account where warranted. We consider severity, repetition, intent where known, and the risk to others. We will provide an explanation and an opportunity for review where lawful and practicable. Immediate containment may be appropriate for ongoing malware, fraud, or serious danger.",
+          "A restriction does not automatically forfeit lawful earnings, unrelated source, or mandatory refunds. We preserve relevant evidence and provide an appropriate export or remedy path where safe. Report concerns or appeal an action through hello@webcanbe.com with the relevant account, project or decision reference."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Promotions, public builds and attribution",
+        "paragraphs": [
+          "Do not fabricate entry qualifications, steal another person's finished build, impersonate entrants, buy bot traffic, conceal automated duplicate accounts or create sham referrals. Verification uses the published campaign criteria and relevant evidence. We may request proportionate statistics for a shortlisted reach-based entry; an unusually successful legitimate post is not, by itself, evidence of abuse.",
+          "Describe your real experience and disclose material incentives where required. You may criticize Webcanbe honestly, compare it with other tools, report defects and seek refunds. An unfavorable opinion is not grounds to confiscate lawful earnings, remove an otherwise valid entry or terminate an unrelated project license.",
+          "Do not post another person's private data or proprietary reusable source merely to prove that a project exists. A public End Project, screenshot or redacted demonstration usually provides a way to show the work without disclosing unrelated files."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix A. Security reporting and authorized research",
+        "paragraphs": [
+          "A.1 Report a vulnerability Send a report to hello@webcanbe.com with the subject “Security report.” Include the affected Webcanbe URL or component, a minimal reproduction, potential impact, and a safe way to contact you. Redact credentials and other users' information. Ask for a secure transfer channel before sending sensitive artifacts.",
+          "This is a disclosure channel, not a promise of a paid bug bounty, certification, fixed response- time guarantee, or authorization to test unrelated providers. We will assess credible reports and coordinate appropriate remediation.",
+          "A.2 Permitted good-faith research We authorize proportionate, non-destructive testing of Webcanbe-controlled public application endpoints using accounts and projects you control, provided you minimize access and stop when a vulnerability is demonstrated. Do not access, change, exfiltrate, or publish another person's private data; perform denial-of-service or high-volume scans; execute real payment or payout abuse; deploy malware; use social engineering; or attack authentication, cloud, payment, or other third-party systems.",
+          "If you encounter another user's data, stop, do not retain more than the minimum redacted evidence, and notify us. Public source availability is not permission to probe every connected production service. Contact us before tests that could cause material load or irreversible effects.",
+          "A.3 Our commitment For good-faith research that follows this policy, we will not bring a claim under our Terms solely because you tested or reported the issue. If a third party questions research that complied with this policy, we will make that limited authorization clear where appropriate. We cannot grant immunity under criminal law or waive a third party's rights.",
+          "We will evaluate reports on their evidence rather than require public exploitation. A reasonable coordinated-disclosure discussion should not be used to silence independent lawful speech indefinitely. Do not publish active secrets or personal data as part of disclosure.",
+          "A.4 User-facing security statements Our published security descriptions must accurately state the tested boundary and environment. They do not promise that code is immune to all vulnerabilities. Report incorrect security claims or a suspected account compromise through the same channel, specifying which issue requires urgent containment."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/licenses": {
+    "title": "Licenses",
+    "intro": "Licenses. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Platform code and purchased projects are different",
+        "paragraphs": [
+          "The license to use the Webcanbe service, the license for a project acquired through its marketplace, and the licenses of third-party components are separate. Receiving source does not automatically transfer exclusive copyright. A platform subscription does not change a purchased project's permitted number of End Projects.",
+          "The applicable project license and release-specific notices are supplied with the order and export. The Single-Project Commercial License applies only where expressly selected for the release. A project under MIT, Apache-2.0, or another open-source license retains the permissions and conditions of that license."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Third-party notices",
+        "paragraphs": [
+          "The release-specific platform component and asset notices are provided at https://webcanbe.com/legal/third-party-notices. That inventory identifies the package or asset, version where applicable, copyright owner, license, required attribution, and source or notice location. Notices are specific to the distributed package or asset and its applicable version.",
+          "Project exports must preserve their own license manifest and required notices. A top-level code license does not automatically cover every photograph, icon, font, sample logo, or bundled dataset. If an essential asset requires a separate license, that restriction must be disclosed before acquisition."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. Branding and reports",
+        "paragraphs": [
+          "Webcanbe branding does not grant permission to imply endorsement or resell the service under its name. Creator and third-party trademarks remain with their respective owners. Publicly available brand assets have only the permission stated with them, not a blanket trademark assignment.",
+          "Report a missing attribution or licensing concern to hello@webcanbe.com with the exact component, listing, release, or export. We will review the actual rights and correct notices or distribution where needed. A general notice does not override a component's license text; we provide required corrections when a missing or inaccurate notice is identified."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Release-specific notice records",
+        "paragraphs": [
+          "For each acquired project, keep the license record and bundled third-party notices with the export. The record should identify the release, permitted End Project scope, included code and assets, applicable license identifiers or texts, required attribution and any clearly disclosed separate license needed for an essential asset. No generic footer notice overrides those terms.",
+          "Webcanbe's public brand name, a paid subscription and a project's zero price each have different meanings. None by itself grants an unrestricted right to reuse every asset, resell a template or claim exclusive ownership. Equally, a Webcanbe agreement does not take away independent rights you already hold under an open-source license.",
+          "AI model services and their applicable model terms are separate from the license of the Webcanbe application and its downloadable projects. A model name or an inference response does not settle the provenance of every generated file."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "Appendix A. Copyright and intellectual-property reports",
+        "paragraphs": [
+          "A.1 Reporting a concern Send a rights report to hello@webcanbe.com with the subject “Copyright / IP report.” Identify the rightsholder or authorized representative, the work or right concerned, the exact Webcanbe URL and release if known, why the use is unauthorized, and contact details for follow-up. A signature, including an appropriate electronic signature, should identify the person making the report. Provide evidence you are entitled to act; do not include unrelated confidential material.",
+          "A formal U.S. DMCA notice should contain: (1) your physical or electronic signature; (2) identification of the copyrighted work, or a representative list where applicable; (3) identification and reasonably sufficient location information for the allegedly infringing material; (4) reasonably sufficient contact information, including address, telephone number and email if available; (5) a good-faith statement that the complained-of use is not authorized by the owner, its agent, or the law; and (6) a statement that the notice is accurate and, under penalty of perjury, that you are authorized to act for the owner of the allegedly infringed exclusive right. The designated-agent information for any applicable registered U.S. DMCA process is no registered U.S. DMCA designated agent has been verified for this launch; general intellectual-property reports are accepted at hello@webcanbe.com. Our general IP-report address remains available independently. Providing a reporting address is not a representation that a particular statutory safe harbor applies to every Webcanbe activity.",
+          "A.2 Assessment and action We may request clarification, restrict the affected listing or download, preserve relevant evidence, and notify the uploader as appropriate. We assess the actual material and license, not merely whether two pages look similar. A report is not automatically proof of infringement. We will avoid disclosing unnecessary personal information, but procedural notices may need to be shared with the affected party or lawful authorities.",
+          "We consider valid pre-existing open-source rights and permitted uses. We may remove an apparent unauthorized asset while preserving unrelated lawful work where feasible. Buyers may have remedies for an unlawfully distributed product under the Refund Policy and applicable law.",
+          "A.3 Counter-notices and review An affected uploader may provide authorization, licensing evidence, or a reason the identified material is not infringing. Where the U.S. DMCA process applies, a counter-notice must contain your physical or electronic signature; identify the removed or disabled material and where it appeared; state under penalty of perjury your good-faith belief that removal or disabling resulted from mistake or misidentification; and provide your name, address and telephone number. It must also state consent to the jurisdiction of the federal district court for your address, or, if outside the United States, a federal district where the service provider may be found, and acceptance of service of process from the notifying person or that person's agent. We provide the applicable contact and procedural instructions when a notice is received. We do not ask every international complaint to adopt a U.S. court clause unless using that statutory procedure.",
+          "For a valid applicable DMCA counter-notice, the statutory restoration process generally involves a 10–14 business-day interval after receipt unless the required court-action notification is received. That process is not a promise to restore independently unlawful, dangerous, or otherwise legitimately restricted material. Other jurisdictions may require a different procedure.",
+          "A.4 Repeat abuse and honest reports We may terminate repeat infringers where appropriate and maintain reasonable records to enforce this policy. We also address fraudulent or knowingly misleading reports. This policy does not penalize a good-faith complaint or legitimate disagreement about rights. A takedown does not establish that all withheld earnings are forfeited.",
+          "Questions about trademark, impersonation, privacy, or other rights can use the same contact route with the relevant category. Describe the specific legal or contractual concern rather than filing a copyright notice for an unrelated service dispute."
+        ],
+        "pendingFields": []
+      }
+    ]
+  },
+  "/legal/privacy-requests": {
+    "title": "Privacy Requests",
+    "intro": "Privacy Requests. Effective 23 September 2026.",
+    "version": "2026-09-23",
+    "publicationBlocked": false,
+    "unresolvedFields": [],
+    "sections": [
+      {
+        "title": "1. Request access, correction, or deletion",
+        "paragraphs": [
+          "Contact Webcanbe Privacy Contact at hello@webcanbe.com with the subject “Privacy request,” or use the privacy form where one is provided. State the action you seek, the account email or safe account reference if known, and an email where we can reply. You do not need to cite an article of law or explain why you wish to exercise a right.",
+          "Available rights depend on applicable law and may include access, correction, deletion, restriction, objection, portability, withdrawal of consent, and review of qualifying automated decisions. You may complain to the relevant supervisory authority. Closing an account, cancelling a subscription, and withdrawing a particular consent are distinct actions; tell us which you intend, and we will explain their consequences."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "2. Verification and representatives",
+        "paragraphs": [
+          "We verify the request in a proportionate way to protect against disclosure or deletion by another person. An authenticated account or a reply through an established address may be sufficient. Do not send passwords, access tokens, full card numbers, or a full identification- document scan unless a specific lawful necessity has been explained and a secure channel provided.",
+          "An authorized representative may act with suitable proof. We will not reject a valid request solely because the account is inaccessible. For project data controlled by an organization, we may need to work with that organization rather than disclose its information to an unverified individual."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "3. What happens next",
+        "paragraphs": [
+          "We acknowledge the request, identify relevant records, and respond within the applicable deadline. Where an extension is legally available, we explain it within the initial period. If a right is restricted, we explain the specific basis and review or complaint route where required.",
+          "Account deletion may leave minimum records needed for accounting, valid licenses, fraud investigation, or an unresolved legal claim. We do not retain all source merely because an invoice must be kept. Deleted data ages out of backups under the retention schedule in the Privacy Policy, and restoration procedures must reapply deletion instructions."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "4. Safe request template",
+        "paragraphs": [
+          "Request type: access / correction / deletion / portability / objection / consent withdrawal / other.",
+          "Account reference: [email or identifier]. Description of the relevant data or correction: [details]. Reply email: [address]. Representative authorization, only if applicable: [description].",
+          "A screenshot is optional and should be redacted. Never paste session headers or a project's secret files into the form."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "5. Response time, cost and review",
+        "paragraphs": [
+          "We respond without undue delay and within the deadline applicable to your request. Where the GDPR applies, the ordinary response period is one month from receipt; an extension of up to two further months is available only where its conditions are met, and we explain the extension and reasons within the initial month. A shorter applicable local deadline takes priority. We do not delay every request by applying the longest period found in any jurisdiction.",
+          "Rights requests are ordinarily free. We charge a permitted reasonable fee or refuse a request only where the applicable law allows it and we can explain the specific basis, such as a manifestly unfounded or excessive request under the relevant law. Exercising a privacy right does not itself justify worse treatment, loss of an unrelated license or a forced plan upgrade.",
+          "If we cannot grant all or part of a request, we explain the relevant reason and available review or complaint route. You may contact the relevant privacy regulator, including the Personal Information Protection Commission in Korea or the competent EU/UK authority where applicable. Internal review is not a prerequisite to a statutory complaint or court remedy."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "6. Analytics, public content and deletion outcomes",
+        "paragraphs": [
+          "For PostHog analytics, give the account or browser reference available to you; we do not require you to discover an internal analytics ID yourself. We will identify matching records where reasonably possible, apply the relevant deletion or objection instruction and distinguish truly non-identifiable aggregates from pseudonymous data that can still be linked to you.",
+          "Removing a public gallery entry does not automatically delete an independently posted social-media video or a domain registration record held by its registrar. We can remove material under our control and explain which independent provider to contact. Campaign evidence, financial records and license records are retained only to the extent justified, not as a reason to keep every private source file.",
+          "For account deletion, we explain the effect on workspaces, subscriptions, pending Creator payouts, accepted project licenses and unfinished prize claims. We distinguish records deleted, restricted or retained and state their purposes and retention basis. Private source, tax records and minimum license evidence are not treated as a single inseparable category."
+        ],
+        "pendingFields": []
+      },
+      {
+        "title": "7. Choosing the request you actually need",
+        "paragraphs": [
+          "Stop emails: unsubscribe from optional marketing; essential account and order messages may still be necessary.",
+          "Stop analytics: use Privacy choices or contact us; this need not close the account.",
+          "Stop a subscription: cancel renewal through Billing or request assistance; project-use licenses remain separate.",
+          "Remove a public build: identify the gallery or post URL under Webcanbe's control.",
+          "Close and delete the account: state that explicitly so billing, data, team access and any remaining earnings can be coordinated.",
+          "Obtain your data: request access or portability and describe the relevant account or workspace. An ordinary source export and a full privacy access request are different; you do not need to purchase a plan upgrade merely to exercise an applicable statutory right."
+        ],
+        "pendingFields": []
+      }
+    ]
+  }
+}
