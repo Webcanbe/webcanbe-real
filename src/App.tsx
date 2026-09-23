@@ -133,7 +133,7 @@ function Protected({ children }: { children: React.ReactNode }) {
     window.addEventListener("wcb:auth-changed", refresh)
     return () => { current = false; window.removeEventListener("wcb:auth-changed", refresh) }
   }, [auth])
-  if (state === "denied") return <main className="route-gate"><span className="signal">Account</span><h1>Sign in to continue.</h1><p>Your workspace will open after you sign in.</p><button type="button" className="button primary" onClick={requestSignIn}>Sign in</button></main>
+  if (state === "denied") return <main className="route-gate"><span className="signal">Account</span><h2>Sign in to continue.</h2><p>Your workspace will open after you sign in.</p><button type="button" className="button primary" onClick={requestSignIn}>Sign in</button></main>
   if (state === "checking") return <main className="route-gate" role="status" aria-live="polite" aria-busy="true"><LoadingSpinner/><span className="signal">Account</span><p>Checking your session…</p></main>
   return <>{children}</>
 }
