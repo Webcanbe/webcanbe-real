@@ -7,10 +7,11 @@ import "./app-shell.css"
 import "./editor-shell.css"
 import "./editor-split-fix.css"
 import "./editor-control-size.css"
-import { initializeAnalytics } from "./analytics"
+import { initializeAnalytics, installLinkTracking } from "./analytics"
 
 if (window.location.pathname === "/requests") void import("./my-requests.css")
 
+installLinkTracking()
 void initializeAnalytics()
 
 createRoot(document.getElementById("root")!).render(

@@ -164,7 +164,7 @@ export default function CompatibleWorkspace() {
   const aiButton = useRef<HTMLButtonElement>(null)
   function closeAi() { setAiOpen(false); window.setTimeout(() => aiButton.current?.focus(), 0) }
   const [sourceUIOpened, setSourceUIOpened] = useState(() => surface !== "canvas")
-  function openSurface(value: "canvas" | "code" | "split" | "history") { if (value !== "canvas") setSourceUIOpened(true); setSurface(value); const url = new URL(window.location.href); url.searchParams.set("mode", value); window.history.replaceState({}, "", url) }
+  function openSurface(value: "canvas" | "code" | "split" | "history") { if (value !== "canvas") setSourceUIOpened(true); if (value !== surface) analytics.capture("wcb_editor_mode_changed", { source: "workspace", editor_mode: value === "canvas" ? "visual" : value }); setSurface(value); const url = new URL(window.location.href); url.searchParams.set("mode", value); window.history.replaceState({}, "", url) }
   const [sourceEpoch, setSourceEpoch] = useState(0)
   const codeLocationSequence = useRef(0)
   const [codeLocation, setCodeLocation] = useState<CodeOpenLocation>()
@@ -228,7 +228,7 @@ export default function CompatibleWorkspace() {
       connected = data.session
       if (cancelled) { stop(connected); return }
       advanceOnboarding(1, window.location.pathname.split("/").filter(Boolean).at(-1) || projectId); setLeftPanel("pages"); setRuntime(data.runtime); setProject(data.project); setSession(data.session); setMessage("Project source is ready. See the verified preview boundary below.")
-      analytics.capture("wcb_workspace_opened", { source: "direct", editor_mode: "visual" })
+      analytics.capture("wcb_workspace_opened", { source: "direct", editor_mode: surface === "canvas" ? "visual" : surface })
     })().catch(() => { if (!cancelled) setMessage("The local Compatible engine is unavailable.") })
     const pagehide = () => { if (connected) stop(connected) }
     window.addEventListener("pagehide", pagehide)
@@ -454,7 +454,7 @@ export default function CompatibleWorkspace() {
     setProjectId(data.project.id)
   }
   async function exportProject() {
-    analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface === "split" ? "preview" : surface })
+    analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface })
     const response = await request("export")
     if (!response.ok || !response.data.archive) { analytics.capture("wcb_export_completed", { source: "workspace", state: "failure" }); setMessage(response.data.error ?? "Export unavailable."); return }
     const bytes = Uint8Array.from(atob(response.data.archive), ch => ch.charCodeAt(0))

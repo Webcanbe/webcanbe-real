@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { createAnalytics, initializeAnalytics, isSafeAnalyticsPayload, sanitizePostHogEvent } from "./analytics"
+import { createAnalytics, initializeAnalytics, isSafeAnalyticsPayload, safeLinkClickPayload, sanitizePostHogEvent } from "./analytics"
 
 function client() {
   return { capture: vi.fn(), identify: vi.fn(), reset: vi.fn() }
@@ -29,6 +29,24 @@ describe("analytics", () => {
     const posthog = client()
     analytics.setClient(posthog as never)
     expect(posthog.capture).toHaveBeenCalledWith("wcb_marketplace_viewed", { source: "marketplace" })
+  })
+
+  it("queues internal identity until initialization and clears pending data on sign-out", () => {
+    const analytics = createAnalytics()
+    analytics.identify("wcb-user-123", { account_creation_state: "complete", auth_provider_names: ["google"] })
+    analytics.capture("wcb_dashboard_viewed", { source: "dashboard" })
+    const posthog = client()
+    analytics.setClient(posthog as never)
+    expect(posthog.identify).toHaveBeenCalledWith("wcb-user-123", { account_creation_state: "complete", auth_provider_names: ["google"] })
+    expect(posthog.capture).toHaveBeenCalledWith("wcb_dashboard_viewed", { source: "dashboard" })
+    analytics.setClient(null)
+    analytics.identify("wcb-user-456")
+    analytics.capture("wcb_projects_viewed", { source: "projects" })
+    analytics.reset()
+    const fresh = client()
+    analytics.setClient(fresh as never)
+    expect(fresh.identify).not.toHaveBeenCalled()
+    expect(fresh.capture).not.toHaveBeenCalled()
   })
 
   it("identifies by stable internal ID and resets", () => {
@@ -73,5 +91,30 @@ describe("analytics", () => {
     } as never)
     expect(result?.properties).toMatchObject({ listing_id: "aperture-north", source: "marketplace", token: "project-token", distinct_id: "anonymous-1", $current_url: "https://webcanbe.com/project/:project" })
     expect(result?.properties.private_note).toBeUndefined()
+  })
+
+  it("keeps custom events with PostHog-injected non-dollar fields", () => {
+    const result = sanitizePostHogEvent({ event: "wcb_checkout_started", properties: {
+      source: "marketplace", listing_id: "listing-1", distinct_id: "sdk-user", token: "sdk-token",
+      $current_url: "https://webcanbe.com/checkout/listing-1?secret=value#private",
+    } } as never)
+    expect(result?.properties).toMatchObject({ source: "marketplace", listing_id: "listing-1", distinct_id: "sdk-user", token: "sdk-token", $current_url: "https://webcanbe.com/checkout/:project" })
+  })
+
+  it("tracks only a normalized internal route or an external host", () => {
+    expect(safeLinkClickPayload("/project/aperture-north/preview?private=1#hero", "https://webcanbe.com/browse?search=private")).toEqual({ source: "marketplace", link_kind: "internal", target_route: "/project/:project/preview" })
+    expect(safeLinkClickPayload("https://github.com/Webcanbe/webcanbe-real?token=private#code", "https://webcanbe.com/contact")).toEqual({ source: "public", link_kind: "external", target_host: "github.com" })
+    expect(safeLinkClickPayload("mailto:secret@example.com", "https://webcanbe.com/")).toBeNull()
+    expect(safeLinkClickPayload("/projects?token=private", "https://webcanbe.com/dashboard")).toEqual({ source: "dashboard", link_kind: "internal", target_route: "/projects" })
+    expect(safeLinkClickPayload("/notes/name%40example.com", "https://webcanbe.com/browse")).toBeNull()
+  })
+
+  it("rejects mixed link targets, query-bearing routes, and arbitrary fields", () => {
+    const posthog = client()
+    const analytics = createAnalytics(posthog as never)
+    analytics.capture("wcb_link_clicked", { source: "public", link_kind: "internal", target_route: "/projects", target_host: "github.com" })
+    analytics.capture("wcb_link_clicked", { source: "public", link_kind: "internal", target_route: "/projects?secret=yes" })
+    analytics.capture("wcb_link_clicked", { source: "public", link_kind: "external", target_host: "github.com", link_text: "Private" } as never)
+    expect(posthog.capture).not.toHaveBeenCalled()
   })
 })
