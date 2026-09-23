@@ -1949,3 +1949,131 @@ Do not move this materially for code, plans, polish, or internal completion alon
 5. Should PR #106 detailed PostHog tracking be reconciled into current main now, or is a newer analytics implementation already replacing it?
 
 These are intentionally treated as unknown rather than guessed.
+
+
+## 35. Canonical war-plan recovery — 100-day plan + active 72-hour market war — 2026-09-23
+
+Recovered from Library handoffs and promoted into the primary GitHub continuity record.
+
+### A. Canonical 100-day war plan
+The older aggressive plan remains valid as the **canonical stretch operating baseline**, not as a prediction.
+
+Core spine:
+- 3 days to public — already achieved early by the Sep 23 public launch.
+- 7 days to first genuine external payment — latest-bound target Sep 28.
+- Sep 30 stretch checkpoint:
+  - 10 paid buyers
+  - 40 external completed-use outcomes
+  - 10 strong live projects
+  - 3+ external Creators
+  - first repeat buyer or second independent buyer signal
+- Oct 7:
+  - 30–50 cumulative paid buyers
+  - $10k+ cumulative GMV stretch
+  - repeat purchase observed
+- Oct 31:
+  - $50k+ monthly GMV stretch
+  - 150–300 paid buyers
+  - 50 active sellers
+  - ~100 strong live listings
+  - clear repeat purchase
+- Nov 30: $250k+ monthly GMV stretch.
+- Dec 31: $1M+ monthly GMV stretch.
+
+Accounting correction:
+- GMV is not Webcanbe company revenue.
+- Current recognized marketplace revenue follows actual fee-bearing sales and current Creator economics (Founding Creator 0%; standard 5%/8%) plus real subscription/AI/other revenue.
+- Do not reuse the historical 15–25% take-rate illustration as current truth.
+
+Operating doctrine:
+- Every business day: metrics → distribution → conversations → one measured bottleneck → record.
+- No coding-only day with no market evidence.
+- Three independent qualified users blocked at the same step => investigate immediately.
+- Two consecutive days of weak qualified conversion => change target/message/offer before adding features.
+- Product Hunt waits until the funnel can convert and teach us something.
+- Founder age is not the initial company marketing hook; the earlier threshold was 100+ real customers OR roughly $50k–$100k+ monthly GMV with fast verified growth.
+- Build League + Founding Prize Vault is the evolved permanent customer-acquisition system.
+
+### B. Active 72-hour market war
+There was an earlier operational declaration tied to the 12:30 product-closure cutoff, but the **formal declaration supersedes it for the canonical war clock**.
+
+Formal war window:
+- Start: **2026-09-23 15:20 KST**
+- End: **2026-09-26 15:20 KST**
+
+Non-negotiable objective:
+Turn Webcanbe from a launched product into a company with **real external market evidence**.
+
+Primary outcomes:
+1. attributable real external traffic;
+2. external full-core-flow completions;
+3. first genuine paid buyer;
+4. if buyer #1 lands early, buyer #2 or repeat-purchase signal;
+5. seller/Creator outreach and concrete submission interest;
+6. Build League / Prize Vault UGC/referral evidence;
+7. PostHog truth from visitor → signup → project start/materialize → edit/save → export → checkout/purchase;
+8. identify and attack the single biggest real bottleneck each cycle.
+
+War rules:
+- Market evidence and revenue outrank polish.
+- No speculative feature expansion or cosmetic polish that displaces market work.
+- Code is allowed only for measured activation/conversion/reliability/payment/trust/seller-buyer blockers.
+- Every day includes distribution, direct conversations, measurement, and one evidence-driven iteration.
+- If a milestone is reached early, pull the next milestone forward immediately.
+- Approximate founder-led operating targets remain:
+  - ~100 qualified buyer/prospect touches/day
+  - ~50 seller/Creator touches/day
+  - at least 5 real user/customer conversations/day
+- These are quality/follow-up targets, not permission for indiscriminate spam.
+
+### C. 24h / 48h / 72h evidence gates
+24h:
+- real attributed traffic;
+- >=1 external core-flow completion;
+- buyer/seller outreach running;
+- >=1 serious Creator intent;
+- Build League joinable;
+- real non-founder PostHog data;
+- first paid buyer = stretch target.
+
+48h:
+- first genuine paid buyer OR exact evidence-backed purchase blocker;
+- 3–5 external full-flow completions;
+- at least one real Creator submission / launch-ready external project in motion;
+- one meaningfully stronger acquisition channel;
+- no unresolved blocker hitting multiple qualified users.
+
+72h:
+Minimum acceptable:
+- real traffic + funnel data;
+- multiple external completions;
+- first buyer OR precise purchase blocker;
+- meaningful seller pipeline;
+- Build League real entrant/UGC/referral signal or clear messaging failure evidence;
+- exact best channel + biggest funnel blocker + next 7-day experiment.
+
+Strong:
+- first paid buyer;
+- buyer #2 or repeat signal;
+- 5–10+ external completions;
+- 1–3 serious Creator submissions/live projects;
+- first Build League UGC/referral evidence;
+- measurable D1 return signal.
+
+### D. Seller-side progress already recorded inside the 72h war
+- First seller outbound batch actually sent via Resend: **30 emails** from hello@webcanbe.com.
+- Airtable rows were marked SENT with send date and Resend IDs.
+- **20 additional high-fit seller candidates** were discovered and added to the WebCanBe GTM Airtable Prospects table.
+- Seller-side first-day target pool therefore reached **30 contacted + 20 fresh candidates = 50**.
+- Next recorded seller action: verify/enrich the 20 new candidates, prioritize direct public emails, then send the second Founding Creator batch.
+
+### E. Current user clarification after recovery
+As of the user's latest clarification in this chat:
+- the first public consumer marketing/event post has **not** been published yet;
+- planned public distribution is primarily X + Instagram initially, with image/event creative acceptable while the site UI is still being cleaned up;
+- Build League / Prize Vault remains strategy/preparation and is intended to go public shortly;
+- no genuine external-user, full-flow, purchase, repeat-user, or Creator-submission market proof has yet been confirmed in this chat;
+- rare-domain rewards are not yet purchased; search continues until shortly before promotion;
+- detailed PostHog tracking has already been implemented beyond the older base-only state, so PR #106 should not be treated as the sole current analytics truth without reconciling actual main.
+
+This section supersedes any older handoff implication that consumer/public marketing had already begun.
