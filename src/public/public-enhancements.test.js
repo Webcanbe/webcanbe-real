@@ -1,7 +1,9 @@
 import fs from 'node:fs'
 import {JSDOM} from 'jsdom'
 import {it,expect} from 'vitest'
-const source=fs.readFileSync('public/public-enhancements.js','utf8')
+// JSDOM eval does not support module imports; these tests exercise the independent
+// support and docs handlers while catalog-model imports are covered in the browser.
+const source=fs.readFileSync('public/public-enhancements.js','utf8').replace(/^import \{ firstPartyTemplates \} from '\.\/catalog-model\.js'\n/,'')
 it('creates a persisted categorized case with bounded safe context and no secrets or query strings',async()=>{
  const dom=new JSDOM(fs.readFileSync('.public-site/__public/contact/issues.html','utf8'),{url:'https://webcanbe.com/contact/issues?token=DO_NOT_SHARE',runScripts:'outside-only'}),w=dom.window
  const calls=[];w.fetch=async(url,options={})=>{calls.push({url,options});return {ok:true,json:async()=>url.endsWith('/session')?{csrf:'csrf-value'}:{request:{requestNumber:'WCB-REQ-ABC234'}}}}
