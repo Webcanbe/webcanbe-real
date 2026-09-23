@@ -1368,3 +1368,9 @@ body { font-family:Inter,"Host Grotesk",Arial,sans-serif; }
   .hub-skeleton i { grid-row:span 2; height:96px; }
   .hub-skeleton b { grid-column:2; width:min(150px,100%); }
 }
+
+/* Keep all detail tabs reachable without widening the mobile page. */
+@media (max-width:680px) {
+  .detail-content .tabs { max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; }
+  .detail-content .tabs button { flex:none; }
+}
