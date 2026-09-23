@@ -5,21 +5,17 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "OPERATOR_POSTAL_ADDRESS",
-      "OPERATOR_REGISTRATION_DISCLOSURE",
-      "OPERATOR_REQUIRED_CONTACT_DETAILS"
+      "OPERATOR_REGISTRATION_DISCLOSURE"
     ],
     "sections": [
       {
         "title": "1. Who operates Webcanbe",
         "paragraphs": [
-          "General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with its business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894). Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. General, billing and legal contact: hello@webcanbe.com. Privacy contact: Webcanbe Privacy Contact at the same address.",
           "The Webcanbe name is a product brand. Your account agreement and order confirmation identify the actual contracting operator. An authentication, infrastructure or payment provider does not become the supplier of your Webcanbe purchase merely by providing that service."
         ],
         "pendingFields": [
-          "OPERATOR_POSTAL_ADDRESS",
-          "OPERATOR_REGISTRATION_DISCLOSURE",
-          "OPERATOR_REQUIRED_CONTACT_DETAILS"
+          "OPERATOR_REGISTRATION_DISCLOSURE"
         ]
       },
       {
@@ -69,22 +65,18 @@
     "version": "2026-09-23-review-3",
     "publicationBlocked": true,
     "unresolvedFields": [
-      "OPERATOR_POSTAL_ADDRESS",
       "OPERATOR_REGISTRATION_DISCLOSURE",
-      "OPERATOR_REQUIRED_CONTACT_DETAILS",
       "SUPPORTED_CUSTOMER_TERRITORIES"
     ],
     "sections": [
       {
         "title": "1. Who operates Webcanbe",
         "paragraphs": [
-          "Contact: hello@webcanbe.com. “Webcanbe,” “we,” and “us” mean that operator, not the software's creators, an authentication provider, or a payment processor.",
+          "Webcanbe is operated by MIN SIHOO, individual operator, established in Republic of Korea, with a business contact address at 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894) and required supplier contact information Email: hello@webcanbe.com. Telephone in the Republic of Korea: 010-8167-8563. International telephone: +82 10-8167-8563. Contact: hello@webcanbe.com. “Webcanbe,” “we,” and “us” mean that operator, not the software's creators, an authentication provider, or a payment processor.",
           "These Terms govern your account and use of our marketplace and source-editing service. The operator is the contracting supplier of Webcanbe subscriptions and AI Actions. Merely making public information accessible does not promise that every paid feature or payout method is offered in every country. For marketplace orders under the distribution model described in the Creator Distribution Agreement, the operator supplies the project license as an authorized distributor; the identified Creator retains the underlying intellectual property. Your checkout and order confirmation identify the contracting supplier and Creator. A payment processor is not substituted for that supplier merely because it processes payment.",
           "You accept these Terms through the account or checkout acceptance action presented to you. Merely viewing a public page does not create a paid subscription. An individual acting for an organization must have authority to bind it; the identified organization is then the customer for that account or order."
         ],
         "pendingFields": [
-          "OPERATOR_POSTAL_ADDRESS",
-          "OPERATOR_REQUIRED_CONTACT_DETAILS",
           "OPERATOR_REGISTRATION_DISCLOSURE",
           "SUPPORTED_CUSTOMER_TERRITORIES"
         ]
@@ -263,24 +255,17 @@
       "AI_REQUEST_RETENTION_SCHEDULE",
       "BACKUP_RETENTION_SCHEDULE",
       "CAMPAIGN_RETENTION_SCHEDULE",
-      "CLOUDFLARE_PROCESSING_DETAILS",
-      "GOOGLE_FIREBASE_PROCESSING_DETAILS",
-      "OPERATOR_POSTAL_ADDRESS",
-      "PAYPAL_PROCESSING_DETAILS",
-      "SECURITY_LOG_RETENTION_SCHEDULE",
-      "SUPABASE_PROCESSING_DETAILS"
+      "SECURITY_LOG_RETENTION_SCHEDULE"
     ],
     "sections": [
       {
         "title": "1. Controller and contact",
         "paragraphs": [
-          "Privacy contact: Webcanbe Privacy Contact, hello@webcanbe.com. Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement..",
+          "MIN SIHOO, operating Webcanbe from 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894), is responsible for personal information we process for our own account, marketplace, billing, security, and support purposes. Privacy contact: Webcanbe Privacy Contact, hello@webcanbe.com. Where required, our EU/UK or other local representative is identified in MIN SIHOO is the named Webcanbe contact for this disclosure at hello@webcanbe.com. No separate statutory representative regime or appointment is asserted by this statement.",
           "For personal information an organization places in its private project for processing solely on its instructions, that organization may be the controller and Webcanbe its processor. Section 14 below explains the separate processing agreement for that role. We do not treat a controller's project data as available for unrelated advertising simply because it is hosted in our workspace.",
           "This policy describes personal-data handling, not a transfer of your intellectual property. Optional marketing, non-essential tracking, and legally required cross-border consents are not bundled into general account acceptance."
         ],
-        "pendingFields": [
-          "OPERATOR_POSTAL_ADDRESS"
-        ]
+        "pendingFields": []
       },
       {
         "title": "2. Information we process",
@@ -429,31 +414,26 @@
         "paragraphs": [
           "This schedule describes each enabled recipient and its particular role. “Processor” means a provider processing on our instructions for that function; some providers separately determine how to process information for their own account, fraud-prevention or legal duties. The schedule does not treat all provider activity as one role.",
           "B.1 Cloudflare Delivery, network security, Workers and related preview services process connection metadata and the source or render artifacts needed for the requested operation. Workers AI receives authorized prompts, selected project context and inference outputs when AI is",
-          "requested. These service-data functions are performed under the relevant service contracts, with separate provider account and legal functions where applicable.",
+          "requested. These service-data functions are performed under the relevant service contracts, with separate provider account and legal functions where applicable. Contracting entity, processing countries, retention and transfer safeguards: Cloudflare, Inc. provides the production global edge network, Workers, static-asset delivery, Hyperdrive and Workers AI. Ordinary HTTPS traffic is processed at Cloudflare data centers near the connecting user unless a separately configured regional service applies; Webcanbe has not configured a regional-services restriction. Cloudflare's current DPA permits processing by Cloudflare and listed subprocessors in the United States and other listed service locations, uses the applicable EU Standard Contractual Clauses and UK transfer addendum for restricted transfers, and limits retention to the earlier of agreement termination or when processing is no longer necessary for the service. Request and response content is ordinarily handled in memory unless caching or another storage product is used. Workers AI does not use Customer Content to train models or improve Cloudflare or third-party services without explicit consent and stores that content only when a separate storage service is deliberately used.",
           "Cloudflare's Workers AI data-use documentation distinguishes inference from training and use of separate storage products. Webcanbe does not authorize general-purpose training on private source or prompts through ordinary use. This does not promise that Webcanbe's own accepted source history, request outcomes, logs or backup records are never stored.",
-          "B.2 Google and Firebase Authentication Enabled sign-in methods process provider-specific identifiers, identity/profile information and authentication metadata. Email/password sign-in is handled by Firebase Authentication. Google sign-in alone does not authorize access to Gmail, Drive or Calendar. Applicable service contracts allocate processing roles; Google also handles its own user-account activity.",
-          "B.3 Supabase-hosted PostgreSQL The application database stores the account, source, revision, workspace, order, license, AI usage and review records needed by the product. Hosting is processing under the applicable service contract. A database region alone is not a guarantee that every related support or backup operation occurs there.",
-          "B.4 PayPal When enabled, PayPal processes checkout, payment authorization, subscriptions, refunds, payment references and its own fraud, verification and compliance records. For its payment and legal functions, PayPal generally acts as an independent controller under the applicable regional arrangement. We do not store full card credentials in our ordinary application records.",
-          "B.5 PostHog PostHog processes the limited analytics events described in Section 11 on our instructions, with any separate provider account duties under its contracts. Only the selected environment is used; we do not claim both U.S. and EU hosting for the same data. Actual contracting entity, selected region/countries, event and identity retention, raw-IP handling, deletion mechanism and transfer safeguards: PostHog is not enabled in the current production configuration because no verified Webcanbe project token and host are supplied. No PostHog analytics events or session replay are transmitted while that configuration remains absent.. Session replay is disabled under this launch policy.",
-          "B.6 Support, email and optional deployment Enabled email-delivery and support services process recipient details, safe account or order references and messages that are necessary to handle the communication. Optional deployment services receive project artifacts only when that specific feature is requested. Actual enabled provider names, legal entities, roles, countries, timing/method, retention and safeguards, or an explicit statement that a function is not enabled: No optional third-party deployment provider is enabled in the current production configuration. Support is handled through hello@webcanbe.com. A requested future deployment or email provider must be disclosed here before that function is enabled..",
+          "B.2 Google and Firebase Authentication Enabled sign-in methods process provider-specific identifiers, identity/profile information and authentication metadata. Email/password sign-in is handled by Firebase Authentication. Google sign-in alone does not authorize access to Gmail, Drive or Calendar. Applicable service contracts allocate processing roles; Google also handles its own user-account activity. Contracting entity, locations, authentication retention and transfer details: Google LLC provides Firebase Authentication for project webcanbe-b607e. Authentication is a United States-only Firebase service: credentials, provider identifiers, basic profile data and authentication metadata are sent by encrypted HTTPS when a person signs up, signs in, refreshes authentication or manages an account. Firebase retains the authentication account until Webcanbe initiates deletion; Firebase states that associated authentication data is then removed from live and backup systems within 180 days. Google and its listed subprocessors process under the applicable Firebase/Google service terms and Cloud Data Processing Addendum, including the applicable contractual transfer safeguards.",
+          "B.3 Supabase-hosted PostgreSQL The application database stores the account, source, revision, workspace, order, license, AI usage and review records needed by the product. Hosting is processing under the applicable service contract. Actual project region, provider entity, backup retention, support access and transfer safeguards: Supabase, Inc. hosts production project kappcfofcobhudmeuzmt. The configured PostgreSQL host resolves to Amazon Web Services region ap-northeast-2 (Northeast Asia / Seoul), so the primary database is in the Republic of Korea and is reached by the Worker through Cloudflare Hyperdrive. The authenticated Supabase dashboard identifies the current organization plan as Free; Supabase does not include automatic database backups on that plan, so no provider daily-backup retention window is claimed. Supabase and its listed subprocessors may access data as necessary to host, secure and support the service, including support by Supabase Pte. Ltd.; its current DPA uses the applicable EU Standard Contractual Clauses and related transfer safeguards for transfers, including support and onward processing in the United States and Singapore. This project-region statement does not claim that every support or account operation remains in the Republic of Korea. A database region alone is not a guarantee that every related support or backup operation occurs there.",
+          "B.4 PayPal When enabled, PayPal processes checkout, payment authorization, subscriptions, refunds, payment references and its own fraud, verification and compliance records. For its payment and legal functions, PayPal generally acts as an independent controller under the applicable regional arrangement. We do not store full card credentials in our ordinary application records. Actual contracting recipient, applicable countries, data categories transferred, timing, retention and provider privacy contact: PayPal payment processing is not enabled in the active production Worker: the safe production diagnostic reports that all PayPal client, secret, webhook and plan bindings are absent. No production checkout, subscription or refund data is therefore transferred to PayPal by Webcanbe at this time. The separately prepared Sandbox configuration is for non-production testing only and must not be described as Live. Before any Live activation, this disclosure must be updated for the verified merchant account and regional PayPal contracting entity. When enabled, PayPal receives checkout identity and contact data, amount, currency, order or subscription references and transaction events at checkout and through signed webhooks; PayPal acts as an independent controller for payment, fraud and legal-compliance functions, retains relationship data for the relationship plus the locally applicable period described in its regional privacy statement (generally 10 years unless law permits or requires longer), and accepts privacy requests through its Privacy Hub.",
+          "B.5 PostHog PostHog processes the limited analytics events described in Section 11 on our instructions, with any separate provider account duties under its contracts. Only the selected environment is used; we do not claim both U.S. and EU hosting for the same data. Actual contracting entity, selected region/countries, event and identity retention, raw-IP handling, deletion mechanism and transfer safeguards: PostHog is not enabled in the current production configuration because no verified Webcanbe project token and host are supplied. No PostHog analytics events or session replay are transmitted while that configuration remains absent. Session replay is disabled under this launch policy.",
+          "B.6 Support, email and optional deployment Enabled email-delivery and support services process recipient details, safe account or order references and messages that are necessary to handle the communication. Optional deployment services receive project artifacts only when that specific feature is requested. Actual enabled provider names, legal entities, roles, countries, timing/method, retention and safeguards, or an explicit statement that a function is not enabled: No optional third-party deployment provider is enabled in the current production configuration. Support is handled through hello@webcanbe.com. A requested future deployment or email provider must be disclosed here before that function is enabled.",
           "B.7 Your transfer information and safeguards For each overseas recipient, the completed disclosure identifies the recipient and contact route; destination countries; information categories; purpose; timing and method; retention or use period; applicable transfer ground or safeguard; and any refusal choice and consequence. These particulars are supplied before transfer where required. A recognized adequacy arrangement or valid contractual safeguard is used only where it actually covers the recipient and transfer. Required consent is separate from unrelated service acceptance. Ask the privacy contact for the relevant safeguards or an available copy."
         ],
-        "pendingFields": [
-          "CLOUDFLARE_PROCESSING_DETAILS",
-          "GOOGLE_FIREBASE_PROCESSING_DETAILS",
-          "SUPABASE_PROCESSING_DETAILS",
-          "PAYPAL_PROCESSING_DETAILS"
-        ]
+        "pendingFields": []
       },
       {
         "title": "Appendix C. Storage and analytics inventory",
         "paragraphs": [
           "The inventory below must match the version of Webcanbe you use. Core session and requested draft-recovery functions are distinguished from optional analytics; data is not classified as essential solely because it is commercially useful to us.",
-          "First-party sessions and sign-in state: The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier..",
-          "Firebase authentication persistence: Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself..",
-          "Interface preferences and local draft recovery: Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record..",
-          "Consent and privacy choices: The current production configuration does not enable optional analytics and does not set a separate consent-storage identifier. Essential authentication and requested interface storage remain described separately in this inventory..",
-          "PostHog optional analytics storage and expiry: No PostHog cookie or local-storage identifier is created by the current production configuration. Session replay is disabled in code and analytics initialization fails closed unless both a verified HTTPS host and project token are configured..",
+          "First-party sessions and sign-in state: The __Host-wcb-login cookie is a Secure, HttpOnly, SameSite=Lax temporary OAuth state cookie with a five-minute maximum age. The __Host-wcb-session cookie is a Secure, HttpOnly, SameSite=Strict first-party session cookie with a seven-day maximum age; server-side session expiry or revocation can end it earlier.",
+          "Firebase authentication persistence: Firebase Authentication uses its browser-local persistence default because Webcanbe does not override Firebase persistence. After Firebase sign-in, the ID token is exchanged for the first-party Webcanbe session cookie; Firebase browser state is not accepted as product authority by itself.",
+          "Interface preferences and local draft recovery: Webcanbe stores interface settings, selected workspace, onboarding progress and payment idempotency references in first-party local storage until cleared or replaced. Redirect intent, preview route, pending-plan and other short-lived interface state use session storage until the browser session ends. Project source and accepted edits are persisted server-side; browser preference storage is not the authoritative project record.",
+          "Consent and privacy choices: The current production configuration does not enable optional analytics and does not set a separate consent-storage identifier. Essential authentication and requested interface storage remain described separately in this inventory.",
+          "PostHog optional analytics storage and expiry: No PostHog cookie or local-storage identifier is created by the current production configuration. Session replay is disabled in code and analytics initialization fails closed unless both a verified HTTPS host and project token are configured.",
           "Clearing local storage can remove unsynced drafts or require sign-in again; it is different from a server-side deletion request. Optional collection follows the choices described above and applicable law. A browser opt-out signal is honored for processing to which the applicable law gives that signal effect; this is not a representation that every browser “Do Not Track” setting controls every external service."
         ],
         "pendingFields": []
@@ -690,10 +670,8 @@
     "title": "Refund Policy",
     "intro": "Refund Policy review draft dated 23 September 2026. It is not effective until the operator and processing details listed in the publication gate are verified.",
     "version": "2026-09-23-review-3",
-    "publicationBlocked": true,
-    "unresolvedFields": [
-      "OPERATOR_POSTAL_ADDRESS"
-    ],
+    "publicationBlocked": false,
+    "unresolvedFields": [],
     "sections": [
       {
         "title": "1. Three different purchases",
@@ -754,12 +732,11 @@
       {
         "title": "7. Sample withdrawal notice",
         "paragraphs": [
+          "To: MIN SIHOO, 256 Gaon-ro, Paju-si, Gyeonggi-do 10894, Republic of Korea (Korean: 경기도 파주시 가온로 256, 10894), hello@webcanbe.com.",
           "I give notice that I withdraw from my contract for the following digital content or service: [description]. Order or contract date: [date]. Order reference, if known: [reference]. Customer name: [name]. Customer contact address: [address]. Email for confirmation: [email]. Date of notice: [date]. Signature is required only if this notice is sent on paper and the applicable form requires it.",
           "You may use this sample or another clear statement. It does not replace any additional local instructions we must provide at checkout."
         ],
-        "pendingFields": [
-          "OPERATOR_POSTAL_ADDRESS"
-        ]
+        "pendingFields": []
       },
       {
         "title": "8. Project issues, account deletion and promotions",
