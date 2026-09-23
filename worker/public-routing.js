@@ -3,6 +3,7 @@ export function publicRoute(pathname,search='') {
  let path=pathname
  try{path=decodeURI(path)}catch{return {status:404,asset:'/__public/404.html'}}
  if(path.length>1&&path.endsWith('/'))return {status:308,redirect:path.replace(/\/+$/,'')+search}
+ if(path==='/marketplace')return {status:308,redirect:'/browse'+search}
  if(manifest.aliases[path])return {status:308,redirect:manifest.aliases[path]+search}
  if(path==='/browse'){
   const category=new URLSearchParams(search).get('category')
