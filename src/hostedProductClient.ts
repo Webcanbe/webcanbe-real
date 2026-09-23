@@ -18,6 +18,8 @@ export type HostedListingDetail = HostedListing & Readonly<{
 }>
 
 export type SourceProjectSummary = Readonly<{ id: string; name: string }>
+export type BuildLeagueProgress = Readonly<{ referralCode: string; stage: number; points: number; actions: number; counts: Record<string,number>; dimensions: {build:number;social:number;completion:number}; milestones:string[]; uniqueReferredVisits:number; recent:Array<{kind:string;created_at:string}>; entry:{project_id:string;statement:string;submitted_at:string}|null }>
+export type BuildLeagueLeader = Readonly<{label:string;build:number;social:number;completion:number;score:number}>
 
 export type AccountData = Readonly<{
   userId: string
@@ -291,6 +293,30 @@ export class HostedProductClient {
 
   async sourceProjects() {
     return (await this.post<{ projects: SourceProjectSummary[] }>("/__webcanbe/api/projects", {})).projects
+  }
+
+  async buildLeagueState() {
+    return (await this.post<{progress:BuildLeagueProgress}>("/__webcanbe/api/build-league/state", {})).progress
+  }
+
+  async buildLeagueTrack(kind:string,eventKey:string,projectId?:string) {
+    return this.post<{ok:true}>("/__webcanbe/api/build-league/track", {kind,eventKey,...(projectId?{projectId}:{})})
+  }
+
+  async buildLeagueSubmit(projectId:string,statement:string) {
+    return (await this.post<{entry:BuildLeagueProgress["entry"]}>("/__webcanbe/api/build-league/submit", {projectId,statement})).entry
+  }
+
+  async buildLeagueLeaderboard() {
+    const response=await this.request("/__webcanbe/api/build-league/public",{credentials:"same-origin"})
+    const value=await response.json().catch(()=>({})) as {leaderboard?:BuildLeagueLeader[];weights?:{build:number;social:number;completion:number};error?:string}
+    if(!response.ok)throw new HostedProductError(response.status,value.error||"Campaign leaderboard is unavailable.")
+    return {leaders:value.leaderboard??[],weights:value.weights??{build:40,social:40,completion:20}}
+  }
+
+  async buildLeagueVisit(code:string) {
+    const response=await this.request("/__webcanbe/api/build-league/visit",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})})
+    return response.ok
   }
 
   async createSellerSubmission(sellerApplicationId: string, workspaceId: string, sourceProjectId: string) {

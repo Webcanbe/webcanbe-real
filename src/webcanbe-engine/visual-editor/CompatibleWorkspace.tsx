@@ -19,6 +19,7 @@ import { hostedEditorMode } from "./editorMode"
 import AiWorkspacePanel from "./AiWorkspacePanel"
 import { acceptsRevisionTransition, type RevisionState } from "./revisionTransition"
 import { analytics } from "../../analytics"
+import { hostedProductClient } from "../../hostedProductClient"
 
 type ProjectInfo = { id: string; name: string; imported: boolean; detection: { framework: string; tailwind: boolean; dependencies: Array<{ name: string; declared: string; resolved: boolean }> } }
 type PreviewSession = { projectId: string; previewId: string; capability: string; expiresAt: string }
@@ -72,6 +73,7 @@ export default function CompatibleWorkspace() {
   const [projectId, setProjectId] = useState(workspaceProjectId)
   const [project, setProject] = useState<ProjectInfo>()
   const [session, setSession] = useState<PreviewSession>()
+  const trackLeague = (kind:string) => { if(hostedMode && session) void hostedProductClient.buildLeagueTrack(kind, `${projectId}:${new Date().toISOString().slice(0,10)}`, projectId).catch(()=>{}) }
   const [hovered, setHovered] = useState<PreviewElement>()
   const [selected, setSelected] = useState<PreviewElement>()
   const [target, setTarget] = useState<SourceTarget>()
@@ -167,7 +169,10 @@ export default function CompatibleWorkspace() {
   const aiButton = useRef<HTMLButtonElement>(null)
   function closeAi() { setAiOpen(false); window.setTimeout(() => aiButton.current?.focus(), 0) }
   const [sourceUIOpened, setSourceUIOpened] = useState(() => surface !== "canvas")
-  function openSurface(value: "canvas" | "code" | "split" | "history") { setPreviewOnly(false); if (value !== "canvas") setSourceUIOpened(true); if (value !== surface) analytics.capture("wcb_editor_mode_changed", { source: "workspace", editor_mode: value === "canvas" ? "visual" : value }); setSurface(value); const url = new URL(window.location.href); url.searchParams.set("mode", value); window.history.replaceState({}, "", url) }
+  function openSurface(value: "canvas" | "code" | "split" | "history") { setPreviewOnly(false); if (value !== "canvas") setSourceUIOpened(true); if (value !== surface) { analytics.capture("wcb_editor_mode_changed", { source: "workspace", editor_mode: value === "canvas" ? "visual" : value }); trackLeague(({canvas:"visual_opened",code:"code_opened",split:"split_opened",history:"history_opened"} as const)[value]) } setSurface(value); const url = new URL(window.location.href); url.searchParams.set("mode", value); window.history.replaceState({}, "", url) }
+  useEffect(()=>{if(viewport==="mobile")trackLeague("mobile_preview_used");else if(viewport==="tablet")trackLeague("tablet_preview_used")},[viewport,session])
+  useEffect(()=>{if(aiOpen)trackLeague("ai_panel_opened")},[aiOpen,session])
+  useEffect(()=>{if(selected)trackLeague("first_element_selected")},[selected,session])
   const [sourceEpoch, setSourceEpoch] = useState(0)
   const codeLocationSequence = useRef(0)
   const [codeLocation, setCodeLocation] = useState<CodeOpenLocation>()
@@ -458,6 +463,7 @@ export default function CompatibleWorkspace() {
   }
   async function exportProject() {
     analytics.capture("wcb_export_started", { source: "workspace", editor_mode: surface === "canvas" ? "visual" : surface })
+    trackLeague("export_started")
     const response = await request("export")
     if (!response.ok || !response.data.archive) { analytics.capture("wcb_export_completed", { source: "workspace", state: "failure" }); setMessage(response.data.error ?? "Export unavailable."); return }
     const bytes = Uint8Array.from(atob(response.data.archive), ch => ch.charCodeAt(0))

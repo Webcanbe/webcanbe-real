@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import type { SourceResponse } from "./CodeWorkspace"
 import type { SourceTarget } from "../core/types"
 import { analytics } from "../../analytics"
+import { hostedProductClient } from "../../hostedProductClient"
 
 export type AiMode = "standard" | "deep"
 export type AiFeature = "modify" | "explain"
@@ -127,6 +128,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
   async function applyProposal() {
     if (!outcome || !requestSpec || busy) return
     if (stale) { setError("Source changed after this proposal. Generate a new proposal before applying."); setPhase("failed"); return }
+    if (typeof requestSpec.idempotencyKey === "string") void hostedProductClient.buildLeagueTrack("ai_proposal_reviewed", requestSpec.idempotencyKey).catch(()=>{})
     const abort = new AbortController(); controller.current = abort; setError(""); setAcceptedPending(false); setApplyUncertain(false); setPhase("applying")
     try {
       const response = await request("ai", { ...requestSpec, expectedRevision: proposalRevision, apply: true }, abort.signal)
