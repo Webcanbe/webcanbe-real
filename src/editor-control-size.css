@@ -94,3 +94,118 @@
   .compatible-workspace .editor-reference-toolbar button,
   .compatible-workspace .editor-reference-toolbar a { min-height: 34px; height: 34px; padding: 0 7px; }
 }
+
+/* Keep each editor pane independently reachable, including the final source line. */
+@media (min-width: 681px) {
+  .compatible-workspace .compatible-layout {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .compatible-workspace .compatible-files,
+  .compatible-workspace .compatible-inspector,
+  .compatible-workspace .compatible-preview-shell {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overscroll-behavior: contain;
+  }
+  .compatible-workspace .compatible-frame-wrap {
+    min-width: 0;
+    min-height: 0;
+    padding: 48px 24px 48px;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .compatible-workspace .source-workspace-code,
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .compatible-workspace .source-workspace-code .source-file-tree,
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split .source-file-tree {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-right: 1px solid var(--editor-border);
+    border-bottom: 0;
+  }
+  .compatible-workspace .source-workspace-code .source-editor-panel,
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split .source-editor-panel {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .compatible-workspace .source-code-editor {
+    flex: 1 0 340px;
+    min-width: 0;
+    min-height: 340px;
+    overflow: hidden;
+  }
+  .compatible-workspace .source-code-editor .cm-editor,
+  .compatible-preview-shell.split-mode .source-code-editor .cm-editor {
+    height: 100%;
+    min-height: 0;
+  }
+  .compatible-workspace .source-code-editor .cm-scroller {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .compatible-workspace .source-workspace-code > .code-status,
+  .compatible-workspace .source-workspace-split > .code-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+  }
+  .compatible-workspace .source-workspace-history {
+    display: block;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .compatible-workspace .source-workspace-history pre {
+    max-height: min(55dvh, 680px);
+    overflow: auto;
+  }
+  .compatible-preview-shell.split-mode .source-workspace {
+    max-height: none;
+  }
+}
+@media (min-width: 681px) and (max-width: 1199px) {
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split { grid-template-columns: minmax(0, 1fr); }
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split .source-file-tree {
+    grid-column: 1;
+    grid-row: 1;
+    height: 108px;
+    border-right: 0;
+    border-bottom: 1px solid var(--editor-border);
+  }
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split {
+    grid-template-rows: 108px minmax(0, 1fr) auto;
+  }
+  .compatible-workspace .compatible-preview-shell.split-mode .source-workspace-split .source-editor-panel { grid-column: 1; grid-row: 2; }
+  .compatible-workspace .source-workspace-split > .code-status { grid-row: 3; }
+}
+@media (max-width: 680px) {
+  .compatible-workspace .source-code-editor { height: clamp(360px, 55dvh, 640px); overflow: hidden; }
+  .compatible-workspace .source-code-editor .cm-editor { height: 100%; }
+  .compatible-workspace .source-code-editor .cm-scroller { overflow: auto; overscroll-behavior: contain; }
+}

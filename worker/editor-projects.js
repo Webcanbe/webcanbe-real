@@ -397,6 +397,25 @@ function validateVisualSource(files) {
   }
 }
 
+function validateDraftSource(file, source) {
+  try {
+    if (file.endsWith(".css")) parsedCSS(source)
+    else if (file.endsWith(".json")) JSON.parse(source)
+    else {
+      const parsed = parsedSource(file, source)
+      const diagnostics = (parsed.parseDiagnostics ?? []).slice(0, 20).map(item => {
+        const location = parsed.getLineAndCharacterOfPosition(item.start ?? 0)
+        const message = typeof item.messageText === "string" ? item.messageText : item.messageText?.messageText ?? "Invalid source syntax."
+        return { file, line: location.line + 1, column: location.character + 1, message: String(message).slice(0, 300) }
+      })
+      return { level: "parse", passed: diagnostics.length === 0, diagnostics }
+    }
+    return { level: "parse", passed: true, diagnostics: [] }
+  } catch (error) {
+    return { level: "parse", passed: false, diagnostics: [{ file, message: String(error instanceof Error ? error.message : "Invalid source syntax.").slice(0, 300) }] }
+  }
+}
+
 function previewPayload(state,route="/"){
   const files=Object.fromEntries([...state.files].sort(([a],[b])=>a.localeCompare(b)).map(([file,bytes])=>[file,Buffer.from(bytes).toString("base64")]))
   return {files,entry:["src/main.tsx","src/main.jsx","src/main.ts","src/main.js"].find(file=>files[file]!==undefined),title:"Webcanbe isolated preview",route}
@@ -634,7 +653,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     if(body.mode==="semantic")fail(422,"The isolated semantic checker is not attached to the production Worker yet.")
     if(typeof body.file!=="string"||typeof body.content!=="string"||!sourceMember(body.file,state.history)||!textFiles(state.files,state.history).has(body.file))fail(400,"Select an authorized source file.")
     if(body.content.includes("\0")||Buffer.byteLength(body.content)>LIMITS.fileBytes)fail(422,"Source file exceeds limits.")
-    return {status:200,value:await finishRead(db,session,projectId,body,{validation:{level:"parse",passed:true,diagnostics:[]},revision:state.revision})}
+    return {status:200,value:await finishRead(db,session,projectId,body,{validation:validateDraftSource(body.file,body.content),revision:state.revision})}
   }
   if(action==="compatibility"){
     return {status:200,value:await finishRead(db,session,projectId,body,{...(()=>{const a=projectStyles(state,body.viewport);return {targets:a.targets,summary:summarizeCompatibility(a.targets),breakpoints:a.breakpoints,styleDiagnostics:a.diagnostics}})(),revision:state.revision})}

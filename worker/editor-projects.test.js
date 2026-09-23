@@ -286,6 +286,20 @@ describe("production Worker source editor API",()=>{
     expect(received.options.allowRequestPattern).toEqual(["^https://webcanbe-real\\.iseig513\\.workers\\.dev/(?:__wcb_preview_runtime|assets/[^?#]+)$"])
   })
 
+  it("reports real draft parse errors without accepting or replacing source",async()=>{
+    const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const before=state.project.files["src/App.tsx"]
+    const invalid=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/validate`,{...auth,file:"src/App.tsx",content:"export default function App( {"})
+    expect(invalid.value.validation).toMatchObject({level:"parse",passed:false})
+    expect(invalid.value.validation.diagnostics[0]).toMatchObject({file:"src/App.tsx",line:1})
+    const corrected=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/validate`,{...auth,file:"src/App.tsx",content:"export default function App(){return <main>Corrected</main>}"})
+    expect(corrected.value.validation).toEqual({level:"parse",passed:true,diagnostics:[]})
+    expect(state.project.files["src/App.tsx"]).toBe(before)
+    expect(state.project.revision).toBe(baseRevision)
+  })
+
   it("routes production project APIs before the static SPA fallback",()=>{
     const worker=fs.readFileSync("worker/index.js","utf8")
     expect(worker).toContain('path === "/__webcanbe/api/projects"')
