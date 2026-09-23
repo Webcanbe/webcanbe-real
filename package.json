@@ -26,7 +26,8 @@
     "db:restore:recovery": "node scripts/db/restore-recovery.mjs",
     "public:generate": "node scripts/generate-public.mjs",
     "predev": "npm run public:generate",
-    "public:check": "node scripts/check-public.mjs"
+    "public:check": "node scripts/check-public.mjs",
+    "payments:live:configure": "node scripts/launch/configure-paypal-live.mjs"
   },
   "dependencies": {
     "@babel/core": "7.29.7",
