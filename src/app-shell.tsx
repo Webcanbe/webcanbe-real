@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { LayoutDashboard, FolderKanban, Store, ShoppingBag, Sparkles, PanelsTopLeft, Columns2, FileCode2, BookOpen, Settings2, UserCircle2, CreditCard, Bell, CircleHelp, ChevronDown, ChevronsUpDown, Plus, Search, X, LogOut, Check, ArrowRight } from 'lucide-react'
 import { hostedProductClient, productionAuthMode, type AccountData } from './hostedProductClient'
 import { appRoutes, type DashboardView, readLocal, writeLocal, onboardingState, dismissOnboarding, workspaceLabel } from './shellState'
+import { analytics } from './analytics'
 
 type Navigate = (path: string) => void
 export function AppLink({ to, navigate, children, className }: { to: string; navigate: Navigate; children: ReactNode; className?: string }) {
@@ -14,7 +15,7 @@ export function useAccount() {
     let current = true
     const refresh = () => {
       if (!productionAuthMode()) { setAccount(readLocal('wcb-demo-profile', { displayName: 'Your account' })); return }
-      void hostedProductClient.account().then(value => { if (current) { setAccount(value); setError(''); try { sessionStorage.setItem('wcb-onboarding-user', value.userId); window.dispatchEvent(new Event('wcb:shell-state')) } catch {} } }, reason => { if (current) setError(reason instanceof Error ? reason.message : 'Account unavailable') })
+      void hostedProductClient.account().then(value => { if (current) { setAccount(value); setError(''); analytics.identify(value.userId, { account_creation_state: 'complete', auth_provider_names: value.providers }); try { sessionStorage.setItem('wcb-onboarding-user', value.userId); window.dispatchEvent(new Event('wcb:shell-state')) } catch {} } }, reason => { if (current) setError(reason instanceof Error ? reason.message : 'Account unavailable') })
     }
     refresh(); window.addEventListener('wcb:profile-updated', refresh)
     return () => { current = false; window.removeEventListener('wcb:profile-updated', refresh) }
