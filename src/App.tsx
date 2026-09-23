@@ -109,6 +109,7 @@ async function productionSignOut(){
     hostedProductClient.logout(),
     signOutFirebase(),
   ])
+  analytics.reset()
 }
 function PublicShell({ children, active }: { children: React.ReactNode; active?: string }) {
   const auth=productionAuthMode(), [menu,setMenu]=useState(false), [signedIn,setSignedIn]=useState(auth?false:localSignedIn())
@@ -614,7 +615,7 @@ function Purchases() {
 function RopeanDashboardShell({ children, view }: { children: React.ReactNode; purchaseBadge?: number; view: DashboardView; onView?: (view: DashboardView) => void }) {
   const signOut = async () => {
     if (productionAuthMode()) await productionSignOut()
-    else { try { sessionStorage.removeItem("wcb-demo-auth") } catch {} }
+    else { try { sessionStorage.removeItem("wcb-demo-auth") } catch {}; analytics.reset() }
     try { sessionStorage.removeItem("wcb-onboarding-user") } catch {}
     window.dispatchEvent(new Event("wcb:auth-changed")); go("/")
   }
@@ -794,7 +795,7 @@ function Settings() {
   const sections=["Profile","Account","GitHub","Domains","Billing","Preferences"]
   useEffect(()=>{if(!live)return;let current=true;void hostedProductClient.account().then(account=>{if(current){setName(account.displayName);setEmail(account.email);setProviders(account.providers);setActiveSessions(account.activeSessions);setMessage("")}},error=>{if(current)setMessage(error instanceof Error?error.message:"Account profile is unavailable.")});return()=>{current=false}},[live])
   const save=async()=>{if(live){try{const account=await hostedProductClient.updateAccount(name);setName(account.displayName);setEmail(account.email);setMessage("Saved.")}catch(error){setMessage(error instanceof Error?error.message:"Could not save changes.")}return}try{localStorage.setItem("wcb-ui-settings",JSON.stringify({name,email}))}catch{}setMessage("Saved for this browser.")}
-  const signOut=async()=>{if(auth)await productionSignOut();else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
+  const signOut=async()=>{if(auth)await productionSignOut();else{try{sessionStorage.removeItem("wcb-demo-auth")}catch{}analytics.reset()}window.dispatchEvent(new Event("wcb:auth-changed"));go("/")}
   return <AppShell active="/settings"><main className="settings"><aside><h1>Settings</h1>{sections.map(x=><button key={x} onClick={()=>setSection(x)} className={section===x?"active":""}>{x}</button>)}</aside><section className="settings-panel"><span className="signal">{section}</span><h2>{section==="Profile"?"Your profile":section+" settings"}</h2>{section==="Profile"&&<><div className="profile-avatar">WC</div><label>Name<input value={name} onChange={e=>setName(e.target.value)}/></label></>}{section==="Account"&&<><label>Email<input value={email} disabled={live} onChange={e=>setEmail(e.target.value)}/></label>{live&&<div className="settings-action-row"><div><b>Sign-in methods</b><p>{providers.length?providers.join(" · "):"No active identity provider."}</p></div></div>}<div className="settings-action-row"><div><b>Session</b><p>{live?activeSessions+" active Webcanbe session"+(activeSessions===1?"":"s")+".":"Sign out returns directly to the landing page."}</p></div><button className="button" onClick={()=>void signOut()}><LogOut/> Sign out</button></div></>}{section==="GitHub"&&<div className="integration"><b>GitHub</b><p>Repository connection is not wired yet, so this action is disabled instead of pretending to work.</p><button className="button" disabled>Connection not enabled yet</button></div>}{section==="Domains"&&<div className="empty-state"><h3>Domains are not connected in this UI phase.</h3><Link className="button" to="/plans">See plans</Link></div>}{section==="Billing"&&<BillingSettings/>}{section==="Preferences"&&<div className="form-rows"><label>Notifications<select><option>Product updates</option><option>Only account notices</option></select></label><p className="settings-note">Theme switching is removed. Dashboard stays light.</p></div>}{["Profile","Account","Preferences"].includes(section)&&<button className="button primary save" onClick={()=>void save()}>Save changes</button>}{message&&<p className="settings-save-status">{message}</p>}</section></main></AppShell>
 }
 function Plans() {
