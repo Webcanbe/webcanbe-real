@@ -17,6 +17,7 @@ function workspaceProject(row) {
   return Object.freeze({
     workspaceProjectId: String(row.workspace_project_id),
     workspaceId: String(row.workspace_id),
+    name: String(row.project_name || "Project"),
     entitlementId: String(row.entitlement_id),
     releaseId: String(row.release_id),
     sourceProjectId: String(row.source_project_id),
@@ -37,7 +38,7 @@ export async function databasePurchases(db, session) {
 
 export async function databaseWorkspaceProjects(db, session) {
   const result = await db.query(
-    `SELECT m.workspace_project_id,m.workspace_id,m.entitlement_id,m.created_at,
+    `SELECT m.workspace_project_id,m.workspace_id,m.entitlement_id,m.project_name,m.created_at,
             e.release_id,r.source_project_id,r.source_revision_id,r.source_content_hash,r.snapshot_hash
        FROM wcb_entitlement_materializations m
        JOIN wcb_license_entitlements e ON e.entitlement_id=m.entitlement_id

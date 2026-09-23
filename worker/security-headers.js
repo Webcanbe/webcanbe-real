@@ -102,3 +102,11 @@ export function applySecurityHeaders(response, options = {}) {
     headers,
   })
 }
+
+export function applySourceDemoHeaders(response) {
+  const secured = applySecurityHeaders(response, { noIndex: true })
+  const headers = new Headers(secured.headers)
+  headers.delete("X-Frame-Options")
+  headers.set("Content-Security-Policy", CONTENT_SECURITY_POLICY.replace("frame-ancestors 'none'", "frame-ancestors 'self'"))
+  return new Response(secured.body, { status: secured.status, statusText: secured.statusText, headers })
+}

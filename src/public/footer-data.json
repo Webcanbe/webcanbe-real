@@ -78,11 +78,11 @@
     "links": [
       [
         "Become a creator",
-        "/creators"
+        "/seller/apply"
       ],
       [
-        "Publish a project",
-        "/seller/projects/new"
+        "Seller application",
+        "/seller/apply"
       ],
       [
         "Seller guide",

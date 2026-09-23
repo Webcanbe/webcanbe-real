@@ -59,6 +59,7 @@ export type LicenseEntitlement = Readonly<{
 export type WorkspaceProject = Readonly<{
   workspaceProjectId: string
   workspaceId: string
+  name?: string
   entitlementId: string
   releaseId: string
   sourceProjectId: string
@@ -76,6 +77,11 @@ export type SellerApplication = Readonly<{
   updatedAt: string
   decidedAt?: string
   decidedBy?: string
+  contactEmail?: string
+  githubUrl?: string
+  archiveName?: string
+  archiveSha256?: string
+  archiveBytes?: number
 }>
 
 export type SellerSubmission = Readonly<{

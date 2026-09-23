@@ -16,7 +16,7 @@ describe("Phase 4 unified shell", () => {
   it("has working shell controls instead of decorative buttons", () => {
     expect(shell).toContain("setSidebarOpen")
     expect(shell).toContain("setSearch")
-    expect(shell).toContain('aria-label="Notifications"')
+    expect(shell).toContain('aria-label="Account menu"')
     expect(app).toContain("Sign out")
     expect(app).toContain("function NotFound")
   })

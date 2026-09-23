@@ -7,7 +7,8 @@ beforeEach(() => { localStorage.clear(); sessionStorage.clear(); vi.clearAllMock
 describe('app route identity and first signup onboarding', () => {
   it('assigns a distinct refreshable path to every sidebar page', () => {
     const routes=Object.entries(appRoutes)
-    expect(new Set(routes.map(([,value])=>value[0])).size).toBe(15)
+    expect(new Set(routes.map(([,value])=>value[0])).size).toBe(14)
+    expect(JSON.stringify(appRoutes)).not.toContain('Creator Studio')
     for(const [view,[path]] of routes) expect(viewForPath(path)).toBe(view)
   })
   it('sends sign-in to Dashboard while retaining an explicit protected return', async () => {

@@ -16,8 +16,8 @@ describe("Phase 4 authenticated operations surfaces", () => {
   })
 
   it("connects Creator Studio to seller-scoped application, studio, listing and submission APIs", () => {
-    for (const token of ["sellerApplication()", "applySeller()", "creatorStudio()", "updateCreatorListing(", "createSellerSubmission("]) expect(client).toContain(token)
-    expect(app).toContain("Creator Studio")
+    for (const token of ["sellerApplication()", "applySeller(input:", "creatorStudio()", "updateCreatorListing(", "createSellerSubmission("]) expect(client).toContain(token)
+    expect(app).toContain("CreatorEnvironment")
     expect(creator).toContain("Submit for review")
     expect(creator).toContain("immutable binding")
     expect(creator).not.toContain("UI-only preview")

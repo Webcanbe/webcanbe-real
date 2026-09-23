@@ -16,7 +16,7 @@ const sitemap=fs.readFileSync(root+'/sitemap-public.xml','utf8'),xml=new JSDOM(s
 const locations=[...xml.querySelectorAll('loc')].map(n=>n.textContent);check(locations.length===Object.keys(routes).length,'Sitemap route count');for(const url of Object.keys(routes))check(locations.includes('https://webcanbe.com'+url),`Sitemap missing ${url}`)
 check(!locations.some(u=>/^\/(dashboard|workspace|settings|purchases|checkout|_ops|auth|login|signup|seller)(\/|$)/.test(new URL(u).pathname)),'Private sitemap URL')
 check(groups.length===7,'Footer group count');const footerUrls=groups.flatMap(g=>g.links.map(([,u])=>u));for(const g of groups)check(g.links.length>=6,'Footer links '+g.title)
-for(const href of footerUrls)check(href==='https://github.com/Webcanbe/webcanbe-real'||['/seller','/seller/projects/new','/creators'].includes(href)||Boolean(routes[href]),'Footer route '+href)
+for(const href of footerUrls)check(href==='https://github.com/Webcanbe/webcanbe-real'||['/seller','/seller/apply','/seller/projects/new','/creators'].includes(href)||Boolean(routes[href]),'Footer route '+href)
 const titles=new Set(),descriptions=new Set(),canonicals=new Set(),docs=new Map()
 for(const [url,m] of Object.entries(routes)){
  const file=root+'/__public'+(url==='/'?'/home':url)+'.html';check(fs.existsSync(file),'Missing HTML '+url);if(!fs.existsSync(file))continue

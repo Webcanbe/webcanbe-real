@@ -16,7 +16,7 @@ export async function databaseControlRead(db, session) {
     promotions, releases, rights, publications, listings, ready, deployIntents, users,
     sessions, workspaces, operators, entitlements, audit,
   ] = await Promise.all([
-    rows(db, "SELECT application_id,user_id,status,decision_by,decided_at,created_at,updated_at FROM wcb_seller_applications ORDER BY created_at DESC LIMIT 200"),
+    rows(db, "SELECT a.application_id,a.user_id,a.status,a.decision_by,a.decided_at,a.created_at,a.updated_at,e.contact_email,e.github_url,e.archive_name,e.archive_sha256,e.archive_bytes FROM wcb_seller_applications a LEFT JOIN wcb_seller_application_evidence e USING(application_id) ORDER BY a.created_at DESC LIMIT 200"),
     rows(db, "SELECT s.submission_id,s.seller_application_id,s.seller_user_id,s.workspace_id,s.source_project_id,s.source_revision_id,s.source_content_hash,s.snapshot_hash,s.created_at,st.status,st.updated_at FROM wcb_seller_submissions s JOIN wcb_seller_submission_states st ON st.submission_id=s.submission_id ORDER BY s.created_at DESC LIMIT 200"),
     rows(db, "SELECT decision_id,submission_id,seller_user_id,source_revision_id,submission_snapshot_hash,decision,reviewer_user_id,created_at FROM wcb_seller_review_decisions ORDER BY created_at DESC LIMIT 200"),
     rows(db, "SELECT assessment_request_id,submission_id,seller_user_id,source_revision_id,source_content_hash,submission_snapshot_hash,review_decision_id,status,admitted_by,created_at FROM wcb_seller_assessment_requests ORDER BY created_at DESC LIMIT 200"),

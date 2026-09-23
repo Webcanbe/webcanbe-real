@@ -9,6 +9,8 @@ export function publicSitePlugin(){
   if(p.length>1&&p.endsWith('/'))redirect=p.replace(/\/+$/,'')+u.search
   if(p==='/browse'&&u.searchParams.has('category')){const c=manifest.categories.find(c=>c.tag.toLowerCase()===u.searchParams.get('category').toLowerCase());if(c)redirect='/browse/'+c.slug}
   if(redirect){res.statusCode=308;res.setHeader('Location',redirect);res.end();return}
+  // The Marketplace is one React surface for direct visits and in-app navigation.
+  if(p==='/browse'||p.startsWith('/browse/')){if(preview){const html=path.join(root,'/app-shell.html');res.setHeader('Content-Type','text/html; charset=utf-8');res.end(req.method==='HEAD'?'':fs.readFileSync(html));return}return next()}
   if(p==='/plans'&&!preview)return next()
   let file,status=200
   if(manifest.routes[p])file=p==='/'?'/__public/home.html':'/__public'+p+'.html'

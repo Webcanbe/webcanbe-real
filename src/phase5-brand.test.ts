@@ -19,7 +19,8 @@ describe("Phase 5 brand pass", () => {
 
   it("keeps the dashboard brand as the official mark plus Webcanbe text", () => {
     expect(shell).toContain('src="/brand/webcanbe-mark.svg"')
-    expect(shell).toContain("<span>WebCanBe</span>")
+    expect(shell).toContain("rd-team-logo")
+    expect(shell).not.toContain("<span>WebCanBe</span>")
   })
 
   it("restores Ropean-style dashboard account dropdown structures instead of removing them", () => {

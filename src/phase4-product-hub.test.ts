@@ -6,9 +6,9 @@ describe("Phase 4 product hub", () => {
     expect(app).toContain("function Projects()")
     expect(app).toContain("function Purchases()")
     expect(app).toContain("function Dashboard(")
-    expect(app).toContain("Continue building")
-    expect(app).toContain("Needs attention")
-    expect(app).toContain("Recent activity")
+    expect(app).toContain("rd-all-projects")
+    expect(app).toContain("No projects yet")
+    expect(app).toContain("Browse marketplace")
     expect(app).not.toContain("ropean-original-dashboard")
   })
   it("keeps the real workspace editor route", () => {

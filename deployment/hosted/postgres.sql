@@ -172,6 +172,20 @@ CREATE TABLE IF NOT EXISTS wcb_seller_applications (
   decision_by uuid, decided_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(), updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
+CREATE TABLE IF NOT EXISTS wcb_seller_application_evidence (
+  application_id uuid PRIMARY KEY REFERENCES wcb_seller_applications(application_id), seller_user_id uuid NOT NULL UNIQUE,
+  contact_email text NOT NULL CHECK(length(contact_email) BETWEEN 3 AND 320),
+  github_url text NOT NULL CHECK(length(github_url) BETWEEN 19 AND 500),
+  archive_name text NOT NULL CHECK(length(archive_name) BETWEEN 5 AND 255),
+  archive_sha256 text NOT NULL CHECK(archive_sha256 ~ '^[a-f0-9]{64}$'),
+  archive_bytes bigint NOT NULL CHECK(archive_bytes BETWEEN 1 AND 10485760), archive bytea NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+CREATE OR REPLACE FUNCTION wcb_refuse_seller_application_evidence_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'seller application evidence is immutable'; END $$;
+DROP TRIGGER IF EXISTS wcb_immutable_seller_application_evidence ON wcb_seller_application_evidence;
+CREATE TRIGGER wcb_immutable_seller_application_evidence BEFORE UPDATE OR DELETE ON wcb_seller_application_evidence
+  FOR EACH ROW EXECUTE FUNCTION wcb_refuse_seller_application_evidence_mutation();
 CREATE TABLE IF NOT EXISTS wcb_seller_submissions (
   submission_id uuid PRIMARY KEY, seller_application_id uuid NOT NULL REFERENCES wcb_seller_applications,
   seller_user_id uuid NOT NULL, workspace_id uuid NOT NULL, source_project_id uuid NOT NULL REFERENCES wcb_projects,

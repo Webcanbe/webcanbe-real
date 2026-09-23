@@ -25,11 +25,11 @@ describe("Phase 5 launch hardening", () => {
   it("routes SPA/static requests through Worker middleware before applying shared security policy", () => {
     expect(wrangler.assets?.run_worker_first).toBe(true)
     expect(worker).toContain("...SECURITY_HEADERS")
-    expect(worker).toContain("let fetched = await env.ASSETS.fetch(new Request(assetUrl, request))")
+    expect(worker).toContain("const fetched = await env.ASSETS.fetch(new Request(assetUrl, request))")
     expect(worker).toContain("applySecurityHeaders(asset,")
     expect(worker).toContain("shouldNoIndexPath(path)")
     expect(worker).toContain("isKnownAppPath(path)")
-    expect(worker).toContain('import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"')
+    expect(worker).toContain('import { SECURITY_HEADERS, applySecurityHeaders, applySourceDemoHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"')
     expect(worker).toContain("status: 404")
   })
 

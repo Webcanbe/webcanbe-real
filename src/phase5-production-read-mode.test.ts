@@ -67,8 +67,8 @@ describe("Phase 5 production product mode", () => {
   it("never substitutes demo catalog or purchase rows for empty production data", () => {
     const dashboard = app.slice(app.indexOf("function Dashboard("), app.indexOf("function Settings()"))
     const releaseProject = app.slice(app.indexOf("function releaseProject"), app.indexOf("function HubTabs"))
-    expect(dashboard).toContain("const catalog = lib.hosted ? lib.catalog : projects")
-    expect(dashboard).toContain("const purchaseRows = lib.hosted")
+    expect(dashboard).toContain("const working = lib.hosted")
+    expect(dashboard).toContain("const purchaseCount = lib.hosted")
     expect(dashboard).toContain("lib.copies.map")
     expect(releaseProject).not.toContain("projects[0]")
   })

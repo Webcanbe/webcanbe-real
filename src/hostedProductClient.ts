@@ -265,8 +265,8 @@ export class HostedProductClient {
     catch (error) { if (error instanceof HostedProductError && error.status === 404) return undefined; throw error }
   }
 
-  async applySeller() {
-    return (await this.post<{ application: SellerApplication }>("/__webcanbe/api/product/seller/applications/apply", {})).application
+  async applySeller(input: { contactEmail: string; githubUrl: string; archiveName: string; archiveBase64: string }) {
+    return (await this.post<{ application: SellerApplication }>("/__webcanbe/api/product/seller/applications/apply", input)).application
   }
 
   async creatorStudio() {

@@ -3,15 +3,15 @@ import { hostedProductClient, productionAuthMode } from './hostedProductClient'
 export const appRoutes = {
   overview: ['/dashboard', 'Dashboard'], projects: ['/projects', 'My projects'],
   marketplace: ['/marketplace', 'Marketplace'], purchases: ['/purchases', 'Purchases'],
-  creator: ['/seller', 'Creator Studio'], 'source-visual': ['/editor/visual', 'Visual editor'],
-  'source-code': ['/editor/code', 'Code editor'], 'source-split': ['/editor/split', 'Split view'],
+  'source-visual': ['/editor/visual', 'Visual editor'], 'source-code': ['/editor/code', 'Code editor'],
+  'source-split': ['/editor/split', 'Split view'],
   workspace: ['/workspace', 'Workspace'], docs: ['/app/docs', 'Documentation'],
   settings: ['/profile', 'Profile'], account: ['/account', 'Account'], billing: ['/billing', 'Billing'],
   notifications: ['/notifications', 'Notifications'], help: ['/help', 'Help Center'],
 } as const
 export type DashboardView = keyof typeof appRoutes
 export function viewForPath(path: string): DashboardView {
-  return (Object.keys(appRoutes) as DashboardView[]).find(key => appRoutes[key][0] === path) ?? (path.startsWith('/seller') ? 'creator' : path === '/settings' ? 'settings' : 'overview')
+  return (Object.keys(appRoutes) as DashboardView[]).find(key => appRoutes[key][0] === path) ?? (path === '/settings' ? 'settings' : 'overview')
 }
 export function readLocal<T>(key: string, fallback: T): T {
   try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback } catch { return fallback }
@@ -37,4 +37,4 @@ export async function finishAuthIntent(signup: boolean, startedAt: number, next:
   } catch { /* Auth success does not depend on onboarding preference storage. */ }
   return signup ? '/marketplace' : next === '/' || next === '/browse' || next === '/templates' ? '/dashboard' : next
 }
-export function workspaceLabel(id: string, index: number) { return id === "personal" ? "Personal workspace" : `Workspace ${index + 1} · ${id.slice(0, 6)}` }
+export function workspaceLabel(id: string, index: number, projectName?: string) { return projectName?.trim() || (id === "personal" ? "Personal workspace" : `Workspace ${index + 1}`) }

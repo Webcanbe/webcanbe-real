@@ -8,21 +8,32 @@ const iso = value => new Date(value).toISOString()
 function id(value, label) { if (typeof value !== "string" || !UUID.test(value)) throw new CreatorDomainError(422, `Invalid ${label}.`); return value }
 function exact(input, allowed) { if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some(key => !allowed.includes(key))) throw new CreatorDomainError(422, "Invalid creator request.") }
 function text(value, label, max) { if (typeof value !== "string" || !value.trim() || value.trim().length > max || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value)) throw new CreatorDomainError(422, `Invalid ${label}.`); return value.trim() }
-function application(row) { return { applicationId: String(row.application_id), userId: String(row.user_id), status: String(row.status), createdAt: iso(row.created_at), updatedAt: iso(row.updated_at), ...(row.decided_at ? { decidedAt: iso(row.decided_at) } : {}), ...(row.decision_by ? { decidedBy: String(row.decision_by) } : {}) } }
+function application(row) { return { applicationId: String(row.application_id), userId: String(row.user_id), status: String(row.status), createdAt: iso(row.created_at), updatedAt: iso(row.updated_at), ...(row.decided_at ? { decidedAt: iso(row.decided_at) } : {}), ...(row.decision_by ? { decidedBy: String(row.decision_by) } : {}), ...(row.contact_email ? { contactEmail: String(row.contact_email), githubUrl: String(row.github_url), archiveName: String(row.archive_name), archiveSha256: String(row.archive_sha256), archiveBytes: Number(row.archive_bytes) } : {}) } }
 function submission(row) { return { submissionId: String(row.submission_id), sellerApplicationId: String(row.seller_application_id), sellerUserId: String(row.seller_user_id), workspaceId: String(row.workspace_id), sourceProjectId: String(row.source_project_id), sourceRevisionId: String(row.source_revision_id), sourceContentHash: String(row.source_content_hash), snapshotHash: String(row.snapshot_hash), status: String(row.status), createdAt: iso(row.created_at), updatedAt: iso(row.updated_at) } }
 function listing(row) { return { listingId: String(row.listing_id), catalogProjectId: String(row.catalog_project_id), releaseId: String(row.release_id), slug: String(row.slug), title: String(row.title), summary: String(row.summary), status: String(row.status), availability: String(row.availability), tags: row.tags ?? [], demoMetadata: row.demo_metadata ?? {}, updatedAt: iso(row.updated_at) } }
 async function approved(db, session) { return (await db.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1 AND status='approved' FOR SHARE", [session.userId])).rows[0] }
 
 export async function sellerApplication(db, session) {
-  const row = (await db.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1", [session.userId])).rows[0]
+  const row = (await db.query("SELECT a.*,e.contact_email,e.github_url,e.archive_name,e.archive_sha256,e.archive_bytes FROM wcb_seller_applications a LEFT JOIN wcb_seller_application_evidence e USING(application_id) WHERE a.user_id=$1", [session.userId])).rows[0]
   return row ? application(row) : undefined
 }
 export async function applySeller(db, session, input) {
-  exact(input, [])
+  exact(input, ["contactEmail", "githubUrl", "archiveName", "archiveBase64"])
+  const contactEmail = text(input.contactEmail, "contact email", 320).toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) throw new CreatorDomainError(422, "Invalid contact email.")
+  const githubUrl = text(input.githubUrl, "GitHub URL", 500)
+  let github
+  try { github = new URL(githubUrl) } catch { throw new CreatorDomainError(422, "Use a valid GitHub URL.") }
+  if (github.protocol !== "https:" || github.hostname !== "github.com" || github.pathname.split("/").filter(Boolean).length < 1 || github.username || github.password || github.search || github.hash) throw new CreatorDomainError(422, "Use a public github.com profile or repository URL.")
+  const archiveName = text(input.archiveName, "ZIP filename", 255)
+  if (!/\.zip$/i.test(archiveName) || typeof input.archiveBase64 !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(input.archiveBase64)) throw new CreatorDomainError(422, "Attach a valid ZIP source archive.")
+  const archive = Buffer.from(input.archiveBase64, "base64")
+  if (!archive.length || archive.length > 10 * 1024 * 1024 || archive[0] !== 0x50 || archive[1] !== 0x4b) throw new CreatorDomainError(422, "ZIP source archive must be 10 MB or smaller.")
+  const archiveSha256 = [...new Uint8Array(await crypto.subtle.digest("SHA-256", archive))].map(value => value.toString(16).padStart(2,"0")).join("")
   const existing = (await db.query("SELECT * FROM wcb_seller_applications WHERE user_id=$1 FOR UPDATE", [session.userId])).rows[0]
-  if (existing) return application(existing)
-  const row = (await db.query("INSERT INTO wcb_seller_applications(application_id,user_id,status,created_at,updated_at) VALUES($1,$2,'pending',clock_timestamp(),clock_timestamp()) RETURNING *", [crypto.randomUUID(), session.userId])).rows[0]
-  return application(row)
+  const row = existing ?? (await db.query("INSERT INTO wcb_seller_applications(application_id,user_id,status,created_at,updated_at) VALUES($1,$2,'pending',clock_timestamp(),clock_timestamp()) RETURNING *", [crypto.randomUUID(), session.userId])).rows[0]
+  if (!existing || row.status === "pending") await db.query("INSERT INTO wcb_seller_application_evidence(application_id,seller_user_id,contact_email,github_url,archive_name,archive_sha256,archive_bytes,archive,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,clock_timestamp()) ON CONFLICT(application_id) DO NOTHING", [row.application_id, session.userId, contactEmail, github.href.replace(/\/$/,""), archiveName, archiveSha256, archive.length, archive])
+  return sellerApplication(db, session)
 }
 export async function creatorStudio(db, session) {
   const app = await approved(db, session); if (!app) throw new CreatorDomainError(403, "Approved creator access required.")

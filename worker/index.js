@@ -1,4 +1,4 @@
-import { renderListingPage, injectCatalog, listingSitemap } from "./public-catalog-pages.js"
+import { listingSitemap, renderListingPage, renderSpaPublicPage } from "./public-catalog-pages.js"
 import { publicRoute, manifest } from "./public-routing.js"
 import { boundedRequestBody } from './request-body.js'
 import { paymentPaths, paymentConfiguration, paymentDiagnostic, privatePayment, paypalWebhook, boundedPaymentBody } from "./payment-routes.js"
@@ -16,7 +16,7 @@ import { IdentityLinkConflict, linkDatabaseIdentity } from "./identity-link.js"
 import { databaseControlRead } from "./control-read.js"
 import { beginBigpersonRegistration, finishBigpersonRegistration, beginBigpersonOperation, consumeBigpersonOperation } from "./bigperson-auth.js"
 import { transitionOperator, transitionSellerApplication, revokeSession, decideSubmissionReview, admitAssessment, promoteAssessmentRelease, verifyReleaseRights, publishPromotedListing, qualifyReleaseReady, grantTestEntitlement, transitionTestEntitlement } from "./control-mutations.js"
-import { SECURITY_HEADERS, applySecurityHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
+import { SECURITY_HEADERS, applySecurityHeaders, applySourceDemoHeaders, isKnownAppPath, shouldNoIndexPath } from "./security-headers.js"
 import { applyPreviewRuntimeHeaders } from "./preview-runtime-headers.js"
 import { requestId, safeFailureLog, withRequestId } from "./telemetry.js"
 import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
@@ -468,7 +468,7 @@ async function privateProduct(request, env, path, traceId) {
       }
       if (path === "/__webcanbe/api/product/seller/applications/get" || path === "/__webcanbe/api/product/seller/applications/apply" || path === "/__webcanbe/api/product/seller/studio/get" || path === "/__webcanbe/api/product/seller/studio/listings/update" || path === "/__webcanbe/api/product/seller/submissions/create" || path === "/__webcanbe/api/product/seller/finance") {
         let body
-        try { body = await smallJsonBody(request) } catch { return json({ error: "Invalid creator request." }, 400) }
+        try { body = await smallJsonBody(request, path.endsWith("/applications/apply") ? 14 * 1024 * 1024 : 32 * 1024) } catch { return json({ error: "Invalid or oversized creator request." }, 400) }
         try {
           if (path.endsWith("/applications/get")) { const value = await sellerApplication(db, databaseSession); return value ? json({ application: value }) : json({ error: "Seller application not found." }, 404) }
           if (path.endsWith("/applications/apply")) { await db.query("BEGIN"); try { const value = await applySeller(db, databaseSession, body); await db.query("COMMIT"); return json({ application: value }, 201) } catch (error) { await db.query("ROLLBACK"); throw error } }
@@ -723,6 +723,13 @@ export default {
           return new Response(listingSitemap(result.rows), {headers:{"Content-Type":"application/xml; charset=utf-8"}})
         })
       }
+      else if (path.startsWith("/demo/aperture-north/")) {
+        response = applySourceDemoHeaders(await env.ASSETS.fetch(request))
+      }
+      else if (path === "/project/aperture-north-source-demo" || path === "/project/aperture-north-source-demo/preview") {
+        const assetUrl = new URL(request.url); assetUrl.pathname = "/app-shell.html"
+        response = applySecurityHeaders(await env.ASSETS.fetch(new Request(assetUrl, request)), { noIndex: true })
+      }
       else if (/^\/project\/[^/]+(?:\/(?:preview|acquire))?$/.test(path)) {
         const key = await anonymousRateKey(request, "public:listing-html")
         if (!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) response=rateLimitedResponse()
@@ -738,7 +745,9 @@ export default {
           if(suffix){assetUrl.pathname="/app-shell.html";return applySecurityHeaders(await env.ASSETS.fetch(new Request(assetUrl,request)),{noIndex:true})}
           const canonical="/project/"+encodeURIComponent(listing.slug)
           if(path!==canonical)return new Response(null,{status:308,headers:{Location:canonical}})
-          return applySecurityHeaders(new Response(renderListingPage(await template.text(),listing),{headers:{"Content-Type":"text/html; charset=utf-8"}}))
+          assetUrl.pathname="/app-shell.html"
+          const shell=await env.ASSETS.fetch(new Request(assetUrl,request))
+          return applySecurityHeaders(new Response(renderListingPage(await shell.text(),listing),{status:shell.status,headers:shell.headers}))
         })
       }
       else {
@@ -747,20 +756,13 @@ export default {
         const internal = path.startsWith("/__public/") || path === "/app-shell.html"
         const assetUrl = new URL(request.url)
         if (internal) assetUrl.pathname = "/__public/404.html"
+        else if ((path === "/browse" || path.startsWith("/browse/")) && route?.status !== 404) assetUrl.pathname = "/app-shell.html"
         else if (route?.asset) assetUrl.pathname = route.asset
         else if (isKnownAppPath(path) && path !== "/__wcb_preview_runtime") assetUrl.pathname = "/app-shell.html"
         else if (!path.split("/").pop().includes(".")) assetUrl.pathname = "/__public/404.html"
-        let fetched = await env.ASSETS.fetch(new Request(assetUrl, request))
-        if ((path === "/browse" || path.startsWith("/browse/")) && route?.status === 200 && env.HYPERDRIVE?.connectionString) {
-          const category = manifest.categories.find(c=>"/browse/"+c.slug===path)
-          try {
-            const key=await anonymousRateKey(request,"public:category-html")
-            if(!await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER,key)) return withRequestId(rateLimitedResponse(),traceId)
-            const listings = await withHyperdrive(env,db=>browseCatalog(db,{limit:100,...(category?{tags:[category.tag.toLowerCase()]}:{})}))
-            fetched=new Response(injectCatalog(await fetched.text(),listings),{status:fetched.status,headers:fetched.headers})
-          } catch { /* Public category guidance remains available during catalog outages. */ }
-        }
-        const asset = route?.status === 404 || internal ? new Response(fetched.body, {status:404,headers:fetched.headers}) : fetched
+        const fetched = await env.ASSETS.fetch(new Request(assetUrl, request))
+        const browseSpa = (path === "/browse" || path.startsWith("/browse/")) && route?.status === 200
+        const asset = route?.status === 404 || internal ? new Response(fetched.body, {status:404,headers:fetched.headers}) : browseSpa ? new Response(renderSpaPublicPage(await fetched.text(),path,manifest.routes[path]),{status:fetched.status,headers:fetched.headers}) : fetched
         if (path === "/__wcb_preview_runtime") {
           response = applyPreviewRuntimeHeaders(asset)
         } else {
