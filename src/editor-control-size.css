@@ -1,0 +1,43 @@
+/* Keep editor controls legible and tappable without squeezing their line boxes. */
+.compatible-workspace .editor-reference-toolbar {
+  height: 52px;
+  min-height: 52px;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
+}
+.compatible-workspace .compatible-layout { height: calc(100dvh - 52px); }
+.compatible-workspace .editor-reference-toolbar button,
+.compatible-workspace .editor-reference-toolbar a {
+  height: 34px;
+  min-height: 34px;
+  font-size: 12px;
+  line-height: 1.3;
+  padding: 0 10px;
+}
+.compatible-workspace .editor-reference-toolbar .compatible-project-status button {
+  height: 22px;
+  min-height: 22px;
+  font-size: 10px;
+}
+.compatible-workspace .editor-account .rd-avatar { width: 30px; height: 30px; font-size: 10px; }
+.compatible-workspace .editor-panel-tabs,
+.compatible-workspace .editor-inspector-tabs { min-height: 48px; }
+.compatible-workspace .compatible-files .editor-panel-tabs button,
+.compatible-workspace .compatible-inspector .editor-inspector-tabs button {
+  min-height: 32px;
+  font-size: 11px !important;
+  line-height: 1.35;
+  padding: 6px 10px !important;
+}
+.compatible-workspace .editor-canvas-tools { padding: 6px 7px; }
+.compatible-workspace .editor-canvas-tools > button,
+.compatible-workspace .editor-zoom-menu > summary,
+.compatible-workspace .editor-canvas-upgrade { min-height: 32px; height: 32px; font-size: 11px; line-height: 1.35; }
+.compatible-workspace .editor-canvas-tools > button { min-width: 32px; }
+.compatible-workspace .editor-canvas-tools .editor-canvas-upgrade { height: 32px; padding: 0 12px; }
+.compatible-workspace .editor-canvas-tools svg { width: 17px; height: 17px; }
+@media (max-width: 680px) {
+  .compatible-workspace .editor-reference-toolbar { height: auto; min-height: 52px; }
+  .compatible-workspace .compatible-layout { height: auto; }
+  .compatible-workspace .editor-reference-toolbar button,
+  .compatible-workspace .editor-reference-toolbar a { min-height: 34px; height: 34px; padding: 0 7px; }
+}
