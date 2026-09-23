@@ -22,6 +22,7 @@ describe("commerce UI closure", () => {
 
   it("exposes real subscription cadence, cancellation, failure, and AI pack balance", () => {
     expect(app).toContain("cadenceName")
+    expect(app).toContain("planName(subscription.planKey)")
     expect(app).toContain('subscription.status === "cancelled"')
     expect(app).toContain('subscription?.status === "past_due"')
     expect(app).toContain("hostedProductClient.cancelSubscription")
