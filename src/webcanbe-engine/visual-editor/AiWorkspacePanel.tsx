@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { SourceResponse } from "./CodeWorkspace"
 import type { SourceTarget } from "../core/types"
+import { analytics } from "../../analytics"
 
 export type AiMode = "standard" | "deep"
 export type AiFeature = "modify" | "explain"
@@ -116,7 +117,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
         if (source.ok && typeof source.data.source === "string") originals[operation.file] = source.data.source
       }))
       if (abort.signal.aborted) return
-      setOutcome(next); setProposalRevision(revision); setProposalDiff(buildProposalDiff(next.proposal, originals)); setPhase(next.state === "done" ? "done" : "ready")
+      setOutcome(next); setProposalRevision(revision); setProposalDiff(buildProposalDiff(next.proposal, originals)); analytics.capture("wcb_ai_proposal_generated", { source: "workspace", ai_mode: "proposal", state: "success" }); setPhase(next.state === "done" ? "done" : "ready")
     } catch (caught) {
       if (abort.signal.aborted) { setError("Generation cancelled in this editor. No source was applied."); setPhase("failed") }
       else { setError(caught instanceof Error ? caught.message : "The AI request could not be completed."); setPhase("failed") }
@@ -135,7 +136,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
       }
       const applied = validateAiOutcome(response.data)
       if (applied.state !== "done" || !applied.result?.applied || typeof applied.result.revision !== "string") throw new Error("The proposal was not applied to source.")
-      setOutcome(applied); setProposalRevision(applied.result.revision); setPhase("done")
+      setOutcome(applied); setProposalRevision(applied.result.revision); analytics.capture("wcb_ai_edit_applied", { source: "workspace", ai_mode: "apply", state: "success" }); setPhase("done")
       try { await onApplied(applied.result) }
       catch { setError("Source was applied, but the workspace refresh failed. Reconnect to load the accepted revision.") }
     } catch (caught) {
