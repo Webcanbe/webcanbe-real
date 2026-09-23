@@ -370,11 +370,9 @@ async function aiProposal(db, session, projectId, body, env) {
   }
   if (body.expectedRevision !== state.revision) fail(409, "Source changed; reload before requesting AI.")
   const files = textFiles(state.files, state.history)
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 15_000)
   try {
     return await runAiRequest({
-      provider: new WorkersAiProvider(env?.AI, aiModel(env)), usage: new AiUsageService(new PostgresAiUsageRepository(db)), request: body, signal: controller.signal,
+      provider: new WorkersAiProvider(env?.AI, aiModel(env)), usage: new AiUsageService(new PostgresAiUsageRepository(db)), request: body,
       files, userId: session.userId, projectId, revision: state.revision,
       apply: async proposal => {
         if (body.apply !== true || proposal.operations.length === 0) return { applied: false, revision: state.revision }
@@ -384,9 +382,8 @@ async function aiProposal(db, session, projectId, body, env) {
     })
   } catch (error) {
     if (error instanceof AiRequestError) fail(error.status, error.message)
-    if (controller.signal.aborted) fail(504, "Workers AI timed out; no source changes were accepted.")
     throw error
-  } finally { clearTimeout(timer) }
+  }
 }
 
 
@@ -472,11 +469,16 @@ function parseBrowserObservation(content){
 }
 
 async function browserSnapshot(env,state,viewport,route){
+  const started=performance.now(), timing={payloadMs:0,providerMs:0,parseMs:0}
+  let outcome="failed"
+  try {
   if(!env?.BROWSER||typeof env.BROWSER.quickAction!=="function")fail(503,"Browser Run preview binding is unavailable.")
   const width=viewport==="mobile"?390:viewport==="tablet"?768:1280
   const payload=previewPayload(state,route)
   const injection="globalThis.__WCB_PROJECT_PAYLOAD__="+JSON.stringify(payload).replace(/</g,"\\u003c")+";globalThis.dispatchEvent(new Event('wcb-project-payload'));"
+  timing.payloadMs=performance.now()-started
   let response
+  const providerStarted=performance.now()
   try{
     response=await env.BROWSER.quickAction("snapshot",{
       url:"https://webcanbe-real.iseig513.workers.dev/__wcb_preview_runtime",
@@ -490,11 +492,14 @@ async function browserSnapshot(env,state,viewport,route){
       allowRequestPattern:["^https://webcanbe-real\\.iseig513\\.workers\\.dev/(?:__wcb_preview_runtime|assets/[^?#]+)$"],
     })
   }catch(error){
+    timing.providerMs=performance.now()-providerStarted
     const message=error instanceof Error?error.message:"Browser Run preview failed."
     if(/429|limit|quota|time/i.test(message))fail(429,"Free preview capacity is cooling down. Wait about 10 seconds and refresh preview.")
     fail(503,"Browser Run preview is temporarily unavailable.")
   }
+  timing.providerMs=performance.now()-providerStarted
   let body
+  const parseStarted=performance.now()
   try{
     if(response instanceof Response){
       if(!response.ok){
@@ -512,14 +517,20 @@ async function browserSnapshot(env,state,viewport,route){
       body=await response.json()
     }else body=response
   }catch(error){
+    timing.parseMs=performance.now()-parseStarted
     if(error instanceof EditorProjectError)throw error
     fail(503,"Browser Run preview response was invalid.")
   }
   const result=body?.result??body
   const png=result?.screenshot,content=result?.content
   if(typeof png!=="string"||png.length<100||png.length>16*1024*1024||!/^[A-Za-z0-9+/]+={0,2}$/.test(png))fail(503,"Browser preview screenshot was invalid.")
-  const observation=parseBrowserObservation(content)
+  let observation
+  try{observation=parseBrowserObservation(content)}finally{timing.parseMs=performance.now()-parseStarted}
+  outcome="ready"
   return {png,observation,width}
+  } finally {
+    console.info("wcb_preview_browser_timing", { outcome, payloadMs:Math.round(timing.payloadMs), providerMs:Math.round(timing.providerMs), parseMs:Math.round(timing.parseMs), totalMs:Math.round(performance.now()-started) })
+  }
 }
 
 // Isolate-local, bounded reuse for authenticated endpoint reads only. Candidate
@@ -529,7 +540,8 @@ const PREVIEW_CACHE_TTL_MS = 60_000
 const PREVIEW_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
 const PREVIEW_CACHE_MAX_BYTES = 8 * 1024 * 1024
 const PREVIEW_CACHE_MAX_ENTRIES = 4
-async function cachedPreviewSnapshot(env,projectId,state,viewport,route,force=false){
+async function cachedPreviewSnapshot(env,projectId,state,viewport,route,force=false,diagnostics={}){
+  diagnostics.cache="miss"
   if (!env?.BROWSER || (typeof env.BROWSER !== "object" && typeof env.BROWSER !== "function")) return browserSnapshot(env,state,viewport,route)
   const cache=previewCache
   const key=JSON.stringify([projectId,state.revision,state.history.revisions.at(-1).contentHash,viewport==="mobile"?"mobile":viewport==="tablet"?"tablet":"desktop",route])
@@ -538,9 +550,9 @@ async function cachedPreviewSnapshot(env,projectId,state,viewport,route,force=fa
   if(force){const old=cache.entries.get(key);if(old){cache.entries.delete(key);cache.bytes-=old.bytes}}
   else {
     const hit=cache.entries.get(key)
-    if(hit){cache.entries.delete(key);cache.entries.set(key,hit);return hit.frame}
+    if(hit){diagnostics.cache="hit";cache.entries.delete(key);cache.entries.set(key,hit);return hit.frame}
     const pending=cache.pending.get(key)
-    if(pending)return pending
+    if(pending){diagnostics.cache="inflight";return pending}
   }
   const work=(async()=>{
     const frame=await browserSnapshot(env,state,viewport,route)
@@ -677,7 +689,7 @@ async function finishRead(db,session,projectId,body,value){
 export async function editorProjectRequest(db, session, path, body={}, env) {
   if(path==="/__webcanbe/api/projects"){
     const rows=(await db.query(
-      `SELECT p.project_id,p.name,p.revision,p.files,p.history,p.source_epoch
+      `SELECT p.project_id,p.workspace_id,p.name,p.revision,p.files,p.history,p.source_epoch
          FROM wcb_projects p
          JOIN wcb_project_members pm ON pm.project_id=p.project_id AND pm.user_id=$1 AND pm.active
          JOIN wcb_workspace_members wm ON wm.workspace_id=p.workspace_id AND wm.user_id=$1 AND wm.active
@@ -689,19 +701,20 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     const projects=[]
     for(const row of rows){
       const state=readProjectState(String(row.project_id),row)
-      projects.push(detectStoredProject({id:String(row.project_id),name:String(row.name||"Hosted project")},state))
+      projects.push({...detectStoredProject({id:String(row.project_id),name:String(row.name||"Hosted project")},state),workspaceId:String(row.workspace_id)})
     }
     return {status:200,value:{projects}}
   }
   const match=/^\/__webcanbe\/api\/projects\/([a-f0-9-]{36})\/([a-z-]+)$/.exec(path)
   if(!match) fail(404,"Editor route is unavailable.")
   const [,projectId,action]=match
+  const previewStarted=action==="preview"?performance.now():0
   if(action==="session"){
     const project=await authorityRow(db,session,projectId,false,true)
     const state=readProjectState(projectId,project)
     const editorSession=await issueCapability(db,session,project)
     return {status:201,value:{
-      project:detectStoredProject({id:projectId,name:String(project.name||"Hosted project")},state),
+      project:{...detectStoredProject({id:projectId,name:String(project.name||"Hosted project")},state),workspaceId:String(project.workspace_id)},
       runtime:{profile:"browser-run-snapshot",supported:true,dependencies:[],issues:[],notes:["Managed Browser Run renders an isolated pixel snapshot. Visual edits use AST source mutations; shared definitions require explicit source scope. Snapshot preview does not support live interaction."]},
       session:editorSession,revision:state.revision,role:String(project.role),hostedReadiness:"PREVIEW_TEXT_VISUAL",
       compatibilityDimensions:{runtimeExecution:{admitted:true,transport:"browser-run-snapshot"},securityAdmission:{controlledRunnerRequired:true,importedNodeExecution:false},hostedReadiness:{status:"PREVIEW_TEXT_VISUAL",publicImportReady:false}},
@@ -711,6 +724,7 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
   if(["code","revert","undo","redo"].includes(action)) return saveCode(db,session,projectId,body,action)
   if(action==="ai") return {status:200,value:await aiProposal(db,session,projectId,body,env)}
   const {state}=await readState(db,session,projectId,body,false,["files","history","preview"].includes(action))
+  const sourceSnapshotMs=action==="preview"?performance.now()-previewStarted:0
   if(action==="files"){
     const listing=publicFiles(state)
     if(body.file!==undefined){
@@ -748,9 +762,22 @@ export async function editorProjectRequest(db, session, path, body={}, env) {
     }
     if(body.command&&body.command!=="update"&&body.command!=="capture")fail(422,"Snapshot preview does not accept interactive browser commands.")
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before preview.")
-    const frame=await cachedPreviewSnapshot(env,projectId,state,body.viewport,typeof body.route==="string"?body.route:"/",body.command==="capture")
-    const generation=randomUUID()
-    return {status:200,value:await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,snapshotElements:frame.observation.elements,snapshotViewport:frame.observation.viewport,snapshotRoute:frame.observation.route,state:"ready"})}
+    const diagnostics={cache:"miss"}
+    const renderStarted=performance.now()
+    let renderMs,authorizationMs=0,outcome="failed"
+    try{
+      const frame=await cachedPreviewSnapshot(env,projectId,state,body.viewport,typeof body.route==="string"?body.route:"/",body.command==="capture",diagnostics)
+      renderMs=performance.now()-renderStarted
+      const generation=randomUUID()
+      const authorizationStarted=performance.now()
+      const value=await finishRead(db,session,projectId,body,{transport:"snapshot",generation,revision:state.revision,png:frame.png,snapshotElements:frame.observation.elements,snapshotViewport:frame.observation.viewport,snapshotRoute:frame.observation.route,state:"ready"})
+      authorizationMs=performance.now()-authorizationStarted
+      outcome="ready"
+      return {status:200,value}
+    }finally{
+      if(renderMs===undefined)renderMs=performance.now()-renderStarted
+      console.info("wcb_preview_request_timing", { outcome, cache:diagnostics.cache, sourceSnapshotMs:Math.round(sourceSnapshotMs), renderMs:Math.round(renderMs), authorizationMs:Math.round(authorizationMs), totalMs:Math.round(performance.now()-previewStarted) })
+    }
   }
   if(action==="export"){
     if(body.expectedRevision!==undefined&&body.expectedRevision!==state.revision)fail(409,"Source changed; reload before export.")

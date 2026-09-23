@@ -82,7 +82,7 @@
 @media(max-width:520px){.bl-modal-art{width:min(32vh,290px,calc(100% - 50px));height:auto;margin:0 auto}}
 
 /* The introduction is a small promotion over the still-visible product. */
-.bl-modal-backdrop{background:transparent;backdrop-filter:none;pointer-events:none;padding:16px}
+.bl-modal-backdrop{background:rgba(115,119,124,.24);backdrop-filter:blur(5px);pointer-events:auto;padding:16px}
 .bl-modal{pointer-events:auto;width:min(100%,580px);max-height:calc(100dvh - 32px);border:1px solid #e7e5ee;box-shadow:0 16px 50px #17151b26;overflow:auto}
 .bl-modal-copy{padding:26px 30px 12px}
 .bl-modal h2{font-size:clamp(34px,4vw,48px)}

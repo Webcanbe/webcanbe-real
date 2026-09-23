@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { hostedProductClient, type BuildLeagueLeader, type BuildLeagueProgress } from "./hostedProductClient"
 import { analytics } from "./analytics"
 import "./build-league.css"
@@ -35,12 +35,33 @@ function CampaignImage({className=""}:{className?:string}) {
 export function BuildLeagueChrome({path}:{path:string}) {
   const [dismissed,setDismissed]=useState(()=>{try{return localStorage.getItem("wcb-build-league-intro-v1")==="closed"}catch{return false}})
   const [progress,setProgress]=useState<BuildLeagueProgress>()
+  const dialog=useRef<HTMLElement>(null)
   const hidden=path.startsWith("/workspace/")||path==="/__wcb_preview_runtime"||path.startsWith("/_ops/")||path==="/login"||path==="/signup"
   useEffect(()=>{if(hidden)return;let active=true;hostedProductClient.buildLeagueState().then(value=>{if(active)setProgress(value)}).catch(()=>{});return()=>{active=false}},[hidden,path])
+  useEffect(()=>{
+    if(hidden||dismissed)return
+    const previous=document.activeElement instanceof HTMLElement?document.activeElement:null
+    const body=document.body, originalOverflow=body.style.overflow, originalPadding=body.style.paddingRight
+    const gap=window.innerWidth-document.documentElement.clientWidth
+    body.style.overflow="hidden"
+    if(gap>0)body.style.paddingRight=`${parseFloat(getComputedStyle(body).paddingRight)+gap}px`
+    dialog.current?.querySelector<HTMLElement>("button")?.focus()
+    const trap=(event:KeyboardEvent)=>{
+      if(event.key!=="Tab")return
+      const items=[...dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href]')??[]]
+      if(!items.length)return
+      const first=items[0],last=items[items.length-1]
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+      else if(!dialog.current?.contains(document.activeElement)){event.preventDefault();first.focus()}
+    }
+    document.addEventListener("keydown",trap)
+    return()=>{document.removeEventListener("keydown",trap);body.style.overflow=originalOverflow;body.style.paddingRight=originalPadding;previous?.focus()}
+  },[dismissed,hidden])
   if(hidden)return null
   const close=()=>{setDismissed(true);try{localStorage.setItem("wcb-build-league-intro-v1","closed")}catch{};analytics.capture("wcb_build_league_intro_dismissed",{source:"public"})}
   return <>
-    {dismissed?<div className="bl-sticky" role="region" aria-label="Build League campaign"><div><strong>BUILD LEAGUE</strong><span>Stage {progress?.stage??1} · Build something real</span><span>{progress?`${progress.points} pts · ${nextAction(progress)}`:"Grand reward: may.cx"}</span></div><a href="/event">View <span aria-hidden="true">↗</span></a></div>:<div className="bl-modal-backdrop"><section className="bl-modal" role="dialog" aria-modal="false" aria-labelledby="bl-intro-title"><button className="bl-modal-close" type="button" onClick={close} aria-label="Close campaign introduction">×</button><div className="bl-modal-copy"><small>BUILD LEAGUE — STAGE 1</small><h2 id="bl-intro-title">Build something real.</h2></div><CampaignImage className="bl-modal-art"/><div className="bl-modal-footer"><p>Complete actions. Earn pts.<br/><strong>Grand reward: may.cx</strong></p><a className="bl-button" href="/event" onClick={close}>Start Building <span aria-hidden="true">↗</span></a></div></section></div>}
+    {dismissed?<div className="bl-sticky" role="region" aria-label="Build League campaign"><div><strong>BUILD LEAGUE</strong><span>Stage {progress?.stage??1} · Build something real</span><span>{progress?`${progress.points} pts · ${nextAction(progress)}`:"Grand reward: may.cx"}</span></div><a href="/event">View <span aria-hidden="true">↗</span></a></div>:<div className="bl-modal-backdrop"><section ref={dialog} className="bl-modal" role="dialog" aria-modal="true" aria-labelledby="bl-intro-title"><button className="bl-modal-close" type="button" onClick={close} aria-label="Close campaign introduction">×</button><div className="bl-modal-copy"><small>BUILD LEAGUE — STAGE 1</small><h2 id="bl-intro-title">Build something real.</h2></div><CampaignImage className="bl-modal-art"/><div className="bl-modal-footer"><p>Complete actions. Earn pts.<br/><strong>Grand reward: may.cx</strong></p><a className="bl-button" href="/event" onClick={close}>Start Building <span aria-hidden="true">↗</span></a></div></section></div>}
   </>
 }
 

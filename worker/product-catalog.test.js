@@ -39,6 +39,7 @@ describe("Workers public catalog adapter", () => {
       listingId: row.listing_id,
       releaseId: row.release_id,
       slug: row.slug,
+      creator: "Webcanbe creator",
       releaseVersion: "1.0.0",
       sourceRevisionId: "rev_1",
       snapshotHash: "snapshot-hash",
@@ -74,7 +75,10 @@ describe("Workers public catalog adapter", () => {
     const db = { query: async () => ({ rows: [row, row] }) }
     await expect(browseCatalog(db, { unknown: true })).rejects.toThrow("Invalid catalog filter")
     await expect(browseCatalog(db, { tags: ["x".repeat(1)], limit: 1.5 })).rejects.toThrow("Invalid catalog filter")
+    await expect(browseCatalog(db, { creator: "../other" })).rejects.toThrow("Invalid catalog filter")
     expect(await browseCatalog(db, { limit: 1 })).toHaveLength(1)
+    expect(await browseCatalog(db, { creator: "webcanbe-creator" })).toHaveLength(2)
+    expect(await browseCatalog(db, { creator: "other-creator" })).toHaveLength(0)
   })
 
   it("fails closed when Hyperdrive is not configured", async () => {

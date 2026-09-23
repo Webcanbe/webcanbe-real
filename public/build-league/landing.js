@@ -1,6 +1,35 @@
 (() => {
   const key = 'wcb-build-league-intro-v1'
   const image = '/build-league/campaign.webp'
+  let unlockPage = () => {}
+
+  function lockPage(layer) {
+    const body = document.body
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const oldOverflow = body.style.overflow
+    const oldPadding = body.style.paddingRight
+    const gap = window.innerWidth - document.documentElement.clientWidth
+    body.style.overflow = 'hidden'
+    if (gap > 0) body.style.paddingRight = `${parseFloat(getComputedStyle(body).paddingRight) + gap}px`
+    const controls = () => [...layer.querySelectorAll('button:not(:disabled),a[href]')]
+    controls()[0]?.focus()
+    const trap = event => {
+      if (event.key !== 'Tab') return
+      const items = controls()
+      if (!items.length) return
+      const first = items[0], last = items[items.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+      else if (!layer.contains(document.activeElement)) { event.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', trap)
+    unlockPage = () => {
+      document.removeEventListener('keydown', trap)
+      body.style.overflow = oldOverflow
+      body.style.paddingRight = oldPadding
+      previous?.focus()
+    }
+  }
 
   function nextAction(progress) {
     const counts = progress.counts || {}
@@ -44,6 +73,7 @@
 
   function closeCard(card) {
     try { localStorage.setItem(key, 'closed') } catch { /* Private browsing may reject storage. */ }
+    unlockPage()
     card.remove()
     showBanner()
   }
@@ -51,8 +81,9 @@
   function showCard() {
     const layer = document.createElement('div')
     layer.id = 'bl-static-layer'
-    layer.innerHTML = `<section class="bl-static-card" role="dialog" aria-modal="false" aria-labelledby="bl-static-title"><button class="bl-static-close" type="button" aria-label="Close campaign introduction">×</button><small>BUILD LEAGUE — STAGE 1</small><h2 id="bl-static-title">Build something real.</h2><img src="${image}" alt="An architectural portal built from stone, brushed metal, and violet glass"><div class="bl-static-footer"><p>Complete actions. Earn pts.<br><strong>Grand reward: may.cx</strong></p><a href="/event">Start Building <span aria-hidden="true">↗</span></a></div></section>`
+    layer.innerHTML = `<section class="bl-static-card" role="dialog" aria-modal="true" aria-labelledby="bl-static-title"><button class="bl-static-close" type="button" aria-label="Close campaign introduction">×</button><small>BUILD LEAGUE — STAGE 1</small><h2 id="bl-static-title">Build something real.</h2><img src="${image}" alt="An architectural portal built from stone, brushed metal, and violet glass"><div class="bl-static-footer"><p>Complete actions. Earn pts.<br><strong>Grand reward: may.cx</strong></p><a href="/event">Start Building <span aria-hidden="true">↗</span></a></div></section>`
     document.body.append(layer)
+    lockPage(layer)
     layer.querySelector('.bl-static-close').addEventListener('click', () => closeCard(layer))
     layer.querySelector('.bl-static-footer a').addEventListener('click', () => closeCard(layer))
   }

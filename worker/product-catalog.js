@@ -12,9 +12,15 @@ function cleanTags(value) {
   return [...new Set(value.map(tag => tag.trim().toLowerCase()).filter(Boolean))].sort()
 }
 
+const creatorSlug = value => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+
 function publicListing(row) {
   const tags = parseJson(row.tags, [])
   const demoMetadata = parseJson(row.demo_metadata, {})
+  const publicMetadata = parseJson(row.public_metadata, {})
+  const creator = typeof publicMetadata.creator === "string" && publicMetadata.creator.trim()
+    ? publicMetadata.creator.trim()
+    : typeof demoMetadata.creator === "string" && demoMetadata.creator.trim() ? demoMetadata.creator.trim() : "Webcanbe creator"
   const listing = {
     listingId: String(row.listing_id),
     catalogProjectId: String(row.catalog_project_id),
@@ -26,6 +32,7 @@ function publicListing(row) {
     availability: String(row.availability),
     tags,
     demoMetadata,
+    creator,
     updatedAt: iso(row.updated_at),
     releaseVersion: String(row.version),
     sourceRevisionId: String(row.source_revision_id),
@@ -46,10 +53,12 @@ function publicListing(row) {
 
 export async function browseCatalog(db, input = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Invalid catalog filter.")
-  if (Object.keys(input).some(key => !["query","tags","limit"].includes(key))) throw new Error("Invalid catalog filter.")
+  if (Object.keys(input).some(key => !["query","tags","creator","limit"].includes(key))) throw new Error("Invalid catalog filter.")
   const query = input.query === undefined ? "" : String(input.query).trim().toLowerCase()
   if (input.query !== undefined && typeof input.query !== "string" || query.length > 100) throw new Error("Invalid catalog filter.")
   const tags = cleanTags(input.tags)
+  const creator = input.creator === undefined ? "" : input.creator
+  if (typeof creator !== "string" || creator && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(creator) || creator.length > 100) throw new Error("Invalid catalog filter.")
   const limit = input.limit === undefined ? 24 : input.limit
   if (!Number.isSafeInteger(limit)) throw new Error("Invalid catalog filter.")
   const bounded = Math.min(Math.max(limit, 1), 100)
@@ -60,7 +69,7 @@ export async function browseCatalog(db, input = {}) {
     WHERE l.status='published' AND l.availability='available' AND c.status='active' ORDER BY l.updated_at DESC`)
   return result.rows
     .map(publicListing)
-    .filter(item => (!query || `${item.title} ${item.summary} ${item.slug} ${item.tags.join(" ")}`.toLowerCase().includes(query)) && tags.every(tag => item.tags.includes(tag)))
+    .filter(item => (!query || `${item.title} ${item.summary} ${item.slug} ${item.tags.join(" ")}`.toLowerCase().includes(query)) && tags.every(tag => item.tags.includes(tag)) && (!creator || creatorSlug(item.creator) === creator))
     .slice(0, bounded)
 }
 

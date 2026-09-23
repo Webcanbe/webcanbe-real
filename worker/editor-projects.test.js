@@ -40,7 +40,7 @@ function fakeDb(){
     if(sql==="BEGIN"){state.began++;return{rows:[],rowCount:0}}
     if(sql==="COMMIT"){state.committed++;return{rows:[],rowCount:0}}
     if(sql==="ROLLBACK"){state.rolledBack++;return{rows:[],rowCount:0}}
-    if(sql.startsWith("SELECT p.project_id,p.name,p.revision")) {
+    if(sql.startsWith("SELECT p.project_id,p.workspace_id,p.name,p.revision,p.files")) {
       return params[0]===userId?{rows:[state.project],rowCount:1}:{rows:[],rowCount:0}
     }
     if(sql.includes("FROM wcb_projects p")&&sql.includes("JOIN wcb_project_members")) {
@@ -140,6 +140,36 @@ describe("production Worker source editor API",()=>{
       await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/code`,{...auth,expectedRevision:baseRevision,idempotencyKey:"tampered-write-1",operations:[{kind:"update",file:"src/App.tsx",expectedHash:listing.value.files.find(item=>item.file==="src/App.tsx").hash,content:"next"}]})).rejects.toMatchObject({status:409})
     } finally { decode.mockRestore() }
   })
+  it("logs privacy-safe preview stage timings without project source, route or identifiers",async()=>{
+    const {db}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const info=vi.spyOn(console,"info").mockImplementation(()=>{})
+    const env={BROWSER:{quickAction:async()=>({screenshot:Buffer.alloc(120,9).toString("base64"),content:'<script id="wcb-observation">'+JSON.stringify({elements:[],viewport:{width:1280,height:900},route:"/private-preview-route"})+'</script>'})}}
+    try{
+      await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision,route:"/private-preview-route"},env)
+      const browser=info.mock.calls.find(([name])=>name==="wcb_preview_browser_timing")?.[1]
+      const request=info.mock.calls.find(([name])=>name==="wcb_preview_request_timing")?.[1]
+      expect(browser).toMatchObject({outcome:"ready",payloadMs:expect.any(Number),providerMs:expect.any(Number),parseMs:expect.any(Number),totalMs:expect.any(Number)})
+      expect(request).toMatchObject({outcome:"ready",cache:"miss",sourceSnapshotMs:expect.any(Number),renderMs:expect.any(Number),authorizationMs:expect.any(Number),totalMs:expect.any(Number)})
+      expect(JSON.stringify([browser,request])).not.toMatch(/src\/App\.tsx|private-preview-route|55555555-5555/)
+    }finally{info.mockRestore()}
+  })
+  it("logs a failed Browser Run timing boundary without exposing the provider error",async()=>{
+    const {db}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
+    const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
+    const auth={previewId:opened.value.session.previewId,capability:opened.value.session.capability}
+    const info=vi.spyOn(console,"info").mockImplementation(()=>{})
+    const env={BROWSER:{quickAction:async()=>{throw new Error("provider timeout with private marker")}}}
+    try{
+      await expect(editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/preview`,{...auth,expectedRevision:baseRevision,route:"/private-preview-route",command:"capture"},env)).rejects.toMatchObject({status:429})
+      const browser=info.mock.calls.find(([name])=>name==="wcb_preview_browser_timing")?.[1]
+      const request=info.mock.calls.find(([name])=>name==="wcb_preview_request_timing")?.[1]
+      expect(browser).toMatchObject({outcome:"failed",providerMs:expect.any(Number)})
+      expect(request).toMatchObject({outcome:"failed",renderMs:expect.any(Number)})
+      expect(JSON.stringify([browser,request])).not.toContain("private marker")
+    }finally{info.mockRestore()}
+  })
   it("reuses only authorized same-head preview frames and invalidates on revision, route or viewport changes",async()=>{
     const {db,state}=fakeDb(),session={sessionId,userId,expiresAt:Date.now()+600000}
     const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
@@ -225,6 +255,7 @@ describe("production Worker source editor API",()=>{
     const session={sessionId,userId,expiresAt:Date.now()+600000}
     const listed=await editorProjectRequest(db,session,"/__webcanbe/api/projects",{})
     expect(listed.value.projects).toHaveLength(1)
+    expect(listed.value.projects[0].workspaceId).toBe(workspaceId)
     const opened=await editorProjectRequest(db,session,`/__webcanbe/api/projects/${projectId}/session`,{})
     expect(opened.status).toBe(201)
     expect(opened.value.project.id).toBe(projectId)

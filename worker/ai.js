@@ -4,11 +4,12 @@ const SECRET_PATH = /(^|\/)(?:\.env(?:\.|$)|secrets?(?:\/|$)|credentials?(?:\/|$
 const SECRET_CONTENT = /(?:-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----|(?:api[_-]?key|secret|token|password|authorization)\s*[:=]\s*["']?[A-Za-z0-9_./+=-]{8,})/i
 const SOURCE_PATH = /^(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:[cm]?[jt]sx?|css|json)$/
 const MODES = new Set(["explain", "modify", "style", "multifile", "fix"])
-const LIMITS = Object.freeze({ files: 12, bytes: 96 * 1024, request: 4000, output: 96 * 1024, retries: 1 })
+const LIMITS = Object.freeze({ files: 12, bytes: 96 * 1024, request: 4000, output: 96 * 1024, retries: 1, providerTimeoutMs: 30_000 })
 
 export class AiRequestError extends Error { constructor(status, message) { super(message); this.status = status } }
 const fail = (status, message) => { throw new AiRequestError(status, message) }
 const bytes = value => new TextEncoder().encode(value).byteLength
+const abortFailure = signal => signal?.reason instanceof AiRequestError ? signal.reason : new AiRequestError(504, "Workers AI timed out.")
 
 export function actionCost(mode) { return mode === "deep" ? 3 : 1 }
 export function aiRequestIdentity(request) {
@@ -90,12 +91,58 @@ export class WorkersAiProvider {
   constructor(binding, model) { this.binding = binding; this.model = model }
   async generate(prompt, signal) {
     if (!this.binding?.run) throw new AiRequestError(503, "Workers AI is not configured for this environment.")
-    const work = this.binding.run(this.model, { messages: [{ role: "user", content: prompt }], max_tokens: 4096 }, signal ? { signal } : undefined)
-    const response = signal ? await Promise.race([work, new Promise((_, reject) => signal.addEventListener("abort", () => reject(new AiRequestError(504, "Workers AI timed out.")), { once: true }))]) : await work
-    const text = typeof response === "string" ? response : response?.response ?? response?.result?.response
-    if (typeof text !== "string") throw new AiRequestError(502, "Workers AI returned no text proposal.")
-    return text
+    if (signal?.aborted) throw abortFailure(signal)
+    let onAbort
+    try {
+      const work = this.binding.run(this.model, { messages: [{ role: "user", content: prompt }], max_tokens: 4096 }, signal ? { signal } : undefined)
+      const response = signal ? await Promise.race([work, new Promise((_, reject) => {
+        onAbort = () => reject(abortFailure(signal))
+        signal.addEventListener("abort", onAbort, { once: true })
+        if (signal.aborted) onAbort()
+      })]) : await work
+      const text = typeof response === "string" ? response : response?.response ?? response?.result?.response
+      if (typeof text !== "string") throw new AiRequestError(502, "Workers AI returned no text proposal.")
+      return text
+    } catch (error) {
+      if (signal?.aborted) throw abortFailure(signal)
+      if (error instanceof AiRequestError) throw error
+      const status = Number(error?.status ?? error?.statusCode)
+      if (status === 429) throw new AiRequestError(429, "Workers AI is busy.")
+      if (status === 503) throw new AiRequestError(503, "Workers AI is temporarily unavailable.")
+      if ([408, 504].includes(status) || /timed?\s*out|deadline exceeded/i.test(String(error?.message ?? error))) throw new AiRequestError(504, "Workers AI timed out.")
+      throw error
+    } finally {
+      if (onAbort) signal.removeEventListener("abort", onAbort)
+    }
   }
+}
+
+function retryableGenerationError(error) {
+  return error instanceof AiRequestError && (
+    error.message === "AI returned malformed proposal JSON." ||
+    ["Workers AI timed out.", "Workers AI is busy.", "Workers AI is temporarily unavailable."].includes(error.message)
+  )
+}
+
+async function generateProposal(provider, prompt, allowedFiles, signal) {
+  let lastError
+  for (let attempt = 0; attempt <= LIMITS.retries; attempt++) {
+    if (signal?.aborted) throw abortFailure(signal)
+    const controller = new AbortController()
+    const cancel = () => controller.abort(abortFailure(signal))
+    signal?.addEventListener("abort", cancel, { once: true })
+    const timer = setTimeout(() => controller.abort(new AiRequestError(504, "Workers AI timed out.")), LIMITS.providerTimeoutMs)
+    try {
+      return parseProposal(await provider.generate(prompt, controller.signal), allowedFiles)
+    } catch (error) {
+      lastError = error
+      if (signal?.aborted || !retryableGenerationError(error) || attempt === LIMITS.retries) throw error
+    } finally {
+      clearTimeout(timer)
+      signal?.removeEventListener("abort", cancel)
+    }
+  }
+  throw lastError
 }
 
 /** Usage is an entitlement adapter, deliberately independent from payment implementation. */
@@ -109,6 +156,11 @@ export async function runAiRequest({ provider, usage, request, files, userId, pr
       const outcome = { ...reservation.outcome }; delete outcome.settlementPending
       try { await usage.commit(reservation.id, outcome) } catch { throw new AiRequestError(503, "Source was accepted; AI Action settlement is pending.") }
       return outcome
+    }
+    if (reservation.outcome?.releasePending === true) {
+      try { await usage.release(reservation.id) }
+      catch { throw new AiRequestError(503, "AI reservation release is pending. Retry this request to reconcile it.") }
+      fail(409, "This AI request was released; use a new idempotency key.")
     }
     fail(409, "This AI request is already in progress.")
   }
@@ -126,12 +178,7 @@ export async function runAiRequest({ provider, usage, request, files, userId, pr
   }
   let settled = false, sourceAccepted = false
   try {
-    let proposal, lastError
-    for (let attempt = 0; attempt <= LIMITS.retries; attempt++) {
-      try { proposal = parseProposal(await provider.generate(proposalPrompt(request, context), signal), new Set(context.map(item => item.file))); break }
-      catch (error) { lastError = error; if (!(error instanceof AiRequestError) || error.message !== "AI returned malformed proposal JSON." || attempt === LIMITS.retries) throw error }
-    }
-    if (!proposal) throw lastError
+    const proposal = await generateProposal(provider, proposalPrompt(request, context), new Set(context.map(item => item.file)), signal)
     const result = await apply(proposal); sourceAccepted = result?.applied === true
     const outcome = { state: result?.applied ? "done" : "ready_to_review", cost: actionCost(request.mode), contextFiles: context.map(item => item.file), proposal, result }
     try { await usage.commit(reservation.id, outcome) }
@@ -145,7 +192,13 @@ export async function runAiRequest({ provider, usage, request, files, userId, pr
     settled = true
     return outcome
   } catch (error) {
-    if (!settled && !sourceAccepted) await usage.release(reservation.id).catch(() => {})
+    if (!settled && !sourceAccepted) {
+      try { await usage.release(reservation.id) }
+      catch {
+        await usage.recordPending?.(reservation.id, { releasePending: true }).catch(() => {})
+        throw new AiRequestError(503, "AI reservation release is pending. Retry this request to reconcile it.")
+      }
+    }
     throw error
   }
 }

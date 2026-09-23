@@ -45,6 +45,16 @@ describe("AI Action usage", () => {
     expect(replay).toMatchObject({ id: first.id, replayed: true }); await usage.release("r1")
     await expect(usage.reserve({ ...input, idempotencyKey: "request-two", cost: 20 })).resolves.toMatchObject({ allocations: [{ actions: 20 }] })
   })
+  it("reconciles a marked failed release before a new reservation and restores concurrency", async () => {
+    const reservations = [{ id: "old", userId: "u", projectId: "p", idempotencyKey: "old-request", cost: 1, expectedRevision: "rev_1", status: "reserved", outcome: { releasePending: true }, allocations: [{ kind: "included", sourceId: "month-1", actions: 1 }] }]
+    const settled = []
+    const repo = { async atomic(_user, action) { return action(this) }, async reservationByUserKeyForUpdate(_user, key) { return reservations.find(row => row.idempotencyKey === key) }, async concurrencyLimitForUserForUpdate() { return 1 }, async includedGrantsForUserForUpdate() { return [month] }, async purchasedCreditsForUserForUpdate() { return [] }, async activeReservationsForUserForUpdate() { return reservations.filter(row => ["reserved", "committed"].includes(row.status)) }, async settleReservationForUpdate(id, status) { const row = reservations.find(value => value.id === id); row.status = status; settled.push(id); return row }, async insertReservation(row) { const value = { ...row, id: "new" }; reservations.push(value); return value } }
+    const usage = new AiUsageService(repo, () => "2026-09-21T00:00:00.000Z")
+    const fresh = await usage.reserve({ userId: "u", projectId: "p", idempotencyKey: "new-request", cost: 20, expectedRevision: "rev_1" })
+    expect(settled).toEqual(["old"])
+    expect(reservations[0].status).toBe("released")
+    expect(fresh.allocations).toEqual([{ kind: "included", sourceId: "month-1", actions: 20 }])
+  })
   it("declares durable server-only reservations and free monthly grants", () => {
     const migration = fs.readFileSync("deployment/hosted/migrations/20260922000100_wcb_ai_usage.sql", "utf8")
     expect(migration).toContain("wcb_ai_usage_reservations")

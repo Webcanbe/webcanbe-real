@@ -56,6 +56,22 @@
 @media(max-width:720px){.compatible-files #editor-project-panel{grid-template-columns:1fr;overflow:auto}.project-settings-nav{position:sticky;top:0;z-index:2;flex-direction:row;overflow:auto;padding:8px;border-right:0;border-bottom:1px solid #ebe8ee}.compatible-files .project-settings-nav>small{display:none}.compatible-files .project-settings-nav>button{width:auto;white-space:nowrap}.project-settings-main{overflow:visible;padding:30px 20px 80px}.project-settings-fields,.project-runtime-grid{grid-template-columns:1fr}}
 
 .editor-account-menu{right:8px;top:46px;width:260px!important}.editor-account-menu .editor-share-account{border-top:0;margin:0 0 6px;padding:8px}.editor-account-menu>a{display:flex!important;justify-content:space-between!important}
+
+/* Keep the editor controls on one measured baseline. Account remains in Canvas menu. */
+.compatible-workspace .editor-reference-toolbar{height:46px;min-height:46px;padding:0 10px;grid-template-columns:260px minmax(0,1fr) 260px}
+.compatible-workspace .editor-reference-toolbar :is(.editor-top-left,.editor-top-right){height:100%;align-items:center}
+.compatible-workspace .editor-reference-toolbar :is(.editor-top-left,.editor-top-right)>button{height:30px;min-height:30px;padding:0 9px}
+.compatible-workspace .editor-reference-toolbar .editor-canvas-menu{height:30px;min-height:30px;padding:0 8px}
+.compatible-workspace .editor-reference-toolbar .editor-popover{top:50px}
+@media(max-width:680px){.compatible-workspace .editor-reference-toolbar{display:flex;grid-template-columns:none;height:auto;min-height:46px;gap:4px;padding:7px}.compatible-workspace .editor-reference-toolbar :is(.editor-top-left,.editor-top-right)>button{padding:0 6px}}
+.compatible-workspace .editor-preview-controls .compatible-preview-head button{min-height:30px;border:1px solid #e7e5eb;border-radius:6px;background:#f5f5f7;color:#494750;padding:0 9px;font:500 10px/1 Inter,Arial,sans-serif}
+.compatible-workspace .editor-preview-controls .compatible-preview-head button:hover:not(:disabled){background:#eceaf7;border-color:#dcd7ed;color:#5147ac}
+.compatible-workspace .editor-preview-controls .compatible-preview-head button:disabled{opacity:.5;cursor:default}
+.compatible-workspace .editor-preview-controls .ai-listbox{min-width:112px}
+.compatible-workspace .editor-preview-controls .ai-listbox-trigger{height:30px!important;min-height:30px!important;border:1px solid #e7e5eb!important;background:#f5f5f7!important}
+.compatible-workspace .editor-preview-controls .ai-listbox-menu{min-width:112px}
+.compatible-workspace .editor-preview-controls .compatible-preview-head{overflow:visible}
+@media(max-width:680px){.compatible-workspace .compatible-files{max-height:36vh}}
 .compatible-preview-shell .source-workspace{position:relative;z-index:1;width:100%;min-height:0;overflow:auto}.compatible-preview-shell.split-mode{overflow:hidden}.compatible-preview-shell.split-mode .source-workspace{flex:0 0 46%;max-height:46%;border-bottom:1px solid #e5e7ee}.compatible-preview-shell.split-mode .compatible-frame-wrap{flex:1;min-height:0}.compatible-preview-shell:not(.split-mode) .source-workspace{flex:1;max-height:none}.source-editor-panel{min-width:0}.source-code-editor{max-width:100%;overflow:hidden}
 
 .editor-artboard{position:relative;margin:0 auto;flex:none}.compatible-inspector .responsive-construction{background:#fff;border:0;border-top:1px solid #ededee;border-radius:0;color:#75757d;padding:12px 4px}.compatible-inspector .responsive-construction summary{color:#686870;font-size:10px;font-weight:500}.compatible-inspector .responsive-construction p{color:#8b8b92}.compatible-inspector .limited-editing{border-left:0;padding:0}.compatible-inspector .style-controls+details{margin-top:0}
