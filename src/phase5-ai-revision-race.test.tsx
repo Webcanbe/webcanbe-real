@@ -22,7 +22,7 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
   const previews: string[] = []
   let releaseAi: (() => void) | undefined
   let releaseCode: (() => void) | undefined
-  const answer = (data: unknown, status = 200) => Promise.resolve({ ok: status === 200, status, json: async () => data } as Response)
+  const answer = (data: unknown, status = 200) => Promise.resolve({ ok: status === 200, status, headers: new Headers({ 'content-type': 'application/json' }), json: async () => data } as Response)
   vi.stubGlobal('fetch', vi.fn((url: string, init: RequestInit) => {
     const action = url.split('/').at(-1), body = JSON.parse(String(init.body))
     if (action === 'session') return answer({ session: { previewId: 'preview', capability: 'capability' }, project: { id: 'phase1-fixture', name: 'Race fixture', detection: { tailwind: false } } })
