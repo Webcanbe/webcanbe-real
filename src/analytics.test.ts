@@ -57,4 +57,25 @@ describe("analytics", () => {
     expect(result?.properties.$pathname).toBe("/workspace/:project")
     expect(result?.properties.$referrer).toBeUndefined()
   })
+
+  it("keeps approved custom events when PostHog adds transport properties", () => {
+    const result = sanitizePostHogEvent({
+      event: "wcb_checkout_started",
+      properties: {
+        source: "marketplace",
+        listing_id: "listing-1",
+        distinct_id: "posthog-generated",
+        token: "posthog-project-token",
+        $current_url: "https://webcanbe.com/checkout/listing-1?provider=private",
+      },
+    } as never)
+    expect(result).not.toBeNull()
+    expect(result?.properties.$current_url).toBe("https://webcanbe.com/checkout/listing-1")
+  })
+
+  it("accepts privacy-safe link tracking fields and rejects query-bearing routes", () => {
+    expect(isSafeAnalyticsPayload({ source: "dashboard", link_kind: "internal", target_route: "/projects" })).toBe(true)
+    expect(isSafeAnalyticsPayload({ source: "public", link_kind: "external", target_host: "github.com" })).toBe(true)
+    expect(isSafeAnalyticsPayload({ source: "public", link_kind: "internal", target_route: "/projects?token=secret" })).toBe(false)
+  })
 })
