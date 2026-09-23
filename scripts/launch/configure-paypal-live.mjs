@@ -151,8 +151,9 @@ async function ensurePlan(token, productId, spec) {
   return created.id
 }
 
-function putSecret(name, value) {
-  run(process.platform === "win32" ? "npx.cmd" : "npx", ["--yes","wrangler@4","versions","secret","put",name], { input: value + "\n" })
+function putSecrets(values) {
+  const command = process.platform === "win32" ? "npx.cmd" : "npx"
+  run(command, ["--yes","wrangler@4","versions","secret","bulk"], { input: JSON.stringify(values) })
 }
 
 function deployNewestSecretVersion() {
@@ -212,9 +213,11 @@ console.log(`PRODUCT_ID=${productId}`)
 for (const spec of plans) console.log(`${spec.env}=${resolved[spec.env]}`)
 
 console.log("Publishing Worker secrets/bindings…")
-putSecret("PAYPAL_CLIENT_ID", clientId)
-putSecret("PAYPAL_CLIENT_SECRET", clientSecret)
-for (const spec of plans) putSecret(spec.env, resolved[spec.env])
+putSecrets({
+  PAYPAL_CLIENT_ID: clientId,
+  PAYPAL_CLIENT_SECRET: clientSecret,
+  ...resolved,
+})
 
 console.log("Deploying the newest secret-bearing Worker version…")
 deployNewestSecretVersion()
