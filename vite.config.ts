@@ -4,6 +4,9 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 import { webCanBeFixturePlugin } from "./src/webcanbe-engine/runtime/viteFixturePlugin"
+import { execFileSync } from "node:child_process"
+
+const buildRevision = execFileSync("git", ["rev-parse", "--short=12", "HEAD"], { encoding: "utf8" }).trim()
 
 export default defineConfig({
   // Project source uses the controlled preview builder, separate from app transforms.
@@ -12,6 +15,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        entryFileNames: `assets/[name]-${buildRevision}-[hash].js`,
+        chunkFileNames: `assets/[name]-${buildRevision}-[hash].js`,
+        assetFileNames: `assets/[name]-${buildRevision}-[hash][extname]`,
         manualChunks(id) {
           if (id.includes("/node_modules/firebase/") || id.includes("/node_modules/@firebase/")) return "vendor-firebase"
           if (id.includes("/node_modules/lucide-react/")) return "vendor-icons"
