@@ -792,7 +792,7 @@ function BillingSettings() {
     setWorking("inspect"); setProviderStatus("")
     try {
       const provider = await hostedProductClient.inspectSubscription(subscription.subscriptionId)
-      setProviderStatus(`PayPal: ${provider.status.replace(/_/g, " ").toLowerCase()}. ${provider.planMatches && provider.referenceMatches ? "Plan and subscription reference match Webcanbe." : "Plan or subscription reference needs support review."}${provider.lastFailedReason ? ` Last failed payment: ${provider.lastFailedReason.replace(/_/g, " ").toLowerCase()}.` : ""}`)
+      setProviderStatus(`PayPal: ${provider.status.replace(/_/g, " ").toLowerCase()}. ${provider.message || (provider.planMatches && provider.referenceMatches ? "Plan and subscription reference match Webcanbe." : "Plan or subscription reference needs support review.")}${provider.lastFailedReason ? ` Last failed payment: ${provider.lastFailedReason.replace(/_/g, " ").toLowerCase()}.` : ""}`)
     } catch (reason) { setProviderStatus(reason instanceof Error ? reason.message : "PayPal status could not be checked.") }
     finally { setWorking("") }
   }

@@ -149,7 +149,7 @@ export class HostedProductClient {
   }
 
   async inspectSubscription(subscriptionId: string) {
-    return (await this.post<{ provider: { status: string; planMatches: boolean; referenceMatches: boolean; lastFailedReason?: string } }>("/__webcanbe/api/payments/subscriptions/inspect", { subscriptionId })).provider
+    return (await this.post<{ provider: { status: string; planMatches: boolean; referenceMatches: boolean; lastFailedReason?: string; message?: string } }>("/__webcanbe/api/payments/subscriptions/inspect", { subscriptionId })).provider
   }
 
   async cancelSubscription(subscriptionId: string) {
