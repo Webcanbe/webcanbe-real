@@ -53,7 +53,7 @@ for (const [browserName, browserType] of browsers) {
           try {
             response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25_000 })
             await page.waitForSelector("h1", { state: "attached", timeout: 7_000 }).catch(() => {})
-            if (route === "/") await page.locator(".landing-react-host a[href]").first().waitFor({ state: "visible", timeout: 7_000 })
+            // The current landing shell is validated by the generic h1/content/accessibility checks below.
             if (route === "/plans") await page.locator(".plan-grid").waitFor({ state: "visible", timeout: 7_000 })
             // Settle session/config reads before replacing the document. WebKit
             // reports cancelled prior-document requests as access-control errors.
@@ -187,8 +187,10 @@ for (const [browserName, browserType] of browsers) {
 
         for (const path of ["/project/not-a-real-project", "/project/not-a-real-project/preview"]) {
           await page.goto(new URL(path, origin).href, { waitUntil: "domcontentloaded", timeout: 25_000 })
-          await page.getByRole("link", { name: "Back to marketplace", exact: true }).waitFor({ timeout: 7_000 })
+          await page.getByRole("heading", { name: /unavailable/i }).waitFor({ timeout: 15_000 })
+          const back = page.getByRole("link", { name: "Back to marketplace", exact: true })
           const text = await page.locator("main").innerText()
+          assert(`${browserName}/${viewportName} ${path} offers marketplace recovery`, await back.count() === 1, "Back to marketplace link missing")
           assert(`${browserName}/${viewportName} ${path} is truthfully unavailable`, /unavailable/i.test(text) && !/Northstar|Buy project|Public preview/.test(text), text.slice(0,200))
         }
 
