@@ -2303,3 +2303,48 @@ At the start of a new session:
 ### From this assistant to the user
 
 The user asked that the next assistant receive a serious personal handoff. This is that handoff. Do not treat it as decorative text. Carry the project forward with the same standard: grounded, exact, ambitious, and evidence-first.
+
+
+## 40. 2026-09-24 return checkpoint — final closure before original GTM plan
+
+The user returned after the prior session handoff and says the implementation phase has felt messy/unreliable, but the intent is unchanged: finish the remaining product closure on Sep 24, then resume the original market plan.
+
+### Fresh repository reconciliation
+Current main product head observed:
+- `6dbafa267b037c3654b0e2afc3f94ff405755969`
+- merge: **Final release hardening: UX, AI resilience, workspace isolation, and preview diagnostics (#108)**
+
+Immediately before it:
+- `a62cf93d887dfcb189d826f97bf25efd49731005`
+- merge: **Launch Build League campaign layer (#107)**
+
+So the Build League campaign layer is now implemented in main, and the final-hardening PR is also merged.
+
+### Verification at #108 merge
+Green:
+- Phase 5 production smoke
+- durable editor/export verify
+- UI verify
+- Bigperson checkpoint verify
+
+Current browser-compatibility smoke is red, but the observed failures are concentrated in:
+- /browse keyboard-focus assertion on the active tag summary;
+- paid-plan CTA / billing-state expectation mismatch while plan and AI purchases are intentionally paused;
+- timeout waiting for an “unavailable” heading.
+
+Interpretation:
+- this is not evidence that the whole product is broken;
+- at least part of the red smoke appears to be test/product-state mismatch created by intentionally paused purchases;
+- still reproduce the user-facing paths before calling closure complete.
+
+### Active decision
+Today remains a **final closure day**, not a new feature day.
+After the remaining real launch-facing instability is resolved:
+1. return immediately to the original GTM plan;
+2. X + Instagram first;
+3. Build League + Founding Prize Vault as the first customer campaign;
+4. may.cx as headline prize once registrar activation/control is confirmed;
+5. PostHog measures real external traffic separately from founder/test traffic;
+6. buyer/seller outreach and first-payment pursuit resume immediately.
+
+The Sep 24 21:00 KST public-beta hard deadline remains the existing launch discipline unless explicitly changed by the user. Do not let cosmetic or test-only issues silently turn into another multi-day product cycle.
