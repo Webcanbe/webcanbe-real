@@ -24,7 +24,7 @@ import { anonymousRateKey, rateLimitAllowed } from "./rate-limit.js"
 import { createRequest, myRequests, myRequest, requestQueue, mutateRequest, RequestCaseError } from "./requests.js"
 import { notifyRequestCreated } from "./request-notifications.js"
 import { databaseCreatorFinance } from "./creator-finance.js"
-import { BuildLeagueError, campaignState, ensureParticipant, leaderboard, recordEvent, recordReferralVisit, submitEntry, winnerWeights } from "./build-league.js"
+import { BuildLeagueError, campaignState, ensureParticipant, recordEvent, recordReferralVisit, submitEntry } from "./build-league.js"
 import { sellerApplication, applySeller, creatorStudio, updateCreatorListing, createSellerSubmission, CreatorDomainError } from "./creator-domain.js"
 
 const APP_ORIGIN = "https://webcanbe.com"
@@ -756,11 +756,7 @@ export default {
         response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : await publicRequestIntake(request, env, traceId)
       }
       else if (path === "/__webcanbe/api/build-league/public") {
-        if (request.method !== "GET") response = json({ error: "Method not allowed." }, 405)
-        else {
-          const key = await anonymousRateKey(request, "build-league:public")
-          response = !await rateLimitAllowed(env.PUBLIC_API_RATE_LIMITER, key) ? rateLimitedResponse() : !databaseAvailable(env) ? json({ error: "Campaign data is unavailable." }, 503) : await withHyperdrive(env, async db => { const weights = winnerWeights(env.WEBCANBE_BUILD_LEAGUE_WEIGHTS); return json({ leaderboard: await leaderboard(db, weights), weights }) })
-        }
+        response = json({ error: "Not found." }, 404)
       }
       else if (path === "/__webcanbe/api/build-league/visit") {
         if (!requireSameOriginPost(request)) response = json({ error: "Referral request refused." }, 403)
