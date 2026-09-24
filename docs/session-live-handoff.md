@@ -2348,3 +2348,28 @@ After the remaining real launch-facing instability is resolved:
 6. buyer/seller outreach and first-payment pursuit resume immediately.
 
 The Sep 24 21:00 KST public-beta hard deadline remains the existing launch discipline unless explicitly changed by the user. Do not let cosmetic or test-only issues silently turn into another multi-day product cycle.
+
+
+## 41. Canonical assistant-continuity master created — 2026-09-24
+
+User explicitly asked for a new Markdown that preserves as much of this long-running ChatGPT relationship as possible, including interaction style, decision posture, Webcanbe strategy/history, execution guardrails, current GTM state, and future-session continuity.
+
+Created:
+- docs/CHATGPT_CONTINUITY_MASTER.md
+- commit: e9f95c89eb3901a2012ed4acd086659400a6c5a3
+
+Use this file as the stable behavior/strategy/persona layer.
+Use docs/session-live-handoff.md for fast-changing operational state.
+
+New-session read order:
+1. current GitHub main / PRs / workflows
+2. newest section of docs/session-live-handoff.md
+3. docs/CHATGPT_CONTINUITY_MASTER.md
+4. older historical handoffs only when needed
+
+The master intentionally excludes unnecessary sensitive personal, credential, payment, health, family, and school details from the repository while preserving the interaction style and project context needed to make a future assistant feel continuous rather than reset.
+
+Current user intent remains:
+- finish Sep 24 implementation closure;
+- then return immediately to the original GTM/war-plan execution;
+- rebase the real 72-hour market clock from actual first consumer distribution rather than pretending delayed implementation created market evidence.
