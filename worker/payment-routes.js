@@ -20,7 +20,8 @@ export function paymentConfigured(env) {
 }
 export function paymentConfiguration(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})
-  return json({...publicPaymentConfiguration(), checkoutAvailable:paymentConfigured(env), environment:paymentConfigured(env)?env.PAYPAL_ENVIRONMENT:null})
+  const configured=paymentConfigured(env)
+  return json({...publicPaymentConfiguration(), checkoutAvailable:configured, subscriptionCheckoutAvailable:configured&&env?.WEBCANBE_SUBSCRIPTION_CHECKOUT==='enabled', aiPackCheckoutAvailable:configured&&env?.WEBCANBE_AI_PACK_CHECKOUT==='enabled', environment:configured?env.PAYPAL_ENVIRONMENT:null})
 }
 export function paymentDiagnostic(request, env) {
   if(request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}})

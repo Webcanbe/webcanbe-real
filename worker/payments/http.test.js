@@ -3,6 +3,16 @@ import { PAYMENT_RETURN_URLS, handlePrivatePaymentRequest, publicPaymentConfigur
 import { PaymentError } from "./contracts.js"
 
 describe("payment HTTP contract", () => {
+  it("refuses new plan and AI pack checkouts while preserving other payment routes", async () => {
+    const repo = { insertSubscription: () => { throw new Error("must not write") }, insertAiPackOrder: () => { throw new Error("must not write") } }
+    const provider = { createSubscription: () => { throw new Error("must not call PayPal") }, createOrder: () => { throw new Error("must not call PayPal") } }
+    for (const [path, code] of [["subscriptions/create", "subscriptions_preparing"], ["ai-packs/create", "ai_packs_preparing"]]) {
+      const route = `/__webcanbe/api/payments/${path}`
+      const response = await handlePrivatePaymentRequest(new Request(`https://webcanbe.com${route}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }), route, { repo, provider, session: { userId: "buyer" }, env: { PAYPAL_ENVIRONMENT: "live" } })
+      expect(response.status).toBe(503)
+      expect((await response.json()).code).toBe(code)
+    }
+  })
   it("verifies every configured Live plan with the runtime provider without creating subscriptions", async () => {
     const prices = { pro_monthly: ["MONTH", "12.00"], pro_annual: ["YEAR", "120.00"], studio_monthly: ["MONTH", "29.00"], studio_annual: ["YEAR", "290.00"] }
     const keys = { PAYPAL_PLAN_PRO_MONTHLY: "P-PM", PAYPAL_PLAN_PRO_ANNUAL: "P-PA", PAYPAL_PLAN_STUDIO_MONTHLY: "P-SM", PAYPAL_PLAN_STUDIO_ANNUAL: "P-SA" }

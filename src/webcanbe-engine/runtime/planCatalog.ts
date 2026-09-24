@@ -18,6 +18,8 @@ export type PublicPaymentConfiguration = Readonly<{
   aiActionCost: Readonly<{ standard: number; deep: number }>
   marketplace: Readonly<{ minimumPaidListingMinor: number; freeListingsAllowed: boolean }>
   checkoutAvailable: boolean
+  subscriptionCheckoutAvailable: boolean
+  aiPackCheckoutAvailable: boolean
   environment: "sandbox" | "live" | null
 }>
 
@@ -25,7 +27,7 @@ export async function loadPublicPaymentConfiguration(fetcher: typeof fetch = fet
   const response = await fetcher("/__webcanbe/api/payments/config", { headers: { Accept: "application/json" } })
   if (!response.ok) throw new Error("Billing configuration is unavailable.")
   const value = await response.json() as Partial<PublicPaymentConfiguration>
-  if (value.currency !== "USD" || !Array.isArray(value.plans) || !Array.isArray(value.aiActionPacks) || !value.aiActionCost || !value.marketplace || typeof value.checkoutAvailable !== "boolean") {
+  if (value.currency !== "USD" || !Array.isArray(value.plans) || !Array.isArray(value.aiActionPacks) || !value.aiActionCost || !value.marketplace || typeof value.checkoutAvailable !== "boolean" || typeof value.subscriptionCheckoutAvailable !== "boolean" || typeof value.aiPackCheckoutAvailable !== "boolean") {
     throw new Error("Billing configuration is invalid.")
   }
   return value as PublicPaymentConfiguration

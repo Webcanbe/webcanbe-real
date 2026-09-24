@@ -43,7 +43,7 @@ function isTextEditingTarget(target: EventTarget | null) {
   return Boolean(element?.closest('input, textarea, select, [contenteditable="true"], .cm-editor'))
 }
 
-export default function CompatibleWorkspace() {
+export default function CompatibleWorkspace({agentChatEnabled=false}:{agentChatEnabled?:boolean}={}) {
   const frame = useRef<HTMLIFrameElement>(null)
   const previewModeButton = useRef<HTMLButtonElement>(null)
   const [copiedText, setCopiedText] = useState<string>()
@@ -595,7 +595,7 @@ export default function CompatibleWorkspace() {
       </section>
       <aside className="compatible-inspector" aria-label="Element properties">
         <div className="inspector-heading editor-inspector-tabs" role="tablist" aria-label="Inspector panels"><button ref={aiButton} role="tab" aria-selected={aiOpen} aria-controls="ai-workspace-panel" onClick={()=>setAiOpen(true)}>Agent</button><button role="tab" aria-selected={!aiOpen} aria-controls="editor-style-panel" onClick={()=>setAiOpen(false)}>Style</button></div>
-        <div id="ai-workspace-panel"><AiWorkspacePanel open={aiOpen} onClose={closeAi} connected={Boolean(session && currentRevision)} currentRevision={currentRevision} storageScope={hostedMode ? chatAccountScope && workspaceId ? `${chatAccountScope}:${workspaceId}:${projectId}` : "" : `local:${projectId}`} target={target} request={request} onApplied={sourceAccepted} /></div>
+        <div id="ai-workspace-panel"><AiWorkspacePanel open={aiOpen} enabled={agentChatEnabled} onClose={closeAi} connected={Boolean(session && currentRevision)} currentRevision={currentRevision} storageScope={hostedMode ? chatAccountScope && workspaceId ? `${chatAccountScope}:${workspaceId}:${projectId}` : "" : `local:${projectId}`} target={target} request={request} onApplied={sourceAccepted} /></div>
         <div id="editor-style-panel" role="tabpanel" aria-label="Style" hidden={aiOpen}>
         {!selected && <div className="empty-inspector"><b>Select a layer</b><p>Click an element on the canvas or choose one from Layers.</p></div>}
         {selected && Object.keys(selected.computed).length > 0 && <div className="editor-measurements">{[{title:"Position",keys:["position"]},{title:"Size",keys:["width","height"]},{title:"Layout",keys:["display","gap","padding"]}].map(group=><section key={group.title}><h3>{group.title}</h3>{group.keys.filter(key=>selected.computed[key]&&!styleOrigins.some(origin=>origin.property===key)).map(key=><label key={key}><span>{key[0].toUpperCase()+key.slice(1)}</span><input aria-label={`Computed ${key}`} title="Computed value. Edit an available source declaration below or use Code." readOnly value={selected.computed[key]}/></label>)}</section>)}</div>}

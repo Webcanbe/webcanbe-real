@@ -72,6 +72,7 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       return json({ order: await captureMarketplaceOrder(repo, provider, session, await body(request)) })
     }
     if (path === "/__webcanbe/api/payments/subscriptions/create") {
+      if (env.WEBCANBE_SUBSCRIPTION_CHECKOUT !== "enabled") throw new PaymentError(503, "subscriptions_preparing", "Plan checkout is preparing.")
       const subscription = await createPlanSubscription(repo, provider, session, await body(request), {
         clock,
         planIds: paypalPlanMapping(env),
@@ -104,6 +105,7 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       } })
     }
     if (path === "/__webcanbe/api/payments/ai-packs/create") {
+      if (env.WEBCANBE_AI_PACK_CHECKOUT !== "enabled") throw new PaymentError(503, "ai_packs_preparing", "AI Action pack checkout is preparing.")
       return json({ order: await createAiPackOrder(repo, provider, session, await body(request), { clock, returnUrl: PAYMENT_RETURN_URLS.aiPackReturn, cancelUrl: PAYMENT_RETURN_URLS.aiPackCancel }) }, 201)
     }
     if (path === "/__webcanbe/api/payments/ai-packs/capture") {

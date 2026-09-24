@@ -13,7 +13,7 @@ const configuration: PublicPaymentConfiguration = {
   ],
   aiActionPacks: [], aiActionCost: { standard: 1, deep: 3 },
   marketplace: { minimumPaidListingMinor: 900, freeListingsAllowed: true },
-  checkoutAvailable: true, environment: "live",
+  checkoutAvailable: true, subscriptionCheckoutAvailable: true, aiPackCheckoutAvailable: true, environment: "live",
 }
 
 describe("PlansGuide", () => {

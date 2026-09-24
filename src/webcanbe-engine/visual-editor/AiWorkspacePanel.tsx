@@ -73,7 +73,7 @@ export function buildProposalDiff(proposal: AiOutcome["proposal"], originals: Re
   return proposal.operations.map(operation => conciseDiff(operation.file, operation.kind, originals[operation.file] ?? "", operation.kind === "delete" ? "" : operation.content ?? "")).join("\n\n")
 }
 
-export default function AiWorkspacePanel({ open, onClose, connected, currentRevision, storageScope, target, request, onApplied }: {
+export default function AiWorkspacePanel({ open, onClose, connected, currentRevision, storageScope, target, request, onApplied, enabled = true }: {
   open: boolean
   onClose: () => void
   connected: boolean
@@ -82,6 +82,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
   target?: SourceTarget
   request: AiRequest
   onApplied: (data: SourceResponse) => Promise<void>
+  enabled?: boolean
 }) {
   const [conversations, setConversations] = useState<AiConversationStore>(() => typeof window === "undefined" ? emptyAiConversationStore(storageScope) : loadAiConversations(window.sessionStorage, storageScope))
   const activeConversation = conversations.threads.find(thread => thread.id === conversations.activeId) ?? conversations.threads[0]
@@ -116,7 +117,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
   const pendingMismatch = Boolean(pendingRequest && !matchesSpec(pendingRequest))
   const sameReadyRequest = Boolean(outcome && ["ready", "done"].includes(phase) && matchesRequestSpec)
 
-  useEffect(() => { if (open) window.setTimeout(() => promptRef.current?.focus(), 0) }, [open])
+  useEffect(() => { if (open && enabled) window.setTimeout(() => promptRef.current?.focus(), 0) }, [open, enabled])
   useEffect(() => () => controller.current?.abort(), [])
   useEffect(() => {
     controller.current?.abort()
@@ -215,6 +216,7 @@ export default function AiWorkspacePanel({ open, onClose, connected, currentRevi
   }
 
   if (!open) return null
+  if (!enabled) return <section className="ai-workspace-panel" aria-label="AI source editor"><header><div><small>Source-backed AI</small><h2>Agent chat is preparing</h2></div><button type="button" onClick={onClose} aria-label="Close AI panel">×</button></header><div className="ai-panel-scroll"><p className="ai-chat-note" role="status">Chat is preparing. You can continue editing your project in Visual or Code.</p></div></section>
   return <section className="ai-workspace-panel" aria-label="AI source editor" onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); onClose() } }}>
     <header><div><small>Source-backed AI</small><h2>Ask for a change</h2></div><button type="button" onClick={onClose} aria-label="Close AI panel">×</button></header>
     <div className="ai-panel-scroll">

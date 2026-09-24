@@ -7,6 +7,19 @@ import { addAiConversation, appendAiConversationMessage, emptyAiConversationStor
 
 afterEach(() => { sessionStorage.clear(); vi.unstubAllGlobals() })
 
+it("shows the preparing state without an agent composer or request", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true)
+  const host = document.createElement("div"); document.body.append(host)
+  const root = createRoot(host), request = vi.fn()
+  try {
+    await act(async () => root.render(<AiWorkspacePanel open enabled={false} onClose={() => {}} connected currentRevision="rev_1" storageScope="account:workspace:project" request={request} onApplied={async () => {}} />))
+    expect(host.textContent).toContain("Agent chat is preparing")
+    expect(host.querySelector("textarea")).toBeNull()
+    expect(host.querySelector('[aria-label="Generate proposal"]')).toBeNull()
+    expect(request).not.toHaveBeenCalled()
+  } finally { await act(async () => root.unmount()); host.remove() }
+})
+
 it("keeps distinct conversation IDs and restores A and B across a reload within the same scope", () => {
   const first = emptyAiConversationStore("account:workspace-a:project-a")
   const a = appendAiConversationMessage(first, first.activeId, "user", "Change the heading in A")
@@ -30,7 +43,7 @@ it("switches A/B in the rendered panel, reloads history, and selects only Standa
   const request = vi.fn(async () => ({ ok: true, status: 200, data: { state: "ready_to_review", cost: 1, contextFiles: [], proposal: { summary: "Proposal ready", operations: [] }, result: { applied: false, revision: "rev_1" } } }))
   const host = document.createElement("div"); document.body.append(host)
   let root = createRoot(host)
-  const panel = <AiWorkspacePanel open onClose={() => {}} connected currentRevision="rev_1" storageScope={scope} request={request} onApplied={async () => {}} />
+  const panel = <AiWorkspacePanel open enabled onClose={() => {}} connected currentRevision="rev_1" storageScope={scope} request={request} onApplied={async () => {}} />
   const click = async (selector: string) => { await act(async () => (host.querySelector(selector) as HTMLButtonElement).click()) }
   const type = async (value: string) => { await act(async () => { const input = host.querySelector("textarea") as HTMLTextAreaElement; Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(input, value); input.dispatchEvent(new Event("input", { bubbles: true })) }) }
   const choose = async (label: string) => { await click('[aria-label^="AI conversation:"]'); await act(async () => (Array.from(host.querySelectorAll('[role="option"]')).find(option => option.textContent?.includes(label)) as HTMLElement).click()) }
@@ -84,7 +97,7 @@ it("keeps a delayed result from the old chat out of a new chat", async () => {
   let answer!: (value: { ok: boolean; status: number; data: Record<string, unknown> }) => void
   const request = vi.fn(() => new Promise<{ ok: boolean; status: number; data: Record<string, unknown> }>(resolve => { answer = resolve }))
   try {
-    await act(async () => root.render(<AiWorkspacePanel open onClose={() => {}} connected currentRevision="rev_1" storageScope="account:workspace:slow-project" request={request} onApplied={async () => {}} />))
+    await act(async () => root.render(<AiWorkspacePanel open enabled onClose={() => {}} connected currentRevision="rev_1" storageScope="account:workspace:slow-project" request={request} onApplied={async () => {}} />))
     await act(async () => { const input = host.querySelector("textarea") as HTMLTextAreaElement; Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(input, "Slow A"); input.dispatchEvent(new Event("input", { bubbles: true })) })
     await act(async () => (host.querySelector('[aria-label="Generate proposal"]') as HTMLButtonElement).click())
     await act(async () => (host.querySelector('[aria-label="Start new chat"]') as HTMLButtonElement).click())
@@ -105,7 +118,7 @@ it("replays the same reservation key after a network failure and refresh", async
   const request = vi.fn()
     .mockRejectedValueOnce(new Error("Network connection lost"))
     .mockResolvedValueOnce({ ok: true, status: 200, data: { state: "ready_to_review", cost: 1, contextFiles: [], proposal: { summary: "Recovered proposal", operations: [] }, result: { applied: false, revision: "rev_1" } } })
-  const panel = <AiWorkspacePanel open onClose={() => {}} connected currentRevision="rev_1" storageScope={scope} request={request} onApplied={async () => {}} />
+  const panel = <AiWorkspacePanel open enabled onClose={() => {}} connected currentRevision="rev_1" storageScope={scope} request={request} onApplied={async () => {}} />
   try {
     await act(async () => root.render(panel))
     await act(async () => { const input = host.querySelector("textarea") as HTMLTextAreaElement; Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(input, "Change heading"); input.dispatchEvent(new Event("input", { bubbles: true })) })

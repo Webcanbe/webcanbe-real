@@ -859,25 +859,6 @@ function BillingSettings() {
     } catch (reason) { setPlanAuditMessage(reason instanceof Error ? reason.message : "PayPal plans could not be verified.") }
     finally { setWorking("") }
   }
-  const buyPack = async (packKey: string, freshAttempt = false) => {
-    if (working || operationStarted.current) return
-    if (freshAttempt) clearPaymentIdempotencyKey("ai-pack", packKey)
-    operationStarted.current = true
-    setWorking(packKey); setMessage("Checking live checkout…")
-    try {
-      const freshConfiguration = await loadPublicPaymentConfiguration()
-      if (!freshConfiguration.checkoutAvailable) throw new Error("Paid checkout is not available yet. Refresh billing status and try again.")
-      analytics.capture("wcb_checkout_started", { plan_key: packKey, source: "settings" })
-      const order = await hostedProductClient.createAiPack(packKey, paymentIdempotencyKey("ai-pack", packKey))
-      if (order.status === "completed") { clearPaymentIdempotencyKey("ai-pack", packKey); overview.refresh(); setMessage("This AI Action pack was already completed. Your balance has been refreshed."); return }
-      if (order.status === "refunded") { clearPaymentIdempotencyKey("ai-pack", packKey); setMessage("The previous pack was refunded. Choose the pack again for a new checkout."); return }
-      if (order.status !== "approval_pending") { setMessage("PayPal could not verify this order. Billing review is needed before another checkout."); return }
-      const approvalUrl = paypalApprovalUrl(order.approvalUrl, freshConfiguration.environment)
-      setMessage("Redirecting to PayPal…")
-      window.location.assign(approvalUrl)
-    } catch (reason) { setMessage(reason instanceof Error ? reason.message : "The AI Action pack could not be started.") }
-    finally { operationStarted.current = false; setWorking("") }
-  }
   if (overview.loading) return <div className="settings-billing"><b>Loading billing…</b></div>
   if (overview.error || !overview.configuration || !overview.billing) return <div className="settings-billing"><b>Billing unavailable</b><p>{overview.error || "Billing state could not be loaded."}</p><button className="button" onClick={overview.refresh}>Try again</button></div>
   const subscription = overview.billing.subscription
@@ -906,11 +887,10 @@ function BillingSettings() {
         {overview.configuration.aiActionPacks.map(pack => <div className="billing-pack-card" key={pack.key}>
           <div className="billing-pack-amount"><strong>{pack.actions}</strong><span>AI Actions</span></div>
           <b>${(pack.priceMinor/100).toFixed(2)}</b>
-          <button className="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `Buy ${pack.actions} actions`}</button>
-          {localStorage.getItem(`wcb-payment:ai-pack:${pack.key}`) && <button className="quiet-link" type="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key, true)}>New checkout attempt</button>}
+          <button className="button" type="button" disabled aria-label={`${pack.actions} AI Actions purchase preparing`}>Preparing</button>
         </div>)}
       </div>
-      {!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}
+      <small>AI Action pack purchases are preparing.</small>
     </div>
     {message && <p className="settings-save-status" role="status">{message}</p>}
     <button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button>
@@ -940,7 +920,7 @@ function Plans() {
   useEffect(() => { const changed=()=>setAuthTick(value=>value+1); window.addEventListener("wcb:auth-changed", changed); return()=>window.removeEventListener("wcb:auth-changed", changed) }, [])
   useEffect(() => { let current = true; setConfigurationError(""); void loadPublicPaymentConfiguration().then(value => { if (current) setConfiguration(value) }, error => { if (current) setConfigurationError(error instanceof Error ? error.message : "Billing configuration is unavailable.") }); return () => { current = false } }, [retry])
   useEffect(() => {
-    if (!configuration?.checkoutAvailable || !requestedPlan || started.current) return
+    if (!configuration?.subscriptionCheckoutAvailable || !requestedPlan || started.current) return
     const plan = configuration.plans.find(item => item.key === requestedPlan && item.key !== "free")
     if (!plan) return
     started.current = true
@@ -976,7 +956,7 @@ function Plans() {
   const money = (minor: number) => `$${minor / 100}`
   const startSubscription = async (plan: PublicPaymentPlan) => {
     if (plan.key === "free") { go("/browse"); return }
-    if (!configuration.checkoutAvailable || started.current || checkoutState === "starting" || checkoutState === "redirecting") return
+    if (!configuration.subscriptionCheckoutAvailable || started.current || checkoutState === "starting" || checkoutState === "redirecting") return
     started.current = true
     setCheckoutState("authenticating"); setCheckoutMessage("")
     if (!await productionSignedIn()) { try { sessionStorage.setItem("wcb-pending-subscription-plan", plan.key) } catch {}; started.current=false; go(`/login?next=${encodeURIComponent("/plans")}`); return }
@@ -991,8 +971,8 @@ function Plans() {
       setCheckoutState("redirecting"); window.location.assign(approvalUrl)
     } catch (reason) { started.current = false; setCheckoutState("failed"); setCheckoutMessage(reason instanceof Error ? reason.message : "Subscription checkout could not be started.") }
   }
-  const billingStatus = configuration.checkoutAvailable ? "PayPal subscription checkout is available." : "Paid checkout is currently unavailable; prices and limits still come from the payment service."
-  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch" role="group" aria-label="Billing period"><button type="button" className={!annual ? "active" : ""} aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</button><button type="button" className={annual ? "active" : ""} aria-pressed={annual} onClick={() => setAnnual(true)}>Annual</button></div>{checkoutMessage&&<p className="inline-error" role="alert">{checkoutMessage}</p>}</div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly, paid = row.id !== "free"; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && configuration.checkoutAvailable && <span className="popular">Available</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "More active projects, AI Actions, concurrency, and deploy capacity."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={paid && (!configuration.checkoutAvailable || checkoutState === "starting" || checkoutState === "redirecting")} onClick={() => void startSubscription(plan)}>{row.id === "free" ? "Start for free" : !configuration.checkoutAvailable ? "Checkout unavailable" : checkoutState === "starting" ? "Starting checkout…" : checkoutState === "redirecting" ? "Redirecting…" : `Choose ${row.name}`}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section><PlansGuide configuration={configuration} annual={annual}/></main></PublicShell> }
+  const billingStatus = configuration.subscriptionCheckoutAvailable ? "PayPal subscription checkout is available." : "Pro and Studio checkout is preparing. Template purchases remain available."
+  return <PublicShell active="/plans"><main className="plans"><div className="plans-head"><span className="signal">Plans</span><h1>The code is free.<br/>The workspace <em>isn’t.</em></h1><p>Exporting your codebase is never behind a plan. {billingStatus}</p><div className="billing-switch" role="group" aria-label="Billing period"><button type="button" className={!annual ? "active" : ""} aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</button><button type="button" className={annual ? "active" : ""} aria-pressed={annual} onClick={() => setAnnual(true)}>Annual</button></div>{checkoutMessage&&<p className="inline-error" role="alert">{checkoutMessage}</p>}</div><section className="plan-grid">{rows.map((row, index) => { const plan = annual ? row.annual : row.monthly, paid = row.id !== "free"; return <article className={index === 1 ? "featured" : ""} key={row.id}>{index === 1 && configuration.subscriptionCheckoutAvailable && <span className="popular">Available</span>}<h2>{row.name}</h2><p>{row.id === "free" ? "For opening a project, changing it, and taking it with you." : "More active projects, AI Actions, concurrency, and deploy capacity."}</p><strong>{money(plan.priceMinor)}<small>{plan.priceMinor > 0 ? annual ? "/ year" : "/ month" : ""}</small></strong><ul>{limits(plan).map(item => <li key={item}>✓ {item}</li>)}</ul><button className={index === 1 ? "button primary" : "button"} disabled={paid && (!configuration.subscriptionCheckoutAvailable || checkoutState === "starting" || checkoutState === "redirecting")} onClick={() => void startSubscription(plan)}>{row.id === "free" ? "Start for free" : !configuration.subscriptionCheckoutAvailable ? "Preparing" : checkoutState === "starting" ? "Starting checkout…" : checkoutState === "redirecting" ? "Redirecting…" : `Choose ${row.name}`}{row.id === "free" && <> <Arrow/></>}</button></article> })}</section><section className="plan-note"><h2>AI and marketplace policy</h2><p>Standard AI uses {configuration.aiActionCost.standard} Action; Deep AI uses {configuration.aiActionCost.deep} Actions. Included AI Actions renew monthly on paid annual plans too. Purchased Actions never expire. Add-ons: {configuration.aiActionPacks.map(addOn => `${addOn.actions} for ${money(addOn.priceMinor)}`).join(" · ")}. Marketplace listings may be free; paid listings start at {money(configuration.marketplace.minimumPaidListingMinor)}.</p></section><PlansGuide configuration={configuration} annual={annual}/></main></PublicShell> }
 
 function CreatorListingEditor({ listing, onSaved }: { listing: CreatorStudioData["listings"][number]; onSaved: (listing: CreatorStudioData["listings"][number]) => void }) {
   const [title, setTitle] = useState(listing.title), [summary, setSummary] = useState(listing.summary), [availability, setAvailability] = useState(listing.availability), [tags, setTags] = useState(listing.tags.join(", "))
