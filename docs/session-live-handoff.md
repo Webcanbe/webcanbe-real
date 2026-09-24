@@ -2395,3 +2395,32 @@ Operating interpretation:
 User instruction:
 **“너는 2번째 AI 아니야.”**
 Treat this as a stable continuity preference unless the user explicitly changes it.
+
+
+## 43. First X campaign post published + final production closeout directive — 2026-09-25
+
+Market milestone:
+- The user reports the first Webcanbe launch-event post has now been published on X.
+- This is the first explicit confirmation in this continuity chain that consumer-facing X distribution actually began.
+- Therefore the old pre-distribution assumption is superseded. From this point, treat market traffic and funnel events as potentially real external evidence and distinguish them from founder/test traffic in PostHog.
+
+Immediate problem:
+- The user considers the current site materially unstable / messy enough that public traffic may hit poor UX, bugs, errors, or preview-loading failures.
+- This is now a P0 conversion/trust issue because public distribution has already started.
+
+Immediate execution directive for Codex:
+1. Perform an end-to-end production-quality closeout of Webcanbe: UX, bugs, errors, loading states, preview reliability/performance, navigation, mobile/responsive behavior, core flows, console/network errors, and regression coverage.
+2. Do not stop at an audit/report; fix issues, retest, and verify the deployed result.
+3. Add exactly one new genuinely paid first-party SaaS template through the authoritative marketplace/listing/release path (not a static demo fallback).
+4. Put disproportionate craft into that single template: long, premium, animated, responsive, exportable, editable, no fake customer/revenue proof, and production-quality on desktop/mobile.
+5. Preserve the existing rule that speculative feature expansion is out of scope; this is stabilization + one deliberately high-quality paid inventory item.
+6. Treat template checkout as real money: verify the real flow safely without fabricating a completed charge if a non-destructive live purchase cannot be executed.
+
+Current repository baseline rechecked before issuing this directive:
+- latest documentation HEAD observed: 12e11b342205d825d2ae496e2ffc3217d9ec8adc
+- latest major product merge: 6dbafa267b037c3654b0e2afc3f94ff405755969 (#108)
+- Build League campaign merge: a62cf93d887dfcb189d826f97bf25efd49731005 (#107)
+- PR #106 detailed PostHog branch is closed and unmerged; do not assume its old branch is canonical. Reconcile current main instrumentation before changing analytics.
+
+Next business rule:
+- Because X distribution has begun, every production bug affecting acquisition -> browse -> project -> preview -> auth/materialize -> edit/save/reopen -> export -> checkout is now a market blocker, not internal polish.
