@@ -12,9 +12,11 @@ if (!fs.existsSync(executable)) {
  if (crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex') !== 'bbdef91774885a0d05f7b048c4eb89ae2bcf3a0c252ae7ca7934e63df76d93c3') throw Error('Lima checksum mismatch.');
  fs.mkdirSync(path.join(state,'tools'),{recursive:true});run('/usr/bin/tar',['-xzf',archive,'-C',path.join(state,'tools')]);
 }
-const env = {...process.env,LIMA_HOME:path.join(state,'lima')};
+// Lima's UNIX socket path must stay below 104 bytes even when the checkout is deeply nested.
+const limaHome = path.join('/private/tmp', 'wcb-lima-'+crypto.createHash('sha256').update(root).digest('hex').slice(0,8));
+const env = {...process.env,LIMA_HOME:limaHome};
 const lima = args => run(executable,args,{env});
-lima(fs.existsSync(path.join(state,'lima/wcb/lima.yaml')) ? ['start','wcb','--timeout=10m'] : ['start','-y','--name=wcb',path.join(__dirname,'vm.yaml'),'--timeout=10m']);
+lima(fs.existsSync(path.join(limaHome,'wcb/lima.yaml')) ? ['start','wcb','--timeout=10m'] : ['start','-y','--name=wcb',path.join(__dirname,'vm.yaml'),'--timeout=10m']);
 lima(['shell','--workdir=/','wcb','sudo','-n','apt-get','install','-y','--no-install-recommends','fonts-noto-color-emoji=2.051-0+deb13u1','fonts-noto-cjk=1:20240730+repack1-1']);
 require('esbuild').buildSync({entryPoints:[path.join(root,'src/webcanbe-engine/runtime/refreshPolicy.ts')],outfile:path.join(state,'refresh-policy.cjs'),bundle:true,platform:'node',format:'cjs',target:'node20'});
 lima(['copy',path.join(state,'refresh-policy.cjs'),'wcb:/tmp/wcb-refresh-policy.cjs']);

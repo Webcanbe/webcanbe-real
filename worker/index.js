@@ -837,6 +837,7 @@ export default {
         const internal = path.startsWith("/__public/") || path === "/app-shell.html"
         const assetUrl = new URL(request.url)
         if (internal) assetUrl.pathname = "/__public/404.html"
+        else if (path === "/__wcb_preview_runtime") assetUrl.pathname = "/preview-runtime.html"
         else if (path === "/plans" && route?.status === 200) assetUrl.pathname = "/app-shell.html"
         else if (route?.asset) assetUrl.pathname = route.asset
         else if (isKnownAppPath(path)) assetUrl.pathname = "/app-shell.html"

@@ -536,7 +536,10 @@ async function browserSnapshot(env,state,viewport,route){
 // Isolate-local, bounded reuse for authenticated endpoint reads only. Candidate
 // frames used by saveVisual must always go through browserSnapshot directly.
 const previewCache = {entries:new Map(),pending:new Map(),bytes:0}
-const PREVIEW_CACHE_TTL_MS = 60_000
+// Reuse an authorized, exact-revision frame across ordinary editor navigation.
+// Memory remains bounded by the byte/entry caps below; a changed source hash,
+// route, or viewport gets a new frame, and every response rechecks authority.
+const PREVIEW_CACHE_TTL_MS = 5 * 60_000
 const PREVIEW_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
 const PREVIEW_CACHE_MAX_BYTES = 8 * 1024 * 1024
 const PREVIEW_CACHE_MAX_ENTRIES = 4
