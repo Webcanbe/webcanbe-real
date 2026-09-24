@@ -116,7 +116,11 @@ function readSource(encoded) {
 function detectStoredProject(name, state) {
   const files = new Map([...Object.keys(state.encodedFiles)].map(file => [file, Buffer.alloc(0)]))
   if (typeof state.encodedFiles["package.json"] === "string") files.set("package.json", Buffer.from(state.encodedFiles["package.json"], "base64"))
-  return detectProject(name, files)
+  const origin = state.history?.templateOrigin
+  const templateOrigin = origin && ["aperture-north", "stillform"].includes(origin.slug) && /^[a-f0-9]{64}$/.test(origin.digest)
+    ? { slug: origin.slug, digest: origin.digest }
+    : undefined
+  return { ...detectProject(name, files), ...(templateOrigin ? { templateOrigin } : {}) }
 }
 
 function detectProject(name, files) {

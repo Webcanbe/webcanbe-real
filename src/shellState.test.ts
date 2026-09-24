@@ -26,6 +26,8 @@ describe('app route identity and first signup onboarding', () => {
   it('starts only a new signup and advances only through accepted project milestones', async () => {
     const now=Date.now();vi.mocked(hostedProductClient.account).mockResolvedValue({ userId:'new', createdAt:new Date(now).toISOString() } as never)
     expect(await finishAuthIntent(true, now, '/dashboard')).toBe('/marketplace')
+    expect(await finishAuthIntent(true, now, '/template/start/stillform')).toBe('/template/start/stillform')
+    expect(await finishAuthIntent(true, now, '/checkout/release')).toBe('/checkout/release')
     expect(onboardingState()?.step).toBe(0)
     advanceOnboarding(3,'p');expect(onboardingState()?.step).toBe(0)
     advanceOnboarding(1,'p');advanceOnboarding(2,'other');expect(onboardingState()?.step).toBe(1)

@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 const source = fs.readFileSync('public/build-league/landing.js', 'utf8')
 const styles = fs.readFileSync('public/build-league/landing.css', 'utf8')
 
-describe('Build League landing introduction', () => {
-  it('blocks the background until the introduction closes, then shows the campaign banner', () => {
+describe('Webcanbe event landing banner', () => {
+  it('shows on the first visit without blocking the landing page and can be dismissed', () => {
     const dom = new JSDOM('<main id="page"><button id="background">Background</button></main>', {
       url: 'https://webcanbe.com/', runScripts: 'outside-only',
     })
@@ -16,17 +16,15 @@ describe('Build League landing introduction', () => {
     window.document.dispatchEvent(new window.Event('DOMContentLoaded'))
 
     const page = window.document.querySelector('#page')
-    const dialog = window.document.querySelector('[role="dialog"]')
-    expect(dialog?.getAttribute('aria-modal')).toBe('true')
-    expect(page?.hasAttribute('inert')).toBe(true)
-    expect(window.document.body.style.overflow).toBe('hidden')
-    expect(styles).toMatch(/#bl-static-layer\{[^}]*backdrop-filter:blur\(5px\)/)
-
-    window.document.querySelector('.bl-static-close').click()
+    const banner = window.document.querySelector('#bl-static-banner')
     expect(page?.hasAttribute('inert')).toBe(false)
     expect(window.document.body.style.overflow).toBe('')
-    expect(window.document.querySelector('#bl-static-banner')?.getAttribute('aria-label')).toBe('Build League campaign')
-    expect(window.document.querySelector('#bl-static-layer')).toBeNull()
+    expect(banner?.getAttribute('aria-label')).toBe('Webcanbe event')
+    expect(banner?.textContent).toContain('Webcanbe Event')
+    expect(window.document.querySelector('[role="dialog"]')).toBeNull()
+    expect(styles).toMatch(/#bl-static-banner\{/)
+    window.document.querySelector('#bl-static-banner button').click()
+    expect(window.document.querySelector('#bl-static-banner')).toBeNull()
     dom.window.close()
   })
 })

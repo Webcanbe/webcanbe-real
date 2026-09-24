@@ -1,4 +1,10 @@
 *, *::before, *::after { box-sizing: border-box; }
+:root {
+  --primary: #111214;
+  --primary-hover: #202124;
+  --primary-active: #090A0B;
+  --primary-foreground: #FFFFFF;
+}
 h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, ul, ol { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 

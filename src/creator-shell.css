@@ -5,4 +5,58 @@
 
 .creator-shell{font-size:14px}.creator-table{font-size:13px}.creator-table th{font-size:11px}.creator-primary,.creator-submit-action{font-size:13px}.creator-sidebar nav a:focus-visible,.creator-shell a:focus-visible,.creator-shell button:focus-visible,.creator-shell select:focus-visible,.creator-shell input:focus-visible,.creator-shell textarea:focus-visible{outline:2px solid var(--creator-accent);outline-offset:3px}
 
+/* Creator pages use the same content rhythm and accent as the main product. */
+.creator-shell{--creator-accent:#6474e4;--creator-border:#e6e8ee;color:#24212b}
+.creator-sidebar{background:#fff}
+.creator-sidebar nav a:hover,.creator-sidebar nav a.active{background:#edf0ff;color:#5265d5}
+.creator-main{width:100%;max-width:1248px;margin-inline:auto;padding:40px clamp(16px,3vw,36px) 64px}
+.creator-page-head{margin-bottom:28px}
+.creator-page-head h1{color:#24212b;font-size:28px;line-height:1.15;font-weight:650;margin:0}
+.creator-page-head p{max-width:640px;margin:8px 0 0;color:#747886;font-size:13px;line-height:1.5}
+.creator-primary,.creator-submit-action,.creator-secondary{min-height:36px;border-radius:7px}
+.creator-primary:hover,.creator-submit-action:hover{background:#5869d7;border-color:#5869d7}
+.creator-panel,.creator-listing-editor,.creator-submit-form{border-color:var(--creator-border);border-radius:9px}
+.creator-panel>header{gap:16px;flex-wrap:wrap}
+.creator-metrics{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.creator-table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+.creator-table{min-width:760px}
+.creator-table td,.creator-project-list article>*{min-width:0;overflow-wrap:anywhere}
+.creator-project-list article{grid-template-columns:minmax(0,1fr) repeat(3,minmax(90px,auto))}
+.creator-menu-button,.creator-close,.creator-scrim{display:none}
+@media(max-width:900px){
+  .creator-main{padding:32px 24px 56px}
+  .creator-project-list article{grid-template-columns:minmax(0,1fr) minmax(90px,auto)}
+}
+@media(max-width:600px){
+  .creator-shell{display:block}
+  .creator-workspace{min-width:0}
+  .creator-topbar{padding:0 16px;justify-content:space-between}
+  .creator-topbar>div{min-width:0}
+  .creator-topbar>div>span{min-width:0}
+  .creator-topbar small{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .creator-main{padding:28px 18px 48px}
+  .creator-page-head{display:flex;flex-wrap:wrap;gap:16px}
+  .creator-page-head .wcb-product-page-action{width:100%}
+  .creator-sidebar{position:fixed;top:0;left:0;bottom:0;z-index:125;width:min(280px,calc(100vw - 48px));height:100dvh;overflow-y:auto;visibility:hidden;transform:translateX(-100%);transition:transform .2s ease,visibility .2s ease;padding:20px 14px}
+  .creator-sidebar-open .creator-sidebar{visibility:visible;transform:none}
+  .creator-sidebar nav span,.creator-brand span,.creator-back:not(svg){font-size:inherit}
+  .creator-brand{justify-content:flex-start;padding-right:36px}
+  .creator-back{justify-content:flex-start}
+  .creator-submit-action{justify-content:flex-start}
+  .creator-submit-action span{display:inline}
+  .creator-menu-button,.creator-close{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--creator-border);border-radius:7px;background:#fff;color:#394052}
+  .creator-menu-button svg,.creator-close svg{width:18px;height:18px}
+  .creator-close{position:absolute;top:15px;right:14px}
+  .creator-scrim{display:block;position:fixed;inset:0;z-index:120;border:0;background:#20233355}
+  .creator-editor-grid,.creator-two{grid-template-columns:minmax(0,1fr)}
+  .creator-actions{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.creator-sidebar{transition:none}}
+
 .creator-finance-error{padding:24px;color:#a3354a}.creator-finance-error button{margin-left:8px;border:0;background:none;color:var(--creator-accent);text-decoration:underline;cursor:pointer}
+.creator-primary,.creator-submit-action{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
+.creator-primary:hover,.creator-submit-action:hover{background:var(--primary-hover);border-color:var(--primary-hover)}
+.creator-primary:active,.creator-submit-action:active{background:var(--primary-active);border-color:var(--primary-active)}
+.creator-listing-editor footer>button{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
+.creator-listing-editor footer>button:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:var(--primary-foreground)}
+.creator-listing-editor footer>button:active{background:var(--primary-active);border-color:var(--primary-active)}

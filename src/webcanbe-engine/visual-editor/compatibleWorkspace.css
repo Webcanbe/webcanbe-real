@@ -103,3 +103,6 @@
 .ai-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .compatible-workspace .ai-composer footer button:not(.ai-listbox-trigger){width:30px;height:30px;min-height:30px!important}
 .compatible-workspace .ai-composer footer .ai-mode-picker .ai-listbox-trigger{height:30px!important;min-height:30px!important}
+.compatible-workspace .ai-composer footer .ai-send,.compatible-workspace .ai-primary{background:var(--primary)!important;border-color:var(--primary)!important;color:var(--primary-foreground)!important}
+.compatible-workspace .ai-composer footer .ai-send:hover,.compatible-workspace .ai-primary:hover{background:var(--primary-hover)!important;border-color:var(--primary-hover)!important}
+.compatible-workspace .ai-composer footer .ai-send:active,.compatible-workspace .ai-primary:active{background:var(--primary-active)!important;border-color:var(--primary-active)!important}

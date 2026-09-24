@@ -84,3 +84,53 @@
   .rd-settings-modal aside>a{white-space:nowrap}
   .rd-settings-modal>div>main{min-width:0;overflow:auto;padding:22px 18px}
 }
+
+/* Shared product page geometry. The shell owns the edge and section spacing. */
+.rd-shell{--wcb-page-width:1248px;--wcb-page-gutter:clamp(16px,3vw,36px);--wcb-border:#e6e8ee}
+.rd-content{min-width:0}
+.rd-main,.rd-content>.standard,.rd-content>.browse,.rd-content>.settings{width:100%;max-width:var(--wcb-page-width);margin-inline:auto;padding:40px var(--wcb-page-gutter) 64px}
+.rd-shell:has(.rd-all-projects),.bl-sticky+.rd-shell:has(.rd-all-projects){height:auto;min-height:100dvh;overflow:visible}
+.rd-shell:has(.rd-all-projects) .rd-content,.bl-sticky+.rd-shell:has(.rd-all-projects) .rd-content{height:auto;min-height:100dvh;overflow:visible}
+.rd-shell:has(.rd-all-projects) .rd-main{min-height:0;padding-top:40px;padding-bottom:64px}
+.rd-all-projects{max-width:none}
+.rd-all-projects>header{flex-wrap:wrap;gap:16px;margin-bottom:28px}
+.rd-all-projects h1{font-size:28px;line-height:1.15}
+.rd-all-projects>header>div{min-width:0;flex-wrap:wrap}
+.rd-new-project,.rd-project-sort>button{min-height:36px;height:36px}
+.rd-gallery-card:hover .rd-gallery-meta strong,.rd-gallery-card:focus-visible .rd-gallery-meta strong{font-size:12px}
+.rd-gallery-card:hover .rd-gallery-meta strong::after,.rd-gallery-card:focus-visible .rd-gallery-meta strong::after{content:none}
+.rd-shell .product-hub .hub-title{padding:0 0 24px;align-items:center;gap:24px}
+.rd-shell .product-hub .hub-title h1{font-size:28px;line-height:1.15;margin:0 0 6px}
+.rd-shell .product-hub .hub-title p{max-width:640px;line-height:1.5}
+.rd-shell .product-hub .hub-tabs{margin-top:0}
+.rd-shell .product-hub .hub-section{padding-top:32px}
+.wcb-product-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:28px}
+.wcb-product-page-header>div:first-child{min-width:0}
+.wcb-product-page-header h1{margin:0;color:#24212b;font-size:28px;line-height:1.15;letter-spacing:-.035em;font-weight:650;overflow-wrap:anywhere}
+.wcb-product-page-header p{max-width:640px;margin:8px 0 0;color:#747886;font-size:13px;line-height:1.5}
+.wcb-product-page-action{display:flex;flex:0 0 auto;align-items:center;gap:8px}
+.rd-settings-modal .wcb-product-page-header{margin-bottom:20px}
+.rd-settings-modal .wcb-product-page-header h1{font-size:20px}
+.rd-settings-modal .wcb-product-page-header p{font-size:11px}
+.rd-search-backdrop{overflow-y:auto;overscroll-behavior:contain;padding:clamp(16px,10vh,96px) 16px 16px}
+.wcb-dialog{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.rd-shell :is(a,button,input,select,textarea,summary):focus-visible{outline:2px solid var(--wcb-accent);outline-offset:2px}
+.request-account{max-width:var(--wcb-page-width);padding:40px var(--wcb-page-gutter) 64px}
+.request-account .wcb-product-page-header{align-items:center}
+.request-account-layout{min-width:0;grid-template-columns:minmax(0,1fr) minmax(300px,420px);min-height:0}
+.request-account-list,.request-account-detail{min-width:0}
+.request-account-list strong,.request-account-detail h2,.request-account-detail p{overflow-wrap:anywhere}
+.rd-primary-action,.rd-shell .button.primary,.rd-new-project{background:var(--primary)!important;border-color:var(--primary)!important;color:var(--primary-foreground)!important;box-shadow:none}
+.rd-primary-action:hover,.rd-shell .button.primary:hover,.rd-new-project:hover{background:var(--primary-hover)!important;border-color:var(--primary-hover)!important}
+.rd-primary-action:active,.rd-shell .button.primary:active,.rd-new-project:active{background:var(--primary-active)!important;border-color:var(--primary-active)!important}
+.rd-settings-modal .rd-primary-action{background:var(--primary)!important;border-color:var(--primary)!important}
+.rd-settings-modal .rd-primary-action:hover{background:var(--primary-hover)!important;border-color:var(--primary-hover)!important}
+.rd-settings-modal .rd-primary-action:active{background:var(--primary-active)!important;border-color:var(--primary-active)!important}
+@media(max-width:760px){
+  .rd-main,.rd-content>.standard,.rd-content>.browse,.rd-content>.settings{padding:68px 18px 48px}
+  .rd-shell:has(.rd-all-projects) .rd-main{padding-top:68px;padding-bottom:48px}
+  .rd-shell .product-hub .hub-title,.wcb-product-page-header{flex-wrap:wrap;align-items:flex-start;gap:16px}
+  .rd-shell .product-hub .hub-title>a,.wcb-product-page-action{flex:0 1 auto}
+  .rd-all-projects>header{align-items:flex-start}
+  .rd-all-projects>header>div{align-items:center;flex-direction:row}
+}

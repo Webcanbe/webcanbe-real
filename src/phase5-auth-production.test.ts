@@ -51,7 +51,7 @@ describe("Phase 5 production authentication", () => {
     expect(app).toContain("createEmailAccountFirebase")
     expect(app).toContain("signInWithEmailFirebase")
     expect(app).toContain("Google, GitHub, and email sign-in are available.")
-    expect(app).toContain("Phone sign-in is not connected yet")
+    expect(app).not.toContain("Continue with phone")
   })
 
   it("keeps direct-route sign-in recoverable and installs its listener before passive effects", () => {

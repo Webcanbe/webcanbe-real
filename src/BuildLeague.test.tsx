@@ -8,7 +8,7 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 const mocks = vi.hoisted(() => ({ sourceProjects: vi.fn(), state: vi.fn(), leaderboard: vi.fn() }))
 vi.mock("./hostedProductClient", () => ({ hostedProductClient: {
   buildLeagueLeaderboard: mocks.leaderboard, buildLeagueState: mocks.state, sourceProjects: mocks.sourceProjects,
-} }))
+}, productReadMode: () => true }))
 vi.mock("./analytics", () => ({ analytics: { capture: vi.fn() } }))
 
 let host: HTMLDivElement, root: Root
@@ -20,6 +20,8 @@ it("selects an owned final-entry project by keyboard without a native select", a
   mocks.sourceProjects.mockResolvedValue([{ id: "owned-project", name: "Owned project" }])
   host = document.createElement("div"); document.body.append(host); root = createRoot(host)
   await act(async () => { root.render(<BuildLeagueEvent />) })
+  expect(host.textContent).toContain("WEBCANBE EVENT")
+  expect(host.textContent).not.toMatch(/leaderboard|points|stage|league/i)
   const trigger = host.querySelector<HTMLButtonElement>('.bl-entry [role="combobox"]')!
   expect(trigger).toBeTruthy()
   expect(host.querySelector('.bl-entry select')).toBeNull()

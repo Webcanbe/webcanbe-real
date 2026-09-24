@@ -12,3 +12,60 @@
 @media(max-width:760px){.marketplace-category-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;margin:25px 0 18px;padding:10px 12px;border:1px solid #e4e6ed;border-radius:8px;background:#f8f9fb;color:#242936;font-size:13px;font-weight:600}.marketplace-category-toggle svg{width:14px;height:14px}.marketplace-directory:not(.open){display:none}.marketplace-directory.open{margin-top:0}}
 
 .project-preview-meta>div:last-child small{display:block;margin-top:8px;line-height:1.55}
+
+/* Product detail: Webcanbe's light treatment of the reference gallery layout. */
+.marketplace-detail{width:min(1060px,calc(100% - 48px));margin:0 auto;padding:60px 0 110px}
+.marketplace-detail-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:30px}
+.marketplace-detail-heading>div:first-child{min-width:0}
+.marketplace-detail-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:25px;color:#737373;text-decoration:none;font-size:12px}
+.marketplace-detail-back svg{width:14px;height:14px}
+.marketplace-detail-back:hover{color:#111214}
+.marketplace-detail-heading h1{margin:0;color:#111214;font-size:30px;font-weight:620;letter-spacing:-.05em;line-height:1.15;overflow-wrap:anywhere}
+.marketplace-detail-heading p{margin:6px 0 0;color:#737373;font-size:13px}
+.marketplace-detail-actions{display:flex;align-items:center;gap:8px;flex:none}
+.marketplace-detail-actions .button{min-height:40px;height:40px;padding:0 15px;gap:8px;font-size:12px;white-space:nowrap}
+.marketplace-detail-media{min-width:0}
+.marketplace-detail-media .project-detail-gallery{margin:0}
+.marketplace-detail-media .project-detail-gallery-main{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:13px;background:#f2f1ed}
+.marketplace-detail-media>.project-preview.large{width:100%;height:auto;min-height:440px;aspect-ratio:16/10;border-radius:13px}
+.marketplace-detail-media .project-detail-thumbnails{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.marketplace-detail-media .project-detail-thumbnails button{width:150px;min-width:0;padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background:#f3f3f3;transition:border-color .15s ease}
+.marketplace-detail-media .project-detail-thumbnails button[aria-pressed="true"]{border-color:#111214;outline:none}
+.marketplace-detail-media .project-detail-thumbnails button:focus-visible{outline:2px solid #111214;outline-offset:3px}
+.marketplace-detail-media .project-detail-thumbnails img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:7px}
+.marketplace-detail-body{display:grid;grid-template-columns:minmax(0,1fr) 282px;gap:60px;align-items:start;margin-top:48px}
+.marketplace-detail-story{min-width:0;max-width:670px;color:#393939;font-size:14px;line-height:1.65}
+.marketplace-detail-story h2{margin:0 0 12px;color:#111214;font-size:24px;line-height:1.2;letter-spacing:-.04em}
+.marketplace-detail-story h3{margin:30px 0 8px;color:#111214;font-size:14px;font-weight:650}
+.marketplace-detail-story p{margin:0 0 14px}
+.marketplace-detail-story .marketplace-detail-lead{font-weight:600;color:#272727}
+.marketplace-detail-story ul{margin:0;padding-left:20px}
+.marketplace-detail-story li{padding:2px 0}
+.marketplace-detail-side{display:grid;gap:12px}
+.marketplace-detail-seller,.marketplace-detail-tags{border:1px solid #e8e8e8;border-radius:14px;background:#fbfbfb;padding:18px}
+.marketplace-detail-seller-name{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid #e8e8e8}
+.marketplace-detail-seller-mark{width:34px;height:34px;border:1px solid #ededed;border-radius:8px;background:#fff;display:grid;place-items:center}
+.marketplace-detail-seller-mark img,.marketplace-detail-seller-mark svg{width:19px;height:19px}
+.marketplace-detail-seller-name strong,.marketplace-detail-seller-name small{display:block}
+.marketplace-detail-seller-name strong{color:#111214;font-size:13px}
+.marketplace-detail-seller-name small{color:#777;font-size:11px}
+.marketplace-detail-seller dl{margin:12px 0 18px}
+.marketplace-detail-seller dl div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:12px}
+.marketplace-detail-seller dt{color:#777}
+.marketplace-detail-seller dd{margin:0;color:#303030;text-align:right;overflow-wrap:anywhere}
+.marketplace-detail-seller .button{display:flex;width:100%;min-height:39px;height:39px;margin-top:8px;padding:0 10px;font-size:12px}
+.marketplace-detail-tags{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#555;font-size:12px}
+.marketplace-detail-tags span{padding:5px 8px;border-radius:6px;background:#f0f0f0;color:#454545}
+.marketplace-detail-related{margin-top:72px;padding-top:36px;border-top:1px solid #e8e8e8}
+.marketplace-detail-related h2{margin:0 0 20px;color:#111214;font-size:20px;letter-spacing:-.03em}
+.marketplace-detail-related>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,250px));gap:18px}
+.marketplace-detail-related .project-preview{height:160px}
+.marketplace-detail-related .project-preview img{width:100%;height:100%;object-fit:cover;object-position:top}
+.marketplace-detail .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.template-fullscreen-preview{position:fixed;inset:0;z-index:1000;background:#fff}
+.template-fullscreen-preview iframe{display:block;width:100%;height:100%;border:0}
+.template-fullscreen-back{position:fixed;bottom:16px;left:16px;z-index:1001;display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 12px;border:1px solid #e3e3e3;border-radius:9px;background:#fff;color:#111214;text-decoration:none;font-size:12px;font-weight:600;box-shadow:0 4px 18px #0000001a}
+.template-fullscreen-back svg{width:15px;height:15px}
+.template-fullscreen-back:hover{background:#f7f7f7}
+.template-fullscreen-back:focus-visible{outline:2px solid #111214;outline-offset:3px}
+@media(max-width:760px){.marketplace-detail{width:calc(100% - 32px);padding:28px 0 72px}.marketplace-detail-heading{display:block;margin-bottom:24px}.marketplace-detail-back{margin-bottom:20px}.marketplace-detail-heading h1{font-size:27px}.marketplace-detail-actions{margin-top:20px;flex-wrap:wrap}.marketplace-detail-media .project-detail-gallery-main{aspect-ratio:16/11}.marketplace-detail-media .project-detail-thumbnails{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 5px}.marketplace-detail-media .project-detail-thumbnails button{flex:0 0 110px}.marketplace-detail-body{grid-template-columns:1fr;gap:30px;margin-top:35px}.marketplace-detail-side{max-width:100%}.marketplace-detail-related{margin-top:50px}.marketplace-detail-related>div{grid-template-columns:repeat(2,minmax(0,1fr))}.marketplace-detail-related .project-preview{height:120px}.template-fullscreen-back{bottom:10px;left:10px}}

@@ -4,13 +4,9 @@ import { describe, expect, it } from "vitest"
 const app = fs.readFileSync("src/App.tsx", "utf8")
 
 describe("Phase 5 launch truthfulness cleanup", () => {
-  it("never maps unavailable phone sign-in to another provider", () => {
+  it("does not expose unavailable phone sign-in", () => {
     const auth = app.slice(app.indexOf("function Auth("), app.indexOf("function Documentation("))
-    expect(auth).toContain('title="Phone sign-in is not connected yet"')
-    expect(auth).toContain('<button className="auth-demo-provider" disabled title="Phone sign-in is not connected yet">')
-    expect(auth).not.toContain("phonePending")
-    const phoneButton = auth.slice(auth.indexOf('title="Phone sign-in is not connected yet"') - 120, auth.indexOf('title="Phone sign-in is not connected yet"') + 240)
-    expect(phoneButton).not.toContain("runGoogle")
+    expect(auth).not.toContain('Continue with phone')
   })
 
   it("removes stale account-backend copy from the dashboard", () => {
@@ -23,12 +19,12 @@ describe("Phase 5 launch truthfulness cleanup", () => {
     expect(dashboard).not.toContain("Google sign-in is active.")
   })
 
-  it("keeps plan checkout preparing independently of template checkout", () => {
+  it("shows paid account plans only when subscription checkout is active", () => {
     const plans = app.slice(app.indexOf("function Plans()"), app.indexOf("function CreatorListingEditor"))
-    expect(plans).toContain("Pro and Studio checkout is preparing")
+    expect(plans).toContain('row.id === "free" || configuration.subscriptionCheckoutAvailable')
     expect(plans).toContain("configuration.subscriptionCheckoutAvailable")
     expect(plans).toContain(">Annual<")
-    expect(plans).toContain("Preparing")
+    expect(plans).not.toContain("Pro and Studio checkout is preparing")
     expect(plans).toContain("hostedProductClient.createSubscription")
     expect(plans).not.toContain("Most chosen")
     expect(plans).toContain("Choose ${row.name}")
@@ -43,7 +39,7 @@ describe("Phase 5 launch truthfulness cleanup", () => {
   })
 
   it("gives hosted marketplace failures and empty catalog results an actionable state", () => {
-    const browse = app.slice(app.indexOf("function Browse("), app.indexOf("function projectStructure"))
+    const browse = app.slice(app.indexOf("function Browse("), app.indexOf("const firstPartyGallery"))
     const detail = app.slice(app.indexOf("function Detail("), app.indexOf("function ProjectPreviewPage"))
     expect(browse).toContain("Marketplace is unavailable")
     expect(browse).toContain("No matching projects")
@@ -52,8 +48,8 @@ describe("Phase 5 launch truthfulness cleanup", () => {
     expect(detail).toContain("Back to marketplace")
   })
 
-  it("keeps the public update page aligned with current launch closure", () => {
-    expect(app).toContain("Launch closure is in progress: production reads are live")
+  it("keeps the public update page aligned with live product state", () => {
+    expect(app).toContain("Check the relevant product screen for its current state.")
     expect(app).not.toContain("Phase 4 UI finalization is in progress.")
   })
 })

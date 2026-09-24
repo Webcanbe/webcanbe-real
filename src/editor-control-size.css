@@ -1,7 +1,7 @@
 /* Keep editor controls legible and tappable without squeezing their line boxes. */
 .compatible-workspace .editor-reference-toolbar {
-  height: 52px;
-  min-height: 52px;
+  height: 58px;
+  min-height: 58px;
   grid-template-columns: 260px minmax(0, 1fr) 260px;
 }
 /* Preview button shows the accepted source render across the full canvas.
@@ -13,16 +13,16 @@
 .compatible-workspace.preview-only .compatible-preview-shell { grid-column: 1; }
 .compatible-workspace.preview-only .editor-canvas-tools > button:first-child { display: none; }
 .compatible-workspace.full-page-canvas { overflow:clip; }
-.compatible-workspace.full-page-canvas .compatible-layout { height:auto; min-height:calc(100dvh - 52px); overflow:visible; align-items:start; }
+.compatible-workspace.full-page-canvas .compatible-layout { height:auto; min-height:calc(100dvh - 58px); overflow:visible; align-items:start; }
 .compatible-workspace.full-page-canvas .compatible-files,
-.compatible-workspace.full-page-canvas .compatible-inspector { height:calc(100dvh - 52px); position:sticky; top:52px; }
-.compatible-workspace.full-page-canvas .compatible-preview-shell { height:auto; min-height:calc(100dvh - 52px); overflow:visible; }
-.compatible-workspace.full-page-canvas .compatible-frame-wrap { flex:none; height:auto; min-height:calc(100dvh - 52px); overflow:visible; }
-.compatible-workspace .compatible-layout { height: calc(100dvh - 52px); }
+.compatible-workspace.full-page-canvas .compatible-inspector { height:calc(100dvh - 58px); position:sticky; top:58px; }
+.compatible-workspace.full-page-canvas .compatible-preview-shell { height:auto; min-height:calc(100dvh - 58px); overflow:visible; }
+.compatible-workspace.full-page-canvas .compatible-frame-wrap { flex:none; height:auto; min-height:calc(100dvh - 58px); overflow:visible; }
+.compatible-workspace .compatible-layout { height: calc(100dvh - 58px); }
 .compatible-workspace .editor-reference-toolbar button,
 .compatible-workspace .editor-reference-toolbar a {
-  height: 34px;
-  min-height: 34px;
+  height: 38px;
+  min-height: 38px;
   font-size: 12px;
   line-height: 1.3;
   padding: 0 10px;
@@ -103,10 +103,10 @@
   }
 }
 @media (max-width: 680px) {
-  .compatible-workspace .editor-reference-toolbar { height: auto; min-height: 52px; }
+  .compatible-workspace .editor-reference-toolbar { height: auto; min-height: 58px; }
   .compatible-workspace .compatible-layout { height: auto; }
   .compatible-workspace .editor-reference-toolbar button,
-  .compatible-workspace .editor-reference-toolbar a { min-height: 34px; height: 34px; padding: 0 7px; }
+  .compatible-workspace .editor-reference-toolbar a { min-height: 38px; height: 38px; padding: 0 7px; }
 }
 
 /* Keep each editor pane independently reachable, including the final source line. */

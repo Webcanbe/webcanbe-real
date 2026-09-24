@@ -20,7 +20,7 @@ describe("Phase 5 production product mode", () => {
   })
 
   it("routes public Marketplace, detail, and preview through authoritative production reads", () => {
-    const browse = app.slice(app.indexOf("function Browse("), app.indexOf("function projectStructure"))
+    const browse = app.slice(app.indexOf("function Browse("), app.indexOf("const firstPartyGallery"))
     const detail = app.slice(app.indexOf("function Detail("), app.indexOf("function ProjectPreviewPage"))
     const preview = app.slice(app.indexOf("function ProjectPreviewPage"), app.indexOf("function authNext()"))
     expect(browse).toContain("const hosted=productReadMode()")
