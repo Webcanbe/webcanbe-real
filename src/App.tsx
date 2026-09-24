@@ -7,7 +7,7 @@ const DocsShell = lazy(() => import("./public/DocsShell").then(m=>({default:m.Do
 import publicManifest from "./public/route-manifest.json"
 const docPages = publicManifest.routes as Record<string,{title:string;description:string}>
 import { ProductShell, OnboardingStrip, Avatar, useAccount, useWorkspaces, CreateWorkspaceDialog } from "./app-shell"
-import { appRoutes, viewForPath, finishAuthIntent, readLocal, writeLocal, workspaceLabel, type DashboardView } from "./shellState"
+import { appRoutes, viewForPath, finishAuthIntent, readLocal, writeLocal, workspaceLabel, workspaceForNewProject, type DashboardView } from "./shellState"
 import { safeAuthReturn } from "./authReturn"
 import "./app.css"
 import "./marketplace.css"
@@ -199,7 +199,7 @@ function Detail({ reference }: { reference: string }) {
       if(project.firstParty){
         if(!hosted || !await hostedProductClient.authenticated()){setBuying(false);go("/login?next="+encodeURIComponent(`/project/${project.slug}`));return}
         const available=await hostedProductClient.workspaces()
-        const workspaceId=available[0]??await hostedProductClient.createWorkspace(crypto.randomUUID())
+        const workspaceId=workspaceForNewProject(available, readLocal<string>("wcb-selected-workspace", ""))??await hostedProductClient.createWorkspace(crypto.randomUUID())
         const projectId=await hostedProductClient.createFirstPartyTemplate(project.slug as "aperture-north"|"stillform",workspaceId,creationKey.current)
         go(`/workspace/${projectId}`)
       } else go(await hostedProductClient.authenticated()?target:"/login?next="+encodeURIComponent(target))
@@ -666,7 +666,7 @@ function Purchases() {
     try {
       const availableWorkspaces = await hostedProductClient.workspaces()
       const preferredWorkspace = readLocal<string>("wcb-selected-workspace", "")
-      const workspaceId = availableWorkspaces.includes(preferredWorkspace) ? preferredWorkspace : availableWorkspaces[0]
+      const workspaceId = workspaceForNewProject(availableWorkspaces, preferredWorkspace)
       if (!workspaceId) throw new Error("Create or join an editable workspace before making a working copy.")
       const copy = await hostedProductClient.materialize(workspaceId, entitlement.entitlementId, project.title)
       analytics.capture("wcb_working_copy_created", { release_id: entitlement.releaseId, source: "purchases", state: "success" })
@@ -881,7 +881,40 @@ function BillingSettings() {
   if (overview.loading) return <div className="settings-billing"><b>Loading billing…</b></div>
   if (overview.error || !overview.configuration || !overview.billing) return <div className="settings-billing"><b>Billing unavailable</b><p>{overview.error || "Billing state could not be loaded."}</p><button className="button" onClick={overview.refresh}>Try again</button></div>
   const subscription = overview.billing.subscription
-  return <div className="settings-billing billing-live"><div className="billing-current"><span>Current plan</span><b>{planName(overview.billing.currentPlanKey)}</b><p>{subscription ? `${planName(subscription.planKey)} ${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>{subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}{subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}<div className="billing-current-actions">{subscription && ["active","past_due","approval_pending"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}{subscription && <button className="button" disabled={Boolean(working)} onClick={()=>void inspect()}>{working === "inspect" ? "Checking PayPal…" : "Check PayPal status"}</button>}<Link className="button" to="/plans">Review plans</Link><button className="button" type="button" disabled={Boolean(working)} onClick={()=>void verifyPlans()}>{working === "verify-plans" ? "Checking Live plans…" : "Check PayPal plan availability"}</button></div>{planAuditMessage && <p className="settings-save-status" role="status">{planAuditMessage}</p>}{providerStatus && <p className="settings-save-status" role="status">{providerStatus}</p>}</div><div className="billing-packs"><span>Purchased AI Actions</span><b>{overview.billing.aiActions.purchased}</b><p>Purchased Actions do not expire. Server usage and reversals determine the displayed balance.</p><div className="billing-pack-grid">{overview.configuration.aiActionPacks.map(pack => <div key={pack.key}><button className="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `${pack.actions} — $${(pack.priceMinor/100).toFixed(2)}`}</button>{localStorage.getItem(`wcb-payment:ai-pack:${pack.key}`) && <button className="quiet-link" type="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key, true)}>Start a new checkout attempt</button>}</div>)}</div>{!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}</div>{message && <p className="settings-save-status" role="status">{message}</p>}<button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button></div>
+  return <div className="settings-billing billing-live">
+    <div className="billing-current">
+      <span>Current plan</span>
+      <b>{planName(overview.billing.currentPlanKey)}</b>
+      <p>{subscription ? `${planName(subscription.planKey)} ${cadenceName(subscription.planKey)} · ${subscription.status.replace(/_/g, " ")}` : "Free · no renewal"}</p>
+      {subscription?.currentPeriodEnd && <small>{subscription.status === "cancelled" ? "Recorded period end" : "Current period ends"} {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</small>}
+      {subscription?.status === "past_due" && <p className="billing-warning">Payment failed. Review the funding source and subscription status in PayPal.</p>}
+      <div className="billing-current-actions">
+        {subscription && ["active","past_due","approval_pending"].includes(subscription.status) && <button className="button" disabled={Boolean(working)} onClick={()=>void cancel()}>{working === "cancel" ? "Cancelling…" : "Cancel subscription"}</button>}
+        {subscription && <button className="button" disabled={Boolean(working)} onClick={()=>void inspect()}>{working === "inspect" ? "Checking PayPal…" : "Check PayPal status"}</button>}
+        <Link className="button" to="/plans">Review plans</Link>
+        <button className="button" type="button" disabled={Boolean(working)} onClick={()=>void verifyPlans()}>{working === "verify-plans" ? "Checking Live plans…" : "Check PayPal plan availability"}</button>
+      </div>
+      {planAuditMessage && <p className="settings-save-status" role="status">{planAuditMessage}</p>}
+      {providerStatus && <p className="settings-save-status" role="status">{providerStatus}</p>}
+    </div>
+    <div className="billing-packs">
+      <div className="billing-packs-heading">
+        <div><span>Purchased AI Actions</span><strong>{overview.billing.aiActions.purchased} <small>available</small></strong></div>
+        <p>Purchased actions do not expire. Your balance reflects completed purchases, usage, and reversals.</p>
+      </div>
+      <div className="billing-pack-grid">
+        {overview.configuration.aiActionPacks.map(pack => <div className="billing-pack-card" key={pack.key}>
+          <div className="billing-pack-amount"><strong>{pack.actions}</strong><span>AI Actions</span></div>
+          <b>${(pack.priceMinor/100).toFixed(2)}</b>
+          <button className="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key)}>{working === pack.key ? "Starting…" : `Buy ${pack.actions} actions`}</button>
+          {localStorage.getItem(`wcb-payment:ai-pack:${pack.key}`) && <button className="quiet-link" type="button" disabled={Boolean(working)} onClick={()=>void buyPack(pack.key, true)}>New checkout attempt</button>}
+        </div>)}
+      </div>
+      {!overview.configuration.checkoutAvailable && <small>Paid checkout is currently unavailable.</small>}
+    </div>
+    {message && <p className="settings-save-status" role="status">{message}</p>}
+    <button className="quiet-link" type="button" onClick={overview.refresh}>Refresh billing status</button>
+  </div>
 }
 
 function Settings() {

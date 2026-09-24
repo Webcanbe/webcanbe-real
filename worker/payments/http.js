@@ -84,15 +84,14 @@ export async function handlePrivatePaymentRequest(request, path, { repo, provide
       const input = await body(request)
       const subscriptionId = domainId(input?.subscriptionId, "subscription")
       if (Object.keys(input || {}).some(key => key !== "subscriptionId")) throw new PaymentError(422, "invalid_request", "Invalid subscription request.")
-      const subscription = await repo.subscriptionForUpdate(subscriptionId)
+      const subscription = await repo.subscriptionById(subscriptionId)
       if (!subscription || subscription.userId !== session.userId) throw new PaymentError(404, "subscription_not_found", "Subscription not found.")
       if (!subscription.providerSubscriptionId) return json({ provider: { status: "NOT_CREATED", planMatches: false, referenceMatches: false } })
       let details
       try { details = await provider.getSubscription(subscription.providerSubscriptionId) }
       catch (error) {
         if (paypalSubscriptionNeedsReview(error)) {
-          await repo.markSubscriptionForReconciliation(subscription.subscriptionId, subscription.providerSubscriptionId)
-          return json({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
+          return json({ provider: { status: "PROVIDER_NOT_FOUND", planMatches: false, referenceMatches: false, message: "PayPal cannot find this subscription in the configured merchant environment. Billing review is needed before another checkout." } })
         }
         throw error
       }
