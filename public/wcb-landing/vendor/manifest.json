@@ -95,12 +95,6 @@
     "sha256": "f1050dc5317b43434c0aeda599d4624c774ffc162e87a8cf204b949b6a85816d",
     "contentType": "font/woff2"
   },
-  "https://launchuicomponents.com/opengraph-image.jpg?opengraph-image.38ymazo3cmmeo.jpg": {
-    "local": "/wcb-landing/vendor/external/opengraph-image-4898dae85f37.jpg",
-    "bytes": 3537199,
-    "sha256": "85fc4eea8fa22b5a01a97c8ceeb1216b17a773e8ea0df6f512067632c30e8418",
-    "contentType": "image/jpeg"
-  },
   "https://www.launchuicomponents.com/_next/image?url=%2Fapp-tasks-light.png&w=3840&q=75&dpl=dpl_daeoLZzFjErdqRYQdtZC6JFnHYR9": {
     "local": "/wcb-landing/vendor/images/app-tasks-light-3840-ae2e012c271b.webp",
     "bytes": 117332,

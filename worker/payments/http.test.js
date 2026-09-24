@@ -3,6 +3,16 @@ import { PAYMENT_RETURN_URLS, handlePrivatePaymentRequest, publicPaymentConfigur
 import { PaymentError } from "./contracts.js"
 
 describe("payment HTTP contract", () => {
+  it("refuses new plan and AI pack checkouts while preserving other payment routes", async () => {
+    const repo = { insertSubscription: () => { throw new Error("must not write") }, insertAiPackOrder: () => { throw new Error("must not write") } }
+    const provider = { createSubscription: () => { throw new Error("must not call PayPal") }, createOrder: () => { throw new Error("must not call PayPal") } }
+    for (const [path, code] of [["subscriptions/create", "subscriptions_preparing"], ["ai-packs/create", "ai_packs_preparing"]]) {
+      const route = `/__webcanbe/api/payments/${path}`
+      const response = await handlePrivatePaymentRequest(new Request(`https://webcanbe.com${route}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }), route, { repo, provider, session: { userId: "buyer" }, env: { PAYPAL_ENVIRONMENT: "live" } })
+      expect(response.status).toBe(503)
+      expect((await response.json()).code).toBe(code)
+    }
+  })
   it("verifies every configured Live plan with the runtime provider without creating subscriptions", async () => {
     const prices = { pro_monthly: ["MONTH", "12.00"], pro_annual: ["YEAR", "120.00"], studio_monthly: ["MONTH", "29.00"], studio_annual: ["YEAR", "290.00"] }
     const keys = { PAYPAL_PLAN_PRO_MONTHLY: "P-PM", PAYPAL_PLAN_PRO_ANNUAL: "P-PA", PAYPAL_PLAN_STUDIO_MONTHLY: "P-SM", PAYPAL_PLAN_STUDIO_ANNUAL: "P-SA" }
@@ -90,21 +100,21 @@ describe("payment HTTP contract", () => {
     let calls = 0
     const provider = { getSubscription: async () => { calls++; return { id: "I-PAYPAL", custom_id: id, plan_id: "P-EXPECTED", status: "APPROVAL_PENDING", subscriber: { email_address: "private@example.com" }, billing_info: { last_failed_payment: { reason_code: "PAYMENT_DENIED" } } } } }
     const request = new Request("https://webcanbe.com/__webcanbe/api/payments/subscriptions/inspect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscriptionId: id }) })
-    const denied = await handlePrivatePaymentRequest(request.clone(), "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionForUpdate: async () => subscription }, provider, session: { userId: "other" }, env: {} })
+    const denied = await handlePrivatePaymentRequest(request.clone(), "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionById: async () => subscription }, provider, session: { userId: "other" }, env: {} })
     expect(denied.status).toBe(404)
     expect(calls).toBe(0)
-    const allowed = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionForUpdate: async () => subscription }, provider, session: { userId: "buyer" }, env: {} })
+    const allowed = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo: { subscriptionById: async () => subscription }, provider, session: { userId: "buyer" }, env: {} })
     expect(await allowed.json()).toEqual({ provider: { status: "APPROVAL_PENDING", planMatches: true, referenceMatches: true, lastFailedReason: "PAYMENT_DENIED" } })
   })
 
-  it("quarantines an unverifiable pending provider ID without treating it as paid", async () => {
+  it("reports an unverifiable provider ID without mutating the pending subscription", async () => {
     const id = "11111111-1111-4111-8111-111111111111"
     const subscription = { subscriptionId: id, userId: "buyer", providerSubscriptionId: "I-PAYPAL", providerPlanId: "P-EXPECTED", status: "approval_pending" }
     const provider = { getSubscription: async () => { const error = new PaymentError(409, "paypal_request_failed", "Provider error"); Object.assign(error, { providerHttpStatus: 404, providerName: "RESOURCE_NOT_FOUND", providerIssue: "INVALID_RESOURCE_ID" }); throw error } }
-    const repo = { subscriptionForUpdate: async () => subscription, markSubscriptionForReconciliation: async (rowId, providerId) => { expect(rowId).toBe(id); expect(providerId).toBe("I-PAYPAL"); subscription.status = "reconciliation_required"; subscription.approvalUrl = null } }
+    const repo = { subscriptionById: async () => subscription, markSubscriptionForReconciliation: () => { throw new Error("Inspection must be read only") } }
     const request = new Request("https://webcanbe.com/__webcanbe/api/payments/subscriptions/inspect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subscriptionId: id }) })
     const response = await handlePrivatePaymentRequest(request, "/__webcanbe/api/payments/subscriptions/inspect", { repo, provider, session: { userId: "buyer" }, env: {} })
-    expect(await response.json()).toEqual({ provider: { status: "RECONCILIATION_REQUIRED", planMatches: false, referenceMatches: false, message: "PayPal cannot verify this subscription. Billing review is needed before another checkout." } })
-    expect(subscription.status).toBe("reconciliation_required")
+    expect(await response.json()).toEqual({ provider: { status: "PROVIDER_NOT_FOUND", planMatches: false, referenceMatches: false, message: "PayPal cannot find this subscription in the configured merchant environment. Billing review is needed before another checkout." } })
+    expect(subscription.status).toBe("approval_pending")
   })
 })

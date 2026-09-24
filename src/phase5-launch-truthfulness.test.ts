@@ -23,12 +23,12 @@ describe("Phase 5 launch truthfulness cleanup", () => {
     expect(dashboard).not.toContain("Google sign-in is active.")
   })
 
-  it("enables paid plans only when the payment service says checkout is available", () => {
+  it("keeps plan checkout preparing independently of template checkout", () => {
     const plans = app.slice(app.indexOf("function Plans()"), app.indexOf("function CreatorListingEditor"))
-    expect(plans).toContain("Paid checkout is currently unavailable")
-    expect(plans).toContain("configuration.checkoutAvailable")
+    expect(plans).toContain("Pro and Studio checkout is preparing")
+    expect(plans).toContain("configuration.subscriptionCheckoutAvailable")
     expect(plans).toContain(">Annual<")
-    expect(plans).toContain("Checkout unavailable")
+    expect(plans).toContain("Preparing")
     expect(plans).toContain("hostedProductClient.createSubscription")
     expect(plans).not.toContain("Most chosen")
     expect(plans).toContain("Choose ${row.name}")

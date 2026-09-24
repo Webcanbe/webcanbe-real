@@ -53,12 +53,16 @@ export class AiUsageService {
         return { ...existing, replayed: true }
       }
       const active = await tx.activeReservationsForUserForUpdate(userId)
+      // A failed generation can outlive a transient ledger outage. Its server-
+      // written marker is safe to release before allocating a new request.
+      for (const item of active) if (item.status === "reserved" && item.outcome?.releasePending === true) await tx.settleReservationForUpdate(item.id, "released", this.clock())
+      const availableActive = active.filter(item => !(item.status === "reserved" && item.outcome?.releasePending === true))
       const concurrency = await tx.concurrencyLimitForUserForUpdate(userId)
-      if (active.filter(item => item.status === "reserved").length >= concurrency) fail(429, "AI concurrency limit reached.")
+      if (availableActive.filter(item => item.status === "reserved").length >= concurrency) fail(429, "AI concurrency limit reached.")
       const allocations = allocateAiActions({
         includedGrants: await tx.includedGrantsForUserForUpdate(userId),
         purchasedCredits: await tx.purchasedCreditsForUserForUpdate(userId),
-        consumed: active, cost, now: this.clock(),
+        consumed: availableActive, cost, now: this.clock(),
       })
       return { ...await tx.insertReservation({ userId, projectId, idempotencyKey, cost, expectedRevision, allocations, status: "reserved", createdAt: this.clock() }), replayed: false }
     })

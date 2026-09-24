@@ -38,3 +38,6 @@ export async function finishAuthIntent(signup: boolean, startedAt: number, next:
   return signup ? '/marketplace' : next === '/' || next === '/browse' || next === '/templates' ? '/dashboard' : next
 }
 export function workspaceLabel(id: string, index: number, projectName?: string) { return projectName?.trim() || (id === "personal" ? "Personal workspace" : `Workspace ${index + 1}`) }
+export function workspaceForNewProject(available: string[], selected: string) {
+  return available.includes(selected) ? selected : available[0]
+}

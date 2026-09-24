@@ -1,10 +1,16 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { advanceOnboarding, appRoutes, dismissOnboarding, finishAuthIntent, onboardingState, viewForPath } from './shellState'
+import { advanceOnboarding, appRoutes, dismissOnboarding, finishAuthIntent, onboardingState, viewForPath, workspaceForNewProject } from './shellState'
 import { hostedProductClient } from './hostedProductClient'
 vi.mock('./hostedProductClient', () => ({ productionAuthMode: () => true, hostedProductClient: { account: vi.fn() } }))
 beforeEach(() => { localStorage.clear(); sessionStorage.clear(); vi.clearAllMocks() })
 describe('app route identity and first signup onboarding', () => {
+  it('creates a template in the selected workspace, with a safe fallback for a stale selection', () => {
+    const available = ['workspace-a', 'workspace-b']
+    expect(workspaceForNewProject(available, 'workspace-b')).toBe('workspace-b')
+    expect(workspaceForNewProject(available, 'deleted-workspace')).toBe('workspace-a')
+    expect(workspaceForNewProject([], 'deleted-workspace')).toBeUndefined()
+  })
   it('assigns a distinct refreshable path to every sidebar page', () => {
     const routes=Object.entries(appRoutes)
     expect(new Set(routes.map(([,value])=>value[0])).size).toBe(14)

@@ -30,3 +30,6 @@
 
 .control-standalone{min-height:100vh;background:#fff;color:#151515}
 .control-standalone>.control{min-height:100vh;padding-top:64px}
+.control-mutation-form .creator-select{gap:5px;color:#666;font-size:10px;font-weight:400}
+.control-mutation-form .creator-select-trigger{min-height:37px;border-color:#d8d8d8;padding:9px 10px;font-size:11px}
+.control-mutation-form .creator-select-options{min-width:max(100%,190px)}

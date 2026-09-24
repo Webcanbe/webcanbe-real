@@ -13,7 +13,9 @@ export default defineConfig({
   plugins: [publicSitePlugin(),webCanBeFixturePlugin(process.cwd(), { fastRefresh: process.env.WCB_REACT_REFRESH === "1", runner: process.env.WCB_PREVIEW_PROVIDER === "lima" ? new LocalLimaRunnerProvider(process.cwd()) : undefined }), react(), tailwindcss()],
   // Keep the sizeable Firebase browser SDK out of the initial application chunk.
   build: {
+    manifest: true,
     rollupOptions: {
+      input: { main: "index.html", preview: "preview-runtime.html" },
       output: {
         entryFileNames: `assets/[name]-${buildRevision}-[hash].js`,
         chunkFileNames: `assets/[name]-${buildRevision}-[hash].js`,

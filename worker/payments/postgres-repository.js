@@ -115,6 +115,7 @@ export class PostgresPaymentRepository {
     return { purchased: Math.max(0,Number(row.granted)-Number(row.used)) }
   }
   async subscriptionByProviderId(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1", [id])).rows[0]) }
+  async subscriptionById(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE subscription_id=$1", [id])).rows[0]) }
   async subscriptionByProviderIdForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE provider='paypal' AND provider_subscription_id=$1 FOR UPDATE", [id])).rows[0]) }
   async subscriptionForUpdate(id) { return camelSubscription((await this.db.query("SELECT * FROM wcb_subscriptions WHERE subscription_id=$1 FOR UPDATE", [id])).rows[0]) }
   async insertSubscription(row) { return camelSubscription((await this.db.query(`INSERT INTO wcb_subscriptions(subscription_id,user_id,plan_key,provider,provider_plan_id,idempotency_key,status,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [row.subscriptionId,row.userId,row.planKey,row.provider,row.providerPlanId,row.idempotencyKey,row.status,row.createdAt])).rows[0]) }

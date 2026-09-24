@@ -2,6 +2,7 @@ import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 import type { LicenseEntitlement, Listing, ProjectRelease, ReadyQualification, SellerApplication, SellerGitHubAdmission, SellerSubmission, SellerZipAdmission, WorkspaceProject } from "./webcanbe-engine/runtime/productDomain"
 
 export type HostedListing = Listing & Readonly<{
+  creator: string
   releaseVersion: string
   sourceRevisionId: string
   snapshotHash: string
@@ -17,7 +18,7 @@ export type HostedListingDetail = HostedListing & Readonly<{
   publicMetadata: Record<string, unknown>
 }>
 
-export type SourceProjectSummary = Readonly<{ id: string; name: string }>
+export type SourceProjectSummary = Readonly<{ id: string; name: string; workspaceId?: string }>
 export type BuildLeagueProgress = Readonly<{ referralCode: string; stage: number; points: number; actions: number; counts: Record<string,number>; dimensions: {build:number;social:number;completion:number}; milestones:string[]; uniqueReferredVisits:number; recent:Array<{kind:string;created_at:string}>; entry:{project_id:string;statement:string;submitted_at:string}|null }>
 export type BuildLeagueLeader = Readonly<{label:string;build:number;social:number;completion:number;score:number}>
 
@@ -122,7 +123,7 @@ export class HostedProductClient {
     return value as T
   }
 
-  async browse(input: { query?: string; tags?: string[]; limit?: number } = {}) {
+  async browse(input: { query?: string; tags?: string[]; creator?: string; limit?: number } = {}) {
     return (await this.publicPost<{ listings: HostedListing[] }>("/__webcanbe/api/product/catalog/browse", input)).listings
   }
 

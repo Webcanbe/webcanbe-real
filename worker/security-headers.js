@@ -83,6 +83,7 @@ export function isKnownAppPath(path) {
   if (PUBLIC_EXACT.has(path) || PRIVATE_EXACT.has(path) || path === "/seller") return true
   if (Object.hasOwn(publicManifest.routes,path) || Object.hasOwn(publicManifest.aliases,path)) return true
   if (/^\/project\/[^/]+(?:\/(?:preview|acquire))?$/.test(path)) return true
+  if (/^\/creators\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(path)) return true
   return PRIVATE_PREFIXES.some(prefix => path.startsWith(prefix))
 }
 

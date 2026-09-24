@@ -1,0 +1,7 @@
+# PostHog PR #106 reconciliation
+
+PR #106 was inspected at `4b7fa8c4eb7517e9e21e2e2cfbe590f2019ef420` against the PR #108 candidate. The appropriate event types and funnel, Creator, Editor, AI, buyer, billing, route, link, identity-reset, and privacy-filter changes are already present in #108. The candidate additionally queues bounded events until asynchronous SDK initialization, strips non-allowlisted custom properties, and redacts dynamic project, workspace, checkout, and Creator URL segments.
+
+The PR #106 branch has two consecutive `wcb_subscription_started` captures in the automatic pending-plan path. PR #108 has one capture in that path and one in the separate manual plan-button path, each guarded by the existing `started` ref. The two paths are mutually exclusive for a single checkout entry; no PR #106 merge is needed and merging its branch wholesale would reintroduce the duplicate.
+
+The candidate installs link tracking once through `installLinkTracking()`. Event payloads contain only allowlisted identifiers, enum values, normalized internal route templates, or an external hostname. Query strings, hashes, referrers, arbitrary caller fields, source code, and secrets are excluded. `autocapture` and session recording are disabled in the PostHog initialization. `src/analytics.test.ts` covers SDK-added transport fields, route redaction, safe link payloads, and rejected sensitive fields.

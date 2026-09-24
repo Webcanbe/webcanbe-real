@@ -54,7 +54,7 @@ it.each(['after Code response', 'before Code response'])('keeps rendered Code re
   const click = async (text: string) => { expect(button(text)).toBeTruthy(); await act(async () => button(text).click()) }
   const flushUntil = async (check: () => void) => { await vi.waitFor(async () => { await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)) }); check() }, { timeout: 5000 }) }
   try {
-    await act(async () => root.render(<CompatibleWorkspace />));
+    await act(async () => root.render(<CompatibleWorkspace agentChatEnabled />));
     (host.querySelector('[aria-label="Local editor access key"]') as HTMLInputElement).value = 'fixture-key'
     await click('Connect / renew session')
     await flushUntil(() => expect(host.querySelector('iframe')?.getAttribute('srcdoc')).toBe('<main>preview</main>'))

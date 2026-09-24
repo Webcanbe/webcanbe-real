@@ -84,7 +84,67 @@ describe("AI proposal domain", () => {
 
   it("surfaces a Workers AI timeout/provider failure without accepting a source change", async () => {
     const binding = { run: vi.fn(async () => { throw new Error("timeout") }) }
-    await expect(new WorkersAiProvider(binding, "@cf/meta/llama-3.3-70b-instruct-fp8-fast").generate("test")).rejects.toThrow("timeout")
+    await expect(new WorkersAiProvider(binding, "@cf/meta/llama-3.3-70b-instruct-fp8-fast").generate("test")).rejects.toMatchObject({ status: 504 })
+  })
+
+  it("retries a transient provider timeout inside one reservation and settles one successful proposal", async () => {
+    const meter = usage(), apply = vi.fn(async () => ({ applied: false, revision: "rev_1" }))
+    const binding = { run: vi.fn().mockRejectedValueOnce(new Error("upstream timed out")).mockResolvedValueOnce({ response: good }) }
+    const model = new WorkersAiProvider(binding, "model")
+    const result = await runAiRequest({ provider: model, usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })
+    expect(result.state).toBe("ready_to_review")
+    expect(binding.run).toHaveBeenCalledTimes(2)
+    expect(meter.reserve).toHaveBeenCalledTimes(1)
+    expect(meter.commit).toHaveBeenCalledTimes(1)
+    expect(meter.release).not.toHaveBeenCalled()
+    expect(apply).toHaveBeenCalledTimes(1)
+  })
+
+  it("ends after two transient failures and releases the one reservation without touching source", async () => {
+    const meter = usage(), apply = vi.fn()
+    const binding = { run: vi.fn(async () => { throw Object.assign(new Error("provider unavailable"), { status: 503 }) }) }
+    const model = new WorkersAiProvider(binding, "model")
+    await expect(runAiRequest({ provider: model, usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toMatchObject({ status: 503 })
+    expect(binding.run).toHaveBeenCalledTimes(2)
+    expect(meter.reserve).toHaveBeenCalledTimes(1)
+    expect(meter.release).toHaveBeenCalledTimes(1)
+    expect(meter.commit).not.toHaveBeenCalled()
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it("bounds two hung provider attempts and releases the reservation", async () => {
+    vi.useFakeTimers()
+    try {
+      const meter = usage(), apply = vi.fn()
+      const binding = { run: vi.fn(() => new Promise(() => {})) }
+      const pending = runAiRequest({ provider: new WorkersAiProvider(binding, "model"), usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })
+      const failed = expect(pending).rejects.toMatchObject({ status: 504 })
+      await vi.advanceTimersByTimeAsync(60_000)
+      await failed
+      expect(binding.run).toHaveBeenCalledTimes(2)
+      expect(meter.reserve).toHaveBeenCalledTimes(1)
+      expect(meter.release).toHaveBeenCalledTimes(1)
+      expect(apply).not.toHaveBeenCalled()
+    } finally { vi.useRealTimers() }
+  })
+
+  it("does not retry permanent provider configuration errors", async () => {
+    const meter = usage(), apply = vi.fn()
+    await expect(runAiRequest({ provider: new WorkersAiProvider(undefined, "model"), usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toThrow("not configured")
+    expect(meter.release).toHaveBeenCalledTimes(1)
+    expect(apply).not.toHaveBeenCalled()
+  })
+
+  it("records a failed release for reconciliation without claiming Actions were returned", async () => {
+    const meter = usage(), apply = vi.fn()
+    meter.release.mockRejectedValueOnce(new Error("ledger offline"))
+    await expect(runAiRequest({ provider: new WorkersAiProvider(undefined, "model"), usage: meter, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toThrow("release is pending")
+    expect(meter.recordPending).toHaveBeenCalledWith("reserve-1", { releasePending: true })
+    const replay = usage()
+    replay.reserve.mockResolvedValue({ id: "reserve-1", status: "reserved", replayed: true, outcome: { releasePending: true } })
+    await expect(runAiRequest({ provider: provider(good), usage: replay, request, files, userId: "u", projectId: "p", revision: "rev_1", apply })).rejects.toMatchObject({ status: 409 })
+    expect(replay.release).toHaveBeenCalledTimes(1)
+    expect(apply).not.toHaveBeenCalled()
   })
 
   it("passes cancellation through generation and releases exactly once", async () => {
@@ -96,6 +156,7 @@ describe("AI proposal domain", () => {
     await expect(pending).rejects.toMatchObject({ status: 504 })
     expect(apply).not.toHaveBeenCalled()
     expect(meter.release).toHaveBeenCalledTimes(1)
+    expect(model.binding.run).toHaveBeenCalledTimes(1)
   })
 
   it("applies the persisted reviewed proposal without regenerating or charging twice", async () => {

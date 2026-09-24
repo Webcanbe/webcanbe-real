@@ -1,0 +1,9 @@
+# Launch build budget measurement
+
+The 2026-09-24 candidate keeps the original byte limits. `npm run build` now emits Vite's production asset manifest, which the build budget uses to calculate the largest delivered route graph. The former `total JS`, `total CSS`, and `app CSS` sums counted mutually exclusive lazy routes as one download. Those inventory sums remain visible in the gate output.
+
+The app entry statically imports React, icons, and Firebase. Analytics initializes and Build League chrome mounts on every app route, so the budget includes their dynamic chunks in every route. For each remaining Vite dynamic entry, the gate adds that entry and its static dependencies to the app entry, deduplicating shared files. Preview runtime retains separate caps. Public CSS and JS use the conservative sum of all static public files, even though a page uses a subset. The app entry CSS gate includes the always mounted Build League stylesheet. The build fails if the manifest or any expected global chunk is missing.
+
+The largest app route graph is 1,620.1 KiB JS against 2,048 KiB. The largest route CSS is 326.6 KiB against 560 KiB. Initial app CSS plus Build League is 189.5 KiB against 230 KiB. Aggregate inventory remains 2,134.3 KiB JS and 609.5 KiB CSS. The Editor's 43.9 KiB of minified CSS is now loaded with its lazy Editor route instead of every app entry. The separate preview entry's static dependencies are counted under its existing preview cap.
+
+The landing vendor manifest included a 3,537,199-byte OG image that no shipped HTML, CSS, or JS referenced. The actual landing `og:image` and `twitter:image` point to `/favicon.png`. Removing the orphan asset and stale manifest entry reduced app dist from 17.63 MiB to 14.26 MiB against the unchanged 15 MiB cap. Total dist remains guarded at 30 MiB, and the largest JS and CSS chunk caps remain unchanged.

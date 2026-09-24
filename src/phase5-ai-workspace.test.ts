@@ -44,8 +44,10 @@ describe("CompatibleWorkspace AI client contract", () => {
   it("keeps usage and provider errors concise without inventing client authority", () => {
     expect(aiErrorMessage(402)).toContain("Not enough AI Actions")
     expect(aiErrorMessage(429)).toContain("already running")
+    expect(aiErrorMessage(429, "Workers AI is busy.")).toContain("provider is busy")
     expect(aiErrorMessage(504)).toContain("reservation was released")
     expect(aiErrorMessage(503, "Source was accepted; AI Action settlement is pending.")).toContain("Reload the project")
+    expect(aiErrorMessage(503, "AI reservation release is pending.")).toContain("reservation is still being reconciled")
   })
 
   it("wires proposal-first apply to the production endpoint and canonical refresh", () => {

@@ -30,10 +30,15 @@ describe("Phase 4 authenticated operations surfaces", () => {
     expect(app).toContain("three-factor")
   })
 
-  it("loads current shell and editor styles after the consolidated product styles", () => {
-    const base=main.indexOf('import "./phase4-final-ui.css"'), shell=main.indexOf('import "./app-shell.css"'), editor=main.indexOf('import "./editor-shell.css"')
+  it("loads shell styles after product styles and editor styles with the editor route", () => {
+    const base=main.indexOf('import "./phase4-final-ui.css"'), shell=main.indexOf('import "./app-shell.css"')
+    const editor=fs.readFileSync("src/webcanbe-engine/visual-editor/CompatibleWorkspace.tsx", "utf8")
     expect(base).toBeGreaterThan(-1)
     expect(shell).toBeGreaterThan(base)
-    expect(editor).toBeGreaterThan(shell)
+    expect(main).not.toContain('import "./editor-shell.css"')
+    expect(editor).toContain('import "../../editor-shell.css"')
+    expect(editor).toContain('import "../../editor-split-fix.css"')
+    expect(editor).toContain('import "../../editor-control-size.css"')
+    expect(editor.indexOf('import "../../editor-shell.css"')).toBeLessThan(editor.indexOf('import "./compatibleWorkspace.css"'))
   })
 })

@@ -41,10 +41,10 @@ describe("Worker security header adapter", () => {
 
 
   it("distinguishes known SPA routes from unknown navigation paths", () => {
-    for (const path of ["/","/browse","/docs","/docs/security","/project/example","/dashboard","/login","/seller/projects","/requests","/_ops/gate2-auth-smoke"]) {
+    for (const path of ["/","/browse","/docs","/docs/security","/project/example","/creators/webcanbe","/creators/example-studio","/dashboard","/login","/seller/projects","/requests","/_ops/gate2-auth-smoke"]) {
       expect(isKnownAppPath(path)).toBe(true)
     }
-    for (const path of ["/definitely-not-a-route","/unknown/nested","/control"]) {
+    for (const path of ["/definitely-not-a-route","/unknown/nested","/control","/creators/invalid/extra","/creators/.hidden"]) {
       expect(isKnownAppPath(path)).toBe(false)
     }
   })

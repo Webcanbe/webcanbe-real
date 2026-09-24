@@ -28,7 +28,13 @@ function initializeLanding(root=document) {
   }
   connect(root.querySelector('.wcb-marketplace-track'),root.querySelector('[data-market-prev]'),root.querySelector('[data-market-next]'))
   root.querySelectorAll('[data-slot="carousel"]').forEach(carousel=>{const track=carousel.querySelector('[data-slot="carousel-content"]');if(track){track.tabIndex=0;track.setAttribute('aria-label','Reviews')}connect(track,carousel.querySelector('[data-slot="carousel-previous"]'),carousel.querySelector('[data-slot="carousel-next"]'))})
-  root.querySelectorAll('button[data-slot="sheet-trigger"]').forEach(button=>{button.setAttribute('aria-label','Open navigation');button.setAttribute('aria-expanded','false');bind(button,'click',()=>{let menu=root.querySelector('.wcb-landing-mobile-menu');if(menu){menu.remove();button.setAttribute('aria-expanded','false');return}menu=document.createElement('nav');menu.className='wcb-landing-mobile-menu';menu.setAttribute('aria-label','Main navigation');menu.innerHTML='<a href="/browse">Marketplace</a><a href="/docs">Documentation</a><a href="/changelog">Changelog</a><a href="/login">Sign in</a>';button.parentElement.append(menu);button.setAttribute('aria-expanded','true')})})
+  root.querySelectorAll('button[data-slot="sheet-trigger"]').forEach(button=>{
+    const close=(restoreFocus=false)=>{root.querySelector('.wcb-landing-mobile-menu')?.remove();button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation');if(restoreFocus)button.focus()}
+    button.setAttribute('aria-label','Open navigation');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','wcb-landing-menu');button.removeAttribute('aria-haspopup')
+    bind(button,'click',()=>{if(root.querySelector('.wcb-landing-mobile-menu')){close();return}const menu=document.createElement('nav');menu.id='wcb-landing-menu';menu.className='wcb-landing-mobile-menu';menu.setAttribute('aria-label','Main navigation');menu.innerHTML='<a href="/browse">Marketplace</a><a href="/docs">Documentation</a><a href="/changelog">Changelog</a><a href="/login">Sign in</a>';button.parentElement.append(menu);button.setAttribute('aria-expanded','true');button.setAttribute('aria-label','Close navigation')})
+    bind(root,'keydown',event=>{if(event.key==='Escape'&&root.querySelector('.wcb-landing-mobile-menu')){event.preventDefault();close(true)}})
+    bind(document,'pointerdown',event=>{const menu=root.querySelector('.wcb-landing-mobile-menu');if(menu&&!menu.contains(event.target)&&!button.contains(event.target))close()})
+  })
   return ()=>cleanup.forEach(fn=>fn())
 }
 window.webcanbeInitializeLanding=initializeLanding
