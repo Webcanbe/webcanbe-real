@@ -43,6 +43,9 @@ export function BuildLeagueChrome({path}:{path:string}) {
     if(hidden||dismissed)return
     const previous=document.activeElement instanceof HTMLElement?document.activeElement:null
     const body=document.body, originalOverflow=body.style.overflow, originalPadding=body.style.paddingRight
+    const backdrop=dialog.current?.parentElement
+    const background=backdrop?.parentElement?[...backdrop.parentElement.children].filter(node=>node!==backdrop&&!node.hasAttribute("inert")):[]
+    background.forEach(node=>node.setAttribute("inert",""))
     const gap=window.innerWidth-document.documentElement.clientWidth
     body.style.overflow="hidden"
     if(gap>0)body.style.paddingRight=`${parseFloat(getComputedStyle(body).paddingRight)+gap}px`
@@ -57,7 +60,7 @@ export function BuildLeagueChrome({path}:{path:string}) {
       else if(!dialog.current?.contains(document.activeElement)){event.preventDefault();first.focus()}
     }
     document.addEventListener("keydown",trap)
-    return()=>{document.removeEventListener("keydown",trap);body.style.overflow=originalOverflow;body.style.paddingRight=originalPadding;previous?.focus()}
+    return()=>{document.removeEventListener("keydown",trap);body.style.overflow=originalOverflow;body.style.paddingRight=originalPadding;background.forEach(node=>node.removeAttribute("inert"));previous?.focus()}
   },[dismissed,hidden])
   if(hidden)return null
   const close=()=>{setDismissed(true);try{localStorage.setItem("wcb-build-league-intro-v1","closed")}catch{};analytics.capture("wcb_build_league_intro_dismissed",{source:"public"})}

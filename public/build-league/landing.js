@@ -8,6 +8,8 @@
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const oldOverflow = body.style.overflow
     const oldPadding = body.style.paddingRight
+    const background = [...body.children].filter(node => node !== layer && !node.hasAttribute('inert'))
+    background.forEach(node => node.setAttribute('inert', ''))
     const gap = window.innerWidth - document.documentElement.clientWidth
     body.style.overflow = 'hidden'
     if (gap > 0) body.style.paddingRight = `${parseFloat(getComputedStyle(body).paddingRight) + gap}px`
@@ -27,6 +29,7 @@
       document.removeEventListener('keydown', trap)
       body.style.overflow = oldOverflow
       body.style.paddingRight = oldPadding
+      background.forEach(node => node.removeAttribute('inert'))
       previous?.focus()
     }
   }
