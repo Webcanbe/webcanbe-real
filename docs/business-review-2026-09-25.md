@@ -5,6 +5,36 @@ Status: ASSISTANT RECOMMENDATION; USER HAS NOT YET ACCEPTED A SHUTDOWN, PIVOT, O
 
 Read alongside docs/session-live-handoff.md. This review supersedes earlier unsupported claims that the current strategy is objectively the best or that tiny numerical success-probability changes are calibrated. It does not rewrite historical records or change production.
 
+## LATEST CORRECTION — all recorded activity is founder/test activity
+
+Source: the user's explicit correction after the initial review, not an independently reconciled identity audit.
+
+- The user confirms that the reported 683 pageviews / 13 recorded identities, 42 workspace opens / 3 identities, 4 code saves / 2 identities, 1 export / 1 identity, and 4 checkout starts / 1 identity are ALL their own activity or testing.
+- The user reports that the first X post has exceeded 2,000 views, but registrations still consist only of the founder and test accounts.
+- Therefore none of the preceding analytics counts establishes an external prospect, activated customer, export by a customer, purchase attempt by a customer, or paying customer. Preserve the historical instrumentation table only as a raw test-activity audit.
+- Confirmed external signups and external product use in this evidence chain: zero according to the user. Total external website arrivals remain unmeasured/unverified; analytics not capturing a visit is not proof no external browser arrived.
+- X 2,000+ views is user-reported post exposure, not 2,000 unique prospective buyers or 2,000 website visitors. Do not compute website signup conversion using it as the denominator.
+- X link clicks, successful external landing-page loads, visitor intent, and signup failures are still unknown. The missing discriminating number is the post's outbound link clicks, preferably paired with real landing-page delivery rather than only client-side analytics.
+
+Decision update:
+- The official launch-event post has not produced a confirmed external signup in the reported observation window. It is an unsuccessful acquisition result so far, not positive traction.
+- This correction removes any possible positive market interpretation of the earlier PostHog counts. It does not by itself demonstrate market-wide rejection of a usable paid product.
+- Strengthen the recommendation to freeze broad platform development, new prize purchases, event automation, and expanded promotional spending while deciding. These are recommendations, not actions taken or user-approved cancellations.
+- Keep already published prize promises and any real customer responsibilities separate; do not silently cancel them or change public rules.
+- Diagnose only the smallest relevant fork: nearly no outbound clicks implies targeting/message/offer/CTA is the first suspect; meaningful outbound clicks with no observed arrivals implies delivery/measurement is a suspect; verified appropriate arrivals with no signup/use implies offer/trust/friction or signup reliability. None of these is automatically a reason to build more features.
+- The previous bounded-test proposal remains unaccepted, not a new mandatory extension. If pursued, use existing deliverable assets and preserve its total effort cap. The user is not obliged to spend more time merely because a test was proposed.
+
+Creative hypothesis, not proven cause:
+- The campaign assets emphasized may.cx and additional domain prizes more clearly than the immediate practical reason to use Webcanbe. Asking a viewer to understand a new service plus event rules may have failed to produce intent.
+- Do not fix this by commissioning another elaborate image set. A product-value-first message with one real use case would be a lower-cost comparison, only if a usable example already exists.
+
+Official metric references checked for this correction:
+- X view counts include non-unique repeat views and author views: https://help.x.com/en/using-x/view-counts
+- Link clicks are clicks on a URL in the post, distinct from all engagements and media opens: https://business.x.com/en/help/campaign-measurement-and-analytics/tweet-activity-dashboard
+- X describes click-versus-third-party-analytics discrepancies, including slow loading/early departure: https://business.x.com/en/help/campaign-measurement-and-analytics/common-analytics-discrepancies
+
+No new calibrated success-probability percentage can be derived from this correction. Do not invent another decimal update.
+
 ## Current question
 
 The user asks for an independent assessment of whether to stop rather than lose more time: recent development has consumed about five days in the user's framing, the product remains unreliable, customer evidence is weak, and differentiation against improving competitors may be insufficient. Treat this as a legitimate capital/time-allocation question, not automatically as avoidance or lack of motivation.
@@ -40,7 +70,7 @@ Query window: 2026-09-21 00:00 UTC to query execution on September 25; observed 
 | wcb_export_completed | 1 | 1 |
 | wcb_subscription_started | 1 | 1 |
 
-Interpretation: not zero recorded activity, but NOT evidence of 13 real prospects, one paying customer, or a measured conversion rate. No completed-payment event appeared in the discovered recent taxonomy; absence of that event is not proof that there were no payments. No payment-provider/order reconciliation was performed this turn.
+Historical interpretation at initial query: not zero recorded activity, but NOT evidence of 13 real prospects, one paying customer, or a measured conversion rate. No completed-payment event appeared in the discovered recent taxonomy; absence of that event is not proof that there were no payments. No payment-provider/order reconciliation was performed that turn. Subsequent user correction above now explicitly classifies this activity as founder/testing, not external traction.
 
 ### Primary-source competitor review
 
