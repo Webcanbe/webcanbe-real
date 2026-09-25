@@ -5,7 +5,57 @@ Status: ASSISTANT RECOMMENDATION; USER HAS NOT YET ACCEPTED A SHUTDOWN, PIVOT, O
 
 Read alongside docs/session-live-handoff.md. This review supersedes earlier unsupported claims that the current strategy is objectively the best or that tiny numerical success-probability changes are calibrated. It does not rewrite historical records or change production.
 
-## LATEST UPDATE — 2 X link clicks and negative feedback across several groups
+## LATEST ASSESSMENT — supplied differentiation criticism reviewed
+
+The user has now supplied actual criticism excerpts in English and Korean. Paraphrased claims:
+- Code ownership/export is not a strong enough differentiator, even with good implementation, because alternatives such as Framer have export plugins.
+- Customers may prefer integrated publishing over handling code/deployment, while building the extra infrastructure is harder for the business.
+- Miscellaneous features may not create meaningful customer interest.
+- One excerpt declares the web-development marketplace a lost cause because the opportunity has passed.
+- Another excerpt says there is little significant differentiation.
+
+These are supplied opinions, not a representative demand study or verified hands-on comparison. The number of distinct authors, their buyer fit, the introduction shown to them, and whether each tested the actual workflow remain unverified. Do not invent those facts. Prior requests for examples are now partially satisfied; do not keep asking for the same excerpts.
+
+### Primary sources checked September 25, 2026
+
+1. Framer Marketplace's React Export listing by Tommy D. Rossi describes selected components exported through the unframer CLI and integrated into a React project. It explicitly requires React development knowledge. This verifies that a relevant export plugin exists; it does not verify effortless native export of every complete site, CMS/backend service, or arbitrary two-way source editing.
+   - https://www.framer.com/marketplace/plugins/react-export/
+   - https://unframer.co/
+2. Framer Marketplace also lists Proofly React Export, with claimed component export and a Vite/React project scaffold. These are vendor descriptions, not independently tested quality/compatibility results.
+   - https://www.framer.com/marketplace/plugins/proofly-react-export/
+3. Framer's own help pages are inconsistent on whole-site portability: one says no HTML export/self-host bundle; another says published HTML/CSS/JS/assets may be downloaded and hosted elsewhere. Both display September 15, 2026 updates. Do not claim that this inconsistency has been resolved or use either to assert complete feature parity/no alternative.
+   - https://www.framer.com/help/articles/can-i-export-my-website-to-html-and-self-host-it/
+   - https://www.framer.com/help/articles/porting-your-data-from-framer/
+4. Lovable documents GitHub sync, code ownership/export and external deployment, further weakening a generic exclusivity claim for owning the source.
+   - https://docs.lovable.dev/integrations/github
+5. Framer's June 16, 2026 announcement reports more than 7,000 creators selling templates/components and $6.5 million paid to creators during 2025, up 200% year over year. These are company-reported figures, not audited total-market size, marketplace-only GMV, or proof a new entrant can win. They are inconsistent with treating 'the whole market is dead' as an established fact.
+   - https://www.framer.com/blog/framer-3/
+
+### Independent interpretation
+
+- The most persuasive criticism is not 'Framer has an identical product' or 'nobody can enter this market'. It is that our costly technical differences have not yet been shown to solve an important buyer problem better than existing alternatives.
+- Webcanbe's planned Visual editing does not inherently force every user to touch source code. Do not adopt the strawman that source ownership necessarily makes its interface harder. Code can be an optional escape hatch. Nevertheless, that optionality alone does not establish enough switching value for broad nontechnical buyers.
+- For a buyer who only needs a good-looking live site, portability may be secondary to getting a dependable result without managing infrastructure. For a buyer who needs source-level control, existing developer tools/export routes are alternatives. These are segmentation hypotheses derived from the workflows, not measured statements about all users.
+- An integrated workflow could still create commercial differentiation without unique individual features if a particular customer job is materially easier, faster, more dependable or cheaper. 'No matter how well implemented' is therefore too absolute. No comparative evidence currently demonstrates that advantage for Webcanbe.
+- Template assets, hosted website builders, full application starters, and custom development services are adjacent but distinct markets; success or difficulty in one does not settle all of them. Do not defend the current landing-page-heavy offer by citing a speculative future complete-software ecosystem as though it already exists.
+- Current user-reported 2,000+ X views, 2 link clicks and no external signup chiefly establish failure to generate observable acquisition from this exposure, not rejection by thousands of product users. Feedback and campaign performance are different evidence and must not be double-counted as the same validated market test.
+- Readiness delay and expense matter even without proof of universal market rejection: the resource allocation question is whether the next work has a strong enough justification. A large market is not itself a reason to fund this implementation.
+
+### Current recommendation after reading the criticism
+
+Maintain and strengthen the recommendation to stop expanding the current broad, general-purpose marketplace plus proprietary editor as the default main bet. Preserve the code/assets; do not equate development freeze with deletion, unilateral shutdown, or abandoning the founder's larger business goal.
+
+Do not answer these objections by building more AI, more automation, more gamification, a larger domain campaign, or a new speculative platform. The current case for those investments is unproven.
+
+A restart would need a specific buyer/problem/reason to switch, grounded in actual requested work or behavior using an already-deliverable asset. Code portability can be supporting evidence of that value, not the assumed value itself. The earlier bounded test remains optional and unaccepted; do not renew it or add another multi-day sprint by default.
+
+If the choice is only (A) another large round of development in the same shape or (B) shelving that shape, recommend B on present evidence. This is a judgment about this implementation/positioning and current resources, not proof the entire market has no opportunities.
+
+Earlier assistant advice overweighted implementation depth and hypothetical scale, and treated an untested prize campaign too favorably. Do not defend those earlier recommendations from the supplied criticism. Do not manufacture another precise success probability.
+
+This turn changes the analysis record only. No product code, production deployment, campaign terms, purchases, or external messages were changed.
+
+## Prior update — 2 X link clicks and negative feedback across several groups
 
 Authority: the user's current explicit message says "링크 클릭2회". The prior version of this file said 20, which conflicts with that message. Use **2**, not 20. The earlier 20-click / ~1% interpretation is superseded and must not be repeated as current fact. No independent X analytics export has been inspected in this turn.
 
@@ -14,7 +64,7 @@ User-reported facts:
 - Previously reported X views: **more than 2,000**.
 - Only founder/test registrations and product activity are known; no confirmed external signup or paid customer.
 - The user sought opinions in an overseas developer server, from a close acquaintance and an expert, and in a Korean business KakaoTalk group, and reports many negative responses.
-- Actual comment wording, the introduction shown, number of respondents, audience fit, and whether respondents tried the product are unknown.
+- At this prior update, actual comment wording, the introduction shown, number of respondents, audience fit, and whether respondents tried the product were unknown. The latest assessment above now includes supplied excerpts, while their sampling and hands-on context remain unknown.
 - Targeted personal-context retrieval did not recover these particular recent criticisms. Older technical advice or prior project audits must not be substituted for the current feedback.
 
 Interpretation:
@@ -27,8 +77,8 @@ Interpretation:
 
 Current decision posture:
 - Maintain the recommendation to pause broad platform development and additional campaign expansion. Do not automatically propose another development sprint or another expensive image set.
-- The immediate lowest-cost step is to review the introduction actually shared and 3–5 representative negative comments, ideally recurring substantive objections rather than only the harshest wording. No new build is needed for this.
-- Distinguish objections to (a) the practical need or reason to choose Webcanbe instead of an existing alternative; (b) reliability, delivery cost, and implementation feasibility; (c) clarity of the offer or prize-event presentation. These are hypothetical analytical categories, not quotations from the actual feedback.
+- The immediate lowest-cost step was to review the introduction actually shared and 3–5 representative negative comments. The latest supplied excerpts are analyzed above. No new build is needed for this.
+- Distinguish objections to (a) the practical need or reason to choose Webcanbe instead of an existing alternative; (b) reliability, delivery cost, and implementation feasibility; (c) clarity of the offer or prize-event presentation.
 - If intended buyers understand the offer but repeatedly identify no meaningful advantage, and delivering the proposed advantage would still require substantial engineering, recommend shelving or replacing the current form rather than defending it.
 - If a concrete desired outcome appears but the tool cannot deliver it, assess only whether a narrower already-usable offer exists; do not restart the full roadmap.
 - If criticism is mainly of unclear event advertising, change the communication test only if a truthful usable example already exists. That does not justify more platform development.
