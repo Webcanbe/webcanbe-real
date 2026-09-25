@@ -2454,3 +2454,44 @@ Current assistant recommendation:
 
 Decision principle:
 **Do not protect Webcanbe because five days were spent on it. Protect the founder's next months from being spent on an idea that still lacks a compelling reason to choose it.**
+
+
+## 45. New-idea search doctrine after Webcanbe pause — 2026-09-25
+
+User wants the next startup-idea search to be substantially stricter than generic “pain-point hunting.”
+
+Required idea characteristics:
+- Must not optimize only for severe pain; avoid grotesque, implausible, hyper-niche, or operationally absurd problems just because the pain score is high.
+- Must not simply recycle obvious existing startup categories or add AI to a known product.
+- Must have a plausible path from a sharp initial wedge to a **very large global company**, with multiple credible expansion vectors and meaningful long-run revenue potential.
+- Must create value for user #1; immediate marketplace/network-effect dependence is strongly disfavored.
+- Must have a clear, specific switching reason against current alternatives.
+- Must be feasible to validate cheaply before substantial engineering.
+- Must not require years of R&D, large capital, extreme regulation, hardware manufacturing, or enterprise-only distribution before demand can be tested.
+- Must be structurally hard to commoditize through “a major incumbent adds one feature,” not merely protected by implementation polish.
+- Must have believable retention / repeated use or repeated transaction economics.
+- Must target a reachable buyer/user population and have at least one practical first-100-customers path.
+- Must distinguish between an interesting problem, a good product, and a venture-scale company opportunity.
+
+Research standard:
+- Start from broad changes in behavior, technology, economics, regulation, labor, infrastructure, and market structure; then locate problems created or newly solvable by those changes.
+- Search for existing spend, labor, workarounds, failed products, emerging workflows, and under-served segments.
+- Generate novel combinations only after evidence collection; novelty without evidence is not enough.
+- Attack every candidate for incumbent response, copy risk, distribution cost, retention weakness, gross-margin problems, support burden, trust/security barriers, and market ceiling.
+- Reject ideas whose upside is mostly an attractive niche business unless the expansion path is concrete and independently credible.
+- Reject ideas whose “huge TAM” depends on assuming unrelated adjacencies can be won later.
+- Prefer opportunities where the wedge is small but the underlying control point/data/workflow/economic layer can compound into a platform.
+
+Operating sequence for the next idea:
+1. discover structural shifts;
+2. identify economically meaningful unsolved problems created by those shifts;
+3. verify behavior/spend/workarounds;
+4. map incumbents and substitutes;
+5. define switching reason;
+6. prove wedge economics;
+7. prove expansion architecture;
+8. adversarially kill weak candidates;
+9. run zero/low-code validation;
+10. only then implement.
+
+Do not preserve Webcanbe merely to reuse sunk work. Reusable code/assets may be reused only if they naturally fit the winning problem.
