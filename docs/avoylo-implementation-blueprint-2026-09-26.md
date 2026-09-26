@@ -811,3 +811,30 @@ Codex requirement:
 - UI review at each phase must check that no forbidden component-library dependency was introduced.
 
 The Framer Home import is frozen and exempt from this component-system migration. Do NOT convert the approved marketing Home to coss merely for consistency.
+
+
+## 28. coss licensing correction + Phase 1 blocked state — 2026-09-26
+
+Codex reported Phase 1 BLOCKED because no real Supabase-compatible test environment is currently available. This is correct: PGlite/local simulations are not sufficient to mark Supabase Auth/RLS GREEN. Do not begin Phase 2 until a local Supabase stack or dedicated non-production hosted Supabase project is used to run the real auth/RLS matrix.
+
+Important coss licensing correction:
+- The official coss repository uses mixed licensing.
+- The repository default / most directories are AGPL-3.0.
+- `apps/ui/` (the current coss UI component library/docs/registry) is MIT-licensed.
+- `apps/origin/` is also MIT-licensed.
+- The official coss Skill at `apps/ui/skills/coss/SKILL.md` declares MIT.
+- Therefore Avoylo should NOT retain/copy code from AGPL-covered repository paths such as generic shared/root packages when using coss UI.
+- Avoylo should source components only from the MIT-licensed `apps/ui/` registry/docs (or install/use dependencies according to the official coss UI instructions) and retain required MIT notices/attribution as applicable.
+- If the current Avoylo repository contains copied coss source whose provenance is AGPL-covered or uncertain, remove/replace it before further product UI work. Do not proceed under an AGPL obligation accidentally.
+
+Sources checked 2026-09-26:
+- https://github.com/cosscom/coss
+- https://github.com/cosscom/coss/blob/main/README.md
+- https://github.com/cosscom/coss/blob/main/apps/ui/skills/coss/SKILL.md
+
+Phase 1 next gate:
+1. Clean/verify coss provenance so only MIT-covered coss UI code remains.
+2. Establish local Supabase or a dedicated Avoylo QA Supabase project.
+3. Apply migrations.
+4. Run real Auth + Data API + RLS isolation matrix.
+5. Mark Phase 1 GREEN only if those tests pass.
