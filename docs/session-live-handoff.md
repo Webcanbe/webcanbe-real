@@ -3600,3 +3600,35 @@ Next immediate action:
 - user runs `npm run test:qa` in the credentialed terminal;
 - if all tests pass, mark inbound dispatch GREEN, update/push handoff;
 - only then continue with the next bounded slice: Host QR receive scan for assigned Host, `INBOUND -> RECEIVED`, with custody/audit/idempotency and no STORED transition yet.
+
+
+## 80. Inbound dispatch real QA: 15/16, browser dispatch path timeout — 2026-09-27
+
+User manually ran the credentialed `npm run test:qa` for Avoylo inbound dispatch on remote HEAD `52007f8fbbc74c931ea1c394f028a47d3beaa323`.
+
+Result:
+- 16 tests total
+- **15 passed, 1 failed**
+- all earlier Auth/Seller/Host/materialization assertions passed
+- the single failure occurs inside the combined materialization/dispatch QA scenario after the Seller clicks **“Mark inbound shipped”**
+- Playwright timed out after 30s waiting for visible text:
+  `Inbound batch marked as shipped.`
+- failing line ~2692.
+- The failure label still says `materializes accepted inbound units once and stores only opaque QR hashes` because dispatch assertions were appended to that same test; this is not evidence that the earlier materialization/QR logic regressed.
+
+Repository inspection confirms:
+- UI calls `markInboundShipped()`, which POSTs to `/v1/seller/inbound-batches/:id/dispatch`;
+- success message is set only after that Worker request resolves successfully;
+- the message itself is stored in the parent SellerBatches component and is not obviously lost merely by the subsequent revision refresh;
+- Worker CORS includes Authorization, Content-Type and Idempotency-Key for `/v1/seller/inbound-batches/*`.
+
+Current evidence is insufficient to claim whether the POST returned an application error, stalled/ran slowly, or succeeded while the browser assertion missed it. Do not blindly increase the timeout or alter production semantics.
+
+Next diagnostic/fix should be narrow:
+1. inspect the browser dispatch request/response path;
+2. make the QA test explicitly await/capture the `/dispatch` response and surface status/body (and visible alert text if present);
+3. determine whether DB batch/unit states changed;
+4. fix only the demonstrated root cause;
+5. rerun local checks;
+6. user then reruns credentialed `npm run test:qa`;
+7. keep inbound dispatch BLOCKED until 16/16.
