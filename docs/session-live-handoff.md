@@ -3383,3 +3383,34 @@ Recommended next slice after checkpoint:
 - materialize parcel units for an ACCEPTED Host/batch from the sealed batch items;
 - issue opaque QR tokens for those parcel units;
 - no shipping labels, outbound order allocation, payments, payouts, Shopify, public flows or live flags yet.
+
+
+## 73. Avoylo parcel-unit materialization + QR issuance implemented; real QA pending — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- Host offer response GREEN checkpoint committed at `d4f46b216e72055aa18d6b77a9b4ed5ef02c0aa7` after credentialed QA **15/15**.
+- Current `core-sandbox` HEAD: `5f1cf146d28ee0de2879cf8f707cb0addfb3c73b`
+- commit: `Materialize accepted inbound parcel units`
+- `avoylo-qa` migrations: **8/8 applied**
+- local `npm run check`: passed, including 17 unit tests and 133 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- all seven live flags remain false
+- Framer Home unchanged
+- Worker not deployed
+
+Implemented in current BLOCKED slice:
+- HOST_ACCEPTED batch + matching ACCEPTED offer required;
+- exact parcel-unit materialization from inbound expected quantities;
+- assigned Host/Seller/profile/batch relationships preserved;
+- idempotent retry without duplicate units;
+- 256-bit opaque QR contents, server stores only SHA-256 token hashes;
+- QR raw contents returned only once through trusted Admin Worker response for label generation;
+- browser roles cannot execute materialization RPC or read QR token hashes;
+- Seller/Host read summaries added without raw UUIDs/token hashes;
+- audit events for materialization + QR issuance.
+
+Status remains **BLOCKED only pending credentialed real `npm run test:qa`**.
+
+When user supplies the real QA result:
+- if all pass, mark slice GREEN, update/push handoff, then move to the next bounded Phase-2 slice;
+- likely next slice after GREEN: Host inbound scan / custody transition beginning with CREATED -> INBOUND -> RECEIVED, but confirm current handoff and test results before issuing the prompt.
