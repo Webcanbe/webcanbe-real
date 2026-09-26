@@ -3484,3 +3484,23 @@ Immediate action:
 - user runs `npm run test:qa` in the already credentialed QA terminal;
 - if 16/16 passes, Codex should mark the slice GREEN, update `docs/current-handoff.md`, commit/push the minimal test fix + handoff, and report final HEAD;
 - if another test fails, keep BLOCKED and fix only that root cause.
+
+
+## 76. Avoylo parcel-unit materialization + QR issuance real QA passes 16/16 — 2026-09-27
+
+User ran the credentialed real QA matrix after the one-line QA method fix.
+
+Result:
+- **16/16 passed**
+- parcel-unit materialization + opaque QR issuance test passed
+- total duration ~158.84s
+- no application-code change was required for the final fix; only the QA request method was corrected from GET to POST
+
+Interpretation:
+- parcel-unit materialization + QR issuance has cleared the real QA gate and can be marked **GREEN** once the local one-line QA fix + handoff update are committed/pushed to `origin/core-sandbox`.
+- remote product HEAD before that finalization remains `5f1cf146d28ee0de2879cf8f707cb0addfb3c73b`.
+
+Recommended next bounded Phase-2 sequence after checkpoint finalization:
+1. add an authenticated/internal inbound-dispatch action for a HOST_ACCEPTED batch that advances it toward physical inbound and marks its materialized parcel units from CREATED -> INBOUND, preserving assigned Host and audits/idempotency;
+2. only after that, add Host QR receive scan as a separate checkpoint (INBOUND -> RECEIVED), then storage confirmation (RECEIVED -> STORED).
+Do not skip the explicit parcel state machine merely to move faster.
