@@ -3446,3 +3446,24 @@ Immediate next action:
 - run credentialed `npm run test:qa` in the private QA terminal.
 - If PASS: mark slice GREEN, update handoff, commit/push documentation if needed, then continue to the next bounded Phase-2 slice.
 - If FAIL: do not expand scope; fix only the failing root cause and rerun.
+
+
+## 74. Avoylo parcel materialization real-QA failure diagnosed as wrong HTTP method in test — 2026-09-27
+
+User ran credentialed `npm run test:qa` on parcel-unit materialization/QR slice:
+- 16 tests total
+- 15 passed
+- 1 failed: `materializes accepted inbound units once and stores only opaque QR hashes`
+- failure: expected anonymous call status 401, received 404 at test line ~2270.
+
+Repository inspection:
+- target Worker route is POST-only: `POST /v1/admin/inbound-batches/:batchId/materialize`;
+- QA helper `callWorker(path, actor?, method = "GET", ...)` defaults to GET;
+- failing assertion calls `callWorker(route)` with no method, so it sends GET to a POST-only route and Hono correctly returns 404.
+- Therefore this is a QA test bug, not evidence of a materialization/QR product bug.
+
+Required minimal fix:
+- change the anonymous unauthorized assertion to invoke the same route with `POST`, e.g. `callWorker(route, undefined, "POST", undefined, randomUUID())` (or equivalent POST call);
+- do not alter production route behavior;
+- rerun credentialed `npm run test:qa`;
+- keep slice BLOCKED until 16/16 passes.
