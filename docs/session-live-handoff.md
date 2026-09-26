@@ -3333,3 +3333,27 @@ Status remains **BLOCKED** only because the credentialed real `npm run test:qa` 
 When the user supplies the real QA result:
 - if GREEN, immediately provide the next concise Codex prompt;
 - next likely bounded slice after GREEN is parcel-unit materialization + QR issuance for the accepted Host/batch, but only after checking the current handoff and actual QA result.
+
+
+## 71. Avoylo Host-response real QA failure diagnosed as expected-error console bookkeeping — 2026-09-26
+
+User ran the credentialed real QA matrix for HEAD `ebbc8f026e711ad9de3b64a3f5b9c9557df02adb`.
+
+Result:
+- 15 tests total
+- 14 passed
+- 1 failed: Host offer-response QA
+- functional ACCEPT/DECLINE/rematch assertions reached the final browser-console assertion;
+- failure was `normalConsoleErrors` containing exactly two browser resource 500 messages.
+
+Repository inspection shows the Host QA test intentionally injects two HTTP 500 responses:
+1. forced pending-offer list error;
+2. forced Host response error.
+Unlike the earlier Seller browser QA test, which explicitly clears `normalConsoleErrors` after its forced 500, the Host test does not clear those expected console errors before asserting the final array is empty.
+
+Interpretation:
+- keep the slice BLOCKED until rerun passes;
+- this evidence points to a QA harness bookkeeping defect, not a proven Host-flow product defect;
+- fix narrowly by clearing only the expected forced-500 console entries after the forced-error UX assertions (or equivalently scope console assertions so expected injected failures are excluded);
+- do NOT suppress real console errors globally and do NOT change application behavior merely to hide the intentionally generated 500s;
+- rerun credentialed `npm run test:qa`; if GREEN, update handoff and push the minimal test fix.
