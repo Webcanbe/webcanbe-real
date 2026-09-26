@@ -3275,3 +3275,36 @@ Recommended deploy command from repo root:
 `npx wrangler deploy --config apps/worker/wrangler.jsonc`
 (or equivalent `cd apps/worker && npx wrangler deploy`).
 - Keep repo root for workspace dependency installation; do not enable live feature flags merely to fix deployment.
+
+
+## 69. Avoylo Phase 2 internal Host matching/offer GREEN — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `2731f5c8d1c10744075bc22189e1028191f70868`
+- commit: `Add internal host matching and offer slice`
+- Host matching/offer slice: **GREEN**
+- `avoylo-qa` migrations: **6/6 applied**
+- real QA: **14/14 passed**
+- `npm run check`: passed, including 14 Vitest tests and 103 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- Wrangler root dry-run using explicit config succeeded with Worker name `avoylo`
+- all seven live flags remain false
+- Worker not deployed
+- Framer Home unchanged
+
+Implemented:
+- private Host-location ↔ service-area mapping;
+- matching only for valid SUBMITTED batches with sealed contents + active service area;
+- deterministic eligible Host selection;
+- approved/ACTIVE Host + same service area + sufficient remaining capacity required;
+- capacity accounts for existing OFFERED/ACCEPTED reservations;
+- one open offer inserted;
+- atomic `SUBMITTED -> MATCHING -> OFFERED`;
+- idempotent replay + audits;
+- Seller/Host/unassigned/direct-browser matching invocation denied.
+
+Next bounded slice:
+- Host views its own pending OFFERED assignment and can ACCEPT or DECLINE;
+- ACCEPT must atomically enforce ownership/eligibility/current OFFERED state, mark offer ACCEPTED, assign host location to batch, transition batch to HOST_ACCEPTED, preserve capacity reservation, audit/idempotency;
+- DECLINE marks offer DECLINED and returns batch to MATCHING (or equivalent explicitly defined rematch-ready state) without assigning Host;
+- do not create parcel units, QR, shipping, payments, payouts, Shopify or public flows yet.
