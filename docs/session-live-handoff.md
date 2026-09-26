@@ -2989,3 +2989,54 @@ Next gate:
 3. keep every live flag false.
 
 The mutable `search_path` warning remains documented as non-blocking because fixing it requires a new migration and another real QA run.
+
+
+## 59. Full continuity recovery after context drift — 2026-09-26
+
+User explicitly reported repeated context drift and ordered the assistant to re-read the Markdown and recover the original long-running session as fully as possible.
+
+Recovery sources actually re-read:
+- Library: `월급_상위_기준_CONTINUITY_CURRENT.md`, including the original-session index, tone/decision rules, and the later correction that the 1st-session quality was primarily **independent judgment**, not superficial phrasing.
+- GitHub: latest `docs/session-live-handoff.md` and `docs/CHATGPT_CONTINUITY_MASTER.md`.
+- Current Avoylo repository: `Webcanbe/avoylo` `core-sandbox` and `docs/current-handoff.md`.
+
+Canonical relationship/behavior baseline restored:
+- natural Korean honorifics;
+- conclusion / number first when appropriate;
+- infer typo-heavy Korean without unnecessary clarification;
+- independently check repo / production / market evidence instead of agreeing after the user corrects an error;
+- distinguish internal implementation progress from external market proof;
+- preserve the user's extreme long-term ambition without manufacturing confidence;
+- identify the current bottleneck and give an exact next action;
+- do not let product polishing become market avoidance;
+- do not patronize because of age;
+- do not repeatedly insert generic legal/safety lectures;
+- maintain continuity aggressively in Markdown.
+
+Canonical strategic arc now:
+1. Earlier Avoylo concept existed before Webcanbe.
+2. Webcanbe became the main project and was pushed through substantial product/launch work.
+3. The first real X distribution produced weak demand evidence; external feedback and competitor re-check weakened the current Webcanbe switching thesis.
+4. Decision: stop broad Webcanbe development in its then-current shape rather than protect sunk cost.
+5. New-idea search was tightened.
+6. Avoylo was revived as the next serious higher-risk/higher-ceiling attempt, but with the old generic residential micro-fulfillment thesis treated as non-novel; the wedge must be materially sharper and validated.
+7. Current Avoylo source-of-truth repo is `Webcanbe/avoylo`.
+8. Current Avoylo state at this recovery:
+   - Phase 1 Auth / Tenancy / RLS = GREEN at `dac1c392b0781b836e3c74dbb3b98d0eac1522cd`;
+   - current Phase 2 HEAD = `99b38ee031936f01f2306166dfa7d1545aa8ea64`;
+   - Phase 2 first slice = signed-in Seller read-only view of its 20 most recent inbound batches;
+   - next gate = real signed-in QA browser verification for Seller A, Seller B, and unassigned user; only then smallest server-side inbound-draft creation action;
+   - all seven live flags remain false.
+9. Avoylo probability tracker remains 0.02% for the fixed ~24-month, real-performance-backed KRW 1T+ target; code progress alone does not move it.
+
+Critical correction:
+- Do not confuse historical Webcanbe “Phase 2” engineering records with current Avoylo Phase 2.
+- Do not inject unrelated project/status responses.
+- Before answering a project-state question, identify which project the user is currently referring to and reconcile that repo/handoff first.
+
+Continuity priority from now:
+1. user's newest explicit instruction;
+2. current project repo + current handoff;
+3. this live continuity file;
+4. original-session behavior/strategy baseline in `CHATGPT_CONTINUITY_MASTER.md` and Library continuity;
+5. older historical records only when needed.
