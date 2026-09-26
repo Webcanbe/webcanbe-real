@@ -3567,3 +3567,36 @@ Out of scope for this task:
 - Framer Home changes.
 
 When Codex returns a completion report, verify it and immediately provide the next concise prompt unless a real blocker requires clarification.
+
+
+## 79. Avoylo inbound dispatch implemented; credentialed real QA pending — 2026-09-27
+
+Verified in `Webcanbe/avoylo`:
+- parcel materialization + QR checkpoint finalized GREEN at `6094dcfec1c776f6d0b5fdd322699ab2d520cfd9`
+- current `core-sandbox` HEAD: `52007f8fbbc74c931ea1c394f028a47d3beaa323`
+- commit: `feat: dispatch accepted inbound batches`
+- migration history: **9/9 applied**
+- local `npm run check`: passed, including 18 unit tests and 133 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- dispatch RPC executable only by `service_role`
+- all seven live flags remain false
+- Worker not deployed
+- Framer Home unchanged
+
+Implemented:
+- Seller-authenticated/internal dispatch for HOST_ACCEPTED batches;
+- accepted Host offer + assigned location revalidated;
+- complete materialization + QR hash presence required;
+- atomic batch transition `HOST_ACCEPTED -> INBOUND_PENDING -> IN_TRANSIT`;
+- parcel units `CREATED -> INBOUND`;
+- idempotent replay;
+- append-only audit events;
+- minimal Seller UI action: “Mark inbound shipped”.
+
+Status:
+- **BLOCKED pending credentialed real `npm run test:qa`** because Codex task environment lacked private QA credentials.
+
+Next immediate action:
+- user runs `npm run test:qa` in the credentialed terminal;
+- if all tests pass, mark inbound dispatch GREEN, update/push handoff;
+- only then continue with the next bounded slice: Host QR receive scan for assigned Host, `INBOUND -> RECEIVED`, with custody/audit/idempotency and no STORED transition yet.
