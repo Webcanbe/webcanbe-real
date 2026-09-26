@@ -3069,3 +3069,22 @@ Persistence rule:
 - Material Avoylo business decisions, evidence, pivots, phase transitions, blockers and external-validation results must be written to Markdown immediately.
 - Fast-changing engineering truth belongs in `Webcanbe/avoylo/docs/current-handoff.md`.
 - Cross-session business/strategy continuity belongs in this live handoff.
+
+
+## 61. Avoylo probability-reporting format clarified — 2026-09-26
+
+User wants every future Avoylo success-probability answer to explicitly include the change versus the immediately previous estimate.
+
+Required format whenever asked for current probability:
+- previous estimate -> current estimate;
+- absolute change in percentage points;
+- relative increase/decrease percentage when meaningful;
+- one-line reason for the change;
+- if there is no material external evidence, say clearly that it is unchanged.
+
+Current tracker remains:
+- previous: 0.02%
+- current: 0.02%
+- absolute delta: 0.00 percentage points
+- relative delta: 0%
+Reason: Phase 1 GREEN and Phase 2 internal implementation reduce technical uncertainty but do not yet add external Seller/Host/parcel/unit-economics evidence.
