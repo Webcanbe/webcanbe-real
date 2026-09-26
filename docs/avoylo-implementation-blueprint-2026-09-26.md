@@ -747,3 +747,18 @@ Preferred order:
 3. only after state/legal/insurance/account structure is ready: tiny merchant/Host pilot.
 
 The value of a physical pilot is exception discovery, not proving demand from ten shipments.
+
+## 25. Marketing landing import rule — Framer export
+
+The founder intends to give Codex an exported Framer/Ability marketing-site file and use only its Home page for the first Avoylo release.
+
+Rules:
+- Preserve the Home page visually and textually as exported unless the founder separately authorizes changes.
+- Remove the visible bottom-right “Made in Framer” badge/overlay from the exported implementation.
+- Do not redesign, rewrite, restyle, reorder, simplify or “improve” the Home page as part of import.
+- Only the Home page is publicly routed for now. Existing other template pages/components should not be published or linked, but should be preserved in source for possible later reuse rather than destructively deleted.
+- Keep the landing code isolated from the operational Avoylo app so future Seller/Host/Admin expansion does not force a landing rewrite.
+- Prepare invisible infrastructure for later expansion: central site/app URL config, route registry, root-only sitemap/robots, clean 404/home fallback, and deploy separation between marketing root domain and app subdomain.
+- Remove or neutralize stale Framer-preview/template route references only when they would create broken public navigation; do not alter visible labels/design without explicit approval.
+- Before/after visual regression should show no unintended change outside the removed Framer badge area and necessary routing behavior.
+- Do not mix landing import work with Avoylo backend, auth, payments, shipping or dashboard implementation until the marketing import is clean and independently buildable.
