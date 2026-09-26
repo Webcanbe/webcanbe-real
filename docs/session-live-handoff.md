@@ -3088,3 +3088,30 @@ Current tracker remains:
 - absolute delta: 0.00 percentage points
 - relative delta: 0%
 Reason: Phase 1 GREEN and Phase 2 internal implementation reduce technical uncertainty but do not yet add external Seller/Host/parcel/unit-economics evidence.
+
+
+## 62. Avoylo success-probability definition corrected — 2026-09-26
+
+User clarified that the probability tracker should NOT mean “chance of success if the company stays frozen in exactly its current state.” It should use the more useful business/venture interpretation:
+
+**Given the company’s current starting point, the founder’s demonstrated execution capacity, and a realistic allowance for iteration/pivots/fundraising/hiring/market adaptation over the remaining target window, what is the chance of actually reaching the fixed target?**
+
+Fixed target remains:
+- roughly 24 months;
+- a real, performance-backed KRW 1T+ company;
+- real customers/economics/growth, not hype-only valuation;
+- founder retains meaningfully high ownership.
+
+Tracker reset under this corrected definition:
+- previous tracker under the overly snapshot-like definition: 0.02%;
+- corrected current midpoint estimate: **0.05% (~1 in 2,000)**;
+- absolute change: +0.03 percentage points;
+- relative change: +150%;
+- this is primarily a **definition correction / recalibration**, NOT new market evidence.
+
+Use a rough uncertainty band of about **0.02%–0.10%** at the present pre-validation stage rather than implying statistical precision.
+
+Future updates:
+- internal technical progress may move the estimate slightly when it materially reduces execution risk;
+- external evidence (Seller/Host commitments, real parcel throughput, unit economics, repeat usage, local density, retention/growth) should drive the largest changes;
+- always report previous -> current, absolute percentage-point delta, relative % change, and the main evidence/reason.
