@@ -2909,3 +2909,17 @@ Next required action remains Phase 1 only:
 3. Run Worker private-route integration.
 4. Re-run full local regression suite.
 5. Mark Phase 1 GREEN only if the real QA matrix passes; otherwise remain BLOCKED.
+
+
+## 55. Avoylo success-probability tracking rule — 2026-09-26
+
+User requested persistent probability delta reporting for Avoylo.
+
+Current subjective baseline for the fixed target (roughly 24 months to a real, performance-backed KRW 1T+ company while founder retains high ownership): **0.02% (~1 in 5,000)**. This is an estimate, not a statistically calibrated personal probability.
+
+Reporting rule from now on:
+- Whenever a material new development occurs, report: previous estimate -> current estimate, absolute delta in percentage points, relative change when useful, and the concrete evidence that caused the change.
+- Do not change the estimate merely because more code was written, a phase passed, a connector was fixed, a landing page was polished, or internal tests passed, unless that development materially reduces a major execution risk.
+- Meaningful upward/downward revisions should primarily follow external evidence: independent Sellers, independent Hosts, real parcel throughput, paid usage, repeat usage, retention, unit economics, Host SLA/reliability, local density/repeatability, growth, regulatory/insurance constraints, or evidence the wedge does/does not matter.
+- If a development is operationally useful but does not materially change the business odds, explicitly report `0.02% -> 0.02% (no change)` rather than inventing false precision.
+- Do not use four-decimal pseudo-precision. Recalibrate only when evidence warrants it.
