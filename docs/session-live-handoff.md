@@ -2893,3 +2893,19 @@ Next engineering gate remains unchanged:
 3. Apply the two committed migrations.
 4. Run the real Auth/Data API/RLS/Worker matrix.
 5. Mark Phase 1 GREEN only if those tests pass; Phase 2 remains forbidden while blocked.
+
+
+## 54. Supabase connector access restored for Avoylo QA — 2026-09-26
+
+ChatGPT directly verified access to Supabase project ref `lrfwdzkvmvmirpkukefj` after the user reconnected the Supabase plugin/account.
+- Project is reachable and ACTIVE_HEALTHY.
+- Region: us-east-2.
+- Current QA database has zero public tables and zero applied migrations, matching the pre-migration state.
+- This removes the connector-permission blocker for Phase 1.
+
+Next required action remains Phase 1 only:
+1. Codex/apply the two committed migrations to `avoylo-qa`.
+2. Run real Supabase Auth + Data API/PostgREST + PostgreSQL RLS matrix.
+3. Run Worker private-route integration.
+4. Re-run full local regression suite.
+5. Mark Phase 1 GREEN only if the real QA matrix passes; otherwise remain BLOCKED.
