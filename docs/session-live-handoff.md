@@ -3657,3 +3657,25 @@ Next action:
 - rerun local check + e2e;
 - if the Codex runtime can see the credentialed environment, run `npm run test:qa` directly; otherwise user reruns it;
 - keep inbound dispatch BLOCKED until 16/16.
+
+
+## 82. Inbound dispatch completeness fix pushed; corrected real QA pending — 2026-09-27
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `115d7cb9f0736272f762b08d8a1abbfb30e724cb`
+- commit: `fix: correct inbound dispatch completeness check`
+- migration 10/10 applied to `avoylo-qa`
+- corrected completeness predicate now requires:
+  - matched Seller/profile units == expected quantity;
+  - zero matched units with wrong state;
+  - zero matched units with wrong Host assignment.
+- dispatch RPC remains `service_role` only.
+- `npm run check`: passed (18 unit tests, 133 local RLS assertions, builds/security checks)
+- `npm run test:e2e`: 2/2 passed.
+- all seven live flags remain false.
+- Worker not deployed; Framer Home unchanged.
+
+Status:
+- inbound dispatch remains **BLOCKED only pending the corrected credentialed real QA rerun**.
+- Immediate action: user runs `npm run test:qa` in the already credentialed local terminal.
+- If 16/16 passes: mark inbound dispatch GREEN, update/push handoff, then continue with the next bounded Phase-2 slice: Host QR receive scan, `INBOUND -> RECEIVED`, with assigned-Host validation, opaque-token lookup, custody/audit/idempotency; no STORED transition yet.
