@@ -2953,3 +2953,39 @@ Credential handling decision:
 - Prefer current Supabase publishable (`sb_publishable_...`) + secret (`sb_secret_...`) keys; Supabase is deprecating legacy anon/service_role keys by end of 2026.
 - Supply the elevated secret only through Codex's private runtime credential/environment path; never paste it into chat, source, Git, Vite/client env, or logs.
 - The existing test variable named `AVOYLO_QA_SERVICE_ROLE_KEY` may temporarily carry the modern QA `sb_secret_...` value because it is used only by the Node test/admin client; rename later to `AVOYLO_QA_SECRET_KEY` for clarity when convenient.
+
+
+## 58. Avoylo Phase 1 GREEN; Phase 2 read-only Seller inbound slice started — 2026-09-26
+
+Verified against `Webcanbe/avoylo` `core-sandbox`:
+- Phase 1 — Auth / Tenancy / RLS is now **GREEN**.
+- GREEN checkpoint commit: `dac1c392b0781b836e3c74dbb3b98d0eac1522cd`.
+- The reported real `avoylo-qa` matrix passed **9/9** tests.
+- The current task/handoff records that the credentialed QA matrix was reported by the user and not independently rerun in the later task; schema/migration state was independently verified.
+- Phase 2 — Internal operational path is now **IN PROGRESS**.
+- Current Phase 2 HEAD: `99b38ee031936f01f2306166dfa7d1545aa8ea64`.
+
+Current Phase 2 slice:
+- signed-in Seller can read the 20 most recent inbound batches for its own Seller organization;
+- fields are limited to `id`, `state`, and `created_at`;
+- uses existing tenant-scoped authenticated Data API policy;
+- explicitly filters by database-backed Seller relationship;
+- includes loading / empty / error / refresh states;
+- no create or mutation action;
+- no Worker write route;
+- no schema change;
+- no new browser grant.
+
+Verification:
+- `npm run check` passed with 14 unit tests and 56 local RLS assertions;
+- `npm run test:e2e` passed 2/2;
+- coss provenance and client-secret scans passed;
+- frozen Framer Home has no source diff;
+- all seven live flags remain false.
+
+Next gate:
+1. real signed-in QA browser pass for Seller A, Seller B, and an unassigned user;
+2. only after that, design the smallest server-side draft-creation action with transactionality, audit, and idempotency;
+3. keep every live flag false.
+
+The mutable `search_path` warning remains documented as non-blocking because fixing it requires a new migration and another real QA run.
