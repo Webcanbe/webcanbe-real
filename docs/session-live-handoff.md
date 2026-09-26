@@ -3115,3 +3115,16 @@ Future updates:
 - internal technical progress may move the estimate slightly when it materially reduces execution risk;
 - external evidence (Seller/Host commitments, real parcel throughput, unit economics, repeat usage, local density, retention/growth) should drive the largest changes;
 - always report previous -> current, absolute percentage-point delta, relative % change, and the main evidence/reason.
+
+
+## 63. Avoylo probability tracker is dynamic — 2026-09-26
+
+Clarification:
+- The current **0.05%** is NOT a permanently fixed baseline.
+- It is the current best estimate under the corrected 24-month business-success definition and may move up or down whenever material evidence changes.
+- For future probability questions, compare the immediately previous estimate to the newly assessed estimate.
+- Report both absolute percentage-point change and relative percentage change.
+- Internal implementation progress should usually cause little or no movement unless it materially removes a major execution risk.
+- External evidence should drive larger moves: Seller/Host commitments, real pilot behavior, parcel reliability, unit economics, repeat usage, local density, retention, growth, capital access, or serious operational/regulatory failures.
+
+Current estimate remains 0.05% until new evidence justifies a change.
