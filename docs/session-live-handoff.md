@@ -3504,3 +3504,23 @@ Recommended next bounded Phase-2 sequence after checkpoint finalization:
 1. add an authenticated/internal inbound-dispatch action for a HOST_ACCEPTED batch that advances it toward physical inbound and marks its materialized parcel units from CREATED -> INBOUND, preserving assigned Host and audits/idempotency;
 2. only after that, add Host QR receive scan as a separate checkpoint (INBOUND -> RECEIVED), then storage confirmation (RECEIVED -> STORED).
 Do not skip the explicit parcel state machine merely to move faster.
+
+
+## 77. Recovered omitted visible reply after parcel QA 16/16 — 2026-09-27
+
+A chat turn was visibly missing after the user reran the credentialed QA matrix for the parcel-unit materialization + QR issuance slice.
+
+Recovered canonical result from the Markdown:
+- credentialed real QA passed **16/16**;
+- the only final correction was QA bookkeeping: anonymous request used POST for the POST-only route;
+- production Worker behavior was unchanged;
+- parcel-unit materialization + opaque QR issuance can be treated as **GREEN once the local QA fix + handoff are committed/pushed**;
+- remote product HEAD before finalization was `5f1cf146d28ee0de2879cf8f707cb0addfb3c73b`.
+
+Recovered intended next bounded sequence:
+1. finalize GREEN checkpoint: update `docs/current-handoff.md`, commit/push the one-line QA fix + handoff, report final HEAD;
+2. next slice: authenticated/internal inbound dispatch for HOST_ACCEPTED batch, advancing the physical inbound state and parcel units `CREATED -> INBOUND`;
+3. after that, separate Host QR receive scan checkpoint `INBOUND -> RECEIVED`;
+4. after that, storage confirmation `RECEIVED -> STORED`.
+
+Do not skip directly from QR issuance to STORED; preserve explicit custody/state transitions and audits/idempotency.
