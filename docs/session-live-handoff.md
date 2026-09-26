@@ -2828,3 +2828,24 @@ Technical preparation:
 React Native/Expo is currently the preferred native path for Avoylo because the main stack is TypeScript and the app is mostly forms, task lists, camera/QR, notifications and photos rather than highly custom graphics. This remains an architecture choice, not a claim that Expo removes App Store/Play Store operational requirements.
 
 No mobile app was created or submitted during this decision.
+
+
+## 51. Avoylo implementation checkpoint — Phase 0 GREEN locally — 2026-09-26
+
+User-reported Codex checkpoint:
+- Branch: `core-sandbox`
+- HEAD: `c0dbcb0736d66362f8e28b23452b5a1837d36f0b`
+- Added separate web/Worker apps, shared domain states/disabled feature flags, CI, architecture/handoff docs, and a 39-table initial migration.
+- Approved Framer marketing Home has no diff.
+- Operational UI foundation follows official coss setup; no operational screens yet.
+- Tests reported green locally: clean install; marketing/Vite/Wrangler dry-run builds; typecheck/lint/format; 11/11 unit tests; 2/2 Playwright tests.
+- Migration executed in PGlite: 39 tables with RLS enabled, zero browser policies, four append-only triggers.
+- All live feature flags remain false.
+- Known inherited Framer React #405 persists.
+- Critical limitation: Supabase CLI download stalled, so the migration/RLS behavior has NOT yet been executed against a real Supabase project/local Supabase stack.
+
+Assistant interpretation:
+- Phase 0 is acceptable as GREEN for repository/foundation work.
+- Phase 1 must NOT be marked GREEN until auth + RLS are proven against a real Supabase-compatible environment (local Supabase stack or dedicated non-production hosted Supabase project). PGlite is useful for migration syntax/domain checks but is not sufficient evidence for Supabase Auth/RLS semantics.
+- Do not add new scope/tables merely because Phase 0 passed. Preserve the existing 39-table schema unless Phase 1 reveals a concrete normalization/security defect.
+- Next implementation target: Phase 1 only — Supabase Auth, database-backed memberships/roles, private-data RLS, and cross-tenant isolation tests. If a real Supabase test environment cannot be established, Phase 1 should end BLOCKED with complete code/policies/tests ready, not a fake GREEN.
