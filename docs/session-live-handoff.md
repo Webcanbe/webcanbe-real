@@ -2776,3 +2776,55 @@ C. seller tax-nexus implications for inventory placed in that state and Seller o
 Do not hire a general lawyer to review every U.S. state before selecting a market. First pick the likely launch state/metro based on seller demand, Host feasibility, carrier economics and these legal screens; then perform targeted state-specific review.
 
 No contract, account, payout, shipment, Host recruitment, Seller outreach, inventory intake or spending was executed during this review.
+
+
+## 50. Avoylo app strategy — Host native app required for scale, Seller/Admin web-first — 2026-09-26
+
+User asked whether Avoylo should necessarily launch an app and believes it should.
+
+Decision:
+- Avoylo SHOULD have a real mobile app as part of the intended product, primarily for Hosts.
+- A native App Store / Play Store release is NOT required before the first controlled pilot or before the core logistics state machine is proven.
+- Product architecture should assume a Host mobile app from the beginning so the later native app is not a rewrite of domain logic.
+- Seller experience remains web-first; Admin remains web-only initially. A Seller mobile app is optional later if actual usage justifies it.
+
+Why Host app matters:
+- Host work happens physically beside parcels, not at a desk.
+- Camera/QR scanning is a first-class action.
+- Host needs task notifications, inbound reminders, handoff prompts and exception alerts.
+- A persistent installed app improves trust, repeat use and fast task access compared with asking a casual Host to reopen a browser tab.
+- Offline/retry handling and device-level interaction become increasingly valuable once real inventory is handled.
+- App-store presence can strengthen perceived legitimacy, but is not itself demand validation.
+
+Recommended sequence:
+1. Build API/domain/state machine and responsive Host web/PWA flow first as part of Phase 0–8 sandbox.
+2. Use mobile web/PWA for internal/demo/very small pilot if needed.
+3. Once real Host workflow is confirmed, build apps/host-mobile with React Native + Expo, reusing TypeScript domain types/API contracts from monorepo.
+4. Release to TestFlight/internal Android testing before public app-store launch.
+5. Public App Store/Google Play launch only after scan/task flows, notification behavior, privacy disclosures, support and legal/account ownership are ready.
+
+Native Host app initial screens:
+- Sign in / eligibility state
+- Home / tasks
+- Inbound batches
+- Scan
+- Stored inventory summary
+- Outbound task
+- Label / print handoff
+- Exceptions
+- Earnings
+- Profile / capacity / availability
+
+Do NOT put full Seller/Admin features into the Host app.
+
+Technical preparation:
+- API-first backend; no business logic inside React web components.
+- Shared packages for domain types, schemas, API client and state-transition error codes.
+- QR token and scan endpoints device-agnostic.
+- Notification abstraction in backend so email/web can precede APNs/FCM.
+- Photo upload, signed URLs and task actions designed to work from mobile.
+- Avoid browser-only assumptions in Host core workflow.
+
+React Native/Expo is currently the preferred native path for Avoylo because the main stack is TypeScript and the app is mostly forms, task lists, camera/QR, notifications and photos rather than highly custom graphics. This remains an architecture choice, not a claim that Expo removes App Store/Play Store operational requirements.
+
+No mobile app was created or submitted during this decision.
