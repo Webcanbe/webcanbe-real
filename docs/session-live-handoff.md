@@ -3168,3 +3168,15 @@ Recommended next Phase-2 slice:
   3. enforce tenant ownership, DRAFT-only mutation, validation, idempotency and audit;
   4. verify with real QA and keep all live flags false.
 - Do NOT jump yet to Host assignment, QR issuance, shipping, payments or live deployment.
+
+
+## 65. Probability reporting trigger clarified — 2026-09-26
+
+User clarified that Avoylo success probability should be reported **only when the user explicitly asks for it**.
+
+Do not append probability updates to unrelated implementation/status answers.
+When explicitly asked, use the stored format:
+- previous estimate -> current estimate
+- absolute percentage-point delta
+- relative % increase/decrease
+- reason/evidence
