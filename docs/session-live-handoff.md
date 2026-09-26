@@ -3467,3 +3467,20 @@ Required minimal fix:
 - do not alter production route behavior;
 - rerun credentialed `npm run test:qa`;
 - keep slice BLOCKED until 16/16 passes.
+
+
+## 75. Parcel materialization QA test fix applied locally; 16/16 still pending — 2026-09-27
+
+Codex applied only the previously identified QA-test fix:
+- anonymous request to the POST-only parcel-materialization endpoint now uses POST;
+- Worker/application code was not changed.
+
+Current status:
+- real `npm run test:qa` has not rerun in the Codex task because that process lacks private `AVOYLO_QA_*` credentials;
+- local fix is not yet committed/pushed;
+- parcel-unit materialization + QR issuance remains **BLOCKED** until the credentialed terminal reports 16/16.
+
+Immediate action:
+- user runs `npm run test:qa` in the already credentialed QA terminal;
+- if 16/16 passes, Codex should mark the slice GREEN, update `docs/current-handoff.md`, commit/push the minimal test fix + handoff, and report final HEAD;
+- if another test fails, keep BLOCKED and fix only that root cause.
