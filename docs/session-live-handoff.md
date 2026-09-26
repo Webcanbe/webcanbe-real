@@ -3308,3 +3308,28 @@ Next bounded slice:
 - ACCEPT must atomically enforce ownership/eligibility/current OFFERED state, mark offer ACCEPTED, assign host location to batch, transition batch to HOST_ACCEPTED, preserve capacity reservation, audit/idempotency;
 - DECLINE marks offer DECLINED and returns batch to MATCHING (or equivalent explicitly defined rematch-ready state) without assigning Host;
 - do not create parcel units, QR, shipping, payments, payouts, Shopify or public flows yet.
+
+
+## 70. Avoylo Phase 2 Host offer response implemented; real QA still required — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `ebbc8f026e711ad9de3b64a3f5b9c9557df02adb`
+- commit: `Add Host offer response flow`
+- migration history: **7/7 applied**
+- local `npm run check`: passed, including 16 Vitest tests and 117 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- all seven live flags remain false
+- Worker not deployed
+- Framer Home unchanged
+
+Implemented:
+- Host-only pending-offer view;
+- ACCEPT: ownership recheck, serialized transaction, offer -> ACCEPTED, Host assignment, batch -> HOST_ACCEPTED, audit/idempotency;
+- DECLINE: offer -> DECLINED, batch -> MATCHING/rematch-ready, capacity released, audit/idempotency;
+- rematcher excludes previously declined Host location for that batch.
+
+Status remains **BLOCKED** only because the credentialed real `npm run test:qa` matrix has not yet run in the private QA runtime. Do not extend Phase 2 until that passes.
+
+When the user supplies the real QA result:
+- if GREEN, immediately provide the next concise Codex prompt;
+- next likely bounded slice after GREEN is parcel-unit materialization + QR issuance for the accepted Host/batch, but only after checking the current handoff and actual QA result.
