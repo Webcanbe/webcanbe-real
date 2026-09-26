@@ -3357,3 +3357,29 @@ Interpretation:
 - fix narrowly by clearing only the expected forced-500 console entries after the forced-error UX assertions (or equivalently scope console assertions so expected injected failures are excluded);
 - do NOT suppress real console errors globally and do NOT change application behavior merely to hide the intentionally generated 500s;
 - rerun credentialed `npm run test:qa`; if GREEN, update handoff and push the minimal test fix.
+
+
+## 72. Avoylo Host offer-response credentialed QA passes 15/15 — 2026-09-26
+
+User manually ran the credentialed `npm run test:qa` after the narrow Host QA harness fix.
+
+Result:
+- **15/15 passed**
+- Host offer-response test now passes fully
+- duration ~141.12s
+- no new application-code change was required; the only fix was clearing expected console errors after intentionally injected 500-path UX checks
+
+Interpretation:
+- the Host offer-response slice has now cleared the real Auth/Data API/browser QA gate;
+- however, the local QA-harness fix and GREEN handoff update were not yet committed/pushed at the moment of this report, so the remote checkpoint still needs finalization.
+
+Next immediate action:
+1. Codex marks Host offer response GREEN in `docs/current-handoff.md`;
+2. commit/push the minimal QA-harness fix + handoff update to `origin/core-sandbox`;
+3. report final HEAD;
+4. only after that checkpoint, continue with the next bounded Phase-2 slice.
+
+Recommended next slice after checkpoint:
+- materialize parcel units for an ACCEPTED Host/batch from the sealed batch items;
+- issue opaque QR tokens for those parcel units;
+- no shipping labels, outbound order allocation, payments, payouts, Shopify, public flows or live flags yet.
