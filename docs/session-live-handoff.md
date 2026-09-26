@@ -3754,3 +3754,39 @@ Plan:
 5. for that slice, keep STORED, outbound, shipping purchase, payments, Shopify, public flows, deployments and all live flags out of scope;
 6. every pushed implementation must pass local check/e2e and then the automated real-QA gate before Codex extends further;
 7. if CI exposes a real failure, fix only the root cause and rerun; if a decision beyond the established state machine is required, stop and report instead of inventing policy.
+
+
+## 85. Overnight autonomous Avoylo execution plan — 2026-09-27
+
+User is going to sleep and wants Codex to make maximum useful progress, not stop at Phase 2.
+
+Current verified state:
+- `core-sandbox` HEAD: `7331ba6b45e3bb84a4ec8459dbf8cbcd143e47ab`
+- Phase 0 checks for that HEAD: GREEN
+- GitHub Actions Real QA run #2 for that HEAD is in progress
+- the workflow's QA credential-presence step already passed, confirming GitHub Actions has the three QA secrets configured
+- credentialed `npm run test:qa` is currently running automatically
+- user should no longer need to manually run real QA after each slice
+
+Overnight Codex strategy:
+- single branch only: `core-sandbox`
+- use GitHub Actions Real QA as the credentialed gate after each pushed bounded slice
+- if a run fails, inspect logs, fix only root cause, repush, and repeat until green
+- do not ask the user for routine engineering choices; use current handoff/domain/test-plan/architecture as source of truth
+- keep each slice separately committed and handoff updated
+- all seven live flags remain false
+- no Worker production deployment, public signup, live physical operations, live shipping/postage, payments, payouts, Shopify, or Framer Home changes
+- do not label a slice GREEN until its required local gates and credentialed Real QA gate are green
+- if an external credential/provider is missing, document that dependency and continue with independent bounded work without pretending the blocked integration is green
+
+Preferred sequence after inbound dispatch GREEN:
+1. Phase 3 Host QR receive scan: assigned Host only; opaque QR hash lookup; INBOUND -> RECEIVED; batch receiving state; wrong/foreign/invalid/duplicate scan denial; append-only custody/audit/idempotency.
+2. Separate storage confirmation: RECEIVED -> STORED; assigned Host; custody/audit; only STORED becomes allocatable.
+3. Phase 4 order ingestion/allocation: manual then CSV sandbox input, deterministic validation, atomic allocation of STORED units with row locking / no double reservation, concurrency overload tests and cancellation-race tests.
+4. Phase 5 shipping-provider sandbox boundary: provider interface and EasyPost TEST-only adapter where credentials permit; duplicate/out-of-order webhooks, timeouts, no live postage.
+5. Phase 6 immutable Seller-charge / Host-earning ledger behavior, duplicate/retry protection and reconciliation; no live payment/payout.
+6. Phase 7 audited exception recovery using compensating events, never deleting history.
+7. Phase 8 end-to-end Seller -> Host -> carrier sandbox flow with no manual DB edits, desktop + 390px Host UX, authorization/concurrency/provider-failure/accessibility/console/network checks.
+8. Stop before Phase 9/live activation unless user explicitly approves later.
+
+If one phase is externally blocked, continue independent code/tests/docs for later sandbox phases when doing so does not compound an unverified state transition or violate source-of-truth invariants.
