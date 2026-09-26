@@ -2588,3 +2588,57 @@ Decision principle:
 - If it passes, then Avoylo becomes the active company hypothesis and can earn a larger implementation budget.
 
 No outreach, inventory intake, spending, contracts, carrier partnership request, host onboarding or product build was executed in making this decision.
+
+
+## 48. Avoylo operating-model correction — host as accessible side gig; seller wedge = post-dropship / hero-SKU forward stock — 2026-09-26
+
+User corrected the previous repeated framing around “one seller.” That framing was only a risk-limited physical pilot concept and should NOT define Avoylo's acquisition/product architecture.
+
+### Updated host-side thesis
+- Host positioning should be broadly accessible **side-gig work for ordinary people with appropriate spare indoor/garage space**, not a professional micro-warehouse operator role.
+- “Anyone can do it” is a marketing/product goal, not zero screening. Minimum eligibility still includes secure suitable storage, identity/address verification, smartphone access, reliable weekday handoff availability and ability to apply/scan shipping labels.
+- The core simplification should be stronger than generic garage fulfillment:
+  - Seller/manufacturer pre-packs each sellable unit or fixed bundle into a customer-ready sealed parcel.
+  - Units arrive to the Host in master cartons/batches and receive unique parcel/SKU identity.
+  - Host opens only the inbound master carton as needed, scans/stores sealed units, never opens the customer-ready parcel.
+  - On an order, Host retrieves the indicated sealed unit, scan-verifies it, applies the destination carrier label and hands it to the carrier/drop-off.
+  - No SKU assembly, custom pack-out, inserts, kitting, repacking or returns inspection in the initial wedge.
+- Conceptual distinction to test: **3PGL-like home micro-warehouse vs Avoylo as a human-operated distributed parcel cache / forward-stock node.**
+- 3PGL currently already markets ordinary-family/garage side-income, KYC, shelving/cameras, proximity routing and pick/pack. Therefore “ordinary people earn from spare garages” is NOT differentiation. The potentially meaningful difference is much lower operator complexity and setup because inventory arrives prepacked/customer-ready.
+- Whether that simplification actually lowers total seller economics after merchant/manufacturer pre-pack labor, master-carton inbound splitting, storage, Host compensation and postage is UNPROVEN.
+
+### Updated first seller ICP
+Do NOT target generic pure dropshippers who never want to own inventory. The first seller hypothesis is:
+- **post-dropship / validated-product sellers** moving a winning product from slow per-order cross-border fulfillment into small-batch U.S. forward stock;
+- or small multichannel DTC brands with 1–5 hero SKUs / fixed bundles that are compact, durable, nonperishable and nonhazardous;
+- seller has enough repeated U.S. demand that delivery speed/zone cost matters, but does not want or cannot economically justify a conventional multi-node fulfillment setup.
+- Strongest product fit is one customer order = one already sealed parcel/fixed bundle. Multi-item arbitrary cart fulfillment is out of the first wedge.
+
+TikTok Shop's current U.S. seller-shipping requirements reinforce that dispatch, valid tracking and delivery SLAs matter, but TikTok also offers FBT and TikTok Shipping, so “fast shipping” alone is NOT Avoylo differentiation. The target reason to choose Avoylo must be some combination of tiny forward-stock batches, low commitment, multichannel use and simple distributed placement that beats the seller's actual alternative.
+
+### Acquisition / implementation correction
+- Do NOT insist on finding one seller before there is anything credible to show.
+- First implementation should be a **minimal operational core**, not a full marketplace:
+  1. Host application / ZIP / available volume / availability / storage-photo flow.
+  2. Seller batch creation with package dimensions/weight and prepacked-unit count.
+  3. Unique parcel QR/ID generation and host assignment.
+  4. Host mobile scan for inbound / stored / outbound states.
+  5. Seller order input or minimal Shopify/CSV order ingestion.
+  6. Shipping-label/tracking handoff path in sandbox or supported carrier/aggregator integration.
+  7. Simple coverage + cost estimator for sellers.
+- Payments, insurance automation, nationwide routing, returns, dynamic pricing, ratings and full dispute handling are not prerequisites to demonstrate the workflow.
+- Recruit **multiple seller leads and multiple Host leads in parallel**. Do not architect the business around a single merchant.
+- Actual physical inventory should still begin with a tiny number of willing merchant/Host matches because liability and debugging exposure grows with inventory. This is different from searching for only one seller.
+- Host waitlist can be broader/earlier because no recurring payout is promised until activated; supply density still needs metro focus. Seller geography should ultimately determine which Host supply is activated.
+
+### Competitive / economic facts rechecked
+- 3PGL publicly states garage-owner KYC, shelving/cameras, pick/pack, proximity routing; published merchant prices are $0.90/cu-ft/month storage, $0.60/order-line pick, $1/order pack, shipping pass-through. Vendor claims of 20–40% lower last-mile cost / 2–3x faster local delivery are estimates, not independently verified.
+  https://3pgl.us/
+- TikTok Shop U.S. currently documents Seller Shipping, TikTok Shipping and Fulfilled by TikTok. Seller Shipping requires valid tracking and SLA compliance; current documented end-to-end targets include Express 3 business days and Standard/Economy 6 business days with eligibility/performance requirements. This validates shipping speed/fulfillment reliability as a real seller constraint but also confirms strong platform-native alternatives.
+  https://seller-us.tiktok.com/university/essay?knowledge_id=8308896260065025
+  https://seller-us.tiktok.com/university/essay?knowledge_id=6837879804970754
+
+### Current decision
+- Keep Avoylo as the selected direction.
+- Replace the “find one seller first” execution framing with: **build the smallest credible host/seller operational core, create Host supply interest, and recruit multiple post-dropship / hero-SKU seller leads; activate only a tiny number of matched physical pilots once economics and operational requirements are known.**
+- Do not call the side-gig Host concept unique. The differentiation under test is **prepacked-parcel simplicity + lower host setup + tiny distributed forward-stock batches**, not the existence of home garages.
