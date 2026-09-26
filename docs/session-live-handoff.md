@@ -2923,3 +2923,18 @@ Reporting rule from now on:
 - Meaningful upward/downward revisions should primarily follow external evidence: independent Sellers, independent Hosts, real parcel throughput, paid usage, repeat usage, retention, unit economics, Host SLA/reliability, local density/repeatability, growth, regulatory/insurance constraints, or evidence the wedge does/does not matter.
 - If a development is operationally useful but does not materially change the business odds, explicitly report `0.02% -> 0.02% (no change)` rather than inventing false precision.
 - Do not use four-decimal pseudo-precision. Recalibrate only when evidence warrants it.
+
+
+## 56. Avoylo Phase 1 blocker narrowed to Codex task integration — 2026-09-26
+
+Latest Codex report:
+- Phase 1 remains BLOCKED at HEAD `58e59d24cce7584a0f4ea44771bac052da2ae908` on `origin/core-sandbox`.
+- Supabase plugin is enabled, but within that specific Codex task the backend rejects project/table/migration calls as `Unknown tool` before project access.
+- No DDL or QA writes occurred; real Auth/RLS/Worker matrix remains unrun.
+- This is now treated as a task-scoped Codex integration-loading failure rather than an Avoylo code or Supabase-project permission failure.
+
+Execution decision:
+- Stop spending attempts in the broken Codex task.
+- Start a fresh Codex task/session with the `Webcanbe/avoylo` repo and Supabase integration loaded from the beginning, then resume Phase 1 only.
+- If the fresh task still returns `Unknown tool`, use another authorized execution path (including ChatGPT's working Supabase connector) rather than weakening the Phase-1 gate.
+- Phase 2 remains forbidden until the real QA gate passes.
