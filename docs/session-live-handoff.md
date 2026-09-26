@@ -3632,3 +3632,28 @@ Next diagnostic/fix should be narrow:
 5. rerun local checks;
 6. user then reruns credentialed `npm run test:qa`;
 7. keep inbound dispatch BLOCKED until 16/16.
+
+
+## 81. Inbound dispatch QA diagnostic confirms RPC completeness-check bug — 2026-09-27
+
+User reran credentialed `npm run test:qa` after diagnostic instrumentation.
+
+Observed failure:
+- 16 tests total
+- 15 passed, 1 failed
+- dispatch POST returned **HTTP 409**
+- response error code: `MATERIALIZATION_INCOMPLETE`
+- visible UI alert: `Batch is not ready to dispatch.`
+- persisted batch state remained `HOST_ACCEPTED`
+- all five parcel units remained `CREATED`
+
+This confirms the failure is inside the dispatch RPC readiness/completeness validation, not a Playwright timing issue.
+
+Static review had already identified the likely SQL predicate defect in the completeness check: for each batch item it compares the count of invalid units to `expected_quantity`. With a fully valid set, invalid count is 0, so that condition incorrectly classifies a complete materialization as incomplete.
+
+Next action:
+- Codex should fix only that SQL completeness predicate in the inbound-dispatch migration/function path;
+- preserve all production semantics outside the demonstrated bug;
+- rerun local check + e2e;
+- if the Codex runtime can see the credentialed environment, run `npm run test:qa` directly; otherwise user reruns it;
+- keep inbound dispatch BLOCKED until 16/16.
