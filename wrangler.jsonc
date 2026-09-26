@@ -51,7 +51,8 @@
     "WEBCANBE_BIGPERSON_GOOGLE_EMAIL": "sihumin196@gmail.com",
     "WEBCANBE_CONTROL_MODE": "disabled",
     "WEBCANBE_PRODUCT_MUTATIONS": "disabled",
-    "WEBCANBE_PAYMENTS": "enabled",
+    "WEBCANBE_PAYMENTS": "disabled",
+    "WEBCANBE_PAYPAL_WEBHOOKS": "enabled",
     "PAYPAL_ENVIRONMENT": "live",
     "PAYPAL_WEBHOOK_ID": "7T758752LK1378010"
   },

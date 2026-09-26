@@ -15,6 +15,9 @@ const present = value => typeof value === 'string' && value.length > 0
 function paypalConfigured(env) {
   return env?.WEBCANBE_PAYMENTS === 'enabled' && ['sandbox','live'].includes(env.PAYPAL_ENVIRONMENT) && PAYPAL_CORE_KEYS.every(key=>present(env?.[key]))
 }
+function webhookConfigured(env) {
+  return env?.WEBCANBE_PAYPAL_WEBHOOKS === 'enabled' && ['sandbox','live'].includes(env?.PAYPAL_ENVIRONMENT) && PAYPAL_CORE_KEYS.every(key=>present(env?.[key]))
+}
 export function paymentConfigured(env) {
   return paypalConfigured(env) && PAYPAL_PLAN_KEYS.every(key=>present(env?.[key]))
 }
@@ -44,7 +47,7 @@ export async function privatePayment(request, path, db, session, env) {
 }
 export async function paypalWebhook(request, env) {
   if(request.method !== 'POST') return new Response(null,{status:405,headers:{Allow:'POST'}})
-  if(!paypalConfigured(env)) return json({error:'Payment webhook is not configured.'},503)
+  if(!webhookConfigured(env)) return json({error:'Payment webhook is not configured.'},503)
   let body
   try { body = await boundedPaymentBody(request, 256 * 1024) }
   catch { return json({error:'Invalid or oversized webhook body.'},413) }
