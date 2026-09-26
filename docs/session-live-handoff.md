@@ -3128,3 +3128,43 @@ Clarification:
 - External evidence should drive larger moves: Seller/Host commitments, real pilot behavior, parcel reliability, unit economics, repeat usage, local density, retention, growth, capital access, or serious operational/regulatory failures.
 
 Current estimate remains 0.05% until new evidence justifies a change.
+
+
+## 64. Avoylo Phase 2 Seller inbound draft slice GREEN — 2026-09-26
+
+Verified against `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `3ec6996d98974479e283d95d19ab5114339e414e`
+- commit: `Add audited Seller inbound draft creation`
+- Phase 2 Seller inbound draft slice: **GREEN**
+- `avoylo-qa` migrations: **3/3 applied**
+- final real QA: **11/11 passed**
+- local `npm run check`: passed, including 14 unit tests and 66 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- coss provenance and client-secret scans passed
+- Framer Home remains unchanged
+- all seven live flags remain false
+- Worker is not deployed; production create control would require Worker URL + exact allowed-origin configuration
+
+What this slice proves:
+- Seller A/B own-organization draft creation
+- foreign/unassigned denial
+- direct browser RPC denial
+- idempotent duplicate replay without duplicate batch
+- audit record creation
+- real QA browser create -> bounded list refresh
+- service secret absent from browser requests
+
+Current business-probability tracker:
+- previous: 0.05%
+- current: 0.05%
+- absolute delta: 0.00 percentage points
+- relative delta: 0%
+Reason: this materially improves technical execution confidence, but still adds no external Seller/Host commitment, real parcel flow, unit-economics, or repeat-usage evidence.
+
+Recommended next Phase-2 slice:
+- before Host matching/assignment, make the Seller draft describe the actual sealed inventory:
+  1. server-side creation of a Seller-owned `parcel_profile` with name/dimensions/weight and `sealed_ready=true`;
+  2. attach that profile + expected quantity to the Seller's own DRAFT inbound batch through `inbound_batch_items`;
+  3. enforce tenant ownership, DRAFT-only mutation, validation, idempotency and audit;
+  4. verify with real QA and keep all live flags false.
+- Do NOT jump yet to Host assignment, QR issuance, shipping, payments or live deployment.
