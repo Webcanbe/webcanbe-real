@@ -3524,3 +3524,46 @@ Recovered intended next bounded sequence:
 4. after that, storage confirmation `RECEIVED -> STORED`.
 
 Do not skip directly from QR issuance to STORED; preserve explicit custody/state transitions and audits/idempotency.
+
+
+## 78. Current active Codex prompt — Avoylo inbound dispatch — 2026-09-27
+
+The user confirmed that the currently running Codex task is:
+
+1. finalize parcel-unit materialization + QR issuance as GREEN after credentialed real QA 16/16;
+2. commit/push the one-line QA fix + current handoff;
+3. continue Phase 2 with **INBOUND DISPATCH**.
+
+Active bounded scope:
+- only HOST_ACCEPTED batches with materialized units;
+- accepted Host assignment must still match;
+- atomic batch transitions:
+  HOST_ACCEPTED -> INBOUND_PENDING -> IN_TRANSIT;
+- parcel unit transition:
+  CREATED -> INBOUND;
+- preserve Seller/profile/Host ownership;
+- idempotent + audited;
+- reject foreign Seller/Host, wrong state, incomplete materialization, forged assignment;
+- minimal Seller action: “Mark inbound shipped” with pending/success/error;
+- no raw internal IDs.
+
+Required QA:
+- correct batch/unit transitions;
+- foreign/wrong-state denial;
+- replay safety;
+- audits;
+- assignment preservation;
+- client secret/browser checks.
+
+Out of scope for this task:
+- Host QR receiving;
+- RECEIVED/STORED;
+- outbound orders;
+- shipping-label purchase;
+- payments;
+- Shopify;
+- public flows;
+- live flags;
+- Framer Home changes.
+
+When Codex returns a completion report, verify it and immediately provide the next concise prompt unless a real blocker requires clarification.
