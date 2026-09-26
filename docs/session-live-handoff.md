@@ -3712,3 +3712,31 @@ Required minimal fix:
 - do not change Worker/UI production behavior;
 - rerun local checks and credentialed QA;
 - keep inbound dispatch BLOCKED until 16/16.
+
+
+## 84. Avoylo real QA moved to GitHub Actions to remove manual npm reruns — 2026-09-27
+
+User explicitly requested to stop manually running credentialed `npm run test:qa` after every Codex slice.
+
+Implemented in `Webcanbe/avoylo` on `core-sandbox`:
+- commit `2363c0cf289b22548df30fb2c4abf2c66c0ae9e2`
+- new workflow: `.github/workflows/real-qa.yml`
+- trigger: pushes to `core-sandbox` affecting app/package/QA/migration/package files, plus workflow_dispatch
+- runner: Node 24, npm ci, Playwright Chromium, then `npm run test:qa`
+- credentials are read only from GitHub Actions repository secrets:
+  - `AVOYLO_QA_SUPABASE_URL`
+  - `AVOYLO_QA_PUBLISHABLE_KEY`
+  - `AVOYLO_QA_SERVICE_ROLE_KEY`
+- workflow checks only presence and does not print secret values.
+- concurrency serializes real-QA runs.
+
+One-time user setup still required because GitHub connector cannot create repository secrets:
+- copy the three already-set local environment values into GitHub Actions repository secrets once (prefer piping them via `gh secret set` without printing values).
+After that:
+- Codex no longer needs private QA credentials;
+- Codex may run local `npm run check` + `npm run test:e2e`, commit/push the bounded slice, and GitHub Actions runs the credentialed real QA automatically;
+- keep a slice BLOCKED until the GitHub Actions real-QA job is GREEN;
+- assistant can verify workflow status through GitHub rather than asking user to rerun npm manually.
+
+Current caveat:
+- Codex currently has uncommitted scoped QA assertion/handoff changes based on the prior HEAD. Because the CI workflow was committed remotely, Codex should sync/rebase while preserving those local changes before its next push.
