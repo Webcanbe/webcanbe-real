@@ -762,3 +762,4 @@ Rules:
 - Remove or neutralize stale Framer-preview/template route references only when they would create broken public navigation; do not alter visible labels/design without explicit approval.
 - Before/after visual regression should show no unintended change outside the removed Framer badge area and necessary routing behavior.
 - Do not mix landing import work with Avoylo backend, auth, payments, shipping or dashboard implementation until the marketing import is clean and independently buildable.
+NaN
