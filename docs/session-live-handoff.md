@@ -2868,3 +2868,28 @@ Decision:
 - Do not begin Phase 2.
 - Next required action is infrastructure only: establish an Avoylo-owned non-production Supabase QA environment (or official local Supabase stack), then apply both migrations and run the real Auth/RLS/Worker matrix.
 - Phase 1 becomes GREEN only after those real-environment tests pass.
+
+
+## 53. Avoylo source-of-truth GitHub repo plan — 2026-09-26
+
+Current Codex checkpoint:
+- Phase 1 remains BLOCKED.
+- Local HEAD: `b5e256e8f9ed50ec12eeca4bbfbef3288450c25a` on `core-sandbox`.
+- `avoylo-qa` Supabase project exists but the connected Supabase tool currently lacks permission to access it; no migrations or QA writes were made.
+
+Repository decision:
+- Create a dedicated private GitHub repository for the actual Avoylo product source: `Webcanbe/avoylo`.
+- Do not reuse `Webcanbe/webcanbe-real` for Avoylo application code; that repository remains continuity/reference history for the older Webcanbe project and planning docs.
+- Preserve the current local Avoylo Git history rather than reinitializing or squashing it.
+- Initial source-of-truth branch remains `core-sandbox` until the sandbox core reaches a stable gate; do not create branch/PR sprawl merely for repository setup.
+- Do not auto-initialize the new GitHub repository with README/.gitignore/license if doing so would create an unrelated root commit.
+- Push the current `core-sandbox` branch and all relevant existing tags/history. Record the remote URL and pushed HEAD in `docs/current-handoff.md`.
+- Repository should be PRIVATE initially. No secrets, `.env`, provider credentials, Supabase keys, service-role secrets, or local screenshots/artifacts may be committed.
+- Add/verify secret scanning / `.gitignore` hygiene before first push.
+
+Next engineering gate remains unchanged:
+1. Create/push dedicated Avoylo GitHub repo.
+2. Obtain authorized `avoylo-qa` Supabase access.
+3. Apply the two committed migrations.
+4. Run the real Auth/Data API/RLS/Worker matrix.
+5. Mark Phase 1 GREEN only if those tests pass; Phase 2 remains forbidden while blocked.
