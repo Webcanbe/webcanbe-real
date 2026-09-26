@@ -2849,3 +2849,22 @@ Assistant interpretation:
 - Phase 1 must NOT be marked GREEN until auth + RLS are proven against a real Supabase-compatible environment (local Supabase stack or dedicated non-production hosted Supabase project). PGlite is useful for migration syntax/domain checks but is not sufficient evidence for Supabase Auth/RLS semantics.
 - Do not add new scope/tables merely because Phase 0 passed. Preserve the existing 39-table schema unless Phase 1 reveals a concrete normalization/security defect.
 - Next implementation target: Phase 1 only — Supabase Auth, database-backed memberships/roles, private-data RLS, and cross-tenant isolation tests. If a real Supabase test environment cannot be established, Phase 1 should end BLOCKED with complete code/policies/tests ready, not a fake GREEN.
+
+
+## 52. Avoylo implementation checkpoint — Phase 1 still BLOCKED, coss license cleaned — 2026-09-26
+
+User-reported Codex checkpoint:
+- Branch: `core-sandbox`
+- HEAD: `bc56b655801488159b27ad6bbd06a946dd247ffc`
+- Phase 1 remains BLOCKED solely because no real Supabase-compatible QA environment is available.
+- No `avoylo-qa` hosted project was created; Webcanbe projects were not touched.
+- coss provenance cleanup completed: six copies previously sourced from AGPL-covered `packages/ui/` were replaced with pinned equivalents from MIT-covered `apps/ui/registry/default/`; MIT notice/checksum gate added; no known AGPL-covered coss source remains.
+- Real Supabase migrations/Auth/Data API/RLS/Worker integration remain unrun.
+- Local checks remain green: build/typecheck/lint/format, 13 unit tests, local migration/RLS checks, coss provenance, client secret scan, and 2/2 Playwright tests.
+- Local PGlite matrix still passes 56 assertions but does not satisfy the real Supabase gate.
+- All seven live flags remain false.
+
+Decision:
+- Do not begin Phase 2.
+- Next required action is infrastructure only: establish an Avoylo-owned non-production Supabase QA environment (or official local Supabase stack), then apply both migrations and run the real Auth/RLS/Worker matrix.
+- Phase 1 becomes GREEN only after those real-environment tests pass.
