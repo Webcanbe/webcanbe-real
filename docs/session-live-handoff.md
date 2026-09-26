@@ -3258,3 +3258,20 @@ Recommended next Phase-2 slice:
 - start with selecting eligible approved Host locations by service area + available capacity and creating a single OFFERED assignment record;
 - do not yet create parcel units, QR tokens, shipping labels, payments, payouts, or deploy live Worker;
 - keep Host acceptance as a subsequent checkpoint unless the matching/offer slice is already tightly bounded and fully QA'd.
+
+
+## 68. Avoylo Codex handoff rule + Cloudflare monorepo deploy blocker — 2026-09-26
+
+Workflow preference:
+- When the user sends a Codex completion/checkpoint report, after verifying it, automatically provide the **next concise Codex prompt** unless a genuine decision/clarification is required first.
+- Current Codex usage is reported at ~7%, so prompts should avoid repeating stored context and should be as short as safely possible.
+
+Current Cloudflare Workers build issue from user screenshot:
+- build/dry-run succeeds;
+- actual deploy command runs `npx wrangler deploy` from repository root;
+- Cloudflare errors because application detection is running at the monorepo/workspace root while Worker config lives at `apps/worker/wrangler.jsonc`;
+- this is a deployment working-directory/config-path issue, not evidence of an Avoylo Worker code failure.
+Recommended deploy command from repo root:
+`npx wrangler deploy --config apps/worker/wrangler.jsonc`
+(or equivalent `cd apps/worker && npx wrangler deploy`).
+- Keep repo root for workspace dependency installation; do not enable live feature flags merely to fix deployment.
