@@ -3679,3 +3679,36 @@ Status:
 - inbound dispatch remains **BLOCKED only pending the corrected credentialed real QA rerun**.
 - Immediate action: user runs `npm run test:qa` in the already credentialed local terminal.
 - If 16/16 passes: mark inbound dispatch GREEN, update/push handoff, then continue with the next bounded Phase-2 slice: Host QR receive scan, `INBOUND -> RECEIVED`, with assigned-Host validation, opaque-token lookup, custody/audit/idempotency; no STORED transition yet.
+
+
+## 83. Inbound dispatch QA now functionally succeeds; final failure is a global-count test bug — 2026-09-27
+
+User reran credentialed `npm run test:qa` after the SQL completeness fix at Avoylo HEAD `115d7cb9f0736272f762b08d8a1abbfb30e724cb`.
+
+Result:
+- 16 tests total
+- **15 passed, 1 failed**
+- new failure at ~line 2786:
+  `sellerPage.getByText("Accepted Host destination").count()` returned **2**, test expected 1.
+
+Crucial interpretation:
+- the strengthened diagnostic checks immediately before this assertion passed;
+- therefore the dispatch POST succeeded;
+- success message was visible;
+- target batch persisted as `IN_TRANSIT`;
+- all 5 target parcel units persisted as `INBOUND`.
+This confirms the production inbound-dispatch flow now works for the tested path.
+
+Repository inspection explains the count=2:
+- an earlier Host-response QA test creates `acceptedFixture.batch` for the same Seller A organization and leaves it in `HOST_ACCEPTED`;
+- Seller batch UI intentionally renders the label `Accepted Host destination` for both `HOST_ACCEPTED` and `IN_TRANSIT` batches;
+- current test then dispatches another Seller A batch to `IN_TRANSIT`;
+- the Seller page legitimately contains two such labels.
+The failing assertion is therefore globally scoped and brittle, not a production defect.
+
+Required minimal fix:
+- change only the QA assertion to scope it to the current dispatched batch row, preferably the row containing `5 units · INBOUND` and `IN_TRANSIT`;
+- assert exactly one `Accepted Host destination` inside that row;
+- do not change Worker/UI production behavior;
+- rerun local checks and credentialed QA;
+- keep inbound dispatch BLOCKED until 16/16.
