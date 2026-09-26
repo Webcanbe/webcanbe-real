@@ -3740,3 +3740,17 @@ After that:
 
 Current caveat:
 - Codex currently has uncommitted scoped QA assertion/handoff changes based on the prior HEAD. Because the CI workflow was committed remotely, Codex should sync/rebase while preserving those local changes before its next push.
+
+
+## 85. Overnight Avoylo execution plan — 2026-09-27
+
+User wants to leave as much safe progress running as possible overnight.
+
+Plan:
+1. configure the three existing local QA env values once as GitHub Actions repository secrets for `Webcanbe/avoylo`;
+2. Codex preserves its current uncommitted scoped QA assertion/handoff changes, syncs with `origin/core-sandbox`, runs local check/e2e, commits and pushes;
+3. GitHub Actions `real-qa.yml` runs credentialed `npm run test:qa` automatically on the push;
+4. Codex may inspect the CI result; if GREEN, mark INBOUND DISPATCH GREEN and proceed to the next bounded slice: Host QR receive scan (`INBOUND -> RECEIVED`);
+5. for that slice, keep STORED, outbound, shipping purchase, payments, Shopify, public flows, deployments and all live flags out of scope;
+6. every pushed implementation must pass local check/e2e and then the automated real-QA gate before Codex extends further;
+7. if CI exposes a real failure, fix only the root cause and rerun; if a decision beyond the established state machine is required, stop and report instead of inventing policy.
