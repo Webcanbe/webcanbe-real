@@ -2938,3 +2938,18 @@ Execution decision:
 - Start a fresh Codex task/session with the `Webcanbe/avoylo` repo and Supabase integration loaded from the beginning, then resume Phase 1 only.
 - If the fresh task still returns `Unknown tool`, use another authorized execution path (including ChatGPT's working Supabase connector) rather than weakening the Phase-1 gate.
 - Phase 2 remains forbidden until the real QA gate passes.
+
+
+## 57. Avoylo Phase 1 — migrations applied; real QA runner awaiting private runtime credentials — 2026-09-26
+
+Latest Codex task state from user screenshot:
+- Fresh Codex task succeeded in reaching `avoylo-qa` and reports both committed migrations are now applied.
+- `npm run test:e2e` passes 2/2.
+- `npm run test:qa` stops at credential preflight before running tests because the task runtime lacks QA URL, publishable key, and elevated server-only QA key.
+- Phase 1 remains BLOCKED until the real Auth/Data API/RLS/Worker matrix executes.
+
+Credential handling decision:
+- Use the dedicated QA project only.
+- Prefer current Supabase publishable (`sb_publishable_...`) + secret (`sb_secret_...`) keys; Supabase is deprecating legacy anon/service_role keys by end of 2026.
+- Supply the elevated secret only through Codex's private runtime credential/environment path; never paste it into chat, source, Git, Vite/client env, or logs.
+- The existing test variable named `AVOYLO_QA_SERVICE_ROLE_KEY` may temporarily carry the modern QA `sb_secret_...` value because it is used only by the Node test/admin client; rename later to `AVOYLO_QA_SECRET_KEY` for clarity when convenient.
