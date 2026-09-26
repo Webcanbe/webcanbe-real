@@ -2642,3 +2642,137 @@ TikTok Shop's current U.S. seller-shipping requirements reinforce that dispatch,
 - Keep Avoylo as the selected direction.
 - Replace the “find one seller first” execution framing with: **build the smallest credible host/seller operational core, create Host supply interest, and recruit multiple post-dropship / hero-SKU seller leads; activate only a tiny number of matched physical pilots once economics and operational requirements are known.**
 - Do not call the side-gig Host concept unique. The differentiation under test is **prepacked-parcel simplicity + lower host setup + tiny distributed forward-stock batches**, not the existence of home garages.
+
+
+## 49. Avoylo legal / payment / operating architecture review — 2026-09-26
+
+User asked for a detailed pre-implementation review, especially laws, contracts and the operating decisions that must be fixed before Avoylo handles real inventory.
+
+### Core architecture recommendation
+- Treat Avoylo's first customer relationship as B2B fulfillment/logistics service, NOT as the merchant of record for the seller's consumer sale.
+- End-customer checkout, product legality, product warranty/returns/refunds, consumer-facing sales tax and customer service remain with Seller unless a later product explicitly changes this.
+- Seller pays Avoylo for logistics/storage/handling. Avoylo separately accrues/pays Host compensation. Do not route consumer purchase proceeds through Avoylo in the first model.
+- This does not eliminate tax, worker-classification, storage, insurance or state nexus obligations; it only avoids unnecessary payment/merchant-of-record complexity.
+
+### Payments
+- PayPal Payouts officially supports payouts to vendors/contractors/customers. This is conceptually closer to Host payout than multiparty consumer checkout.
+- PayPal Complete Payments Platform / multiparty seller onboarding requires PayPal platform approval. Do not make that an MVP dependency.
+- Suggested early flow: Seller -> Avoylo B2B payment / prepaid balance; Avoylo -> Host earnings payout. Keep a ledger; no end-customer payment through Avoylo.
+- U.S. PayPal User Agreement currently requires an individual U.S. account holder to be 18 or age of majority; a U.S. business account must meet PayPal's U.S. business eligibility terms. Because the founder is a minor, real contracts/payment accounts need an adult authorized representative / legally valid entity structure before live money/inventory. Do not attempt to bypass platform age/KYC rules.
+- Exact entity, ownership and authorized-signer structure remains state/country-specific and is not fixed here.
+
+Sources:
+https://developer.paypal.com/payouts/overview/
+https://developer.paypal.com/platforms/get-started/
+https://www.paypal.com/us/legalhub/paypal/useragreement-full?locale.x=en-US
+
+### Carrier / labels
+- Do NOT have Hosts log in to Seller carrier accounts or freely share carrier credentials. UPS terms explicitly restrict third-party use/resale of UPS accounts/services without approval.
+- Prefer a platform-friendly shipping API/aggregator for the first technical path. EasyPost documents Child Users for customers/platforms and separate carrier credentials, and Shippo explicitly lists logistics providers/marketplaces as API use cases.
+- Label should be generated centrally. Host sees only the task + printable label.
+- Need to test carrier-specific label display/return-address behavior so an end customer does not unnecessarily receive a Host's residential address. Keep actual ship-from, billing/rating and return-address rules carrier-compliant rather than spoofing location.
+- Customer returns should NOT go to Host in the first wedge. Seller or an approved commercial returns address handles them.
+Sources:
+https://www.ups.com/us/en/support/shipping-support/shipping-special-care-regulated-items/prohibited-items
+https://docs.easypost.com/docs/users/child-users
+https://support.goshippo.com/hc/en-us/articles/4404415886491-Get-started-with-the-Shippo-API
+
+### Biggest legal red zones
+1. **Host worker classification.** Calling Hosts 'independent contractors' in ToS does not decide status. IRS uses behavioral control, financial control and relationship facts. IRS Pub. 15-A (2026) also explicitly lists a possible statutory-employee category for an individual who works at home on supplied goods that must be returned/delivered as directed, if additional conditions are met (personal service, insufficient investment, continuing relationship). Avoylo's casual home-host model is close enough that this needs targeted tax/employment review before public paid operation. DOL's federal analysis is also in 2026 rulemaking; state rules can differ or be stricter.
+2. **Home zoning / lease / HOA / local licenses.** SBA states home businesses can still be subject to local zoning. 'Host self-certifies' does not make a prohibited home warehouse legal. Initial metro/ZIP activation needs a local eligibility screen.
+3. **Storage / bailment / warehouse law.** State UCC Article 7 implementations define warehouse/storage-for-hire concepts, but registration/licensing/receipts/lien rules vary. Example only: Texas Business & Commerce Code defines a warehouse as a person engaged in storing goods for hire. Do not assume every residential Host is legally exempt from warehouse rules.
+4. **Seller tax nexus.** Inventory physically placed in a state can create seller registration/tax obligations independent of economic thresholds. California officially treats stock of goods in a third-party fulfillment location as a place of business and says an out-of-state retailer whose only California presence is inventory can be treated as a California retailer. Therefore Avoylo must NOT silently route a Seller's inventory into new states. Seller chooses/approves states and confirms its tax position.
+5. **Insurance / entrusted goods.** Homeowner policies must not be assumed to cover business activity or third-party inventory. SBA specifically distinguishes home-based business coverage/riders and general business insurance. Before real public inventory, get actual quotes for the specific model, including third-party/customer goods custody and general liability as applicable.
+6. **Prohibited/restricted goods.** Carrier and payment terms restrict hazardous, regulated and other goods. Terms cannot cure prohibited shipping. Initial Accepted Goods policy should be intentionally narrow.
+
+Primary sources:
+https://www.irs.gov/publications/p15a
+https://www.irs.gov/businesses/small-businesses-self-employed/independent-contractor-self-employed-or-employee
+https://www.sba.gov/counseling/launch-your-business/
+https://www.sba.gov/business-guide/launch-your-business/get-business-insurance
+https://www.uniformlaws.org/acts/catalog/current/ucc
+https://www.statutes.legis.state.tx.us/Docs/BC/htm/BC.7.htm
+https://www.cdtfa.ca.gov/industry/local-and-district-retailer-taxes/local-tax.htm
+https://cdtfa.ca.gov/formspubs/pub44/place-of-sale.htm
+https://www.ups.com/us/en/support/shipping-support/shipping-special-care-regulated-items/prohibited-items
+
+### Initial accepted-goods recommendation
+For first physical operation, accept only low-value, durable, nonhazardous, nonperishable, nonregulated, nonfragile prepacked parcels. Exclude at minimum hazardous materials, alcohol, tobacco/vape, firearms/weapons, drugs/controlled products, perishables, live goods, high-value jewelry/metals, loose lithium batteries and items requiring special carrier contracts/handling. Consider temporarily excluding liquids, food/supplements, cosmetics and battery-containing electronics until carrier/insurance/claims policies are mature. Exact exclusions need carrier/insurer review.
+- Seller warrants accurate commodity description and package weight/dimensions.
+- Seller keeps title to inventory.
+- Host never opens customer-ready parcel; damaged/tampered parcel is quarantined, photographed and escalated.
+
+### Seller tax/nexus product requirement
+- State-level inventory placement must be opt-in by Seller, not automatic.
+- UI should warn that storing inventory in a state can create tax/registration obligations and require Seller confirmation before assignment.
+- First seller cohort should preferably already be registered/operating in the launch state or have confirmed the placement with its tax advisor. This is a strategic acquisition constraint, not just a legal footer.
+
+### Host-side product / ops requirements
+- Host is 18+, verified identity/address, verified right to use storage location, secure dry space, smartphone, declared availability, and label-printing path.
+- Customer/end-recipient pickup at Host's home is prohibited in first scope.
+- Host decides available capacity and accepts/declines inbound batches before commitment; accepted batches have clear service windows.
+- Initial operational promise should be carrier handoff by a clear business-day cutoff, not same-day local courier delivery.
+- Every parcel gets unique ID/QR and append-only custody events: created -> inbound -> received -> stored -> reserved -> label ready -> handed off -> carrier acceptance -> delivered/exception.
+- Inbound and outbound condition photos can support claims; do not claim photos eliminate legal liability.
+- First-scale hardware: phone camera; activated Host may need normal printer/thermal printer path. Do not assume every casual Host already has a label printer.
+
+### Seller-side / first wedge
+- Best initial ICP remains post-dropship / hero-SKU or fixed-bundle merchants with repeat U.S. demand.
+- Strongest first physical parcel pattern: one order corresponds to one already sealed parcel/fixed bundle.
+- Multi-SKU arbitrary pick/pack, kitting, repacking and Host returns inspection remain out of first scope.
+- Seller pays inbound positioning freight. Economics must include that inbound cost and the merchant's prepack labor; do not treat host labor savings as free.
+
+### Commercial / claims structure
+- Proposed first pricing architecture: Seller pays Avoylo storage + outbound handling + postage/pass-through + explicit platform/service margin; Host earns storage/capacity compensation + handoff compensation. Exact prices NOT selected until unit economics.
+- Do not use Host as a direct recipient of Seller customer payment. Avoid consumer escrow.
+- Keep Seller and Host ledgers distinct; host payout status is not inventory status.
+- Initial physical pilot should use strict per-parcel and per-Host declared-value caps. Numeric caps are still to be chosen from insurer/risk quotes; do not invent legal limits.
+- Claims need documented custody state, declared value, filing deadline, exclusions and escalation. Liability caps/indemnities are not substitutes for insurance and may be state-dependent.
+- Do not allow Host to keep/sell abandoned goods under a generic ToS clause. Unpaid/abandoned inventory disposition can intersect with state warehouse/lien law and requires state-specific terms.
+
+### Contract/document architecture
+Do NOT rely on one giant website ToS. Before public physical handling, use separate documents:
+- Seller Fulfillment Services Agreement.
+- Host Services / Space Agreement (final title depends on classification review; do not assume 'independent contractor').
+- Accepted / Prohibited Goods Policy.
+- Operational SLA and Host Standards.
+- Loss / Damage / Claims Policy.
+- Privacy Policy + recipient-data handling terms; later DPA if enterprise/seller requirements justify it.
+- Website/App Terms for software access.
+Key Seller agreement concepts: Seller is merchant/product owner; accurate goods declaration; title remains Seller; tax/state-placement approval; customer support/refunds/product liability remain Seller; payment, removal/offboarding, claims and limits.
+Key Host agreement concepts: space eligibility; custody duties; no opening/use/unauthorized relocation; capacity/availability; scan requirements; privacy/confidentiality; payment calculation; offboarding and inventory handback; local-law/property authorization; insurance/worker-status provisions based on actual reviewed model.
+Terms must not falsely claim a legal status that facts/law do not support.
+
+### Product/privacy decisions
+- Host exact home address should be disclosed only as operationally necessary; never publish it.
+- End customer should not visit Host.
+- Collect the minimum recipient PII needed to create/handle a shipment. Host needs label/task data, not the Seller's full customer database.
+- Separate from-address / return-address capabilities must be tested with the chosen shipping provider. Do not falsify ship-from location.
+- Seller remains responsible for end-customer sales relationship; Avoylo can surface tracking/status.
+
+### Build order recommendation
+The software is not the hardest part. Minimum credible core:
+1. Seller/Host/Admin auth and approval.
+2. Host location/capacity/availability.
+3. Seller SKU/package profile + inbound batch.
+4. parcel-unit IDs/QR.
+5. custody scan state machine and immutable events.
+6. order import first by CSV/manual + one Shopify path later/parallel.
+7. shipping rate/label/tracking sandbox using a platform-friendly API.
+8. Seller balance/fee ledger and Host earnings ledger; PayPal sandbox/Payouts integration when eligible.
+9. exception/claim/admin reconciliation.
+10. local eligibility flags for activated Host ZIPs.
+Do NOT spend early time on AI, ratings/gamification, nationwide routing, dynamic pricing, returns marketplace, custom courier network, or end-consumer checkout.
+
+### Entity / founder constraint
+The founder is a minor. Do not ignore this at the contract/payment stage. U.S. PayPal requires an individual user to be 18/age of majority. Before real money/contracts/inventory, choose a legally valid entity/authorized-adult arrangement with professional review rather than using false age or another person's account informally. The exact ownership/manager structure is not decided here.
+
+### Priority before live physical inventory
+The three highest-priority external checks are:
+A. Host classification + home-storage legality for ONE selected launch state/metro.
+B. insurer quote/coverage for third-party inventory at approved residential Host locations.
+C. seller tax-nexus implications for inventory placed in that state and Seller onboarding disclosure/consent.
+
+Do not hire a general lawyer to review every U.S. state before selecting a market. First pick the likely launch state/metro based on seller demand, Host feasibility, carrier economics and these legal screens; then perform targeted state-specific review.
+
+No contract, account, payout, shipment, Host recruitment, Seller outreach, inventory intake or spending was executed during this review.
