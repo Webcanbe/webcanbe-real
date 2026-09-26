@@ -3414,3 +3414,35 @@ Status remains **BLOCKED only pending credentialed real `npm run test:qa`**.
 When user supplies the real QA result:
 - if all pass, mark slice GREEN, update/push handoff, then move to the next bounded Phase-2 slice;
 - likely next slice after GREEN: Host inbound scan / custody transition beginning with CREATED -> INBOUND -> RECEIVED, but confirm current handoff and test results before issuing the prompt.
+
+
+## 73. Avoylo parcel-unit materialization + QR issuance implemented; real QA pending — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `5f1cf146d28ee0de2879cf8f707cb0addfb3c73b`
+- commit: `Materialize accepted inbound parcel units`
+- Host offer-response checkpoint is GREEN; QA-harness fix checkpoint pushed separately at `d4f46b216e72055aa18d6b77a9b4ed5ef02c0aa7`
+- parcel-unit materialization + QR issuance slice is implemented but **BLOCKED pending credentialed real QA**
+- `avoylo-qa` migration history: **8/8**
+- local `npm run check`: passed, including 17 unit tests and 133 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- browser roles cannot execute the materialization RPC or read QR token hashes
+- all seven live flags remain false
+- Worker not deployed
+- Framer Home unchanged
+
+Implemented:
+- HOST_ACCEPTED batch + ACCEPTED Host offer required;
+- exact expected quantity expands into CREATED parcel units;
+- assigned Host location is preserved;
+- one unique opaque QR token per parcel unit;
+- QR raw contents are 256-bit random and returned once for trusted label generation;
+- only SHA-256 hashes persist in DB;
+- idempotent replay does not duplicate units/tokens;
+- audits for materialization and QR issuance;
+- Seller/Host views expose counts/status, not internal IDs or token hashes.
+
+Immediate next action:
+- run credentialed `npm run test:qa` in the private QA terminal.
+- If PASS: mark slice GREEN, update handoff, commit/push documentation if needed, then continue to the next bounded Phase-2 slice.
+- If FAIL: do not expand scope; fix only the failing root cause and rerun.
