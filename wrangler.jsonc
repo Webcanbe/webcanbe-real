@@ -1,7 +1,7 @@
 {
   "name": "webcanbe-real",
   "compatibility_date": "2026-09-18",
-  "main": "./worker/index.js",
+  "main": "./worker/closure.js",
   "keep_vars": true,
   "ratelimits": [
     {
@@ -49,8 +49,8 @@
   ],
   "vars": {
     "WEBCANBE_BIGPERSON_GOOGLE_EMAIL": "sihumin196@gmail.com",
-    "WEBCANBE_CONTROL_MODE": "enabled",
-    "WEBCANBE_PRODUCT_MUTATIONS": "enabled",
+    "WEBCANBE_CONTROL_MODE": "disabled",
+    "WEBCANBE_PRODUCT_MUTATIONS": "disabled",
     "WEBCANBE_PAYMENTS": "enabled",
     "PAYPAL_ENVIRONMENT": "live",
     "PAYPAL_WEBHOOK_ID": "7T758752LK1378010"
