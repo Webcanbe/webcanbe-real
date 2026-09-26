@@ -641,3 +641,109 @@ The software is acceptable for the next business-validation phase only when:
 - there are no fake market claims or fake production success reports.
 
 The build is an operational sandbox core, not permission to hold real customer inventory.
+
+
+## 24. 2026-09-26 shipping-infrastructure findings and implementation corrections
+
+The assistant independently rechecked a separate analysis supplied by the user. Several claims are useful, but they change the implementation plan only where the underlying official documentation supports them.
+
+### USPS Connect Local: important but narrower than “pickup makes same-day trivial”
+- USPS Connect Local is explicitly based on packages being entered close to final destination and advertises expected same-day / next-day delivery in participating areas.
+- Current USPS Connect material states free pickup is available for next-day delivery; same-day requires the package to be handed off at the participating local USPS facility by the critical early-morning entry time. Do not describe residential pickup as a generic same-day path.
+- Therefore the strong Avoylo use case is: local forward stock + next-day carrier pickup / handoff convenience, with same-day as a more operationally demanding path that may require Host drop-off to the designated USPS facility.
+- Connect Local requires program terms and a USPS business relationship. Do not assume EasyPost's ordinary Wallet USPS account automatically exposes Connect Local.
+Sources:
+https://www.usps.com/business/connect/
+https://qusps.usps.com/business/connect-local.htm
+
+### Address/privacy issue that must be resolved before live USPS pickup
+- USPS general small-business Package Pickup guidance says mail should have return information matching the pickup location.
+- Older USPS Connect Local material says the program return address should be the Participant's place of business and need not be local.
+- These statements are not enough to safely choose an Avoylo label/return-address policy for residential Hosts. Before live pickup, obtain current program-specific confirmation from USPS for the exact account/service configuration.
+- Do not promise Host-address privacy on a carrier label until this is tested/confirmed. Keep Host address private in Avoylo UI regardless.
+Sources:
+https://faq.usps.com/articles/FAQ/What-are-the-Shipping-Options-for-Small-Business-Owners
+https://www.usps.com/business/pdf/usps-connect-local-welcome-packet.pdf
+
+### USPS Connect eCommerce: real possible later economics, NOT MVP revenue
+- USPS Connect eCommerce officially offers discounted platform and merchant rates.
+- EasyPost's current CeC Platform NSA documentation confirms a direct USPS relationship, separate Platform and Merchant Enterprise Payment Accounts, EFT enrollment, and defines the delta as Platform Commission.
+- Therefore shipping spread/commission is a legitimate later business-model option if Avoylo is approved and contracted for CeC.
+- Do not include it in initial unit economics, forecasts or seller pricing before actual approval/rate cards.
+- Do not assume CeC terms/rates automatically apply to Connect Local.
+Sources:
+https://www.usps.com/business/connect/ecommerce.htm
+https://support.easypost.com/hc/en-us/articles/45004353305101-USPS-Ship-Wallet-Carrier-Account-CeC-Platform-NSA
+
+### EasyPost
+Confirmed current published terms/features:
+- Wallet Carrier plan: first 3,000 labels/month have no EasyPost label platform fee; postage still costs money.
+- Pickup API supports multiple carriers including USPS/UPS/FedEx/OnTrac/Veho/Better Trucks.
+- EasyPost ScanForm can group shipments from the same origin/carrier account into one scannable form.
+Implementation changes:
+- Add a DailyHandoffBatch / manifest concept after single-parcel handoff works.
+- ScanForm requires same origin address and carrier account. Build this at Host-location granularity.
+- Do not make ScanForm a prerequisite for the first shipment E2E.
+Sources:
+https://www.easypost.com/pricing/
+https://docs.easypost.com/docs/pickups
+https://docs.easypost.com/docs/scan-form
+
+### Printerless Host
+- USPS Label Broker can print a label for free at participating Post Offices, but the label is designed to be affixed at the Post Office; the Host cannot normally print it there and take it home for later pickup.
+- USPS Label Delivery is currently $1.65/label but adds delivery delay and is incompatible with a normal fast-fulfillment loop.
+Decision:
+- Printerless USPS routes are backup/onboarding tools, not a primary Host tier.
+- For an activated Host doing recurring outbound tasks, the operating model should assume access to a normal printer/thermal printer or another genuinely at-home label method.
+Sources:
+https://faq.usps.com/articles/Knowledge/Label-Broker
+https://www.usps.com/ship/label-broker.htm
+https://www.usps.com/ship/express-mail.htm
+
+### Identity
+- Stripe Identity currently lists government-ID + selfie verification at $1.50/completed verification with the first 50 verifications free.
+- It is identity verification only, not a background check, property-right check, zoning check, insurance check or worker-classification determination.
+Implementation:
+- Create IdentityProvider abstraction and verification-status fields, but do not block early sandbox E2E on live Stripe.
+- Use provider mock/sandbox until legal/account ownership is ready.
+Source:
+https://stripe.com/identity
+
+### Transit insurance
+- EasyPost currently publishes 1% of declared package value for shipping insurance and states coverage applies after the package enters the carrier network.
+- The current public page reviewed does not support a blanket claim that this product has a $1 minimum; separate automatic insurance is advertised at $1/label for up to $100 coverage.
+- Carrier-transit insurance is NOT storage/custody insurance.
+Implementation:
+- Keep transit insurance and storage/custody protection as separate concepts.
+- Do not show Avoylo “protected” claims before storage/custody coverage exists.
+Sources:
+https://support.easypost.com/hc/en-us/articles/27844282936589-EasyPost-Shipping-Insurance
+https://support.easypost.com/hc/en-us/articles/4422941088397-Automatic-Shipping-Insurance
+
+### Routing / allocation
+- Google Routes Compute Route Matrix Essentials currently has a 10,000 monthly free-usage cap.
+- EasyPost SmartRate currently has a 500-call threshold, then $0.03/call, and is US-domestic only.
+- Long-term routing should not equal nearest Host. Candidate score may combine actual postage + service/transit probability + Host handling fee + inventory scarcity + Host reliability + operational cutoff.
+- Do NOT implement the full optimizer before real multi-Host data. Initial allocation must first be correct and deterministic; add cost/transit optimization only after actual rate inputs and service promises exist.
+Sources:
+https://developers.google.com/maps/billing-and-pricing/pricing
+https://support.easypost.com/hc/en-us/articles/15433074900365-SmartRate-API-FAQs
+
+### Shopify
+- Shopify development stores support unlimited test orders/products and test payments.
+- Shopify officially models third-party fulfillment services and callbacks/tracking/inventory.
+Implementation:
+- Preserve manual + CSV as the Phase-4 source of truth for core logistics tests.
+- Add Shopify dev-store integration immediately after core order/allocation/shipping E2E is stable; it is a high-value seller integration and can be tested without live merchant transactions.
+Sources:
+https://shopify.dev/docs/apps/build/stores/development-stores
+https://shopify.dev/docs/api/admin-graphql/unstable/queries/fulfillmentservice
+
+### Physical pilot budget
+Do NOT automatically spend the available ~$100/remaining founder budget on postage before the software and legal boundary tests pass.
+Preferred order:
+1. $0 software sandbox / provider test modes.
+2. controlled shipments using only founder/test-owned low-value goods when a U.S. operational setup is available, to test physical state transitions without entrusting third-party inventory.
+3. only after state/legal/insurance/account structure is ready: tiny merchant/Host pilot.
+
+The value of a physical pilot is exception discovery, not proving demand from ten shipments.
