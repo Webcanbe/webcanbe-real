@@ -3227,3 +3227,34 @@ Next:
 2. commit and push the submit-batch slice to `origin/core-sandbox`;
 3. verify the new remote HEAD;
 4. only then choose the next Phase-2 slice.
+
+
+## 67. Avoylo Phase 2 Seller batch submission slice GREEN — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `6bf58e9be25e23b57d913d75851620edb4e3e709`
+- commit: `Add audited seller inbound batch submission`
+- Seller batch submission slice: **GREEN**
+- `avoylo-qa` migrations: **5/5 applied**
+- real QA: **13/13 passed**
+- `npm run check`: passed, including 14 unit tests and 94 local RLS assertions
+- `npm run test:e2e`: **2/2 passed**
+- all seven live flags remain false
+- Framer Home unchanged
+- Worker remains undeployed
+
+What is now implemented in the Seller inbound flow:
+1. signed-in Seller sees own recent inbound batches;
+2. Seller creates a DRAFT inbound batch;
+3. Seller creates sealed parcel profiles;
+4. Seller attaches expected quantities to the DRAFT;
+5. Seller submits the complete DRAFT: `DRAFT -> SUBMITTED`;
+6. submission requires Seller ownership, active service area, and valid sealed contents;
+7. submission is transactional, idempotent and audited;
+8. batch-item edits are blocked after submission.
+
+Recommended next Phase-2 slice:
+- begin Host matching/offer as a separate bounded checkpoint;
+- start with selecting eligible approved Host locations by service area + available capacity and creating a single OFFERED assignment record;
+- do not yet create parcel units, QR tokens, shipping labels, payments, payouts, or deploy live Worker;
+- keep Host acceptance as a subsequent checkpoint unless the matching/offer slice is already tightly bounded and fully QA'd.
