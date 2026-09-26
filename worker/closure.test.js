@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { closedPage, homePage } from '../site/closure-pages.mjs'
 import closure from './closure.js'
 
 const env = {
   ASSETS: {
     async fetch(request) {
       const pathname = new URL(request.url).pathname
-      const filename = pathname === '/' ? 'index.html' : pathname.slice(1)
-      return new Response(readFileSync(new URL(`../dist/${filename}`, import.meta.url)), { status: 200 })
+      return new Response(pathname === '/' ? homePage : pathname === '/closed.html' ? closedPage : 'User-agent: *\nDisallow: /\n', { status: 200 })
     },
   },
 }
