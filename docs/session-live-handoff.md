@@ -3208,3 +3208,22 @@ Next recommended Phase-2 checkpoint:
 Prompt-length preference:
 - user reports Codex usage is down to ~8%;
 - future Codex prompts should be concise and avoid restating already-recorded context unless needed for safety or exact scope.
+
+
+## 67. Avoylo Phase 2 submit-batch QA pass reported — 2026-09-26
+
+User manually ran `npm run test:qa` after the next Phase-2 submit-batch work.
+
+Reported result:
+- `tests/qa/phase1.test.ts`: **13/13 passed**
+- new scenario passed: valid owned DRAFT submits once and then its contents are locked
+- earlier QA scenarios also remained green
+
+At the time of this record, remote `core-sandbox` still showed HEAD `b6eaa3a27c050e85b383546f47b499c4ef3c610e`.
+Therefore the QA result is recorded, but the submit-batch slice is not yet a confirmed durable GitHub checkpoint.
+
+Next:
+1. update `docs/current-handoff.md`;
+2. commit and push the submit-batch slice to `origin/core-sandbox`;
+3. verify the new remote HEAD;
+4. only then choose the next Phase-2 slice.
