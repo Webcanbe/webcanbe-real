@@ -763,3 +763,51 @@ Rules:
 - Before/after visual regression should show no unintended change outside the removed Framer badge area and necessary routing behavior.
 - Do not mix landing import work with Avoylo backend, auth, payments, shipping or dashboard implementation until the marketing import is clean and independently buildable.
 NaN
+
+## 27. UI system lock for Avoylo operational product — coss UI only
+
+This decision applies to the Avoylo operational product (Seller/Host/Admin web app and later Host mobile design language), NOT to the imported Framer marketing Home page.
+
+The previously approved Webcanbe product UI standard is now carried forward to Avoylo:
+- **coss UI is the only primary web component system.**
+- Use the **official coss Skill/instructions** whenever available before implementing product UI.
+- Use existing coss primitives/components first.
+- Do not mix in shadcn/ui, MUI, Chakra, Mantine, Ant Design, DaisyUI, HyperUI or another full component library.
+- Do not directly paste random third-party component markup just because it is visually convenient.
+- Do not let library defaults determine the Avoylo visual identity.
+
+Required component policy:
+- Buttons, inputs, textareas, selects, comboboxes, checkboxes, radios, switches, cards, dialogs, drawers/sheets, dropdowns, tabs, tooltips, popovers, badges, tables, pagination, toasts, forms and other common primitives should use coss UI equivalents.
+- If coss already has a usable primitive, do not create a parallel custom version.
+- If a required primitive is missing, first verify coss documentation/Skill; then create the smallest Avoylo-specific wrapper/custom component that follows coss tokens, interaction patterns and accessibility. Document the exception.
+- Normalize any imported specialized UI into the same spacing, radius, typography, focus, border and interaction system.
+
+Design references may inform layout/interaction only:
+- GitHub Primer
+- Vercel Geist / Vercel interface guidelines
+- Microsoft Fluent 2
+- Adobe Spectrum 2
+- IBM Carbon
+
+These are reference systems, NOT additional component libraries to install.
+
+Visual direction:
+- serious modern logistics/network product
+- white / neutral surfaces with restrained Avoylo cobalt accent
+- dense enough for operational work, but not enterprise-cluttered
+- strong information hierarchy
+- minimal decorative gradients/shadows
+- no gimmicky glassmorphism, neon, gaming UI, excessive pills or motion
+- operational states and exceptions must be legible before visual flair
+
+Consistency rule:
+- one Avoylo design system across Seller, Host and Admin.
+- Host mobile UI may adapt density and interaction size for field use, but should remain recognizably the same product family.
+- Never introduce a new UI library inside one screen/feature to save time.
+
+Codex requirement:
+- Before building the first operational screen, install/configure coss UI according to the current official Skill/docs and create a small shared Avoylo design-token layer.
+- Record the chosen coss setup and any exceptions in docs/UI_SYSTEM.md.
+- UI review at each phase must check that no forbidden component-library dependency was introduced.
+
+The Framer Home import is frozen and exempt from this component-system migration. Do NOT convert the approved marketing Home to coss merely for consistency.
