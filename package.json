@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-aperture-demo.mjs && node scripts/generate-public.mjs && tsc -b && vite build && node scripts/generate-public.mjs --dist",
+    "build": "node scripts/build-closure.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "runtime:prepare": "npm ci --ignore-scripts --prefix runtime-profiles/react19-vite6",
