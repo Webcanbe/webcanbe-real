@@ -25,10 +25,52 @@ if(catalog){
  const card=item=>{const article=document.createElement('article');article.className='wcb-marketplace-card';const cover=document.createElement('a');cover.className='wcb-marketplace-cover-link';cover.href='/project/'+encodeURIComponent(item.slug);cover.setAttribute('aria-label','View '+item.title);const img=document.createElement('img');img.className='wcb-project-card-cover';img.alt=item.title+' website preview';img.loading='lazy';const thumb=item.thumbnail||item.demoMetadata?.previewImage||item.demoMetadata?.thumbnail;if(typeof thumb==='string'&&(/^\/[^/]/.test(thumb)||/^https:\/\/[^/]+/.test(thumb)))img.src=thumb;else img.classList.add('wcb-project-card-cover-empty');cover.append(img);const meta=text('div','','wcb-marketplace-card-meta'),name=text('div','');const title=document.createElement('a');title.href=cover.href;title.append(text('h3',item.title));const creator=document.createElement('a');creator.className='wcb-marketplace-creator';creator.href='/creators/'+encodeURIComponent(String(item.creator||item.demoMetadata?.creator||'Webcanbe').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''));creator.textContent='by '+(item.creator||item.demoMetadata?.creator||'Webcanbe');name.append(title,creator);const price=text('strong',Number.isSafeInteger(item.priceMinor)?item.priceMinor===0?'Free':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(item.priceMinor/100):'View price');meta.append(name,price);article.append(cover,meta,text('p',item.summary||''));return article}
  const sync=()=>{const current=state();const heading=document.querySelector('.public-market-intro h1'),lead=document.querySelector('.public-market-intro p');if(current.type!=='templates'){const name=current.type[0].toUpperCase()+current.type.slice(1);if(heading)heading.textContent=name;if(lead)lead.textContent=`No ${current.type} have been published yet. Explore source-backed templates while this collection grows.`;document.title=name+' | Webcanbe Marketplace'}else if(heading&&heading.dataset.originalHeading){heading.textContent=heading.dataset.originalHeading;if(lead)lead.textContent=heading.dataset.originalLead;document.title=heading.dataset.originalTitle}for(const f of [form,headerSearch]){const input=f?.querySelector('[name=query]');if(input&&input.value!==current.query)input.value=current.query}syncListboxes(current);for(const a of document.querySelectorAll('[data-market-type],[data-market-sort]')){if(a.dataset.marketType===current.type||a.dataset.marketSort===current.sort)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')}}
  const introHeading=document.querySelector('.public-market-intro h1'),introLead=document.querySelector('.public-market-intro p');if(introHeading){introHeading.dataset.originalHeading=introHeading.textContent;introHeading.dataset.originalLead=introLead?.textContent||'';introHeading.dataset.originalTitle=document.title}
- const load=async()=>{controller?.abort();controller=new AbortController();const id=++requestNumber,options=state();sync();grid.replaceChildren();if(options.type!=='templates'){retry.hidden=true;catalog.dataset.catalogError='false';status.textContent=options.type[0].toUpperCase()+options.type.slice(1)+' have no published items yet. Browse source-backed templates while this catalog grows.';return}status.textContent='Loading projects…';const first=firstPartyTemplates.filter(p=>!routeCategory||p.category.toLowerCase()===routeCategory.toLowerCase());let published=[],failed=false
- try{const response=await fetch('/__webcanbe/api/product/catalog/browse',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:options.query,limit:100,...(routeCategory?{tags:[routeCategory.toLowerCase()]}:{})}),signal:controller.signal});if(!response.ok)throw Error();const payload=await response.json();if(!Array.isArray(payload.listings))throw Error();published=payload.listings.filter(p=>typeof p.slug==='string'&&typeof p.title==='string')}catch(e){if(e.name==='AbortError')return;failed=true}if(id!==requestNumber)return
- let items=[...first,...published.filter(p=>!first.some(template=>template.slug===p.slug))].filter(p=>(!options.query||`${p.title} ${p.summary} ${p.category||''} ${Array.isArray(p.tags)?p.tags.join(' '):''}`.toLowerCase().includes(options.query.toLowerCase()))&&(options.style==='all'||[p.category,p.demoMetadata?.category,...(Array.isArray(p.tags)?p.tags:[])].some(value=>String(value||'').toLowerCase()===options.style.toLowerCase()))&&(options.price==='all'||options.price==='free'&&p.priceMinor===0||options.price==='under-75'&&p.priceMinor<7500||options.price==='75-plus'&&p.priceMinor>=7500))
- if(options.sort==='name')items.sort((a,b)=>a.title.localeCompare(b.title));if(options.sort==='price-low')items.sort((a,b)=>(a.priceMinor??0)-(b.priceMinor??0));grid.replaceChildren(...items.map(card));status.textContent=failed?(items.length?`Showing ${items.length} first-party template${items.length===1?'':'s'}. Published listings could not be loaded. Retry to see the full catalog.`:'Published listings could not be loaded. Retry to see the full catalog.'):items.length?`${items.length} project${items.length===1?'':'s'} available`:'No projects match these filters. Clear the filters or try another category.';catalog.dataset.catalogError=failed?'true':'false';retry.hidden=!failed;document.querySelector('#catalog-schema')?.remove();if(items.length){const schema=document.createElement('script');schema.type='application/ld+json';schema.id='catalog-schema';schema.textContent=JSON.stringify({'@context':'https://schema.org','@type':'ItemList',itemListElement:items.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.title,url:'https://webcanbe.com/project/'+encodeURIComponent(p.slug)}))});document.head.append(schema)}}
+ const load=async()=>{
+  controller?.abort()
+  const active=new AbortController()
+  controller=active
+  const id=++requestNumber,options=state()
+  sync()
+  if(options.type!=='templates'){
+   grid.replaceChildren()
+   retry.hidden=true
+   catalog.dataset.catalogError='false'
+   status.textContent=options.type[0].toUpperCase()+options.type.slice(1)+' have no published items yet. Browse source-backed templates while this catalog grows.'
+   return
+  }
+  const first=firstPartyTemplates.filter(p=>!routeCategory||p.category.toLowerCase()===routeCategory.toLowerCase())
+  const matches=p=>(!options.query||`${p.title} ${p.summary} ${p.category||''} ${Array.isArray(p.tags)?p.tags.join(' '):''}`.toLowerCase().includes(options.query.toLowerCase()))
+   &&(options.style==='all'||[p.category,p.demoMetadata?.category,...(Array.isArray(p.tags)?p.tags:[])].some(value=>String(value||'').toLowerCase()===options.style.toLowerCase()))
+   &&(options.price==='all'||options.price==='free'&&p.priceMinor===0||options.price==='under-75'&&p.priceMinor<7500||options.price==='75-plus'&&p.priceMinor>=7500)
+  const render=(published,phase)=>{
+   const items=[...first,...published.filter(p=>!first.some(template=>template.slug===p.slug))].filter(matches)
+   if(options.sort==='name')items.sort((a,b)=>a.title.localeCompare(b.title))
+   if(options.sort==='price-low')items.sort((a,b)=>(a.priceMinor??0)-(b.priceMinor??0))
+   grid.replaceChildren(...items.map(card))
+   status.textContent=phase==='loading'
+    ?items.length?`Showing ${items.length} first-party template${items.length===1?'':'s'}. Checking published listings…`:'Checking published listings…'
+    :phase==='error'
+     ?items.length?`Showing ${items.length} first-party template${items.length===1?'':'s'}. Published listings could not be loaded. Retry to see the full catalog.`:'Published listings could not be loaded. Retry to see the full catalog.'
+     :items.length?`${items.length} project${items.length===1?'':'s'} available`:'No projects match these filters. Clear the filters or try another category.'
+   catalog.dataset.catalogError=phase==='error'?'true':'false'
+   retry.hidden=phase!=='error'
+   document.querySelector('#catalog-schema')?.remove()
+   if(items.length){const schema=document.createElement('script');schema.type='application/ld+json';schema.id='catalog-schema';schema.textContent=JSON.stringify({'@context':'https://schema.org','@type':'ItemList',itemListElement:items.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.title,url:'https://webcanbe.com/project/'+encodeURIComponent(p.slug)}))});document.head.append(schema)}
+  }
+  render([],'loading')
+  const timeout=window.setTimeout(()=>active.abort(),9_000)
+  let published=[],failed=false
+  try{
+   const response=await fetch('/__webcanbe/api/product/catalog/browse',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:options.query,limit:100,...(routeCategory?{tags:[routeCategory.toLowerCase()]}:{})}),signal:active.signal})
+   if(!response.ok)throw Error()
+   const payload=await response.json()
+   if(!Array.isArray(payload.listings))throw Error()
+   published=payload.listings.filter(p=>typeof p.slug==='string'&&typeof p.title==='string')
+  }catch{if(id!==requestNumber)return;failed=true}
+  finally{window.clearTimeout(timeout)}
+  if(id!==requestNumber)return
+  render(published,failed?'error':'ready')
+ }
  for(const f of [form,headerSearch])f?.addEventListener('submit',e=>{e.preventDefault();setState({query:f.querySelector('[name=query]')?.value.trim().slice(0,100)||''})})
  form?.querySelector('[data-market-reset]')?.addEventListener('click',()=>{const url=new URL(location.href);url.search='';history.pushState({},'',url);void load()})
  for(const a of document.querySelectorAll('[data-market-type],[data-market-sort]'))a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();setState(a.dataset.marketType?{type:a.dataset.marketType}:{sort:a.dataset.marketSort})})

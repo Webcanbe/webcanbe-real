@@ -388,6 +388,7 @@ body { font-family:Inter,"Host Grotesk",Arial,sans-serif; }
 .billing-switch { padding:3px; border-radius:9px; }
 .billing-switch .active { background:var(--wcb-accent); color:#fff; border-color:var(--wcb-accent); }
 .plan-grid { gap:16px; margin-top:46px; }
+.plan-grid.single { grid-template-columns:minmax(0,420px); }
 .plan-grid article { border-radius:12px; min-height:385px; }
 .plan-grid article.featured { border-color:var(--wcb-accent); box-shadow:0 8px 26px rgba(99,91,255,.09); }
 .plans .plan-note { margin-top:24px; padding:26px 30px; border:1px solid var(--wcb-border); border-radius:12px; background:#fafafd; }
@@ -1221,6 +1222,11 @@ body { font-family:Inter,"Host Grotesk",Arial,sans-serif; }
 .rd-header-actions{margin-left:auto;display:flex;align-items:center;gap:10px}.rd-search{position:relative;width:256px;height:34px;display:flex;align-items:center;gap:8px;padding:0 42px 0 30px;border:1px solid #e4e4e7;border-radius:7px;background:#fafafa;color:#71717a;font-size:12px;text-align:left}.rd-search>svg{position:absolute;left:9px;width:15px}.rd-search kbd{position:absolute;right:5px;top:5px;height:22px;display:flex;align-items:center;padding:0 6px;border:1px solid #e4e4e7;border-radius:5px;background:#f4f4f5;color:#52525b;font-size:9px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.rd-header-avatar{border-radius:50%;background:#18181b;color:#fff;border-color:#18181b;font-size:10px;font-weight:700}
 .rd-main{padding:24px 28px 44px;max-width:1480px;margin:0 auto}
 .rd-main-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.rd-main-heading h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em}.rd-primary-action{height:36px;display:flex;align-items:center;gap:8px;padding:0 13px;border-radius:7px;background:#18181b;color:#fff;text-decoration:none;font-size:12px;font-weight:600}.rd-primary-action svg{width:15px}
+
+/* Semantic primary actions share one Webcanbe treatment across page families. */
+.button.primary,.wcb-public-button,.rope-primary-action,.auth-demo-continue,.auth-demo-layer .auth-demo-continue{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
+.button.primary:hover,.wcb-public-button:hover,.rope-primary-action:hover,.auth-demo-continue:hover,.auth-demo-layer .auth-demo-continue:hover{background:var(--primary-hover);border-color:var(--primary-hover);color:var(--primary-foreground)}
+.button.primary:active,.wcb-public-button:active,.rope-primary-action:active,.auth-demo-continue:active,.auth-demo-layer .auth-demo-continue:active{background:var(--primary-active);border-color:var(--primary-active);color:var(--primary-foreground)}
 .rd-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.rd-stat-grid article,.rd-panel{border:1px solid #e4e4e7;border-radius:9px;background:#fff}.rd-stat-grid article{padding:20px}.rd-stat-grid article>div{display:flex;align-items:center;justify-content:space-between}.rd-stat-grid article span{font-size:13px;font-weight:600}.rd-stat-grid article svg{width:16px;color:#71717a}.rd-stat-grid strong{display:block;margin-top:8px;font-size:24px;letter-spacing:-.025em}.rd-stat-grid p{margin:4px 0 0;color:#71717a;font-size:11px}
 .rd-dashboard-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(320px,3fr);gap:16px;margin-top:16px}.rd-panel>header{padding:20px 20px 12px}.rd-panel>header h2{margin:0;font-size:15px}.rd-panel>header p{margin:5px 0 0;color:#71717a;font-size:12px}
 .rd-project-list{padding:0 20px 20px}.rd-project-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #f0f0f1;color:#27272a;text-decoration:none}.rd-project-thumb{width:42px;height:34px;border-radius:7px;border:1px solid #e4e4e7;background:#f4f4f5}.rd-project-thumb.lilac{background:#ede9fe}.rd-project-thumb.sand{background:#f5efe5}.rd-project-thumb.mint{background:#e8f5ee}.rd-project-thumb.rose{background:#f8e9ef}.rd-project-thumb.ink{background:#e4e4e7}.rd-project-thumb.orange{background:#faecdd}.rd-project-copy{display:grid;gap:3px}.rd-project-copy b{font-size:12px}.rd-project-copy small,.rd-project-meta{font-size:10px;color:#71717a}.rd-project-meta{white-space:nowrap}.rd-empty{padding:20px 0;color:#71717a}.rd-empty b{color:#27272a;font-size:12px}.rd-empty p{margin:4px 0 0;font-size:11px}
@@ -1384,4 +1390,15 @@ body { font-family:Inter,"Host Grotesk",Arial,sans-serif; }
 @media (max-width:680px) {
   .detail-content .tabs { max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; }
   .detail-content .tabs button { flex:none; }
+}
+
+/* Marketplace detail actions use the same compact hit target as other product actions. */
+.detail-actions .button,
+.detail-actions .button.primary {
+  min-width:0;
+  min-height:42px;
+  height:42px;
+  padding:0 16px;
+  gap:8px;
+  font-size:13px;
 }

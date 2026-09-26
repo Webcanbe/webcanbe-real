@@ -35,7 +35,8 @@ export async function finishAuthIntent(signup: boolean, startedAt: number, next:
     const key = `wcb-onboarding:${account.userId}`
     if (signup && Date.parse(account.createdAt) >= startedAt - 10000 && !readLocal(key, null)) writeLocal(key, { step: 0 })
   } catch { /* Auth success does not depend on onboarding preference storage. */ }
-  return signup ? '/marketplace' : next === '/' || next === '/browse' || next === '/templates' ? '/dashboard' : next
+  if (signup && (next === '/dashboard' || next === '/' || next === '/browse' || next === '/templates')) return '/marketplace'
+  return next === '/' || next === '/browse' || next === '/templates' ? '/dashboard' : next
 }
 export function workspaceLabel(id: string, index: number, projectName?: string) { return projectName?.trim() || (id === "personal" ? "Personal workspace" : `Workspace ${index + 1}`) }
 export function workspaceForNewProject(available: string[], selected: string) {

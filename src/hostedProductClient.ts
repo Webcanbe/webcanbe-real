@@ -18,7 +18,7 @@ export type HostedListingDetail = HostedListing & Readonly<{
   publicMetadata: Record<string, unknown>
 }>
 
-export type SourceProjectSummary = Readonly<{ id: string; name: string; workspaceId?: string }>
+export type SourceProjectSummary = Readonly<{ id: string; name: string; workspaceId?: string; templateOrigin?: Readonly<{ slug: "aperture-north" | "stillform"; digest: string }> }>
 export type BuildLeagueProgress = Readonly<{ referralCode: string; stage: number; points: number; actions: number; counts: Record<string,number>; dimensions: {build:number;social:number;completion:number}; milestones:string[]; uniqueReferredVisits:number; recent:Array<{kind:string;created_at:string}>; entry:{project_id:string;statement:string;submitted_at:string}|null }>
 export type BuildLeagueLeader = Readonly<{label:string;build:number;social:number;completion:number;score:number}>
 
@@ -143,8 +143,8 @@ export class HostedProductClient {
     return (await this.post<{ environment: "live"; plans: Array<{ key: string; providerPlanId: string; status: "ACTIVE"; currency: "USD"; priceMinor: number; cadence: string; contractMatches: true }> }>("/__webcanbe/api/payments/plans/verify", {})).plans
   }
 
-  async createPaymentOrder(listingId: string, idempotencyKey: string) {
-    return (await this.post<{ order: PaymentOrder }>("/__webcanbe/api/payments/orders/create", { listingId, idempotencyKey })).order
+  async createPaymentOrder(listingId: string, expectedReleaseId: string, expectedPriceMinor: number, idempotencyKey: string) {
+    return (await this.post<{ order: PaymentOrder }>("/__webcanbe/api/payments/orders/create", { listingId, expectedReleaseId, expectedPriceMinor, idempotencyKey })).order
   }
 
   async capturePaymentOrder(providerOrderId: string) {

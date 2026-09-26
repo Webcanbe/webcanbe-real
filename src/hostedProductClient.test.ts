@@ -73,10 +73,10 @@ describe("hosted product route adapter", () => {
       ["/__webcanbe/api/payments/orders/capture", { order: { ...order, status: "completed" } }],
       ["/__webcanbe/api/payments/status", { billing: { currentPlanKey: "free", subscription: null, aiActions: { purchased: 100 } } }],
     ])
-    await f.client.createPaymentOrder("listing-1", "marketplace:key")
+    await f.client.createPaymentOrder("listing-1", "release-1", 7900, "marketplace:key")
     await f.client.capturePaymentOrder("PAYPAL-TOKEN")
     expect(await f.client.paymentStatus()).toMatchObject({ currentPlanKey: "free", aiActions: { purchased: 100 } })
-    expect(f.seen[1].body).toEqual({ listingId: "listing-1", idempotencyKey: "marketplace:key" })
+    expect(f.seen[1].body).toEqual({ listingId: "listing-1", expectedReleaseId: "release-1", expectedPriceMinor: 7900, idempotencyKey: "marketplace:key" })
     expect(f.seen[2].body).toEqual({ providerOrderId: "PAYPAL-TOKEN" })
     expect(JSON.stringify(f.seen[1].body)).not.toContain("price")
     expect(f.seen.slice(1).every(call => call.headers.get("X-WCB-CSRF") === "csrf-payments")).toBe(true)

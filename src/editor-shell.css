@@ -73,6 +73,13 @@
 .compatible-workspace .editor-preview-controls .compatible-preview-head{overflow:visible}
 @media(max-width:680px){.compatible-workspace .compatible-files{max-height:36vh}}
 .compatible-preview-shell .source-workspace{position:relative;z-index:1;width:100%;min-height:0;overflow:auto}.compatible-preview-shell.split-mode{overflow:hidden}.compatible-preview-shell.split-mode .source-workspace{flex:0 0 46%;max-height:46%;border-bottom:1px solid #e5e7ee}.compatible-preview-shell.split-mode .compatible-frame-wrap{flex:1;min-height:0}.compatible-preview-shell:not(.split-mode) .source-workspace{flex:1;max-height:none}.source-editor-panel{min-width:0}.source-code-editor{max-width:100%;overflow:hidden}
+.editor-preview-status{position:absolute;inset:0;z-index:4;display:grid;place-items:center;padding:24px;background:#f2f1f5e8;backdrop-filter:blur(5px)}
+.editor-preview-status-card{width:min(360px,100%);padding:22px;border:1px solid #e0dce8;border-radius:13px;background:#fff;box-shadow:0 16px 40px #30263d14;color:#24212c}
+.editor-preview-status-card span{display:block;margin-bottom:9px;color:#7658a5;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.editor-preview-status-card b{display:block;font-size:17px;line-height:1.2;letter-spacing:-.03em}
+.editor-preview-status-card p{margin:8px 0 0;color:#666271;font-size:12px;line-height:1.5}
+.editor-preview-status-card button{min-height:36px;margin-top:16px;padding:0 13px;border:0;border-radius:7px;background:#28232f;color:#fff;font-size:11px;font-weight:650;cursor:pointer}
+.editor-preview-status-card button:focus-visible{outline:3px solid #7658a5;outline-offset:2px}
 
 .editor-artboard{position:relative;margin:0 auto;flex:none}.compatible-inspector .responsive-construction{background:#fff;border:0;border-top:1px solid #ededee;border-radius:0;color:#75757d;padding:12px 4px}.compatible-inspector .responsive-construction summary{color:#686870;font-size:10px;font-weight:500}.compatible-inspector .responsive-construction p{color:#8b8b92}.compatible-inspector .limited-editing{border-left:0;padding:0}.compatible-inspector .style-controls+details{margin-top:0}
 

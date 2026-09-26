@@ -54,12 +54,15 @@ async function completeFreeOrder(repo, order, at) {
 }
 
 export async function createMarketplaceOrder(repo, provider, session, input, options = {}) {
-  exactObject(input, ["listingId", "idempotencyKey"], "Only listingId and idempotencyKey are accepted.")
+  exactObject(input, ["listingId", "expectedReleaseId", "expectedPriceMinor", "idempotencyKey"], "Only the selected listing, release, price, and idempotency key are accepted.")
   const listingId = domainId(input.listingId, "checkout")
+  const expectedReleaseId = domainId(input.expectedReleaseId, "selected release")
+  const expectedPriceMinor = moneyMinor(input.expectedPriceMinor, "selected price")
   const idempotencyKey = paymentKey(input.idempotencyKey)
   const existing = await repo.orderByBuyerKey(session.userId, idempotencyKey)
   if (existing) {
     if (existing.listingId !== listingId) throw new PaymentError(409, "idempotency_conflict", "This checkout key belongs to another order.")
+    if (existing.releaseId !== expectedReleaseId || existing.grossMinor !== expectedPriceMinor) throw new PaymentError(409, "selection_changed", "The selected release or price does not match this checkout. Review the listing again.")
     if (existing.status === "processing" && existing.grossMinor === 0) return publicOrder(await completeFreeOrder(repo, existing, nowIso(options.clock || Date.now)))
     if (existing.status === "creating") {
       const resumed = await provider.createOrder({ ...existing, returnUrl: options.returnUrl, cancelUrl: options.cancelUrl })
@@ -69,6 +72,7 @@ export async function createMarketplaceOrder(repo, provider, session, input, opt
   }
   const listing = await repo.checkoutListing(listingId)
   validateListing(listing)
+  if (listing.releaseId !== expectedReleaseId || listing.priceMinor !== expectedPriceMinor) throw new PaymentError(409, "selection_changed", "The selected release or price changed. Review the listing again.")
   if (listing.sellerUserId === session.userId) throw new PaymentError(409, "self_purchase", "Creators cannot purchase their own listing.")
   const at = nowIso(options.clock || Date.now)
   const orderId = uuid(repo.uuid)

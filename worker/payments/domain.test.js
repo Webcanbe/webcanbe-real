@@ -108,7 +108,7 @@ const options = { publicPaidLaunchAt: "2026-09-01T00:00:00.000Z", returnUrl: "ht
 
 async function completedSale(price = 900) {
   const repo = new MemoryRepository(price), provider = new StubProvider()
-  const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "checkout-1" }, options)
+  const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "checkout-1" }, options)
   await captureMarketplaceOrder(repo, provider, { userId: buyer }, { orderId: order.orderId })
   return { repo, provider, order: repo.orders[0] }
 }
@@ -116,8 +116,8 @@ async function completedSale(price = 900) {
 describe("provider-neutral marketplace payments", () => {
   it("completes a free listing without contacting PayPal and grants once", async () => {
     const repo = new MemoryRepository(0), provider = new StubProvider()
-    const first = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "free" }, options)
-    const replay = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "free" }, options)
+    const first = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "free" }, options)
+    const replay = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "free" }, options)
     expect(first).toMatchObject({ status: "completed", grossMinor: 0 })
     expect(replay.orderId).toBe(first.orderId)
     expect(provider.createCalls).toBe(0)
@@ -126,26 +126,38 @@ describe("provider-neutral marketplace payments", () => {
 
   it("rejects missing, stale, and unavailable listing state before provider work", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
-    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId: "99999999-9999-4999-8999-999999999999", idempotencyKey: "missing" }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId: "99999999-9999-4999-8999-999999999999", expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "missing" }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
     for (const patch of [{ status: "archived" }, { availability: "unavailable" }, { releaseStatus: "draft" }]) {
       Object.assign(repo.listing, { status: "published", availability: "available", releaseStatus: "published" }, patch)
-      await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: `stale-${Object.keys(patch)[0]}` }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
+      await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: `stale-${Object.keys(patch)[0]}` }, options)).rejects.toMatchObject({ code: "listing_unavailable" })
     }
+    expect(provider.createCalls).toBe(0)
+  })
+
+  it("refuses a release or price change after the buyer selected a listing", async () => {
+    const repo = new MemoryRepository(), provider = new StubProvider()
+    const selected = { listingId, expectedReleaseId: releaseId, expectedPriceMinor: 900, idempotencyKey: "selected-release" }
+    repo.listing.releaseId = "99999999-9999-4999-8999-999999999999"
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, selected, options)).rejects.toMatchObject({ code: "selection_changed" })
+    repo.listing.releaseId = releaseId
+    repo.listing.priceMinor = 1200
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, selected, options)).rejects.toMatchObject({ code: "selection_changed" })
+    expect(repo.orders).toHaveLength(0)
     expect(provider.createCalls).toBe(0)
   })
 
   it("uses authoritative server price and rejects client price/creator tampering", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
-    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "checkout", priceMinor: 1 }, options)).rejects.toMatchObject({ code: "invalid_request" })
-    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "checkout" }, options)
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "checkout", priceMinor: 1 }, options)).rejects.toMatchObject({ code: "invalid_request" })
+    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "checkout" }, options)
     expect(order.grossMinor).toBe(900)
     expect(repo.orders[0]).toMatchObject({ sellerUserId: seller, currency: "USD", grossMinor: 900 })
   })
 
   it("makes create/capture and entitlement/ledger grants exactly once", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
-    const first = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "same" }, options)
-    const replay = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "same" }, options)
+    const first = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "same" }, options)
+    const replay = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "same" }, options)
     expect(replay.orderId).toBe(first.orderId)
     expect(provider.createCalls).toBe(1)
     await captureMarketplaceOrder(repo, provider, { userId: buyer }, { orderId: first.orderId })
@@ -157,7 +169,7 @@ describe("provider-neutral marketplace payments", () => {
 
   it("captures an approval return by provider token and keeps duplicate returns idempotent", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
-    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "provider-return" }, options)
+    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "provider-return" }, options)
     await captureMarketplaceOrder(repo, provider, { userId: buyer }, { providerOrderId: `PP-${order.orderId}` })
     await captureMarketplaceOrder(repo, provider, { userId: buyer }, { providerOrderId: `PP-${order.orderId}` })
     expect(provider.captureCalls).toBe(1)
@@ -168,16 +180,16 @@ describe("provider-neutral marketplace payments", () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
     const create = provider.createOrder.bind(provider)
     provider.createOrder = async order => { if (provider.createCalls++ === 0) throw new Error("temporary provider failure"); provider.createCalls--; return create(order) }
-    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "resume" }, options)).rejects.toThrow("temporary provider failure")
+    await expect(createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "resume" }, options)).rejects.toThrow("temporary provider failure")
     expect(repo.orders).toHaveLength(1)
-    const resumed = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "resume" }, options)
+    const resumed = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "resume" }, options)
     expect(resumed.orderId).toBe(repo.orders[0].orderId)
     expect(resumed.status).toBe("approval_pending")
   })
 
   it("refuses cross-user capture and quarantines capture mismatches", async () => {
     const repo = new MemoryRepository(), provider = new StubProvider()
-    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, idempotencyKey: "one" }, options)
+    const order = await createMarketplaceOrder(repo, provider, { userId: buyer }, { listingId, expectedReleaseId: releaseId, expectedPriceMinor: repo.listing.priceMinor, idempotencyKey: "one" }, options)
     await expect(captureMarketplaceOrder(repo, provider, { userId: otherBuyer }, { orderId: order.orderId })).rejects.toMatchObject({ code: "order_not_found" })
     provider.captureOrder = async id => ({ providerOrderId: id, providerCaptureId: "bad", status: "COMPLETED", grossMinor: 1, currency: "USD", customId: order.orderId, capturedAt: "2026-09-01T00:00:00.000Z" })
     await expect(captureMarketplaceOrder(repo, provider, { userId: buyer }, { orderId: order.orderId })).rejects.toMatchObject({ code: "capture_mismatch" })

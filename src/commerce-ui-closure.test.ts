@@ -8,8 +8,8 @@ const catalog = fs.readFileSync("worker/product-catalog.js", "utf8")
 describe("commerce UI closure", () => {
   it("keeps marketplace price authoritative and never posts browser price", () => {
     expect(catalog).toContain("priceMinor: Number(row.price_minor)")
-    expect(app).toContain("hostedProductClient.createPaymentOrder(project.id, paymentIdempotencyKey")
-    expect(client).toContain("{ listingId, idempotencyKey }")
+    expect(app).toContain("hostedProductClient.createPaymentOrder(project.id, project.releaseId")
+    expect(client).toContain("{ listingId, expectedReleaseId, expectedPriceMinor, idempotencyKey }")
     expect(client).not.toContain("createPaymentOrder(listingId: string, price")
   })
 
