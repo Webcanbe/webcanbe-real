@@ -3040,3 +3040,32 @@ Continuity priority from now:
 3. this live continuity file;
 4. original-session behavior/strategy baseline in `CHATGPT_CONTINUITY_MASTER.md` and Library continuity;
 5. older historical records only when needed.
+
+
+## 60. Avoylo continuity reaffirmed — 2026-09-26
+
+User explicitly confirmed that the assistant has not lost the whole prior context and asked that the post-Webcanbe Avoylo decisions and implementation progression continue to be preserved carefully in Markdown.
+
+Canonical Avoylo business direction already stored in Sections 46–50 remains active unless explicitly changed:
+- Avoylo is the selected bounded serious business attempt after pausing broad Webcanbe development.
+- Do not use generic “garage micro-fulfillment” as the differentiation.
+- Working wedge: prepacked / box-only local forward-stock fulfillment.
+- Seller/manufacturer prepares customer-ready sealed units/fixed bundles; Host scans, stores, retrieves, label-applies and hands off without SKU picking, repacking, kitting or returns inspection in the first wedge.
+- Host is intended as an accessible side-gig role for ordinary people with suitable verified space, not a professional warehouse-operator requirement.
+- First Seller ICP: post-dropship winning-product sellers and small DTC brands with roughly 1–5 hero SKUs/fixed bundles, compact/durable/nonhazardous, where one order can map naturally to one sealed parcel.
+- Recruit multiple Seller and Host leads in parallel; only a tiny matched physical pilot is activated once economics/operational prerequisites are credible.
+- Seller pays Avoylo B2B logistics/storage/handling; Avoylo separately accrues Host compensation. End-customer checkout remains with Seller in the initial model.
+- Host native mobile app is intended later; Seller remains web-first and Admin web-only initially.
+- External proof—not code volume—determines whether Avoylo earns more investment.
+
+Current implementation state remains:
+- Phase 1 GREEN at `dac1c392b0781b836e3c74dbb3b98d0eac1522cd`.
+- Phase 2 IN PROGRESS at `99b38ee031936f01f2306166dfa7d1545aa8ea64`.
+- Current Phase 2 slice: Seller read-only recent inbound batch view.
+- Next gate: real signed-in QA browser verification, then smallest server-side inbound draft creation path.
+- All live flags remain false.
+
+Persistence rule:
+- Material Avoylo business decisions, evidence, pivots, phase transitions, blockers and external-validation results must be written to Markdown immediately.
+- Fast-changing engineering truth belongs in `Webcanbe/avoylo/docs/current-handoff.md`.
+- Cross-session business/strategy continuity belongs in this live handoff.
