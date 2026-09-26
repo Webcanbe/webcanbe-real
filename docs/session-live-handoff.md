@@ -3180,3 +3180,31 @@ When explicitly asked, use the stored format:
 - absolute percentage-point delta
 - relative % increase/decrease
 - reason/evidence
+
+
+## 66. Avoylo Phase 2 sealed parcel-profile/batch-item slice GREEN — 2026-09-26
+
+Verified in `Webcanbe/avoylo`:
+- current `core-sandbox` HEAD: `b6eaa3a27c050e85b383546f47b499c4ef3c610e`
+- commit: `Add sealed Seller parcel profiles and draft batch items`
+- Phase 2 parcel-profile + DRAFT batch-item slice: **GREEN**
+- `avoylo-qa` migrations: **4/4 applied**
+- real QA: **12/12 passed**
+- local `npm run check`: passed, including 14 local tests and 84 RLS/write assertions
+- `npm run test:e2e`: **2/2 passed**
+- coss provenance and client-secret scans passed
+- Framer Home unchanged
+- Worker remains undeployed
+- all seven live flags remain false
+
+Next recommended Phase-2 checkpoint:
+- add the smallest server-side Seller action to submit a complete DRAFT inbound batch: `DRAFT -> SUBMITTED`
+- require at least one valid sealed batch item and active service area;
+- freeze/deny further DRAFT-content edits after submission;
+- keep transactionality, idempotency, audit and tenant checks;
+- add minimal Seller UI submit control + real QA;
+- do not begin Host matching/assignment, QR, shipping or live deployment in this checkpoint.
+
+Prompt-length preference:
+- user reports Codex usage is down to ~8%;
+- future Codex prompts should be concise and avoid restating already-recorded context unless needed for safety or exact scope.
