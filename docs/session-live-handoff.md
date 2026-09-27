@@ -3958,3 +3958,48 @@ Proposed unattended pickup state/proof:
 Host profile should include handling windows, max daily volume, unattended-pickup capability, pickup-zone type, vacation mode, capacity, cleanliness/dry/lockable-space checks, and optional CCTV/security tier. CCTV is proposed as a quality tier / Seller requirement option, not a universal baseline requirement.
 
 Await user approval/rejection/modification before encoding fee/ledger rules.
+
+## 93. Avoylo next broad engineering plan after commercial-policy decisions — 2026-09-27
+
+User explicitly allows a larger Codex task now and wants progress beyond one narrow Phase-6 slice, while preserving decision boundaries.
+
+Approved/current business semantics to carry into engineering:
+- pricing numbers are configurable pilot defaults/recommendations, not permanent mandatory prices;
+- only the applicable storage floor is enforceable; Seller chooses its actual storage bid above the floor;
+- recommended storage price must be labeled Recommended/Suggested, never market average before real accepted-market data exists;
+- current pilot defaults selected for implementation:
+  - storage floor USD 0.008 / cu ft / day;
+  - storage recommended USD 0.012 / cu ft / day;
+  - accepted storage amount goes 100% to Host;
+  - inbound Seller charge USD 0.40 / parcel, Host earning USD 0.25, Avoylo allocation USD 0.15;
+  - outbound Seller charge USD 1.70 / parcel, Host earning USD 1.00, Avoylo allocation USD 0.70;
+  - QR verification, label application, safe staging and staging photo are one outbound handling event;
+  - carrier postage / paid pickup separately disclosed, no assumed v1 shipping markup;
+  - no mandatory Seller subscription/minimum spend in v1.
+- critical active-logistics incidents such as Host unreachable should have a 30-minute human-first-response service target; implementation may model/measure the SLA but must not fake staffing or public availability before operations are live.
+- Host onboarding should remain low-friction: identity verification + terms + only operationally necessary information. Seller onboarding is lighter than Host verification.
+- Host operational profile should support availability windows/days, maximum daily handling volume, vacation mode, unattended-pickup capability, approved pickup-zone type, capacity, clean/dry/lockable-space checks, and optional CCTV/security tier.
+- Seller should not need to contact Host per order; future commerce connector flow should automate order intake/task creation.
+- pickup staging evidence: assigned QR + in-app photo; this proves Host staging only. Carrier scan/tracking remains authoritative evidence of carrier acceptance.
+
+Technical starting point:
+- Webcanbe/avoylo, branch core-sandbox;
+- verified pre-commercial-policy checkpoint 874829548e14fd9847a84bfdf086d61c0dafcc52;
+- Phase 0–4 GREEN;
+- provider-independent Phase 5/fake-provider work GREEN, EasyPost TEST credentialed adapter blocked;
+- Seller cancellation recovery GREEN;
+- Phase 8 connected sandbox/hardening through slice 55 GREEN;
+- credentialed GitHub Actions Real QA is the exact-HEAD gate.
+
+Preferred broad bounded sequence now:
+A. versioned configurable pricing policy + Seller storage bid + Host acceptance snapshot;
+B. immutable Seller/Host ledgers + storage accrual + reconciliation + compensating entries;
+C. Host availability/capacity/security profile + matching constraints;
+D. pickup staging photo evidence and explicit HANDOFF_READY vs carrier-accepted custody boundary;
+E. critical logistics incident/support-SLA data model and internal UI;
+F. low-friction Host/Seller onboarding state/provider boundaries without live public signup;
+G. Shopify development/sandbox connector boundary and signed webhook/idempotent order ingestion if safely possible, while keeping SHOPIFY_ENABLED=false;
+H. EasyPost TEST adapter only with authorized TEST credentials; otherwise keep external portion blocked and continue independent work;
+I. comprehensive Phase 0–8 closure audit after these approved semantics are implemented.
+
+For each bounded slice: local check/e2e -> push -> exact-HEAD Real QA -> fix root cause until GREEN -> handoff -> next slice. No Phase 9/live activation, no real money, no production Worker deployment, no public signup, no live shipping/payment/payout, no Framer Home changes.
