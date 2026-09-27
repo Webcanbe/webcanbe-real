@@ -3918,3 +3918,43 @@ Proposed economics awaiting approval:
 - Shipping postage is initially pass-through; future negotiated carrier-rate economics may become an additional margin source only when actually contracted.
 - $200–$300/month is a design target for an active standard Host, not a guaranteed earning claim.
 - CCTV should be a quality/security tier signal rather than an absolute requirement for every small Host unless policy later changes.
+
+
+## 91. Proposed Avoylo v1 economics + unattended pickup evidence — 2026-09-27
+
+User asked the assistant to choose an initial coherent pricing/ops model for discussion and proposed that when a Host stages an outbound parcel outside, the minimum proof should be QR scan + photo.
+
+Factual external anchors checked:
+- Amazon AWD US 2026 base storage is $0.48/cu ft/month in East/South regions and $0.57/cu ft/month on West Coast; inbound and outbound processing are each $1.40/box.
+- ShipBob separates receiving, storage and fulfillment as distinct fee categories.
+- FedEx says the shipper does not have to be present for pickup if the package is left safe and accessible.
+- USPS Package Pickup supports designated locations including porch/front door/mail room, subject to local restrictions.
+
+Proposed v1 economics for user approval (policy proposal, not observed Avoylo market data):
+- storage bid is volume-normalized internally:
+  - floor: $0.010 per cubic foot/day (~$0.30/cu ft/month)
+  - recommended: $0.015 per cubic foot/day (~$0.45/cu ft/month)
+  - faster-match reference: $0.020 per cubic foot/day (~$0.60/cu ft/month)
+- Seller UI converts these to the actual parcel profile's $/box/day; Seller may bid above floor.
+- 100% of storage bid goes to Host.
+- Host receive earning: $0.25/parcel received.
+- Host outbound earning: $0.85/parcel staged/handed off.
+- Avoylo Seller fee: $0.10 per inbound parcel + $0.35 per outbound parcel.
+- no mandatory monthly Seller subscription in initial model;
+- carrier postage is separate/pass-through initially.
+- active standard Host design target: roughly $200–$300/month under sufficient utilization, not a guarantee.
+
+Illustrative utilization (not forecast): 150 average 0.5-cu-ft parcels stored at recommended rate, 200 inbound + 200 outbound in a month gives Host about $253.75/month and Avoylo about $90/month in network fees from that Host's throughput, excluding shipping/postage and support costs.
+
+Proposed unattended pickup state/proof:
+1. Host scans the assigned parcel QR.
+2. Host attaches the generated label.
+3. Host stages the parcel at the pre-approved safe pickup zone.
+4. Host takes a photo in-app; server records timestamp and task linkage.
+5. This marks parcel HANDOFF_READY/staged, not carrier-accepted.
+6. Carrier scan/tracking event is the authoritative evidence for actual pickup/handoff.
+7. If no carrier acceptance event appears by cutoff, create an incident; do not treat the Host photo alone as proof the carrier took possession.
+
+Host profile should include handling windows, max daily volume, unattended-pickup capability, pickup-zone type, vacation mode, capacity, cleanliness/dry/lockable-space checks, and optional CCTV/security tier. CCTV is proposed as a quality tier / Seller requirement option, not a universal baseline requirement.
+
+Await user approval/rejection/modification before encoding fee/ledger rules.
