@@ -29,17 +29,30 @@ jobs:
           node-version: '26'
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Detect service closure
+        id: closure
+        run: |
+          if grep -q '"main": "./worker/closure.js"' wrangler.jsonc; then
+            echo 'active=true' >> "$GITHUB_OUTPUT"
+          fi
       - name: Prepare runtime profile
+        if: steps.closure.outputs.active != 'true'
         run: npm run runtime:prepare
       - name: Secret scan
         run: npm run security:secrets
       - name: Browser Run Visual regressions
+        if: steps.closure.outputs.active != 'true'
         run: npx vitest run src/phase5-browser-run-visual-preview.test.ts worker/editor-projects.test.js src/phase5-production-hosted-editor.test.ts src/phase5-editor-durable-export.test.ts src/phase5-gate4-launch-chain.test.ts
       - name: Worker syntax
+        if: steps.closure.outputs.active != 'true'
         run: node --check worker/editor-projects.js && node --check worker/index.js
+      - name: Service closure regressions
+        if: steps.closure.outputs.active == 'true'
+        run: npx vitest run worker/closure.test.js worker/payment-routes.test.js worker/payments/domain.test.js worker/payments/http.test.js worker/payments/paypal-provider.test.js
       - name: Production build
         run: npm run build
       - name: Production build budget
+        if: steps.closure.outputs.active != 'true'
         run: node scripts/launch/build-budget.mjs
       - name: Worker bundle dry run
         run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
