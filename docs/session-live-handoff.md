@@ -4206,3 +4206,26 @@ Seller-policy core product decisions:
 
 Next legal-document candidates after Seller policy:
 `HOST_SERVICES_POLICY.md`, `PROHIBITED_RESTRICTED_ITEMS.md`, `CLAIMS_PROTECTION_POLICY.md`, `BILLING_PAYMENT_POLICY.md`, `HOST_EARNINGS_PAYOUT_POLICY.md`, `PRIVACY_LOCATION_POLICY.md`, and `EQUIPMENT_REWARDS_POLICY.md`.
+
+
+## 100. Seller Services Policy v0.1 operating decisions — 2026-09-27
+
+A revised final `SELLER_SERVICES_POLICY.md` operating model was agreed in chat. The document is intentionally Seller-workflow focused rather than duplicating contract/payment/insurance terms.
+
+Key fixed decisions:
+- Policy hierarchy: Operations Policy = network-wide baseline; Seller Services Policy = more specific Seller operating rules; Host Services Policy = Host-specific rules; narrower service-specific policy/written agreement controls for its feature.
+- Definitions explicitly include Parcel, Batch, Placement, Host Location, Accepted Terms and Authoritative State.
+- Initial Batch model: one Batch is assigned to one Host Location unless Avoylo explicitly splits it before assignment.
+- Replenishment is not silently appended to an existing Placement. New physical inventory requires a new authorized Batch or replenishment Placement, even if assigned to the same Host.
+- Parcels in one Placement share that Placement's Accepted Terms unless an explicit parcel-specific exception is recorded.
+- Partial removal is permitted where supported, at explicit Parcel scope, without terminating the remaining Placement.
+- Inbound lifecycle distinguishes AUTHORIZED -> IN_TRANSIT -> RECEIVING -> STORED or equivalent. Carrier Delivered does not by itself mean STORED.
+- Unknown/unapproved Parcels never transition directly to STORED; they follow review -> correction/return/removal/other authorized disposition.
+- Order lifecycle is explicitly modeled functionally as RECEIVED -> VALIDATING -> ACCEPTED -> RESERVED -> FULFILLING -> HANDOFF_READY -> CARRIER_ACCEPTED -> DELIVERED, with exception states such as BLOCKED/CANCELLED/RETURN_PENDING/RETURNED.
+- Every physically fulfilled order must authoritatively reserve one exact eligible Parcel before Host outbound handling.
+- Missed pickup does not automatically roll a Parcel from HANDOFF_READY back to STORED. It remains in the outbound custody flow while a pickup-retry/equivalent exception is handled. Only an explicit cancelled outbound flow with secure re-storage can return it to STORED.
+- A replacement shipping label supersedes the previous label for future handoff.
+- In Avoylo-managed reverse logistics, Avoylo determines the authorized return destination according to the enabled service and Seller configuration; Sellers cannot use a Host address as a generic return address.
+- Current storage accrual policy reference: accrual begins no earlier than the authoritative STORED timestamp; exact billable stop event/rounding/minimums belong in Billing & Payment Terms.
+- Seller closure lifecycle: closure request -> new activity restricted -> open orders resolved -> inventory reconciled -> inventory removed/returned/transferred/otherwise lawfully resolved -> operational closure complete.
+- Claims/insurance/payment/tax/fraud/security/public-claims language was intentionally reduced or moved out of the Seller operating policy and should be handled in specialized policy/contract documents.
