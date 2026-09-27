@@ -4183,3 +4183,26 @@ Key fixed operational rules in v0.1:
 - optional equipment/reward program remains compatible with direct sale, third-party/affiliate fulfillment, discount/subsidy, or earned free equipment.
 
 A user-downloadable final Markdown artifact was generated as `OPERATIONS_POLICY.md` in the active conversation. When integrating into the Avoylo repo/site, use this v0.1 content as the baseline and then align implementation/state names before publication.
+
+
+## 100. Avoylo public legal/operations document drafting — 2026-09-27
+
+The founder is now fixing the public legal/operations document set before sending it to Codex for site implementation.
+
+Finalized working document:
+- `OPERATIONS_POLICY.md` v0.1: public top-level operating rules, including normal parcel lifecycle, explicit exception states and transitions, one-Batch/one-Host default placement, cancellation cutoffs, failed pickup recovery, label replacement rules, physical inventory reconciliation, quarantine, Host/Seller exit, stale inventory, authorized transfers, and reverse-logistics boundaries. Exact company/legal/insurance fields remain TBD until separately decided.
+- `SELLER_SERVICES_POLICY.md` v0.1: Seller-facing operational/legal policy covering Seller-of-record responsibilities, authority, lawful inventory ownership, product safety/recall duties, dangerous/prohibited goods, prepacked/sealed requirements, packaging and Parcel identity, declaration accuracy, storage offers, Host matching/address privacy, inbound rules, misdeclaration consequences, commerce integrations, customer data, order/cancellation/shipping/returns, inventory removal/exit, claims, billing/payment boundaries, suspension, circumvention, fraud, security, records, and policy versioning.
+
+Seller-policy core product decisions:
+- Avoylo is B2B fulfillment infrastructure; Seller remains responsible for its own end-customer storefront, pricing, customer-service, retail refunds/returns/warranties/taxes unless Avoylo expressly assumes something.
+- Exact Host address is not ordinary Seller-facing marketplace data; it is used/disclosed only for authorized operational necessity.
+- Seller must not send inventory to a Host outside an authorized Avoylo inbound workflow or reuse a Host address for later unauthorized shipments.
+- Initial inventory remains prepacked/sealed box-only; ordinary Host work excludes opening, SKU picking, repacking, kitting, product QC, or inspection.
+- Seller declarations remain historically preserved; Host observations do not silently overwrite them.
+- Seller must promptly notify Avoylo of recalls/material product-safety issues affecting network inventory.
+- Customer returns must not use a Host private address unless Avoylo explicitly authorizes a return workflow.
+- Seller payment is based on authoritative Avoylo server-side financial records; browser-provided amounts are never authoritative.
+- This policy does not itself create insurance, inventory lien, disposal rights, guaranteed service levels, or legal risk-of-loss allocation.
+
+Next legal-document candidates after Seller policy:
+`HOST_SERVICES_POLICY.md`, `PROHIBITED_RESTRICTED_ITEMS.md`, `CLAIMS_PROTECTION_POLICY.md`, `BILLING_PAYMENT_POLICY.md`, `HOST_EARNINGS_PAYOUT_POLICY.md`, `PRIVACY_LOCATION_POLICY.md`, and `EQUIPMENT_REWARDS_POLICY.md`.
