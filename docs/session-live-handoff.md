@@ -4112,3 +4112,47 @@ Credential placement plan:
 - Cloudflare Worker secrets are added only when a sandbox/staging Worker environment is ready; do not place sandbox PayPal credentials in the current production deployment merely for development.
 - JavaScript SDK v6 browser initialization should use a short-lived browser-safe client token generated server-side from PayPal credentials; no PayPal client secret is ever required in Vite/browser env.
 - Optional future interactive buyer approval QA may add Sandbox Personal buyer account credentials as separate CI secrets, only when that test is actually implemented.
+
+
+## 99. Avoylo operating-policy decisions — Host privacy, multi-Host offers, equipment, reporting — 2026-09-27
+
+Host address privacy:
+- Avoylo should not publicly expose a Host's exact residential/storage address as a normal marketplace field.
+- Seller-facing discovery/offer UI should show only a coarse service area such as state + metro/subregion (example: California / Los Angeles area), plus operational facts needed for selection.
+- This is a product/privacy default, not an extreme secrecy model. The exact address may be disclosed only when operationally necessary for an authorized inbound shipment or other fulfillment step, with the narrowest useful scope.
+- Do not expose a Host's exact address to other Hosts, public pages, search indexes, or unrelated Seller users.
+
+Host offer fan-out:
+- A Seller batch should not be sent to only one Host by default.
+- Send the same bounded opportunity to multiple simultaneously eligible Hosts.
+- The first valid Host acceptance that wins the server-side transactional lock becomes the assignment.
+- Once assignment is committed, all remaining outstanding offers for that batch are atomically expired/closed and should show a clear state such as `No longer available` / `Matched`.
+- Two Hosts must never both win the same capacity/inventory assignment. Treat acceptance as a race-safe database transaction, not a client-side first-click assumption.
+- Later matching policy may control fan-out size, ranking, offer waves, and expiry window.
+
+Label-printer/equipment program:
+- Avoylo may offer compatible shipping-label printers or related equipment to Hosts and/or Sellers.
+- Three acceptable commercial models can coexist:
+  1. milestone/reward: eligible Host/Seller earns a free/subsidized printer after a defined operational milestone;
+  2. direct sale: user buys an Avoylo-approved printer through Avoylo;
+  3. partner/affiliate fulfillment: Avoylo routes the order to an OEM/distributor/retailer and earns a disclosed commercial margin/commission where appropriate.
+- Long-term preference is to negotiate Chinese OEM / manufacturer / distributor pricing so any free/subsidized unit is funded by contribution margin or a deliberate acquisition/retention budget, not an uncontrolled giveaway.
+- Do not require a proprietary Avoylo printer; approved compatible hardware should remain possible.
+- Exact printer model, unit economics, free-printer eligibility threshold, warranty/returns owner, shipping cost and commission structure are not yet fixed.
+
+Operational report expansion:
+- Reporting is two-sided. Sellers can report Host/pickup/fulfillment issues, and Hosts must be able to report Seller/inbound discrepancies.
+- Add/plan structured Host-originated incident types such as:
+  - declared weight mismatch;
+  - declared dimensions/volume mismatch;
+  - parcel count mismatch;
+  - damaged inbound parcel;
+  - invalid/unknown QR or parcel identity;
+  - prohibited/suspicious item;
+  - unsafe/leaking package;
+  - unapproved parcel received;
+  - other inbound mismatch.
+- Evidence can include measured weight/dimensions, photos and notes where appropriate.
+- A Host report must not silently overwrite Seller-declared facts; retain the original declaration and the reported/measured observation separately with audit history.
+- Significant mismatches should create an Avoylo incident/review path rather than forcing the Host to accept/store the item as normal.
+- Existing operational-policy decisions otherwise remain unchanged unless superseded later.
