@@ -3823,3 +3823,28 @@ Important interpretation:
   2. explicit Avoylo fee/posting rules for ledgers;
   3. explicit recovery-policy decisions for additional Phase 7 actions.
 - Until one of those is provided, safe next work should be limited to non-semantic audits/hardening/docs/CI cleanup, not invented business rules or live activation.
+
+
+## 87. Avoylo commercial-policy decisions reopened — pricing/support/onboarding — 2026-09-27
+
+User is awake and explicitly wants business rules decided interactively before more Codex implementation. Decision method:
+- use verified facts as factual grounds;
+- keep recommendations separate from facts;
+- ask user to approve/reject/modify each meaningful policy before encoding it.
+
+Approved direction:
+- Avoylo initial commercial model should be **event/usage based logistics pricing**, not a percentage of Seller GMV.
+- Seller charges and Host earnings should be separate ledger concepts rather than a fixed revenue-share formula.
+
+User preference under discussion:
+- storage should conceptually be per parcel/box per day, but user flagged uncertainty because exit time is unknown;
+- Seller support should include a strong Host-unresponsive escalation path, with Avoylo human support responding within 30 minutes;
+- Host onboarding should be extremely low-friction and individual-friendly: identity verification + terms, with only operational information needed to use the service;
+- Seller onboarding should be similarly simple, with terms plus lighter verification than Host.
+
+Open decisions before Phase-6 ledger implementation:
+1. exact storage metering/billing cadence and when storage starts/stops;
+2. what the 30-minute support promise means (first human response vs resolution, operating hours/coverage, escalation thresholds);
+3. minimum Host activation data/verification beyond identity+terms (address, capacity, payout destination, optional/risk-triggered space proof);
+4. minimum Seller verification;
+5. actual fee amounts and Host earnings after competitive/current-market pricing research.
