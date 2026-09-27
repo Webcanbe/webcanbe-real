@@ -4156,3 +4156,30 @@ Operational report expansion:
 - A Host report must not silently overwrite Seller-declared facts; retain the original declaration and the reported/measured observation separately with audit history.
 - Significant mismatches should create an Avoylo incident/review path rather than forcing the Host to accept/store the item as normal.
 - Existing operational-policy decisions otherwise remain unchanged unless superseded later.
+
+
+## 100. Avoylo Operations Policy v0.1 finalized — 2026-09-27
+
+The founder approved a strengthened public-facing operational policy structure for Avoylo. The policy is intended to define how Avoylo actually operates, while leaving legal-liability allocation, insurance specifics, worker classification, carrier-regulatory classification, and other contract-specific matters to the more specific agreements.
+
+Key fixed operational rules in v0.1:
+- initial model remains prepacked, sealed-parcel fulfillment;
+- one Batch is assigned as a whole to one Host Location unless Avoylo explicitly creates separate Placements before assignment;
+- the same Opportunity may be offered to multiple eligible Hosts; the first valid server-side committed acceptance wins, and all competing offers close;
+- exact Host addresses are not public marketplace information; only coarse region/metro information is normally shown until an authorized operational need exists;
+- authoritative Parcel lifecycle is normal-flow `RECEIVING → STORED → RESERVED → HANDOFF_READY → CARRIER_ACCEPTED → DELIVERED`, with exception/admin states such as `DISCREPANCY_REVIEW`, `QUARANTINED`, `TRANSFER_PENDING`, `RETURN_PENDING`, `REMOVAL_PENDING`, `CANCELLED`, `DAMAGED`, and `LOST`;
+- state transitions are server/provider authoritative; client-side UI state is not authoritative;
+- `HANDOFF_READY` is explicitly distinct from carrier acceptance;
+- cancellation behavior is defined by cutoff stage: before reservation, after reservation, after label issuance, after staging, and after carrier acceptance;
+- missed pickup / missing carrier acceptance requires an incident/recovery workflow, and re-staging or relabeling may require new staging evidence;
+- customer returns are not accepted by Hosts unless Avoylo explicitly authorizes a return workflow; a Host address must not be used as a generic customer-return address by default;
+- Host exit follows: exit request → stop new opportunities → inventory reconciliation → complete/stop eligible tasks → transfer/return/removal → physical inventory zero → deactivate location;
+- Seller exit/inactivity/unpaid status may suspend new services and trigger an inventory-removal workflow, but the operations policy itself does not create an independent lien or disposal right;
+- long-term inventory cannot be treated as abandoned solely because of age absent applicable agreement/law and required process;
+- Avoylo may require physical-inventory reconciliation by scan/count/photo, and mismatches must preserve audit history rather than silently rewriting inventory;
+- quarantine means normal fulfillment is blocked and handling waits for authorized instructions, without requiring unsafe physical movement;
+- shipping-label replacement/void/reprint behavior is explicit: no manual alteration, superseded labels cannot be reused, and a new label may require old-label obscuring and fresh staging evidence;
+- inbound discrepancy reporting includes quantity, weight, dimensions, damage, invalid identity, unauthorized Parcel, prohibited/suspicious item, and safety concerns, with Seller declaration preserved separately from Host observation;
+- optional equipment/reward program remains compatible with direct sale, third-party/affiliate fulfillment, discount/subsidy, or earned free equipment.
+
+A user-downloadable final Markdown artifact was generated as `OPERATIONS_POLICY.md` in the active conversation. When integrating into the Avoylo repo/site, use this v0.1 content as the baseline and then align implementation/state names before publication.
