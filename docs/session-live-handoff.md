@@ -3864,3 +3864,22 @@ Current proposal awaiting explicit approval:
 - Eligible verified Hosts receive the opportunity and may accept it like a dispatch marketplace.
 - Once accepted, the agreed rate is locked for that inbound batch and actual storage accrues from STORED until the storage-stop event.
 - A total budget cap/alert may be separate because exit date is unknown.
+
+
+## 89. Avoylo storage-market pricing guardrail — 2026-09-27
+
+User approved:
+- Seller-posted Host storage offer model;
+- Seller-visible offer amount maps directly to Host storage earning;
+- Avoylo fees are separate Seller charges rather than hidden spread.
+
+New requirement:
+- Avoylo must enforce a minimum Seller offer so Host storage prices cannot race to an uneconomic floor;
+- minimum/recommended rates should be inflation-aware;
+- UI should show a recommended/typical offer rather than leaving Seller pricing completely unguided.
+
+Pricing numbers are not yet approved. Proposed design for discussion:
+- floor and recommended price should be size-adjusted from parcel-profile dimensions already stored in Avoylo;
+- launch UI can expose a simple per-box/day price while backend computes a size-aware minimum;
+- after sufficient accepted-market data exists, use a local rolling median accepted rate as the primary “typical” recommendation because median is less sensitive to outliers than mean;
+- maintain an external inflation/warehousing benchmark for periodic floor review rather than freezing a nominal floor forever.
