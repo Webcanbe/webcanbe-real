@@ -3848,3 +3848,19 @@ Open decisions before Phase-6 ledger implementation:
 3. minimum Host activation data/verification beyond identity+terms (address, capacity, payout destination, optional/risk-triggered space proof);
 4. minimum Seller verification;
 5. actual fee amounts and Host earnings after competitive/current-market pricing research.
+
+
+## 88. Avoylo pricing-policy discussion — 2026-09-27
+
+Confirmed direction:
+- Initial commercial model is logistics-usage/event based rather than a percentage of Seller GMV.
+- Seller charges and Host earnings are separate ledger concepts.
+- Critical Host-unresponsive incidents should get Avoylo human first response within 30 minutes.
+- Host onboarding should be low-friction: identity verification + terms + only operationally required data.
+- Seller onboarding should be lighter than Host verification.
+
+Current proposal awaiting explicit approval:
+- Seller posts a maximum storage rate per parcel/day instead of Avoylo imposing one fixed storage rate.
+- Eligible verified Hosts receive the opportunity and may accept it like a dispatch marketplace.
+- Once accepted, the agreed rate is locked for that inbound batch and actual storage accrues from STORED until the storage-stop event.
+- A total budget cap/alert may be separate because exit date is unknown.
