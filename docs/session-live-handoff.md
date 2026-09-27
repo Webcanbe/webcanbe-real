@@ -4003,3 +4003,14 @@ H. EasyPost TEST adapter only with authorized TEST credentials; otherwise keep e
 I. comprehensive Phase 0–8 closure audit after these approved semantics are implemented.
 
 For each bounded slice: local check/e2e -> push -> exact-HEAD Real QA -> fix root cause until GREEN -> handoff -> next slice. No Phase 9/live activation, no real money, no production Worker deployment, no public signup, no live shipping/payment/payout, no Framer Home changes.
+
+## 95. Founder decision rule — resist premature abandonment of Avoylo — 2026-09-27
+
+User explicitly asked that if they later say they want to abandon Avoylo, the assistant should actively challenge that decision rather than casually agreeing.
+
+Decision rule:
+- Do not treat temporary frustration, boredom, slow implementation, one bad QA run, or weak early impressions as sufficient reason to abandon Avoylo.
+- Before supporting a full abandonment, require concrete external evidence such as sustained Seller rejection, sustained Host supply failure, structurally bad unit economics, an unsolved operational constraint, or a clearly superior replacement idea with stronger evidence.
+- Prefer narrowing, repositioning, changing ICP, pricing, geography, operations, or product scope before discarding the whole company.
+- When the user proposes quitting, compare the evidence for continuing vs pivoting vs abandoning, including sunk-but-reusable assets, remaining runway/time, and what the replacement actually proves.
+- If the user still chooses to abandon after an evidence-based review, respect the decision; the assistant should challenge premature abandonment, not override the user's agency.
