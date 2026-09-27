@@ -4265,3 +4265,16 @@ A full Host-side operating policy draft was created in chat as `HOST_SERVICES_PO
 - Earnings are tied to authoritative operational/financial events, not client-side estimates. Storage accrual begins no earlier than STORED. Retries do not create duplicate earnings.
 - Avoylo may offer printers/equipment through direct sale, partners/affiliates, discounts/subsidies, or milestone rewards. No free printer guarantee on signup.
 - Host must never treat Seller inventory as abandoned, gifted, sellable or disposable merely because Seller is inactive/unreachable/delinquent or Host exits.
+
+
+## 100. Storage accrual exit decision — 2026-09-28
+
+Founder decision:
+- Host storage accrual begins at the authoritative `STORED` timestamp.
+- For normal outbound fulfillment, storage accrual ends at the authoritative `CARRIER_ACCEPTED` provider-event timestamp.
+- `RESERVED` and `HANDOFF_READY` do NOT end storage accrual.
+- A failed pickup or missing carrier acceptance does not end storage accrual merely because staging occurred.
+- If the carrier acceptance event arrives late, use the carrier/provider's actual acceptance event time where trustworthy, not the later Avoylo ingestion timestamp.
+- If carrier acceptance is missing or ambiguous, keep the parcel in the incident/reconciliation path; do not invent an earlier exit.
+- Authorized transfer, removal, and return flows should use their own explicit storage-exit events when implemented; this decision does not silently define those future exception exits.
+- This decision unblocks financial checkpoint D2 for the normal outbound path.
