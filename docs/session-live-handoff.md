@@ -4084,3 +4084,18 @@ Cloudflare 404 diagnosis:
 - apps/worker/wrangler.jsonc configures the API Worker named avoylo;
 - if avoylo.com apex points directly to that Worker, opening https://avoylo.com/ will correctly fall through to the Worker's 404;
 - recommended clean routing if the user wants a visible site without Vercel: avoylo.com for a Cloudflare-hosted frontend/marketing site, app.avoylo.com for operational web, api.avoylo.com for the Worker API. Do not merely add a fake root API response if the intent is to serve the full site.
+
+## 97. Avoylo brand symbol + PayPal sandbox preparation — 2026-09-27
+
+Brand decision:
+- current folded-ribbon Avoylo symbol is approved as the compact app/favicon/OAuth mark;
+- light theme uses the transparent dark/black symbol;
+- dark theme uses the transparent white/light symbol;
+- when the user later provides those transparent assets to Codex, implement theme-aware switching in the website/header/app surfaces without changing the mark itself.
+
+Seller payment preparation:
+- initial provider remains PayPal Business with an embedded PayPal checkout button in Avoylo billing UI;
+- next pre-integration step is a dedicated PayPal Sandbox REST app and sandbox buyer/merchant test accounts;
+- keep client secret server-only; client ID identifies the PayPal app and may be used by the PayPal JS SDK;
+- after the public API hostname/webhook route exists, register PayPal sandbox webhooks and store the webhook ID privately;
+- do not enable PAYMENTS_LIVE or use live credentials until ledger/invoice semantics and sandbox create/approve/capture/reconciliation QA are green.
