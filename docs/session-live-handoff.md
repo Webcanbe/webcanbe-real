@@ -4229,3 +4229,39 @@ Key fixed decisions:
 - Current storage accrual policy reference: accrual begins no earlier than the authoritative STORED timestamp; exact billable stop event/rounding/minimums belong in Billing & Payment Terms.
 - Seller closure lifecycle: closure request -> new activity restricted -> open orders resolved -> inventory reconciled -> inventory removed/returned/transferred/otherwise lawfully resolved -> operational closure complete.
 - Claims/insurance/payment/tax/fraud/security/public-claims language was intentionally reduced or moved out of the Seller operating policy and should be handled in specialized policy/contract documents.
+
+
+## 100. Avoylo Host Services Policy v0.1 operating decisions — 2026-09-27
+
+A full Host-side operating policy draft was created in chat as `HOST_SERVICES_POLICY.md`. Treat the following operating decisions as current unless explicitly superseded:
+
+- Host policy hierarchy: Operations Policy = network-wide model; Seller Services Policy = Seller-specific rules; Host Services Policy = Host-specific rules; narrower service-specific policy controls for its feature.
+- Initial Host role is sealed-parcel receipt/storage/retrieval/QR/label/staging/evidence/carrier handoff. No ordinary opening, pick/pack, kitting, product inspection, repacking, customer service, or discretionary local delivery.
+- Individual Host eligibility baseline: 18+ and age of majority where required; identity/location/tax/payout/terms/operational verification may be required.
+- Inventory stays only at approved Host Location. No casual delegation or unapproved household/third-party operators.
+- Host profile includes capacity, security, processing days/windows, outbound capacity, unattended pickup, pickup zone, vacation/unavailable status. Vacation does not cancel existing custody.
+- By accepting a Placement, Host accepts ongoing ordinary outbound-task obligations for that inventory under declared availability; outbound tasks are not separately optional Opportunities.
+- Same Opportunity may fan out to multiple Hosts; only the first server-committed valid acceptance wins. Accepted Placement reserves capacity and snapshots applicable terms.
+- Seller inbound no-show/delay does not reserve Host capacity indefinitely; storage earnings do not begin merely on Opportunity acceptance.
+- Partial Batch receipt is allowed at Parcel-level states. Unknown/unapproved Parcels never become normal STORED inventory; path is review -> identification/correction/return/removal.
+- Material inbound discrepancies include quantity, weight, dimensions/volume, damage, invalid identity, unexpected parcel, leak/unsafe condition, suspected prohibited item. Seller declaration and Host observation remain separate evidence.
+- QUARANTINED blocks ordinary fulfillment and does not require a Host to physically move dangerous goods where movement could increase risk.
+- Normal Parcel lifecycle: RECEIVING -> STORED -> RESERVED -> HANDOFF_READY -> CARRIER_ACCEPTED -> DELIVERED, with explicit review/transfer/return/removal/damaged/lost/cancelled exceptions.
+- Host storage organization must allow exact Parcel retrieval without opening. No opening/use/tampering/unauthorized sale/relocation.
+- Avoylo may require physical inventory reconciliation by scan/count/photo; material corrections preserve audit history.
+- Fire/flood/disaster rule: human safety first; minimum reasonable emergency relocation is allowed where necessary, then prompt documentation/reporting and authorized recovery.
+- Every outbound task requires exact assigned Parcel retrieval; no substitution. QR mismatches may not be bypassed.
+- Replacement shipping labels supersede prior labels; old/conflicting carrier labels should be removed/covered where safe/practical.
+- If service requires printed labels, Host must maintain reasonable access to compatible printing. No proprietary Avoylo printer requirement by default.
+- HANDOFF_READY requires Host-side staging conditions/evidence and is never equivalent to carrier possession.
+- Failed pickup does not automatically roll Parcel back to STORED. It stays in outbound custody/retry until Avoylo authorizes re-stage/relabel or explicit cancellation + safe return to storage.
+- Host may not independently change carrier, purchase replacement label, redirect shipment, drop at carrier facility, or arrange a different pickup unless task explicitly authorizes it.
+- Customer/Seller direct off-platform operational contact is restricted; no general customer pickup at private Host Location and no ordinary customer returns without an authorized Avoylo return workflow.
+- Host move/closure/exit requires inventory reconciliation and authorized transfer/return/removal; Host Location deactivates after physical Avoylo inventory reaches zero or another lawful disposition is recorded.
+- Host must report unexpected loss of location access or incapacity; unverified representatives do not gain custody authority automatically.
+- Host may report Seller-side discrepancies. Operational evidence must not be fabricated.
+- Host address remains nonpublic by default, with exact use only for legitimate fulfillment/transfer/incident/legal needs.
+- Customer information is minimum-necessary and cannot be reused for marketing or public posting. Shipping labels, QR codes, incident evidence, customer data and nonpublic inventory details must not be posted publicly.
+- Earnings are tied to authoritative operational/financial events, not client-side estimates. Storage accrual begins no earlier than STORED. Retries do not create duplicate earnings.
+- Avoylo may offer printers/equipment through direct sale, partners/affiliates, discounts/subsidies, or milestone rewards. No free printer guarantee on signup.
+- Host must never treat Seller inventory as abandoned, gifted, sellable or disposable merely because Seller is inactive/unreachable/delinquent or Host exits.
