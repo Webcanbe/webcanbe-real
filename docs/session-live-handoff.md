@@ -3883,3 +3883,38 @@ Pricing numbers are not yet approved. Proposed design for discussion:
 - launch UI can expose a simple per-box/day price while backend computes a size-aware minimum;
 - after sufficient accepted-market data exists, use a local rolling median accepted rate as the primary “typical” recommendation because median is less sensitive to outliers than mean;
 - maintain an external inflation/warehousing benchmark for periodic floor review rather than freezing a nominal floor forever.
+
+
+## 90. Avoylo operating model under decision — automated orders, pickup orchestration, Host income — 2026-09-27
+
+Confirmed user direction:
+- Seller should not need to message the Host when an order arrives.
+- Future commerce connectors (Shopify first candidate) should feed orders automatically into Avoylo.
+- Host participation should remain a simple side-gig experience.
+- User considers roughly $200–$300/month a meaningful target for an active standard Host, with earning potential varying by usable capacity and facility quality.
+- Host quality/capacity signals under consideration: box capacity, clean/dry storage, CCTV/security, and availability.
+- Host may not always be home, so the operating model must not assume continuous presence.
+
+Facts checked for pickup orchestration:
+- Shopify supports fulfillment/order webhooks and fulfillment-order APIs.
+- USPS Package Pickup can collect prepaid eligible parcels from designated locations such as porch/front door during a scheduled delivery day; a specific-time option exists separately.
+- FedEx states the shipper does not have to be present for pickup if the package is left safe and accessible; FedEx also offers automated/recurring pickups.
+- UPS offers Smart Pickup, daily, and day-specific recurring pickup options.
+Therefore there is no universal carrier pickup time or universal requirement that the Host be physically present; Avoylo must orchestrate pickup by carrier/location/service and Host preference.
+
+Proposed model awaiting explicit approval:
+1. Seller connects Shopify; order webhook enters Avoylo; no Seller-to-Host contact.
+2. Avoylo allocates an eligible STORED sealed parcel and creates a Host task/label.
+3. Host receives an app notification and prepares only the specified sealed parcel.
+4. Avoylo schedules or confirms carrier pickup according to carrier capability.
+5. Host profile includes handling windows, maximum daily volume, unattended-pickup permission, and secure pickup-location capability.
+6. If unattended pickup is supported and enabled, Host may stage the labeled package in a safe accessible pickup zone before the cutoff; otherwise Host availability/drop-off is required.
+7. Carrier/tracking events update Avoylo and connected Seller channel automatically.
+
+Proposed economics awaiting approval:
+- Seller-posted storage rate goes 100% to Host.
+- Host also earns per-inbound-receive and per-outbound-handoff amounts.
+- Avoylo earns separate per-inbound and per-outbound network/operations fees from Seller.
+- Shipping postage is initially pass-through; future negotiated carrier-rate economics may become an additional margin source only when actually contracted.
+- $200–$300/month is a design target for an active standard Host, not a guaranteed earning claim.
+- CCTV should be a quality/security tier signal rather than an absolute requirement for every small Host unless policy later changes.
