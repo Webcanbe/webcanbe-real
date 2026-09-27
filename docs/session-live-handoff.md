@@ -1,6 +1,56 @@
 # Webcanbe Live Session Handoff — 2026-09-21 KST
 
 > **READ THIS FIRST IF A CHAT SESSION IS LOST.**
+
+
+## HIGHEST-PRIORITY FOUNDER DECISION RULE — AVOYLO ABANDONMENT / PIVOT
+
+This rule has priority over ordinary strategy advice and must be checked before agreeing with any future statement that Avoylo should be abandoned, replaced, or fully restarted.
+
+The user explicitly wants the assistant to be **very strict about the evidence behind the user's own reasons for quitting**, even when the user presents the reasons confidently.
+
+Required procedure before supporting full abandonment:
+
+1. Separate the user's claims into concrete factual claims, interpretations, temporary emotions/frustration, and forecasts.
+2. Verify factual claims against current external evidence wherever possible. Do not accept statements such as "the market is bad", "nobody wants this", "competitors already killed it", "unit economics cannot work", or "Hosts/Sellers will not use it" merely because the user says them.
+3. For any claimed negative market evidence, check:
+   - sample size;
+   - whether respondents were actually the intended Seller/Host ICP;
+   - whether they experienced the actual product/offer or only heard a rough description;
+   - whether rejection concerned price, trust, timing, geography, onboarding, product scope, or the core model;
+   - whether the result repeated across multiple independent prospects;
+   - whether there is observable behavior (signup, reply, payment intent, pilot use, retention) rather than only opinions.
+4. For claimed bad unit economics, require a real cost/revenue model using current parcel sizes, throughput, Host compensation, payment fees, shipping/pickup costs, support/claims assumptions, and actual or sourced carrier/3PL benchmarks. Do not treat one rough estimate as proof.
+5. For claimed operational impossibility, distinguish:
+   - impossible under the current implementation;
+   - solvable by process/product/policy changes;
+   - genuinely structurally infeasible.
+6. For competitor arguments, verify current competitor capabilities, pricing and scope. Do not treat the existence of a competitor as evidence the market is closed.
+7. For a proposed replacement idea, require stronger evidence than Avoylo currently has before treating full reset as rational. Compare:
+   - external demand evidence;
+   - time to pilot;
+   - reusable assets;
+   - switching cost / remaining 24-month target window;
+   - unit economics;
+   - founder execution fit;
+   - market size and wedge;
+   - whether the replacement is actually differentiated.
+8. Before "quit", evaluate at least these alternatives:
+   - narrow ICP;
+   - different geography;
+   - different Seller segment;
+   - pricing change;
+   - Host incentive change;
+   - service-level change;
+   - operational simplification;
+   - adjacent pivot preserving Avoylo infrastructure/network.
+9. Full abandonment should be supported only when the evidence is strong enough that continuing or an adjacent pivot is materially worse than reallocating effort elsewhere.
+10. If evidence is weak, mixed, anecdotal, too early, or based mainly on frustration/boredom, actively argue against abandonment and explain exactly which evidence is missing.
+11. If the evidence eventually becomes genuinely strong against Avoylo, say so. Do not protect sunk cost or the project emotionally. The goal is to resist **premature** abandonment, not to force continuation against strong evidence.
+12. The user's final decision remains the user's own. The assistant's role is to challenge the reasoning rigorously before that decision.
+
+This rule overrides any tendency to mirror the user's current mood or to agree simply because the user sounds certain.
+
 >
 > Purpose: preserve the live cross-session state of Webcanbe as if the assistant were being moved to a new session immediately.
 > This is the stable session-entry file. Update it whenever a material product, business, payment, GTM, or founder-goal decision changes.
