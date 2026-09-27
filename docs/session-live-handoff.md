@@ -4064,3 +4064,23 @@ Decision rule:
 - Prefer narrowing, repositioning, changing ICP, pricing, geography, operations, or product scope before discarding the whole company.
 - When the user proposes quitting, compare the evidence for continuing vs pivoting vs abandoning, including sunk-but-reusable assets, remaining runway/time, and what the replacement actually proves.
 - If the user still chooses to abandon after an evidence-based review, respect the decision; the assistant should challenge premature abandonment, not override the user's agency.
+
+## 96. Payment timing + Cloudflare root-domain 404 architecture — 2026-09-27
+
+Current Avoylo engineering state:
+- core-sandbox HEAD inspected at 1cc0ec9f379249b7a03b65724c6e3731adc257db;
+- commercial Phase 6 A1 versioned pricing policy GREEN;
+- commercial Phase 6 B1 Seller DRAFT storage bid GREEN;
+- next commercial checkpoints are storage-offer requirement/snapshot on Host acceptance, then immutable ledger/reconciliation.
+
+Payment decision:
+- initial Seller collection provider is PayPal Business;
+- Avoylo should embed a PayPal-rendered button in its own billing/invoice UI with backend-created dynamic amounts, not use raw standalone payment-link UX as the normal billing flow;
+- payment collection should be implemented only after immutable ledger + aggregated Seller balance/invoice semantics are GREEN, i.e. late Phase 6 / pre-Phase-9 sandbox integration;
+- PAYMENTS_LIVE remains false until PayPal sandbox exact-amount create/approve/capture, replay/idempotency and reconciliation QA are GREEN.
+
+Cloudflare 404 diagnosis:
+- the current Worker source defines /health and /v1 API routes but no GET / homepage route;
+- apps/worker/wrangler.jsonc configures the API Worker named avoylo;
+- if avoylo.com apex points directly to that Worker, opening https://avoylo.com/ will correctly fall through to the Worker's 404;
+- recommended clean routing if the user wants a visible site without Vercel: avoylo.com for a Cloudflare-hosted frontend/marketing site, app.avoylo.com for operational web, api.avoylo.com for the Worker API. Do not merely add a fake root API response if the intent is to serve the full site.
