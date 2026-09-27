@@ -3790,3 +3790,36 @@ Preferred sequence after inbound dispatch GREEN:
 8. Stop before Phase 9/live activation unless user explicitly approves later.
 
 If one phase is externally blocked, continue independent code/tests/docs for later sandbox phases when doing so does not compound an unverified state transition or violate source-of-truth invariants.
+
+
+## 86. Avoylo overnight autonomous run reached Phase 8 slice 55 — 2026-09-27
+
+Verified in `Webcanbe/avoylo`:
+- current reported checkpoint SHA: `874829548e14fd9847a84bfdf086d61c0dafcc52`
+- commit message: `docs: mark ambiguous cancellation retry green`
+- GitHub Actions Real QA run `36288590655` completed successfully on this exact HEAD
+- credentialed real QA result: **22/22 passed** in ~170s
+- Phase 8 slice 55 (“ambiguous Seller cancellation retry”) is GREEN
+- test proves a committed Seller cancellation can be safely replayed after a simulated lost browser response, with one audit event
+- local `npm run check` and `npm run test:e2e` were reported GREEN on implementation work
+- no migration or production behavior changed for the final slice
+- all seven live flags remain false
+- Worker not deployed
+- Framer Home unchanged
+
+Current phase summary from handoff:
+- Phases 0–4: GREEN
+- Phase 5 provider-independent shipping/fake-provider sandbox work: GREEN
+- Phase 5 EasyPost TEST adapter: BLOCKED pending authorized TEST credentials
+- Phase 6 ledgers: BLOCKED pending approved fee rules/posting definitions
+- Phase 7 Seller cancellation: GREEN; additional recovery actions require explicit policy
+- Phase 8 connected sandbox flow + hardening through slice 55: GREEN
+- Phase 9/live activation remains out of scope
+
+Important interpretation:
+- The overnight autonomous engineering pass did not merely continue Phase 2; it reached the planned Phase 8 sandbox-hardening ceiling and accumulated extensive credentialed browser/QA coverage.
+- Remaining blockers are no longer ordinary implementation gaps Codex should invent around. They require one of:
+  1. authorized EasyPost TEST credentials;
+  2. explicit Avoylo fee/posting rules for ledgers;
+  3. explicit recovery-policy decisions for additional Phase 7 actions.
+- Until one of those is provided, safe next work should be limited to non-semantic audits/hardening/docs/CI cleanup, not invented business rules or live activation.
