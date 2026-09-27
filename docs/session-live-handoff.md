@@ -4099,3 +4099,16 @@ Seller payment preparation:
 - keep client secret server-only; client ID identifies the PayPal app and may be used by the PayPal JS SDK;
 - after the public API hostname/webhook route exists, register PayPal sandbox webhooks and store the webhook ID privately;
 - do not enable PAYMENTS_LIVE or use live credentials until ledger/invoice semantics and sandbox create/approve/capture/reconciliation QA are green.
+
+## 98. PayPal Sandbox credential placement plan — 2026-09-27
+
+User has created a PayPal Sandbox Merchant app and enabled Payment Links & Buttons plus JavaScript SDK v6.
+Do not store credential values in repository docs.
+
+Credential placement plan:
+- GitHub Actions now/next: repository secrets `PAYPAL_SANDBOX_CLIENT_ID` and `PAYPAL_SANDBOX_CLIENT_SECRET` in `Webcanbe/avoylo`. Future PayPal sandbox QA jobs map these to runtime `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` and hardcode/configure sandbox endpoint only.
+- Current long-running Codex task should not be interrupted merely to inject local env; it can implement against the existing plan and use exact-HEAD GitHub Actions for credentialed PayPal sandbox QA once the workflow is extended.
+- Optional local shell testing uses `PAYPAL_ENV=sandbox`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`.
+- Cloudflare Worker secrets are added only when a sandbox/staging Worker environment is ready; do not place sandbox PayPal credentials in the current production deployment merely for development.
+- JavaScript SDK v6 browser initialization should use a short-lived browser-safe client token generated server-side from PayPal credentials; no PayPal client secret is ever required in Vite/browser env.
+- Optional future interactive buyer approval QA may add Sandbox Personal buyer account credentials as separate CI secrets, only when that test is actually implemented.
